@@ -1,5 +1,27 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.BeneficiaryHistory_;
+import gov.cms.bfd.model.rif.Beneficiary_;
+import gov.cms.bfd.server.war.Operation;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,28 +48,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.BeneficiaryHistory_;
-import gov.cms.bfd.model.rif.Beneficiary_;
-import gov.cms.bfd.server.war.Operation;
 
 /**
  * This FHIR {@link IResourceProvider} adds support for STU3 {@link Patient} resources, derived from
@@ -59,7 +59,8 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    */
   private static final List<String> SUPPORTED_HASH_IDENTIFIER_SYSTEMS =
-      Arrays.asList(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
+      Arrays.asList(
+          TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH,
           TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
 
@@ -95,28 +96,24 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * Adds support for the FHIR "read" operation, for {@link Patient}s. The {@link Read} annotation
    * indicates that this method supports the read operation.
    *
-   * <p>
-   * Read operations take a single parameter annotated with {@link IdParam}, and should return a
+   * <p>Read operations take a single parameter annotated with {@link IdParam}, and should return a
    * single resource instance.
    *
    * @param patientId The read operation takes one parameter, which must be of type {@link IdType}
-   *        and must be annotated with the {@link IdParam} annotation.
+   *     and must be annotated with the {@link IdParam} annotation.
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
-   *        to parse out pagination values
+   *     to parse out pagination values
    * @return Returns a resource matching the specified {@link IdDt}, or <code>null</code> if none
-   *         exists.
+   *     exists.
    */
   @Read(version = false)
   @Trace
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
-    if (patientId == null)
-      throw new IllegalArgumentException();
-    if (patientId.getVersionIdPartAsLong() != null)
-      throw new IllegalArgumentException();
+    if (patientId == null) throw new IllegalArgumentException();
+    if (patientId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
 
     String beneIdText = patientId.getIdPart();
-    if (beneIdText == null || beneIdText.trim().isEmpty())
-      throw new IllegalArgumentException();
+    if (beneIdText == null || beneIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
 
@@ -140,8 +137,10 @@ public final class R4PatientResourceProvider implements IResourceProvider {
 
     Beneficiary beneficiary = null;
     Long beneByIdQueryNanoSeconds = null;
-    Timer.Context timerBeneQuery = metricRegistry
-        .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id")).time();
+    Timer.Context timerBeneQuery =
+        metricRegistry
+            .timer(MetricRegistry.name(getClass().getSimpleName(), "query", "bene_by_id"))
+            .time();
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
     } catch (NoResultException e) {
@@ -151,7 +150,8 @@ public final class R4PatientResourceProvider implements IResourceProvider {
 
       TransformerUtils.recordQueryInMdc(
           String.format("bene_by_id.include_%s", String.join("_", includeIdentifiersValues)),
-          beneByIdQueryNanoSeconds, beneficiary == null ? 0 : 1);
+          beneByIdQueryNanoSeconds,
+          beneficiary == null ? 0 : 1);
     }
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
@@ -173,31 +173,33 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * Adds support for the FHIR "search" operation for {@link Patient}s, allowing users to search by
    * {@link Patient#getId()}.
    *
-   * <p>
-   * The {@link Search} annotation indicates that this method supports the search operation. There
-   * may be many different methods annotated with this {@link Search} annotation, to support many
-   * different search criteria.
+   * <p>The {@link Search} annotation indicates that this method supports the search operation.
+   * There may be many different methods annotated with this {@link Search} annotation, to support
+   * many different search criteria.
    *
-   * @param logicalId a {@link TokenParam} (with no system, per the spec) for the
-   *        {@link Patient#getId()} to try and find a matching {@link Patient} for
+   * @param logicalId a {@link TokenParam} (with no system, per the spec) for the {@link
+   *     Patient#getId()} to try and find a matching {@link Patient} for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
-   *        pagination
+   *     pagination
    * @param lastUpdated an {@link OptionalParam} to filter the results based on the passed date
-   *        range
+   *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
-   *        to parse out pagination values
+   *     to parse out pagination values
    * @return Returns a {@link List} of {@link Patient}s, which may contain multiple matching
-   *         resources, or may also be empty.
+   *     resources, or may also be empty.
    */
   @Search
   @Trace
   public Bundle searchByLogicalId(
-      @RequiredParam(name = Patient.SP_RES_ID) @Description(
-          shortDefinition = "The patient identifier to search for") TokenParam logicalId,
-      @OptionalParam(name = "startIndex") @Description(
-          shortDefinition = "The offset used for result pagination") String startIndex,
-      @OptionalParam(name = "_lastUpdated") @Description(
-          shortDefinition = "Include resources last updated in the given range") DateRangeParam lastUpdated,
+      @RequiredParam(name = Patient.SP_RES_ID)
+          @Description(shortDefinition = "The patient identifier to search for")
+          TokenParam logicalId,
+      @OptionalParam(name = "startIndex")
+          @Description(shortDefinition = "The offset used for result pagination")
+          String startIndex,
+      @OptionalParam(name = "_lastUpdated")
+          @Description(shortDefinition = "Include resources last updated in the given range")
+          DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     if (logicalId.getQueryParameterQualifier() != null)
       throw new InvalidRequestException(
@@ -214,9 +216,11 @@ public final class R4PatientResourceProvider implements IResourceProvider {
       patients = Collections.emptyList();
     } else {
       try {
-        patients = Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
-            .filter(p -> QueryUtils.isInRange(p.getMeta().getLastUpdated(), lastUpdated))
-            .map(p -> Collections.singletonList((IBaseResource) p)).orElse(Collections.emptyList());
+        patients =
+            Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
+                .filter(p -> QueryUtils.isInRange(p.getMeta().getLastUpdated(), lastUpdated))
+                .map(p -> Collections.singletonList((IBaseResource) p))
+                .orElse(Collections.emptyList());
       } catch (ResourceNotFoundException e) {
         patients = Collections.emptyList();
       }
@@ -232,10 +236,12 @@ public final class R4PatientResourceProvider implements IResourceProvider {
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      @RequiredParam(name = "_has:Coverage.extension") @Description(
-          shortDefinition = "Part D coverage type") TokenParam coverageId,
-      @OptionalParam(name = "cursor") @Description(
-          shortDefinition = "The cursor used for result pagination") String cursor,
+      @RequiredParam(name = "_has:Coverage.extension")
+          @Description(shortDefinition = "Part D coverage type")
+          TokenParam coverageId,
+      @OptionalParam(name = "cursor")
+          @Description(shortDefinition = "The cursor used for result pagination")
+          String cursor,
       RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
@@ -250,20 +256,25 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
 
-    List<IBaseResource> patients = matchingBeneficiaries.stream().map(beneficiary -> {
-      // Null out the unhashed HICNs if we're not supposed to be returning them
-      if (!hasHICN(includeIdentifiersValues)) {
-        beneficiary.setHicnUnhashed(Optional.empty());
-      }
-      // Null out the unhashed MBIs if we're not supposed to be returning
-      if (!hasMBI(includeIdentifiersValues)) {
-        beneficiary.setMedicareBeneficiaryId(Optional.empty());
-      }
+    List<IBaseResource> patients =
+        matchingBeneficiaries.stream()
+            .map(
+                beneficiary -> {
+                  // Null out the unhashed HICNs if we're not supposed to be returning them
+                  if (!hasHICN(includeIdentifiersValues)) {
+                    beneficiary.setHicnUnhashed(Optional.empty());
+                  }
+                  // Null out the unhashed MBIs if we're not supposed to be returning
+                  if (!hasMBI(includeIdentifiersValues)) {
+                    beneficiary.setMedicareBeneficiaryId(Optional.empty());
+                  }
 
-      Patient patient =
-          BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
-      return patient;
-    }).collect(Collectors.toList());
+                  Patient patient =
+                      BeneficiaryTransformer.transform(
+                          metricRegistry, beneficiary, includeIdentifiersValues);
+                  return patient;
+                })
+            .collect(Collectors.toList());
 
     Bundle bundle =
         TransformerUtils.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
@@ -280,30 +291,18 @@ public final class R4PatientResourceProvider implements IResourceProvider {
   }
 
   private String partDFieldFor(CcwCodebookVariable month) {
-    if (month == CcwCodebookVariable.PTDCNTRCT01)
-      return "partDContractNumberJanId";
-    if (month == CcwCodebookVariable.PTDCNTRCT02)
-      return "partDContractNumberFebId";
-    if (month == CcwCodebookVariable.PTDCNTRCT03)
-      return "partDContractNumberMarId";
-    if (month == CcwCodebookVariable.PTDCNTRCT04)
-      return "partDContractNumberAprId";
-    if (month == CcwCodebookVariable.PTDCNTRCT05)
-      return "partDContractNumberMayId";
-    if (month == CcwCodebookVariable.PTDCNTRCT06)
-      return "partDContractNumberJunId";
-    if (month == CcwCodebookVariable.PTDCNTRCT07)
-      return "partDContractNumberJulId";
-    if (month == CcwCodebookVariable.PTDCNTRCT08)
-      return "partDContractNumberAugId";
-    if (month == CcwCodebookVariable.PTDCNTRCT09)
-      return "partDContractNumberSeptId";
-    if (month == CcwCodebookVariable.PTDCNTRCT10)
-      return "partDContractNumberOctId";
-    if (month == CcwCodebookVariable.PTDCNTRCT11)
-      return "partDContractNumberNovId";
-    if (month == CcwCodebookVariable.PTDCNTRCT12)
-      return "partDContractNumberDecId";
+    if (month == CcwCodebookVariable.PTDCNTRCT01) return "partDContractNumberJanId";
+    if (month == CcwCodebookVariable.PTDCNTRCT02) return "partDContractNumberFebId";
+    if (month == CcwCodebookVariable.PTDCNTRCT03) return "partDContractNumberMarId";
+    if (month == CcwCodebookVariable.PTDCNTRCT04) return "partDContractNumberAprId";
+    if (month == CcwCodebookVariable.PTDCNTRCT05) return "partDContractNumberMayId";
+    if (month == CcwCodebookVariable.PTDCNTRCT06) return "partDContractNumberJunId";
+    if (month == CcwCodebookVariable.PTDCNTRCT07) return "partDContractNumberJulId";
+    if (month == CcwCodebookVariable.PTDCNTRCT08) return "partDContractNumberAugId";
+    if (month == CcwCodebookVariable.PTDCNTRCT09) return "partDContractNumberSeptId";
+    if (month == CcwCodebookVariable.PTDCNTRCT10) return "partDContractNumberOctId";
+    if (month == CcwCodebookVariable.PTDCNTRCT11) return "partDContractNumberNovId";
+    if (month == CcwCodebookVariable.PTDCNTRCT12) return "partDContractNumberDecId";
     throw new InvalidRequestException(
         "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
   }
@@ -317,8 +316,8 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * @param paging specified
    * @return the beneficiaries
    */
-  private List<Beneficiary> fetchBeneficiaries(TokenParam coverageId,
-      List<String> includedIdentifiers, PatientLinkBuilder paging) {
+  private List<Beneficiary> fetchBeneficiaries(
+      TokenParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
@@ -333,15 +332,18 @@ public final class R4PatientResourceProvider implements IResourceProvider {
         (hasHICN(includedIdentifiers) || hasMBI(includedIdentifiers)) && paging.isPagingRequested();
     if (useTwoSteps) {
       // Fetch ids
-      List<String> ids = queryBeneficiaryIds(contractMonthField, contractCode, paging)
-          .setMaxResults(paging.getPageSize()).getResultList();
+      List<String> ids =
+          queryBeneficiaryIds(contractMonthField, contractCode, paging)
+              .setMaxResults(paging.getPageSize())
+              .getResultList();
 
       // Fetch the benes using the ids
       return queryBeneficiariesByIds(ids, includedIdentifiers).getResultList();
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
-          .setMaxResults(paging.getPageSize()).getResultList();
+          .setMaxResults(paging.getPageSize())
+          .getResultList();
     }
   }
 
@@ -354,23 +356,33 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * @param identifiers to add for many-to-one relations
    * @return the criteria
    */
-  private TypedQuery<Beneficiary> queryBeneficiariesBy(String field, String value,
-      PatientLinkBuilder paging, List<String> identifiers) {
+  private TypedQuery<Beneficiary> queryBeneficiariesBy(
+      String field, String value, PatientLinkBuilder paging, List<String> identifiers) {
     String joinsClause = "";
-    if (hasMBI(identifiers))
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (hasHICN(identifiers))
-      joinsClause += "left join fetch b.beneficiaryHistories ";
+    if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
-      String query = "select b from Beneficiary b " + joinsClause + "where b." + field
-          + " = :value and b.beneficiaryId > :cursor " + "order by b.beneficiaryId asc";
+      String query =
+          "select b from Beneficiary b "
+              + joinsClause
+              + "where b."
+              + field
+              + " = :value and b.beneficiaryId > :cursor "
+              + "order by b.beneficiaryId asc";
 
-      return entityManager.createQuery(query, Beneficiary.class).setParameter("value", value)
+      return entityManager
+          .createQuery(query, Beneficiary.class)
+          .setParameter("value", value)
           .setParameter("cursor", paging.getCursor());
     } else {
-      String query = "select b from Beneficiary b " + joinsClause + "where b." + field
-          + " = :value " + "order by b.beneficiaryId asc";
+      String query =
+          "select b from Beneficiary b "
+              + joinsClause
+              + "where b."
+              + field
+              + " = :value "
+              + "order by b.beneficiaryId asc";
 
       return entityManager.createQuery(query, Beneficiary.class).setParameter("value", value);
     }
@@ -384,17 +396,27 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * @param paging to use for the result set
    * @return the criteria
    */
-  private TypedQuery<String> queryBeneficiaryIds(String field, String value,
-      PatientLinkBuilder paging) {
+  private TypedQuery<String> queryBeneficiaryIds(
+      String field, String value, PatientLinkBuilder paging) {
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
-      String query = "select b.beneficiaryId from Beneficiary b " + "where b." + field
-          + " = :value and b.beneficiaryId > :cursor " + "order by b.beneficiaryId asc";
+      String query =
+          "select b.beneficiaryId from Beneficiary b "
+              + "where b."
+              + field
+              + " = :value and b.beneficiaryId > :cursor "
+              + "order by b.beneficiaryId asc";
 
-      return entityManager.createQuery(query, String.class).setParameter("value", value)
+      return entityManager
+          .createQuery(query, String.class)
+          .setParameter("value", value)
           .setParameter("cursor", paging.getCursor());
     } else {
-      String query = "select b.beneficiaryId from Beneficiary b " + "where b." + field
-          + " = :value " + "order by b.beneficiaryId asc";
+      String query =
+          "select b.beneficiaryId from Beneficiary b "
+              + "where b."
+              + field
+              + " = :value "
+              + "order by b.beneficiaryId asc";
 
       return entityManager.createQuery(query, String.class).setParameter("value", value);
     }
@@ -407,16 +429,17 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * @param identifiers to add for many-to-one relations
    * @return the criteria
    */
-  private TypedQuery<Beneficiary> queryBeneficiariesByIds(List<String> ids,
-      List<String> identifiers) {
+  private TypedQuery<Beneficiary> queryBeneficiariesByIds(
+      List<String> ids, List<String> identifiers) {
     String joinsClause = "";
-    if (hasMBI(identifiers))
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (hasHICN(identifiers))
-      joinsClause += "left join fetch b.beneficiaryHistories ";
+    if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
-    String query = "select b from Beneficiary b " + joinsClause + "where b.beneficiaryId in :ids "
-        + "order by b.beneficiaryId asc";
+    String query =
+        "select b from Beneficiary b "
+            + joinsClause
+            + "where b.beneficiaryId in :ids "
+            + "order by b.beneficiaryId asc";
     return entityManager.createQuery(query, Beneficiary.class).setParameter("ids", ids);
   }
 
@@ -425,38 +448,39 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * {@link Patient#getIdentifier()}. Specifically, the following criteria are supported:
    *
    * <ul>
-   * <li>Matching a {@link Beneficiary#getHicn()} hash value: when {@link TokenParam#getSystem()}
-   * matches one of the {@link #SUPPORTED_HASH_IDENTIFIER_SYSTEMS} entries.
+   *   <li>Matching a {@link Beneficiary#getHicn()} hash value: when {@link TokenParam#getSystem()}
+   *       matches one of the {@link #SUPPORTED_HASH_IDENTIFIER_SYSTEMS} entries.
    * </ul>
    *
-   * <p>
-   * Searches that don't match one of the above forms are not supported.
+   * <p>Searches that don't match one of the above forms are not supported.
    *
-   * <p>
-   * The {@link Search} annotation indicates that this method supports the search operation. There
-   * may be many different methods annotated with this {@link Search} annotation, to support many
-   * different search criteria.
+   * <p>The {@link Search} annotation indicates that this method supports the search operation.
+   * There may be many different methods annotated with this {@link Search} annotation, to support
+   * many different search criteria.
    *
-   * @param identifier an {@link Identifier} {@link TokenParam} for the
-   *        {@link Patient#getIdentifier()} to try and find a matching {@link Patient} for
+   * @param identifier an {@link Identifier} {@link TokenParam} for the {@link
+   *     Patient#getIdentifier()} to try and find a matching {@link Patient} for
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
-   *        pagination
+   *     pagination
    * @param lastUpdated an {@link OptionalParam} to filter the results based on the passed date
-   *        range
+   *     range
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
-   *        to parse out pagination values
+   *     to parse out pagination values
    * @return Returns a {@link List} of {@link Patient}s, which may contain multiple matching
-   *         resources, or may also be empty.
+   *     resources, or may also be empty.
    */
   @Search
   @Trace
   public Bundle searchByIdentifier(
-      @RequiredParam(name = Patient.SP_IDENTIFIER) @Description(
-          shortDefinition = "The patient identifier to search for") TokenParam identifier,
-      @OptionalParam(name = "startIndex") @Description(
-          shortDefinition = "The offset used for result pagination") String startIndex,
-      @OptionalParam(name = "_lastUpdated") @Description(
-          shortDefinition = "Include resources last updated in the given range") DateRangeParam lastUpdated,
+      @RequiredParam(name = Patient.SP_IDENTIFIER)
+          @Description(shortDefinition = "The patient identifier to search for")
+          TokenParam identifier,
+      @OptionalParam(name = "startIndex")
+          @Description(shortDefinition = "The offset used for result pagination")
+          String startIndex,
+      @OptionalParam(name = "_lastUpdated")
+          @Description(shortDefinition = "Include resources last updated in the given range")
+          DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
     if (identifier.getQueryParameterQualifier() != null)
       throw new InvalidRequestException(
@@ -488,9 +512,10 @@ public final class R4PatientResourceProvider implements IResourceProvider {
               "Unsupported identifier system: " + identifier.getSystem());
       }
 
-      patients = QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
-          ? Collections.singletonList(patient)
-          : Collections.emptyList();
+      patients =
+          QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
+              ? Collections.singletonList(patient)
+              : Collections.emptyList();
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
@@ -504,30 +529,34 @@ public final class R4PatientResourceProvider implements IResourceProvider {
   /**
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
    * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *        value to use
+   *     value to use
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
-   *         {@link Beneficiary#getHicn()} hash value
-   * @throws NoResultException A {@link NoResultException} will be thrown if no matching
-   *         {@link Beneficiary} can be found
+   *     {@link Beneficiary#getHicn()} hash value
+   * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
+   *     Beneficiary} can be found
    */
   @Trace
   private Patient queryDatabaseByHicnHash(String hicnHash, List<String> includeIdentifiersValues) {
-    return queryDatabaseByHash(hicnHash, "hicn", includeIdentifiersValues, Beneficiary_.hicn,
-        BeneficiaryHistory_.hicn);
+    return queryDatabaseByHash(
+        hicnHash, "hicn", includeIdentifiersValues, Beneficiary_.hicn, BeneficiaryHistory_.hicn);
   }
 
   /**
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
    * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *        value to use
+   *     value to use
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
-   *         {@link Beneficiary#getMbiHash()} ()} hash value
-   * @throws NoResultException A {@link NoResultException} will be thrown if no matching
-   *         {@link Beneficiary} can be found
+   *     {@link Beneficiary#getMbiHash()} ()} hash value
+   * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
+   *     Beneficiary} can be found
    */
   @Trace
   private Patient queryDatabaseByMbiHash(String mbiHash, List<String> includeIdentifiersValues) {
-    return queryDatabaseByHash(mbiHash, "mbi", includeIdentifiersValues, Beneficiary_.mbiHash,
+    return queryDatabaseByHash(
+        mbiHash,
+        "mbi",
+        includeIdentifiersValues,
+        Beneficiary_.mbiHash,
         BeneficiaryHistory_.mbiHash);
   }
 
@@ -535,21 +564,22 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * @param hash the {@link Beneficiary} hash value to match
    * @param hashType a string to represent the hash type (used for logging purposes)
    * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *        value to use
+   *     value to use
    * @param beneficiaryHashField the JPA location of the beneficiary hash field
    * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
-   *         {@link Beneficiary} hash value
-   * @throws NoResultException A {@link NoResultException} will be thrown if no matching
-   *         {@link Beneficiary} can be found
+   *     {@link Beneficiary} hash value
+   * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
+   *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByHash(String hash, String hashType,
+  private Patient queryDatabaseByHash(
+      String hash,
+      String hashType,
       List<String> includeIdentifiersValues,
       SingularAttribute<Beneficiary, String> beneficiaryHashField,
       SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField) {
-    if (hash == null || hash.trim().isEmpty())
-      throw new IllegalArgumentException();
+    if (hash == null || hash.trim().isEmpty()) throw new IllegalArgumentException();
 
     /*
      * Beneficiaries' HICN/MBIs can change over time and those past HICN/MBIs may land in
@@ -590,13 +620,19 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     Root<BeneficiaryHistory> beneHistoryMatchesRoot =
         beneHistoryMatches.from(BeneficiaryHistory.class);
     beneHistoryMatches.select(beneHistoryMatchesRoot.get(BeneficiaryHistory_.beneficiaryId));
-    beneHistoryMatches
-        .where(builder.equal(beneHistoryMatchesRoot.get(beneficiaryHistoryHashField), hash));
+    beneHistoryMatches.where(
+        builder.equal(beneHistoryMatchesRoot.get(beneficiaryHistoryHashField), hash));
     List<String> matchingIdsFromBeneHistory = null;
     Long hicnsFromHistoryQueryNanoSeconds = null;
     Timer.Context beneHistoryMatchesTimer =
-        metricRegistry.timer(MetricRegistry.name(getClass().getSimpleName(), "query",
-            "bene_by_" + hashType, hashType + "s_from_beneficiarieshistory")).time();
+        metricRegistry
+            .timer(
+                MetricRegistry.name(
+                    getClass().getSimpleName(),
+                    "query",
+                    "bene_by_" + hashType,
+                    hashType + "s_from_beneficiarieshistory"))
+            .time();
     try {
       matchingIdsFromBeneHistory = entityManager.createQuery(beneHistoryMatches).getResultList();
     } finally {
@@ -629,22 +665,34 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     List<Beneficiary> matchingBenes = Collections.emptyList();
     Long benesByHashOrIdQueryNanoSeconds = null;
     Timer.Context timerHicnQuery =
-        metricRegistry.timer(MetricRegistry.name(getClass().getSimpleName(), "query",
-            "bene_by_" + hashType, "bene_by_" + hashType + "_or_id")).time();
+        metricRegistry
+            .timer(
+                MetricRegistry.name(
+                    getClass().getSimpleName(),
+                    "query",
+                    "bene_by_" + hashType,
+                    "bene_by_" + hashType + "_or_id"))
+            .time();
     try {
       matchingBenes = entityManager.createQuery(beneMatches).getResultList();
     } finally {
       benesByHashOrIdQueryNanoSeconds = timerHicnQuery.stop();
 
       TransformerUtils.recordQueryInMdc(
-          String.format("bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
+          String.format(
+              "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
               String.join("_", includeIdentifiersValues)),
-          benesByHashOrIdQueryNanoSeconds, matchingBenes.size());
+          benesByHashOrIdQueryNanoSeconds,
+          matchingBenes.size());
     }
 
     // Then, if we found more than one distinct BENE_ID, or none, throw an error.
-    long distinctBeneIds = matchingBenes.stream().map(Beneficiary::getBeneficiaryId)
-        .filter(Objects::nonNull).distinct().count();
+    long distinctBeneIds =
+        matchingBenes.stream()
+            .map(Beneficiary::getBeneficiaryId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .count();
     Beneficiary beneficiary = null;
     if (distinctBeneIds <= 0) {
       throw new NoResultException();
@@ -675,10 +723,10 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * Following method will bring back the Beneficiary that has the most recent rfrnc_yr since the
    * hicn points to more than one bene id in the Beneficiaries table
    *
-   * @param duplicateBenes of matching Beneficiary records the
-   *        {@link Beneficiary#getBeneficiaryId()} value to match
+   * @param duplicateBenes of matching Beneficiary records the {@link
+   *     Beneficiary#getBeneficiaryId()} value to match
    * @return a FHIR {@link Beneficiary} for the CCW {@link Beneficiary} that matches the specified
-   *         {@link Beneficiary#getHicn()} hash value
+   *     {@link Beneficiary#getHicn()} hash value
    */
   @Trace
   private Beneficiary selectBeneWithLatestReferenceYear(List<Beneficiary> duplicateBenes) {
@@ -702,14 +750,14 @@ public final class R4PatientResourceProvider implements IResourceProvider {
   }
 
   /**
-   * The header key used to determine which header should be used. See
-   * {@link #returnIncludeIdentifiersValues(RequestDetails)} for details.
+   * The header key used to determine which header should be used. See {@link
+   * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
 
   /**
-   * The List of valid values for the {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header. See
-   * {@link #returnIncludeIdentifiersValues(RequestDetails)} for details.
+   * The List of valid values for the {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
+   * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
       Arrays.asList("true", "false", "hicn", "mbi");
@@ -718,22 +766,26 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * Return a valid List of values for the IncludeIdenfifiers header
    *
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
-   *        to parse out include identifiers values
+   *     to parse out include identifiers values
    * @return List of validated header values against the VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
-   *         list.
+   *     list.
    */
   public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
     String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
-    if (headerValues == null || headerValues == "")
-      return Arrays.asList("");
+    if (headerValues == null || headerValues == "") return Arrays.asList("");
     else
       // Return values split on a comma with any whitespace, valid, distict, and sort
-      return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream().peek(c -> {
-        if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
-          throw new InvalidRequestException(
-              "Unsupported " + HEADER_NAME_INCLUDE_IDENTIFIERS + " header value: " + c);
-      }).distinct().sorted().collect(Collectors.toList());
+      return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream()
+          .peek(
+              c -> {
+                if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
+                  throw new InvalidRequestException(
+                      "Unsupported " + HEADER_NAME_INCLUDE_IDENTIFIERS + " header value: " + c);
+              })
+          .distinct()
+          .sorted()
+          .collect(Collectors.toList());
   }
 
   /**
@@ -788,9 +840,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
    * @param paging to check
    */
   public static void checkPageSize(LinkBuilder paging) {
-    if (paging.getPageSize() == 0)
-      throw new InvalidRequestException("A zero count is unsupported");
-    if (paging.getPageSize() < 0)
-      throw new InvalidRequestException("A negative count is invalid");
+    if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
+    if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
   }
 }

@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.codebook.model.Variable;
+import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import java.time.Instant;
 import java.util.Date;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -14,71 +18,64 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Money;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.codesystems.Adjudication;
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.codebook.model.Variable;
-import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.CarrierClaimColumn;
 
 /**
- * Contains all of the shared constants used to transform CCW JPA entities (e.g.
- * {@link Beneficiary}) into FHIR resources (e.g. {@link Patient}).
+ * Contains all of the shared constants used to transform CCW JPA entities (e.g. {@link
+ * Beneficiary}) into FHIR resources (e.g. {@link Patient}).
  *
  * <h3>Naming Conventions</h3>
  *
- * <p>
- * This is a monster list of constants. To keep it somewhat manageable, the following naming
+ * <p>This is a monster list of constants. To keep it somewhat manageable, the following naming
  * conventions must be used for the constants:
  *
  * <ol>
- * <li>If the constant value is used as a FHIR extension URL (see {@link Extension#setUrl(String)}),
- * the constant must be prefixed with <code>EXTENSION_</code>.
- * <li>If the constant value is used as a FHIR coding system (see
- * {@link Coding#setSystem(String)}):, the constant must be prefixed with <code>CODING_</code>.
- * <ol>
- * <li>If the codeset is part of the Medicare billing standards, the constant must be further
- * prefixed with <code>CMS_</code>.
- * <li>If the codeset is only used with the Chronic Conditions Warehouse, the constant must be
- * further prefixed with <code>CCW_</code>.
- * <li>If the codeset is only used with the Blue Button API, the constant must be further prefixed
- * with <code>BBAPI_</code>.
- * </ol>
- * <li>If the constant is used as a code in a FHIR coding (see {@link Coding#setCode(String)}), the
- * constant must be prefixed with <code>CODED_</code> and the same suffix as the constant for the
- * coding's system constant.
- * <li>If the constant value is used as a FHIR identifier system (see
- * {@link Identifier#setSystem(String)}), the constant must be prefixed with
- * <code>IDENTIFIER_</code> .
+ *   <li>If the constant value is used as a FHIR extension URL (see {@link
+ *       Extension#setUrl(String)}), the constant must be prefixed with <code>EXTENSION_</code>.
+ *   <li>If the constant value is used as a FHIR coding system (see {@link
+ *       Coding#setSystem(String)}):, the constant must be prefixed with <code>CODING_</code>.
+ *       <ol>
+ *         <li>If the codeset is part of the Medicare billing standards, the constant must be
+ *             further prefixed with <code>CMS_</code>.
+ *         <li>If the codeset is only used with the Chronic Conditions Warehouse, the constant must
+ *             be further prefixed with <code>CCW_</code>.
+ *         <li>If the codeset is only used with the Blue Button API, the constant must be further
+ *             prefixed with <code>BBAPI_</code>.
+ *       </ol>
+ *   <li>If the constant is used as a code in a FHIR coding (see {@link Coding#setCode(String)}),
+ *       the constant must be prefixed with <code>CODED_</code> and the same suffix as the constant
+ *       for the coding's system constant.
+ *   <li>If the constant value is used as a FHIR identifier system (see {@link
+ *       Identifier#setSystem(String)}), the constant must be prefixed with <code>IDENTIFIER_</code>
+ *       .
  * </ol>
  *
  * <h3>FHIR Extension URLs and Coding System URIs</h3>
  *
- * <p>
- * Every FHIR {@link Extension} must have an {@link Extension#getUrl()} value that applications can
- * use to identify/select the field. Similarly, every FHIR {@link Coding} must have a
- * {@link Coding#getSystem()} URI value that applications can use to identify the codeset.
+ * <p>Every FHIR {@link Extension} must have an {@link Extension#getUrl()} value that applications
+ * can use to identify/select the field. Similarly, every FHIR {@link Coding} must have a {@link
+ * Coding#getSystem()} URI value that applications can use to identify the codeset.
  *
- * <p>
- * To try and achieve some consistency in our API, the following guidelines must be adhered to when
- * adding new {@link Extension#getUrl()}s and {@link Coding#getSystem()} URIs to our application:
+ * <p>To try and achieve some consistency in our API, the following guidelines must be adhered to
+ * when adding new {@link Extension#getUrl()}s and {@link Coding#getSystem()} URIs to our
+ * application:
  *
  * <ol>
- * <li>If FHIR has a published URL/URI for it already, that must be used (e.g.
- * {@link #CODING_NPI_US}).
- * <li>All other extension URLs and coding URIs must be set to the URL of a public web page
- * controlled by the Blue Button API team, where links and/or documentation for the item in question
- * can be posted. This is necessary to ensure the API remains appropriately documented and usable in
- * the future. TODO file JIRA ticket to switch all existing URLs/URIs
+ *   <li>If FHIR has a published URL/URI for it already, that must be used (e.g. {@link
+ *       #CODING_NPI_US}).
+ *   <li>All other extension URLs and coding URIs must be set to the URL of a public web page
+ *       controlled by the Blue Button API team, where links and/or documentation for the item in
+ *       question can be posted. This is necessary to ensure the API remains appropriately
+ *       documented and usable in the future. TODO file JIRA ticket to switch all existing URLs/URIs
  * </ol>
  */
 public final class TransformerConstants {
   /**
    * The base URL/URI/system for FHIR output when the domain concept in question is owned by (or at
    * least documented by) the Blue Button API team. Please note that the documentation on this site
-   * is generated from the following project:
-   * <a href= "https://github.com/CMSgov/bluebutton-site-static">bluebutton-site-static</a>.
+   * is generated from the following project: <a href=
+   * "https://github.com/CMSgov/bluebutton-site-static">bluebutton-site-static</a>.
    *
-   * <p>
-   * This URL will never be used by itself; it will always be suffixed with a more specific path.
+   * <p>This URL will never be used by itself; it will always be suffixed with a more specific path.
    */
   static final String BASE_URL_BBAPI_RESOURCES = "https://bluebutton.cms.gov/resources";
 
@@ -86,13 +83,12 @@ public final class TransformerConstants {
    * The base URL/URI/system for FHIR output related to {@link CcwCodebookVariable}:
    *
    * <ul>
-   * <li>{@link Extension#getUrl()}
-   * <li>{@link Coding#getSystem()}
-   * <li>{@link Identifier#getSystem()}
+   *   <li>{@link Extension#getUrl()}
+   *   <li>{@link Coding#getSystem()}
+   *   <li>{@link Identifier#getSystem()}
    * </ul>
    *
-   * <p>
-   * This URL will never be used by itself; it will always be suffixed with the (lower-cased)
+   * <p>This URL will never be used by itself; it will always be suffixed with the (lower-cased)
    * {@link CcwCodebookVariable#getVariable()}'s {@link Variable#getId()}.
    */
   static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
@@ -107,8 +103,8 @@ public final class TransformerConstants {
       BASE_URL_BBAPI_RESOURCES + "/codesystem/adjudication";
 
   /**
-   * The CMS-custom {@link Coding#getSystem()} value for Medicare
-   * {@link SupportingInformationComponent#getCategory()}s.
+   * The CMS-custom {@link Coding#getSystem()} value for Medicare {@link
+   * SupportingInformationComponent#getCategory()}s.
    */
   static final String CODING_BBAPI_INFORMATION_CATEGORY =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/information";
@@ -136,10 +132,9 @@ public final class TransformerConstants {
       BASE_URL_BBAPI_RESOURCES + "/codesystem/diagnosis-type";
 
   /**
-   * Used as the {@link Coding#getSystem()} for {@link ItemComponent#getService()} and
-   * {@link ItemComponent#getModifier()}. (This is used instead of
-   * {@link CcwCodebookVariable#HCPCS_CD} so that we can provide some extra helpful documentation at
-   * the URL.)
+   * Used as the {@link Coding#getSystem()} for {@link ItemComponent#getService()} and {@link
+   * ItemComponent#getModifier()}. (This is used instead of {@link CcwCodebookVariable#HCPCS_CD} so
+   * that we can provide some extra helpful documentation at the URL.)
    */
   static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
@@ -157,14 +152,14 @@ public final class TransformerConstants {
 
   /**
    * Used to identify the drugs that were purchased as part of Part D, Carrier, and DME claims. See
-   * here for more information on using NDC codes with FHIR:
-   * <a href="http://hl7.org/fhir/ndc.html">10 Using NDC and NHRIC Codes with FHIR</a>.
+   * here for more information on using NDC codes with FHIR: <a
+   * href="http://hl7.org/fhir/ndc.html">10 Using NDC and NHRIC Codes with FHIR</a>.
    */
   static final String CODING_NDC = "http://hl7.org/fhir/sid/ndc";
 
   /**
-   * The United States National Provider Identifier, as available at
-   * <a href="http://download.cms.gov/nppes/NPI_Files.html">NPI/NPPES File</a> .
+   * The United States National Provider Identifier, as available at <a
+   * href="http://download.cms.gov/nppes/NPI_Files.html">NPI/NPPES File</a> .
    */
   static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
