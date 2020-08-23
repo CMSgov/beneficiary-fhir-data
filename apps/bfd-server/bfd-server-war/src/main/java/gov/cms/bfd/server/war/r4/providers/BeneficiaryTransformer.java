@@ -143,6 +143,7 @@ final class BeneficiaryTransformer {
           currentIdentifier);
 
     List<String> unhashedMbis = new ArrayList<String>();
+    beneficiary.getMedicareBeneficiaryIdHistories().size();
     for (MedicareBeneficiaryIdHistory mbiHistory :
         beneficiary.getMedicareBeneficiaryIdHistories()) {
       Optional<String> mbiUnhashedHistoric = mbiHistory.getMedicareBeneficiaryId();
