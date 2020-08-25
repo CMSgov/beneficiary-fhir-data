@@ -20,3 +20,8 @@ alter table "BeneficiariesHistory" add column "mbiEffectiveDate" date;
 alter table "BeneficiariesHistory" add column "mbiObsoleteDate" date;
 
 alter table "InpatientClaimLines" add column "clmUncompensatedCareAmount" numeric(38, 2);
+
+alter table "CarrierClaimLines" add column "clmControlNumber" varchar(23) not null;
+
+alter table "DMEClaimLines" add column "clmControlNumber" varchar(23) not null;
+
