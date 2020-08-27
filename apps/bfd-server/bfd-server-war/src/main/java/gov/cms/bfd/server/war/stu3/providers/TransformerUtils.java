@@ -336,8 +336,10 @@ public final class TransformerUtils {
     }
 
     // Link the EOB.item to the care team entry (if it isn't already).
-    if (!eobItem.getCareTeamLinkId().contains(careTeamEntry.getSequence())) {
-      eobItem.addCareTeamLinkId(careTeamEntry.getSequence());
+    final int careTeamEntrySequence = careTeamEntry.getSequence();
+    if (eobItem.getCareTeamLinkId().stream()
+        .noneMatch(id -> id.getValue() == careTeamEntrySequence)) {
+      eobItem.addCareTeamLinkId(careTeamEntrySequence);
     }
 
     return careTeamEntry;
