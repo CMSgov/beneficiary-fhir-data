@@ -946,7 +946,6 @@ public final class EndpointJsonResponseComparatorIT {
       throw new UncheckedIOException(
           "Unable to deserialize the following JSON content as tree: " + newJson, e);
     }
-
     JsonNode diff = JsonDiff.asJson(beforeNode, afterNode);
 
     // Filter out diffs that we don't care about (due to changing with each call)
