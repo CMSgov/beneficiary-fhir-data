@@ -3,7 +3,7 @@
 [RFC Proposal]: #rfc-proposal
 
 * RFC Proposal ID: `0001-bfd-v2-patient`
-* Start Date: 08-03-2020
+* Start Date: 2020-08-03
 * RFC PR: [BFD-264-v2_Patient_RFC #313](https://github.com/CMSgov/beneficiary-fhir-data/pull/313)
 * JIRA Ticket(s): [BFD-264](https://jira.cms.gov/browse/BFD-264)
 
@@ -216,6 +216,8 @@ This structure defines the following Slices:
 [Differential_view_1](./Differential_view_Patientv2_1.PNG)
 
 [Differential_view_2](./Differential_view_Patientv2_2.PNG)
+
+diff ./patientReadCurrentState.json ./patientReadFutureState.json > ./patient-v1-to-v2.diff
 
 
 ### Unresolved Questions
