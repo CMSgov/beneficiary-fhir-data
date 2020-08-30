@@ -213,11 +213,8 @@ This structure defines the following Slices:
 ### Differential View
 [Differential View]: #differential-view
 
-[Differential_view_1](./Differential_view_Patientv2_1.PNG)
 
-[Differential_view_2](./Differential_view_Patientv2_2.PNG)
-
-diff ./patientReadCurrentState.json ./patientReadFutureState.json > ./patient-v1-to-v2.diff
+[Differential_view](./patient-v1-to-v2.diff)
 
 
 ### Unresolved Questions
