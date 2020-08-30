@@ -204,6 +204,8 @@ The following questions need to be resolved prior to merging this RFC:
 
 Do we need to return hash identifiers? Use the identifier flag in the header to determine what to send – MBI. HICN, Hashes? We do send out BENE_ID as local patient (beneficiary) identifier (medical record number).
 
+**RESOLVED:** Hashed MBI’s will not be provided.
+
 2. Race code mapping for Hispanic:
 
 What is the best approach in CMS-Blue Button to map Hispanic race to US-Core Race code (see below):
@@ -217,7 +219,7 @@ What is the best approach in CMS-Blue Button to map Hispanic race to US-Core Rac
 •	UNK			Unknown  
 •	ASKU			Asked but no answer  
 
- 		
+**RESOLVED:**  CCW Race codes will be mapped as UNK race code for ALL races to support US-Core race Code System. CCW/SSA Race codes will continue to be provided to accurately reflect race in the system. 		
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
