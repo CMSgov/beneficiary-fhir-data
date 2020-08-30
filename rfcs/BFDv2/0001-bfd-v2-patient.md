@@ -140,8 +140,9 @@ Patient.identifier:
 •	http://terminology.hl7.org/CodeSystem/v2-0203  
 
 Patient.gender:
-	* Change value set from http://hl7.org/fhir/ValueSet/administrative-gender to http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1
 
+	* Change value set from http://hl7.org/fhir/ValueSet/administrative-gender to http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1
+	
 
 
 #### Not Supported:
