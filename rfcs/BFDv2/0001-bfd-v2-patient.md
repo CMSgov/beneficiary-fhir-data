@@ -72,13 +72,13 @@ http://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-CARIN-BB-Patient.html
           .setSystem("https://bluebutton.cms.gov/resources/variables/bene_id").getType().addCoding()
           .setCode(
           "PI")
-          .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+          .setSystem("http://hl7.org/fhir/us/carin-bb/CodeSystem/IdentifierTypeCS")
           .setDisplay("Patient Internal Identifier");
 
       patientSlicing.addIdentifier()
           .setValue("-2b034220943953861f7b17963091ea962c13548f4b1d5f4c1013ee1779d621f4")
           .setSystem("https://bluebutton.cms.gov/resources/identifier/mbi-hash").getType()
-          .addCoding().setCode("MC").setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+          .addCoding().setCode("MC").setSystem("http://hl7.org/fhir/us/carin-bb/CodeSystem/IdentifierTypeCS")
           .setDisplay("Patient's Medicare Number");
 
 **Below are the payload changes being proposed in Patient resource:**
@@ -107,11 +107,33 @@ Slicing Implementation: POC code above. Slicing codes are used from the below li
 
 Race:
  
-HL7 FHIR extension for Race used by US-Core and CARIN.
+CMS/CCW Race Codes will continue to be provided. In addition US-Core OMB Race extension will also be provided. CCW Race codes will be mapped as UNK (Unknown) Race code for ALL races to support US-Core Race Code System (this may undergo change based on FINAL decision). CCW Race codes will continue to be provided to accurately reflect Race in the system.
+
+CMS BFD Code System URL:
+
+https://bluebutton.cms.gov/resources/variables/race/
+
+US Core Race Code Systems URL:
+
+http://hl7.org/fhir/us/core/StructureDefinition/us-core-race
+
+CCW Race Codes:
+
+|Code|Code value|
+|-|-|
+|0|UNKNOWN|
+|1|NON-HISPANIC WHITE|
+|2|BLACK (OR AFRICAN-AMERICAN)|
+|3|OTHER|
+|4|ASIAN/PACIFIC ISLANDER|
+|5|HISPANIC|
+|6|AMERICAN INDIAN / ALASKA NATIVE|
 
 ##### Patient.Active field 
 
 Type boolean
+
+If the patient is not deceased and has any coverage mark them active, else mark them false. We will use Death_Dt to populate this field. If deceased date is not present set Active flag to *true* else *false*.
 
 ##### MANDATORY New Fields to be Added:
 None as part of FHIR-R4 Spec. But CARIN mandates some mandatory Patient fields:  
