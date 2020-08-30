@@ -203,12 +203,12 @@ This structure defines the following Slices:
 ### Current State
 [Current State]: #current-state
 
-[BFD v1: Current State Patient Resource](./BFD_v1_Patient-Current_State.txt)
+[BFD v1: Current State Patient Resource](./patientReadCurrentState.json)
 
 ### Future State
 [Future State]: #future-state
 
-[BFD v2: Future State Patient Resource](./BFD_v2_Patient-Future_State.txt)
+[BFD v2: Future State Patient Resource](./patientReadFutureState.json)
 
 ### Differential View
 [Differential View]: #differential-view
