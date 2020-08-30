@@ -94,12 +94,13 @@ Future State: The element Patient.identifier is sliced based on the values of va
 
 Slicing Implementation: POC code above. Slicing codes are used from the below list:
 
-Code		Display  
-MR		Medical record number  
-MA		Patient Medicaid number  
-PI		Patient internal identifier  
-PT		Patient external identifier  
-SN		Subscriber Number  
+|Code|Display|
+|-|-|
+|MR|Medical record number|
+|MA|Patient Medicaid number|
+|PI|Patient internal identifier|
+|PT|Patient external identifier|
+|SN|Subscriber Number|
  
 
 ##### Extensions/Code System Changes:
@@ -139,7 +140,7 @@ Patient.identifier:
 •	http://terminology.hl7.org/CodeSystem/v2-0203  
 
 Patient.gender:
-	•	Change value set from http://hl7.org/fhir/ValueSet/administrative-gender to http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1
+	* Change value set from http://hl7.org/fhir/ValueSet/administrative-gender to http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1
 
 
 
