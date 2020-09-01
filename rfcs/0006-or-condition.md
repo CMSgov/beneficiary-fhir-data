@@ -77,6 +77,8 @@ Before a solution goes into place, how can we validate that this actually does h
 Performance testing this with real world examples, e.g. comparing AB2D performance querying 6 months separately
 vs. 1 query with 6 months.
 
+Will other groups use this solution?
+
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
