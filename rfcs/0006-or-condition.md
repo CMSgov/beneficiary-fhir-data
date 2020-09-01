@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0006-or-condition`
 * Start Date: 2020-08-21
-* RFC PR: [rust-lang/rfcs#0000](https://github.com/rust-lang/rfcs/pull/0000)
+* RFC PR: [https://github.com/CMSgov/beneficiary-fhir-data/pull/344](https://github.com/CMSgov/beneficiary-fhir-data/pull/344)
 * JIRA Ticket(s):
     * [https://jira.cms.gov/browse/AB2D-1862](https://jira.cms.gov/browse/AB2D-1862)
 
