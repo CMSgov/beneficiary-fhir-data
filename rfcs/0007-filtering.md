@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0007-filtering-fields`
 * Start Date: 2020-08-21
-* RFC PR: [rust-lang/rfcs#0007](https://github.com/rust-lang/rfcs/pull/0000)
+* RFC PR: [rfcs#0007](https://github.com/CMSgov/beneficiary-fhir-data/pull/345)
 * JIRA Ticket(s):
     * [https://jira.cms.gov/browse/AB2D-1863](https://jira.cms.gov/browse/AB2D-1863)
 
