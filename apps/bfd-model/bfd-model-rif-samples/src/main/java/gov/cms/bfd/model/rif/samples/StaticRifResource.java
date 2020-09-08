@@ -15,13 +15,24 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.csv.CSVParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.zeroturnaround.exec.InvalidExitValueException;
+import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
 
 /** Enumerates the sample RIF resources available on the classpath. */
 public enum StaticRifResource {
@@ -336,7 +347,20 @@ public enum StaticRifResource {
   SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY(
       resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaryhistory.txt"),
       RifFileType.BENEFICIARY_HISTORY,
-      7);
+      7),
+
+  SYNTHEA_BENES(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary.csv")),
+      RifFileType.BENEFICIARY,
+      10),
+
+  SYNTHEA_INPATIENT(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/inpatient.csv")),
+      RifFileType.INPATIENT,
+      10);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StaticRifResource.class);
+  private static Path SYNTHEA_OUTPUT_DIR;
 
   private final Supplier<URL> resourceUrlSupplier;
   private final RifFileType rifFileType;
@@ -512,6 +536,209 @@ public enum StaticRifResource {
         throw new BadCodeMonkeyException(e);
       }
     };
+  }
+
+  /**
+   * @param fileMatcher the {@link PathMatcher} to select the correct output file from Synthea
+   * @return a {@link URL} that can be used to access the Synthea-generated data
+   */
+  private static Supplier<URL> syntheaData(PathMatcher fileMatcher) {
+    // This block acts as a Supplier for the URL it returns.
+    return () -> {
+      /*
+       * Run Synthea (only once, per JVM) to generate the output data.
+       */
+      synchronized (StaticRifResource.class) {
+        if (SYNTHEA_OUTPUT_DIR == null) {
+          SYNTHEA_OUTPUT_DIR = generateSyntheaData();
+        }
+      }
+
+      // Find all output files that match the specified glob.
+      Set<Path> matchedSyntheaFiles = null;
+      try (Stream<Path> stream = Files.walk(SYNTHEA_OUTPUT_DIR)) {
+        matchedSyntheaFiles =
+            stream
+                .peek(file -> System.out.println(file))
+                .filter(file -> !Files.isDirectory(file))
+                .filter(file -> fileMatcher.matches(file))
+                .collect(Collectors.toSet());
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+
+      // Verify we got back exactly one match.
+      if (matchedSyntheaFiles.isEmpty()) {
+        throw new BadCodeMonkeyException("Synthea didn't generate any matching files.");
+      } else if (matchedSyntheaFiles.size() > 1) {
+        throw new BadCodeMonkeyException(
+            "Synthea generated too many matching files: " + matchedSyntheaFiles);
+      }
+
+      // Return the matched file as a URL.
+      try {
+        return matchedSyntheaFiles.iterator().next().toUri().toURL();
+      } catch (MalformedURLException e) {
+        throw new UncheckedIOException(e);
+      }
+    };
+  }
+
+  /**
+   * TODO
+   *
+   * @return
+   */
+  private static Path generateSyntheaData() {
+    try {
+      // Grab the build directory to use for Synthea.
+      Path syntheaBaseDir = getBuildRootTargetDirectory().resolve("synthea");
+      if (Files.notExists(syntheaBaseDir)) {
+        Files.createDirectories(syntheaBaseDir);
+      }
+
+      /* FIXME need to abstract the process management here, particularly STDOUT and STDERR. */
+      /* FIXME need to improve error handling here. */
+
+      // Clone Synthea's Git repo to that dir.
+      Path syntheaGitDir = syntheaBaseDir.resolve("synthea.git");
+      if (!Files.isDirectory(syntheaGitDir)) {
+        LOGGER.info("Cloning Synthea to '{}'...", syntheaGitDir);
+        ProcessResult gitCloneResult =
+            new ProcessExecutor(
+                    "git", "clone", "https://github.com/synthetichealth/synthea.git", "synthea.git")
+                .directory(syntheaBaseDir.toFile())
+                .readOutput(true)
+                .timeout(5, TimeUnit.MINUTES)
+                .execute();
+        if (gitCloneResult.getExitValue() != 0) {
+          throw new RuntimeException("Running 'git clone' failed: " + gitCloneResult.outputUTF8());
+        }
+        LOGGER.info("Cloned Synthea to '{}'.", syntheaBaseDir);
+      }
+
+      // Checkout the right branch.
+      LOGGER.info("Checking out required Synthea branch...");
+      ProcessResult gitCheckoutResult =
+          new ProcessExecutor("git", "checkout", "bb-export")
+              .directory(syntheaGitDir.toFile())
+              .readOutput(true)
+              .timeout(1, TimeUnit.MINUTES)
+              .execute();
+      if (gitCheckoutResult.getExitValue() != 0) {
+        throw new RuntimeException(
+            "Running 'git checkout' failed: " + gitCheckoutResult.outputUTF8());
+      }
+      LOGGER.info("Checked out required Synthea branch.");
+
+      // Build the Synthea branch.
+      Path syntheaAppClassFile =
+          syntheaGitDir
+              .resolve("build")
+              .resolve("classes")
+              .resolve("java")
+              .resolve("main")
+              .resolve("App.class");
+      if (!Files.exists(syntheaAppClassFile)) {
+        LOGGER.info("Building Synthea...");
+        Path gradlewBinPath = syntheaGitDir.resolve("gradlew");
+        ProcessResult gradleCheckResult =
+            new ProcessExecutor(gradlewBinPath.toString(), "clean", "check")
+                .directory(syntheaGitDir.toFile())
+                .readOutput(true)
+                .timeout(30, TimeUnit.MINUTES)
+                .execute();
+        if (gradleCheckResult.getExitValue() != 0) {
+          throw new RuntimeException(
+              "Running 'gradlew clean check' failed: " + gradleCheckResult.outputUTF8());
+        }
+        LOGGER.info("Built Synthea.");
+      }
+
+      // Run Synthea.
+      Path syntheaOutputDir = syntheaGitDir.resolve("output").resolve("bb2");
+      if (!Files.exists(syntheaOutputDir)) {
+        LOGGER.info("Running Synthea...");
+        Path syntheaBinPath = syntheaGitDir.resolve("run_synthea");
+        ProcessResult syntheaRunResult =
+            new ProcessExecutor(
+                    syntheaBinPath.toString(), "-s", "0", "-p", "100", "--exporter.bb2.export=true")
+                .directory(syntheaGitDir.toFile())
+                .readOutput(true)
+                .timeout(5, TimeUnit.MINUTES)
+                .execute();
+        if (syntheaRunResult.getExitValue() != 0) {
+          throw new RuntimeException(
+              "Running 'run_synthea' failed: " + syntheaRunResult.outputUTF8());
+        }
+        LOGGER.info("Ran Synthea.");
+      }
+
+      if (!Files.exists(syntheaOutputDir)) {
+        throw new RuntimeException("Synthea output directory missing: " + syntheaOutputDir);
+      }
+
+      return syntheaOutputDir;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (InvalidExitValueException e) {
+      // Won't occur, as we're not setting ProcessExecutor.exitValues(...).
+      throw new RuntimeException(e);
+    } catch (TimeoutException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * <strong>Note:</strong> This method should only be used by unit/integration tests, and will not
+   * work in any other context.
+   *
+   * @return the local {@link Path} to the root project's/module's <code>target/</code> directory,
+   *     e.g. <code>/foo/beneficiary-fhir-data.git/apps/target/</code>, which will be created if it
+   *     does not exist
+   */
+  private static Path getBuildRootTargetDirectory() {
+    /*
+     * The working directory for tests will be somewhere in the overall 'apps/' tree. If we run a
+     * single test manually from Eclipse, it should be in the module directory for whatever test is
+     * being run. If we run it from the overall Maven build, it should be the root of the 'apps/'
+     * tree. Regardless of where we end up, what we want here is `apps/target/` (which Maven won't
+     * create by default).
+     */
+    String rootProjectDirectoryName = "apps";
+    try {
+      /*
+       * Start with the current directory and look "up" no more than two times until the 'apps/'
+       * directory is found.
+       */
+      Path projectDir = Paths.get(".");
+
+      if (!projectDir.toRealPath().endsWith(rootProjectDirectoryName)) {
+        projectDir = projectDir.resolve("..");
+      }
+
+      if (!projectDir.toRealPath().endsWith(rootProjectDirectoryName)) {
+        projectDir = projectDir.resolve("..");
+      }
+
+      if (!projectDir.toRealPath().endsWith(rootProjectDirectoryName)) {
+        throw new IllegalStateException(
+            String.format(
+                "Unable to find '%s' directory, starting from '%s', and ending at '%s'.",
+                rootProjectDirectoryName,
+                Paths.get(".").toAbsolutePath(),
+                projectDir.toAbsolutePath()));
+      }
+
+      Path targetDir = projectDir.resolve("target");
+      Files.createDirectories(targetDir);
+
+      return targetDir.toRealPath();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   /**
