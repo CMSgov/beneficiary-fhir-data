@@ -361,6 +361,16 @@ public final class RifLoaderIT {
         dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3.getResources()));
   }
 
+  /**
+   * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
+   * StaticRifResourceGroup#SYNTHEA} data.
+   */
+  @Test
+  public void loadSyntheaData() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHEA.getResources()));
+  }
+
   /** Tests the RifLoaderIdleTasks class with a Sample. Note: only works with Postgres. */
   @Ignore
   @Test

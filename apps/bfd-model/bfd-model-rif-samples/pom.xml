@@ -42,6 +42,14 @@
 		</dependency>
 
 		<dependency>
+			<!-- Used in builds/tests to run and manage external processes. (Can't
+				be marked as test-scoped, as the build/test code needs to live in src/main/java.) -->
+			<groupId>org.zeroturnaround</groupId>
+			<artifactId>zt-exec</artifactId>
+			<version>1.12</version>
+		</dependency>
+
+		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
