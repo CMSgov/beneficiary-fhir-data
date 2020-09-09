@@ -30,6 +30,13 @@
   },
   "organization" : {
     "identifier" : {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "code" : "NPI",
+          "display" : "National Provider Identifier"
+        } ]
+      },
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "value" : "1023011079"
     },
@@ -45,6 +52,13 @@
       }
     } ],
     "identifier" : {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "code" : "NPI",
+          "display" : "National Provider Identifier"
+        } ]
+      },
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "value" : "1023011079"
     },
