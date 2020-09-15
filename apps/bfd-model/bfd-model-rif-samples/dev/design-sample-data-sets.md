@@ -397,3 +397,16 @@ It was created via the following process:
 3. For each of those beneficiaries, randomly select Part D events from the synthetic data set to associate with them. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://confluence.cms.gov/pages/viewpage.action?pageId=172097602).
     * It so happens that MCT wants each beneficiary to have exactly 5 Part D events, but this appears to have been a mostly arbitrary decision.
 4. Adjust all other identifiers (`BENE_ID`, `CLM_ID`, `PDE_ID`, and `CLM_GRP_ID`) so that they don't conflict/collide with any other data sets.
+
+### `SAMPLE_MCT`: MCT-Compatible Test Data (Derived from Synthetic) Added 11 new beneficiaries and associated data with pde's
+
+**Location**: [CMSgov/bluebutton-data-model:bluebutton-data-model-rif-samples/src/main/resources/rif-static-samples/](https://github.com/CMSgov/bluebutton-data-model/tree/master/bluebutton-data-model-rif-samples/src/main/resources/rif-static-samples)
+
+The `SAMPLE_MCT` data set is a small data set created specifically to support the Medicare Coverage Tools (MCT) project (also known as the new "Medicare Plan Finder").
+
+It was created via the following process:
+
+1. Start with the synthetic data set from sample-mct-update-4-beneficiaries.txt.
+2. Randomly select 11 beneficiaries from the synthetic data set. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://jira.cms.gov/browse/BFD-326).  Adjust identifiers `BENE_ID` so that they don't conflict/collide with any other data sets.
+3. For each of those beneficiaries, randomly select Part D events from the synthetic data sample-mct-update-5-pde.txt set to associate with them. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://jira.cms.gov/browse/BFD-326).
+4. Adjust all other identifiers (`BENE_ID`, `PDE_ID`, and `CLM_GRP_ID`) so that they don't conflict/collide with any other data sets.
