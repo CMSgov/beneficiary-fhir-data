@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -23,6 +24,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -236,14 +238,15 @@ public final class PatientResourceProvider implements IResourceProvider {
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      @RequiredParam(name = "_has:Coverage.extension")
+      @RequiredParam(
+              name = "_has:Coverage.extension",
+              chainWhitelist = {""})
           @Description(shortDefinition = "Part D coverage type")
-          TokenParam coverageId,
+          TokenOrListParam coverageId,
       @OptionalParam(name = "cursor")
           @Description(shortDefinition = "The cursor used for result pagination")
           String cursor,
       RequestDetails requestDetails) {
-    checkCoverageId(coverageId);
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
     checkPageSize(paging);
@@ -317,12 +320,22 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the beneficiaries
    */
   private List<Beneficiary> fetchBeneficiaries(
-      TokenParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
-    String contractMonth =
-        coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
-    CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
-    String contractMonthField = partDFieldFor(partDContractMonth);
-    String contractCode = coverageId.getValueNotNull();
+      TokenOrListParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
+    List<TokenParam> wantedCodings = coverageId.getValuesAsQueryTokens();
+
+    if (wantedCodings.isEmpty()) {
+      throw new IllegalArgumentException("Must supply at least one TokenParam");
+    }
+
+    List<SQLFieldValue> fieldValues = new ArrayList<>();
+    for (TokenParam tokenParam : wantedCodings) {
+      checkCoverageId(tokenParam);
+      String contractMonthParam =
+          tokenParam.getSystem().substring(tokenParam.getSystem().lastIndexOf('/') + 1);
+      CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonthParam);
+      String contractMonthField = partDFieldFor(partDContractMonth);
+      fieldValues.add(new SQLFieldValue(contractMonthField, tokenParam.getValueNotNull()));
+    }
 
     // Fetching with joins is not compatible with setMaxResults as explained in this post:
     // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
@@ -333,7 +346,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
-          queryBeneficiaryIds(contractMonthField, contractCode, paging)
+          queryBeneficiaryIds(fieldValues, paging)
               .setMaxResults(paging.getPageSize())
               .getResultList();
 
@@ -341,9 +354,27 @@ public final class PatientResourceProvider implements IResourceProvider {
       return queryBeneficiariesByIds(ids, includedIdentifiers).getResultList();
     } else {
       // Fetch benes and their histories in one query
-      return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
+      return queryBeneficiariesBy(fieldValues, paging, includedIdentifiers)
           .setMaxResults(paging.getPageSize())
           .getResultList();
+    }
+  }
+
+  private static class SQLFieldValue {
+    private final String name;
+    private final String value;
+
+    SQLFieldValue(String name, String value) {
+      this.name = name;
+      this.value = value;
+    }
+
+    String getName() {
+      return name;
+    }
+
+    String getValue() {
+      return value;
     }
   }
 
@@ -357,68 +388,107 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
-      String field, String value, PatientLinkBuilder paging, List<String> identifiers) {
+      List<SQLFieldValue> sqlFieldValues, PatientLinkBuilder paging, List<String> identifiers) {
     String joinsClause = "";
     if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
+
+    String fieldValueClause = generateFieldValueClause(sqlFieldValues);
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
           "select b from Beneficiary b "
               + joinsClause
-              + "where b."
-              + field
-              + " = :value and b.beneficiaryId > :cursor "
+              + "where "
+              + fieldValueClause
+              + " and b.beneficiaryId > :cursor "
               + "order by b.beneficiaryId asc";
 
-      return entityManager
-          .createQuery(query, Beneficiary.class)
-          .setParameter("value", value)
-          .setParameter("cursor", paging.getCursor());
+      TypedQuery<Beneficiary> typedQuery =
+          entityManager
+              .createQuery(query, Beneficiary.class)
+              .setParameter("cursor", paging.getCursor());
+      setFieldValues(typedQuery, sqlFieldValues);
+      return typedQuery;
     } else {
       String query =
           "select b from Beneficiary b "
               + joinsClause
-              + "where b."
-              + field
-              + " = :value "
+              + "where "
+              + fieldValueClause
               + "order by b.beneficiaryId asc";
 
-      return entityManager.createQuery(query, Beneficiary.class).setParameter("value", value);
+      TypedQuery<Beneficiary> typedQuery = entityManager.createQuery(query, Beneficiary.class);
+      setFieldValues(typedQuery, sqlFieldValues);
+      return typedQuery;
+    }
+  }
+
+  private String generateFieldValueClause(List<SQLFieldValue> fieldValues) {
+    if (fieldValues.size() == 0) {
+      throw new IllegalArgumentException("FieldValues must contain at least one value");
+    }
+    String fieldValueClause = "";
+    if (fieldValues.size() > 1) {
+      for (int i = 0; i < fieldValues.size(); i++) {
+        fieldValueClause += "b." + fieldValues.get(i).getName() + " = :value" + i + " ";
+        if (i < fieldValues.size() - 1) {
+          fieldValueClause += "or ";
+        }
+      }
+
+      return fieldValueClause;
+    } else {
+      return "b." + fieldValues.get(0).getName() + " = :value ";
     }
   }
 
   /**
    * Build a criteria for a general beneficiaryId query
    *
-   * @param field to match on
-   * @param value to match on
+   * @param fieldValues list of field names to values to match on
    * @param paging to use for the result set
    * @return the criteria
    */
   private TypedQuery<String> queryBeneficiaryIds(
-      String field, String value, PatientLinkBuilder paging) {
+      List<SQLFieldValue> fieldValues, PatientLinkBuilder paging) {
+    String fieldValueClause = generateFieldValueClause(fieldValues);
+
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
           "select b.beneficiaryId from Beneficiary b "
-              + "where b."
-              + field
-              + " = :value and b.beneficiaryId > :cursor "
+              + "where "
+              + fieldValueClause
+              + " and b.beneficiaryId > :cursor "
               + "order by b.beneficiaryId asc";
 
-      return entityManager
-          .createQuery(query, String.class)
-          .setParameter("value", value)
-          .setParameter("cursor", paging.getCursor());
+      TypedQuery<String> typedQuery =
+          entityManager.createQuery(query, String.class).setParameter("cursor", paging.getCursor());
+
+      setFieldValues(typedQuery, fieldValues);
+      return typedQuery;
     } else {
       String query =
           "select b.beneficiaryId from Beneficiary b "
-              + "where b."
-              + field
-              + " = :value "
-              + "order by b.beneficiaryId asc";
+              + "where "
+              + fieldValueClause
+              + " order by b.beneficiaryId asc";
 
-      return entityManager.createQuery(query, String.class).setParameter("value", value);
+      TypedQuery<String> typedQuery = entityManager.createQuery(query, String.class);
+
+      setFieldValues(typedQuery, fieldValues);
+      return typedQuery;
+    }
+  }
+
+  private void setFieldValues(
+      TypedQuery<? extends Object> typedQuery, List<SQLFieldValue> fieldValues) {
+    if (fieldValues.size() > 1) {
+      for (int i = 0; i < fieldValues.size(); i++) {
+        typedQuery.setParameter("value" + i, fieldValues.get(i).getValue());
+      }
+    } else {
+      typedQuery.setParameter("value", fieldValues.get(0).getValue());
     }
   }
 
