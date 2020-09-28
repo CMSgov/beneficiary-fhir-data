@@ -238,9 +238,7 @@ public final class PatientResourceProvider implements IResourceProvider {
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      @RequiredParam(
-              name = "_has:Coverage.extension",
-              chainWhitelist = {""})
+      @RequiredParam(name = "_has:Coverage.extension")
           @Description(shortDefinition = "Part D coverage type")
           TokenOrListParam coverageId,
       @OptionalParam(name = "cursor")
