@@ -1619,6 +1619,38 @@ public final class PatientResourceProviderIT {
   }
 
   @Test
+  public void searchForExistingPatientByPartDContractNum2Months() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // Should return a single match
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .and(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT02),
+                        "S4607"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getEntry().size());
+  }
+
+  @Test
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
