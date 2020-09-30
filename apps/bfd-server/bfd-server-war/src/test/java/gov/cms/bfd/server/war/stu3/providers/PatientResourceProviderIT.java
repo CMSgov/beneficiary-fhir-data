@@ -1627,23 +1627,15 @@ public final class PatientResourceProviderIT {
     // Should return a single match
     Bundle searchResults =
         fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .or(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT02),
-                        "S4607"))
-            .returnBundle(Bundle.class)
+            .byUrl(
+                ServerTestUtils.getServerBaseUrl()
+                    + "/v1/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/"
+                    + TransformerUtils.calculateVariableReferenceUrl(
+                        CcwCodebookVariable.PTDCNTRCT01)
+                    + "|S4607,"
+                    + TransformerUtils.calculateVariableReferenceUrl(
+                        CcwCodebookVariable.PTDCNTRCT02)
+                    + "|S4607&_format=json")
             .execute();
 
     Assert.assertNotNull(searchResults);
