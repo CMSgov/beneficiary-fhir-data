@@ -1626,18 +1626,19 @@ public final class PatientResourceProviderIT {
 
     // Should return a single match
     Bundle searchResults =
-        fhirClient
-            .search()
-            .byUrl(
-                ServerTestUtils.getServerBaseUrl()
-                    + "/v1/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/"
-                    + TransformerUtils.calculateVariableReferenceUrl(
-                        CcwCodebookVariable.PTDCNTRCT01)
-                    + "|S4607,"
-                    + TransformerUtils.calculateVariableReferenceUrl(
-                        CcwCodebookVariable.PTDCNTRCT02)
-                    + "|S4607&_format=json")
-            .execute();
+        (Bundle)
+            fhirClient
+                .search()
+                .byUrl(
+                    ServerTestUtils.getServerBaseUrl()
+                        + "/v1/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/"
+                        + TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01)
+                        + "|S4607,"
+                        + TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT02)
+                        + "|S4607&_format=json")
+                .execute();
 
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getEntry().size());
