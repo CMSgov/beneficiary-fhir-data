@@ -27,3 +27,11 @@ data "aws_s3_bucket" "moderate_bucket" {
 data "aws_kms_alias" "moderate_cmk" {
   name = "alias/bfd-insights-moderate-cmk"
 }
+
+module "workgroup" {
+  source          = "../../modules/workgroup"
+  bucket          = module.bucket.id
+  bucket_cmk      = module.bucket.bucket_cmk
+  name            = local.database
+  tags            = local.tags
+}
