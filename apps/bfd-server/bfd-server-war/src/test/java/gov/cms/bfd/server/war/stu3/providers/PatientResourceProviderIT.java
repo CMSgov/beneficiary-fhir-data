@@ -1636,7 +1636,7 @@ public final class PatientResourceProviderIT {
                         TransformerUtils.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
-            .and(
+            .or(
                 new TokenClientParam("_has:Coverage.extension")
                     .exactly()
                     .systemAndIdentifier(
