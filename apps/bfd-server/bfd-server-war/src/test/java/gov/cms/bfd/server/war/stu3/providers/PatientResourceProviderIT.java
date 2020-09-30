@@ -1627,6 +1627,7 @@ public final class PatientResourceProviderIT {
     // Should return a single match
     Bundle searchResults =
         fhirClient
+            .search()
             .byUrl(
                 ServerTestUtils.getServerBaseUrl()
                     + "/v1/fhir/Patient?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/"
