@@ -14,7 +14,7 @@ Enable the CMS Enterprise to drive innovation in data sharing so that beneficiar
 ### BFD Vision
 Provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data. 
 
-## License
+### License
 
 This project is in the worldwide [public domain](LICENSE.md). As stated in [LICENSE](LICENSE.md):
 
@@ -32,7 +32,7 @@ Below are links to detailed instructions on configuring your AWS credentials for
 
   * [Configuration and Credential Files](http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html)
 
-## Github Configuration
+### Github Configuration
 
 You will need to configure an SSH credential in order to clone the Blue Button repositories.  Instructions are thoroughly documented on Github but for convenience here are the relevant links:
 
@@ -41,7 +41,7 @@ You will need to configure an SSH credential in order to clone the Blue Button r
   * [Adding a new SSH key to your GitHub account](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/)
   * [Testing your SSH connection](https://help.github.com/articles/testing-your-ssh-connection/)
 
-## Cloning the Repository
+### Cloning the Repository
 
 Clone the repository:
 ```
@@ -49,7 +49,7 @@ mkdir -p ~/workspaces/bfd/
 git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/beneficiary-fhir-data.git
 ```
 
-## Setting up the FHIR server and DB with Docker
+### Setting up the FHIR server and DB with Docker
 
 Requirements: Docker 
 
@@ -86,7 +86,7 @@ cd /app/apps/bfd-server
 mvn verify
 ```
 
-### Serving the BFD
+#### Serving the BFD
 
 To run the BFD locally in a way that will allow you and other systems to interact with it some modifications need to be made so that it serves on a consistent port. Caution: Since this changes the code in the repository (server-start.sh) please keep in mind not to commit these changes.
 
@@ -111,7 +111,7 @@ The FHIR server should now be reachable from the browser at https://localhost:13
 In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one. 
 Note MacOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application. 
 
-### Loading data to work with
+#### Loading data to work with
 
 First you'll want some synthetic data to load and work with. To fetch the synthetic data from a public S3 bucket:
 ```
@@ -132,8 +132,7 @@ This can take as long as an hour depending on your system.
 Once loaded going to a URL like [https://localhost:1337/v1/fhir/Patient/-19990000000001?_format=json](https://localhost:1337/v1/fhir/Patient/-19990000000001?_format=json) in your browser should show you some data.
 
 
-Integration with a downstream system
----
+#### Integration with a downstream system
 
 An example of connecting http://github.com/cmsgov/bluebutton-web-server to the local BFD.
 
@@ -209,17 +208,17 @@ docker-compose -f docker-compose.yml -f docker-compose.bb2.yml -f docker-compose
 docker-compose -f docker-compose.bb2.yml exec bb2 ./docker-compose/migrate.sh
 ```
 
-## Security
+### Security
 
 We work with sensitive information: do not put any PHI or PII in the public repo for BFD.
 
 If you believe you’ve found or been made aware of a security vulnerability, please refer to the CMS Vulnerability Disclosure Policy (here is a [link](https://www.cms.gov/Research-Statistics-Data-and-Systems/CMS-Information-Technology/CIO-Directives-and-Policies/Downloads/CMS-Vulnerability-Disclosure-Policy.pdf) to the most recent version as of the time of this commit.
 
-## Eclipse Configuration
+### Eclipse Configuration
 
 The following instructions are to be executed from within the Eclipse IDE application to ensure proper configuration.
 
-### Eclipse JDK
+#### Eclipse JDK
 
 Verify Eclipse is using the correct Java 8 JDK.
 
@@ -228,7 +227,7 @@ Verify Eclipse is using the correct Java 8 JDK.
 1. If your JDK does not appear in the **Installed JREs** table add it by clicking the **Add** button, select **Standard VM** and locate your installation using the **Directory...** button.
 1. Ensure your JDK is selected in the **Installed JREs** table by checking the checkbox next to the JDK you wish to use.
 
-### Eclipse Preferences
+#### Eclipse Preferences
 
 If you're using Eclipse for development, you'll want to configure its preferences, as follows:
 
@@ -251,7 +250,7 @@ If you're using Eclipse for development, you'll want to configure its preference
     1. Enable the **Format source code** option.
 1. Click **OK**.
 
-### Importing Maven Projects into Eclipse
+#### Importing Maven Projects into Eclipse
 
 The repository can easily be added to your Eclipse workspace using the **Import** feature.
 
