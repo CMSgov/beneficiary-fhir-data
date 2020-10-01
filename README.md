@@ -32,6 +32,13 @@ The following provide information on how to use BFD:
 * [Request Options](./docs/request-options.md):
   This document details the request options that can be used when calling BFD.
 
+## BFD Developer Documentation
+
+The following provide information on how to develop BFD:
+
+* [Sample Data Sets](./apps/bfd-model/bfd-model-rif-samples/dev/design-sample-data-sets.md):
+  This document details the various sample/test data sets available for use with the Blue Button Data/backend systems.
+
 ## Development Environment Setup
 
 ### AWS Credentials
