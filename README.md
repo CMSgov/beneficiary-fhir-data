@@ -6,13 +6,13 @@
 Beneficiary FHIR Data (BFD) Server: The BFD Server is an internal backend system used at CMS to represent Medicare beneficiaries' demographic, enrollment, and claims data in [FHIR](https://www.hl7.org/fhir/overview.html) format.
 
 ### DASG Mission
-Drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare. 
+Drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare.
 
 ### BFD Mission
-Enable the CMS Enterprise to drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare. 
+Enable the CMS Enterprise to drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare.
 
 ### BFD Vision
-Provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data. 
+Provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data.
 
 ### License
 
@@ -51,9 +51,9 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 
 ### Setting up the FHIR server and DB with Docker
 
-Requirements: Docker 
+Requirements: Docker
 
-Caution: Setting up your local environments requires git patches to run. Please make sure you `make unservable` and `make unloadadable` before you commit your changes to revert these patches. 
+Caution: Setting up your local environments requires git patches to run. Please make sure you `make unservable` and `make unloadadable` before you commit your changes to revert these patches.
 
 Let's begin!
 
@@ -90,7 +90,7 @@ mvn verify
 
 To run the BFD locally in a way that will allow you and other systems to interact with it some modifications need to be made so that it serves on a consistent port. Caution: Since this changes the code in the repository (server-start.sh) please keep in mind not to commit these changes.
 
-These changes are contained in the file `contributing/patches/allow_local_port_config.patch` and can be applied with 
+These changes are contained in the file `contributing/patches/allow_local_port_config.patch` and can be applied with
 
 ```
 make servable
@@ -106,10 +106,10 @@ make restart
 
 if they're already running.
 
-The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'. 
+The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'.
 
-In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one. 
-Note MacOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application. 
+In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one.
+Note MacOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application.
 
 #### Loading data to work with
 
@@ -118,14 +118,14 @@ First you'll want some synthetic data to load and work with. To fetch the synthe
 make synthetic-data/*.rif
 ```
 
-Tip: This will download to a folder within the contributing folder within the repo. Consider moving this synthetic data outside the repo and updating your .env file to point to this new location. It will save you some steps in the future. 
+Tip: This will download to a folder within the contributing folder within the repo. Consider moving this synthetic data outside the repo and updating your .env file to point to this new location. It will save you some steps in the future.
 
-To load some data for the BFD to return first apply the patches that allow the system to load local data: 
+To load some data for the BFD to return first apply the patches that allow the system to load local data:
 
-Caution: Since this changes the code in the repository please keep in mind not to commit these changes and to be aware of them while making your own changes. Reverse them before you submit your changes. 
+Caution: Since this changes the code in the repository please keep in mind not to commit these changes and to be aware of them while making your own changes. Reverse them before you submit your changes.
 
 ```make loadable```
-Then load the data 
+Then load the data
 ```make load```
 This can take as long as an hour depending on your system.
 
@@ -194,7 +194,7 @@ services:
       context: ../../bb.dev/msls
       dockerfile: Dockerfile
     command: msls
-    ports: 
+    ports:
       - "8080:8080"
 ```
 
