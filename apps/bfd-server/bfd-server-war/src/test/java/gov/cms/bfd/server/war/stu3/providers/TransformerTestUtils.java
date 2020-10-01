@@ -1782,9 +1782,12 @@ final class TransformerTestUtils {
       BigDecimal totalChargeAmount,
       BigDecimal nonCoveredChargeAmount,
       BigDecimal unitCount,
+      String claimControlNum,
       Optional<BigDecimal> nationalDrugCodeQuantity,
       Optional<String> nationalDrugCodeQualifierCode,
       Optional<String> revenueCenterRenderingPhysicianNPI,
+      String fiOriginalClaimControlNumber,
+      String fiDocumentClaimControlNumber,
       int index) {
 
     assertHasCoding(CcwCodebookVariable.REV_CNTR, revenueCenterCode, item.getRevenue());
@@ -1808,6 +1811,10 @@ final class TransformerTestUtils {
 
     TransformerTestUtils.assertCareTeamEquals(
         revenueCenterRenderingPhysicianNPI.get(), ClaimCareteamrole.PRIMARY, eob);
+
+    Assert.assertEquals(claimControlNum, fiOriginalClaimControlNumber);
+
+    Assert.assertEquals(claimControlNum, fiDocumentClaimControlNumber);
   }
 
   /**

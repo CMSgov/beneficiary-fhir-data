@@ -34,6 +34,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -619,6 +620,8 @@ public final class RifLoader implements AutoCloseable {
       oldBeneCopy.setSex(oldBeneficiaryRecord.getSex());
       oldBeneCopy.setMedicareBeneficiaryId(oldBeneficiaryRecord.getMedicareBeneficiaryId());
       oldBeneCopy.setMbiHash(oldBeneficiaryRecord.getMbiHash());
+      oldBeneCopy.setMbiEffectiveDate(oldBeneficiaryRecord.getMbiEffectiveDate());
+      oldBeneCopy.setMbiObsoleteDate(oldBeneficiaryRecord.getMbiObsoleteDate());
       oldBeneCopy.setLastUpdated(batchTimestamp);
 
       entityManager.persist(oldBeneCopy);
@@ -641,9 +644,37 @@ public final class RifLoader implements AutoCloseable {
         && newBeneficiaryRecord.getSex() == oldBeneficiaryRecord.getSex()
         && newBeneficiaryRecord.getMbiHash().equals(oldBeneficiaryRecord.getMbiHash())
         && newBeneficiaryRecord
+            .getMbiEffectiveDate()
+            .equals(oldBeneficiaryRecord.getMbiEffectiveDate())
+        && newBeneficiaryRecord
+            .getMbiObsoleteDate()
+            .equals(oldBeneficiaryRecord.getMbiObsoleteDate())
+        && newBeneficiaryRecord
             .getMedicareBeneficiaryId()
             .equals(oldBeneficiaryRecord.getMedicareBeneficiaryId())) {
       return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Ensures that a {@link Optional<LocalDate>} records for old and new benificiaries are equal or
+   * not equal.
+   *
+   * @param newBeneficiaryRecordOptDate the {@link Optional<LocalDate>} new record being processed
+   * @param oldBeneficiaryRecordOptDate the {@link Optional<LocalDate>} old record that was
+   *     processed
+   */
+  static boolean areOptionalDatesEqual(
+      Optional<LocalDate> newBeneficiaryRecordOptDate,
+      Optional<LocalDate> oldBeneficiaryRecordOpDate) {
+
+    if (!newBeneficiaryRecordOptDate.isPresent() && !oldBeneficiaryRecordOpDate.isPresent())
+      return true;
+
+    if (newBeneficiaryRecordOptDate.isPresent() && oldBeneficiaryRecordOpDate.isPresent()) {
+      if (newBeneficiaryRecordOptDate.equals(oldBeneficiaryRecordOpDate)) return true;
     }
 
     return false;

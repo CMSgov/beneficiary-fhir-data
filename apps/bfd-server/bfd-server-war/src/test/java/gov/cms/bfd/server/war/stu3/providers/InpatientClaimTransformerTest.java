@@ -208,6 +208,8 @@ public final class InpatientClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(
         eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 
+    String claimControlNumber = "0000000000";
+
     // Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice
     // and SNF match
     TransformerTestUtils.assertEobCommonItemRevenueEquals(
@@ -218,9 +220,12 @@ public final class InpatientClaimTransformerTest {
         claimLine1.getTotalChargeAmount(),
         claimLine1.getNonCoveredChargeAmount(),
         claimLine1.getUnitCount(),
+        claimControlNumber,
         claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
+        claimLine1.getFiOriginalClaimControlNumber(),
+        claimLine1.getFiDocumentClaimControlNumber(),
         0 /* index */);
 
     // verify {@link

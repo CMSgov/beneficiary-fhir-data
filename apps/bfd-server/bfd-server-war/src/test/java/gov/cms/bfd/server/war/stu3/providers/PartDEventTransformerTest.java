@@ -97,8 +97,11 @@ public final class PartDEventTransformerTest {
             .findFirst()
             .get();
 
+    ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
+    assertMatches(claim, eob);
     return claim;
   }
+
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
    * the specified {@link PartDEvent}.
