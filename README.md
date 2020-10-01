@@ -22,7 +22,17 @@ This project is in the worldwide [public domain](LICENSE.md). As stated in [LICE
 >
 > All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
 
-## AWS Configuration
+## BFD User Documentation
+
+The following provide information on how to use BFD:
+
+* [Request Audit Headers](./docs/request-audit-headers.md):
+  This document details the HTTP headers that should be included when calling BFD,
+    to ensure that proper audit information is available to the BFD team.
+* [Request Options](./docs/request-options.md):
+  This document details the request options that can be used when calling BFD.
+
+## Development Environment Setup
 
 ### AWS Credentials
 
