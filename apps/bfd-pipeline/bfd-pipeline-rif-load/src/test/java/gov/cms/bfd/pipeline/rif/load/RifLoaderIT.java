@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.sharedutils.SlowTests;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,6 +39,7 @@ import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -366,6 +368,7 @@ public final class RifLoaderIT {
    * StaticRifResourceGroup#SYNTHEA} data.
    */
   @Test
+  @Category(SlowTests.class)
   public void loadSyntheaData() {
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHEA.getResources()));

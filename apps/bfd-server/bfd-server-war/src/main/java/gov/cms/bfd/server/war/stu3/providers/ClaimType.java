@@ -189,4 +189,18 @@ public enum ClaimType {
       if (claimType.name().toLowerCase().equals(claimTypeText)) return Optional.of(claimType);
     return Optional.empty();
   }
+
+  /**
+   * @param entity the entity to check, e.g. a{@link CarrierClaim}, {@link PartDEvent}, etc.
+   *     instance
+   * @return the {@link ClaimType} for the specified entity (e.g. {@link CarrierClaim}, {@link
+   *     PartDEvent}, etc.), if one could be found
+   */
+  public static Optional<ClaimType> findClaimTypeForEntity(Object entity) {
+    for (ClaimType claimType : values()) {
+      if (claimType.entityClass.equals(entity.getClass())) return Optional.of(claimType);
+    }
+
+    return Optional.empty();
+  }
 }
