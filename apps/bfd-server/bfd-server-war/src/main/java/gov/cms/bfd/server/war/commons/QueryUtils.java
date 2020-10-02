@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import java.util.Date;
@@ -17,7 +17,7 @@ public class QueryUtils {
    * @param range to base the predicate on
    * @return a predicate on the lastUpdated field
    */
-  static Predicate createLastUpdatedPredicate(
+  public static Predicate createLastUpdatedPredicate(
       CriteriaBuilder cb, Root<?> root, DateRangeParam range) {
     final Path<Date> lastUpdatedPath = root.get("lastUpdated");
     final Date lowerBound = range.getLowerBoundAsInstant();
@@ -73,7 +73,7 @@ public class QueryUtils {
    * @param range to base test against. Maybe null.
    * @return true iff within the range specified
    */
-  static boolean isInRange(Date lastUpdated, DateRangeParam range) {
+  public static boolean isInRange(Date lastUpdated, DateRangeParam range) {
     if (range == null || range.isEmpty()) {
       return true;
     }

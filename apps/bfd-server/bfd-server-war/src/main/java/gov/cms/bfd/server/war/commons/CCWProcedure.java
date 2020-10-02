@@ -1,11 +1,11 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.commons;
 
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
 /** Models a ccwProcedure code entry in a claim. */
-final class CCWProcedure extends IcdCode {
+public final class CCWProcedure extends IcdCode {
 
   private Optional<LocalDate> procedureDate;
 
@@ -48,7 +48,7 @@ final class CCWProcedure extends IcdCode {
    * @return the new {@link CCWProcedure}, or {@link Optional#empty()} if no <code>icdCode</code>
    *     was present
    */
-  static Optional<CCWProcedure> from(
+  public static Optional<CCWProcedure> from(
       Optional<String> icdCode,
       Optional<Character> icdVersionCode,
       Optional<LocalDate> procedureDate) {
