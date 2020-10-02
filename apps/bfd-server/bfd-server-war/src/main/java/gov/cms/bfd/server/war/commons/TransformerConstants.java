@@ -189,7 +189,10 @@ public final class TransformerConstants {
   public static final String CODED_IDENTIFIER_TYPE_UPIN_DISPLAY =
       "Unique Physician Identification Number";
 
-  /** The Code System, as available at <a */
+  /**
+   * The Code System, as available at <a
+   * href="https://terminology.hl7.org/1.0.0/CodeSystem-v2-0203.html">identifierType</a>.
+   */
   public static final String CODING_SYSTEM_HL7_IDENTIFIER_TYPE =
       "http://terminology.hl7.org/CodeSystem/v2-0203";
 

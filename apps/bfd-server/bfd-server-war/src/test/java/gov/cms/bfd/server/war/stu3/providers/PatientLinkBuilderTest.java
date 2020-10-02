@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.rest.api.Constants;
+import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import java.util.Collections;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;

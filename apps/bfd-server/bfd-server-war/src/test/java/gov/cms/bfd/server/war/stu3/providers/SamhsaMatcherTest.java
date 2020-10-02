@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
