@@ -345,28 +345,6 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
-    Assert.assertEquals(
-        beneficiary.getDerivedCityName().orElse(""),
-        patient.getAddress().get(0).getCity() != null ? patient.getAddress().get(0).getCity() : "");
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress1().orElse(""),
-        patient.getAddress().get(0).getLine().get(0).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress2().orElse(""),
-        patient.getAddress().get(0).getLine().get(1).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress3().orElse(""),
-        patient.getAddress().get(0).getLine().get(2).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress4().orElse(""),
-        patient.getAddress().get(0).getLine().get(3).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress5().orElse(""),
-        patient.getAddress().get(0).getLine().get(4).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress6().orElse(""),
-        patient.getAddress().get(0).getLine().get(5).getValueNotNull());
-
     if (beneficiary.getSex() == Sex.MALE.getCode())
       Assert.assertEquals(
           AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());
