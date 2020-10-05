@@ -255,7 +255,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals("01", pdeRow.getPrescriberIdQualifierCode());
     Assert.assertEquals("1750384806", pdeRow.getPrescriberId());
     Assert.assertEquals(new BigDecimal(799999), pdeRow.getPrescriptionReferenceNumber());
-    Assert.assertEquals("49035044700", pdeRow.getNationalDrugCode());
+    Assert.assertEquals("551545779", pdeRow.getNationalDrugCode());
     Assert.assertEquals("H9999", pdeRow.getPlanContractId());
     Assert.assertEquals("020", pdeRow.getPlanBenefitPackageId());
     Assert.assertEquals(1, pdeRow.getCompoundCode());
@@ -1039,8 +1039,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals('3', claimLine.getMtusCode().get().charValue());
     Assert.assertEquals(new BigDecimal("44.4"), claimLine.getHctHgbTestResult());
     Assert.assertEquals("R2", claimLine.getHctHgbTestTypeCode().get());
-    Assert.assertEquals("49035044700", claimLine.getNationalDrugCode().get());
-    Assert.assertEquals("000000000", claimLine.getClmControlNumber());
+    Assert.assertEquals("551545779", claimLine.getNationalDrugCode().get());
   }
 
   /**

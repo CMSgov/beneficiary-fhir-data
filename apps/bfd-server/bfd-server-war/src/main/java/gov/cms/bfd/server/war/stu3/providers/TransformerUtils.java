@@ -336,8 +336,10 @@ public final class TransformerUtils {
     }
 
     // Link the EOB.item to the care team entry (if it isn't already).
-    if (!eobItem.getCareTeamLinkId().contains(careTeamEntry.getSequence())) {
-      eobItem.addCareTeamLinkId(careTeamEntry.getSequence());
+    final int careTeamEntrySequence = careTeamEntry.getSequence();
+    if (eobItem.getCareTeamLinkId().stream()
+        .noneMatch(id -> id.getValue() == careTeamEntrySequence)) {
+      eobItem.addCareTeamLinkId(careTeamEntrySequence);
     }
 
     return careTeamEntry;
@@ -704,8 +706,37 @@ public final class TransformerUtils {
    * @return a {@link Reference} with the specified {@link Identifier}
    */
   static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
+
     return new Reference()
         .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+        .setDisplay(retrieveNpiCodeDisplay(identifierValue));
+  }
+
+  /**
+   * @param identifierType the {@link gov.cms.bfd.server.war.stu3.providers.IdentifierType}
+   * @param identifierValue the {@link Identifier#getValue()} to use in {@link
+   *     Reference#getIdentifier()}
+   * @return a {@link Reference} with the specified {@link Identifier}
+   */
+  static Reference createIdentifierReference(
+      IdentifierType identifierType, String identifierValue) {
+
+    Reference reference = new Reference();
+    Coding coding =
+        new Coding()
+            .setSystem(identifierType.getSystem())
+            .setCode(identifierType.getCode())
+            .setDisplay(identifierType.getDisplay());
+    List<Coding> codingList = new ArrayList<Coding>();
+    codingList.add(coding);
+
+    CodeableConcept codeableConcept = new CodeableConcept().setCoding(codingList);
+    return reference
+        .setIdentifier(
+            new Identifier()
+                .setSystem(identifierType.getSystem())
+                .setValue(identifierValue)
+                .setType(codeableConcept))
         .setDisplay(retrieveNpiCodeDisplay(identifierValue));
   }
 
