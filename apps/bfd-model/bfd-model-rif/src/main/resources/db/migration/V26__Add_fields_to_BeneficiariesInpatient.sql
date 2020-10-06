@@ -21,21 +21,21 @@ alter table "BeneficiariesHistory" add column "mbiObsoleteDate" date;
 
 alter table "InpatientClaimLines" add column "clmUncompensatedCareAmount" numeric(38, 2);
 
-alter table "CarrierClaimLines" add column "clmControlNumber" varchar(23) not null;
+alter table "CarrierClaimLines" add column "clmControlNumber" varchar(23);
 
-alter table "DMEClaimLines" add column "clmControlNumber" varchar(23) not null;
+alter table "DMEClaimLines" add column "clmControlNumber" varchar(23);
 
-alter table "HHAClaimLines" add column "fiDocumentClaimControlNumber" varchar(23) not null;
-alter table "HHAClaimLines" add column "fiOriginalClaimControlNumber" varchar(23) not null;
+alter table "HHAClaimLines" add column "fiDocumentClaimControlNumber" varchar(23);
+alter table "HHAClaimLines" add column "fiOriginalClaimControlNumber" varchar(23);
 
-alter table "HospiceClaimLines" add column "fiDocumentClaimControlNumber" varchar(23) not null;
-alter table "HospiceClaimLines" add column "fiOriginalClaimControlNumber" varchar(23) not null;
+alter table "HospiceClaimLines" add column "fiDocumentClaimControlNumber" varchar(23);
+alter table "HospiceClaimLines" add column "fiOriginalClaimControlNumber" varchar(23);
 
-alter table "InpatientClaimLines" add column "fiDocumentClaimControlNumber" varchar(23) not null;
-alter table "InpatientClaimLines" add column "fiOriginalClaimControlNumber" varchar(23) not null;
+alter table "InpatientClaimLines" add column "fiDocumentClaimControlNumber" varchar(23);
+alter table "InpatientClaimLines" add column "fiOriginalClaimControlNumber" varchar(23);
 
-alter table "OutpatientClaimLines" add column "fiDocumentClaimControlNumber" varchar(23) not null;
-alter table "OutpatientClaimLines" add column "fiOriginalClaimControlNumber" varchar(23) not null;
+alter table "OutpatientClaimLines" add column "fiDocumentClaimControlNumber" varchar(23);
+alter table "OutpatientClaimLines" add column "fiOriginalClaimControlNumber" varchar(23);
 
-alter table "SNFClaimLines" add column "fiDocumentClaimControlNumber" varchar(23) not null;
-alter table "SNFClaimLines" add column "fiOriginalClaimControlNumber" varchar(23) not null;
+alter table "SNFClaimLines" add column "fiDocumentClaimControlNumber" varchar(23);
+alter table "SNFClaimLines" add column "fiOriginalClaimControlNumber" varchar(23);
