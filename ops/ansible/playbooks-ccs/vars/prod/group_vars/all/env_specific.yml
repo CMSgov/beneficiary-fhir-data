@@ -46,3 +46,5 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
   - alias: client_dpc_prod
     certificate: "{{ lookup('file', 'files/client_data_server_dpc_prod_certificate.pem') }}"
+  - alias: client_ab2d_prod
+    certificate: "{{ lookup('file', 'files/client_data_server_ab2d_prod_certificate.pem') }}"
