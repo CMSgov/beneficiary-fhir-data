@@ -7,6 +7,8 @@ import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;

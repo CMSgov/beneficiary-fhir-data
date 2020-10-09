@@ -1,9 +1,10 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /*
- * PagingArguments encapsulates the arguments related to paging for the
- * {@link ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
+ * PagingArguments encapsulates the arguments related to paging for the {@link
+ * ExplanationOfBenefit}, {@link Patient}, and {@link Coverage} requests.
  */
 public final class OffsetLinkBuilder implements LinkBuilder {
 
@@ -146,8 +147,8 @@ public final class OffsetLinkBuilder implements LinkBuilder {
     }
 
     /*
-     * This formula rounds numTotalResults down to the nearest multiple of pageSize
-     * that's less than and not equal to numTotalResults
+     * This formula rounds numTotalResults down to the nearest multiple of pageSize that's less than
+     * and not equal to numTotalResults
      */
     int lastIndex;
     try {

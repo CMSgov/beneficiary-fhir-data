@@ -1,9 +1,10 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.commons;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.Variable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
+import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import java.time.Instant;
 import java.util.Date;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -77,7 +78,7 @@ public final class TransformerConstants {
    *
    * <p>This URL will never be used by itself; it will always be suffixed with a more specific path.
    */
-  static final String BASE_URL_BBAPI_RESOURCES = "https://bluebutton.cms.gov/resources";
+  public static final String BASE_URL_BBAPI_RESOURCES = "https://bluebutton.cms.gov/resources";
 
   /**
    * The base URL/URI/system for FHIR output related to {@link CcwCodebookVariable}:
@@ -91,36 +92,36 @@ public final class TransformerConstants {
    * <p>This URL will never be used by itself; it will always be suffixed with the (lower-cased)
    * {@link CcwCodebookVariable#getVariable()}'s {@link Variable#getId()}.
    */
-  static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
+  public static final String BASE_URL_CCW_VARIABLES = BASE_URL_BBAPI_RESOURCES + "/variables";
 
-  static final String CODED_MONEY_USD = "USD";
+  public static final String CODED_MONEY_USD = "USD";
 
-  static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE =
+  public static final String CODING_BBAPI_BENEFIT_BALANCE_TYPE =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/benefit-balance";
 
   /** The CMS-custom {@link Coding#getSystem()} value for Medicare {@link Adjudication}s. */
-  static final String CODING_CCW_ADJUDICATION_CATEGORY =
+  public static final String CODING_CCW_ADJUDICATION_CATEGORY =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/adjudication";
 
   /**
    * The CMS-custom {@link Coding#getSystem()} value for Medicare {@link
    * SupportingInformationComponent#getCategory()}s.
    */
-  static final String CODING_BBAPI_INFORMATION_CATEGORY =
+  public static final String CODING_BBAPI_INFORMATION_CATEGORY =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/information";
 
   /**
    * Used as the {@link Identifier#getSystem()} that the RIF <code>CLM_GROUP_ID</code> fields (e.g.
    * {@link CarrierClaimColumn#CLM_GRP_ID}) are mapped to.
    */
-  static final String IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID =
+  public static final String IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID =
       BASE_URL_BBAPI_RESOURCES + "/identifier/claim-group";
 
   /**
    * Used as the {@link Coding#getSystem()} for the {@link ExplanationOfBenefit#getType()} entry
    * that each EOB's ClaimType is mapped to.
    */
-  static final String CODING_SYSTEM_BBAPI_EOB_TYPE =
+  public static final String CODING_SYSTEM_BBAPI_EOB_TYPE =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/eob-type";
 
   // FIXME this URL has a typo -- first 'c' shouldn't have been there
@@ -128,7 +129,7 @@ public final class TransformerConstants {
       "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/typcsrvcb.txt";
 
   /** Used as the {@link Coding#getSystem()} for {@link DiagnosisComponent#getType()} entries. */
-  static final String CODING_SYSTEM_BBAPI_DIAGNOSIS_TYPE =
+  public static final String CODING_SYSTEM_BBAPI_DIAGNOSIS_TYPE =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/diagnosis-type";
 
   /**
@@ -136,119 +137,123 @@ public final class TransformerConstants {
    * ItemComponent#getModifier()}. (This is used instead of {@link CcwCodebookVariable#HCPCS_CD} so
    * that we can provide some extra helpful documentation at the URL.)
    */
-  static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
+  public static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
   /**
    * Used as the {@link Coding#getSystem()} for determining the currency of an {@link Identifier}.
    */
-  static final String CODING_SYSTEM_IDENTIFIER_CURRENCY =
+  public static final String CODING_SYSTEM_IDENTIFIER_CURRENCY =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/identifier-currency";
 
   /**
    * The standard {@link Money#getSystem()} for currency. (It looks odd that it has "iso" in there
    * twice, but some web searches seem to confirm that that's correct.)
    */
-  static final String CODING_MONEY = "urn:iso:std:iso:4217";
+  public static final String CODING_MONEY = "urn:iso:std:iso:4217";
 
   /**
    * Used to identify the drugs that were purchased as part of Part D, Carrier, and DME claims. See
    * here for more information on using NDC codes with FHIR: <a
    * href="http://hl7.org/fhir/ndc.html">10 Using NDC and NHRIC Codes with FHIR</a>.
    */
-  static final String CODING_NDC = "http://hl7.org/fhir/sid/ndc";
+  public static final String CODING_NDC = "http://hl7.org/fhir/sid/ndc";
 
   /**
    * The United States National Provider Identifier, as available at <a
    * href="http://download.cms.gov/nppes/NPI_Files.html">NPI/NPPES File</a> .
    */
-  static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
+  public static final String CODING_NPI_US = "http://hl7.org/fhir/sid/us-npi";
 
   /**
    * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is a NPI.
    */
-  static final String CODED_IDENTIFIER_TYPE_NPI = "NPI";
+  public static final String CODED_IDENTIFIER_TYPE_NPI = "NPI";
 
   /**
    * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
    * identifier is a NPI.
    */
-  static final String CODED_IDENTIFIER_TYPE_NPI_DISPLAY = "National Provider Identifier";
+  public static final String CODED_IDENTIFIER_TYPE_NPI_DISPLAY = "National Provider Identifier";
 
   /**
    * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is a UPIN.
    */
-  static final String CODED_IDENTIFIER_TYPE_UPIN = "UPIN";
+  public static final String CODED_IDENTIFIER_TYPE_UPIN = "UPIN";
 
   /**
    * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
    * identifier is a UPIN.
    */
-  static final String CODED_IDENTIFIER_TYPE_UPIN_DISPLAY = "Unique Physician Identification Number";
+  public static final String CODED_IDENTIFIER_TYPE_UPIN_DISPLAY =
+      "Unique Physician Identification Number";
 
-  /** The Code System, as available at <a */
-  static final String CODING_SYSTEM_HL7_IDENTIFIER_TYPE =
+  /**
+   * The Code System, as available at <a
+   * href="https://terminology.hl7.org/1.0.0/CodeSystem-v2-0203.html">identifierType</a>.
+   */
+  public static final String CODING_SYSTEM_HL7_IDENTIFIER_TYPE =
       "http://terminology.hl7.org/CodeSystem/v2-0203";
 
   /**
    * Used as the {@link Coding#getSystem()} for custom-to-BFD {@link Identifier#getType()} codes.
    */
-  static final String CODING_SYSTEM_IDENTIFIER_TYPE =
+  public static final String CODING_SYSTEM_IDENTIFIER_TYPE =
       BASE_URL_BBAPI_RESOURCES + "/codesystem/identifier-type";
 
   /**
    * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is a PDP.
    */
-  static final String CODED_IDENTIFIER_TYPE_PDP = "NCPDP";
+  public static final String CODED_IDENTIFIER_TYPE_PDP = "NCPDP";
 
   /**
    * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
    * identifier is a PDP.
    */
-  static final String CODED_IDENTIFIER_TYPE_PDP_DISPLAY =
+  public static final String CODED_IDENTIFIER_TYPE_PDP_DISPLAY =
       "National Council for Prescription Drug Programs";
 
   /**
    * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is a DL.
    */
-  static final String CODED_IDENTIFIER_TYPE_DL = "DL";
+  public static final String CODED_IDENTIFIER_TYPE_DL = "DL";
 
   /**
    * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
    * identifier is a DL.
    */
-  static final String CODED_IDENTIFIER_TYPE_DL_DISPLAY = "State license number";
+  public static final String CODED_IDENTIFIER_TYPE_DL_DISPLAY = "State license number";
 
   /**
    * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is a TAX.
    */
-  static final String CODED_IDENTIFIER_TYPE_TAX = "TAX";
+  public static final String CODED_IDENTIFIER_TYPE_TAX = "TAX";
 
   /**
    * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
    * identifier is a TAX.
    */
-  static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Federal tax number";
+  public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Federal tax number";
 
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure (UCUM)", a
    * standardized coding system for basic units of measure.
    */
-  static final String CODING_SYSTEM_UCUM = "http://unitsofmeasure.org";
+  public static final String CODING_SYSTEM_UCUM = "http://unitsofmeasure.org";
 
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getCode()} for "pint". */
-  static final String CODING_SYSTEM_UCUM_PINT_CODE = "[pt_us]";
+  public static final String CODING_SYSTEM_UCUM_PINT_CODE = "[pt_us]";
 
   /** The {@link #CODING_SYSTEM_UCUM} {@link Coding#getDisplay()} for "pint". */
-  static final String CODING_SYSTEM_UCUM_PINT_DISPLAY = "pint";
+  public static final String CODING_SYSTEM_UCUM_PINT_DISPLAY = "pint";
 
-  static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
+  public static final String COVERAGE_ISSUER = "Centers for Medicare and Medicaid Services";
 
-  static final String COVERAGE_PLAN = "Medicare";
+  public static final String COVERAGE_PLAN = "Medicare";
 
   /** The {@link Coverage#getGrouping()} {@link GroupComponent#getSubPlan()} value for Part A. */
   public static final String COVERAGE_PLAN_PART_A = "Part A";
@@ -296,12 +301,12 @@ public final class TransformerConstants {
    * The {@link #CODING_BBAPI_BENE_HICN_HASH} used in earlier versions of the API, which is still
    * supported by {@link PatientResourceProvider} for backwards compatibility reasons.
    */
-  static final String CODING_BBAPI_BENE_HICN_HASH_OLD =
+  public static final String CODING_BBAPI_BENE_HICN_HASH_OLD =
       "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
 
   /**
    * Fallback value to use when a record does not have a lastUpdated value. These records where
    * loaded before the lastUpdated feature was in place.
    */
-  static final Date FALLBACK_LAST_UPDATED = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+  public static final Date FALLBACK_LAST_UPDATED = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
 }

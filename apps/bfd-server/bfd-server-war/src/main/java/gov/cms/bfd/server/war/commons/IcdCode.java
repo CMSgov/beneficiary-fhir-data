@@ -1,17 +1,18 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.commons;
 
+import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.util.Objects;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 
 /** Models a icdCode code entry in a claim. */
-abstract class IcdCode {
+public abstract class IcdCode {
   /** The {@link Coding#getSystem()} used for ICD-9 diagnosis codes. */
-  static final String CODING_SYSTEM_ICD_9 = "http://hl7.org/fhir/sid/icd-9-cm";
+  public static final String CODING_SYSTEM_ICD_9 = "http://hl7.org/fhir/sid/icd-9-cm";
 
   /** The {@link Coding#getSystem()} used for ICD-10 diagnosis codes. */
-  static final String CODING_SYSTEM_ICD_10 = "http://hl7.org/fhir/sid/icd-10";
+  public static final String CODING_SYSTEM_ICD_10 = "http://hl7.org/fhir/sid/icd-10";
 
   private final String icdCode;
   private final Character icdVersionCode;
@@ -38,7 +39,7 @@ abstract class IcdCode {
    * @return <code>true</code> if the specified {@link CodeableConcept} contains a {@link Coding}
    *     that matches this {@link IcdCode}, <code>false</code> if not
    */
-  boolean isContainedIn(CodeableConcept codeableConcept) {
+  public boolean isContainedIn(CodeableConcept codeableConcept) {
     return codeableConcept.getCoding().stream()
             .filter(c -> icdCode.equals(c.getCode()))
             .filter(c -> getFhirSystem().equals(c.getSystem()))
@@ -47,7 +48,7 @@ abstract class IcdCode {
   }
 
   /** @return a {@link CodeableConcept} that contains this {@link IcdCode} */
-  CodeableConcept toCodeableConcept() {
+  public CodeableConcept toCodeableConcept() {
     CodeableConcept codeableConcept = new CodeableConcept();
     Coding coding = codeableConcept.addCoding();
 
@@ -74,7 +75,7 @@ abstract class IcdCode {
    * @return the <a href= "https://www.hl7.org/fhir/terminologies-systems.html"> FHIR Coding
    *     system</a> value for this {@link IcdCode}' {@link #icdVersionCode} value
    */
-  protected String getFhirSystem() {
+  public String getFhirSystem() {
     String system;
     if (icdVersionCode == null || icdVersionCode.equals('9')) system = CODING_SYSTEM_ICD_9;
     else if (icdVersionCode.equals('0')) system = CODING_SYSTEM_ICD_10;

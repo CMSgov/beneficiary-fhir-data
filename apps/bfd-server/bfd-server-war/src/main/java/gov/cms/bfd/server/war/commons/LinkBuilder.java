@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.commons;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 

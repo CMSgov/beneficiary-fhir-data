@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.model.rif.LoadedBatch;
@@ -207,11 +207,12 @@ public class LoadedFilterManager {
   public void refreshFilters() {
     /*
      * Dev note: the pipeline has a process to trim the files list. Nevertheless, building a set of
-     * bloom filters may take a while. This method is expected to be called on it's own thread by the
-     * the Spring framework. In addition, it doesn't lock this object until the end of the process, so
-     * this filter building process can happen without interfering with serving. Also, this refresh
-     * time will be proportional to the number of files which have been loaded in the past refresh
-     * period. If no files have been loaded, this refresh should take less than a millisecond.
+     * bloom filters may take a while. This method is expected to be called on it's own thread by
+     * the the Spring framework. In addition, it doesn't lock this object until the end of the
+     * process, so this filter building process can happen without interfering with serving. Also,
+     * this refresh time will be proportional to the number of files which have been loaded in the
+     * past refresh period. If no files have been loaded, this refresh should take less than a
+     * millisecond.
      */
     try {
       // If new batches are present, then build new filters for the affected files

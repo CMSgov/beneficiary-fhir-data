@@ -7,6 +7,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimLine;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.util.Arrays;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;

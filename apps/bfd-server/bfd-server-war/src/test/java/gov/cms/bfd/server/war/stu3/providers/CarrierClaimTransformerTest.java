@@ -7,6 +7,8 @@ import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;

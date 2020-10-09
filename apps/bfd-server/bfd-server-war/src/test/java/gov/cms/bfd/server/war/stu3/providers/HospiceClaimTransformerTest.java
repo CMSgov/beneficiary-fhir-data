@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rif.HospiceClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
