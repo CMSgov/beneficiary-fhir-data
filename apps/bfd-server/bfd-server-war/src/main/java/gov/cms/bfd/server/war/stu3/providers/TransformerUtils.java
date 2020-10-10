@@ -2229,10 +2229,7 @@ public final class TransformerUtils {
      * Seems silly, but allows the block below to be simple one-liners, rather than requiring
      * if-blocks.
      */
-    Consumer<Optional<Diagnosis>> diagnosisAdder =
-        d -> {
-          if (d.isPresent()) diagnoses.add(d.get());
-        };
+    Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
 
     diagnosisAdder.accept(
         Diagnosis.from(
@@ -3122,5 +3119,23 @@ public final class TransformerUtils {
       // Remove _count parameter from the current request details
       requestDetails.setParameters(params);
     }
+  }
+
+  public static Consumer<Optional<Diagnosis>> addPrincipalDiagnosis(List<Diagnosis> diagnoses) {
+    return diagnosisToAdd -> {
+      if (diagnosisToAdd.isPresent()) {
+        Optional<Diagnosis> matchingDiagnosis =
+            diagnoses.stream()
+                .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
+                .findFirst();
+        if (matchingDiagnosis.isPresent()) {
+          // append labels
+          matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
+          diagnoses.add(matchingDiagnosis.get());
+        } else {
+          diagnoses.add(diagnosisToAdd.get());
+        }
+      }
+    };
   }
 }
