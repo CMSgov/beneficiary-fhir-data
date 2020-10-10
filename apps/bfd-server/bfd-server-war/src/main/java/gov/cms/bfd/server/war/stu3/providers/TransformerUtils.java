@@ -32,8 +32,15 @@ import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
+import gov.cms.bfd.server.war.commons.CCWProcedure;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.IdentifierType;
+import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
-import gov.cms.bfd.server.war.stu3.providers.Diagnosis.DiagnosisLabel;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -168,9 +175,8 @@ public final class TransformerUtils {
       Optional<? extends Number> amountValue) {
     /*
      * TODO Once we switch to STU4 (expected >= Q3 2018), remap these to the new
-     * `ExplanationOfBenefit.total` field. In anticipation of that, the
-     * CcwCodebookVariable param here is named `category`: right now it's used for
-     * the `Extension.url` but can be changed to
+     * `ExplanationOfBenefit.total` field. In anticipation of that, the CcwCodebookVariable param
+     * here is named `category`: right now it's used for the `Extension.url` but can be changed to
      * `ExplanationOfBenefit.total.category` once this mapping is moved to STU4.
      */
 
@@ -666,9 +672,9 @@ public final class TransformerUtils {
    */
   static Date convertToDate(LocalDate localDate) {
     /*
-     * We use the system TZ here to ensure that the date doesn't shift at all, as
-     * FHIR will just use this as an unzoned Date (I think, and if not, it's almost
-     * certainly using the same TZ as this system).
+     * We use the system TZ here to ensure that the date doesn't shift at all, as FHIR will just use
+     * this as an unzoned Date (I think, and if not, it's almost certainly using the same TZ as this
+     * system).
      */
     return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
@@ -1015,8 +1021,8 @@ public final class TransformerUtils {
   private static Coding createCoding(
       IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object code) {
     /*
-     * The code parameter is an Object to avoid needing multiple copies of this and
-     * related methods. This if-else block is the price to be paid for that, though.
+     * The code parameter is an Object to avoid needing multiple copies of this and related methods.
+     * This if-else block is the price to be paid for that, though.
      */
     String codeString;
     if (code instanceof Character) codeString = ((Character) code).toString();
@@ -1064,11 +1070,10 @@ public final class TransformerUtils {
    */
   static CodeableConcept createAdjudicationCategory(CcwCodebookVariable ccwVariable) {
     /*
-     * Adjudication.category is mapped a bit differently than other
-     * Codings/CodeableConcepts: they all share the same Coding.system and use the
-     * CcwCodebookVariable reference URL as their Coding.code. This looks weird, but
-     * makes it easy for API developers to find more information about what the
-     * specific adjudication they're looking at means.
+     * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
+     * all share the same Coding.system and use the CcwCodebookVariable reference URL as their
+     * Coding.code. This looks weird, but makes it easy for API developers to find more information
+     * about what the specific adjudication they're looking at means.
      */
 
     String conceptCode = calculateVariableReferenceUrl(ccwVariable);
@@ -1121,12 +1126,12 @@ public final class TransformerUtils {
       throw new BadCodeMonkeyException("No display values for Variable: " + ccwVariable);
 
     /*
-     * We know that the specified CCW Variable is coded, but there's no guarantee
-     * that the Coding's code matches one of the known/allowed Variable values: data
-     * is messy. When that happens, we log the event and return normally. The log
-     * event will at least allow for further investigation, if warranted. Also,
-     * there's a chance that the CCW Variable data itself is messy, and that the
-     * Coding's code matches more than one value -- we just log those events, too.
+     * We know that the specified CCW Variable is coded, but there's no guarantee that the Coding's
+     * code matches one of the known/allowed Variable values: data is messy. When that happens, we
+     * log the event and return normally. The log event will at least allow for further
+     * investigation, if warranted. Also, there's a chance that the CCW Variable data itself is
+     * messy, and that the Coding's code matches more than one value -- we just log those events,
+     * too.
      */
     List<Value> matchingVariableValues =
         ccwVariable.getVariable().getValueGroups().get().stream()
@@ -1463,8 +1468,9 @@ public final class TransformerUtils {
     // diagnosisRelatedGroupCd
     if (diagnosisRelatedGroupCd.isPresent()) {
       /*
-       * FIXME This is an invalid DiagnosisComponent, since it's missing a (required)
-       * ICD code. Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this field so if this is updated you'll need to update that as well.
+       * FIXME This is an invalid DiagnosisComponent, since it's missing a (required) ICD code.
+       * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this
+       * field so if this is updated you'll need to update that as well.
        */
       eob.addDiagnosis()
           .setPackageCode(
@@ -1644,8 +1650,8 @@ public final class TransformerUtils {
         createExtensionCoding(eob, CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode));
 
     /*
-     * Referrals are represented as contained resources, since they share the
-     * lifecycle and identity of their containing EOB.
+     * Referrals are represented as contained resources, since they share the lifecycle and identity
+     * of their containing EOB.
      */
     if (referringPhysicianNpi.isPresent()) {
       ReferralRequest referral = new ReferralRequest();
@@ -1904,9 +1910,9 @@ public final class TransformerUtils {
 
     if (nationalDrugCodeQualifierCode.isPresent()) {
       /*
-       * TODO: Is NDC count only ever present when line quantity isn't set? Depending
-       * on that, it may be that we should stop using this as an extension and instead
-       * set the code & system on the FHIR quantity field.
+       * TODO: Is NDC count only ever present when line quantity isn't set? Depending on that, it
+       * may be that we should stop using this as an extension and instead set the code & system on
+       * the FHIR quantity field.
        */
       // TODO Shouldn't this be part of the same Extension with the NDC code itself?
       Extension drugQuantityExtension =
@@ -2220,8 +2226,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring if-blocks.
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
         d -> {
@@ -2285,8 +2291,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring if-blocks.
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
         d -> {
@@ -2349,8 +2355,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring if-blocks.
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
         d -> {
@@ -2490,8 +2496,8 @@ public final class TransformerUtils {
     List<CCWProcedure> ccwProcedures = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring if-blocks.
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
      */
     Consumer<Optional<CCWProcedure>> ccwProcedureAdder =
         p -> {
@@ -2620,10 +2626,9 @@ public final class TransformerUtils {
     if (icdCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire ICD file the first time and put in a Map
     if (icdMap == null) {
@@ -2659,9 +2664,9 @@ public final class TransformerUtils {
         final BufferedReader icdCodesIn =
             new BufferedReader(new InputStreamReader(icdCodeDisplayStream))) {
       /*
-       * We want to extract the ICD Diagnosis codes and display values and put in a
-       * map for easy retrieval to get the display value icdColumns[1] is
-       * DGNS_DESC(i.e. 7840 code is HEADACHE description)
+       * We want to extract the ICD Diagnosis codes and display values and put in a map for easy
+       * retrieval to get the display value icdColumns[1] is DGNS_DESC(i.e. 7840 code is HEADACHE
+       * description)
        */
       String line = "";
       icdCodesIn.readLine();
@@ -2687,10 +2692,9 @@ public final class TransformerUtils {
     if (npiCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire NPI file the first time and put in a Map
     if (npiMap == null) {
@@ -2728,13 +2732,12 @@ public final class TransformerUtils {
         final BufferedReader npiCodesIn =
             new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
       /*
-       * We want to extract the NPI codes and display values and put in a map for easy
-       * retrieval to get the display value-- npiColumns[0] is the NPI Code,
-       * npiColumns[4] is the NPI Organization Code, npiColumns[8] is the NPI provider
-       * name prefix, npiColumns[6] is the NPI provider first name, npiColumns[7] is
-       * the NPI provider middle name, npiColumns[5] is the NPI provider last name,
-       * npiColumns[9] is the NPI provider suffix name, npiColumns[10] is the NPI
-       * provider credential.
+       * We want to extract the NPI codes and display values and put in a map for easy retrieval to
+       * get the display value-- npiColumns[0] is the NPI Code, npiColumns[4] is the NPI
+       * Organization Code, npiColumns[8] is the NPI provider name prefix, npiColumns[6] is the NPI
+       * provider first name, npiColumns[7] is the NPI provider middle name, npiColumns[5] is the
+       * NPI provider last name, npiColumns[9] is the NPI provider suffix name, npiColumns[10] is
+       * the NPI provider credential.
        */
       String line = "";
       npiCodesIn.readLine();
@@ -2774,10 +2777,9 @@ public final class TransformerUtils {
     if (procedureCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire Procedure code file the first time and put in a Map
     if (procedureMap == null) {
@@ -2814,9 +2816,9 @@ public final class TransformerUtils {
         final BufferedReader procedureCodesIn =
             new BufferedReader(new InputStreamReader(procedureCodeDisplayStream))) {
       /*
-       * We want to extract the procedure codes and display values and put in a map
-       * for easy retrieval to get the display value icdColumns[0] is PRCDR_CD;
-       * icdColumns[1] is PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
+       * We want to extract the procedure codes and display values and put in a map for easy
+       * retrieval to get the display value icdColumns[0] is PRCDR_CD; icdColumns[1] is
+       * PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
        */
       String line = "";
       procedureCodesIn.readLine();
@@ -2841,16 +2843,15 @@ public final class TransformerUtils {
   public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
 
     /*
-     * Handle bad data (e.g. our random test data) if drug code is empty or
-     * length is less than 9 characters
+     * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
+     * characters
      */
     if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire NDC file the first time and put in a Map
     if (ndcProductMap == null) {
@@ -2893,10 +2894,10 @@ public final class TransformerUtils {
         final BufferedReader ndcProductsIn =
             new BufferedReader(new InputStreamReader(ndcProductStream))) {
       /*
-       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the
-       * FDA Products file (fda_products_utf8.tsv is in /target/classes directory) and
-       * put in a Map for easy retrieval to get the display value which is a
-       * combination of PROPRIETARYNAME & SUBSTANCENAME
+       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
+       * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
+       * retrieval to get the display value which is a combination of PROPRIETARYNAME &
+       * SUBSTANCENAME
        */
       String line = "";
       ndcProductsIn.readLine();
@@ -2958,8 +2959,8 @@ public final class TransformerUtils {
     if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
-       * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
-       * working correctly.
+       * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not working
+       * correctly.
        */
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
@@ -2970,9 +2971,10 @@ public final class TransformerUtils {
     }
 
     /*
-     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
-     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
-     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole
+     * database. Because the filterManager's tracking of this timestamp is lazily updated for
+     * performance reason, the resources of the bundle may be after the filter manager's version of
+     * the timestamp.
      */
     Date maxBundleDate =
         resources.stream()
@@ -3006,9 +3008,10 @@ public final class TransformerUtils {
         paging.isPagingRequested() ? new UnsignedIntType() : new UnsignedIntType(resources.size()));
 
     /*
-     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole database.
-     * Because the filterManager's tracking of this timestamp is lazily updated for performance reason,
-     * the resources of the bundle may be after the filter manager's version of the timestamp.
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole
+     * database. Because the filterManager's tracking of this timestamp is lazily updated for
+     * performance reason, the resources of the bundle may be after the filter manager's version of
+     * the timestamp.
      */
     Date maxBundleDate =
         resources.stream()

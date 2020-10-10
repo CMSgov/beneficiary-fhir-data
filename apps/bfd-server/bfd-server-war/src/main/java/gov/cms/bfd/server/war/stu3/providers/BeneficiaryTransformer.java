@@ -7,6 +7,8 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
+import gov.cms.bfd.server.war.commons.Sex;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

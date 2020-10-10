@@ -11,6 +11,8 @@ import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.server.war.commons.LoadedFileFilter;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
