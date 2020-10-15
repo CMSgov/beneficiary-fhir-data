@@ -62,6 +62,31 @@ public final class PatientLinkBuilder implements LinkBuilder {
     }
   }
 
+  @Override
+  public void addLinks(org.hl7.fhir.r4.model.Bundle to) {
+    List<org.hl7.fhir.r4.model.Bundle.BundleEntryComponent> entries = to.getEntry();
+    if (!isPagingRequested()) return;
+
+    to.addLink(
+        new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
+            .setRelation(Constants.LINK_SELF)
+            .setUrl(components.toUriString()));
+    to.addLink(
+        new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
+            .setRelation(Constants.LINK_FIRST)
+            .setUrl(buildUrl("")));
+
+    if (entries.size() == getPageSize() && entries.size() > 0) {
+      org.hl7.fhir.r4.model.Patient lastPatient =
+          (org.hl7.fhir.r4.model.Patient) entries.get(entries.size() - 1).getResource();
+      String lastPatientId = lastPatient.getId();
+      to.addLink(
+          new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
+              .setRelation(Constants.LINK_NEXT)
+              .setUrl(buildUrl(lastPatientId)));
+    }
+  }
+
   public String getCursor() {
     return cursor;
   }

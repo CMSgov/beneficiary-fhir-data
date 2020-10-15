@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.commons;
 
-import org.hl7.fhir.dstu3.model.Bundle;
-
 /** An interface for building page links in a Bundle. */
 public interface LinkBuilder {
   /**
@@ -26,5 +24,13 @@ public interface LinkBuilder {
    *
    * @param to bundle
    */
-  void addLinks(Bundle to);
+  void addLinks(org.hl7.fhir.dstu3.model.Bundle to);
+
+  /**
+   * Add the links from the builder to the bundle. No links are are added if paging is not
+   * requested.
+   *
+   * @param to bundle
+   */
+  void addLinks(org.hl7.fhir.r4.model.Bundle to);
 }
