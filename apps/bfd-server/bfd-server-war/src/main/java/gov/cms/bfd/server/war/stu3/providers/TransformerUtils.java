@@ -2253,6 +2253,7 @@ public final class TransformerUtils {
 
   /**
    * Extract the Diagnosis values for codes 1-12
+   *
    * @param diagnosisAdmittingCode
    * @param diagnosisAdmittingCodeVersion
    * @param diagnosisPrincipalCode
