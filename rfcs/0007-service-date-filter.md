@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0007-service-date-filter` (fill me in with a unique ident)
 * Start Date: 2020-10-15
-* RFC PR: [TODO_FILL_ME_IN](https://github.com/rust-lang/rfcs/pull/0000)
+* RFC PR: [#376](https://github.com/CMSgov/beneficiary-fhir-data/pull/376)
 * JIRA Ticket(s):
     * [BCDA-3871](https://jira.cms.gov/browse/BCDA-3871)
 
