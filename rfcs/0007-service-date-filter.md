@@ -69,6 +69,8 @@ Sample Requests:
 * https://\<hostname\>/v1/fhir/ExplanationOfBenefit?patient=\<beneficiaryId\>&serviceEndDate=ge2020-01-01&serviceEndDate=le2020-01-31
   * Returns claims data that occurred between 2020-01-01 and 2020-01-31 (inclusive)
 
+If a claim entity's date field is unset/null and the caller supplies a `serviceEndDate`, then the claim **will not** be returned to the caller. Since we cannot guarantee that the claim falls within the supplied filter, we cannot return it.
+
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
