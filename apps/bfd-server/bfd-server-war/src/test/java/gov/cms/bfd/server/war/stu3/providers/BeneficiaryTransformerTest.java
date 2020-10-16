@@ -342,31 +342,6 @@ public final class BeneficiaryTransformerTest {
 
     Assert.assertEquals(beneficiary.getBeneficiaryId(), patient.getIdElement().getIdPart());
     Assert.assertEquals(1, patient.getAddress().size());
-    Assert.assertEquals(
-        beneficiary.getDerivedStateCode().orElse(null), patient.getAddress().get(0).getState());
-    Assert.assertEquals(beneficiary.getCountyCode(), patient.getAddress().get(0).getDistrict());
-    Assert.assertEquals(
-        beneficiary.getDerivedZipCode().orElse(null), patient.getAddress().get(0).getPostalCode());
-    Assert.assertEquals(
-        beneficiary.getDerivedCityName().orElse(null), patient.getAddress().get(0).getCity());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress1().orElse(null),
-        patient.getAddress().get(0).getLine().get(0).toString());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress2().orElse(null),
-        patient.getAddress().get(0).getLine().get(1).toString());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress3().orElse(null),
-        patient.getAddress().get(0).getLine().get(2).toString());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress4().orElse(null),
-        patient.getAddress().get(0).getLine().get(3).toString());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress5().orElse(null),
-        patient.getAddress().get(0).getLine().get(4).toString());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress6().orElse(null),
-        patient.getAddress().get(0).getLine().get(5).toString());
 
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
