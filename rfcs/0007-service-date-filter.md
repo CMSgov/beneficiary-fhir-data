@@ -1,7 +1,7 @@
 # RFC Proposal
 [RFC Proposal]: #rfc-proposal
 
-* RFC Proposal ID: `0007-service-date-filter` (fill me in with a unique ident)
+* RFC Proposal ID: `0007-service-date-filter` 
 * Start Date: 2020-10-15
 * RFC PR: [#376](https://github.com/CMSgov/beneficiary-fhir-data/pull/376)
 * JIRA Ticket(s):
