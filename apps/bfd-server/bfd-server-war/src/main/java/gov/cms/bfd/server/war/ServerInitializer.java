@@ -28,6 +28,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
  */
 public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
+  private LoadFhirAppOptions options;
+  private FhirAppConfiguration appConfig = null;
 
   /**
    * @see org.springframework.web.WebApplicationInitializer#onStartup(javax.servlet.ServletContext)
@@ -35,6 +37,8 @@ public final class ServerInitializer implements WebApplicationInitializer {
   @Override
   public void onStartup(ServletContext servletContext) throws ServletException {
     LOGGER.info("Initializing Blue Button API backend server...");
+
+    appConfig = FhirAppConfiguration.readConfigFromEnvironmentVariables();
 
     // Create the Spring application context.
     AnnotationConfigWebApplicationContext springContext =
@@ -59,11 +63,17 @@ public final class ServerInitializer implements WebApplicationInitializer {
     cxfServletReg.setLoadOnStartup(1);
     cxfServletReg.addMapping("/v1/fhir/*");
 
-    // Register the Blue Button R4 Server/Servlet.
-    R4Server r4Servlet = new R4Server();
-    cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
-    cxfServletReg.setLoadOnStartup(1);
-    cxfServletReg.addMapping("/v2/fhir/*");
+    // Register the Blue Button R4 Server/Servlet if v2 is ENABLED!!
+
+    options = appConfig.getLoadOptions();
+
+    if (options.isV2Enabled()) {
+
+      R4Server r4Servlet = new R4Server();
+      cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
+      cxfServletReg.setLoadOnStartup(1);
+      cxfServletReg.addMapping("/v2/fhir/*");
+    }
 
     /*
      * Register the MetricRegistry and HealthCheckRegistry into the ServletContext,
