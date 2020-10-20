@@ -904,8 +904,8 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals('1', claimGroup.getClaimReferralCode().get().charValue());
     Assert.assertEquals(new BigDecimal(3), claimGroup.getTotalVisitCount());
     Assert.assertEquals(LocalDate.of(2015, 6, 23), claimGroup.getCareStartDate().get());
-    Assert.assertEquals("308683096577486", claimGroup.getFiDocumentClaimControlNumber().get());
-    Assert.assertEquals("10493204767560565", claimGroup.getFiOriginalClaimControlNumber().get());
+    // Assert.assertEquals("308683096577486", claimGroup.getFiDocumentClaimControlNumber().get());
+    // Assert.assertEquals("10493204767560565", claimGroup.getFiOriginalClaimControlNumber().get());
 
     Assert.assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
