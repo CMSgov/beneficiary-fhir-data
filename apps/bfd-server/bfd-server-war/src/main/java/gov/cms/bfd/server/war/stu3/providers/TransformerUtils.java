@@ -70,7 +70,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -111,7 +110,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.dstu3.model.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -3127,21 +3125,24 @@ public final class TransformerUtils {
     }
   }
 
-  static ItemComponent mapEobCommonGroupInpHHAHospiceSNFClaimControlNumber(ExplanationOfBenefit eob,
-    ItemComponent item, String fiDocumentClaimControlNumber, String fiOriginalClaimControlNumber){
-      
-      if(!Strings.isNullOrEmpty(fiDocumentClaimControlNumber))
-      {
-        item.addExtension(
-          createExtensionCoding(eob, CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, fiDocumentClaimControlNumber));
-      }
+  static ItemComponent mapEobCommonGroupInpHHAHospiceSNFClaimControlNumber(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      String fiDocumentClaimControlNumber,
+      String fiOriginalClaimControlNumber) {
 
-      if(!Strings.isNullOrEmpty(fiOriginalClaimControlNumber))
-      {
-        item.addExtension(
-          createExtensionCoding(eob, CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, fiOriginalClaimControlNumber));
-      }
-
-      return item;
+    if (!Strings.isNullOrEmpty(fiDocumentClaimControlNumber)) {
+      item.addExtension(
+          createExtensionCoding(
+              eob, CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, fiDocumentClaimControlNumber));
     }
+
+    if (!Strings.isNullOrEmpty(fiOriginalClaimControlNumber)) {
+      item.addExtension(
+          createExtensionCoding(
+              eob, CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, fiOriginalClaimControlNumber));
+    }
+
+    return item;
+  }
 }

@@ -213,7 +213,9 @@ final class BeneficiaryTransformer {
     }
 
     if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
-      patient.setDeceased(new DateTimeType(TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get())));
+      patient.setDeceased(
+          new DateTimeType(
+              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get())));
     }
 
     char sex = beneficiary.getSex();
