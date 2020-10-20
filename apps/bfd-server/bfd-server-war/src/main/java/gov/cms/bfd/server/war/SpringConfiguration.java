@@ -54,6 +54,7 @@ public class SpringConfiguration {
   public static final String PROP_DB_PASSWORD = "bfdServer.db.password";
   public static final String PROP_DB_CONNECTIONS_MAX = "bfdServer.db.connections.max";
   public static final String PROP_DB_SCHEMA_APPLY = "bfdServer.db.schema.apply";
+  public static final String PROP_BFD_V2_ENABLED = "bfdServer.v2.enabled";
   public static final int TRANSACTION_TIMEOUT = 30;
 
   /**

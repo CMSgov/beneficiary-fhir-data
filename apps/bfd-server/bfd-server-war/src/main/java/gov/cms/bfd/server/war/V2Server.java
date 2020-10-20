@@ -6,13 +6,11 @@ import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
@@ -22,22 +20,21 @@ import org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.cors.CorsConfiguration;
 
 /**
  * The primary {@link Servlet} for this web application. Uses the <a href="http://hapifhir.io/">HAPI
  * FHIR</a> framework to provide a fully functional FHIR API server that queries stored RIF data
  * from the CCW and converts it to the proper FHIR format "on the fly".
  */
-public class R4Server extends RestfulServer {
+public class V2Server extends RestfulServer {
 
   private static final long serialVersionUID = 1L;
 
   static final String CAPABILITIES_PUBLISHER = "Centers for Medicare & Medicaid Services";
   static final String CAPABILITIES_SERVER_NAME = "Blue Button API: Direct";
 
-  /** Constructs a new {@link R4Server} instance. */
-  public R4Server() {
+  /** Constructs a new {@link V2Server} instance. */
+  public V2Server() {
     super(FhirContext.forR4());
     setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
     configureServerInfoMetadata();
@@ -108,24 +105,12 @@ public class R4Server extends RestfulServer {
     for (IServerInterceptor hapiInterceptor : hapiInterceptors) {
       this.registerInterceptor(hapiInterceptor);
     }
-    /*
-     * Enable CORS.
-     */
-    CorsConfiguration config = new CorsConfiguration();
-    CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-    config.addAllowedHeader("Accept");
-    config.addAllowedHeader("Content-Type");
-    config.addAllowedOrigin("*");
-    config.addExposedHeader("Location");
-    config.addExposedHeader("Content-Location");
-    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    registerInterceptor(corsInterceptor);
 
     // Enable ETag Support (this is already the default)
     setETagSupport(ETagSupportEnum.ENABLED);
 
     // Default to XML and pretty printing.
-    setDefaultResponseEncoding(EncodingEnum.XML);
-    setDefaultPrettyPrint(true);
+    setDefaultResponseEncoding(EncodingEnum.JSON);
+    setDefaultPrettyPrint(false);
   }
 }

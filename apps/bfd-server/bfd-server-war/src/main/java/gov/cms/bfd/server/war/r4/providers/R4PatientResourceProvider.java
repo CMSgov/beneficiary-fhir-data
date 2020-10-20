@@ -56,7 +56,7 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
- * This FHIR {@link IResourceProvider} adds support for STU3 {@link Patient} resources, derived from
+ * This FHIR {@link IResourceProvider} adds support for R4 {@link Patient} resources, derived from
  * the CCW beneficiaries.
  */
 @Component

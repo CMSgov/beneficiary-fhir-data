@@ -28,8 +28,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
  */
 public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
-  private LoadFhirAppOptions options;
-  private FhirAppConfiguration appConfig = null;
 
   /**
    * @see org.springframework.web.WebApplicationInitializer#onStartup(javax.servlet.ServletContext)
@@ -37,8 +35,6 @@ public final class ServerInitializer implements WebApplicationInitializer {
   @Override
   public void onStartup(ServletContext servletContext) throws ServletException {
     LOGGER.info("Initializing Blue Button API backend server...");
-
-    appConfig = FhirAppConfiguration.readConfigFromEnvironmentVariables();
 
     // Create the Spring application context.
     AnnotationConfigWebApplicationContext springContext =
@@ -57,7 +53,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
     servletContext.addListener(RequestContextListener.class);
 
     // Register the Blue Button STU3 Server/Servlet.
-    Stu3Server stu3Servlet = new Stu3Server();
+    V1Server stu3Servlet = new V1Server();
     ServletRegistration.Dynamic cxfServletReg =
         servletContext.addServlet("fhirStu3Servlet", stu3Servlet);
     cxfServletReg.setLoadOnStartup(1);
@@ -65,11 +61,9 @@ public final class ServerInitializer implements WebApplicationInitializer {
 
     // Register the Blue Button R4 Server/Servlet if v2 is ENABLED!!
 
-    options = appConfig.getLoadOptions();
+    if (Boolean.parseBoolean(SpringConfiguration.PROP_BFD_V2_ENABLED)) {
 
-    if (options.isV2Enabled()) {
-
-      R4Server r4Servlet = new R4Server();
+      V2Server r4Servlet = new V2Server();
       cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
       cxfServletReg.setLoadOnStartup(1);
       cxfServletReg.addMapping("/v2/fhir/*");
