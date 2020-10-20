@@ -186,8 +186,8 @@
       "birthDate" : "1981-03-17",
       "address" : [ {
         "district" : "123",
-        "state" : "IA",
-        "postalCode" : "123456789"
+        "state" : "MO",
+        "postalCode" : "12345"
       } ]
     }
   } ]

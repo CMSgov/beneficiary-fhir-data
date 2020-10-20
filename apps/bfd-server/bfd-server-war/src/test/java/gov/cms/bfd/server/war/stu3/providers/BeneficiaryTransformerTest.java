@@ -30,8 +30,7 @@ public final class BeneficiaryTransformerTest {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
     Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("false"), true);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("false"));
     assertMatches(beneficiary, patient);
 
     Assert.assertEquals("Number of identifiers should be 2", 2, patient.getIdentifier().size());
@@ -57,7 +56,7 @@ public final class BeneficiaryTransformerTest {
 
     Patient patient =
         BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("hicn", "mbi"), true);
+            new MetricRegistry(), beneficiary, Arrays.asList("hicn", "mbi"));
     assertMatches(beneficiary, patient);
 
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
@@ -94,8 +93,7 @@ public final class BeneficiaryTransformerTest {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
     Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("true"), true);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("true"));
     assertMatches(beneficiary, patient);
 
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
@@ -132,8 +130,7 @@ public final class BeneficiaryTransformerTest {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
     Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("hicn"), true);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("hicn"));
     assertMatches(beneficiary, patient);
 
     Assert.assertEquals("Number of identifiers should be 6", 6, patient.getIdentifier().size());
@@ -176,8 +173,7 @@ public final class BeneficiaryTransformerTest {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
     Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("mbi"), true);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("mbi"));
     assertMatches(beneficiary, patient);
 
     Assert.assertEquals("Number of identifiers should be 4", 4, patient.getIdentifier().size());
@@ -235,13 +231,13 @@ public final class BeneficiaryTransformerTest {
     beneficiary.setLastUpdated(new Date());
     Patient patientWithLastUpdated =
         BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList(), true);
+            new MetricRegistry(), beneficiary, Collections.emptyList());
     assertMatches(beneficiary, patientWithLastUpdated);
 
     beneficiary.setLastUpdated(null);
     Patient patientWithoutLastUpdated =
         BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList(), true);
+            new MetricRegistry(), beneficiary, Collections.emptyList());
     assertMatches(beneficiary, patientWithoutLastUpdated);
   }
 
@@ -258,7 +254,7 @@ public final class BeneficiaryTransformerTest {
 
     Patient patient =
         BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList(), true);
+            new MetricRegistry(), beneficiary, Collections.emptyList());
     assertMatches(beneficiary, patient);
   }
 
@@ -325,8 +321,7 @@ public final class BeneficiaryTransformerTest {
     TransformerTestUtils.setAllOptionalsToEmpty(beneficiary);
 
     Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList(""), true);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList(""));
     assertMatches(beneficiary, patient);
   }
 

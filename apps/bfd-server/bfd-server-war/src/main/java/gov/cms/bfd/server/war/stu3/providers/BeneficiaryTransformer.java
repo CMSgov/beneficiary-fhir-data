@@ -65,20 +65,18 @@ final class BeneficiaryTransformer {
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param includeIdentifiersValues the includeIdentifiers header values to use
-   * @param includeAddressFields the boolean flag includeAddressFields derived from header
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
   @Trace
   public static Patient transform(
       MetricRegistry metricRegistry,
       Beneficiary beneficiary,
-      List<String> includeIdentifiersValues,
-      Boolean includeAddressFields) {
+      List<String> includeIdentifiersValues) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform"))
             .time();
-    Patient patient = transform(beneficiary, includeIdentifiersValues, includeAddressFields);
+    Patient patient = transform(beneficiary, includeIdentifiersValues);
     timer.stop();
 
     return patient;
@@ -91,10 +89,7 @@ final class BeneficiaryTransformer {
    *     determine if derived address info be included or not
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(
-      Beneficiary beneficiary,
-      List<String> includeIdentifiersValues,
-      Boolean includeAddressFields) {
+  private static Patient transform(Beneficiary beneficiary, List<String> includeIdentifiersValues) {
     Objects.requireNonNull(beneficiary);
 
     Patient patient = new Patient();
@@ -183,29 +178,11 @@ final class BeneficiaryTransformer {
       }
     }
 
-    // support header includeAddressFields from downstream components e.g. BB2
-    // per requirement of BFD-379, BB2 always send header includeAddressFields = False
-    if (includeAddressFields) {
-      patient
-          .addAddress()
-          .setState(beneficiary.getDerivedStateCode().orElse(null))
-          .setDistrict(beneficiary.getCountyCode())
-          .setPostalCode(beneficiary.getDerivedZipCode().orElse(null))
-          .setCity(beneficiary.getDerivedCityName().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress1().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress2().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress3().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress4().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress5().orElse(null))
-          .addLine(beneficiary.getDerivedMailingAddress6().orElse(null));
-    } else {
-      // keep amount of location info at the same level as before new address fields were introduced
-      patient
-          .addAddress()
-          .setState(beneficiary.getDerivedStateCode().orElse(null))
-          .setDistrict(beneficiary.getCountyCode())
-          .setPostalCode(beneficiary.getDerivedZipCode().orElse(null));
-    }
+    patient
+        .addAddress()
+        .setState(beneficiary.getStateCode())
+        .setDistrict(beneficiary.getCountyCode())
+        .setPostalCode(beneficiary.getPostalCode());
 
     if (beneficiary.getBirthDate() != null) {
       patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));

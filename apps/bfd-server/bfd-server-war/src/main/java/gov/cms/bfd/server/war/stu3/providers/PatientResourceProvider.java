@@ -122,7 +122,6 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (beneIdText == null || beneIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
-    Boolean includeAddressFields = returnIncludeAddressFieldsValue(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
@@ -172,8 +171,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     }
 
     Patient patient =
-        BeneficiaryTransformer.transform(
-            metricRegistry, beneficiary, includeIdentifiersValues, includeAddressFields);
+        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
     return patient;
   }
 
@@ -253,7 +251,6 @@ public final class PatientResourceProvider implements IResourceProvider {
       RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
-    Boolean includeAddressFields = returnIncludeAddressFieldsValue(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
     checkPageSize(paging);
 
@@ -280,10 +277,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
                   Patient patient =
                       BeneficiaryTransformer.transform(
-                          metricRegistry,
-                          beneficiary,
-                          includeIdentifiersValues,
-                          includeAddressFields);
+                          metricRegistry, beneficiary, includeIdentifiersValues);
                   return patient;
                 })
             .collect(Collectors.toList());
@@ -502,7 +496,6 @@ public final class PatientResourceProvider implements IResourceProvider {
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
-    Boolean includeAddressFields = returnIncludeAddressFieldsValue(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "identifier");
@@ -515,14 +508,10 @@ public final class PatientResourceProvider implements IResourceProvider {
       switch (identifier.getSystem()) {
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
-          patient =
-              queryDatabaseByHicnHash(
-                  identifier.getValue(), includeIdentifiersValues, includeAddressFields);
+          patient = queryDatabaseByHicnHash(identifier.getValue(), includeIdentifiersValues);
           break;
         case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
-          patient =
-              queryDatabaseByMbiHash(
-                  identifier.getValue(), includeIdentifiersValues, includeAddressFields);
+          patient = queryDatabaseByMbiHash(identifier.getValue(), includeIdentifiersValues);
           break;
         default:
           throw new InvalidRequestException(
@@ -555,15 +544,9 @@ public final class PatientResourceProvider implements IResourceProvider {
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByHicnHash(
-      String hicnHash, List<String> includeIdentifiersValues, Boolean includeAddressFields) {
+  private Patient queryDatabaseByHicnHash(String hicnHash, List<String> includeIdentifiersValues) {
     return queryDatabaseByHash(
-        hicnHash,
-        "hicn",
-        includeIdentifiersValues,
-        Beneficiary_.hicn,
-        BeneficiaryHistory_.hicn,
-        includeAddressFields);
+        hicnHash, "hicn", includeIdentifiersValues, Beneficiary_.hicn, BeneficiaryHistory_.hicn);
   }
 
   /**
@@ -578,15 +561,13 @@ public final class PatientResourceProvider implements IResourceProvider {
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByMbiHash(
-      String mbiHash, List<String> includeIdentifiersValues, Boolean includeAddressFields) {
+  private Patient queryDatabaseByMbiHash(String mbiHash, List<String> includeIdentifiersValues) {
     return queryDatabaseByHash(
         mbiHash,
         "mbi",
         includeIdentifiersValues,
         Beneficiary_.mbiHash,
-        BeneficiaryHistory_.mbiHash,
-        includeAddressFields);
+        BeneficiaryHistory_.mbiHash);
   }
 
   /**
@@ -607,8 +588,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       String hashType,
       List<String> includeIdentifiersValues,
       SingularAttribute<Beneficiary, String> beneficiaryHashField,
-      SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField,
-      Boolean includeAddressFields) {
+      SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField) {
     if (hash == null || hash.trim().isEmpty()) throw new IllegalArgumentException();
 
     /*
@@ -745,8 +725,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     }
 
     Patient patient =
-        BeneficiaryTransformer.transform(
-            metricRegistry, beneficiary, includeIdentifiersValues, includeAddressFields);
+        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
     return patient;
   }
 
@@ -787,33 +766,11 @@ public final class PatientResourceProvider implements IResourceProvider {
   public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
 
   /**
-   * The header key used to determine whether include derived addresses. See {@link
-   * #returnIncludeAddressFieldsValue(RequestDetails)} for details.
-   */
-  public static final String HEADER_NAME_INCLUDE_ADDRESS_FIELDS = "IncludeAddressFields";
-
-  /**
    * The List of valid values for the {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
    * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
       Arrays.asList("true", "false", "hicn", "mbi");
-
-  /**
-   * Return a valid List of values for the IncludeIdenfifiers header
-   *
-   * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
-   *     to parse out include identifiers values
-   * @return List of validated header values against the VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
-   *     list.
-   */
-  public static Boolean returnIncludeAddressFieldsValue(RequestDetails requestDetails) {
-    String headerValue = requestDetails.getHeader(HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
-
-    return (headerValue == null || headerValue == "" || headerValue.equalsIgnoreCase("FALSE"))
-        ? Boolean.FALSE
-        : Boolean.TRUE;
-  }
 
   /**
    * Return a valid List of values for the IncludeIdenfifiers header
