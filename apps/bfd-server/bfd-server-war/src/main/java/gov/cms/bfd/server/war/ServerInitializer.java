@@ -61,7 +61,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
 
     // Register the Blue Button R4 Server/Servlet if v2 is ENABLED!!
 
-    if (Boolean.parseBoolean(SpringConfiguration.PROP_BFD_V2_ENABLED)) {
+    if (SpringConfiguration.isV2Enabled()) {
 
       V2Server r4Servlet = new V2Server();
       cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
