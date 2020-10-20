@@ -371,6 +371,7 @@ public final class RifFilesProcessorTest {
     Assert.assertFalse(claimGroup.getDiagnosis5CodeVersion().isPresent());
     Assert.assertEquals(1, claimGroup.getLines().size());
     Assert.assertEquals("0", claimGroup.getClinicalTrialNumber().get());
+    Assert.assertEquals("74655592568216", claimGroup.getClaimCarrierControlNumber().get());
 
     // Verify one of the claim lines.
     CarrierClaimLine claimLine = claimGroup.getLines().get(0);
@@ -419,7 +420,6 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals("49035044700", claimLine.getNationalDrugCode().get());
     Assert.assertEquals("BB889999AA", claimLine.getCliaLabNumber().get());
     Assert.assertEquals(new BigDecimal(0), claimLine.getAnesthesiaUnitCount());
-    Assert.assertEquals("0000000000", claimLine.getClmControlNumber());
   }
 
   /**
@@ -528,6 +528,10 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals("0TCDDEE", claimGroup.getProcedure1Code().get());
     Assert.assertEquals('0', claimGroup.getProcedure1CodeVersion().get().charValue());
     Assert.assertEquals(LocalDate.of(2016, 1, 16), claimGroup.getProcedure1Date().get());
+    Assert.assertEquals(
+        new BigDecimal("120.56"), claimGroup.getClaimUncompensatedCareAmount().get());
+    Assert.assertEquals("28486613848", claimGroup.getFiDocumentClaimControlNumber().get());
+    Assert.assertEquals("261660474641024", claimGroup.getFiOriginalClaimControlNumber().get());
 
     Assert.assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -535,10 +539,6 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(new BigDecimal("84888.88"), claimLine.getTotalChargeAmount());
     Assert.assertEquals(new BigDecimal("3699.00"), claimLine.getNonCoveredChargeAmount());
     Assert.assertEquals("345345345", claimLine.getRevenueCenterRenderingPhysicianNPI().get());
-    Assert.assertEquals(
-        "0000000000", claimGroup.getLines().get(0).getFiOriginalClaimControlNumber());
-    Assert.assertEquals(
-        "0000000000", claimGroup.getLines().get(0).getFiDocumentClaimControlNumber());
   }
 
   /**
@@ -618,6 +618,8 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(new BigDecimal("175.73"), claimGroup.getCoinsuranceAmount());
     Assert.assertEquals(new BigDecimal("693.92"), claimGroup.getProviderPaymentAmount());
     Assert.assertEquals(new BigDecimal("44.00"), claimGroup.getBeneficiaryPaymentAmount());
+    Assert.assertEquals("32490593716374487", claimGroup.getFiDocumentClaimControlNumber().get());
+    Assert.assertEquals("373273882012", claimGroup.getFiOriginalClaimControlNumber().get());
 
     Assert.assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -634,10 +636,6 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(
         new BigDecimal(134.00), claimGroup.getLines().get(0).getNonCoveredChargeAmount());
     Assert.assertEquals("345345345", claimLine.getRevenueCenterRenderingPhysicianNPI().get());
-    Assert.assertEquals(
-        "0000000000", claimGroup.getLines().get(0).getFiOriginalClaimControlNumber());
-    Assert.assertEquals(
-        "0000000000", claimGroup.getLines().get(0).getFiDocumentClaimControlNumber());
   }
 
   /**
@@ -741,6 +739,8 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals('9', claimGroup.getDiagnosisAdmittingCodeVersion().get().charValue());
     Assert.assertEquals("R2222", claimGroup.getDiagnosisExternal1Code().get());
     Assert.assertEquals('9', claimGroup.getDiagnosisExternal1CodeVersion().get().charValue());
+    Assert.assertEquals("23443453453", claimGroup.getFiDocumentClaimControlNumber().get());
+    Assert.assertEquals("34534535535", claimGroup.getFiOriginalClaimControlNumber().get());
 
     Assert.assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -749,8 +749,6 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(new BigDecimal("95.00"), claimLine.getTotalChargeAmount());
     Assert.assertEquals(new BigDecimal("88.00"), claimLine.getNonCoveredChargeAmount());
     Assert.assertEquals("345345345", claimLine.getRevenueCenterRenderingPhysicianNPI().get());
-    Assert.assertEquals("0000000000", claimLine.getFiOriginalClaimControlNumber());
-    Assert.assertEquals("0000000000", claimLine.getFiDocumentClaimControlNumber());
   }
 
   /**
@@ -822,6 +820,8 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals("R5555", claimGroup.getDiagnosisPrincipalCode().get());
     Assert.assertEquals('9', claimGroup.getDiagnosisPrincipalCodeVersion().get().charValue());
     Assert.assertEquals(LocalDate.of(2014, 7, 06), claimGroup.getClaimHospiceStartDate().get());
+    Assert.assertEquals("38875439343923937", claimGroup.getFiOriginalClaimControlNumber().get());
+    Assert.assertEquals("2718813985998", claimGroup.getFiDocumentClaimControlNumber().get());
 
     Assert.assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -833,10 +833,6 @@ public final class RifFilesProcessorTest {
         new BigDecimal("300.00"), claimGroup.getLines().get(0).getNonCoveredChargeAmount().get());
     Assert.assertEquals("Q9999", claimGroup.getLines().get(0).getHcpcsInitialModifierCode().get());
     Assert.assertEquals("345345345", claimLine.getRevenueCenterRenderingPhysicianNPI().get());
-    Assert.assertEquals(
-        "0000000000", claimGroup.getLines().get(0).getFiOriginalClaimControlNumber());
-    Assert.assertEquals(
-        "0000000000", claimGroup.getLines().get(0).getFiDocumentClaimControlNumber());
   }
 
   /**
@@ -908,6 +904,8 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals('1', claimGroup.getClaimReferralCode().get().charValue());
     Assert.assertEquals(new BigDecimal(3), claimGroup.getTotalVisitCount());
     Assert.assertEquals(LocalDate.of(2015, 6, 23), claimGroup.getCareStartDate().get());
+    Assert.assertEquals("308683096577486", claimGroup.getFiDocumentClaimControlNumber().get());
+    Assert.assertEquals("10493204767560565", claimGroup.getFiOriginalClaimControlNumber().get());
 
     Assert.assertEquals(1, claimGroup.getLines().size());
     // Verify one of the claim lines.
@@ -920,10 +918,6 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(
         new BigDecimal("25.00"), claimGroup.getLines().get(0).getTotalChargeAmount());
     Assert.assertEquals("345345345", claimLine.getRevenueCenterRenderingPhysicianNPI().get());
-    Assert.assertEquals(
-        "0000000000", claimGroup.getLines().get(0).getFiOriginalClaimControlNumber());
-    Assert.assertEquals(
-        "0000000000", claimGroup.getLines().get(0).getFiDocumentClaimControlNumber());
   }
 
   /**
@@ -998,6 +992,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals("1306849450", claimGroup.getReferringPhysicianNpi().get());
     Assert.assertEquals("0", claimGroup.getClinicalTrialNumber().get());
     Assert.assertEquals(1, claimGroup.getLines().size());
+    Assert.assertEquals("74655592568216", claimGroup.getClaimCarrierControlNumber().get());
 
     // Verify one of the claim lines.
     DMEClaimLine claimLine = claimGroup.getLines().get(0);
