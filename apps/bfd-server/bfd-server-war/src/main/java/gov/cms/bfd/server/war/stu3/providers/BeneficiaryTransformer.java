@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -209,6 +210,10 @@ final class BeneficiaryTransformer {
 
     if (beneficiary.getBirthDate() != null) {
       patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));
+    }
+
+    if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
+      patient.setDeceased(new DateTimeType(TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get())));
     }
 
     char sex = beneficiary.getSex();

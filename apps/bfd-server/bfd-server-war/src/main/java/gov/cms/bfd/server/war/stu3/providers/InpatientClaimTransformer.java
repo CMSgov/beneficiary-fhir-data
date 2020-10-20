@@ -296,6 +296,10 @@ final class InpatientClaimTransformer {
       // Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
       TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
           eob, item, claimLine.getDeductibleCoinsuranceCd());
+    
+      TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFClaimControlNumber(
+        eob, item, claimLine.getFiDocumentClaimControlNumber(), claimLine.getFiOriginalClaimControlNumber());
+
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
