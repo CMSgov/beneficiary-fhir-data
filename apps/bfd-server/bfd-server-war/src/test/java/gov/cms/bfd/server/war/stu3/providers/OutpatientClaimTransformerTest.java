@@ -176,7 +176,9 @@ public final class OutpatientClaimTransformerTest {
         claim.getAttendingPhysicianNpi(),
         claim.getTotalChargeAmount(),
         claim.getPrimaryPayerPaidAmount(),
-        claim.getFiscalIntermediaryNumber());
+        claim.getFiscalIntermediaryNumber(),
+        claim.getFiDocumentClaimControlNumber(),
+        claim.getFiOriginalClaimControlNumber());
 
     Assert.assertTrue(
         "Expect actual diagnosis count is less than or equal to the claim count",
@@ -295,8 +297,6 @@ public final class OutpatientClaimTransformerTest {
         claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
-        claimLine1.getFiOriginalClaimControlNumber(),
-        claimLine1.getFiDocumentClaimControlNumber(),
         1 /* index */);
 
     // Test to ensure item level fields between Outpatient, HHA and Hospice match

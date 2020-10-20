@@ -19,11 +19,11 @@ alter table "Beneficiaries" add column "beneLinkKey" numeric(38);
 alter table "BeneficiariesHistory" add column "mbiEffectiveDate" date;
 alter table "BeneficiariesHistory" add column "mbiObsoleteDate" date;
 
-alter table "InpatientClaims" add column "clmUncompensatedCareAmount" numeric(38, 2);
+alter table "InpatientClaims" add column "claimUncompensatedCareAmount" numeric(38, 2);
 
-alter table "CarrierClaims" add column "clmControlNumber" varchar(23);
+alter table "CarrierClaims" add column "claimCarrierControlNumber" varchar(23);
 
-alter table "DMEClaims" add column "clmControlNumber" varchar(23);
+alter table "DMEClaims" add column "claimCarrierControlNumber" varchar(23);
 
 alter table "HHAClaims" add column "fiDocumentClaimControlNumber" varchar(23);
 alter table "HHAClaims" add column "fiOriginalClaimControlNumber" varchar(23);

@@ -145,7 +145,9 @@ public final class SNFClaimTransformerTest {
         claim.getAttendingPhysicianNpi(),
         claim.getTotalChargeAmount(),
         claim.getPrimaryPayerPaidAmount(),
-        claim.getFiscalIntermediaryNumber());
+        claim.getFiscalIntermediaryNumber(),
+        claim.getFiDocumentClaimControlNumber(),
+        claim.getFiOriginalClaimControlNumber());
 
     Assert.assertEquals(6, eob.getDiagnosis().size());
 
@@ -197,8 +199,6 @@ public final class SNFClaimTransformerTest {
         claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
-        claimLine1.getFiOriginalClaimControlNumber(),
-        claimLine1.getFiDocumentClaimControlNumber(),
         1 /* index */);
 
     // verify {@link

@@ -94,7 +94,9 @@ public final class HospiceClaimTransformerTest {
         claim.getAttendingPhysicianNpi(),
         claim.getTotalChargeAmount(),
         claim.getPrimaryPayerPaidAmount(),
-        claim.getFiscalIntermediaryNumber());
+        claim.getFiscalIntermediaryNumber(),
+        claim.getFiDocumentClaimControlNumber(),
+        claim.getFiOriginalClaimControlNumber());
 
     // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
     // expected
@@ -153,8 +155,6 @@ public final class HospiceClaimTransformerTest {
         claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
-        claimLine1.getFiOriginalClaimControlNumber(),
-        claimLine1.getFiDocumentClaimControlNumber(),
         1 /* index */);
 
     TransformerTestUtils.assertCareTeamEquals(

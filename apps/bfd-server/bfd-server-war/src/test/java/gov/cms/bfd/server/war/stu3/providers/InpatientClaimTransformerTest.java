@@ -156,7 +156,9 @@ public final class InpatientClaimTransformerTest {
         claim.getAttendingPhysicianNpi(),
         claim.getTotalChargeAmount(),
         claim.getPrimaryPayerPaidAmount(),
-        claim.getFiscalIntermediaryNumber());
+        claim.getFiscalIntermediaryNumber(),
+        claim.getFiDocumentClaimControlNumber(),
+        claim.getFiOriginalClaimControlNumber());
 
     Assert.assertEquals(9, eob.getDiagnosis().size());
 
@@ -227,8 +229,6 @@ public final class InpatientClaimTransformerTest {
         claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
-        claimLine1.getFiOriginalClaimControlNumber(),
-        claimLine1.getFiDocumentClaimControlNumber(),
         0 /* index */);
 
     // verify {@link

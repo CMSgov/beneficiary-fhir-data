@@ -1724,7 +1724,9 @@ final class TransformerTestUtils {
       Optional<String> attendingPhysicianNpi,
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
-      Optional<String> fiscalIntermediaryNumber) {
+      Optional<String> fiscalIntermediaryNumber,
+      Optional<String> fiDocumentClaimControlNumber,
+      Optional<String> fiOriginalClaimControlNumber) {
 
     TransformerTestUtils.assertReferenceIdentifierEquals(
         TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getOrganization());
@@ -1789,8 +1791,6 @@ final class TransformerTestUtils {
       Optional<BigDecimal> nationalDrugCodeQuantity,
       Optional<String> nationalDrugCodeQualifierCode,
       Optional<String> revenueCenterRenderingPhysicianNPI,
-      String fiOriginalClaimControlNumber,
-      String fiDocumentClaimControlNumber,
       int index) {
 
     assertHasCoding(CcwCodebookVariable.REV_CNTR, revenueCenterCode, item.getRevenue());
@@ -1814,10 +1814,6 @@ final class TransformerTestUtils {
 
     TransformerTestUtils.assertCareTeamEquals(
         revenueCenterRenderingPhysicianNPI.get(), ClaimCareteamrole.PRIMARY, eob);
-
-    Assert.assertEquals(claimControlNum, fiOriginalClaimControlNumber);
-
-    Assert.assertEquals(claimControlNum, fiDocumentClaimControlNumber);
   }
 
   /**
