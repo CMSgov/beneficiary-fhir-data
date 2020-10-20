@@ -117,5 +117,6 @@ java \
   "-DbfdServer.db.username=${DB_USERNAME}" \
   "-DbfdServer.db.password=${DB_PASSWORD}" \
   "-DbfdServer.db.connections.max=${DB_CONNECTIONS_MAX}" \
+  "-DbfdServer.v2.enabled=${V2_ENABLED}" \
   -jar "{{ data_server_dir }}/{{ data_server_launcher | basename }}" \
   >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
