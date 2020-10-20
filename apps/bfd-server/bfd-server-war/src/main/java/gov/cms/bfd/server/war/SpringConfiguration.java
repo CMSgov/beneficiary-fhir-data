@@ -6,6 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.google.common.base.Strings;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
@@ -378,6 +379,9 @@ public class SpringConfiguration {
    */
   public static boolean isV2Enabled() {
 
-    return Boolean.parseBoolean(v2Enabled);
+    if (!Strings.isNullOrEmpty(v2Enabled)) {
+      return Boolean.parseBoolean(v2Enabled);
+    }
+    return false;
   }
 }
