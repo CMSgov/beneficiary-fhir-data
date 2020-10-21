@@ -1613,6 +1613,11 @@ public final class TransformerUtils {
     }
   }
 
+  static void mapEobWeeklyProcessDate(ExplanationOfBenefit eob, LocalDate weeklyProcessLocalDate) {
+    TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_WKLY_PROC_DT)
+        .setTiming(new DateType(TransformerUtils.convertToDate(weeklyProcessLocalDate)));
+  }
+
   /**
    * Transforms the common group level data elements between the {@link CarrierClaim} and {@link
    * DMEClaim} claim types to FHIR. The method parameter fields from {@link CarrierClaim} and {@link

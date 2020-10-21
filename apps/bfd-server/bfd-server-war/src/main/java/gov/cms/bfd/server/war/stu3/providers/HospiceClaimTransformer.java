@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.dstu3.model.Period;
 
 /**
  * Transforms CCW {@link HospiceClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -60,6 +61,8 @@ final class HospiceClaimTransformer {
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
 
+    TransformerUtils.mapEobWeeklyProcessDate(eob, claimGroup.getWeeklyProcessDate());
+
     // map eob type codes into FHIR
     TransformerUtils.mapEobType(
         eob,
@@ -91,6 +94,22 @@ final class HospiceClaimTransformer {
           .addExtension(
               TransformerUtils.createExtensionQuantity(
                   CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
+    }
+
+    if (claimGroup.getClaimHospiceStartDate().isPresent()) {
+      Period hospiceStartPeriod = new Period();
+      TransformerUtils.setPeriodStart(
+          hospiceStartPeriod, claimGroup.getClaimHospiceStartDate().get());
+      TransformerUtils.addInformation(eob, CcwCodebookVariable.CLM_HOSP_START_DT_ID)
+          .setTiming(hospiceStartPeriod);
+    }
+
+    if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
+      Period hospiceEndPeriod = new Period();
+      TransformerUtils.setPeriodStart(
+          hospiceEndPeriod, claimGroup.getBeneficiaryDischargeDate().get());
+      TransformerUtils.addInformation(eob, CcwCodebookVariable.CLM_HOSP_START_DT_ID)
+          .setTiming(hospiceEndPeriod);
     }
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
