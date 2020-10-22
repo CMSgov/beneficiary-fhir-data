@@ -10,7 +10,6 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -161,17 +160,10 @@ final class SNFClaimTransformer {
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber());
 
-    Optional<Diagnosis> admittingDiagnosis =
-        Diagnosis.from(
-            claimGroup.getDiagnosisAdmittingCode(),
-            claimGroup.getDiagnosisAdmittingCodeVersion(),
-            DiagnosisLabel.ADMITTING);
-    if (admittingDiagnosis.isPresent()) {
-      TransformerUtils.addDiagnosisCode(eob, admittingDiagnosis.get());
-    }
-
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(
+            claimGroup.getDiagnosisAdmittingCode(),
+            claimGroup.getDiagnosisAdmittingCodeVersion(),
             claimGroup.getDiagnosisPrincipalCode(),
             claimGroup.getDiagnosisPrincipalCodeVersion(),
             claimGroup.getDiagnosis1Code(),
