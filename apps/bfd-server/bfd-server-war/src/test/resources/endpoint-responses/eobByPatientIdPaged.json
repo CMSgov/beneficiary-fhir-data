@@ -85,6 +85,18 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "15444"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "32490593716374487"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "373273882012"
+        }
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -163,6 +175,16 @@
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+            "display" : "NCH Weekly Claim Processing Date"
+          } ]
+        },
+        "timingDate" : "2011-02-26"
+      }, {
+        "sequence" : 2,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw",
             "display" : "Claim MCO Paid Switch"
           } ]
@@ -175,7 +197,7 @@
           } ]
         }
       }, {
-        "sequence" : 2,
+        "sequence" : 3,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -191,7 +213,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 4,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -206,7 +228,7 @@
           } ]
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 5,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -696,6 +718,18 @@
           "display" : "Physician/supplier"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/carr_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/carr_num",
+          "value" : "74655592568216"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
+          "value" : "01"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -776,6 +810,17 @@
       "referral" : {
         "reference" : "#1"
       },
+      "information" : [ {
+        "sequence" : 1,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+            "display" : "NCH Weekly Claim Processing Date"
+          } ]
+        },
+        "timingDate" : "2014-02-14"
+      } ],
       "careTeam" : [ {
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
@@ -1146,6 +1191,18 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "15999"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "08683096577486"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "10493204767560565"
+        }
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -1210,6 +1267,16 @@
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+            "display" : "NCH Weekly Claim Processing Date"
+          } ]
+        },
+        "timingDate" : "2015-11-06"
+      }, {
+        "sequence" : 2,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
             "display" : "Claim Frequency Code"
           } ]
@@ -1222,7 +1289,7 @@
           } ]
         }
       }, {
-        "sequence" : 2,
+        "sequence" : 3,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1238,7 +1305,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 4,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1254,7 +1321,7 @@
           } ]
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 5,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1270,7 +1337,7 @@
           } ]
         }
       }, {
-        "sequence" : 5,
+        "sequence" : 6,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1574,6 +1641,20 @@
           "code" : "USD"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
+        "valueMoney" : {
+          "value" : 66125.51,
+          "system" : "urn:iso:std:iso:4217",
+          "code" : "USD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt",
+        "valueMoney" : {
+          "value" : 120.56,
+          "system" : "urn:iso:std:iso:4217",
+          "code" : "USD"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
         "valueMoney" : {
           "value" : 112.0,
@@ -1677,6 +1758,18 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "8299"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "28486613848"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "261660474641024"
+        }
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -1753,6 +1846,16 @@
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+            "display" : "NCH Weekly Claim Processing Date"
+          } ]
+        },
+        "timingDate" : "2016-02-26"
+      }, {
+        "sequence" : 2,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/nch_ptnt_stus_ind_cd",
             "display" : "NCH Patient Status Indicator Code"
           } ]
@@ -1765,7 +1868,7 @@
           } ]
         }
       }, {
-        "sequence" : 2,
+        "sequence" : 3,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1781,7 +1884,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 4,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1796,7 +1899,7 @@
           } ]
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 5,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1811,7 +1914,7 @@
           "code" : "[pt_us]"
         }
       }, {
-        "sequence" : 5,
+        "sequence" : 6,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1827,7 +1930,7 @@
           } ]
         }
       }, {
-        "sequence" : 6,
+        "sequence" : 7,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1843,7 +1946,7 @@
           } ]
         }
       }, {
-        "sequence" : 7,
+        "sequence" : 8,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -1859,7 +1962,7 @@
           } ]
         }
       }, {
-        "sequence" : 8,
+        "sequence" : 9,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2395,6 +2498,18 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "11111"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "23443453453"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "34534535535"
+        }
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -2471,6 +2586,16 @@
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+            "display" : "NCH Weekly Claim Processing Date"
+          } ]
+        },
+        "timingDate" : "2014-02-14"
+      }, {
+        "sequence" : 2,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
             "display" : "Claim Inpatient Admission Type Code"
           } ]
@@ -2483,7 +2608,7 @@
           } ]
         }
       }, {
-        "sequence" : 2,
+        "sequence" : 3,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2498,7 +2623,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 4,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2511,7 +2636,7 @@
           "end" : "2002-01-21"
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 5,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2521,7 +2646,7 @@
         },
         "timingDate" : "2002-01-31"
       }, {
-        "sequence" : 5,
+        "sequence" : 6,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2537,7 +2662,7 @@
           } ]
         }
       }, {
-        "sequence" : 6,
+        "sequence" : 7,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2552,7 +2677,7 @@
           "code" : "[pt_us]"
         }
       }, {
-        "sequence" : 7,
+        "sequence" : 8,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2565,7 +2690,7 @@
           "end" : "2013-11-05"
         }
       }, {
-        "sequence" : 8,
+        "sequence" : 9,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2581,7 +2706,7 @@
           } ]
         }
       }, {
-        "sequence" : 9,
+        "sequence" : 10,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2597,7 +2722,7 @@
           } ]
         }
       }, {
-        "sequence" : 10,
+        "sequence" : 11,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2612,7 +2737,7 @@
           } ]
         }
       }, {
-        "sequence" : 11,
+        "sequence" : 12,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -3426,6 +3551,18 @@
           "display" : "Physician/supplier"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/carr_num",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/carr_num",
+          "value" : "74655592568216"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
+          "value" : "1"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -3510,6 +3647,17 @@
       "referral" : {
         "reference" : "#1"
       },
+      "information" : [ {
+        "sequence" : 1,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+            "display" : "NCH Weekly Claim Processing Date"
+          } ]
+        },
+        "timingDate" : "1999-11-06"
+      } ],
       "careTeam" : [ {
         "extension" : [ {
           "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
@@ -3897,6 +4045,18 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "6666"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "2718813985998"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+        "valueIdentifier" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "value" : "38875439343923937"
+        }
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -3965,6 +4125,16 @@
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+            "display" : "NCH Weekly Claim Processing Date"
+          } ]
+        },
+        "timingDate" : "2014-10-10"
+      }, {
+        "sequence" : 2,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/nch_ptnt_stus_ind_cd",
             "display" : "NCH Patient Status Indicator Code"
           } ]
@@ -3977,7 +4147,31 @@
           } ]
         }
       }, {
-        "sequence" : 2,
+        "sequence" : 3,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
+            "display" : "Claim Hospice Start Date"
+          } ]
+        },
+        "timingPeriod" : {
+          "start" : "2014-07-06"
+        }
+      }, {
+        "sequence" : 4,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
+            "display" : "Claim Hospice Start Date"
+          } ]
+        },
+        "timingPeriod" : {
+          "start" : "2015-06-29"
+        }
+      }, {
+        "sequence" : 5,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -3993,7 +4187,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 6,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -4009,7 +4203,7 @@
           } ]
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 7,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",

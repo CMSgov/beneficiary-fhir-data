@@ -133,6 +133,20 @@ final class InpatientClaimTransformer {
           claimGroup.getClaimTotalPPSCapitalAmount());
     }
 
+    if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {
+      TransformerUtils.addAdjudicationTotal(
+          eob,
+          CcwCodebookVariable.IME_OP_CLM_VAL_AMT,
+          claimGroup.getIndirectMedicalEducationAmount().get());
+    }
+
+    if (claimGroup.getClaimUncompensatedCareAmount().isPresent()) {
+      TransformerUtils.addAdjudicationTotal(
+          eob,
+          CcwCodebookVariable.CLM_UNCOMPD_CARE_PMT_AMT,
+          claimGroup.getClaimUncompensatedCareAmount().get());
+    }
+
     /*
      * add field values to the benefit balances that are common between the
      * Inpatient and SNF claim types
@@ -183,7 +197,9 @@ final class InpatientClaimTransformer {
         claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiOriginalClaimControlNumber());
 
     // Common group level fields between Inpatient, HHA, Hospice and SNF
     TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(
@@ -298,12 +314,6 @@ final class InpatientClaimTransformer {
       // Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
       TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
           eob, item, claimLine.getDeductibleCoinsuranceCd());
-
-      TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFClaimControlNumber(
-          eob,
-          item,
-          claimLine.getFiDocumentClaimControlNumber(),
-          claimLine.getFiOriginalClaimControlNumber());
     }
     TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;

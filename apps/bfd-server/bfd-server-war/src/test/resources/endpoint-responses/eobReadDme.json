@@ -63,6 +63,18 @@
       "display" : "Physician/supplier"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/carr_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/carr_num",
+      "value" : "74655592568216"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
+      "value" : "01"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -143,6 +155,17 @@
   "referral" : {
     "reference" : "#1"
   },
+  "information" : [ {
+    "sequence" : 1,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "2014-02-14"
+  } ],
   "careTeam" : [ {
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",

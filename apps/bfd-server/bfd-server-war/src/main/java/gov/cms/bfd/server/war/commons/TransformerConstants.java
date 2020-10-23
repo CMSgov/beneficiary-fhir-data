@@ -309,4 +309,10 @@ public final class TransformerConstants {
    * loaded before the lastUpdated feature was in place.
    */
   public static final Date FALLBACK_LAST_UPDATED = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+
+  public static final String CARR_CLM_CNTL_NUM_SYSTEM_URL = "carriercontrolnumber";
+
+  public static final String FI_DOC_CLM_CNTL_NUM_SYSTEM_URL = "fidoccontrolnumber";
+
+  public static final String FI_ORIG_CLM_CNTL_NUM_SYSTEM_URL = "fiorgcontrolnumber";
 }

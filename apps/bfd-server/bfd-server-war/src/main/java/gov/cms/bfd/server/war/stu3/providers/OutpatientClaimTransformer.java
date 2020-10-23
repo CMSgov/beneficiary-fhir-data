@@ -130,7 +130,9 @@ final class OutpatientClaimTransformer {
         claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiOriginalClaimControlNumber());
 
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(

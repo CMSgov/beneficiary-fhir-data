@@ -89,7 +89,9 @@ final class DMEClaimTransformer {
         claimGroup.getProviderPaymentAmount(),
         claimGroup.getBeneficiaryPaymentAmount(),
         claimGroup.getSubmittedChargeAmount(),
-        claimGroup.getAllowedChargeAmount());
+        claimGroup.getAllowedChargeAmount(),
+        claimGroup.getClaimDispositionCode(),
+        claimGroup.getClaimCarrierControlNumber());
 
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(

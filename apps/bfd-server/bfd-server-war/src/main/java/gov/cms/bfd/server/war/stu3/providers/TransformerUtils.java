@@ -5,7 +5,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Strings;
 import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.Value;
@@ -819,6 +818,17 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param systemUrl the system URL being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
+   *     specified input values
+   */
+  static Extension createExtensionIdentifier(String systemUrl, String identifierValue) {
+    return createExtensionIdentifier(systemUrl, identifierValue);
+  }
+
+  /**
    * @param ccwVariable the {@link CcwCodebookVariable} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
@@ -831,6 +841,19 @@ public final class TransformerUtils {
         new Identifier()
             .setSystem(calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue);
+    return identifier;
+  }
+
+  /**
+   * @param systemUrl the url being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Identifier}
+   */
+  static Identifier createIdentifier(String systemUrl, String identifierValue) {
+    if (identifierValue == null) throw new IllegalArgumentException();
+
+    Identifier identifier = new Identifier().setSystem(systemUrl).setValue(identifierValue);
     return identifier;
   }
 
@@ -1649,11 +1672,28 @@ public final class TransformerUtils {
       BigDecimal providerPaymentAmount,
       BigDecimal beneficiaryPaymentAmount,
       BigDecimal submittedChargeAmount,
-      BigDecimal allowedChargeAmount) {
+      BigDecimal allowedChargeAmount,
+      String claimDispositionCode,
+      Optional<String> claimCarrierControlNumber) {
 
     eob.addExtension(createExtensionIdentifier(CcwCodebookVariable.CARR_NUM, carrierNumber));
+
+    if (claimCarrierControlNumber.isPresent()) {
+      eob.addExtension(
+          createExtensionIdentifier(
+              TransformerConstants.CARR_CLM_CNTL_NUM_SYSTEM_URL, claimCarrierControlNumber.get()));
+    }
+
     eob.addExtension(
         createExtensionCoding(eob, CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode));
+
+    if (claimCarrierControlNumber.isPresent()) {
+      eob.addExtension(
+          createExtensionIdentifier(CcwCodebookVariable.CARR_NUM, claimCarrierControlNumber.get()));
+    }
+
+    eob.addExtension(
+        createExtensionIdentifier(CcwCodebookVariable.CLM_DISP_CD, claimDispositionCode));
 
     /*
      * Referrals are represented as contained resources, since they share the lifecycle and identity
@@ -2060,7 +2100,9 @@ public final class TransformerUtils {
       Optional<String> attendingPhysicianNpi,
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
-      Optional<String> fiscalIntermediaryNumber) {
+      Optional<String> fiscalIntermediaryNumber,
+      Optional<String> fiDocumentClaimControlNumber,
+      Optional<String> fiOriginalClaimControlNumber) {
 
     if (organizationNpi.isPresent()) {
       eob.setOrganization(
@@ -2124,6 +2166,20 @@ public final class TransformerUtils {
       eob.addExtension(
           createExtensionIdentifier(CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber));
     }
+
+    // if (fiDocumentClaimControlNumber.isPresent()) {
+    //   eob.addExtension(
+    //       createExtensionIdentifier(
+    //           TransformerConstants.FI_DOC_CLM_CNTL_NUM_SYSTEM_URL,
+    //           fiDocumentClaimControlNumber.get()));
+    // }
+
+    // if (fiOriginalClaimControlNumber.isPresent()) {
+    //   eob.addExtension(
+    //       createExtensionIdentifier(
+    //           TransformerConstants.FI_ORIG_CLM_CNTL_NUM_SYSTEM_URL,
+    //           fiOriginalClaimControlNumber.get()));
+    // }
   }
 
   /**
@@ -3128,26 +3184,5 @@ public final class TransformerUtils {
       // Remove _count parameter from the current request details
       requestDetails.setParameters(params);
     }
-  }
-
-  static ItemComponent mapEobCommonGroupInpHHAHospiceSNFClaimControlNumber(
-      ExplanationOfBenefit eob,
-      ItemComponent item,
-      String fiDocumentClaimControlNumber,
-      String fiOriginalClaimControlNumber) {
-
-    if (!Strings.isNullOrEmpty(fiDocumentClaimControlNumber)) {
-      item.addExtension(
-          createExtensionCoding(
-              eob, CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, fiDocumentClaimControlNumber));
-    }
-
-    if (!Strings.isNullOrEmpty(fiOriginalClaimControlNumber)) {
-      item.addExtension(
-          createExtensionCoding(
-              eob, CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, fiOriginalClaimControlNumber));
-    }
-
-    return item;
   }
 }

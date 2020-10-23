@@ -161,7 +161,9 @@ final class SNFClaimTransformer {
         claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiOriginalClaimControlNumber());
 
     Optional<Diagnosis> admittingDiagnosis =
         Diagnosis.from(
