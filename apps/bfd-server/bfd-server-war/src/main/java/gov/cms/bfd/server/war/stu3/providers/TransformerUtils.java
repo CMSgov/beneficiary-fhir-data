@@ -2291,10 +2291,7 @@ public final class TransformerUtils {
      * Seems silly, but allows the block below to be simple one-liners, rather than requiring
      * if-blocks.
      */
-    Consumer<Optional<Diagnosis>> diagnosisAdder =
-        d -> {
-          if (d.isPresent()) diagnoses.add(d.get());
-        };
+    Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
 
     diagnosisAdder.accept(
         Diagnosis.from(
@@ -2316,6 +2313,75 @@ public final class TransformerUtils {
     return diagnoses;
   }
 
+  /**
+   * Extract the Diagnosis values for codes 1-12
+   *
+   * @param diagnosisAdmittingCode
+   * @param diagnosisAdmittingCodeVersion
+   * @param diagnosisPrincipalCode
+   * @param diagnosisPrincipalCodeVersion
+   * @param diagnosis1Code through diagnosis12Code
+   * @param diagnosis1CodeVersion through diagnosis12CodeVersion
+   * @return the {@link Diagnosis}es that can be extracted from the specified
+   */
+  public static List<Diagnosis> extractDiagnoses1Thru12(
+      Optional<String> diagnosisAdmittingCode,
+      Optional<Character> diagnosisAdmittingCodeVersion,
+      Optional<String> diagnosisPrincipalCode,
+      Optional<Character> diagnosisPrincipalCodeVersion,
+      Optional<String> diagnosis1Code,
+      Optional<Character> diagnosis1CodeVersion,
+      Optional<String> diagnosis2Code,
+      Optional<Character> diagnosis2CodeVersion,
+      Optional<String> diagnosis3Code,
+      Optional<Character> diagnosis3CodeVersion,
+      Optional<String> diagnosis4Code,
+      Optional<Character> diagnosis4CodeVersion,
+      Optional<String> diagnosis5Code,
+      Optional<Character> diagnosis5CodeVersion,
+      Optional<String> diagnosis6Code,
+      Optional<Character> diagnosis6CodeVersion,
+      Optional<String> diagnosis7Code,
+      Optional<Character> diagnosis7CodeVersion,
+      Optional<String> diagnosis8Code,
+      Optional<Character> diagnosis8CodeVersion,
+      Optional<String> diagnosis9Code,
+      Optional<Character> diagnosis9CodeVersion,
+      Optional<String> diagnosis10Code,
+      Optional<Character> diagnosis10CodeVersion,
+      Optional<String> diagnosis11Code,
+      Optional<Character> diagnosis11CodeVersion,
+      Optional<String> diagnosis12Code,
+      Optional<Character> diagnosis12CodeVersion) {
+    List<Diagnosis> diagnoses = new LinkedList<>();
+
+    /*
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
+     */
+    Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
+    diagnosisAdder.accept(
+        Diagnosis.from(
+            diagnosisAdmittingCode, diagnosisAdmittingCodeVersion, DiagnosisLabel.ADMITTING));
+    diagnosisAdder.accept(
+        Diagnosis.from(
+            diagnosisPrincipalCode, diagnosisPrincipalCodeVersion, DiagnosisLabel.PRINCIPAL));
+    diagnosisAdder.accept(
+        Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion, DiagnosisLabel.PRINCIPAL));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis2Code, diagnosis2CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis3Code, diagnosis3CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis4Code, diagnosis4CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis5Code, diagnosis5CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis6Code, diagnosis6CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis7Code, diagnosis7CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis8Code, diagnosis8CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis9Code, diagnosis9CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis10Code, diagnosis10CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis11Code, diagnosis11CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis12Code, diagnosis12CodeVersion));
+
+    return diagnoses;
+  }
   /**
    * Extract the Diagnosis values for codes 13-25
    *
@@ -3184,5 +3250,23 @@ public final class TransformerUtils {
       // Remove _count parameter from the current request details
       requestDetails.setParameters(params);
     }
+  }
+
+  public static Consumer<Optional<Diagnosis>> addPrincipalDiagnosis(List<Diagnosis> diagnoses) {
+    return diagnosisToAdd -> {
+      if (diagnosisToAdd.isPresent()) {
+        Optional<Diagnosis> matchingDiagnosis =
+            diagnoses.stream()
+                .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
+                .findFirst();
+        if (matchingDiagnosis.isPresent()) {
+          // append labels
+          matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
+          diagnoses.add(matchingDiagnosis.get());
+        } else {
+          diagnoses.add(diagnosisToAdd.get());
+        }
+      }
+    };
   }
 }
