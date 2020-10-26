@@ -313,8 +313,21 @@ final class InpatientClaimTransformer {
      * rather than requiring if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
-        TransformerUtils.addPrincipalDiagnosis(diagnoses);
-
+        diagnosisToAdd -> {
+          if (diagnosisToAdd.isPresent()) {
+            Optional<Diagnosis> matchingDiagnosis =
+                diagnoses.stream()
+                    .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
+                    .findFirst();
+            if (matchingDiagnosis.isPresent()) {
+              // append labels
+              matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
+              diagnoses.add(matchingDiagnosis.get());
+            } else {
+              diagnoses.add(diagnosisToAdd.get());
+            }
+          }
+        };
     diagnosisAdder.accept(
         Diagnosis.from(
             claim.getDiagnosisAdmittingCode(),
