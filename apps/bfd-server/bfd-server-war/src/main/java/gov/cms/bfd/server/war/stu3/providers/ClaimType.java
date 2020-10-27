@@ -103,7 +103,7 @@ public enum ClaimType {
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;
   private final SingularAttribute<?, String> entityBeneficiaryIdAttribute;
-  private final Function<Object, LocalDate> serviceEndAttributeSupplier;
+  private final Function<Object, LocalDate> serviceEndAttributeFunction;
   private final BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer;
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 
@@ -121,13 +121,13 @@ public enum ClaimType {
       Class<?> entityClass,
       SingularAttribute<?, ?> entityIdAttribute,
       SingularAttribute<?, String> entityBeneficiaryIdAttribute,
-      Function<Object, LocalDate> serviceEndAttributeSupplier,
+      Function<Object, LocalDate> serviceEndAttributeFunction,
       BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
     this.entityBeneficiaryIdAttribute = entityBeneficiaryIdAttribute;
-    this.serviceEndAttributeSupplier = serviceEndAttributeSupplier;
+    this.serviceEndAttributeFunction = serviceEndAttributeFunction;
     this.transformer = transformer;
     this.entityLazyAttributes =
         entityLazyAttributes != null
@@ -161,7 +161,7 @@ public enum ClaimType {
    *     filter
    */
   public Function<Object, LocalDate> getServiceEndAttributeFunction() {
-    return serviceEndAttributeSupplier;
+    return serviceEndAttributeFunction;
   }
 
   /**
