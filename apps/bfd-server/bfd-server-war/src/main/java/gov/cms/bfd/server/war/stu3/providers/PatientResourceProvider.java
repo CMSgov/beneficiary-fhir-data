@@ -536,8 +536,6 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
    * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
    *     value to use
-   * @param includeAddressFieldsValue the {@link #returnIncludeAddressFieldsValue(RequestDetails)}
-   *     value to use to decide if address fields need to be included
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -553,8 +551,6 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
    * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
    *     value to use
-   * @param includeAddressFields the {@link #returnIncludeAddressFieldsValue(RequestDetails)} value
-   *     to decide if address fields need to be included
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getMbiHash()} ()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
