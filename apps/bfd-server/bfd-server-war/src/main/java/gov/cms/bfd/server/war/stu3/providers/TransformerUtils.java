@@ -806,6 +806,22 @@ public final class TransformerUtils {
   }
 
   /**
+   * @param systemUrl the system Url being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
+   *     specified input values
+   */
+  static Extension createExtensionIdentifierWithoutCCW(String systemUrl, String identifierValue) {
+
+    Identifier identifier = createIdentifier(systemUrl, identifierValue);
+
+    Extension extension = new Extension(systemUrl, identifier);
+
+    return extension;
+  }
+
+  /**
    * @param ccwVariable the {@link CcwCodebookVariable} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
@@ -825,7 +841,7 @@ public final class TransformerUtils {
    *     specified input values
    */
   static Extension createExtensionIdentifier(String systemUrl, String identifierValue) {
-    return createExtensionIdentifier(systemUrl, identifierValue);
+    return createExtensionIdentifierWithoutCCW(systemUrl, identifierValue);
   }
 
   /**

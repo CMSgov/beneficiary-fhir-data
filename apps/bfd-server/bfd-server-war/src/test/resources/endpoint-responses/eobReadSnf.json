@@ -101,18 +101,6 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
       "value" : "11111"
     }
-  }, {
-    "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-    "valueIdentifier" : {
-      "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-      "value" : "23443453453"
-    }
-  }, {
-    "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-    "valueIdentifier" : {
-      "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-      "value" : "34534535535"
-    }
   } ],
   "identifier" : [ {
     "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",

@@ -79,18 +79,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "15444"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "32490593716374487"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "373273882012"
-        }
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -1185,18 +1173,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "15999"
         }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "08683096577486"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "10493204767560565"
-        }
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -1751,18 +1727,6 @@
         "valueIdentifier" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "8299"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "28486613848"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "261660474641024"
         }
       } ],
       "identifier" : [ {
@@ -2491,18 +2455,6 @@
         "valueIdentifier" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "11111"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "23443453453"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "34534535535"
         }
       } ],
       "identifier" : [ {
@@ -4038,18 +3990,6 @@
         "valueIdentifier" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
           "value" : "6666"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "2718813985998"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-          "value" : "38875439343923937"
         }
       } ],
       "identifier" : [ {
