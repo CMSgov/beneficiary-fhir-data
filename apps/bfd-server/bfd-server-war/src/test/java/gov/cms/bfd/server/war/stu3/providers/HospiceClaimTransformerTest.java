@@ -94,7 +94,9 @@ public final class HospiceClaimTransformerTest {
         claim.getAttendingPhysicianNpi(),
         claim.getTotalChargeAmount(),
         claim.getPrimaryPayerPaidAmount(),
-        claim.getFiscalIntermediaryNumber());
+        claim.getFiscalIntermediaryNumber(),
+        claim.getFiDocumentClaimControlNumber(),
+        claim.getFiOriginalClaimControlNumber());
 
     // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
     // expected
@@ -138,6 +140,7 @@ public final class HospiceClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(
         eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 
+    String claimControlNumber = "0000000000";
     // Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice
     // and SNF match
     TransformerTestUtils.assertEobCommonItemRevenueEquals(
@@ -148,6 +151,7 @@ public final class HospiceClaimTransformerTest {
         claimLine1.getTotalChargeAmount(),
         claimLine1.getNonCoveredChargeAmount().get(),
         claimLine1.getUnitCount(),
+        claimControlNumber,
         claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),

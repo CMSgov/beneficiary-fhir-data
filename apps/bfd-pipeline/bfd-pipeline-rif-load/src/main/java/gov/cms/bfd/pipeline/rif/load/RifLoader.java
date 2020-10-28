@@ -619,6 +619,8 @@ public final class RifLoader implements AutoCloseable {
       oldBeneCopy.setSex(oldBeneficiaryRecord.getSex());
       oldBeneCopy.setMedicareBeneficiaryId(oldBeneficiaryRecord.getMedicareBeneficiaryId());
       oldBeneCopy.setMbiHash(oldBeneficiaryRecord.getMbiHash());
+      oldBeneCopy.setMbiEffectiveDate(oldBeneficiaryRecord.getMbiEffectiveDate());
+      oldBeneCopy.setMbiObsoleteDate(oldBeneficiaryRecord.getMbiObsoleteDate());
       oldBeneCopy.setLastUpdated(batchTimestamp);
 
       entityManager.persist(oldBeneCopy);
@@ -640,6 +642,12 @@ public final class RifLoader implements AutoCloseable {
         && newBeneficiaryRecord.getHicnUnhashed().equals(oldBeneficiaryRecord.getHicnUnhashed())
         && newBeneficiaryRecord.getSex() == oldBeneficiaryRecord.getSex()
         && newBeneficiaryRecord.getMbiHash().equals(oldBeneficiaryRecord.getMbiHash())
+        && newBeneficiaryRecord
+            .getMbiEffectiveDate()
+            .equals(oldBeneficiaryRecord.getMbiEffectiveDate())
+        && newBeneficiaryRecord
+            .getMbiObsoleteDate()
+            .equals(oldBeneficiaryRecord.getMbiObsoleteDate())
         && newBeneficiaryRecord
             .getMedicareBeneficiaryId()
             .equals(oldBeneficiaryRecord.getMedicareBeneficiaryId())) {

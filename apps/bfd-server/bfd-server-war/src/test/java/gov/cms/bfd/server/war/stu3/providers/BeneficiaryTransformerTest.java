@@ -340,7 +340,9 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
     Assert.assertEquals(beneficiary.getCountyCode(), patient.getAddress().get(0).getDistrict());
     Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
+
     if (beneficiary.getSex() == Sex.MALE.getCode())
       Assert.assertEquals(
           AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());

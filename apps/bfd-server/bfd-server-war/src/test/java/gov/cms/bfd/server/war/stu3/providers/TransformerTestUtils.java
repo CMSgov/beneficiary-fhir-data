@@ -1724,7 +1724,9 @@ final class TransformerTestUtils {
       Optional<String> attendingPhysicianNpi,
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
-      Optional<String> fiscalIntermediaryNumber) {
+      Optional<String> fiscalIntermediaryNumber,
+      Optional<String> fiDocumentClaimControlNumber,
+      Optional<String> fiOriginalClaimControlNumber) {
 
     TransformerTestUtils.assertReferenceIdentifierEquals(
         TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getOrganization());
@@ -1785,6 +1787,7 @@ final class TransformerTestUtils {
       BigDecimal totalChargeAmount,
       BigDecimal nonCoveredChargeAmount,
       BigDecimal unitCount,
+      String claimControlNum,
       Optional<BigDecimal> nationalDrugCodeQuantity,
       Optional<String> nationalDrugCodeQualifierCode,
       Optional<String> revenueCenterRenderingPhysicianNPI,
