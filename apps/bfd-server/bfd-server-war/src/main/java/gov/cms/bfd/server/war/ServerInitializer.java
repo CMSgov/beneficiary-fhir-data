@@ -5,6 +5,7 @@ import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
+import com.google.common.base.Strings;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,6 +29,14 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
  */
 public final class ServerInitializer implements WebApplicationInitializer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerInitializer.class);
+
+  /** Checks for BFD v2 Flag */
+  private static boolean isV2Enabled() {
+    if (!Strings.isNullOrEmpty(System.getProperty("bfdServer.v2.enabled"))) {
+      return Boolean.parseBoolean(System.getProperty("bfdServer.v2.enabled"));
+    }
+    return false;
+  }
 
   /**
    * @see org.springframework.web.WebApplicationInitializer#onStartup(javax.servlet.ServletContext)
@@ -61,7 +70,7 @@ public final class ServerInitializer implements WebApplicationInitializer {
 
     // Register the Blue Button R4 Server/Servlet if v2 is ENABLED!!
 
-    if (SpringConfiguration.isV2Enabled()) {
+    if (isV2Enabled()) {
 
       V2Server r4Servlet = new V2Server();
       cxfServletReg = servletContext.addServlet("r4Servlet", r4Servlet);
