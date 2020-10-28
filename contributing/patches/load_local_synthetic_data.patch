@@ -252,13 +252,13 @@ index a1401b55..a44fca81 100644
        StaticRifResource.SYNTHETIC_BENEFICIARY_1999,
        StaticRifResource.SYNTHETIC_BENEFICIARY_2000,
 diff --git a/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java b/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
-index a163268d..b067192b 100644
+index a163268d..5378d8ce 100644
 --- a/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
 +++ b/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
-@@ -315,6 +315,19 @@ public final class RifLoaderIT {
-     } finally {
+@@ -316,6 +316,20 @@ public final class RifLoaderIT {
        if (entityManager != null) entityManager.close();
      }
+   }
 +  /**
 +   * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
 +   * StaticRifResourceGroup#LOCAL_SYNTHETIC} data.
@@ -272,9 +272,10 @@ index a163268d..b067192b 100644
 +    Runtime.getRuntime().maxMemory() >= 4500000000L); */
 +    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
 +    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.LOCAL_SYNTHETIC.getResources()));
-   }
++  }
    /**
     * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
+    * StaticRifResourceGroup#SAMPLE_B} data.
 -- 
 2.19.0
 
