@@ -24,7 +24,7 @@ data_pipeline_ec2_instance_type_vcpu: 4
 data_pipeline_idempotency_required: false
 
 # Whether to enable BFD API V2
-data_server_v2_enabled: false
+data_server_v2_enabled: true
 
 # These systems are m5.xlarge (4 vCPUs, 16 GB RAM).
 data_server_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
