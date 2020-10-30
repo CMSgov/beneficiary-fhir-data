@@ -23,6 +23,11 @@ public final class Value {
     this.description = null;
   }
 
+  public Value(String code, String description) {
+    this.code = code;
+    this.description = description;
+  }
+
   /**
    * @return the coded value for this {@link Value}, representing one of the allowed values for its
    *     great-grandparent {@link Variable}

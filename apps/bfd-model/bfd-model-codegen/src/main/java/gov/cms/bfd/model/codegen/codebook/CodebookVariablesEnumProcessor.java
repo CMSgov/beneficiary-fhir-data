@@ -121,7 +121,6 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
     logNote(annotatedPackage, "Processing package annotated with: '%s'.", annotation);
 
     Map<String, Variable> variablesById = CodebookVariableReader.buildVariablesMappedById();
-
     ClassName variableEnumName =
         ClassName.get(annotatedPackage.getQualifiedName().toString(), annotation.enumName());
     TypeSpec.Builder variablesEnumType =

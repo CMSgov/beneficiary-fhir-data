@@ -31,6 +31,11 @@ public final class ValueGroup {
     this.values = new ArrayList<>();
   }
 
+  public ValueGroup(List<String> description, List<Value> values) {
+    this.description = description;
+    this.values = values;
+  }
+
   /**
    * @return a textual description that applies to all of the {@link Variable}s in this {@link
    *     ValueGroup}, with one paragraph per {@link List} entry, or <code>null</code> if there is no

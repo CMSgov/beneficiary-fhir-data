@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
 /**
@@ -109,10 +110,28 @@ final class BeneficiaryTransformer {
     }
 
     if (beneficiary.getMbiHash().isPresent()) {
-      patient
-          .addIdentifier()
-          .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
-          .setValue(beneficiary.getMbiHash().get());
+      Period mbiPeriod = new Period();
+
+      if (beneficiary.getMbiEffectiveDate().isPresent()) {
+        TransformerUtils.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
+      }
+
+      if (beneficiary.getMbiObsoleteDate().isPresent()) {
+        TransformerUtils.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
+      }
+
+      if (mbiPeriod.hasStart() || mbiPeriod.hasEnd()) {
+        patient
+            .addIdentifier()
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+            .setValue(beneficiary.getMbiHash().get())
+            .setPeriod(mbiPeriod);
+      } else {
+        patient
+            .addIdentifier()
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+            .setValue(beneficiary.getMbiHash().get());
+      }
     }
 
     Extension currentIdentifier =
@@ -189,6 +208,7 @@ final class BeneficiaryTransformer {
       patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));
     }
 
+    // Death Date
     if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
       patient.setDeceased(
           new DateTimeType(

@@ -24,6 +24,18 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
       "value" : "6666"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "2718813985998"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+      "value" : "38875439343923937"
+    }
   } ],
   "identifier" : [ {
     "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -130,8 +142,8 @@
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-        "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
-        "display" : "Claim Hospice Start Date"
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_dschrg_dt",
+        "display" : "NCH Beneficiary Discharge Date"
       } ]
     },
     "timingPeriod" : {

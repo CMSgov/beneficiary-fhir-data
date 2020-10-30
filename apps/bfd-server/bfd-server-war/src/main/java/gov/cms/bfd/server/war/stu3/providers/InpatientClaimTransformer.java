@@ -97,6 +97,7 @@ final class InpatientClaimTransformer {
         claimGroup.getMedicareBenefitsExhaustedDate(),
         claimGroup.getDiagnosisRelatedGroupCd());
 
+    // Claim Operational Indirect Medical Education Amount
     if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob,
@@ -104,6 +105,7 @@ final class InpatientClaimTransformer {
           claimGroup.getIndirectMedicalEducationAmount());
     }
 
+    // Claim Operational disproportionate Amount
     if (claimGroup.getDisproportionateShareAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob, CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claimGroup.getDisproportionateShareAmount());
@@ -140,6 +142,7 @@ final class InpatientClaimTransformer {
           claimGroup.getIndirectMedicalEducationAmount().get());
     }
 
+    // Claim Uncompensated Care Payment Amount
     if (claimGroup.getClaimUncompensatedCareAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob,

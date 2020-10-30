@@ -96,6 +96,7 @@ final class HospiceClaimTransformer {
                   CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
     }
 
+    // Date beneficiary enrolled in Hospice
     if (claimGroup.getClaimHospiceStartDate().isPresent()) {
       Period hospiceStartPeriod = new Period();
       TransformerUtils.setPeriodStart(
@@ -104,11 +105,12 @@ final class HospiceClaimTransformer {
           .setTiming(hospiceStartPeriod);
     }
 
+    // Date beneficiary discharged in Hospice
     if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
       Period hospiceEndPeriod = new Period();
       TransformerUtils.setPeriodStart(
           hospiceEndPeriod, claimGroup.getBeneficiaryDischargeDate().get());
-      TransformerUtils.addInformation(eob, CcwCodebookVariable.CLM_HOSP_START_DT_ID)
+      TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_BENE_DSCHRG_DT)
           .setTiming(hospiceEndPeriod);
     }
 
