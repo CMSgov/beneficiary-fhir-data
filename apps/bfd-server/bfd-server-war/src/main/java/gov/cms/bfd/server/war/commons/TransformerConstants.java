@@ -309,4 +309,55 @@ public final class TransformerConstants {
    * loaded before the lastUpdated feature was in place.
    */
   public static final Date FALLBACK_LAST_UPDATED = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+
+  /**
+   * CARIN CodeSystem for Patient Identifier Type <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
+   * C4BB Identifier Type</a>
+   */
+  public static final String CARIN_IDENTIFIER_SYSTEM =
+      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
+
+  /**
+   * CARIN Code System Display value for Patient Identifier Type <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
+   * C4BB Identifier Type</a>
+   */
+  public static final String PATIENT_PI_ID_DISPLAY = "Patient internal identifier";
+
+  /**
+   * CARIN Code System Display value for Patient Identifier Type <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
+   * C4BB Identifier Type</a>
+   */
+  public static final String PATIENT_MR_ID_DISPLAY = "Medical record number";
+
+  /**
+   * CARIN Code System Display value for Patient Identifier Type <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
+   * C4BB Identifier Type</a>
+   */
+  public static final String PATIENT_MC_ID_DISPLAY = "Patient's Medicare number";
+
+  /**
+   * Race Category code for Unknown Race <a
+   * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">ValueSet Omb Race
+   * Category</a>
+   */
+  public static final String HL7_RACE_UNKNOWN_CODE = "UNK";
+
+  /**
+   * Race Category Display value for Unknown Race <a
+   * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">ValueSet Omb Race
+   * Category</a>
+   */
+  public static final String HL7_RACE_UNKNOWN_DISPLAY = "Unknown";
+
+  /**
+   * Code System URL for US Core Race <a
+   * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">Code System URL for US
+   * Core Race</a>
+   */
+  public static final String CODING_RACE_US =
+      "http://hl7.org/fhir/us/core/ValueSet/omb-race-category";
 }

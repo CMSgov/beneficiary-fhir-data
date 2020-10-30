@@ -176,7 +176,9 @@ public final class OutpatientClaimTransformerTest {
         claim.getAttendingPhysicianNpi(),
         claim.getTotalChargeAmount(),
         claim.getPrimaryPayerPaidAmount(),
-        claim.getFiscalIntermediaryNumber());
+        claim.getFiscalIntermediaryNumber(),
+        claim.getFiDocumentClaimControlNumber(),
+        claim.getFiOriginalClaimControlNumber());
 
     Assert.assertTrue(
         "Expect actual diagnosis count is less than or equal to the claim count",
@@ -279,6 +281,8 @@ public final class OutpatientClaimTransformerTest {
         claimLine1.getPatientResponsibilityAmount(),
         eobItem0.getAdjudication());
 
+    String claimControlNumber = "0000000000";
+
     // Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice
     // and SNF match
     TransformerTestUtils.assertEobCommonItemRevenueEquals(
@@ -289,6 +293,7 @@ public final class OutpatientClaimTransformerTest {
         claimLine1.getTotalChargeAmount(),
         claimLine1.getNonCoveredChargeAmount(),
         claimLine1.getUnitCount(),
+        claimControlNumber,
         claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),

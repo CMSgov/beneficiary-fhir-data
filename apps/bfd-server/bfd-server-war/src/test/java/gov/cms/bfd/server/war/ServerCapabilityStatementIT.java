@@ -38,8 +38,8 @@ public final class ServerCapabilityStatementIT {
     Assert.assertNotNull(capabilities);
 
     // Verify that our custom server metadata is correct.
-    Assert.assertEquals(Stu3Server.CAPABILITIES_PUBLISHER, capabilities.getPublisher());
-    Assert.assertEquals(Stu3Server.CAPABILITIES_SERVER_NAME, capabilities.getSoftware().getName());
+    Assert.assertEquals(V1Server.CAPABILITIES_PUBLISHER, capabilities.getPublisher());
+    Assert.assertEquals(V1Server.CAPABILITIES_SERVER_NAME, capabilities.getSoftware().getName());
     Assert.assertEquals(
         "gov.cms.bfd:bfd-server-war", capabilities.getImplementation().getDescription());
     Assert.assertNotEquals(null, capabilities.getSoftware().getVersion());
