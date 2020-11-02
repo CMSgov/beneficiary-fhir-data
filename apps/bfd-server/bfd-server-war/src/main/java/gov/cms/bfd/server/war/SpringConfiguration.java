@@ -11,6 +11,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
@@ -62,6 +63,10 @@ public class SpringConfiguration {
    */
   static final String BLUEBUTTON_STU3_RESOURCE_PROVIDERS = "bluebuttonStu3ResourceProviders";
 
+  /**
+   * The {@link Bean#name()} for the {@link List} of R4 {@link IResourceProvider} beans for the
+   * application.
+   */
   static final String BLUEBUTTON_R4_RESOURCE_PROVIDERS = "bluebuttonR4ResourceProviders";
 
   /**
@@ -333,10 +338,12 @@ public class SpringConfiguration {
    */
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
   public List<IResourceProvider> r4ResourceProviders(
-      R4PatientResourceProvider r4PatientResourceProvider) {
+      R4PatientResourceProvider r4PatientResourceProvider,
+      R4CoverageResourceProvider r4CoverageResourceProvider) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
+    r4ResourceProviders.add(r4CoverageResourceProvider);
     return r4ResourceProviders;
   }
 

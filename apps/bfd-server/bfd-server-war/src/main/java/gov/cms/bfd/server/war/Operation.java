@@ -5,6 +5,7 @@ import com.codahale.metrics.servlets.MetricsServlet;
 import com.codahale.metrics.servlets.PingServlet;
 import com.codahale.metrics.servlets.ThreadDumpServlet;
 import com.newrelic.api.agent.NewRelic;
+import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
@@ -100,6 +101,9 @@ public final class Operation {
 
     /** Handled by {@link R4PatientResourceProvider}. */
     V2_PATIENT("/v2/fhir/Patient"),
+
+    /** Handled by {@link R4CoverageResourceProvider}. */
+    V2_COVERAGE("/v2/fhir/Coverage"),
 
     /** Some other, unknown HTTP endpoint/operation. */
     OTHER(null);
