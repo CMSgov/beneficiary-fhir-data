@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.codebook.data;
 
+import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.codebook.model.ValueGroup;
 import gov.cms.bfd.model.codebook.model.Variable;
