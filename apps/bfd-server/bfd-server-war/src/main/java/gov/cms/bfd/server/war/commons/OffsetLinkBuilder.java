@@ -163,6 +163,50 @@ public final class OffsetLinkBuilder implements LinkBuilder {
   }
 
   /**
+   * Add next, first, last, and previous links to a bundle
+   *
+   * @param toBundle to add the links
+   */
+  public void addLinks(org.hl7.fhir.r4.model.Bundle toBundle) {
+    Integer pageSize = getPageSize();
+    Integer startIndex = getStartIndex();
+    int total = numTotalResults == -1 ? toBundle.getEntry().size() : numTotalResults;
+    toBundle.addLink(
+        new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
+            .setRelation(Constants.LINK_FIRST)
+            .setUrl(createPageLink(0)));
+
+    if (startIndex + pageSize < total) {
+      toBundle.addLink(
+          new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
+              .setRelation(Constants.LINK_NEXT)
+              .setUrl(createPageLink(startIndex + pageSize)));
+    }
+
+    if (!isFirstPage()) {
+      toBundle.addLink(
+          new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
+              .setRelation(Constants.LINK_PREVIOUS)
+              .setUrl(createPageLink(Math.max(startIndex - pageSize, 0))));
+    }
+
+    /*
+     * This formula rounds numTotalResults down to the nearest multiple of pageSize that's less than
+     * and not equal to numTotalResults
+     */
+    int lastIndex;
+    try {
+      lastIndex = (total - 1) / pageSize * pageSize;
+    } catch (ArithmeticException e) {
+      throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
+    }
+    toBundle.addLink(
+        new org.hl7.fhir.r4.model.Bundle.BundleLinkComponent()
+            .setRelation(Constants.LINK_LAST)
+            .setUrl(createPageLink(lastIndex)));
+  }
+
+  /**
    * Build the link string
    *
    * @param startIndex start index

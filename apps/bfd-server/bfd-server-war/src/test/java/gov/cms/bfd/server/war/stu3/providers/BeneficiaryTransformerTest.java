@@ -337,6 +337,9 @@ public final class BeneficiaryTransformerTest {
 
     Assert.assertEquals(beneficiary.getBeneficiaryId(), patient.getIdElement().getIdPart());
     Assert.assertEquals(1, patient.getAddress().size());
+    Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+    Assert.assertEquals(beneficiary.getCountyCode(), patient.getAddress().get(0).getDistrict());
+    Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
 
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
