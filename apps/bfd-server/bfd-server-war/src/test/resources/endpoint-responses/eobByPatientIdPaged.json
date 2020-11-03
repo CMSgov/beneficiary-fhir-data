@@ -3714,6 +3714,21 @@
             "display" : "Optometrist"
           } ]
         }
+      }, {
+        "sequence" : 3,
+        "provider" : {
+          "identifier" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/tax_num",
+            "value" : "204299999"
+          }
+        },
+        "role" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/claimcareteamrole",
+            "code" : "primary",
+            "display" : "Primary provider"
+          } ]
+        }
       } ],
       "diagnosis" : [ {
         "sequence" : 1,
@@ -3815,7 +3830,7 @@
           }
         } ],
         "sequence" : 6,
-        "careTeamLinkId" : [ 2 ],
+        "careTeamLinkId" : [ 2, 3 ],
         "diagnosisLinkId" : [ 5 ],
         "category" : {
           "coding" : [ {

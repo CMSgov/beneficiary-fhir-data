@@ -161,6 +161,11 @@ final class CarrierClaimTransformer {
         }
       }
 
+      String taxNumSystem =
+          TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.TAX_NUM);
+      TransformerUtils.addCareTeamPractitioner(
+          eob, item, taxNumSystem, claimLine.getProviderTaxNumber(), ClaimCareteamrole.PRIMARY);
+
       item.addAdjudication(
           TransformerUtils.createAdjudicationWithReason(
               eob,
