@@ -116,7 +116,7 @@
   } ],
   "gender" : "male",
   "birthDate" : "1981-03-17",
-  "deceasedDateTime" : "1981-03-17T00:00:00-05:00",
+  "deceasedDateTime" : "1981-03-17",
   "address" : [ {
     "district" : "123",
     "state" : "MO",

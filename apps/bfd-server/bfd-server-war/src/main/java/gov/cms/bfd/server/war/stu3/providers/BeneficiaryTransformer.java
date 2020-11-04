@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -212,7 +213,8 @@ final class BeneficiaryTransformer {
     if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
       patient.setDeceased(
           new DateTimeType(
-              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get())));
+              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              TemporalPrecisionEnum.DAY));
     }
 
     char sex = beneficiary.getSex();
