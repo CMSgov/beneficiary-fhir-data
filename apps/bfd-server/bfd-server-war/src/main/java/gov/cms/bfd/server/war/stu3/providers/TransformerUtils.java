@@ -123,7 +123,7 @@ public final class TransformerUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
 
   /**
-   * Tracks the {@link CcwCodebookVariable}s that have already had code lookup failures due to
+   * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
    * missing {@link Value} matches. Why track this? To ensure that we don't spam log events for
    * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
    * were flooding our logs and filling up the drive.
@@ -133,7 +133,7 @@ public final class TransformerUtils {
   private static final Set<CcwCodebookInterface> codebookLookupMissingFailures = new HashSet<>();
 
   /**
-   * Tracks the {@link CcwCodebookVariable}s that have already had code lookup failures due to
+   * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
    * duplicate {@link Value} matches. Why track this? To ensure that we don't spam log events for
    * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
    * were flooding our logs and filling up the drive.
@@ -165,7 +165,7 @@ public final class TransformerUtils {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
-   * @param categoryVariable the {@link CcwCodebookVariable} to map to the adjudication's <code>
+   * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
    *     category</code>
    * @param amountValue the {@link Money#getValue()} for the adjudication total
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
@@ -191,7 +191,7 @@ public final class TransformerUtils {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
-   * @param categoryVariable the {@link CcwCodebookVariable} to map to the adjudication's <code>
+   * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
    *     category</code>
    * @param totalAmountValue the {@link Money#getValue()} for the adjudication total
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
@@ -232,7 +232,7 @@ public final class TransformerUtils {
    * @param benefitCategory the {@link BenefitCategory} (see {@link
    *     BenefitBalanceComponent#getCategory()}) for the {@link BenefitBalanceComponent} that the
    *     new {@link BenefitComponent} should be part of
-   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   * @param financialType the {@link CcwCodebookInterface} to map to {@link
    *     BenefitComponent#getType()}
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
    *     appropriate {@link ExplanationOfBenefit#getBenefitBalance()} entry
@@ -482,7 +482,7 @@ public final class TransformerUtils {
    * {@link ExplanationOfBenefit}.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface to map to {@link
    *     SupportingInformationComponent#getCategory()}
    * @return the newly-added {@link SupportingInformationComponent} entry
    */
@@ -507,9 +507,9 @@ public final class TransformerUtils {
    * based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
-   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   * @param codeSystemVariable the {@link CcwCodebookInterface} to map to the {@link
    *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
    * @param codeValue the value to map to the {@link Coding#getCode()} used in the {@link
    *     SupportingInformationComponent#getCode()}
@@ -536,9 +536,9 @@ public final class TransformerUtils {
    * based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
-   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   * @param codeSystemVariable the {@link CcwCodebookInterface} to map to the {@link
    *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
    * @param codeValue the value to map to the {@link Coding#getCode()} used in the {@link
    *     SupportingInformationComponent#getCode()}
@@ -789,7 +789,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
@@ -824,7 +824,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
@@ -847,7 +847,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
    * @return the output {@link Identifier}
@@ -876,7 +876,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param dateYear the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
@@ -901,7 +901,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
@@ -923,7 +923,7 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
@@ -937,7 +937,7 @@ public final class TransformerUtils {
    * Sets the {@link Quantity} fields related to the unit for the amount: {@link
    * Quantity#getSystem()}, {@link Quantity#getCode()}, and {@link Quantity#getUnit()}.
    *
-   * @param ccwVariable the {@link CcwCodebookVariable} for the unit coding
+   * @param ccwVariable the {@link CcwCodebookInterface} for the unit coding
    * @param unitCode the value to use for {@link Quantity#getCode()}
    * @param rootResource the root FHIR {@link IAnyResource} that is being mapped
    * @param quantity the {@link Quantity} to modify
@@ -966,7 +966,7 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
    *     Coding} to represent the specified input values
@@ -986,7 +986,7 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
    *     Coding} to represent the specified input values
@@ -1001,7 +1001,7 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting (single) {@link
    *     Coding}, wrapped within the resulting {@link CodeableConcept}
    * @return the output {@link CodeableConcept} for the specified input values
@@ -1021,7 +1021,7 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting (single) {@link
    *     Coding}, wrapped within the resulting {@link CodeableConcept}
    * @return the output {@link CodeableConcept} for the specified input values
@@ -1042,7 +1042,7 @@ public final class TransformerUtils {
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
    * @param codingSystem the {@link Coding#getSystem()} to use
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @return the output {@link CodeableConcept} for the specified input values
    */
   private static CodeableConcept createCodeableConceptForFieldId(
@@ -1056,7 +1056,7 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
@@ -1084,7 +1084,7 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
@@ -1094,8 +1094,8 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
-   * @return the public URL at which documentation for the specified {@link CcwCodebookVariable} is
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
+   * @return the public URL at which documentation for the specified {@link CcwCodebookInterface} is
    *     published
    */
   static String calculateVariableReferenceUrl(CcwCodebookInterface ccwVariable) {
@@ -1106,9 +1106,9 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
-   *     specified {@link CcwCodebookVariable}
+   *     specified {@link CcwCodebookInterface}
    */
   static CodeableConcept createAdjudicationCategory(CcwCodebookInterface ccwVariable) {
     /*
@@ -1128,7 +1128,7 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     AdjudicationComponent} will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param reasonCode the value to use for the {@link AdjudicationComponent#getReason()}'s {@link
    *     Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link AdjudicationComponent} for the specified input values
@@ -1152,11 +1152,11 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the FHIR {@link Coding#getCode()} value to determine a corresponding {@link
    *     Coding#getDisplay()} value for
    * @return the {@link Coding#getDisplay()} value to use for the specified {@link
-   *     CcwCodebookVariable} and {@link Coding#getCode()}, or {@link Optional#empty()} if no
+   *     CcwCodebookInterface} and {@link Coding#getCode()}, or {@link Optional#empty()} if no
    *     matching display value could be determined
    */
   private static Optional<String> calculateCodingDisplay(
