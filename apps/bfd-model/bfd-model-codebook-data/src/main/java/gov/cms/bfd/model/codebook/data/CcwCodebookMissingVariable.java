@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
-  MBI_EFFCTV_DT,
-  /**
+    /**
    * The {@code MBI_EFFCTV_DT}
    *
    * <ul>
@@ -30,7 +29,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    *       <p>THE EFFECTIVE DATE WHEN AN MBI IS ASSIGNED TO A BENEFICIARY.
    * </ul>
    */
-  MBI_END_DT,
+  MBI_EFFCTV_DT,
   /**
    * The {@code MBI_END_DT}
    *
@@ -50,7 +49,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    *       BEING COMPROMISED OR INVOLVED IN A CROSS REFERENCE ACTION.
    * </ul>
    */
-  BENE_LINK_KEY_NUM,
+  MBI_END_DT,
   /**
    * The {@code BENE_LINK_KEY_NUM}
    *
@@ -73,7 +72,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    *       <p>CLAIM BILLS THAT BELONG TO A SINGLE BENEFICIARY.
    * </ul>
    */
-  CARR_CLM_CNTL_NUM,
+  BENE_LINK_KEY_NUM,
   /**
    * The {@code CARR_CLM_CNTL_NUM}
    *
@@ -94,7 +93,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    *       <p>Unique control number assigned by a carrier to a non-institutional claim.
    * </ul>
    */
-  FI_DOC_CLM_CNTL_NUM,
+  CARR_CLM_CNTL_NUM,
   /**
    * The {@code FI_DOC_CLM_CNTL_NUM}
    *
@@ -112,11 +111,11 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    *   <li><strong>Value Format:</strong> 0-12
    *   <li><strong>Coded Values?:</strong> false
    *   <li><strong>Comment:</strong>
-   *       <p>Unique control number assigned by an ntermediary to an institutional claim.
+   *       <p>Unique control number assigned by an intermediary to an institutional claim.
    * </ul>
    */
-  FI_ORIG_CLM_CNTL_NUM;
-  /**
+  FI_DOC_CLM_CNTL_NUM,
+   /**
    * The {@code FI_ORIG_CLM_CNTL_NUM}
    *
    * <ul>
@@ -137,6 +136,8 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    *       <p>claims, representing the ICN of the original transaction now being adjusted.
    * </ul>
    */
+  FI_ORIG_CLM_CNTL_NUM;
+ 
   private Map<String, Variable> VARIABLES_BY_ID = buildVariablesMappedById();
 
   public static Map<String, Variable> buildVariablesMappedById() {
