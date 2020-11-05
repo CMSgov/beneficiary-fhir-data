@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
-    /**
+  /**
    * The {@code MBI_EFFCTV_DT}
    *
    * <ul>
@@ -115,7 +115,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    * </ul>
    */
   FI_DOC_CLM_CNTL_NUM,
-   /**
+  /**
    * The {@code FI_ORIG_CLM_CNTL_NUM}
    *
    * <ul>
@@ -137,7 +137,7 @@ public enum CcwCodebookMissingVariable implements CcwCodebookInterface {
    * </ul>
    */
   FI_ORIG_CLM_CNTL_NUM;
- 
+
   private Map<String, Variable> VARIABLES_BY_ID = buildVariablesMappedById();
 
   public static Map<String, Variable> buildVariablesMappedById() {
