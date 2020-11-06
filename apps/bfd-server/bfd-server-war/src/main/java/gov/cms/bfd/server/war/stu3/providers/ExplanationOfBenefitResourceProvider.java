@@ -239,6 +239,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
                 .toString());
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
     operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
+    operation.setOption(
         "service-date", Boolean.toString(serviceDate != null && !serviceDate.isEmpty()));
     operation.publishOperationName();
 

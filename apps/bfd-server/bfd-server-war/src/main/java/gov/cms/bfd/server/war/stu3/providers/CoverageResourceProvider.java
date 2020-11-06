@@ -180,6 +180,8 @@ public final class CoverageResourceProvider implements IResourceProvider {
     Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
     operation.setOption("by", "beneficiary");
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
 
     return TransformerUtils.createBundle(

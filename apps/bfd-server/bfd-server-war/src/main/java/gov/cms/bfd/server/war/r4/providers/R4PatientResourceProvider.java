@@ -235,6 +235,8 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     operation.setOption("by", "id");
     operation.setOption(
         "IncludeIdentifiers", returnIncludeIdentifiersValues(requestDetails).toString());
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
 
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
@@ -501,6 +503,8 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
     operation.setOption("by", "identifier");
     operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
 
     List<IBaseResource> patients;
