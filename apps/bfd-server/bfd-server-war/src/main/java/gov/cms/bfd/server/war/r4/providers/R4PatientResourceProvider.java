@@ -86,7 +86,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param loadedFilterManager the {@link R4LoadedFilterManager} to use */
+  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
