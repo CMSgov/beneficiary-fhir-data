@@ -227,6 +227,16 @@ public final class R4PatientResourceProvider implements IResourceProvider {
       }
     }
 
+    /*
+     * Publish the operation name. Note: This is a bit later than we'd normally do this, as we need
+     * to override the operation name that was published by the possible call to read(...), above.
+     */
+    Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
+    operation.setOption("by", "id");
+    operation.setOption(
+        "IncludeIdentifiers", returnIncludeIdentifiersValues(requestDetails).toString());
+    operation.publishOperationName();
+
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
