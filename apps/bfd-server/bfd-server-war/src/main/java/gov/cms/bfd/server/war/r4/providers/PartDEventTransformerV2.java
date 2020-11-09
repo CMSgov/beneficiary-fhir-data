@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
-final class PartDEventTransformer {
+final class PartDEventTransformerV2 {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link PartDEvent} to transform
@@ -32,7 +32,7 @@ final class PartDEventTransformer {
   static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
     Timer.Context timer =
         metricRegistry
-            .timer(MetricRegistry.name(PartDEventTransformer.class.getSimpleName(), "transform"))
+            .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof PartDEvent)) throw new BadCodeMonkeyException();

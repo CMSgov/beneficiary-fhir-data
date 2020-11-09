@@ -26,7 +26,7 @@ public enum ClaimType {
       PartDEvent.class,
       PartDEvent_.eventId,
       PartDEvent_.beneficiaryId,
-      PartDEventTransformer::transform);
+      PartDEventTransformerV2::transform);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;
