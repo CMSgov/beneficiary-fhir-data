@@ -55,9 +55,13 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
@@ -66,6 +70,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -511,24 +516,18 @@ public final class TransformerUtilsV2 {
     return createCodeableConcept(rootResource, ccwVariable, codeOptional);
   }
 
-  /**
-   * Unlike {@link #createCodeableConcept(IAnyResource, CcwCodebookVariable, Optional)}, this method
-   * creates a {@link CodeableConcept} that's intended for use as a field ID/discriminator: the
-   * {@link Variable#getId()} will be used for the {@link Coding#getCode()}, rather than the {@link
-   * Coding#getSystem()}.
-   *
-   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
-   *     CodeableConcept} will be contained in
-   * @param codingSystem the {@link Coding#getSystem()} to use
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
-   * @return the output {@link CodeableConcept} for the specified input values
-   */
   private static CodeableConcept createCodeableConceptForFieldId(
       IAnyResource rootResource, String codingSystem, CcwCodebookVariable ccwVariable) {
     String code = calculateVariableReferenceUrl(ccwVariable);
-    Coding coding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
+    
+    Coding caringCoding = new Coding().setCode("info").setSystem("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType").setDisplay("Information");
+    Coding cmsBBcoding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
+    
+    CodeableConcept categoryCodeableConcept = new CodeableConcept();
+    categoryCodeableConcept.addCoding(caringCoding);
+    categoryCodeableConcept.addCoding(cmsBBcoding);
 
-    return new CodeableConcept().addCoding(coding);
+    return categoryCodeableConcept;
   }
 
   /**
@@ -1362,4 +1361,335 @@ public final class TransformerUtilsV2 {
         Coverage.class.getSimpleName(),
         String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
   }
+  
+  /**
+   * @param eob the {@link ExplanationOfBenefit} to extract the claim type from
+   * @return the {@link ClaimType}
+   */
+  static ClaimType getClaimType(ExplanationOfBenefit eob) {
+    String type =
+        eob.getType().getCoding().stream()
+            .filter(c -> c.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE))
+            .findFirst()
+            .get()
+            .getCode();
+    return ClaimType.valueOf(type);    
+  }
+  
+  /**
+   * Transforms the common group level header fields between all claim types
+   *
+   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param claimId CLM_ID
+   * @param beneficiaryId BENE_ID
+   * @param claimType {@link ClaimType} to process
+   * @param claimGroupId CLM_GRP_ID
+   * @param coverageType {@link MedicareSegment}
+   * @param dateFrom CLM_FROM_DT
+   * @param dateThrough CLM_THRU_DT
+   * @param paymentAmount CLM_PMT_AMT
+   * @param finalAction FINAL_ACTION
+   */
+  static void mapEobCommonClaimHeaderData(
+      ExplanationOfBenefit eob,
+      String claimId,
+      String beneficiaryId,
+      ClaimType claimType,
+      String claimGroupId,
+      MedicareSegment coverageType,
+      Optional<LocalDate> dateFrom,
+      Optional<LocalDate> dateThrough,
+      Optional<BigDecimal> paymentAmount,
+      char finalAction) {
+
+    eob.setId(buildEobId(claimType, claimId));
+
+    if (claimType.equals(ClaimType.PDE))
+      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId));
+    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId));
+
+    eob.addIdentifier()
+        .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
+        .setValue(claimGroupId);
+
+    // eob.getInsurance().setCoverage(referenceCoverage(beneficiaryId, coverageType));
+
+    eob.addInsurance().setCoverage(referenceCoverage(beneficiaryId, coverageType));
+
+    eob.setPatient(referencePatient(beneficiaryId));
+    switch (finalAction) {
+      case 'F':
+        eob.setStatus(ExplanationOfBenefitStatus.ACTIVE);
+        break;
+      case 'N':
+        eob.setStatus(ExplanationOfBenefitStatus.CANCELLED);
+        break;
+      default:
+        // unknown final action value
+        throw new BadCodeMonkeyException();
+    }
+
+    if (dateFrom.isPresent()) {
+      validatePeriodDates(dateFrom, dateThrough);
+      setPeriodStart(eob.getBillablePeriod(), dateFrom.get());
+      setPeriodEnd(eob.getBillablePeriod(), dateThrough.get());
+    }
+
+    if (paymentAmount.isPresent()) {
+      eob.getPayment().setAmount(createMoney(paymentAmount));
+    }
+  }
+  
+  /**
+   * @param amountValue the value to use for {@link Money#getValue()}
+   * @return a new {@link Money} instance, with the specified {@link Money#getValue()}
+   */
+  static Money createMoney(Optional<? extends Number> amountValue) {
+    if (!amountValue.isPresent()) throw new IllegalArgumentException();
+
+    Money money = new Money();
+    // TO-DO
+    // money.setSystem(TransformerConstants.CODING_MONEY);
+    // money.setCode(TransformerConstants.CODED_MONEY_USD);
+
+    if (amountValue.get() instanceof BigDecimal) money.setValue((BigDecimal) amountValue.get());
+    else throw new BadCodeMonkeyException();
+
+    return money;
+  }
+
+  /**
+   * @param amountValue the value to use for {@link Money#getValue()}
+   * @return a new {@link Money} instance, with the specified {@link Money#getValue()}
+   */
+  static Money createMoney(Number amountValue) {
+    return createMoney(Optional.of(amountValue));
+  }
+  
+  /**
+   * Ensures that the specified {@link ExplanationOfBenefit} has the specified {@link
+   * CareTeamComponent}, and links the specified {@link ItemComponent} to that {@link
+   * CareTeamComponent} (via {@link ItemComponent#addCareTeamLinkId(int)}).
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param eobItem the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param practitionerIdSystem the {@link Identifier#getSystem()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param practitionerIdValue the {@link Identifier#getValue()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param careTeamRole the {@link ClaimCareteamrole} to use for the {@link
+   *     CareTeamComponent#getRole()}
+   * @return the {@link CareTeamComponent} that was created/linked
+   */
+  static CareTeamComponent addCareTeamPractitioner(
+      ExplanationOfBenefit eob,
+      ItemComponent eobItem,
+      String practitionerIdSystem,
+      String practitionerIdValue,
+      ClaimCareteamrole careTeamRole) {
+    // Try to find a matching pre-existing entry.
+    CareTeamComponent careTeamEntry =
+        eob.getCareTeam().stream()
+            .filter(ctc -> ctc.getProvider().hasIdentifier())
+            .filter(
+                ctc ->
+                    practitionerIdSystem.equals(ctc.getProvider().getIdentifier().getSystem())
+                        && practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
+            .filter(ctc -> ctc.hasRole())
+            .filter(
+                ctc ->
+                    careTeamRole.toCode().equals(ctc.getRole().getCodingFirstRep().getCode())
+                        && careTeamRole
+                            .getSystem()
+                            .equals(ctc.getRole().getCodingFirstRep().getSystem()))
+            .findAny()
+            .orElse(null);
+
+    // If no match was found, add one to the EOB.
+    if (careTeamEntry == null) {
+      careTeamEntry = eob.addCareTeam();
+      careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
+      careTeamEntry.setProvider(
+          createIdentifierReference(practitionerIdSystem, practitionerIdValue));
+
+      CodeableConcept careTeamRoleConcept =
+          createCodeableConcept(ClaimCareteamrole.OTHER.getSystem(), careTeamRole.toCode());
+      careTeamRoleConcept.getCodingFirstRep().setDisplay(careTeamRole.getDisplay());
+      careTeamEntry.setRole(careTeamRoleConcept);
+    }
+
+    // care team entry is at eob level so no need to create item link id
+    if (eobItem == null) {
+      return careTeamEntry;
+    }
+
+    // REDONE for R4: Link the EOB.item to the care team entry (if it isn't already).
+    if (!eobItem.getCareTeamSequence().contains(careTeamEntry.getSequence())) {
+      eobItem.addCareTeamSequence(careTeamEntry.getSequence());
+    }
+
+    return careTeamEntry;
+  }
+
+  /**
+   * Returns a new {@link SupportingInformationComponent} that has been added to the specified
+   * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
+   * CcwCodebookVariable)}, this also sets the {@link SupportingInformationComponent#getCode()}
+   * based on the values provided.
+   *
+   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   *     SupportingInformationComponent#getCategory()}
+   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
+   * @param codeValue the value to map to the {@link Coding#getCode()} used in the {@link
+   *     SupportingInformationComponent#getCode()}
+   * @return the newly-added {@link SupportingInformationComponent} entry
+   */
+  static SupportingInformationComponent addInformationWithCode(
+      ExplanationOfBenefit eob,
+      CcwCodebookVariable categoryVariable,
+      CcwCodebookVariable codeSystemVariable,
+      Optional<?> codeValue) {
+    SupportingInformationComponent infoComponent = addInformation(eob, categoryVariable);
+
+    CodeableConcept infoCode =
+        new CodeableConcept().addCoding(createCoding(eob, codeSystemVariable, codeValue));
+    infoComponent.setCode(infoCode);
+
+    return infoComponent;
+  }
+  
+  /**
+   * Returns a new {@link SupportingInformationComponent} that has been added to the specified
+   * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
+   * CcwCodebookVariable)}, this also sets the {@link SupportingInformationComponent#getCode()}
+   * based on the values provided.
+   *
+   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   *     SupportingInformationComponent#getCategory()}
+   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
+   * @param codeValue the value to map to the {@link Coding#getCode()} used in the {@link
+   *     SupportingInformationComponent#getCode()}
+   * @return the newly-added {@link SupportingInformationComponent} entry
+   */
+  static SupportingInformationComponent addInformationWithCode(
+      ExplanationOfBenefit eob,
+      CcwCodebookVariable categoryVariable,
+      CcwCodebookVariable codeSystemVariable,
+      Object codeValue) {
+    return addInformationWithCode(
+        eob, categoryVariable, codeSystemVariable, Optional.of(codeValue));
+  }
+
+  
+  /**
+   * Returns a new {@link SupportingInformationComponent} that has been added to the specified
+   * {@link ExplanationOfBenefit}.
+   *
+   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   *     SupportingInformationComponent#getCategory()}
+   * @return the newly-added {@link SupportingInformationComponent} entry
+   */
+  static SupportingInformationComponent addInformation(
+      ExplanationOfBenefit eob, CcwCodebookVariable categoryVariable) {
+    int maxSequence =
+        eob.getSupportingInfo().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
+
+    SupportingInformationComponent infoComponent = new SupportingInformationComponent();
+    infoComponent.setSequence(maxSequence + 1);
+    infoComponent.setCategory(
+        createCodeableConceptForFieldId(
+            eob, TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY, categoryVariable));
+    eob.getSupportingInfo().add(infoComponent);
+
+    return infoComponent;
+  }
+
+  /**
+   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimId the <code>claimId</code> field value (e.g. from {@link
+   *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
+   * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
+   *     </code> value
+   */
+  public static String buildEobId(ClaimType claimType, String claimId) {
+    return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
+  }
+
+  /**
+   * maps a blue button claim type to a FHIR claim type
+   *
+   * @param eobType the {@link CodeableConcept} that will get remapped
+   * @param blueButtonClaimType the blue button {@link ClaimType} we are mapping from
+   * @param ccwNearLineRecordIdCode if present, the blue button near line id code {@link
+   *     Optional}&lt;{@link Character}&gt; gets remapped to a ccw record id code
+   * @param ccwClaimTypeCode if present, the blue button claim type code {@link Optional}&lt;{@link
+   *     String}&gt; gets remapped to a nch claim type code
+   */
+  static void mapEobType(
+      ExplanationOfBenefit eob,
+      ClaimType blueButtonClaimType,
+      Optional<Character> ccwNearLineRecordIdCode,
+      Optional<String> ccwClaimTypeCode) {
+
+    // map blue button claim type code into a nch claim type
+    if (ccwClaimTypeCode.isPresent()) {
+      eob.getType()
+          .addCoding(createCoding(eob, CcwCodebookVariable.NCH_CLM_TYPE_CD, ccwClaimTypeCode));
+    }
+
+    // This Coding MUST always be present as it's the only one we can definitely map
+    // for all 8 of our claim types.
+    eob.getType()
+        .addCoding()
+        .setSystem(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
+        .setCode(blueButtonClaimType.name());
+
+    // Map a Coding for FHIR's ClaimType coding system, if we can.
+    org.hl7.fhir.r4.model.codesystems.ClaimType fhirClaimType;
+    switch (blueButtonClaimType) {
+      
+
+      case PDE:
+        fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.PHARMACY;
+        break;     
+
+      default:
+        // unknown claim type
+        throw new BadCodeMonkeyException();
+    }
+    if (fhirClaimType != null)
+      eob.getType()
+          .addCoding(
+              new Coding(
+                  fhirClaimType.getSystem(), fhirClaimType.toCode(), fhirClaimType.getDisplay()));
+
+    // map blue button near line record id to a ccw record id code
+    if (ccwNearLineRecordIdCode.isPresent()) {
+      eob.getType()
+          .addCoding(
+              createCoding(
+                  eob, CcwCodebookVariable.NCH_NEAR_LINE_REC_IDENT_CD, ccwNearLineRecordIdCode));
+    }
+  }
+  
+  /**
+   * @param eob the {@link ExplanationOfBenefit} to extract the id from
+   * @return the <code>claimId</code> field value (e.g. from {@link CarrierClaim#getClaimId()})
+   */
+  static String getUnprefixedClaimId(ExplanationOfBenefit eob) {
+    for (Identifier i : eob.getIdentifier()) {
+      if (i.getSystem().contains("clm_id") || i.getSystem().contains("pde_id")) {
+        return i.getValue();
+      }
+    }
+
+    throw new BadCodeMonkeyException("A claim ID was expected but none was found.");
+  }
+
 }
