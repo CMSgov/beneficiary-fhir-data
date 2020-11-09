@@ -33,8 +33,6 @@
     - import_role:
         name: install_jenkins
     - import_role:
-        name: install_docker
-    - import_role:
         name: conf_jenkins
     - import_role:
         name: cloudwatch-agent-instrumented

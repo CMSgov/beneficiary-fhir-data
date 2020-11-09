@@ -12,6 +12,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2.CurrencyIdentifier;
@@ -1328,5 +1329,37 @@ public final class TransformerUtilsV2 {
       // Remove _count parameter from the current request details
       requestDetails.setParameters(params);
     }
+  }
+
+  /**
+   * @param beneficiaryPatientId the {@link #TransformerConstants.CODING_SYSTEM_CCW_BENE_ID} ID
+   *     value for the {@link Coverage#getBeneficiary()} value to match
+   * @param coverageType the {@link MedicareSegment} value to match
+   * @return a {@link Reference} to the {@link Coverage} resource where {@link Coverage#getPlan()}
+   *     matches {@link #COVERAGE_PLAN} and the other parameters specified also match
+   */
+  static Reference referenceCoverage(String beneficiaryPatientId, MedicareSegment coverageType) {
+    return new Reference(buildCoverageId(coverageType, beneficiaryPatientId));
+  }
+
+  /**
+   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
+   * @param beneficiary the {@link Beneficiary} to compute a {@link Coverage#getId()} for
+   * @return the {@link Coverage#getId()} value to use for the specified values
+   */
+  public static IdDt buildCoverageId(MedicareSegment medicareSegment, Beneficiary beneficiary) {
+    return buildCoverageId(medicareSegment, beneficiary.getBeneficiaryId());
+  }
+
+  /**
+   * @param medicareSegment the {@link MedicareSegment} to compute a {@link Coverage#getId()} for
+   * @param beneficiaryId the {@link Beneficiary#getBeneficiaryId()} value to compute a {@link
+   *     Coverage#getId()} for
+   * @return the {@link Coverage#getId()} value to use for the specified values
+   */
+  public static IdDt buildCoverageId(MedicareSegment medicareSegment, String beneficiaryId) {
+    return new IdDt(
+        Coverage.class.getSimpleName(),
+        String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
   }
 }
