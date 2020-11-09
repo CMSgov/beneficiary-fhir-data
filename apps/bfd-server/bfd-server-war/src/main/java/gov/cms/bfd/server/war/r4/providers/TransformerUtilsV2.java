@@ -1552,7 +1552,7 @@ public final class TransformerUtilsV2 {
         Coverage.class.getSimpleName(),
         String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
   }
-
+  
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
@@ -1673,7 +1673,7 @@ public final class TransformerUtilsV2 {
       eob.getPayment().setAmount(createMoney(paymentAmount));
     }
   }
-
+  
   /**
    * @param amountValue the value to use for {@link Money#getValue()}
    * @return a new {@link Money} instance, with the specified {@link Money#getValue()}
@@ -1701,7 +1701,7 @@ public final class TransformerUtilsV2 {
   static Money createMoney(Number amountValue) {
     return createMoney(Optional.of(amountValue));
   }
-
+  
   /**
    * Ensures that the specified {@link ExplanationOfBenefit} has the specified {@link
    * CareTeamComponent}, and links the specified {@link ItemComponent} to that {@link
@@ -1798,7 +1798,7 @@ public final class TransformerUtilsV2 {
 
     return infoComponent;
   }
-
+  
   /**
    * Returns a new {@link SupportingInformationComponent} that has been added to the specified
    * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
@@ -1949,7 +1949,6 @@ public final class TransformerUtilsV2 {
               eob, CcwCodebookVariable.NCH_NEAR_LINE_REC_IDENT_CD, ccwNearLineRecordIdCode));
     }
   }
-
   /**
    * @param eob the {@link ExplanationOfBenefit} to extract the id from
    * @return the <code>claimId</code> field value (e.g. from {@link CarrierClaim#getClaimId()})
