@@ -238,6 +238,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
                 .collect(Collectors.toList())
                 .toString());
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+    operation.setOption(
+        "service-date", Boolean.toString(serviceDate != null && !serviceDate.isEmpty()));
     operation.publishOperationName();
 
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
