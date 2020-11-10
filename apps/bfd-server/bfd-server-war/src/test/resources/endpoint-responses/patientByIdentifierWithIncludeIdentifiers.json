@@ -189,6 +189,8 @@
       "birthDate" : "1981-03-17",
       "deceasedDateTime" : "1981-03-17",
       "address" : [ {
+        "line" : [ "204 SOUTH ST", "7560 123TH ST", "SURREY", "DAEJEON SI 34867", "COLOMBIA", "SURREY" ],
+        "city" : "PODUNK",
         "state" : "MO",
         "postalCode" : "12345"
       } ]

@@ -51,7 +51,7 @@ public final class PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, false);
   }
 
   /**
@@ -62,11 +62,12 @@ public final class PatientResourceProviderIT {
   @Test
   public void readExistingPatientIncludeIdentifiersTrue() {
     String includeIdentifiersValue = "true";
+    String includeAddressValues = "true";
     boolean expectingHicn = true;
     boolean expectingMbi = true;
 
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        includeIdentifiersValue, expectingHicn, expectingMbi, includeAddressValues);
   }
 
   /**
@@ -79,9 +80,10 @@ public final class PatientResourceProviderIT {
     String includeIdentifiersValue = "hicn,mbi";
     boolean expectingHicn = true;
     boolean expectingMbi = true;
+    String includeAddressValues = "true";
 
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        includeIdentifiersValue, expectingHicn, expectingMbi, includeAddressValues);
   }
 
   /**
@@ -94,9 +96,10 @@ public final class PatientResourceProviderIT {
     String includeIdentifiersValue = "hicn";
     boolean expectingHicn = true;
     boolean expectingMbi = false;
+    String includeAddressValues = "true";
 
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        includeIdentifiersValue, expectingHicn, expectingMbi, includeAddressValues);
   }
 
   /**
@@ -109,9 +112,10 @@ public final class PatientResourceProviderIT {
     String includeIdentifiersValue = "mbi";
     boolean expectingHicn = false;
     boolean expectingMbi = true;
+    String includeAddressValues = "true";
 
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        includeIdentifiersValue, expectingHicn, expectingMbi, includeAddressValues);
   }
 
   /**
@@ -124,9 +128,10 @@ public final class PatientResourceProviderIT {
     String includeIdentifiersValue = "false";
     boolean expectingHicn = false;
     boolean expectingMbi = false;
+    String includeAddressValues = "true";
 
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        includeIdentifiersValue, expectingHicn, expectingMbi, includeAddressValues);
   }
 
   /**
@@ -139,9 +144,10 @@ public final class PatientResourceProviderIT {
     String includeIdentifiersValue = "";
     boolean expectingHicn = false;
     boolean expectingMbi = false;
+    String includeAddressValues = "true";
 
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        includeIdentifiersValue, expectingHicn, expectingMbi, includeAddressValues);
   }
 
   /**
@@ -155,9 +161,10 @@ public final class PatientResourceProviderIT {
     String includeIdentifiersValue = "invalid-identifier-value";
     boolean expectingHicn = false;
     boolean expectingMbi = false;
+    String includeAddressValues = "true";
 
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        includeIdentifiersValue, expectingHicn, expectingMbi, includeAddressValues);
   }
 
   /**
@@ -171,9 +178,10 @@ public final class PatientResourceProviderIT {
     String includeIdentifiersValue = "mbi,invalid-identifier-value";
     boolean expectingHicn = false;
     boolean expectingMbi = false;
+    String includeAddressValues = "true";
 
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        includeIdentifiersValue, expectingHicn, expectingMbi, includeAddressValues);
   }
 
   /**
@@ -186,13 +194,16 @@ public final class PatientResourceProviderIT {
    * @param expectingMbi true if expecting a MBI
    */
   public void assertExistingPatientIncludeIdentifiersExpected(
-      String includeIdentifiersValue, boolean expectingHicn, boolean expectingMbi) {
+      String includeIdentifiersValue,
+      boolean expectingHicn,
+      boolean expectingMbi,
+      String includeAddressValues) {
 
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(includeIdentifiersValue);
+    extraParamsInterceptor.setIncludeIdentifiers(includeIdentifiersValue, includeAddressValues);
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -205,7 +216,7 @@ public final class PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, true);
 
     /*
      * Ensure the unhashed values for HICN and MBI are present.
@@ -243,7 +254,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
+    extraParamsInterceptor.setIncludeIdentifiers("true", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -256,7 +267,7 @@ public final class PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, true);
 
     /*
      * Ensure the unhashed values for HICN and MBI are present.
@@ -329,7 +340,7 @@ public final class PatientResourceProviderIT {
 
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult, false);
   }
 
   /**
@@ -344,7 +355,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
+    extraParamsInterceptor.setIncludeIdentifiers("true", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -397,7 +408,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
+    extraParamsInterceptor.setIncludeIdentifiers("false", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -541,7 +552,7 @@ public final class PatientResourceProviderIT {
 
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult, false);
   }
 
   /**
@@ -556,7 +567,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
+    extraParamsInterceptor.setIncludeIdentifiers("true", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -746,7 +757,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
+    extraParamsInterceptor.setIncludeIdentifiers("false", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -823,7 +834,7 @@ public final class PatientResourceProviderIT {
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult, false);
 
     /*
      * Verify that only the first and last paging links exist, since there should
@@ -922,7 +933,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
+    extraParamsInterceptor.setIncludeIdentifiers("true", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     loadedRecords.stream()
@@ -1019,7 +1030,7 @@ public final class PatientResourceProviderIT {
 
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult, false);
 
     String mbiHashIdentifier =
         patientFromSearchResult.getIdentifier().stream()
@@ -1045,7 +1056,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
+    extraParamsInterceptor.setIncludeIdentifiers("true", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -1343,7 +1354,7 @@ public final class PatientResourceProviderIT {
               .findAny()
               .get();
       Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-      BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+      BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult, false);
     }
   }
 
@@ -1359,7 +1370,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
+    extraParamsInterceptor.setIncludeIdentifiers("false", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     Beneficiary beneficiary =
@@ -1438,7 +1449,7 @@ public final class PatientResourceProviderIT {
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult, false);
 
     /*
      * Verify that only the first and last paging links exist, since there should
@@ -1539,7 +1550,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
+    extraParamsInterceptor.setIncludeIdentifiers("true", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     loadedRecords.stream()
@@ -1625,7 +1636,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
+    extraParamsInterceptor.setIncludeIdentifiers("true", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     // Should return a single match
@@ -1774,7 +1785,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
+    extraParamsInterceptor.setIncludeIdentifiers("false", "true");
     fhirClient.registerInterceptor(extraParamsInterceptor);
 
     // Should return a single match

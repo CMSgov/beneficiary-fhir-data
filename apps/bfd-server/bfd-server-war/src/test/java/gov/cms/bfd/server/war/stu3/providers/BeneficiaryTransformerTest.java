@@ -32,7 +32,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Arrays.asList("false"), Boolean.TRUE);
-    assertMatches(beneficiary, patient);
+    assertMatches(beneficiary, patient, true);
 
     Assert.assertEquals("Number of identifiers should be 2", 2, patient.getIdentifier().size());
 
@@ -63,7 +63,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Arrays.asList("hicn", "mbi"), Boolean.TRUE);
-    assertMatches(beneficiary, patient);
+    assertMatches(beneficiary, patient, true);
 
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
 
@@ -105,7 +105,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Arrays.asList("true"), Boolean.TRUE);
-    assertMatches(beneficiary, patient);
+    assertMatches(beneficiary, patient, true);
 
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
 
@@ -147,7 +147,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Arrays.asList("hicn"), Boolean.TRUE);
-    assertMatches(beneficiary, patient);
+    assertMatches(beneficiary, patient, true);
 
     Assert.assertEquals("Number of identifiers should be 6", 6, patient.getIdentifier().size());
 
@@ -195,7 +195,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Arrays.asList("mbi"), Boolean.TRUE);
-    assertMatches(beneficiary, patient);
+    assertMatches(beneficiary, patient, true);
 
     Assert.assertEquals("Number of identifiers should be 4", 4, patient.getIdentifier().size());
 
@@ -257,13 +257,13 @@ public final class BeneficiaryTransformerTest {
     Patient patientWithLastUpdated =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.TRUE);
-    assertMatches(beneficiary, patientWithLastUpdated);
+    assertMatches(beneficiary, patientWithLastUpdated, true);
 
     beneficiary.setLastUpdated(null);
     Patient patientWithoutLastUpdated =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.TRUE);
-    assertMatches(beneficiary, patientWithoutLastUpdated);
+    assertMatches(beneficiary, patientWithoutLastUpdated, true);
 
     Patient patient =
         BeneficiaryTransformer.transform(
@@ -285,7 +285,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.TRUE);
-    assertMatches(beneficiary, patient);
+    assertMatches(beneficiary, patient, true);
     patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.FALSE);
@@ -357,7 +357,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Arrays.asList(""), Boolean.TRUE);
-    assertMatches(beneficiary, patient);
+    assertMatches(beneficiary, patient, true);
     patient =
         BeneficiaryTransformer.transform(
             new MetricRegistry(), beneficiary, Arrays.asList(""), Boolean.FALSE);
@@ -389,37 +389,10 @@ public final class BeneficiaryTransformerTest {
    * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
    * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
    */
-  static void assertMatches(Beneficiary beneficiary, Patient patient) {
+  static void assertMatches(Beneficiary beneficiary, Patient patient, Boolean withAddressFields) {
     TransformerTestUtils.assertNoEncodedOptionals(patient);
 
     Assert.assertEquals(beneficiary.getBeneficiaryId(), patient.getIdElement().getIdPart());
-    Assert.assertEquals(1, patient.getAddress().size());
-    // assert address fields etc.
-    Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
-    // assert CountyCode is no longer mapped
-    Assert.assertNull(patient.getAddress().get(0).getDistrict());
-    Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
-    Assert.assertEquals(
-        beneficiary.getDerivedCityName().orElse(null), patient.getAddress().get(0).getCity());
-
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress1().orElse(""),
-        patient.getAddress().get(0).getLine().get(0).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress2().orElse(""),
-        patient.getAddress().get(0).getLine().get(1).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress3().orElse(""),
-        patient.getAddress().get(0).getLine().get(2).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress4().orElse(""),
-        patient.getAddress().get(0).getLine().get(3).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress5().orElse(""),
-        patient.getAddress().get(0).getLine().get(4).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress6().orElse(""),
-        patient.getAddress().get(0).getLine().get(5).getValueNotNull());
 
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
@@ -447,5 +420,61 @@ public final class BeneficiaryTransformerTest {
           CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), patient);
 
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), patient);
+
+    if (withAddressFields) {
+      assertMatchesWithAddress(beneficiary, patient);
+    } else {
+      assertMatchesWithoutAddress(beneficiary, patient);
+    }
+  }
+  /**
+   * Verifies that the {@link Patient} "looks like" it should, if it were produced from the
+   * specified {@link Beneficiary}.
+   *
+   * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
+   * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
+   */
+  static void assertMatchesWithAddress(Beneficiary beneficiary, Patient patient) {
+    Assert.assertEquals(1, patient.getAddress().size());
+    // assert address fields etc.
+    Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+    // assert CountyCode is no longer mapped
+    Assert.assertNull(patient.getAddress().get(0).getDistrict());
+    Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+    Assert.assertEquals(
+        beneficiary.getDerivedCityName().orElse(null), patient.getAddress().get(0).getCity());
+
+    Assert.assertEquals(
+        beneficiary.getDerivedMailingAddress1().orElse(""),
+        patient.getAddress().get(0).getLine().get(0).getValueNotNull());
+    Assert.assertEquals(
+        beneficiary.getDerivedMailingAddress2().orElse(""),
+        patient.getAddress().get(0).getLine().get(1).getValueNotNull());
+    Assert.assertEquals(
+        beneficiary.getDerivedMailingAddress3().orElse(""),
+        patient.getAddress().get(0).getLine().get(2).getValueNotNull());
+    Assert.assertEquals(
+        beneficiary.getDerivedMailingAddress4().orElse(""),
+        patient.getAddress().get(0).getLine().get(3).getValueNotNull());
+    Assert.assertEquals(
+        beneficiary.getDerivedMailingAddress5().orElse(""),
+        patient.getAddress().get(0).getLine().get(4).getValueNotNull());
+    Assert.assertEquals(
+        beneficiary.getDerivedMailingAddress6().orElse(""),
+        patient.getAddress().get(0).getLine().get(5).getValueNotNull());
+  }
+
+  /**
+   * Verifies that the {@link Patient} "looks like" it should, if it were produced from the
+   * specified {@link Beneficiary}.
+   *
+   * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
+   * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
+   */
+  static void assertMatchesWithoutAddress(Beneficiary beneficiary, Patient patient) {
+    Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+    // assert CountyCode is no longer mapped
+    Assert.assertNull(patient.getAddress().get(0).getDistrict());
+    Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
   }
 }
