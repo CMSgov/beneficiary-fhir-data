@@ -261,6 +261,11 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
+    boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
+    if (hasAnotherPage) {
+      matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
+      paging = new PatientLinkBuilder(paging, hasAnotherPage);
+    }
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
@@ -339,16 +344,16 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
-          queryBeneficiaryIds(contractMonthField, contractCode, paging)
-              .setMaxResults(paging.getPageSize())
-              .getResultList();
+          queryBeneficiaryIds(contractMonthField, contractCode, paging).getResultList();
 
       // Fetch the benes using the ids
-      return queryBeneficiariesByIds(ids, includedIdentifiers).getResultList();
+      return queryBeneficiariesByIds(ids, includedIdentifiers)
+          .setMaxResults(paging.getPageSize() + 1)
+          .getResultList();
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
-          .setMaxResults(paging.getPageSize())
+          .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
   }
