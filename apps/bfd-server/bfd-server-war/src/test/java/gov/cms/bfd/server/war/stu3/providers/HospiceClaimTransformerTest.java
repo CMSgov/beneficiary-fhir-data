@@ -75,11 +75,6 @@ public final class HospiceClaimTransformerTest {
         claim.getPatientStatusCd(),
         eob);
 
-    TransformerTestUtils.assertDateEquals(
-        claim.getClaimHospiceStartDate().get(), eob.getHospitalization().getStartElement());
-    TransformerTestUtils.assertDateEquals(
-        claim.getBeneficiaryDischargeDate().get(), eob.getHospitalization().getEndElement());
-
     // Test to ensure common group fields between Inpatient, Outpatient HHA, Hospice
     // and SNF match
     TransformerTestUtils.assertEobCommonGroupInpOutHHAHospiceSNFEquals(
@@ -111,11 +106,6 @@ public final class HospiceClaimTransformerTest {
     ItemComponent eobItem0 = eob.getItem().get(0);
     HospiceClaimLine claimLine1 = claim.getLines().get(0);
     Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
-
-    TransformerTestUtils.assertExtensionQuantityEquals(
-        CcwCodebookVariable.BENE_HOSPC_PRD_CNT,
-        claim.getHospicePeriodCount(),
-        eob.getHospitalization());
 
     Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 

@@ -5,6 +5,11 @@
     "lastUpdated" : "IGNORED_FIELD"
   },
   "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+    "valueQuantity" : {
+      "value" : 2
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -147,7 +152,7 @@
       } ]
     },
     "timingPeriod" : {
-      "start" : "2015-06-29"
+      "end" : "2015-06-29"
     }
   }, {
     "sequence" : 5,
@@ -287,16 +292,6 @@
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }
-  },
-  "hospitalization" : {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
-      "valueQuantity" : {
-        "value" : 2
-      }
-    } ],
-    "start" : "2014-07-06",
-    "end" : "2015-06-29"
   },
   "item" : [ {
     "extension" : [ {

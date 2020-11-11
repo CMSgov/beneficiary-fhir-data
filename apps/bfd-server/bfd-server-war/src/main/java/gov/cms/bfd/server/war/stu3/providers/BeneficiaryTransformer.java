@@ -54,9 +54,9 @@ import org.hl7.fhir.dstu3.model.Period;
  * fields to the FHIR export - and your customers will receive for the first time - the following
  * fields:
  *
- * <p>CLM_UNCOMPD_CARE_PMT_AMT EFCTV_BGN_DT EFCTV_END_DT BENE_LINK_KEY CLM_CNTL_NUM
- * FI_DOC_CLM_CNTL_NUM FI_ORIG_CLM_CNTL_NUM TAX_NUM BENE_DEATH_DT NCH_WKLY_PROC_DT REV_CNTR_DT
- * IME_OP_CLM_VAL_AMT DSH_OP_CLM_VAL_AMT CLM_HOSPC_START_DT_ID NCH_BENE_DSCHRG_DT
+ * <p>CLM_UNCOMPD_CARE_PMT_AMT EFCTV_BGN_DT EFCTV_END_DT CLM_CNTL_NUM FI_DOC_CLM_CNTL_NUM
+ * FI_ORIG_CLM_CNTL_NUM BENE_DEATH_DT NCH_WKLY_PROC_DT REV_CNTR_DT IME_OP_CLM_VAL_AMT
+ * DSH_OP_CLM_VAL_AMT CLM_HOSPC_START_DT_ID NCH_BENE_DSCHRG_DT
  *
  * <p>Note that BB2.0 API will be filtering out all derived line address fields (1-6) and CITY_NAME.
  * Please announce this to your respective customer communities as you see fit. A list of which

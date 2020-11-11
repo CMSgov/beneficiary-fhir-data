@@ -376,6 +376,30 @@
         "display" : "Employer group health plan (EGHP) insurance for an aged beneficiary"
       } ]
     }
+  }, {
+    "sequence" : 10,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
+        "display" : "Claim Hospice Start Date"
+      } ]
+    },
+    "timingPeriod" : {
+      "start" : "2016-01-15"
+    }
+  }, {
+    "sequence" : 11,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_dschrg_dt",
+        "display" : "NCH Beneficiary Discharge Date"
+      } ]
+    },
+    "timingPeriod" : {
+      "end" : "2016-01-27"
+    }
   } ],
   "careTeam" : [ {
     "sequence" : 2,
@@ -661,10 +685,6 @@
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }
-  },
-  "hospitalization" : {
-    "start" : "2016-01-15",
-    "end" : "2016-01-27"
   },
   "item" : [ {
     "extension" : [ {

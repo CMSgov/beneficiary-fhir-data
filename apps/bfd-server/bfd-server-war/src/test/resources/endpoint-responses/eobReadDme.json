@@ -75,12 +75,6 @@
       "value" : "74655592568216"
     }
   }, {
-    "url" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
-    "valueIdentifier" : {
-      "system" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
-      "value" : "01"
-    }
-  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -161,6 +155,7 @@
   "referral" : {
     "reference" : "#1"
   },
+  "disposition" : "01",
   "information" : [ {
     "sequence" : 1,
     "category" : {

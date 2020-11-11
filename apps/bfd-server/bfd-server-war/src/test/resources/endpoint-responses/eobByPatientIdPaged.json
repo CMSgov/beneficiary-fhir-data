@@ -730,12 +730,6 @@
           "value" : "74655592568216"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
-          "value" : "01"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -816,6 +810,7 @@
       "referral" : {
         "reference" : "#1"
       },
+      "disposition" : "01",
       "information" : [ {
         "sequence" : 1,
         "category" : {
@@ -1358,6 +1353,18 @@
             "display" : "Physician referral - The patient was admitted upon the recommendation of a personal physician."
           } ]
         }
+      }, {
+        "sequence" : 7,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
+            "display" : "Claim Hospice Start Date"
+          } ]
+        },
+        "timingPeriod" : {
+          "start" : "2015-06-23"
+        }
       } ],
       "careTeam" : [ {
         "sequence" : 2,
@@ -1448,9 +1455,6 @@
         "coverage" : {
           "reference" : "Coverage/part-b-567834"
         }
-      },
-      "hospitalization" : {
-        "start" : "2015-06-23"
       },
       "item" : [ {
         "extension" : [ {
@@ -1983,6 +1987,30 @@
             "display" : "Employer group health plan (EGHP) insurance for an aged beneficiary"
           } ]
         }
+      }, {
+        "sequence" : 10,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
+            "display" : "Claim Hospice Start Date"
+          } ]
+        },
+        "timingPeriod" : {
+          "start" : "2016-01-15"
+        }
+      }, {
+        "sequence" : 11,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_dschrg_dt",
+            "display" : "NCH Beneficiary Discharge Date"
+          } ]
+        },
+        "timingPeriod" : {
+          "end" : "2016-01-27"
+        }
       } ],
       "careTeam" : [ {
         "sequence" : 2,
@@ -2268,10 +2296,6 @@
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
-      },
-      "hospitalization" : {
-        "start" : "2016-01-15",
-        "end" : "2016-01-27"
       },
       "item" : [ {
         "extension" : [ {
@@ -2672,6 +2696,30 @@
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
+            "display" : "Claim Hospice Start Date"
+          } ]
+        },
+        "timingPeriod" : {
+          "start" : "2013-11-05"
+        }
+      }, {
+        "sequence" : 8,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_dschrg_dt",
+            "display" : "NCH Beneficiary Discharge Date"
+          } ]
+        },
+        "timingPeriod" : {
+          "end" : "2013-12-18"
+        }
+      }, {
+        "sequence" : 9,
+        "category" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
             "code" : "https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty",
             "display" : "NCH Blood Pints Furnished Quantity"
           } ]
@@ -2683,7 +2731,7 @@
           "code" : "[pt_us]"
         }
       }, {
-        "sequence" : 8,
+        "sequence" : 10,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2696,7 +2744,7 @@
           "end" : "2013-11-05"
         }
       }, {
-        "sequence" : 9,
+        "sequence" : 11,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2712,7 +2760,7 @@
           } ]
         }
       }, {
-        "sequence" : 10,
+        "sequence" : 12,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2728,7 +2776,7 @@
           } ]
         }
       }, {
-        "sequence" : 11,
+        "sequence" : 13,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2743,7 +2791,7 @@
           } ]
         }
       }, {
-        "sequence" : 12,
+        "sequence" : 14,
         "category" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -2910,10 +2958,6 @@
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
-      },
-      "hospitalization" : {
-        "start" : "2013-11-05",
-        "end" : "2013-12-18"
       },
       "item" : [ {
         "sequence" : 1,
@@ -3569,12 +3613,6 @@
           "value" : "74655592568216"
         }
       }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
-          "value" : "1"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -3659,6 +3697,7 @@
       "referral" : {
         "reference" : "#1"
       },
+      "disposition" : "1",
       "information" : [ {
         "sequence" : 1,
         "category" : {
@@ -3712,21 +3751,6 @@
             "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
             "code" : "41",
             "display" : "Optometrist"
-          } ]
-        }
-      }, {
-        "sequence" : 3,
-        "provider" : {
-          "identifier" : {
-            "system" : "https://bluebutton.cms.gov/resources/variables/tax_num",
-            "value" : "204299999"
-          }
-        },
-        "role" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/claimcareteamrole",
-            "code" : "primary",
-            "display" : "Primary provider"
           } ]
         }
       } ],
@@ -3830,7 +3854,7 @@
           }
         } ],
         "sequence" : 6,
-        "careTeamLinkId" : [ 2, 3 ],
+        "careTeamLinkId" : [ 2 ],
         "diagnosisLinkId" : [ 5 ],
         "category" : {
           "coding" : [ {
@@ -4053,6 +4077,11 @@
         "lastUpdated" : "IGNORED_FIELD"
       },
       "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
+        "valueQuantity" : {
+          "value" : 2
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
@@ -4195,7 +4224,7 @@
           } ]
         },
         "timingPeriod" : {
-          "start" : "2015-06-29"
+          "end" : "2015-06-29"
         }
       }, {
         "sequence" : 5,
@@ -4335,16 +4364,6 @@
         "coverage" : {
           "reference" : "Coverage/part-a-567834"
         }
-      },
-      "hospitalization" : {
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/resources/variables/bene_hospc_prd_cnt",
-          "valueQuantity" : {
-            "value" : 2
-          }
-        } ],
-        "start" : "2014-07-06",
-        "end" : "2015-06-29"
       },
       "item" : [ {
         "extension" : [ {

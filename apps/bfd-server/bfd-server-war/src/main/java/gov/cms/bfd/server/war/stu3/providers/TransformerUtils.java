@@ -1731,8 +1731,7 @@ public final class TransformerUtils {
     }
 
     // Claim Disposition Code
-    eob.addExtension(
-        createExtensionIdentifier(CcwCodebookVariable.CLM_DISP_CD, claimDispositionCode));
+    eob.setDisposition(claimDispositionCode);
 
     /*
      * Referrals are represented as contained resources, since they share the lifecycle and identity
@@ -2239,19 +2238,25 @@ public final class TransformerUtils {
       Optional<LocalDate> beneficiaryDischargeDate,
       Optional<BigDecimal> utilizedDays) {
 
-    if (claimAdmissionDate.isPresent() || beneficiaryDischargeDate.isPresent()) {
-      TransformerUtils.validatePeriodDates(claimAdmissionDate, beneficiaryDischargeDate);
-      Period period = new Period();
-      if (claimAdmissionDate.isPresent()) {
-        period.setStart(
-            TransformerUtils.convertToDate(claimAdmissionDate.get()), TemporalPrecisionEnum.DAY);
-      }
-      if (beneficiaryDischargeDate.isPresent()) {
-        period.setEnd(
-            TransformerUtils.convertToDate(beneficiaryDischargeDate.get()),
+    if (claimAdmissionDate.isPresent()) {
+      SupportingInformationComponent clmAdmissionDateInfo =
+          TransformerUtils.addInformation(eob, CcwCodebookVariable.CLM_HOSP_START_DT_ID);
+      Period clmAdmissionStartDate = new Period();
+      if (claimAdmissionDate.isPresent())
+        clmAdmissionStartDate.setStart(
+            TransformerUtils.convertToDate((claimAdmissionDate.get())), TemporalPrecisionEnum.DAY);
+      clmAdmissionDateInfo.setTiming(clmAdmissionStartDate);
+    }
+
+    if (beneficiaryDischargeDate.isPresent()) {
+      SupportingInformationComponent clmAdmissionDateInfo =
+          TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_BENE_DSCHRG_DT);
+      Period clmAdmissionEndDate = new Period();
+      if (beneficiaryDischargeDate.isPresent())
+        clmAdmissionEndDate.setEnd(
+            TransformerUtils.convertToDate((beneficiaryDischargeDate.get())),
             TemporalPrecisionEnum.DAY);
-      }
-      eob.setHospitalization(period);
+      clmAdmissionDateInfo.setTiming(clmAdmissionEndDate);
     }
 
     if (utilizedDays.isPresent()) {

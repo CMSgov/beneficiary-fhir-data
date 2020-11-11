@@ -73,12 +73,6 @@
       "value" : "74655592568216"
     }
   }, {
-    "url" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
-    "valueIdentifier" : {
-      "system" : "https://bluebutton.cms.gov/resources/variables/clm_disp_cd",
-      "value" : "1"
-    }
-  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -163,6 +157,7 @@
   "referral" : {
     "reference" : "#1"
   },
+  "disposition" : "1",
   "information" : [ {
     "sequence" : 1,
     "category" : {
@@ -216,21 +211,6 @@
         "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
         "code" : "41",
         "display" : "Optometrist"
-      } ]
-    }
-  }, {
-    "sequence" : 3,
-    "provider" : {
-      "identifier" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/tax_num",
-        "value" : "204299999"
-      }
-    },
-    "role" : {
-      "coding" : [ {
-        "system" : "http://hl7.org/fhir/claimcareteamrole",
-        "code" : "primary",
-        "display" : "Primary provider"
       } ]
     }
   } ],
@@ -334,7 +314,7 @@
       }
     } ],
     "sequence" : 6,
-    "careTeamLinkId" : [ 2, 3 ],
+    "careTeamLinkId" : [ 2 ],
     "diagnosisLinkId" : [ 5 ],
     "category" : {
       "coding" : [ {

@@ -14,7 +14,6 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.Period;
 
 /**
  * Transforms CCW {@link HospiceClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -89,30 +88,28 @@ final class HospiceClaimTransformer {
         Optional.of(claimGroup.getUtilizationDayCount()));
 
     if (claimGroup.getHospicePeriodCount().isPresent()) {
-      // TODO should this be benefitBalance?
-      eob.getHospitalization()
-          .addExtension(
-              TransformerUtils.createExtensionQuantity(
-                  CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
+      eob.addExtension(
+          TransformerUtils.createExtensionQuantity(
+              CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
     }
 
-    // Date beneficiary enrolled in Hospice
-    if (claimGroup.getClaimHospiceStartDate().isPresent()) {
-      Period hospiceStartPeriod = new Period();
-      TransformerUtils.setPeriodStart(
-          hospiceStartPeriod, claimGroup.getClaimHospiceStartDate().get());
-      TransformerUtils.addInformation(eob, CcwCodebookVariable.CLM_HOSP_START_DT_ID)
-          .setTiming(hospiceStartPeriod);
-    }
+    // // Date beneficiary enrolled in Hospice
+    // if (claimGroup.getClaimHospiceStartDate().isPresent()) {
+    //   Period hospiceStartPeriod = new Period();
+    //   TransformerUtils.setPeriodStart(
+    //       hospiceStartPeriod, claimGroup.getClaimHospiceStartDate().get());
+    //   TransformerUtils.addInformation(eob, CcwCodebookVariable.CLM_HOSP_START_DT_ID)
+    //       .setTiming(hospiceStartPeriod);
+    // }
 
-    // Date beneficiary discharged in Hospice
-    if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-      Period hospiceEndPeriod = new Period();
-      TransformerUtils.setPeriodStart(
-          hospiceEndPeriod, claimGroup.getBeneficiaryDischargeDate().get());
-      TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_BENE_DSCHRG_DT)
-          .setTiming(hospiceEndPeriod);
-    }
+    // // Date beneficiary discharged in Hospice
+    // if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
+    //   Period hospiceEndPeriod = new Period();
+    //   TransformerUtils.setPeriodStart(
+    //       hospiceEndPeriod, claimGroup.getBeneficiaryDischargeDate().get());
+    //   TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_BENE_DSCHRG_DT)
+    //       .setTiming(hospiceEndPeriod);
+    // }
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(
