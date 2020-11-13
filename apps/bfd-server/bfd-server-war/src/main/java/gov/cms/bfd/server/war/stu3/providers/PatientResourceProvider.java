@@ -387,7 +387,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
-          "select b from Beneficiary b "
+          "select distinct b from Beneficiary b "
               + joinsClause
               + "where b."
               + field
@@ -400,7 +400,7 @@ public final class PatientResourceProvider implements IResourceProvider {
           .setParameter("cursor", paging.getCursor());
     } else {
       String query =
-          "select b from Beneficiary b "
+          "select distinct b from Beneficiary b "
               + joinsClause
               + "where b."
               + field
