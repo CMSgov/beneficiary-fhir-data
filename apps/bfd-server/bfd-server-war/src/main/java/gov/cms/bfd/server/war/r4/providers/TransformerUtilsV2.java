@@ -604,6 +604,30 @@ public final class TransformerUtilsV2 {
     categoryConcept.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
     return categoryConcept;
   }
+  
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
+   *     specified {@link CcwCodebookVariable}
+   */
+  static CodeableConcept createAdjudicationCategoryV2(CcwCodebookVariable ccwVariable, String carinAdjuCode, String carinAdjuCodeDisplay) {
+    /*
+     * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
+     * all share the same Coding.system and use the CcwCodebookVariable reference URL as their
+     * Coding.code. This looks weird, but makes it easy for API developers to find more information
+     * about what the specific adjudication they're looking at means.
+     */
+
+    String conceptCode = calculateVariableReferenceUrl(ccwVariable);
+    CodeableConcept categoryConcept =
+        createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, conceptCode);
+    categoryConcept.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
+    
+    categoryConcept.addCoding().setSystem("http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication").setCode(carinAdjuCode).setDisplay(carinAdjuCodeDisplay);
+    
+    return categoryConcept;
+  }
+
 
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
@@ -1406,9 +1430,12 @@ public final class TransformerUtilsV2 {
       char finalAction) {
 
     eob.setId(buildEobId(claimType, claimId));
+    
+    CodeableConcept claimCodeType = new CodeableConcept();
+    claimCodeType.addCoding().setCode("uc").setSystem("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType");
 
     if (claimType.equals(ClaimType.PDE))
-      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId));
+      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId)).setType(claimCodeType);
     else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId));
 
     eob.addIdentifier()
