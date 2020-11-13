@@ -379,7 +379,6 @@ public final class TransformerConstants {
    */
   public static final String CARIN_ADJUDICATION_CODE =
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
-
   /**
    * ValueSet: C4BB Adjudication <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
@@ -404,3 +403,4 @@ public final class TransformerConstants {
   public static final String C4BB_ADJUDICATION_CODE =
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
 }
+

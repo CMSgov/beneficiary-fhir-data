@@ -403,11 +403,17 @@ public final class TransformerUtilsV2 {
    */
   static Identifier createIdentifier(CcwCodebookInterface ccwVariable, String identifierValue) {
     if (identifierValue == null) throw new IllegalArgumentException();
+    
+    CodeableConcept claimCodeType = new CodeableConcept();
+    claimCodeType
+        .addCoding()
+        .setCode("uc")
+        .setSystem(TransformerConstants.C4BB_IDENTIFIER_TYPE);
 
     Identifier identifier =
         new Identifier()
             .setSystem(calculateVariableReferenceUrl(ccwVariable))
-            .setValue(identifierValue);
+            .setValue(identifierValue).setType(claimCodeType);
     return identifier;
   }
 
@@ -776,7 +782,7 @@ public final class TransformerUtilsV2 {
 
     return categoryConcept;
   }
-
+  
   /**
    * @param ccwVariable the {@link CcwCodebookVariable} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
@@ -1773,14 +1779,7 @@ public final class TransformerUtilsV2 {
     // Claim Type + Claim ID => ExplanationOfBenefit.id
     eob.setId(buildEobId(claimType, claimId));
 
-    CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType
-        .addCoding()
-        .setCode("uc")
-        .setSystem("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType");
-
     if (claimType.equals(ClaimType.PDE)) {
-      // PDE_ID => ExplanationOfBenefit.identifier
       eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId));
     } else {
       // CLM_ID => ExplanationOfBenefit.identifier
