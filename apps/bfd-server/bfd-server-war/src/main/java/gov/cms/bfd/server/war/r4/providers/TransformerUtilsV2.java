@@ -351,11 +351,17 @@ public final class TransformerUtilsV2 {
    */
   static Identifier createIdentifier(CcwCodebookInterface ccwVariable, String identifierValue) {
     if (identifierValue == null) throw new IllegalArgumentException();
+    
+    CodeableConcept claimCodeType = new CodeableConcept();
+    claimCodeType
+        .addCoding()
+        .setCode("uc")
+        .setSystem(TransformerConstants.C4BB_IDENTIFIER_TYPE);
 
     Identifier identifier =
         new Identifier()
             .setSystem(calculateVariableReferenceUrl(ccwVariable))
-            .setValue(identifierValue);
+            .setValue(identifierValue).setType(claimCodeType);
     return identifier;
   }
 
@@ -675,7 +681,7 @@ public final class TransformerUtilsV2 {
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
    *     specified {@link CcwCodebookVariable}
    */
-  static CodeableConcept createAdjudicationCategoryV2(
+  static CodeableConcept createAdjudicationCategory(
       CcwCodebookVariable ccwVariable, String carinAdjuCode, String carinAdjuCodeDisplay) {
     /*
      * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
@@ -691,7 +697,7 @@ public final class TransformerUtilsV2 {
 
     categoryConcept
         .addCoding()
-        .setSystem("http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication")
+        .setSystem(TransformerConstants.C4BB_ADJUDICATION_CODE)
         .setCode(carinAdjuCode)
         .setDisplay(carinAdjuCodeDisplay);
 
@@ -1517,12 +1523,6 @@ public final class TransformerUtilsV2 {
       char finalAction) {
 
     eob.setId(buildEobId(claimType, claimId));
-
-    CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType
-        .addCoding()
-        .setCode("uc")
-        .setSystem("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType");
 
     if (claimType.equals(ClaimType.PDE))
       eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId));
