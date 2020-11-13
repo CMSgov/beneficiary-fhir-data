@@ -178,7 +178,7 @@ final class PartDEventTransformerV2 {
       planPaidAmountAdjudicationValue = claimGroup.getPartDPlanCoveredPaidAmount();
     } else {
       planPaidAmountAdjudicationCategory =
-          TransformerUtilsV2.createAdjudicationCategoryV2(
+          TransformerUtilsV2.createAdjudicationCategory(
               CcwCodebookVariable.NCVRD_PLAN_PD_AMT, "noncovered", "Noncovered");
       planPaidAmountAdjudicationValue = claimGroup.getPartDPlanNonCoveredPaidAmount();
     }
@@ -196,7 +196,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-            TransformerUtilsV2.createAdjudicationCategoryV2(
+            TransformerUtilsV2.createAdjudicationCategory(
                 CcwCodebookVariable.GDC_BLW_OOPT_AMT, "coinsurance", "Coinsurance"))
         .setAmount(
             TransformerUtilsV2.createMoney(claimGroup.getGrossCostBelowOutOfPocketThreshold()));
@@ -205,7 +205,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-            TransformerUtilsV2.createAdjudicationCategoryV2(
+            TransformerUtilsV2.createAdjudicationCategory(
                 CcwCodebookVariable.GDC_ABV_OOPT_AMT, "coinsurance", "Coinsurance"))
         .setAmount(
             TransformerUtilsV2.createMoney(claimGroup.getGrossCostAboveOutOfPocketThreshold()));
@@ -214,7 +214,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-            TransformerUtilsV2.createAdjudicationCategoryV2(
+            TransformerUtilsV2.createAdjudicationCategory(
                 CcwCodebookVariable.PTNT_PAY_AMT, "paidbypatient", "Paid by patient"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getPatientPaidAmount()));
 
@@ -222,7 +222,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-            TransformerUtilsV2.createAdjudicationCategoryV2(
+            TransformerUtilsV2.createAdjudicationCategory(
                 CcwCodebookVariable.OTHR_TROOP_AMT, "priorpayerpaid", "Prior payer paid"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getOtherTrueOutOfPocketPaidAmount()));
 
@@ -230,7 +230,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-            TransformerUtilsV2.createAdjudicationCategoryV2(
+            TransformerUtilsV2.createAdjudicationCategory(
                 CcwCodebookVariable.LICS_AMT, "discount", "Discount"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getLowIncomeSubsidyPaidAmount()));
 
@@ -238,7 +238,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-            TransformerUtilsV2.createAdjudicationCategoryV2(
+            TransformerUtilsV2.createAdjudicationCategory(
                 CcwCodebookVariable.PLRO_AMT, "priorpayerpaid", "Prior payer paid"))
         .setAmount(
             TransformerUtilsV2.createMoney(
@@ -248,7 +248,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-            TransformerUtilsV2.createAdjudicationCategoryV2(
+            TransformerUtilsV2.createAdjudicationCategory(
                 CcwCodebookVariable.TOT_RX_CST_AMT, "drugcost", "Drug cost"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getTotalPrescriptionCost()));
 
@@ -256,7 +256,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-            TransformerUtilsV2.createAdjudicationCategoryV2(
+            TransformerUtilsV2.createAdjudicationCategory(
                 CcwCodebookVariable.RPTD_GAP_DSCNT_NUM, "discount", "Discount"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getGapDiscountAmount()));
 
