@@ -360,12 +360,12 @@ public final class PatientResourceProvider implements IResourceProvider {
 
       // Fetch the benes using the ids
       return queryBeneficiariesByIds(ids, includedIdentifiers)
-          .setMaxResults(paging.getPageSize() + 1)
+          .setMaxResults(paging.getPageSize())
           .getResultList();
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
-          .setMaxResults(paging.getPageSize() + 1)
+          .setMaxResults(paging.getPageSize())
           .getResultList();
     }
   }
@@ -459,7 +459,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
     String query =
-        "select b from Beneficiary b "
+        "select distinct b from Beneficiary b "
             + joinsClause
             + "where b.beneficiaryId in :ids "
             + "order by b.beneficiaryId asc";
