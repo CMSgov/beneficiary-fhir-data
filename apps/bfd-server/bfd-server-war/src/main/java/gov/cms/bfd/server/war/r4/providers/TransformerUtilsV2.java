@@ -350,6 +350,22 @@ public final class TransformerUtilsV2 {
   static Identifier createIdentifier(CcwCodebookVariable ccwVariable, String identifierValue) {
     if (identifierValue == null) throw new IllegalArgumentException();
 
+    Identifier identifier =
+        new Identifier()
+            .setSystem(calculateVariableReferenceUrl(ccwVariable))
+            .setValue(identifierValue);
+    return identifier;
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Identifier}
+   */
+  static Identifier createClaimIdentifier(CcwCodebookVariable ccwVariable, String identifierValue) {
+    if (identifierValue == null) throw new IllegalArgumentException();
+
     CodeableConcept claimCodeType = new CodeableConcept();
     claimCodeType.addCoding().setCode("uc").setSystem(TransformerConstants.C4BB_IDENTIFIER_TYPE);
 
@@ -358,6 +374,7 @@ public final class TransformerUtilsV2 {
             .setSystem(calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue)
             .setType(claimCodeType);
+
     return identifier;
   }
 
@@ -1440,8 +1457,8 @@ public final class TransformerUtilsV2 {
     eob.setId(buildEobId(claimType, claimId));
 
     if (claimType.equals(ClaimType.PDE))
-      eob.addIdentifier(createIdentifier(CcwCodebookVariable.PDE_ID, claimId));
-    else eob.addIdentifier(createIdentifier(CcwCodebookVariable.CLM_ID, claimId));
+      eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId));
+    else eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.CLM_ID, claimId));
 
     eob.addIdentifier()
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
