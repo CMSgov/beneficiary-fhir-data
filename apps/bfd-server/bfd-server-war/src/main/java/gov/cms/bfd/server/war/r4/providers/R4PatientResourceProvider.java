@@ -269,7 +269,6 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
 
-    // Insures backwards compatability
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
