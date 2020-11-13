@@ -404,6 +404,22 @@ public final class TransformerUtilsV2 {
   static Identifier createIdentifier(CcwCodebookInterface ccwVariable, String identifierValue) {
     if (identifierValue == null) throw new IllegalArgumentException();
 
+    Identifier identifier =
+        new Identifier()
+            .setSystem(calculateVariableReferenceUrl(ccwVariable))
+            .setValue(identifierValue);
+    return identifier;
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Identifier}
+   */
+  static Identifier createClaimIdentifier(CcwCodebookVariable ccwVariable, String identifierValue) {
+    if (identifierValue == null) throw new IllegalArgumentException();
+
     CodeableConcept claimCodeType = new CodeableConcept();
     claimCodeType.addCoding().setCode("uc").setSystem(TransformerConstants.C4BB_IDENTIFIER_TYPE);
 
@@ -412,6 +428,7 @@ public final class TransformerUtilsV2 {
             .setSystem(calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue)
             .setType(claimCodeType);
+
     return identifier;
   }
 
