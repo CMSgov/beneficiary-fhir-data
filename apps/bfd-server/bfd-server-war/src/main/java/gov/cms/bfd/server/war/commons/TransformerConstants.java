@@ -361,7 +361,6 @@ public final class TransformerConstants {
   public static final String CODING_RACE_US =
       "http://hl7.org/fhir/us/core/ValueSet/omb-race-category";
 
-<<<<<<< HEAD
   /**
    * CARIN Value Set URL for Identifier Type <a href=
    * "http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">ValueSet: C4BB
@@ -385,30 +384,27 @@ public final class TransformerConstants {
    */
   public static final String CARIN_ADJUDICATION_CODE =
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
-=======
 
-/**
- * ValueSet: C4BB Adjudication <a
- * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB Adjudication</a>
- */
+  /**
+    * ValueSet: C4BB Adjudication <a
+    * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB Adjudication</a>
+    */
   public static final String C4BB_IDENTIFIER_TYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
 
   /**
    * CodeSystem: C4BB Supporting Info Type <a
-   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem: C4BB Supporting Info Type</a>
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem:
+   * C4BB Supporting Info Type</a>
    */
   public static final String C4BB_SUPPORTING_INFO_TYPE =
       "http://hl7.org/fhir/ValueSet/claim-informationcategory";
 
   /**
    * ValueSet: C4BB Adjudication <a
-   * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB Adjudication</a>
+   * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
+   * Adjudication</a>
    */
   public static final String C4BB_ADJUDICATION_CODE =
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
-
-  
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
 }
-
