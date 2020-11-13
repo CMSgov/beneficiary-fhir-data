@@ -270,7 +270,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
         fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
 
     // Insures backwards compatability
-    boolean hasAnotherPage = matchingBeneficiaries.size() == paging.getPageSize();
+    boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
       paging = new PatientLinkBuilder(paging, hasAnotherPage);
@@ -452,7 +452,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
     String query =
-        "select b from Beneficiary b "
+        "select distinct b from Beneficiary b "
             + joinsClause
             + "where b.beneficiaryId in :ids "
             + "order by b.beneficiaryId asc";
