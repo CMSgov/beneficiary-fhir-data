@@ -403,4 +403,3 @@ public final class TransformerConstants {
   public static final String C4BB_ADJUDICATION_CODE =
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
 }
-

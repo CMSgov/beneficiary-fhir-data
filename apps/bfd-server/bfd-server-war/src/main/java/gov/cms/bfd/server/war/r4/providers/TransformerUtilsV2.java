@@ -403,17 +403,15 @@ public final class TransformerUtilsV2 {
    */
   static Identifier createIdentifier(CcwCodebookInterface ccwVariable, String identifierValue) {
     if (identifierValue == null) throw new IllegalArgumentException();
-    
+
     CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType
-        .addCoding()
-        .setCode("uc")
-        .setSystem(TransformerConstants.C4BB_IDENTIFIER_TYPE);
+    claimCodeType.addCoding().setCode("uc").setSystem(TransformerConstants.C4BB_IDENTIFIER_TYPE);
 
     Identifier identifier =
         new Identifier()
             .setSystem(calculateVariableReferenceUrl(ccwVariable))
-            .setValue(identifierValue).setType(claimCodeType);
+            .setValue(identifierValue)
+            .setType(claimCodeType);
     return identifier;
   }
 
