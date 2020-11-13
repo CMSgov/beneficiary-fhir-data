@@ -474,7 +474,7 @@ In 2020, CMS engaged Synthea to add an output mode
   that produced data in BFD's RIF input file formats.
 The initial engagement ended with these accomplishments:
 
-* Synthea added a `--exporter.bb2.export=true` option to produce RIF.
+* Synthea added a `--exporter.bfd.export=true` option to produce RIF.
 * It produces beneficiary RIF records:
     * These are valid records with all 192 columns and convert to FHIR without errors.
     * Most of those columns are optional. Synthea currently populates 21 of them.

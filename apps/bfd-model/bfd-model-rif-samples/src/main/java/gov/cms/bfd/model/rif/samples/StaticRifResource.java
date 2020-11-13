@@ -718,7 +718,7 @@ public enum StaticRifResource {
       }
 
       // Run Synthea.
-      Path syntheaOutputDir = syntheaGitDir.resolve("output").resolve("bb2");
+      Path syntheaOutputDir = syntheaGitDir.resolve("output").resolve("bfd");
       if (!Files.exists(syntheaOutputDir)) {
         LOGGER.info("Running Synthea...");
         Path syntheaBinPath = syntheaGitDir.resolve("run_synthea");
@@ -733,7 +733,7 @@ public enum StaticRifResource {
                     "20200101",
                     "-p",
                     "100",
-                    "--exporter.bb2.export=true")
+                    "--exporter.bfd.export=true")
                 .directory(syntheaGitDir.toFile())
                 .readOutput(true)
                 .timeout(5, TimeUnit.MINUTES)

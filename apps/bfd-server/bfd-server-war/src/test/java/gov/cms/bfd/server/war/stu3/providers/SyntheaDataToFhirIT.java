@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.sharedutils.SharedTestUtils;
 import gov.cms.bfd.sharedutils.SlowTests;
 import java.io.FileNotFoundException;
