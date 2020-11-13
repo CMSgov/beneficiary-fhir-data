@@ -58,6 +58,7 @@
 	</repositories>
 
 	<modules>
+		<module>bfd-shared-utils</module>
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
@@ -91,6 +92,10 @@
 		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
 		<its.db.username></its.db.username>
 		<its.db.password></its.db.password>
+		
+		<!-- These properties are used by Surefire and Failsafe to manage JUnit test category inclusion/exclusion. -->
+		<tests.categories.include></tests.categories.include>
+		<tests.categories.exclude>gov.cms.bfd.sharedutils.SlowTests</tests.categories.exclude>
 	</properties>
 
 	<dependencyManagement>
@@ -363,6 +368,13 @@ checkJavaFormat
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
+
+						<!-- By default, don't run test cases that tend to take longer than 30 seconds.
+							See the gov.cms.bfd.sharedutils.SlowTests interface's JavaDoc for details.
+							Also note: custom properties have to be used here as the Javadoc plugin also
+							uses "groups". -->
+						<groups>${tests.categories.include}</groups>
+						<excludedGroups>${tests.categories.exclude}</excludedGroups>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -380,6 +392,13 @@ checkJavaFormat
 							<its.db.username>${its.db.username}</its.db.username>
 							<its.db.password>${its.db.password}</its.db.password>
 						</systemPropertyVariables>
+
+						<!-- By default, don't run test cases that tend to take longer than 30 seconds.
+							See the gov.cms.bfd.sharedutils.SlowTests interface's JavaDoc for details.
+							Also note: custom properties have to be used here as the Javadoc plugin also
+							uses "groups". -->
+						<groups>${tests.categories.include}</groups>
+						<excludedGroups>${tests.categories.exclude}</excludedGroups>
 					</configuration>
 				</plugin>
 				<plugin>

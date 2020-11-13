@@ -91,7 +91,14 @@ public enum StaticRifResourceGroup {
 
   SAMPLE_HICN_MULT_BENES(
       StaticRifResource.SAMPLE_HICN_MULT_BENES,
-      StaticRifResource.SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY);
+      StaticRifResource.SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY),
+
+  /**
+   * This {@link StaticRifResourceGroup} will run a customized version of <a
+   * href="https://synthetichealth.github.io/synthea/">Synthea</a> to generate realistic-looking
+   * synthetic data for BFD.
+   */
+  SYNTHEA(StaticRifResource.SYNTHEA_BENES, StaticRifResource.SYNTHEA_INPATIENT);
 
   private final StaticRifResource[] resources;
 
