@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.rif.extract;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistoryParser;
@@ -37,6 +36,7 @@ import gov.cms.bfd.model.rif.parse.RifParsingUtils;
 import gov.cms.bfd.pipeline.rif.extract.CsvRecordGroupingIterator.ColumnValueCsvRecordGrouper;
 import gov.cms.bfd.pipeline.rif.extract.CsvRecordGroupingIterator.CsvRecordGrouper;
 import gov.cms.bfd.pipeline.rif.extract.exceptions.UnsupportedRifFileTypeException;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;

@@ -23,12 +23,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides various utilities, particularly for managing DB connections. -->
-			<groupId>com.justdavis.karl.jessentials</groupId>
-			<artifactId>jessentials-misc</artifactId>
-		</dependency>
-
-		<dependency>
 			<!-- Hibernate's JPA implementation is used to load data into the Blue 
 				Button API's database. -->
 			<groupId>org.hibernate</groupId>
