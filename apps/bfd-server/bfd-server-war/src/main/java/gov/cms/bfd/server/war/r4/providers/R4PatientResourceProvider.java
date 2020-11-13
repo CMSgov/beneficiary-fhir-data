@@ -350,7 +350,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
       // Fetch ids
       List<String> ids =
           queryBeneficiaryIds(contractMonthField, contractCode, paging)
-              .setMaxResults(paging.getPageSize())
+              .setMaxResults(paging.getPageSize() + 1)
               .getResultList();
 
       // Fetch the benes using the ids
@@ -358,7 +358,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
-          .setMaxResults(paging.getPageSize())
+          .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
   }

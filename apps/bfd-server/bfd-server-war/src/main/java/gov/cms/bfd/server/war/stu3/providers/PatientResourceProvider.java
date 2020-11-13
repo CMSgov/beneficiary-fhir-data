@@ -356,16 +356,16 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
-          queryBeneficiaryIds(contractMonthField, contractCode, paging).getResultList();
+          queryBeneficiaryIds(contractMonthField, contractCode, paging)
+              .setMaxResults(paging.getPageSize() + 1)
+              .getResultList();
 
       // Fetch the benes using the ids
-      return queryBeneficiariesByIds(ids, includedIdentifiers)
-          .setMaxResults(paging.getPageSize())
-          .getResultList();
+      return queryBeneficiariesByIds(ids, includedIdentifiers).getResultList();
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
-          .setMaxResults(paging.getPageSize())
+          .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
   }
