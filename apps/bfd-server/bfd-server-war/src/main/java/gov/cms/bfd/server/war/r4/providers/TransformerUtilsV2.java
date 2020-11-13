@@ -804,13 +804,14 @@ public final class TransformerUtilsV2 {
 
     return categoryConcept;
   }
-  
+
   /**
    * @param ccwVariable the {@link CcwCodebookVariable} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
    *     specified {@link CcwCodebookVariable}
    */
-  static CodeableConcept createAdjudicationCategoryV2(CcwCodebookVariable ccwVariable, String carinAdjuCode, String carinAdjuCodeDisplay) {
+  static CodeableConcept createAdjudicationCategoryV2(
+      CcwCodebookVariable ccwVariable, String carinAdjuCode, String carinAdjuCodeDisplay) {
     /*
      * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
      * all share the same Coding.system and use the CcwCodebookVariable reference URL as their
@@ -822,12 +823,15 @@ public final class TransformerUtilsV2 {
     CodeableConcept categoryConcept =
         createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, conceptCode);
     categoryConcept.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
-    
-    categoryConcept.addCoding().setSystem("http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication").setCode(carinAdjuCode).setDisplay(carinAdjuCodeDisplay);
-    
+
+    categoryConcept
+        .addCoding()
+        .setSystem("http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication")
+        .setCode(carinAdjuCode)
+        .setDisplay(carinAdjuCodeDisplay);
+
     return categoryConcept;
   }
-
 
   /**
    * Optionally adds an {@link AdjudicationComponent} to an {@link ItemComponent#getAdjudication()}
@@ -1768,9 +1772,12 @@ public final class TransformerUtilsV2 {
 
     // Claim Type + Claim ID => ExplanationOfBenefit.id
     eob.setId(buildEobId(claimType, claimId));
-    
+
     CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType.addCoding().setCode("uc").setSystem("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType");
+    claimCodeType
+        .addCoding()
+        .setCode("uc")
+        .setSystem("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType");
 
     if (claimType.equals(ClaimType.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
