@@ -105,6 +105,70 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(new BigDecimal("1"), beneRow.getBeneLinkKey().get());
   }
 
+  @Test
+  public void process1BeneRecordWithTrailingNulls() {
+    RifFilesEvent filesEvent =
+        new RifFilesEvent(
+            Instant.now(), StaticRifResource.SAMPLE_A_BENES_WITH_TRAILING_NULLS.toRifFile());
+    RifFilesProcessor processor = new RifFilesProcessor();
+    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
+    List<RifRecordEvent<?>> rifEventsList =
+        rifFileRecords.getRecords().collect(Collectors.toList());
+
+    Assert.assertEquals(
+        StaticRifResource.SAMPLE_A_BENES_WITH_TRAILING_NULLS.getRecordCount(),
+        rifEventsList.size());
+
+    RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+    Assert.assertEquals(
+        StaticRifResource.SAMPLE_A_BENES_WITH_TRAILING_NULLS.getRifFileType(),
+        rifRecordEvent.getFileEvent().getFile().getFileType());
+    Assert.assertNotNull(rifRecordEvent.getRecord());
+    Assert.assertTrue(rifRecordEvent.getRecord() instanceof Beneficiary);
+
+    Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
+    Assert.assertEquals(beneRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
+    Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
+    Assert.assertEquals("567834", beneRow.getBeneficiaryId());
+    Assert.assertEquals("MO", beneRow.getStateCode());
+    Assert.assertEquals("123", beneRow.getCountyCode());
+    Assert.assertEquals("12345", beneRow.getPostalCode());
+    Assert.assertEquals(LocalDate.of(1981, Month.MARCH, 17), beneRow.getBirthDate());
+    Assert.assertEquals(('1'), beneRow.getSex());
+    Assert.assertEquals(new Character('1'), beneRow.getRace().get());
+    Assert.assertEquals(new Character('1'), beneRow.getEntitlementCodeOriginal().get());
+    Assert.assertEquals(new Character('1'), beneRow.getEntitlementCodeCurrent().get());
+    Assert.assertEquals(new Character('N'), beneRow.getEndStageRenalDiseaseCode().get());
+    Assert.assertEquals(new String("20"), beneRow.getMedicareEnrollmentStatusCode().get());
+    Assert.assertEquals(new Character('0'), beneRow.getPartBTerminationCode().get());
+    Assert.assertEquals(new Character('0'), beneRow.getPartBTerminationCode().get());
+    Assert.assertEquals("543217066U", beneRow.getHicn());
+    Assert.assertEquals("Doe", beneRow.getNameSurname());
+    Assert.assertEquals("John", beneRow.getNameGiven());
+    Assert.assertEquals(new Character('A'), beneRow.getNameMiddleInitial().get());
+
+    Assert.assertEquals("3456789", beneRow.getMedicareBeneficiaryId().get());
+    Assert.assertEquals(
+        LocalDate.of(1981, Month.MARCH, 17), beneRow.getBeneficiaryDateOfDeath().get());
+    Assert.assertEquals(
+        LocalDate.of(1963, Month.OCTOBER, 3), beneRow.getMedicareCoverageStartDate().get());
+    Assert.assertEquals(new Character('1'), beneRow.getHmoIndicatorAprInd().get());
+    Assert.assertEquals(new BigDecimal(5), beneRow.getPartDMonthsCount().get());
+    Assert.assertEquals("00", beneRow.getPartDLowIncomeCostShareGroupFebCode().get());
+    Assert.assertEquals(new Character('N'), beneRow.getPartDRetireeDrugSubsidyDecInd().get());
+    Assert.assertEquals("204 SOUTH ST", beneRow.getDerivedMailingAddress1().get());
+    Assert.assertEquals("7560 123TH ST", beneRow.getDerivedMailingAddress2().get());
+    Assert.assertEquals("SURREY", beneRow.getDerivedMailingAddress3().get());
+    Assert.assertEquals("DAEJEON SI 34867", beneRow.getDerivedMailingAddress4().get());
+    Assert.assertEquals("COLOMBIA", beneRow.getDerivedMailingAddress5().get());
+    Assert.assertEquals("SURREY", beneRow.getDerivedMailingAddress6().get());
+    Assert.assertEquals("PODUNK", beneRow.getDerivedCityName().get());
+    Assert.assertEquals("IA", beneRow.getDerivedStateCode().get());
+    Assert.assertEquals("123456789", beneRow.getDerivedZipCode().get());
+    Assert.assertEquals(LocalDate.of(2020, Month.JULY, 30), beneRow.getMbiEffectiveDate().get());
+    Assert.assertEquals(new BigDecimal("1"), beneRow.getBeneLinkKey().get());
+  }
+
   /**
    * Ensures that {@link gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor} can correctly handle
    * {@link StaticRifResource#SAMPLE_A_BENEFICIARY_HISTORY}.

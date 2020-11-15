@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.rif.parse;
 
+import com.google.common.base.Strings;
 import gov.cms.bfd.model.rif.RifFile;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,7 +79,7 @@ public final class RifParsingUtils {
    *     consistency)
    */
   public static String parseString(String string) {
-    return string;
+    return removeInvalidCharacters(string);
   }
 
   /**
@@ -88,7 +89,7 @@ public final class RifParsingUtils {
    *     value
    */
   public static Optional<String> parseOptionalString(String string) {
-    return string.isEmpty() ? Optional.empty() : Optional.of(string);
+    return string.isEmpty() ? Optional.empty() : Optional.of(removeInvalidCharacters(string));
   }
 
   /**
@@ -268,5 +269,14 @@ public final class RifParsingUtils {
     } else {
       return Optional.of(parseCharacter(charText));
     }
+  }
+
+  public static String removeInvalidCharacters(String string) {
+    String newString = string;
+    if (!Strings.isNullOrEmpty(newString)) {
+      newString = newString.replace("\\0", "");
+    }
+
+    return newString;
   }
 }
