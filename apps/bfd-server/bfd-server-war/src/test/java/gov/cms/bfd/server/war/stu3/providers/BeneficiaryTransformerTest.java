@@ -29,10 +29,9 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecord() {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
-    Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("false"), Boolean.TRUE);
-    assertMatches(beneficiary, patient, true);
+    RequestHeaders rh = getRHwithIncldIdntityHdr("false");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
 
     Assert.assertEquals("Number of identifiers should be 2", 2, patient.getIdentifier().size());
 
@@ -43,11 +42,6 @@ public final class BeneficiaryTransformerTest {
         "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
-
-    patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("false"), Boolean.FALSE);
-    assertNoAddressFields(beneficiary, patient);
   }
 
   /**
@@ -59,14 +53,10 @@ public final class BeneficiaryTransformerTest {
   @Test
   public void transformSampleARecordWithIdentifiers() {
     Beneficiary beneficiary = loadSampleABeneficiary();
-
-    Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("hicn", "mbi"), Boolean.TRUE);
-    assertMatches(beneficiary, patient, true);
-
+    RequestHeaders rh = getRHwithIncldIdntityHdr("hicn,mbi");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
-
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient,
@@ -86,10 +76,6 @@ public final class BeneficiaryTransformerTest {
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9AB2WW3GR44");
-    patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("hicn", "mbi"), Boolean.FALSE);
-    assertNoAddressFields(beneficiary, patient);
   }
 
   /**
@@ -101,14 +87,10 @@ public final class BeneficiaryTransformerTest {
   @Test
   public void transformSampleARecordWithIdentifiersTrue() {
     Beneficiary beneficiary = loadSampleABeneficiary();
-
-    Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("true"), Boolean.TRUE);
-    assertMatches(beneficiary, patient, true);
-
+    RequestHeaders rh = getRHwithIncldIdntityHdr("true");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
-
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient,
@@ -128,10 +110,6 @@ public final class BeneficiaryTransformerTest {
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9AB2WW3GR44");
-    patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("true"), Boolean.FALSE);
-    assertNoAddressFields(beneficiary, patient);
   }
 
   /**
@@ -144,13 +122,10 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecordWithIdentifiersHicn() {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
-    Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("hicn"), Boolean.TRUE);
-    assertMatches(beneficiary, patient, true);
-
+    RequestHeaders rh = getRHwithIncldIdntityHdr("hicn");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
     Assert.assertEquals("Number of identifiers should be 6", 6, patient.getIdentifier().size());
-
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient,
@@ -166,10 +141,6 @@ public final class BeneficiaryTransformerTest {
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066T");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED, "543217066Z");
-    patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("hicn"), Boolean.FALSE);
-    assertNoAddressFields(beneficiary, patient);
   }
 
   /**
@@ -192,13 +163,10 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecordWithIdentifiersMbi() {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
-    Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("mbi"), Boolean.TRUE);
-    assertMatches(beneficiary, patient, true);
-
+    RequestHeaders rh = getRHwithIncldIdntityHdr("mbi");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
     Assert.assertEquals("Number of identifiers should be 4", 4, patient.getIdentifier().size());
-
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient,
@@ -210,10 +178,6 @@ public final class BeneficiaryTransformerTest {
         patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "3456789");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED, "9AB2WW3GR44");
-    patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("mbi"), Boolean.FALSE);
-    assertNoAddressFields(beneficiary, patient);
   }
 
   /**
@@ -253,22 +217,16 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecordWithLastUpdated() {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
+    RequestHeaders rh = getRHwithIncldIdntityHdr("");
     beneficiary.setLastUpdated(new Date());
     Patient patientWithLastUpdated =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.TRUE);
-    assertMatches(beneficiary, patientWithLastUpdated, true);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patientWithLastUpdated, rh);
 
     beneficiary.setLastUpdated(null);
     Patient patientWithoutLastUpdated =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.TRUE);
-    assertMatches(beneficiary, patientWithoutLastUpdated, true);
-
-    Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.FALSE);
-    assertNoAddressFields(beneficiary, patient);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patientWithoutLastUpdated, rh);
   }
 
   /**
@@ -281,15 +239,9 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecordWithoutLastUpdated() {
     Beneficiary beneficiary = loadSampleABeneficiary();
     beneficiary.setLastUpdated(null);
-
-    Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.TRUE);
-    assertMatches(beneficiary, patient, true);
-    patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList(), Boolean.FALSE);
-    assertNoAddressFields(beneficiary, patient);
+    RequestHeaders rh = getRHwithIncldIdntityHdr("");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
   }
 
   /**
@@ -353,33 +305,67 @@ public final class BeneficiaryTransformerTest {
             .findFirst()
             .get();
     TransformerTestUtils.setAllOptionalsToEmpty(beneficiary);
-
-    Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList(""), Boolean.TRUE);
-    assertMatches(beneficiary, patient, true);
-    patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList(""), Boolean.FALSE);
-    assertNoAddressFields(beneficiary, patient);
+    RequestHeaders rh = getRHwithIncldIdntityHdr("");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
   }
 
   /**
-   * Verifies that the {@link Patient} does not include address lines, if it were produced from the
-   * specified {@link Beneficiary}.
-   *
-   * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
-   * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
+   * Notes for reviewer: for header related coverage, do not test on the combination of headers
+   * values if there is no correlation between the headers, hence removed includeAddressFields
+   * header tests out of includeIdentifiers header tests to speed up tests and keep the same level
+   * of coverage at the same time.
    */
-  static void assertNoAddressFields(Beneficiary beneficiary, Patient patient) {
-    Assert.assertEquals(1, patient.getAddress().size());
-    Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
-    // assert CountyCode is no longer mapped
-    Assert.assertNull(patient.getAddress().get(0).getDistrict());
-    Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
-    // assert address city name and line 0 - 5 fields etc.
-    Assert.assertNull(patient.getAddress().get(0).getCity());
-    Assert.assertEquals(0, patient.getAddress().get(0).getLine().size());
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer} works
+   * correctly when passed a {@link Beneficiary} where all {@link Optional} fields are set to {@link
+   * Optional#empty()} and includeAddressFields header take all possible values.
+   */
+  @Test
+  public void transformBeneficiaryWithIncludeAddressFieldsAllOptEmpty() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    Beneficiary beneficiary =
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    TransformerTestUtils.setAllOptionalsToEmpty(beneficiary);
+    RequestHeaders rh = getRHwithIncldAddrFldHdr("true");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
+    rh = getRHwithIncldAddrFldHdr("false");
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
+    rh = getRHwithIncldAddrFldHdr("");
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
+    rh = RequestHeaders.getHeaderWrapper();
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
+  }
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer} works
+   * correctly when passed a {@link Beneficiary} with various includeAddressFields header values.
+   */
+  @Test
+  public void transformSampleARecordWithIncludeAddressFields() {
+    Beneficiary beneficiary = loadSampleABeneficiary();
+    RequestHeaders rh = getRHwithIncldAddrFldHdr("true");
+    Patient patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
+    rh = getRHwithIncldAddrFldHdr("false");
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
+    rh = getRHwithIncldAddrFldHdr("");
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
+    rh = RequestHeaders.getHeaderWrapper();
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, rh);
+    assertMatches(beneficiary, patient, rh);
   }
 
   /**
@@ -389,7 +375,7 @@ public final class BeneficiaryTransformerTest {
    * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
    * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
    */
-  static void assertMatches(Beneficiary beneficiary, Patient patient, Boolean withAddressFields) {
+  static void assertMatches(Beneficiary beneficiary, Patient patient, RequestHeaders rh) {
     TransformerTestUtils.assertNoEncodedOptionals(patient);
 
     Assert.assertEquals(beneficiary.getBeneficiaryId(), patient.getIdElement().getIdPart());
@@ -421,60 +407,68 @@ public final class BeneficiaryTransformerTest {
 
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), patient);
 
-    if (withAddressFields) {
-      assertMatchesWithAddress(beneficiary, patient);
+    Boolean inclAddrFlds =
+        (Boolean) rh.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
+
+    if (inclAddrFlds != null && inclAddrFlds) {
+      Assert.assertEquals(1, patient.getAddress().size());
+      // assert address fields etc.
+      Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+      // assert CountyCode is no longer mapped
+      Assert.assertNull(patient.getAddress().get(0).getDistrict());
+      Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+      Assert.assertEquals(
+          beneficiary.getDerivedCityName().orElse(null), patient.getAddress().get(0).getCity());
+
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress1().orElse(""),
+          patient.getAddress().get(0).getLine().get(0).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress2().orElse(""),
+          patient.getAddress().get(0).getLine().get(1).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress3().orElse(""),
+          patient.getAddress().get(0).getLine().get(2).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress4().orElse(""),
+          patient.getAddress().get(0).getLine().get(3).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress5().orElse(""),
+          patient.getAddress().get(0).getLine().get(4).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress6().orElse(""),
+          patient.getAddress().get(0).getLine().get(5).getValueNotNull());
     } else {
-      assertMatchesWithoutAddress(beneficiary, patient);
+      Assert.assertEquals(1, patient.getAddress().size());
+      Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+      // assert CountyCode is no longer mapped
+      Assert.assertNull(patient.getAddress().get(0).getDistrict());
+      Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+      // assert address city name and line 0 - 5 fields etc.
+      Assert.assertNull(patient.getAddress().get(0).getCity());
+      Assert.assertEquals(0, patient.getAddress().get(0).getLine().size());
     }
   }
-  /**
-   * Verifies that the {@link Patient} "looks like" it should, if it were produced from the
-   * specified {@link Beneficiary}.
-   *
-   * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
-   * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
-   */
-  static void assertMatchesWithAddress(Beneficiary beneficiary, Patient patient) {
-    Assert.assertEquals(1, patient.getAddress().size());
-    // assert address fields etc.
-    Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
-    // assert CountyCode is no longer mapped
-    Assert.assertNull(patient.getAddress().get(0).getDistrict());
-    Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
-    Assert.assertEquals(
-        beneficiary.getDerivedCityName().orElse(null), patient.getAddress().get(0).getCity());
 
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress1().orElse(""),
-        patient.getAddress().get(0).getLine().get(0).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress2().orElse(""),
-        patient.getAddress().get(0).getLine().get(1).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress3().orElse(""),
-        patient.getAddress().get(0).getLine().get(2).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress4().orElse(""),
-        patient.getAddress().get(0).getLine().get(3).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress5().orElse(""),
-        patient.getAddress().get(0).getLine().get(4).getValueNotNull());
-    Assert.assertEquals(
-        beneficiary.getDerivedMailingAddress6().orElse(""),
-        patient.getAddress().get(0).getLine().get(5).getValueNotNull());
+  /**
+   * test helper
+   *
+   * @param value of all include identifier values
+   * @return RequestHeaders instance derived from value
+   */
+  public static RequestHeaders getRHwithIncldIdntityHdr(String value) {
+    return RequestHeaders.getHeaderWrapper(
+        PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, value);
   }
 
   /**
-   * Verifies that the {@link Patient} "looks like" it should, if it were produced from the
-   * specified {@link Beneficiary}.
+   * test helper
    *
-   * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
-   * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
+   * @param value of all include address fields values
+   * @return RequestHeaders instance derived from value
    */
-  static void assertMatchesWithoutAddress(Beneficiary beneficiary, Patient patient) {
-    Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
-    // assert CountyCode is no longer mapped
-    Assert.assertNull(patient.getAddress().get(0).getDistrict());
-    Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+  public static RequestHeaders getRHwithIncldAddrFldHdr(String value) {
+    return RequestHeaders.getHeaderWrapper(
+        PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, value);
   }
 }

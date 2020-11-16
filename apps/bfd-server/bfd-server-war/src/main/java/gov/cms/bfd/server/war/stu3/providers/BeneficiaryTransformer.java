@@ -73,15 +73,12 @@ final class BeneficiaryTransformer {
    */
   @Trace
   public static Patient transform(
-      MetricRegistry metricRegistry,
-      Beneficiary beneficiary,
-      List<String> includeIdentifiersValues,
-      Boolean includeAddressFields) {
+      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders rh) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform"))
             .time();
-    Patient patient = transform(beneficiary, includeIdentifiersValues, includeAddressFields);
+    Patient patient = transform(beneficiary, rh);
     timer.stop();
 
     return patient;
@@ -94,10 +91,7 @@ final class BeneficiaryTransformer {
    *     determine if derived address info be included or not
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(
-      Beneficiary beneficiary,
-      List<String> includeIdentifiersValues,
-      Boolean includeAddressFields) {
+  private static Patient transform(Beneficiary beneficiary, RequestHeaders rh) {
     Objects.requireNonNull(beneficiary);
 
     Patient patient = new Patient();
@@ -108,7 +102,7 @@ final class BeneficiaryTransformer {
             CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
 
     // Add hicn-hash identifier ONLY if raw hicn is requested.
-    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
+    if (rh.isHICNinIncludeIdentifiers()) {
       patient
           .addIdentifier()
           .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
@@ -147,7 +141,7 @@ final class BeneficiaryTransformer {
     // Add lastUpdated
     TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
 
-    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
+    if (rh.isHICNinIncludeIdentifiers()) {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
 
       if (hicnUnhashedCurrent.isPresent())
@@ -175,7 +169,7 @@ final class BeneficiaryTransformer {
       }
     }
 
-    if (PatientResourceProvider.hasMBI(includeIdentifiersValues)) {
+    if (rh.isMBIinIncludeIdentifiers()) {
       Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
 
       if (mbiUnhashedCurrent.isPresent())
@@ -206,7 +200,8 @@ final class BeneficiaryTransformer {
 
     // support header includeAddressFields from downstream components e.g. BB2
     // per requirement of BFD-379, BB2 always send header includeAddressFields = False
-    if (includeAddressFields) {
+    Boolean addrHdrVal = rh.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
+    if (addrHdrVal != null && addrHdrVal) {
       patient
           .addAddress()
           .setState(beneficiary.getStateCode())

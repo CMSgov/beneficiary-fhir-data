@@ -8,18 +8,25 @@ import java.util.Optional;
 
 /** A HAPI {@link IClientInterceptor} that allows us to add HTTP headers to our requests. */
 public class ExtraParamsInterceptor implements IClientInterceptor {
-  private Optional<String> includeIdentifiersValue = Optional.empty();
-
-  private String includeIdentifiersValues = "";
-  private String includeAddressValues = "";
+  private RequestHeaders rh;
+  // private IHttpRequest theRequest;
+  // private String includeIdentifiersValues = "";
+  // private String includeAddressValues = "";
 
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
-    String headerValue = includeIdentifiersValues;
-    String headerAddressValue = includeAddressValues;
-    theRequest.addHeader(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, headerValue);
-    theRequest.addHeader(
-        PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, headerAddressValue);
+    // String headerValue = includeIdentifiersValues;
+    // String headerAddressValue = includeAddressValues;
+
+    // inject headers values
+    rh.getNVPairs()
+        .forEach(
+            (n, v) -> {
+              theRequest.addHeader(n, v.toString());
+            });
+    // theRequest.addHeader(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, headerValue);
+    // theRequest.addHeader(
+    //     PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, headerAddressValue);
   }
 
   /**
@@ -31,8 +38,7 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
     // nothing needed here
   }
 
-  public void setIncludeIdentifiers(String includeIdentifiersValues, String includeAddressValues) {
-    this.includeIdentifiersValues = includeIdentifiersValues;
-    this.includeAddressValues = includeAddressValues;
+  public void setHeaders(RequestHeaders rh) {
+    this.rh = rh;
   }
 }
