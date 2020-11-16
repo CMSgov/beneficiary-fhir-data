@@ -273,6 +273,11 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
+    boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
+    if (hasAnotherPage) {
+      matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
+      paging = new PatientLinkBuilder(paging, hasAnotherPage);
+    }
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
@@ -352,7 +357,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       // Fetch ids
       List<String> ids =
           queryBeneficiaryIds(contractMonthField, contractCode, paging)
-              .setMaxResults(paging.getPageSize())
+              .setMaxResults(paging.getPageSize() + 1)
               .getResultList();
 
       // Fetch the benes using the ids
@@ -360,7 +365,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
-          .setMaxResults(paging.getPageSize())
+          .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
   }
@@ -382,7 +387,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
-          "select b from Beneficiary b "
+          "select distinct b from Beneficiary b "
               + joinsClause
               + "where b."
               + field
@@ -395,7 +400,7 @@ public final class PatientResourceProvider implements IResourceProvider {
           .setParameter("cursor", paging.getCursor());
     } else {
       String query =
-          "select b from Beneficiary b "
+          "select distinct b from Beneficiary b "
               + joinsClause
               + "where b."
               + field
@@ -454,7 +459,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
     String query =
-        "select b from Beneficiary b "
+        "select distinct b from Beneficiary b "
             + joinsClause
             + "where b.beneficiaryId in :ids "
             + "order by b.beneficiaryId asc";
