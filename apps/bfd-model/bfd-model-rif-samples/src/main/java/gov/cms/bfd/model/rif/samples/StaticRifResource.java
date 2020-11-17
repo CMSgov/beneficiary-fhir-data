@@ -43,6 +43,11 @@ public enum StaticRifResource {
       RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
       1),
 
+  SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA(
+      resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory-extra.txt"),
+      RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
+      1),
+
   SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
 
   SAMPLE_A_INPATIENT(

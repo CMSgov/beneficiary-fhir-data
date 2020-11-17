@@ -58,6 +58,7 @@
 	</repositories>
 
 	<modules>
+		<module>bfd-shared-utils</module>
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
@@ -151,14 +152,6 @@
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-jvm</artifactId>
 				<version>${metrics.version}</version>
-			</dependency>
-
-
-			<dependency>
-				<!-- Just useful. -->
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>24.1.1-jre</version>
 			</dependency>
 
 			<!-- We lock down the versions of all the various Spring components that 
