@@ -272,19 +272,20 @@ public final class RifParsingUtils {
   }
 
   /**
-   * @param string tring to parse
+   * @param inputString {@link String} that possible contains invalid characters
    * @return an {@link String} with a null representation stripped from it if the input has a null
    *     field representation.
    */
-  public static String removeInvalidCharacters(String string) {
-    String newString = string;
+  public static String removeInvalidCharacters(String inputString) {
+    String verifiedInputString = inputString;
 
     // Null Field
     String nullFields = "\\0";
-    if (!Strings.isNullOrEmpty(newString)) {
-      if (newString.contains(nullFields)) newString = newString.replace(nullFields, "");
+    if (!Strings.isNullOrEmpty(verifiedInputString)) {
+      if (verifiedInputString.contains(nullFields))
+        verifiedInputString = verifiedInputString.replace(nullFields, "");
     }
 
-    return newString;
+    return verifiedInputString;
   }
 }

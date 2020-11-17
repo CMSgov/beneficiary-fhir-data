@@ -153,6 +153,14 @@
 				<version>${metrics.version}</version>
 			</dependency>
 
+
+			<dependency>
+				<!-- Just useful. -->
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>24.1.1-jre</version>
+			</dependency>
+
 			<!-- We lock down the versions of all the various Spring components that 
 				child projects use, as incompatibility problems with Spring are common. -->
 			<dependency>
