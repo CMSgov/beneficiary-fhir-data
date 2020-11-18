@@ -127,9 +127,8 @@ public final class RifFilesProcessorTest {
     Assert.assertTrue(rifRecordEvent.getRecord() instanceof Beneficiary);
 
     Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
-
     Assert.assertEquals("204 SOUTH ST", beneRow.getDerivedMailingAddress1().get());
-    Assert.assertEquals("7560 123TH ST", beneRow.getDerivedMailingAddress2().get());
+    Assert.assertEquals(new String("7560 123TH ST"), beneRow.getDerivedMailingAddress2().get());
     Assert.assertEquals("SURREY", beneRow.getDerivedMailingAddress3().get());
     Assert.assertEquals("DAEJEON SI 34867", beneRow.getDerivedMailingAddress4().get());
     Assert.assertEquals("COLOMBIA", beneRow.getDerivedMailingAddress5().get());
