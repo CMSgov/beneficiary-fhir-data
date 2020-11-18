@@ -33,13 +33,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Just useful. -->
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>24.1.1-jre</version>
-		</dependency>
-
-		<dependency>
 			<!-- Automatically generates META-INF/services files for service classes 
 				annotated with `@AutoService`. -->
 			<groupId>com.google.auto.service</groupId>
