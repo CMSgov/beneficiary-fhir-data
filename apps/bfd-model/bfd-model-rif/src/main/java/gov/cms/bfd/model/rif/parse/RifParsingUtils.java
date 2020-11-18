@@ -280,11 +280,6 @@ public final class RifParsingUtils {
     String verifiedInputString = inputString;
 
     if (!Strings.isNullOrEmpty(verifiedInputString)) {
-      if (verifiedInputString.contains("\\0x00"))
-        verifiedInputString = verifiedInputString.replace("\\0x00", "");
-      if (verifiedInputString.contains("\\x00"))
-        verifiedInputString = verifiedInputString.replace("\\x00", "");
-
       verifiedInputString = verifiedInputString.trim();
     }
 
