@@ -145,7 +145,7 @@ final class PartDEventTransformerV2 {
     /*
      * Create an adjudication for either CVRD_D_PLAN_PD_AMT or NCVRD_PLAN_PD_AMT,
      * depending on the value of DRUG_CVRG_STUS_CD. Stick DRUG_CVRG_STUS_CD into the
-     * adjudication.reason field.
+     * adjudication.reason field. CARING Slicing and CARING Adjudication Value Sets.
      */
     CodeableConcept planPaidAmountAdjudicationCategory;
     BigDecimal planPaidAmountAdjudicationValue;
