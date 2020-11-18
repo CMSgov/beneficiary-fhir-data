@@ -279,11 +279,11 @@ public final class RifParsingUtils {
   public static String removeInvalidCharacters(String inputString) {
     String verifiedInputString = inputString;
 
-    // Null Field
-    String nullFields = "\\0";
     if (!Strings.isNullOrEmpty(verifiedInputString)) {
-      if (verifiedInputString.contains(nullFields))
-        verifiedInputString = verifiedInputString.replace(nullFields, "");
+      if (verifiedInputString.contains("\\0x00"))
+        verifiedInputString = verifiedInputString.replace("\\0x00", "");
+      if (verifiedInputString.contains("\\x00"))
+        verifiedInputString = verifiedInputString.replace("\\x00", "");
     }
 
     return verifiedInputString;
