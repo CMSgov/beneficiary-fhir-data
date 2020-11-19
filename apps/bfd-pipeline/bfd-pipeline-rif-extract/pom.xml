@@ -23,6 +23,13 @@
 		</dependency>
 
 		<dependency>
+			<!-- Just useful. -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>24.1.1-jre</version>
+		</dependency>
+
+		<dependency>
 			<!-- Used to poll interact with AWS' S3 service, which is where RIF files 
 				from the CCW will arrive, when this ETL pipeline is running in production. -->
 			<groupId>com.amazonaws</groupId>
