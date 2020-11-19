@@ -280,7 +280,8 @@ public final class RifParsingUtils {
     String verifiedInputString = inputString;
 
     if (!Strings.isNullOrEmpty(verifiedInputString)) {
-      verifiedInputString = verifiedInputString.trim();
+      // remove all NULLs
+      verifiedInputString = verifiedInputString.replaceAll("\\x00", "");
     }
 
     return verifiedInputString;
