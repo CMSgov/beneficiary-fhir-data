@@ -8,7 +8,7 @@
     * [https://jira.cms.gov/browse/AB2D-1863](https://jira.cms.gov/browse/AB2D-1863)
 
 This proposal will suggest adding server side filtering to API calls that return EOBs to the client in order to 
-cut down on the amount of data that needs to be transferred. 
+reduce on the amount of data that needs to be transferred. 
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
@@ -26,18 +26,23 @@ cut down on the amount of data that needs to be transferred.
 ## Motivation
 [Motivation]: #motivation
 
-AB2D receives lots of data back from BFD when we make API calls to gather EOBs (Explanation of Benefits), 
-where we filter out much of the data we receive. This might not be terrible for a few API calls, but for 
-thousands it can impact our performance significantly. Since we only need a small portion of the data that we receive, it makes
-sense for the server to send us only the data that we end up using. This will also help BFD in reducing
-the amount of data that they need to send over the network.  
+AB2D receives more data than needed from BFD when we make API calls to gather EOBs (Explanation of Benefits).  AB2D
+currently filters out unrelevant fields.  This might not be terrible for dozens of API calls, but for 
+10 to 100 thousand requests it can impact our performance significantly.  Since we only need a projection of the data
+(10 out of 69 top level getters; 6 out of 42 fields in the ItemComponent), it makes
+sense for the server to send us only the data consumed.  This reduces bandwidth requirements for receiving the data.
+
+For example, GraphQL solves this problem by allowing clients to specify field selection (e.g. a database projection) at
+invocation time.
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
-The solution will allow BFD to keep track of which fields AB2D will use on the server side so that any change in the fields 
-that AB2D receives would need to be updated in the BFD code base. Since we don't expect these fields to change too often, 
-we can have them stored in the BFD code base. The filtering will need to happen towards the end of processing. This is to avoid
+The solution adds code in the BFD server to configure which fields AB2D requires.  Non-required fields are null'd out
+before being transformed in the result.  The specific set of required fields should remain stable
+and not require modifications.
+
+The filtering will need to happen towards the end of processing. This is to avoid
 spaghetti code since transformations from the entity object to the FHIR object happen in several places throughout
 the codebase. 
 
@@ -51,12 +56,12 @@ The BeanUtils library can be utilized for transforming properties
 <dependency>
     <groupId>commons-beanutils</groupId>
     <artifactId>commons-beanutils</artifactId>
-    <version>1.8.2</version>
+    <version>1.9.4</version>
 </dependency>
 ```
 
-A `private static final Set<String>` of fields will need to be maintained in `TransformerUtils`. This will
-be an allow list of fields that AB2D wants to keep in the FHIR object that gets sent back to the client. Just before the
+A `private static final Map<String, SubfieldSelection>` of fields will need to be maintained in `TransformerUtils`. This will
+be the AB2D required fields in the FHIR object that gets sent back to the client. Just before the
 end of the method `findByPatient` in `ExplanationOfBenefitsResourceProvider` the `eobs` can be passed to a new
 method in `TransformerUtils`.
 
@@ -66,62 +71,141 @@ fields in the object we are interested in (ExplanationOfBenefits). If the field 
 be allowed to stay, otherwise it will be nulled out. Every field in the object will need to be visited so that we don't miss any
 fields.
 
+Fields that represent objects are recursed into, applying the same field selection approach.
+
 ```
-private static final Set<String> allowAB2DList = new HashSet<>();
+    private enum WhichFields {ALL, EXPLICIT}
 
-static {
-    allowedAB2DList.add("patient");
-    allowedAB2DList.add("provider");
-    allowedAB2DList.add("organization");
-    ...
-}
+    private static class SubfieldSelection {
+        final WhichFields pickMe;
+        final Map<String, SubfieldSelection> explictFields;
 
+        public SubfieldSelection() {
+            this.pickMe = WhichFields.ALL;
+            explictFields = Collections.emptyMap();
+        }
 
-static void filterEOBs(List<IBaseResource> eobs) {
-    for(ExplanationOfBenefit eob : eobs) {
-        Field[] fields = eob.getClass().getDeclaredFields();
-        for(Field field : fields) {
-            if(!allowedAB2DList.contains(field)) {
-                PropertyUtils.setProperty(eob, field.getName(), null);
-            }
+        public SubfieldSelection(Map<String, SubfieldSelection> explictFields) {
+            this.pickMe = WhichFields.EXPLICIT;
+            this.explictFields = explictFields;
+        }
+
+        public void addField(String fieldName) {
+            explictFields.put(fieldName, wildCard);
+        }
+
+        public WhichFields getPickMe() {
+            return pickMe;
+        }
+
+        public Map<String, SubfieldSelection> getExplictFields() {
+            return explictFields;
         }
     }
-}
+
+    private static final SubfieldSelection wildCard = new SubfieldSelection();
+
+    private static final Map<String, SubfieldSelection> eobFieldSelection = new HashMap<>();
+
+    static {
+        eobFieldSelection.put("patient", wildCard);
+        eobFieldSelection.put("provider", wildCard);
+        eobFieldSelection.put("organization", wildCard);
+        eobFieldSelection.put("facility", wildCard);
+        eobFieldSelection.put("type", wildCard);
+        eobFieldSelection.put("resourceType", wildCard);
+        eobFieldSelection.put("diagnosis", wildCard);
+        eobFieldSelection.put("procedure", wildCard);
+        eobFieldSelection.put("item", buildItemDef());
+        eobFieldSelection.put("careTeam", wildCard);
+        eobFieldSelection.put("identifier", wildCard);
+    }
+
+    private static SubfieldSelection buildItemDef() {
+        Map<String, SubfieldSelection> itemMap = new HashMap<>();
+        itemMap.put("service", wildCard);
+        itemMap.put("quantity", wildCard);
+        itemMap.put("servicedPeriod", wildCard);
+        itemMap.put("location", wildCard);
+        itemMap.put("careTeamLinkId", wildCard);
+        itemMap.put("sequence", wildCard);
+        return new SubfieldSelection(itemMap);
+    }
+    
+    // Entry point
+    public static void filterEOBs(List<ExplanationOfBenefit> eobs) {
+        for (ExplanationOfBenefit eob : eobs) {
+            trimFields(eob, eobFieldSelection);
+        }
+    }
+
+    private static void trimFields(Object objToTrim, Map<String, SubfieldSelection> fieldMapping) {
+        Field[] fields = objToTrim.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            // Do not return this field, null it out.
+            if (!fieldMapping.containsKey(field.getName())) {
+                PropertyUtils.setProperty(objToTrim, field.getName(), null);
+                continue;
+            }
+
+            // Return the entire field in the results
+            SubfieldSelection selection = fieldMapping.get(field.getName());
+            if (selection.getPickMe() == WhichFields.ALL) {
+                continue;
+            }
+
+            // Return a subset of the fields of the object referenced.
+            trimFieldsThrowException(objToTrim, field, selection);
+        }
+    }
+
+    private static void trimFieldsThrowException(Object objToTrim, Field field, SubfieldSelection selection) {
+        try {
+            trimFields(field.get(objToTrim), selection.getExplictFields());
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException(iae);
+        }
+    }
 ``` 
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
-How much will this save us? We will need to benchmark this solution compared to the old one to ensure it will
-be worth putting into production.
+How much will this save us?
+ 
+Proposed profiling is invoking BFD with at least 10,000 EOB Requests by Patient ID (ExplanationOfBenefit?patient=) and to measure
+the aggregate time of completion of all calls.  In other words, sum up the time taken by each call over all calls.
+
+This test will be baselined on current implementation and then ran again after the solution is deployed.
 
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
-There will be extra time spent filtering fields out on the server side, but this should save AB2D a lot in terms
-of reducing the amount of data we need to receive and then filter. BFD will be sending less data over the network.
+This solution incurs nominal amount of extra processing to traverse the EOB object and null out fields that do not
+need to be returned.
 
-This solution will also put the burden of maintaining the fields on BFD's side, which would mean that AB2D would make
-a change in a codebase other than our own, but since we don't expect these fields to change very often, that should be a
-minimal amount of change.
+This solution adds AB2D specific code within the BFD source base.  Any new required fields results in changes to BFD
+code.  The expecation is that this is rare and involves minimal effort.
 
 ### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
 
-One alternative that would give clients more flexibility would be to send the parameters themselves, but with that
-added flexibility comes a danger of being able to more easily make a mistake. By setting the parameters on the server
-side it's more difficult to change, but also less error prone. 
+GraphQL is a notable alternative where the fields are explicitly requested in the invocation.  Since GraphQL
+supports introspection, the client can actively determine the available fields.  A hybrid approach using
+*registered queries* requires queries to be specified in advance so that they can be locked down by a production server.
 
-An alternative for using a library like PropertyUtils would be JXPath, but when I benchmarked the two, PropertyUtils
-was consistently faster. Having said that, I would like to run some more realistic tests, which would not be very hard 
-to setup, since it would just be a very simple matter of changing one line of code really to compare the two.
+The downside is that this would be a significant amount of work for BFD to adopt a different API style while continuing
+to support the REST calls.
+
+An alternative for using a library like PropertyUtils would be JXPath, but initial benchmarks showed that PropertyUtils
+was consistently faster.
 
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
 
-There could be filtering on the database side as well. Right now there are 194 columns
-in the beneficiary table, and we certainly do not need all of them, so filtering on the 
-database side would reduce the load on the database.
+There could be dynamic projections on the database side as well. Right now there are 194 columns
+in the beneficiary table, and we certainly do not need all of them, so retrieving only the needed columns
+would reduce the load on the database.
 
 Other groups would likely want to utilize filtering as well, but that is out of scope for this RFC.
