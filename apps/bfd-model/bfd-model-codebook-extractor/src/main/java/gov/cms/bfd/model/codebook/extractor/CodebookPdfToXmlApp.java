@@ -1,8 +1,8 @@
 package gov.cms.bfd.model.codebook.extractor;
 
-import com.justdavis.karl.misc.exceptions.unchecked.UncheckedJaxbException;
 import gov.cms.bfd.model.codebook.model.Codebook;
 import gov.cms.bfd.model.codebook.model.Variable;
+import gov.cms.bfd.sharedutils.exceptions.UncheckedJaxbException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
