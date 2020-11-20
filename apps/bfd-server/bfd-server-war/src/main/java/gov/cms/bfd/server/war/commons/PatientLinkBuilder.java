@@ -16,6 +16,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
   private final UriComponents components;
   private final Integer count;
   private final String cursor;
+  private final boolean hasAnotherPage;
 
   public static final String PARAM_CURSOR = "cursor";
 
@@ -23,6 +24,14 @@ public final class PatientLinkBuilder implements LinkBuilder {
     components = UriComponentsBuilder.fromUriString(requestString).build();
     count = extractCountParam(components);
     cursor = extractCursorParam(components);
+    hasAnotherPage = false; // Don't really know, so default to false
+  }
+
+  public PatientLinkBuilder(PatientLinkBuilder prev, boolean hasAnotherPage) {
+    components = prev.components;
+    count = prev.count;
+    cursor = prev.cursor;
+    this.hasAnotherPage = hasAnotherPage;
   }
 
   @Override
@@ -52,7 +61,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
     to.addLink(
         new Bundle.BundleLinkComponent().setRelation(Constants.LINK_FIRST).setUrl(buildUrl("")));
 
-    if (entries.size() == getPageSize() && entries.size() > 0) {
+    if (hasAnotherPage) {
       Patient lastPatient = (Patient) entries.get(entries.size() - 1).getResource();
       String lastPatientId = lastPatient.getId();
       to.addLink(

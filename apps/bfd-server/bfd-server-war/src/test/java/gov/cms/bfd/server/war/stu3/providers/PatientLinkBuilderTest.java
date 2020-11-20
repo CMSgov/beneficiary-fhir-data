@@ -105,6 +105,28 @@ public class PatientLinkBuilderTest {
 
     Assert.assertNotNull(bundle.getLink(Constants.LINK_SELF));
     Assert.assertNotNull(bundle.getLink(Constants.LINK_FIRST));
+    Assert.assertNull(bundle.getLink(Constants.LINK_NEXT));
+  }
+
+  @Test
+  public void fullPageTestWithPaging() {
+    // test a page with a page size of 1 and 1 patient in the result
+    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=1");
+    paging = new PatientLinkBuilder(paging, true);
+
+    Assert.assertTrue(paging.isPagingRequested());
+    Assert.assertTrue(paging.isFirstPage());
+    Assert.assertEquals(1, paging.getPageSize());
+
+    Bundle bundle = new Bundle();
+    Patient patient = new Patient();
+    patient.setId("1");
+    TransformerUtils.addResourcesToBundle(bundle, Collections.singletonList(patient));
+    Assert.assertTrue(bundle.getLink().isEmpty());
+    paging.addLinks(bundle);
+
+    Assert.assertNotNull(bundle.getLink(Constants.LINK_SELF));
+    Assert.assertNotNull(bundle.getLink(Constants.LINK_FIRST));
     Assert.assertNotNull(bundle.getLink(Constants.LINK_NEXT));
     UriComponents nextLink =
         UriComponentsBuilder.fromUriString(bundle.getLink(Constants.LINK_NEXT).getUrl()).build();

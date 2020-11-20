@@ -27,13 +27,6 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<!-- Provides various utilities, particularly for managing DB connections. -->
-				<groupId>com.justdavis.karl.jessentials</groupId>
-				<artifactId>jessentials-misc</artifactId>
-				<version>3.2.0</version>
-			</dependency>
-
-			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
 				<groupId>org.slf4j</groupId>
@@ -64,6 +57,16 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<!-- Provides utility code and dependencies that are shared by (more or
+				less) all of the other BFD modules. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<pluginManagement>

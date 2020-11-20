@@ -1,9 +1,9 @@
 package gov.cms.bfd.model.rif.samples;
 
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,6 +28,11 @@ public enum StaticRifResource {
   SAMPLE_A_BENES(
       resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
+  SAMPLE_A_BENES_WITH_TRAILING_NULLS(
+      resourceUrl("rif-static-samples/sample-a-beneficiaries-with-trailing-nulls.txt"),
+      RifFileType.BENEFICIARY,
+      1),
+
   SAMPLE_A_BENEFICIARY_HISTORY(
       resourceUrl("rif-static-samples/sample-a-beneficiaryhistory.txt"),
       RifFileType.BENEFICIARY_HISTORY,
@@ -35,6 +40,11 @@ public enum StaticRifResource {
 
   SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY(
       resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory.txt"),
+      RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
+      1),
+
+  SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA(
+      resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory-extra.txt"),
       RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
       1),
 

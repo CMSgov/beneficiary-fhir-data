@@ -58,6 +58,7 @@
 	</repositories>
 
 	<modules>
+		<module>bfd-shared-utils</module>
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
@@ -95,13 +96,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<!-- Provides various utilities, particularly for managing DB connections. -->
-				<groupId>com.justdavis.karl.jessentials</groupId>
-				<artifactId>jessentials-misc</artifactId>
-				<version>3.2.0</version>
-			</dependency>
-
 			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
