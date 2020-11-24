@@ -227,6 +227,18 @@ public final class R4PatientResourceProvider implements IResourceProvider {
       }
     }
 
+    /*
+     * Publish the operation name. Note: This is a bit later than we'd normally do this, as we need
+     * to override the operation name that was published by the possible call to read(...), above.
+     */
+    Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
+    operation.setOption("by", "id");
+    operation.setOption(
+        "IncludeIdentifiers", returnIncludeIdentifiersValues(requestDetails).toString());
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
+    operation.publishOperationName();
+
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
@@ -256,6 +268,12 @@ public final class R4PatientResourceProvider implements IResourceProvider {
 
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
+
+    boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
+    if (hasAnotherPage) {
+      matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
+      paging = new PatientLinkBuilder(paging, hasAnotherPage);
+    }
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
@@ -331,7 +349,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
       // Fetch ids
       List<String> ids =
           queryBeneficiaryIds(contractMonthField, contractCode, paging)
-              .setMaxResults(paging.getPageSize())
+              .setMaxResults(paging.getPageSize() + 1)
               .getResultList();
 
       // Fetch the benes using the ids
@@ -339,7 +357,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
-          .setMaxResults(paging.getPageSize())
+          .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
   }
@@ -361,7 +379,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
-          "select b from Beneficiary b "
+          "select distinct b from Beneficiary b "
               + joinsClause
               + "where b."
               + field
@@ -374,7 +392,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
           .setParameter("cursor", paging.getCursor());
     } else {
       String query =
-          "select b from Beneficiary b "
+          "select distinct b from Beneficiary b "
               + joinsClause
               + "where b."
               + field
@@ -433,7 +451,7 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
     String query =
-        "select b from Beneficiary b "
+        "select distinct b from Beneficiary b "
             + joinsClause
             + "where b.beneficiaryId in :ids "
             + "order by b.beneficiaryId asc";
@@ -491,6 +509,8 @@ public final class R4PatientResourceProvider implements IResourceProvider {
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
     operation.setOption("by", "identifier");
     operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
 
     List<IBaseResource> patients;

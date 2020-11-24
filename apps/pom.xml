@@ -58,6 +58,7 @@
 	</repositories>
 
 	<modules>
+		<module>bfd-shared-utils</module>
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
@@ -95,13 +96,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<!-- Provides various utilities, particularly for managing DB connections. -->
-				<groupId>com.justdavis.karl.jessentials</groupId>
-				<artifactId>jessentials-misc</artifactId>
-				<version>3.2.0</version>
-			</dependency>
-
 			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
@@ -157,11 +151,11 @@
 				child projects use, as incompatibility problems with Spring are common. -->
 			<dependency>
 				<!-- Lock & harmonize the versions of the various Spring Framework modules. 
-					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir:pom:2.4 
-					uses the 4.3.7.RELEASE version of the Spring Framework. -->
+					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir:pom:4.1 
+					uses the 4.3.29.RELEASE version of the Spring Framework. -->
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
-				<version>4.3.7.RELEASE</version>
+				<version>4.3.29.RELEASE</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -170,7 +164,7 @@
 					Framework that we're using, per http://docs.spring.io/spring-data/jpa/docs/1.11.4.RELEASE/reference/html/#dependencies.spring-framework. -->
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.11.4.RELEASE</version>
+				<version>1.11.23.RELEASE</version>
 			</dependency>
 
 			<dependency>

@@ -18,6 +18,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaim_;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,7 @@ public enum ClaimType {
       CarrierClaim.class,
       CarrierClaim_.claimId,
       CarrierClaim_.beneficiaryId,
+      (entity) -> ((CarrierClaim) entity).getDateThrough(),
       CarrierClaimTransformer::transform,
       CarrierClaim_.lines),
 
@@ -47,6 +49,7 @@ public enum ClaimType {
       DMEClaim.class,
       DMEClaim_.claimId,
       DMEClaim_.beneficiaryId,
+      (entity) -> ((DMEClaim) entity).getDateThrough(),
       DMEClaimTransformer::transform,
       DMEClaim_.lines),
 
@@ -54,6 +57,7 @@ public enum ClaimType {
       HHAClaim.class,
       HHAClaim_.claimId,
       HHAClaim_.beneficiaryId,
+      (entity) -> ((HHAClaim) entity).getDateThrough(),
       HHAClaimTransformer::transform,
       HHAClaim_.lines),
 
@@ -61,6 +65,7 @@ public enum ClaimType {
       HospiceClaim.class,
       HospiceClaim_.claimId,
       HospiceClaim_.beneficiaryId,
+      (entity) -> ((HospiceClaim) entity).getDateThrough(),
       HospiceClaimTransformer::transform,
       HospiceClaim_.lines),
 
@@ -68,6 +73,7 @@ public enum ClaimType {
       InpatientClaim.class,
       InpatientClaim_.claimId,
       InpatientClaim_.beneficiaryId,
+      (entity) -> ((InpatientClaim) entity).getDateThrough(),
       InpatientClaimTransformer::transform,
       InpatientClaim_.lines),
 
@@ -75,6 +81,7 @@ public enum ClaimType {
       OutpatientClaim.class,
       OutpatientClaim_.claimId,
       OutpatientClaim_.beneficiaryId,
+      (entity) -> ((OutpatientClaim) entity).getDateThrough(),
       OutpatientClaimTransformer::transform,
       OutpatientClaim_.lines),
 
@@ -82,18 +89,21 @@ public enum ClaimType {
       PartDEvent.class,
       PartDEvent_.eventId,
       PartDEvent_.beneficiaryId,
+      (entity) -> ((PartDEvent) entity).getPrescriptionFillDate(),
       PartDEventTransformer::transform),
 
   SNF(
       SNFClaim.class,
       SNFClaim_.claimId,
       SNFClaim_.beneficiaryId,
+      (entity) -> ((SNFClaim) entity).getDateThrough(),
       SNFClaimTransformer::transform,
       SNFClaim_.lines);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;
   private final SingularAttribute<?, String> entityBeneficiaryIdAttribute;
+  private final Function<Object, LocalDate> serviceEndAttributeFunction;
   private final BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer;
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 
@@ -111,11 +121,13 @@ public enum ClaimType {
       Class<?> entityClass,
       SingularAttribute<?, ?> entityIdAttribute,
       SingularAttribute<?, String> entityBeneficiaryIdAttribute,
+      Function<Object, LocalDate> serviceEndAttributeFunction,
       BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
     this.entityBeneficiaryIdAttribute = entityBeneficiaryIdAttribute;
+    this.serviceEndAttributeFunction = serviceEndAttributeFunction;
     this.transformer = transformer;
     this.entityLazyAttributes =
         entityLazyAttributes != null
@@ -145,7 +157,15 @@ public enum ClaimType {
   }
 
   /**
-   * @return the {@link Function} to use to transform the JPA {@link Entity} instances into FHIR
+   * @return the {@link Function} to use to retrieve the {@link LocalDate} to use for service date
+   *     filter
+   */
+  public Function<Object, LocalDate> getServiceEndAttributeFunction() {
+    return serviceEndAttributeFunction;
+  }
+
+  /**
+   * @return the {@link BiFunction} to use to transform the JPA {@link Entity} instances into FHIR
    *     {@link ExplanationOfBenefit} instances
    */
   public BiFunction<MetricRegistry, Object, ExplanationOfBenefit> getTransformer() {

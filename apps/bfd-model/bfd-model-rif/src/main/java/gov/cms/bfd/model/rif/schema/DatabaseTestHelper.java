@@ -1,6 +1,6 @@
 package gov.cms.bfd.model.rif.schema;
 
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
