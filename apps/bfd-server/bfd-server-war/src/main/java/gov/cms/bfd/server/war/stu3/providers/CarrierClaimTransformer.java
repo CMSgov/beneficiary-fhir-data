@@ -125,6 +125,16 @@ final class CarrierClaimTransformer {
        * it's not safe to guess at this, so we'll leave it blank.)
        */
       if (claimLine.getPerformingPhysicianNpi().isPresent()) {
+        /*
+         * FIXME This is all likely buggy: we only map ORG_NPI_NUM and friends if PRF_PHYSN_NPI is
+         * present.
+         */
+
+        /*
+         * TODO Looking at it again, I also suspect we probably DO need to map non-NPI identifiers
+         * in all of our claim types, e.g. CARR_PRFRNG_PIN_NUM and PRF_PHYSN_UPIN.
+         */
+
         ExplanationOfBenefit.CareTeamComponent performingCareTeamMember =
             TransformerUtils.addCareTeamPractitioner(
                 eob,
@@ -156,6 +166,7 @@ final class CarrierClaimTransformer {
                 claimLine.getProviderParticipatingIndCode()));
         // FIXME: Following addExtensionCoding should be a new method
         // addExtensionReference
+        // Note: As of 2020-11-20, this field is null for 100% of carrier claims lines.
         if (claimLine.getOrganizationNpi().isPresent()) {
           TransformerUtils.addExtensionCoding(
               performingCareTeamMember,
