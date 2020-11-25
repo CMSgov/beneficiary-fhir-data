@@ -1,5 +1,40 @@
 # API Changelog
 
+## BLUEBUTTON-865: Adding Carrier & DME Tax Numbers to ExplanationOfBenefit resource
+
+A new optional flag has been added that will cause tax numbers from a claim to be included in response `ExplanationOfBenefit` resources.
+To enable this, set an "`IncludeTaxNumbers: true`" HTTP header in the `/ExplanationOfBenefit` request.
+
+The added fields will look like:
+
+```
+"resource" : {
+  "resourceType" : "ExplanationOfBenefit",
+  ...
+  "careTeam" : [
+    ... ,
+    {
+      "sequence" : 42,
+      "provider" : {
+        "identifier" : {
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "value" : "9994931888"
+        }
+      },
+      "responsible" : true,
+      "role" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/claimcareteamrole",
+          "code" : "other",
+          "display" : "Other"
+        } ]
+      }
+    },
+    ...
+  ],
+}
+```
+
 ## BCDA-3872: Add service-date query parameter on ExplanationOfBenefit resources
 A new optional query parameter has been added to ExplanationOfBenefit searches that will filter the returned results by type their respective service dates.
 

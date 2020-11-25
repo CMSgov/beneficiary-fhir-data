@@ -34,7 +34,8 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecord() throws FHIRException {
     PartDEvent claim = getPartDEventClaim();
-    ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        PartDEventTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     assertMatches(claim, eob);
   }
 
@@ -83,7 +84,8 @@ public final class PartDEventTransformerTest {
       String serviceProviderIdQualiferCode, String serviceProviderCode) {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
-    ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        PartDEventTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     TransformerTestUtils.assertReferenceEquals(
         serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
     TransformerTestUtils.assertReferenceEquals(

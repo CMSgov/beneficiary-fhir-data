@@ -331,3 +331,22 @@ select
 --     489  -- 90th percentile total claim line count (for sample beneficiaries)
 --    1304  -- 99th percentile total claim line count (for sample beneficiaries)
 --    9237  -- 100th percentile total claim line count (for sample beneficiaries)
+
+
+-- Measure how well-populated some carrier & DME claim columns are.
+SELECT DISTINCT
+    count(*),
+    length("performingProviderIdNumber"),
+    length("performingPhysicianUpin"),
+    length("performingPhysicianNpi"),
+    length("organizationNpi"),
+    length("providerTaxNumber"),
+    length("providerZipCode")
+  FROM "CarrierClaimLines"
+  GROUP BY
+    length("performingProviderIdNumber"),
+    length("performingPhysicianUpin"),
+    length("performingPhysicianNpi"),
+    length("organizationNpi"),
+    length("providerTaxNumber"),
+    length("providerZipCode");

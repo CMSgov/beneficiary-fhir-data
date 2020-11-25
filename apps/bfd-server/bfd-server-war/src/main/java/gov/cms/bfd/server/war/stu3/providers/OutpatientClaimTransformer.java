@@ -25,11 +25,13 @@ final class OutpatientClaimTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link OutpatientClaim} to transform
+   * @param includeTaxNumbers (unused here)
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(

@@ -41,8 +41,9 @@ public final class DMEClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = DMEClaimTransformer.transform(new MetricRegistry(), claim);
-    assertMatches(claim, eob);
+    ExplanationOfBenefit eob =
+        DMEClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+    assertMatches(claim, eob, Optional.of(true));
   }
 
   /**
@@ -52,9 +53,15 @@ public final class DMEClaimTransformerTest {
    * @param claim the {@link DMEClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     DMEClaim}
+   * @param includedTaxNumbers whether or not to include tax numbers are expected to be included in
+   *     the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(DMEClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(
+      DMEClaim claim, ExplanationOfBenefit eob, Optional<Boolean> includedTaxNumbers)
+      throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -108,6 +115,15 @@ public final class DMEClaimTransformerTest {
         CcwCodebookVariable.PRTCPTNG_IND_CD,
         claimLine1.getProviderParticipatingIndCode(),
         performingCareTeamEntry);
+
+    CareTeamComponent taxNumberCareTeamEntry =
+        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
+            claimLine1.getProviderTaxNumber(), eob.getCareTeam());
+    if (includedTaxNumbers.orElse(false)) {
+      Assert.assertNotNull(taxNumberCareTeamEntry);
+    } else {
+      Assert.assertNull(taxNumberCareTeamEntry);
+    }
 
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.PRVDR_STATE_CD,

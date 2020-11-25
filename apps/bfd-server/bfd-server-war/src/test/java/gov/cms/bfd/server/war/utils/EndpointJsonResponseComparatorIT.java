@@ -105,7 +105,15 @@ public final class EndpointJsonResponseComparatorIT {
         (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdPaged
       },
       {"eobReadCarrier", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrier},
+      {
+        "eobReadCarrierWithTaxNumbers",
+        (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrierWithTaxNumbers
+      },
       {"eobReadDme", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDme},
+      {
+        "eobReadDmeWithTaxNumbers",
+        (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDmeWithTaxNumbers
+      },
       {"eobReadHha", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHha},
       {"eobReadHospice", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHospice},
       {"eobReadInpatient", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadInpatient},
@@ -739,6 +747,37 @@ public final class EndpointJsonResponseComparatorIT {
   /**
    * @return the results of the {@link
    *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
+   *     Carrier claims, with the {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} set to <code>true
+   *     </code>
+   */
+  public static String eobReadCarrierWithTaxNumbers() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+    extraParamsInterceptor.setIncludeTaxNumbers("true");
+    fhirClient.registerInterceptor(extraParamsInterceptor);
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    CarrierClaim carrClaim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+    fhirClient
+        .read()
+        .resource(ExplanationOfBenefit.class)
+        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
+   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
    *     DME claims
    */
   public static String eobReadDme() {
@@ -746,6 +785,37 @@ public final class EndpointJsonResponseComparatorIT {
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    DMEClaim dmeClaim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+    fhirClient
+        .read()
+        .resource(ExplanationOfBenefit.class)
+        .withId(TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
+   *     ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation for
+   *     DME claims, with the {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} set to <code>true
+   *     </code>
+   */
+  public static String eobReadDmeWithTaxNumbers() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+    extraParamsInterceptor.setIncludeTaxNumbers("true");
+    fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
     DMEClaim dmeClaim =

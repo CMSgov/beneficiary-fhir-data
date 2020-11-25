@@ -44,13 +44,13 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(new Date());
     ExplanationOfBenefit eobWithLastUpdated =
-        CarrierClaimTransformer.transform(new MetricRegistry(), claim);
-    assertMatches(claim, eobWithLastUpdated);
+        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+    assertMatches(claim, eobWithLastUpdated, Optional.of(true));
 
     claim.setLastUpdated(null);
     ExplanationOfBenefit eobWithoutLastUpdated =
-        CarrierClaimTransformer.transform(new MetricRegistry(), claim);
-    assertMatches(claim, eobWithoutLastUpdated);
+        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+    assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
   }
 
   /**
@@ -71,8 +71,9 @@ public final class CarrierClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = CarrierClaimTransformer.transform(new MetricRegistry(), claim);
-    assertMatches(claim, eob);
+    ExplanationOfBenefit eob =
+        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+    assertMatches(claim, eob, Optional.of(true));
   }
 
   /**
@@ -82,9 +83,15 @@ public final class CarrierClaimTransformerTest {
    * @param claim the {@link CarrierClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     CarrierClaim}
+   * @param includedTaxNumbers whether or not to include tax numbers are expected to be included in
+   *     the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(CarrierClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(
+      CarrierClaim claim, ExplanationOfBenefit eob, Optional<Boolean> includedTaxNumbers)
+      throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -145,6 +152,15 @@ public final class CarrierClaimTransformerTest {
         TransformerConstants.CODING_NPI_US,
         TransformerConstants.CODING_NPI_US,
         "" + claimLine1.getOrganizationNpi().get());
+
+    CareTeamComponent taxNumberCareTeamEntry =
+        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
+            claimLine1.getProviderTaxNumber(), eob.getCareTeam());
+    if (includedTaxNumbers.orElse(false)) {
+      Assert.assertNotNull(taxNumberCareTeamEntry);
+    } else {
+      Assert.assertNull(taxNumberCareTeamEntry);
+    }
 
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.PRVDR_STATE_CD,

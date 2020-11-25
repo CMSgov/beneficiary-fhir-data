@@ -15,11 +15,15 @@ import java.io.IOException;
 public class ExtraParamsInterceptor implements IClientInterceptor {
 
   private String includeIdentifiersValues = "";
+  private String includeTaxNumbersValue = "";
 
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
-    String headerValue = includeIdentifiersValues;
-    theRequest.addHeader(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, headerValue);
+    theRequest.addHeader(
+        PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, includeIdentifiersValues);
+    theRequest.addHeader(
+        ExplanationOfBenefitResourceProvider.HEADER_NAME_INCLUDE_TAX_NUMBERS,
+        includeTaxNumbersValue);
   }
 
   @Override
@@ -30,5 +34,9 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
 
   public void setIncludeIdentifiers(String includeIdentifiersValues) {
     this.includeIdentifiersValues = includeIdentifiersValues;
+  }
+
+  public void setIncludeTaxNumbers(String includeTaxNumbersValue) {
+    this.includeTaxNumbersValue = includeTaxNumbersValue;
   }
 }
