@@ -92,6 +92,10 @@ public final class Variable {
     this.comment = null;
   }
 
+  /**
+   * Constructs a new {@link Variable} instance for the CCWCodebookMissingVariable. Has to add new
+   * constructor for instantiation of the CCWCodebookInterface
+   */
   public Variable(
       String id,
       String label,

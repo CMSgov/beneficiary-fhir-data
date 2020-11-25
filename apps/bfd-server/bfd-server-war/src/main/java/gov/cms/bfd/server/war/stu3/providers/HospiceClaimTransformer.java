@@ -88,28 +88,11 @@ final class HospiceClaimTransformer {
         Optional.of(claimGroup.getUtilizationDayCount()));
 
     if (claimGroup.getHospicePeriodCount().isPresent()) {
-      eob.addExtension(
-          TransformerUtils.createExtensionQuantity(
-              CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
+      eob.getHospitalization()
+          .addExtension(
+              TransformerUtils.createExtensionQuantity(
+                  CcwCodebookVariable.BENE_HOSPC_PRD_CNT, claimGroup.getHospicePeriodCount()));
     }
-
-    // // Date beneficiary enrolled in Hospice
-    // if (claimGroup.getClaimHospiceStartDate().isPresent()) {
-    //   Period hospiceStartPeriod = new Period();
-    //   TransformerUtils.setPeriodStart(
-    //       hospiceStartPeriod, claimGroup.getClaimHospiceStartDate().get());
-    //   TransformerUtils.addInformation(eob, CcwCodebookVariable.CLM_HOSP_START_DT_ID)
-    //       .setTiming(hospiceStartPeriod);
-    // }
-
-    // // Date beneficiary discharged in Hospice
-    // if (claimGroup.getBeneficiaryDischargeDate().isPresent()) {
-    //   Period hospiceEndPeriod = new Period();
-    //   TransformerUtils.setPeriodStart(
-    //       hospiceEndPeriod, claimGroup.getBeneficiaryDischargeDate().get());
-    //   TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_BENE_DSCHRG_DT)
-    //       .setTiming(hospiceEndPeriod);
-    // }
 
     // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     TransformerUtils.mapEobCommonGroupInpOutHHAHospiceSNF(

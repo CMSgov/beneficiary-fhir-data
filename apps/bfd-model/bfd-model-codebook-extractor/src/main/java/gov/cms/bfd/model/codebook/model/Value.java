@@ -23,6 +23,10 @@ public final class Value {
     this.description = null;
   }
 
+  /**
+   * Constructs a new {@link Value} instance for the CCWCodebookMissingVariable. Had to add new
+   * constructor for instantiation of the CCWCodebookInterface
+   */
   public Value(String code, String description) {
     this.code = code;
     this.description = description;

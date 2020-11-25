@@ -269,30 +269,6 @@
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-        "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
-        "display" : "Claim Hospice Start Date"
-      } ]
-    },
-    "timingPeriod" : {
-      "start" : "2013-11-05"
-    }
-  }, {
-    "sequence" : 8,
-    "category" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-        "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_dschrg_dt",
-        "display" : "NCH Beneficiary Discharge Date"
-      } ]
-    },
-    "timingPeriod" : {
-      "end" : "2013-12-18"
-    }
-  }, {
-    "sequence" : 9,
-    "category" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
         "code" : "https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty",
         "display" : "NCH Blood Pints Furnished Quantity"
       } ]
@@ -304,7 +280,7 @@
       "code" : "[pt_us]"
     }
   }, {
-    "sequence" : 10,
+    "sequence" : 8,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -317,7 +293,7 @@
       "end" : "2013-11-05"
     }
   }, {
-    "sequence" : 11,
+    "sequence" : 9,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -333,7 +309,7 @@
       } ]
     }
   }, {
-    "sequence" : 12,
+    "sequence" : 10,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -349,7 +325,7 @@
       } ]
     }
   }, {
-    "sequence" : 13,
+    "sequence" : 11,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -364,7 +340,7 @@
       } ]
     }
   }, {
-    "sequence" : 14,
+    "sequence" : 12,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -531,6 +507,10 @@
     "coverage" : {
       "reference" : "Coverage/part-a-567834"
     }
+  },
+  "hospitalization" : {
+    "start" : "2013-11-05",
+    "end" : "2013-12-18"
   },
   "item" : [ {
     "sequence" : 1,

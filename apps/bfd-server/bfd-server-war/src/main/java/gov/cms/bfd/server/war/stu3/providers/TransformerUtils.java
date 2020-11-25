@@ -808,22 +808,6 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param systemUrl the system Url being mapped
-   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
-   *     {@link Identifier}
-   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
-   *     specified input values
-   */
-  static Extension createExtensionIdentifierWithoutCCW(String systemUrl, String identifierValue) {
-
-    Identifier identifier = createIdentifier(systemUrl, identifierValue);
-
-    Extension extension = new Extension(systemUrl, identifier);
-
-    return extension;
-  }
-
-  /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
@@ -833,17 +817,6 @@ public final class TransformerUtils {
   static Extension createExtensionIdentifier(
       CcwCodebookInterface ccwVariable, String identifierValue) {
     return createExtensionIdentifier(ccwVariable, Optional.of(identifierValue));
-  }
-
-  /**
-   * @param systemUrl the system URL being mapped
-   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
-   *     {@link Identifier}
-   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
-   *     specified input values
-   */
-  static Extension createExtensionIdentifier(String systemUrl, String identifierValue) {
-    return createExtensionIdentifierWithoutCCW(systemUrl, identifierValue);
   }
 
   /**
@@ -2238,25 +2211,20 @@ public final class TransformerUtils {
       Optional<LocalDate> beneficiaryDischargeDate,
       Optional<BigDecimal> utilizedDays) {
 
-    if (claimAdmissionDate.isPresent()) {
-      SupportingInformationComponent clmAdmissionDateInfo =
-          TransformerUtils.addInformation(eob, CcwCodebookVariable.CLM_HOSP_START_DT_ID);
-      Period clmAdmissionStartDate = new Period();
-      if (claimAdmissionDate.isPresent())
-        clmAdmissionStartDate.setStart(
-            TransformerUtils.convertToDate((claimAdmissionDate.get())), TemporalPrecisionEnum.DAY);
-      clmAdmissionDateInfo.setTiming(clmAdmissionStartDate);
-    }
-
-    if (beneficiaryDischargeDate.isPresent()) {
-      SupportingInformationComponent clmAdmissionDateInfo =
-          TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_BENE_DSCHRG_DT);
-      Period clmAdmissionEndDate = new Period();
-      if (beneficiaryDischargeDate.isPresent())
-        clmAdmissionEndDate.setEnd(
-            TransformerUtils.convertToDate((beneficiaryDischargeDate.get())),
+    if (claimAdmissionDate.isPresent() || beneficiaryDischargeDate.isPresent()) {
+      TransformerUtils.validatePeriodDates(claimAdmissionDate, beneficiaryDischargeDate);
+      Period period = new Period();
+      if (claimAdmissionDate.isPresent()) {
+        period.setStart(
+            TransformerUtils.convertToDate(claimAdmissionDate.get()), TemporalPrecisionEnum.DAY);
+      }
+      if (beneficiaryDischargeDate.isPresent()) {
+        period.setEnd(
+            TransformerUtils.convertToDate(beneficiaryDischargeDate.get()),
             TemporalPrecisionEnum.DAY);
-      clmAdmissionDateInfo.setTiming(clmAdmissionEndDate);
+      }
+
+      eob.setHospitalization(period);
     }
 
     if (utilizedDays.isPresent()) {

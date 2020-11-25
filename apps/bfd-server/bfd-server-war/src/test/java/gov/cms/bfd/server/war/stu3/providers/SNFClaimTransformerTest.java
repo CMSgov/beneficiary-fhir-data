@@ -109,6 +109,11 @@ public final class SNFClaimTransformerTest {
         claim.getMedicareBenefitsExhaustedDate(),
         claim.getDiagnosisRelatedGroupCd());
 
+    TransformerTestUtils.assertDateEquals(
+        claim.getClaimAdmissionDate().get(), eob.getHospitalization().getStartElement());
+    TransformerTestUtils.assertDateEquals(
+        claim.getBeneficiaryDischargeDate().get(), eob.getHospitalization().getEndElement());
+
     // test common eob information between Inpatient, HHA, Hospice and SNF claims are set as
     // expected
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFEquals(

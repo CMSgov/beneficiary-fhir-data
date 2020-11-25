@@ -14,11 +14,10 @@ public final class CcwCodebookVariableTest {
     Assert.assertTrue(CcwCodebookVariable.values().length > 0);
   }
 
-  // /**
-  //  * Verifies that {@link gov.cms.bfd.model.codebook.data.CcwCodebookVariable#getVariable()}
-  // works
-  //  * as expected.
-  //  */
+  /**
+   * Verifies that {@link gov.cms.bfd.model.codebook.data.CcwCodebookVariable#getVariable()} works
+   * as expected.
+   */
   @Test
   public void getVariable() {
     for (CcwCodebookVariable variableEnum : CcwCodebookVariable.values()) {

@@ -63,9 +63,9 @@
         "type" : "string",
         "documentation" : "If true, exclude all SAMHSA-related resources"
       }, {
-        "name": "service-date",
-        "type": "date",
-        "documentation": "Include resources that completed in the given range"
+        "name" : "service-date",
+        "type" : "date",
+        "documentation" : "Include resources that completed in the given range"
       }, {
         "name" : "startIndex",
         "type" : "string",

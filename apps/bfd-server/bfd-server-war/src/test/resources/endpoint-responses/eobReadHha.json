@@ -185,18 +185,6 @@
         "display" : "Physician referral - The patient was admitted upon the recommendation of a personal physician."
       } ]
     }
-  }, {
-    "sequence" : 7,
-    "category" : {
-      "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
-        "code" : "https://bluebutton.cms.gov/resources/variables/clm_hosp_start_dt_id",
-        "display" : "Claim Hospice Start Date"
-      } ]
-    },
-    "timingPeriod" : {
-      "start" : "2015-06-23"
-    }
   } ],
   "careTeam" : [ {
     "sequence" : 2,
@@ -287,6 +275,9 @@
     "coverage" : {
       "reference" : "Coverage/part-b-567834"
     }
+  },
+  "hospitalization" : {
+    "start" : "2015-06-23"
   },
   "item" : [ {
     "extension" : [ {

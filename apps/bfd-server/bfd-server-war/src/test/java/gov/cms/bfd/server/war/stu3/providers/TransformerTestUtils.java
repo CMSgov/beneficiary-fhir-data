@@ -1890,6 +1890,14 @@ final class TransformerTestUtils {
       Optional<LocalDate> beneficiaryDischargeDate,
       Optional<BigDecimal> utilizedDays) {
 
+    TransformerTestUtils.assertDateEquals(
+        claimAdmissionDate.get(), eob.getHospitalization().getStartElement());
+
+    if (beneficiaryDischargeDate.isPresent()) {
+      TransformerTestUtils.assertDateEquals(
+          beneficiaryDischargeDate.get(), eob.getHospitalization().getEndElement());
+    }
+
     if (utilizedDays.isPresent()) {
       TransformerTestUtils.assertBenefitBalanceUsedIntEquals(
           BenefitCategory.MEDICAL,
