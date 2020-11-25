@@ -112,12 +112,12 @@ public final class HospiceClaimTransformerTest {
     HospiceClaimLine claimLine1 = claim.getLines().get(0);
     Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
-    Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
-
     TransformerTestUtils.assertExtensionQuantityEquals(
         CcwCodebookVariable.BENE_HOSPC_PRD_CNT,
         claim.getHospicePeriodCount(),
         eob.getHospitalization());
+
+    Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     TransformerTestUtils.assertHcpcsCodes(
         eobItem0,
