@@ -105,7 +105,7 @@ public final class DMEClaimTransformerTest {
     TransformerTestUtils.assertCareTeamEquals(
         claimLine1.getProviderNPI().get(), ClaimCareteamrole.PRIMARY, eob);
     CareTeamComponent performingCareTeamEntry =
-        TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
+        TransformerTestUtils.findCareTeamEntryForProviderNpi(
             claimLine1.getProviderNPI().get(), eob.getCareTeam());
     TransformerTestUtils.assertHasCoding(
         CcwCodebookVariable.PRVDR_SPCLTY,

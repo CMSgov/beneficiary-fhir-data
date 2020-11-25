@@ -133,7 +133,7 @@ public final class CarrierClaimTransformerTest {
     TransformerTestUtils.assertCareTeamEquals(
         claimLine1.getPerformingPhysicianNpi().get(), ClaimCareteamrole.PRIMARY, eob);
     CareTeamComponent performingCareTeamEntry =
-        TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
+        TransformerTestUtils.findCareTeamEntryForProviderNpi(
             claimLine1.getPerformingPhysicianNpi().get(), eob.getCareTeam());
     TransformerTestUtils.assertHasCoding(
         CcwCodebookVariable.PRVDR_SPCLTY,

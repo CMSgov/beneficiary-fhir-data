@@ -1044,7 +1044,7 @@ final class TransformerTestUtils {
    *     {@link Identifier} with the specified provider NPI, or else <code>null</code> if no such
    *     {@link CareTeamComponent} was found
    */
-  static CareTeamComponent findCareTeamEntryForProviderIdentifier(
+  static CareTeamComponent findCareTeamEntryForProviderNpi(
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
         TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
