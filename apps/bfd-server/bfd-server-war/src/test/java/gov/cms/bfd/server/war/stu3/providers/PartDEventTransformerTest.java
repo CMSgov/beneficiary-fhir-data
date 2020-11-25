@@ -69,7 +69,7 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "11";
-    String serviceProviderCode = IdentifierType.FTN.getSystem();
+    String serviceProviderCode = IdentifierType.TAX.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
