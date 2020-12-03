@@ -22,7 +22,7 @@ create table "Enrollment" (
     "partDRetireeDrugSubsidyInd" char(1),
     "medicaidDualEligibilityCode" varchar(2),
     "partDLowIncomeCostShareGroupCode" varchar(2),
-    constraint "Enrollment_pkey" primary key ("enrollmentId")
+    constraint "Enrollment_pkey" primary key ("beneficiaryId", "date")
 )
 ${logic.tablespaces-escape} tablespace "enrollment_ts"
 ;
