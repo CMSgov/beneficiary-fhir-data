@@ -509,7 +509,7 @@ public final class RifLoader implements AutoCloseable {
         LoadStrategy strategy = selectStrategy(recordAction);
         LoadAction loadAction;
 
-        boolean recordsIsBeneficiary = (record instanceof Beneficiary);
+        boolean recordsIsBeneficiary = (record instanceof Beneficiary) ? true : false;
 
         if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
           // Check to see if record already exists.

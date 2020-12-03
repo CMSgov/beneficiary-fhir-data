@@ -1,19 +1,13 @@
 package gov.cms.bfd.model.rif;
 
+import java.io.Serializable;
 import java.util.Optional;
 import javax.persistence.*;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "`Enrollment`")
-public class Enrollment {
-  @Column(name = "`EnrollmentId`", nullable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "enrollment_enrollmentId_seq")
-  @SequenceGenerator(
-      name = "enrollment_enrollmentId_seq",
-      sequenceName = "enrollment_enrollmentId_seq",
-      allocationSize = 10000)
-  private long enrollmentId;
-
+public class Enrollment implements Serializable {
   @Id
   @Column(name = "`beneficiaryId`", nullable = false)
   private String beneficiaryId;
@@ -81,24 +75,19 @@ public class Enrollment {
       Optional<String> partDLowIncomeCostShareGroupCode) {
     this.beneficiaryId = beneficiaryId;
     this.date = date;
-    this.fipsStateCntyCode = fipsStateCntyCode.get();
-    this.medicareStatusCode = medicareStatusCode.get();
-    this.entitlementBuyInInd = entitlementBuyInInd.get();
-    this.hmoIndicatorInd = hmoIndicatorInd.get();
-    this.partCContractNumberId = partCContractNumberId.get();
-    this.partCPbpNumberId = partCPbpNumberId.get();
-    this.partCPlanTypeCode = partCPlanTypeCode.get();
-    this.partDContractNumberId = partDContractNumberId.get();
-    this.partDPbpNumberId = partDPbpNumberId.get();
-    this.partDSegmentNumberId = partDSegmentNumberId.get();
-    this.partDRetireeDrugSubsidyInd = partDRetireeDrugSubsidyInd.get();
-    this.medicaidDualEligibilityCode = medicaidDualEligibilityCode.get();
-    this.partDLowIncomeCostShareGroupCode = partDLowIncomeCostShareGroupCode.get();
-  }
-
-  /** @return the identifier */
-  public long getEnrollmentId() {
-    return enrollmentId;
+    this.fipsStateCntyCode = fipsStateCntyCode.orElse(null);
+    this.medicareStatusCode = medicareStatusCode.orElse(null);
+    this.entitlementBuyInInd = entitlementBuyInInd.orElse(null);
+    this.hmoIndicatorInd = hmoIndicatorInd.orElse(null);
+    this.partCContractNumberId = partCContractNumberId.orElse(null);
+    this.partCPbpNumberId = partCPbpNumberId.orElse(null);
+    this.partCPlanTypeCode = partCPlanTypeCode.orElse(null);
+    this.partDContractNumberId = partDContractNumberId.orElse(null);
+    this.partDPbpNumberId = partDPbpNumberId.orElse(null);
+    this.partDSegmentNumberId = partDSegmentNumberId.orElse(null);
+    this.partDRetireeDrugSubsidyInd = partDRetireeDrugSubsidyInd.orElse(null);
+    this.medicaidDualEligibilityCode = medicaidDualEligibilityCode.orElse(null);
+    this.partDLowIncomeCostShareGroupCode = partDLowIncomeCostShareGroupCode.orElse(null);
   }
 
   public String getBeneficiaryId() {
