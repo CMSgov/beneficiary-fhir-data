@@ -623,7 +623,7 @@ public final class RifLoader implements AutoCloseable {
    */
   private static void updateEnrollment(
       EntityManager entityManager, LoadAction loadAction, Beneficiary beneficiaryRecord) {
-    List<Enrollment> enrollments = new ArrayList<Enrollment>();
+      List<Enrollment> enrollments = new ArrayList<Enrollment>();
     String date = null;
 
     if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
@@ -632,7 +632,25 @@ public final class RifLoader implements AutoCloseable {
       date = DateTime.now().year().toString();
     }
 
-    enrollments.add(
+
+        enrollments.add(new Enrollment(
+              beneficiaryRecord.getBeneficiaryId(),
+              date + "-01",
+              beneficiaryRecord.getFipsStateCntyJanCode(),
+              beneficiaryRecord.getMedicareStatusJanCode(),
+              beneficiaryRecord.getEntitlementBuyInJanInd(),
+              beneficiaryRecord.getHmoIndicatorJanInd(),
+              beneficiaryRecord.getPartCContractNumberJanId(),
+              beneficiaryRecord.getPartCPbpNumberJanId(),
+              beneficiaryRecord.getPartCPlanTypeJanCode(),
+              beneficiaryRecord.getPartDContractNumberJanId(),
+              beneficiaryRecord.getPartDPbpNumberJanId(),
+              beneficiaryRecord.getPartDSegmentNumberJanId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityJanCode(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupJanCode()));
+
+        enrollments.add(
         new Enrollment(
             beneficiaryRecord.getBeneficiaryId(),
             date + "-01",
@@ -846,13 +864,13 @@ public final class RifLoader implements AutoCloseable {
             beneficiaryRecord.getPartDSegmentNumberDecId(),
             beneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
             beneficiaryRecord.getMedicaidDualEligibilityDecCode(),
-            beneficiaryRecord.getPartDLowIncomeCostShareGroupDecCode()));
+            beneficiaryRecord.getPartDLowIncomeCostShareGroupDecCode())); */
 
     if (loadAction == LoadAction.UPDATED) {
       entityManager.merge(enrollments);
     } else {
       entityManager.persist(enrollments);
-    }
+    } 
   }
 
   /**

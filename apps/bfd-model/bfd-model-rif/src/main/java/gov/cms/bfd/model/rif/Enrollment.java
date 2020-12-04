@@ -13,8 +13,8 @@ public class Enrollment implements Serializable {
   private String beneficiaryId;
 
   @Id
-  @Column(name = "`date", nullable = false)
-  private String date;
+  @Column(name = "`yearMonth`", nullable = false)
+  private String yearMonth;
 
   @Column(name = "`fipsStateCntyCode`", nullable = true)
   private String fipsStateCntyCode;
@@ -59,7 +59,7 @@ public class Enrollment implements Serializable {
 
   public Enrollment(
       String beneficiaryId,
-      String date,
+      String yearMonth,
       Optional<String> fipsStateCntyCode,
       Optional<String> medicareStatusCode,
       Optional<Character> entitlementBuyInInd,
@@ -74,7 +74,7 @@ public class Enrollment implements Serializable {
       Optional<String> medicaidDualEligibilityCode,
       Optional<String> partDLowIncomeCostShareGroupCode) {
     this.beneficiaryId = beneficiaryId;
-    this.date = date;
+    this.yearMonth = yearMonth;
     this.fipsStateCntyCode = fipsStateCntyCode.orElse(null);
     this.medicareStatusCode = medicareStatusCode.orElse(null);
     this.entitlementBuyInInd = entitlementBuyInInd.orElse(null);
@@ -98,12 +98,12 @@ public class Enrollment implements Serializable {
     this.beneficiaryId = beneficiaryId;
   }
 
-  public String getDate() {
-    return date;
+  public String getYearMonth() {
+    return yearMonth;
   }
 
-  public void setDate(String date) {
-    this.date = date;
+  public void setYearMonth(String yearMonth) {
+    this.yearMonth = yearMonth;
   }
 
   public Optional<String> getFipsStateCntyCode() {
