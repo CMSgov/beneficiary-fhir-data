@@ -634,7 +634,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-01",
             beneficiaryRecord.getFipsStateCntyJanCode(),
             beneficiaryRecord.getMedicareStatusJanCode(),
@@ -652,7 +652,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-01",
             beneficiaryRecord.getFipsStateCntyJanCode(),
             beneficiaryRecord.getMedicareStatusJanCode(),
@@ -670,7 +670,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-02",
             beneficiaryRecord.getFipsStateCntyFebCode(),
             beneficiaryRecord.getMedicareStatusFebCode(),
@@ -688,7 +688,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-03",
             beneficiaryRecord.getFipsStateCntyMarCode(),
             beneficiaryRecord.getMedicareStatusMarCode(),
@@ -706,7 +706,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-04",
             beneficiaryRecord.getFipsStateCntyAprCode(),
             beneficiaryRecord.getMedicareStatusAprCode(),
@@ -724,7 +724,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-05",
             beneficiaryRecord.getFipsStateCntyMayCode(),
             beneficiaryRecord.getMedicareStatusMayCode(),
@@ -742,7 +742,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-06",
             beneficiaryRecord.getFipsStateCntyJunCode(),
             beneficiaryRecord.getMedicareStatusJunCode(),
@@ -760,7 +760,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-07",
             beneficiaryRecord.getFipsStateCntyJulCode(),
             beneficiaryRecord.getMedicareStatusJulCode(),
@@ -778,7 +778,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-08",
             beneficiaryRecord.getFipsStateCntyAugCode(),
             beneficiaryRecord.getMedicareStatusAugCode(),
@@ -796,7 +796,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-09",
             beneficiaryRecord.getFipsStateCntySeptCode(),
             beneficiaryRecord.getMedicareStatusSeptCode(),
@@ -814,7 +814,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-10",
             beneficiaryRecord.getFipsStateCntyOctCode(),
             beneficiaryRecord.getMedicareStatusOctCode(),
@@ -832,7 +832,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-11",
             beneficiaryRecord.getFipsStateCntyNovCode(),
             beneficiaryRecord.getMedicareStatusNovCode(),
@@ -850,7 +850,7 @@ public final class RifLoader implements AutoCloseable {
 
     enrollments.add(
         new Enrollment(
-            beneficiaryRecord.getBeneficiaryId(),
+            beneficiaryRecord,
             date + "-12",
             beneficiaryRecord.getFipsStateCntyDecCode(),
             beneficiaryRecord.getMedicareStatusDecCode(),

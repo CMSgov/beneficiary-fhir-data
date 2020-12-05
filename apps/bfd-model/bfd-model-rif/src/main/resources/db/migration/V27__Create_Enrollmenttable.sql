@@ -6,7 +6,7 @@
 ${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
 
 create table "Enrollments" (
-    "beneficiaryId" varchar(15) not null,
+    "parentBeneficiary" varchar(255) not null,
     "yearMonth" varchar(7) not null,
     "fipsStateCntyCode" varchar(5),
     "medicareStatusCode" varchar(2),
@@ -21,7 +21,7 @@ create table "Enrollments" (
     "partDRetireeDrugSubsidyInd" char(1),
     "medicaidDualEligibilityCode" varchar(2),
     "partDLowIncomeCostShareGroupCode" varchar(2),
-    constraint "Enrollment_pkey" primary key ("beneficiaryId", "yearMonth")
+    constraint "Enrollment_pkey" primary key ("parentBeneficiary", "yearMonth")
 )
 ${logic.tablespaces-escape} tablespace "enrollment_ts"
 ;
@@ -137,5 +137,5 @@ INSERT INTO "Enrollments"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
 alter table "Enrollments" 
-  add constraint "Enrollment_beneficiaryId_to_Beneficiary" foreign key ("beneficiaryId") 
+  add constraint "Enrollment_parentClaim_to_Beneficiary" foreign key ("parentBeneficiary") 
   references "Beneficiaries";
