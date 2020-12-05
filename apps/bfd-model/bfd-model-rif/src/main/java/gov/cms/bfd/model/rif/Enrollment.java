@@ -9,13 +9,6 @@ import javax.persistence.*;
 @Table(name = "`Enrollments`")
 public class Enrollment implements Serializable {
   @Id
-  @ManyToOne
-  @JoinColumn(
-      name = "`parentBeneficiary`",
-      foreignKey = @ForeignKey(name = "Enrollment_parentClaim_to_Beneficiary"))
-  private Beneficiary parentBeneficiary;
-
-  @Id
   @Column(name = "`yearMonth`", nullable = false)
   private String yearMonth;
 
@@ -61,7 +54,6 @@ public class Enrollment implements Serializable {
   public Enrollment() {}
 
   public Enrollment(
-      Beneficiary parentBeneficiary,
       String yearMonth,
       Optional<String> fipsStateCntyCode,
       Optional<String> medicareStatusCode,
@@ -76,7 +68,6 @@ public class Enrollment implements Serializable {
       Optional<Character> partDRetireeDrugSubsidyInd,
       Optional<String> medicaidDualEligibilityCode,
       Optional<String> partDLowIncomeCostShareGroupCode) {
-    this.parentBeneficiary = parentBeneficiary;
     this.yearMonth = yearMonth;
     this.fipsStateCntyCode = fipsStateCntyCode.orElse(null);
     this.medicareStatusCode = medicareStatusCode.orElse(null);
@@ -91,14 +82,6 @@ public class Enrollment implements Serializable {
     this.partDRetireeDrugSubsidyInd = partDRetireeDrugSubsidyInd.orElse(null);
     this.medicaidDualEligibilityCode = medicaidDualEligibilityCode.orElse(null);
     this.partDLowIncomeCostShareGroupCode = partDLowIncomeCostShareGroupCode.orElse(null);
-  }
-
-  public Beneficiary getParentBeneficiary() {
-    return parentBeneficiary;
-  }
-
-  public void setParentBeneficiary(Beneficiary parentBeneficiary) {
-    this.parentBeneficiary = parentBeneficiary;
   }
 
   public String getYearMonth() {

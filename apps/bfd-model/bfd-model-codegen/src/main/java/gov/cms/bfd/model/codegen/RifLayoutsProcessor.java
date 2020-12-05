@@ -199,7 +199,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                           null,
                           "MedicareBeneficiaryIdHistory",
                           "medicareBeneficiaryIdHistories")))
-              .setHasLines(false));
+              .setHasLines(false)
+              .setHasEnrollments(true));
       /*
        * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
        * DB), as they won't ever have changed data. We should change the RIF layout to
@@ -230,7 +231,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(
                       Arrays.asList("hicnUnhashed", "mbiHash")))
-              .setHasLines(false));
+              .setHasLines(false)
+              .setHasEnrollments(true));
 
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -239,7 +241,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntity("MedicareBeneficiaryIdHistory")
               .setHeaderTable("MedicareBeneficiaryIdHistory")
               .setHeaderEntityIdField("medicareBeneficiaryIdKey")
-              .setHasLines(false));
+              .setHasLines(false)
+              .setHasEnrollments(false));
 
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -247,7 +250,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntity("PartDEvent")
               .setHeaderTable("PartDEvents")
               .setHeaderEntityIdField("eventId")
-              .setHasLines(false));
+              .setHasLines(false)
+              .setHasEnrollments(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
@@ -255,7 +259,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("CarrierClaims")
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
-              .setLineTable("CarrierClaimLines"));
+              .setLineTable("CarrierClaimLines")
+              .setHasEnrollments(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
@@ -263,7 +268,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("InpatientClaims")
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
-              .setLineTable("InpatientClaimLines"));
+              .setLineTable("InpatientClaimLines")
+              .setHasEnrollments(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.outpatientSheet()))
@@ -271,7 +277,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("OutpatientClaims")
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
-              .setLineTable("OutpatientClaimLines"));
+              .setLineTable("OutpatientClaimLines")
+              .setHasEnrollments(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hhaSheet()))
@@ -279,7 +286,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("HHAClaims")
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
-              .setLineTable("HHAClaimLines"));
+              .setLineTable("HHAClaimLines")
+              .setHasEnrollments(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.dmeSheet()))
@@ -287,7 +295,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("DMEClaims")
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
-              .setLineTable("DMEClaimLines"));
+              .setLineTable("DMEClaimLines")
+              .setHasEnrollments(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hospiceSheet()))
@@ -295,7 +304,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("HospiceClaims")
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
-              .setLineTable("HospiceClaimLines"));
+              .setLineTable("HospiceClaimLines")
+              .setHasEnrollments(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
@@ -303,7 +313,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("SNFClaims")
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
-              .setLineTable("SNFClaimLines"));
+              .setLineTable("SNFClaimLines")
+              .setHasEnrollments(false));
     } finally {
       if (spreadsheetWorkbook != null) spreadsheetWorkbook.close();
     }
@@ -541,6 +552,39 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
+   * Generates a Java {@link Entity} for the line {@link RifField}s in the specified {@link
+   * MappingSpec}.
+   *
+   * @param mappingSpec the {@link MappingSpec} of the layout to generate code for
+   * @return the Java {@link Entity} that was generated
+   * @throws IOException An {@link IOException} may be thrown if errors are encountered trying to
+   *     generate source files.
+   */
+  private TypeSpec generateEnrollmentEntity() throws IOException {
+
+    // Create the Entity class.
+    AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
+    AnnotationSpec tableAnnotation =
+        AnnotationSpec.builder(Table.class).addMember("name", "$S", "`Enrollmentsss`").build();
+    TypeSpec.Builder lineEntity =
+        TypeSpec.classBuilder("Enrollmentsss")
+            .addAnnotation(entityAnnotation)
+            .addAnnotation(
+                AnnotationSpec.builder(IdClass.class)
+                    .addMember("value", "$T.class", "yearMonth")
+                    .build())
+            .addAnnotation(tableAnnotation)
+            .addModifiers(Modifier.PUBLIC);
+
+    TypeSpec lineEntityFinal = lineEntity.build();
+    JavaFile lineEntityClassFile =
+        JavaFile.builder("gov.cms.bfd.model.rif", lineEntityFinal).build();
+    lineEntityClassFile.writeTo(processingEnv.getFiler());
+
+    return lineEntityFinal;
+  }
+
+  /**
    * Generates a Java {@link Entity} for the header {@link RifField}s in the specified {@link
    * MappingSpec}.
    *
@@ -702,6 +746,38 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           MethodSpec.methodBuilder("getLines")
               .addModifiers(Modifier.PUBLIC)
               .addStatement("return $N", "lines")
+              .returns(childFieldType)
+              .build();
+      headerEntityClass.addMethod(childGetter);
+    }
+
+    // Add the parent-to-child join field and accessor, if appropriate.
+    if (mappingSpec.getHasEnrollments()) {
+
+      ParameterizedTypeName childFieldType =
+          ParameterizedTypeName.get(ClassName.get(List.class), mappingSpec.getEnrollmentEntity());
+
+      FieldSpec.Builder childField =
+          FieldSpec.builder(childFieldType, "enrollments", Modifier.PRIVATE)
+              .initializer("new $T<>()", LinkedList.class);
+
+      childField.addAnnotation(
+          AnnotationSpec.builder(OneToMany.class)
+              .addMember("mappedBy", "$S", mappingSpec.getEnrollmentEntityParentField())
+              .addMember("orphanRemoval", "$L", true)
+              .addMember("fetch", "$T.LAZY", FetchType.class)
+              .addMember("cascade", "$T.ALL", CascadeType.class)
+              .build());
+      childField.addAnnotation(
+          AnnotationSpec.builder(OrderBy.class)
+              .addMember("value", "$S", mappingSpec.getEntityEnrollmentField() + " ASC")
+              .build());
+      headerEntityClass.addField(childField.build());
+
+      MethodSpec childGetter =
+          MethodSpec.methodBuilder("getEnrollments")
+              .addModifiers(Modifier.PUBLIC)
+              .addStatement("return $N", "enrollments")
               .returns(childFieldType)
               .build();
       headerEntityClass.addMethod(childGetter);
