@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name = "`Enrollment`")
+@Table(name = "`Enrollments`")
 public class Enrollment implements Serializable {
   @Id
   @Column(name = "`beneficiaryId`", nullable = false)

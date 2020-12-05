@@ -5,7 +5,7 @@
 
 ${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
 
-create table "Enrollment" (
+create table "Enrollments" (
     "beneficiaryId" varchar(15) not null,
     "yearMonth" varchar(7) not null,
     "fipsStateCntyCode" varchar(5),
@@ -28,7 +28,7 @@ ${logic.tablespaces-escape} tablespace "enrollment_ts"
 
 
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-01') as "yearMonth", "fipsStateCntyJanCode",
     "medicareStatusJanCode", "entitlementBuyInJanInd", "hmoIndicatorJanInd",
     "partCContractNumberJanId", "partCPbpNumberJanId", "partCPlanTypeJanCode",
@@ -37,7 +37,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-02') as "yearMonth", "fipsStateCntyFebCode",
     "medicareStatusFebCode", "entitlementBuyInFebInd", "hmoIndicatorFebInd",
     "partCContractNumberFebId", "partCPbpNumberFebId", "partCPlanTypeFebCode",
@@ -46,7 +46,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-03') as "yearMonth", "fipsStateCntyMarCode",
     "medicareStatusMarCode", "entitlementBuyInMarInd", "hmoIndicatorMarInd",
     "partCContractNumberMarId", "partCPbpNumberMarId", "partCPlanTypeMarCode",
@@ -55,7 +55,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-04') as "yearMonth", "fipsStateCntyAprCode",
     "medicareStatusAprCode", "entitlementBuyInAprInd", "hmoIndicatorAprInd",
     "partCContractNumberAprId", "partCPbpNumberAprId", "partCPlanTypeAprCode",
@@ -64,7 +64,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-05') as "yearMonth", "fipsStateCntyMayCode",
     "medicareStatusMayCode", "entitlementBuyInMayInd", "hmoIndicatorMayInd",
     "partCContractNumberMayId", "partCPbpNumberMayId", "partCPlanTypeMayCode",
@@ -73,7 +73,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-06') as "yearMonth", "fipsStateCntyJunCode",
     "medicareStatusJunCode", "entitlementBuyInJunInd", "hmoIndicatorJunInd",
     "partCContractNumberJunId", "partCPbpNumberJunId", "partCPlanTypeJunCode",
@@ -82,7 +82,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-07') as "yearMonth", "fipsStateCntyJulCode",
     "medicareStatusJulCode", "entitlementBuyInJulInd", "hmoIndicatorJulInd",
     "partCContractNumberJulId", "partCPbpNumberJulId", "partCPlanTypeJulCode",
@@ -91,7 +91,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-08') as "yearMonth", "fipsStateCntyAugCode",
     "medicareStatusAugCode", "entitlementBuyInAugInd", "hmoIndicatorAugInd",
     "partCContractNumberAugId", "partCPbpNumberAugId", "partCPlanTypeAugCode",
@@ -100,7 +100,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-09') as "yearMonth", "fipsStateCntySeptCode",
     "medicareStatusSeptCode", "entitlementBuyInSeptInd", "hmoIndicatorSeptInd",
     "partCContractNumberSeptId", "partCPbpNumberSeptId", "partCPlanTypeSeptCode",
@@ -109,7 +109,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
    SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-10') as "yearMonth", "fipsStateCntyOctCode",
     "medicareStatusOctCode", "entitlementBuyInOctInd", "hmoIndicatorOctInd",
     "partCContractNumberOctId", "partCPbpNumberOctId", "partCPlanTypeOctCode",
@@ -118,7 +118,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;  
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-11') as "yearMonth", "fipsStateCntyNovCode",
     "medicareStatusNovCode", "entitlementBuyInNovInd", "hmoIndicatorNovInd",
     "partCContractNumberNovId", "partCPbpNumberNovId", "partCPlanTypeNovCode",
@@ -127,7 +127,7 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;  
 
-INSERT INTO "Enrollment"
+INSERT INTO "Enrollments"
     SELECT  "beneficiaryId", CONCAT("beneEnrollmentReferenceYear", '-12') as "yearMonth", "fipsStateCntyDecCode",
     "medicareStatusDecCode", "entitlementBuyInDecInd", "hmoIndicatorDecInd",
     "partCContractNumberDecId", "partCPbpNumberDecId", "partCPlanTypeDecCode",
@@ -136,6 +136,6 @@ INSERT INTO "Enrollment"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
-alter table "Enrollment" 
+alter table "Enrollments" 
   add constraint "Enrollment_beneficiaryId_to_Beneficiary" foreign key ("beneficiaryId") 
   references "Beneficiaries";
