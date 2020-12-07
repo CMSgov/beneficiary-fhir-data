@@ -348,13 +348,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       lineEntity = Optional.of(generateLineEntity(mappingSpec));
     }
 
-    generateTestEntity();
-
     /*
      * Then, create the JPA Entity for the "grouped" fields, containing:
      * fields, accessors, and a RIF-to-JPA-Entity parser.
      */
     TypeSpec headerEntity = generateHeaderEntity(mappingSpec);
+
+    TypeSpec enrollmentEntity = generateEnrollmentEntity();
 
     /*
      * Then, create code that can be used to parse incoming RIF rows into
@@ -553,7 +553,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     return lineEntityFinal;
   }
 
-  private TypeSpec generateTestEntity() throws IOException {
+  private TypeSpec generateEnrollmentEntity() throws IOException {
 
     // Create the Entity class.
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
