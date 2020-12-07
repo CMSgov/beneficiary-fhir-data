@@ -232,7 +232,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(
                       Arrays.asList("hicnUnhashed", "mbiHash")))
               .setHasLines(false)
-              .setHasEnrollments(true));
+              .setHasEnrollments(false));
 
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -347,6 +347,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     if (mappingSpec.getHasLines()) {
       lineEntity = Optional.of(generateLineEntity(mappingSpec));
     }
+
+    generateTestEntity();
 
     /*
      * Then, create the JPA Entity for the "grouped" fields, containing:
@@ -551,30 +553,256 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     return lineEntityFinal;
   }
 
-  /**
-   * Generates a Java {@link Entity} for the line {@link RifField}s in the specified {@link
-   * MappingSpec}.
-   *
-   * @param mappingSpec the {@link MappingSpec} of the layout to generate code for
-   * @return the Java {@link Entity} that was generated
-   * @throws IOException An {@link IOException} may be thrown if errors are encountered trying to
-   *     generate source files.
-   */
-  private TypeSpec generateEnrollmentEntity() throws IOException {
+  private TypeSpec generateTestEntity() throws IOException {
 
     // Create the Entity class.
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
     AnnotationSpec tableAnnotation =
-        AnnotationSpec.builder(Table.class).addMember("name", "$S", "`Enrollmentsss`").build();
+        AnnotationSpec.builder(Table.class).addMember("name", "$S", "`Enrollments`").build();
     TypeSpec.Builder lineEntity =
-        TypeSpec.classBuilder("Enrollmentsss")
+        TypeSpec.classBuilder("Enrollment")
             .addAnnotation(entityAnnotation)
             .addAnnotation(
                 AnnotationSpec.builder(IdClass.class)
-                    .addMember("value", "$T.class", "yearMonth")
+                    .addMember(
+                        "value",
+                        "$T.class",
+                        ClassName.get("gov.cms.bfd.model.rif", "Enrollment")
+                            .nestedClass("EnrollmentId"))
                     .build())
             .addAnnotation(tableAnnotation)
             .addModifiers(Modifier.PUBLIC);
+
+    // Create the @IdClass needed for the composite primary key.
+    TypeSpec.Builder lineIdClass =
+        TypeSpec.classBuilder("EnrollmentId")
+            .addSuperinterface(Serializable.class)
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+    lineIdClass.addField(
+        FieldSpec.builder(
+                long.class, "serialVersionUID", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+            .initializer("$L", 1L)
+            .build());
+
+    TypeName parentClaimIdFieldType = ClassName.get(String.class);
+    FieldSpec.Builder parentIdField =
+        FieldSpec.builder(parentClaimIdFieldType, "parentBeneficiary", Modifier.PRIVATE);
+    lineIdClass.addField(parentIdField.build());
+    MethodSpec.Builder parentGetter =
+        MethodSpec.methodBuilder("getParentBeneficiary")
+            .addStatement("return $N", "parentBeneficiary")
+            .returns(parentClaimIdFieldType);
+    lineIdClass.addMethod(parentGetter.build());
+    // Add a field to that @IdClass class for the line number.
+
+    TypeName lineNumberFieldType = ClassName.get(String.class);
+    FieldSpec.Builder lineNumberIdField =
+        FieldSpec.builder(lineNumberFieldType, "yearMonth", Modifier.PRIVATE);
+    lineIdClass.addField(lineNumberIdField.build());
+    MethodSpec.Builder lineNumberGetter =
+        MethodSpec.methodBuilder("get" + capitalize("yearMonth"))
+            .addStatement("return $N", "yearMonth")
+            .returns(lineNumberFieldType);
+    lineIdClass.addMethod(lineNumberGetter.build());
+
+    // Add hashCode() and equals(...) to that @IdClass.
+    lineIdClass.addMethod(generateHashCodeMethod(parentIdField.build(), lineNumberIdField.build()));
+    lineIdClass.addMethod(
+        generateEqualsMethod(
+            ClassName.get(Object.class), parentIdField.build(), lineNumberIdField.build()));
+
+    // Finalize the @IdClass and nest it inside the Entity class.
+    lineEntity.addType(lineIdClass.build());
+
+    // Add a field and accessor to the "line" Entity for the parent.
+    FieldSpec parentClaimField =
+        FieldSpec.builder(
+                ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"),
+                "parentBeneficiary",
+                Modifier.PRIVATE)
+            .addAnnotation(Id.class)
+            .addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
+            .addAnnotation(
+                AnnotationSpec.builder(JoinColumn.class)
+                    .addMember("name", "$S", "`parentBeneficiary`")
+                    .addMember(
+                        "foreignKey",
+                        "@$T(name = $S)",
+                        ForeignKey.class,
+                        String.format(
+                            "%s_%s_to_%s", "Enrollments", "parentBeneficiary", "Beneficiary"))
+                    .build())
+            .build();
+    lineEntity.addField(parentClaimField);
+    MethodSpec parentClaimGetter =
+        MethodSpec.methodBuilder(calculateGetterName(parentClaimField))
+            .addModifiers(Modifier.PUBLIC)
+            .addStatement("return $N", "parentBeneficiary")
+            .returns(ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"))
+            .build();
+    lineEntity.addMethod(parentClaimGetter);
+    MethodSpec.Builder parentClaimSetter =
+        MethodSpec.methodBuilder(calculateSetterName(parentClaimField))
+            .addModifiers(Modifier.PUBLIC)
+            .returns(void.class)
+            .addParameter(
+                ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"), parentClaimField.name);
+    addSetterStatement(false, parentClaimField, parentClaimSetter);
+    lineEntity.addMethod(parentClaimSetter.build());
+
+    createEnrollmentFields(
+        lineEntity,
+        true,
+        false,
+        false,
+        TypeName.CHAR,
+        "yearMonth",
+        RifColumnType.CHAR,
+        Optional.of(7),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "fipsStateCntyCode",
+        RifColumnType.CHAR,
+        Optional.of(5),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "medicareStatusCode",
+        RifColumnType.CHAR,
+        Optional.of(2),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "entitlementBuyInInd",
+        RifColumnType.CHAR,
+        Optional.of(1),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "hmoIndicatorInd",
+        RifColumnType.CHAR,
+        Optional.of(1),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "partCContractNumberId",
+        RifColumnType.CHAR,
+        Optional.of(5),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "partCPbpNumberId",
+        RifColumnType.CHAR,
+        Optional.of(3),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "partCPlanTypeCode",
+        RifColumnType.CHAR,
+        Optional.of(3),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "partDContractNumberId",
+        RifColumnType.CHAR,
+        Optional.of(5),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "partDPbpNumberId",
+        RifColumnType.CHAR,
+        Optional.of(3),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "partDSegmentNumberId",
+        RifColumnType.CHAR,
+        Optional.of(3),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "partDRetireeDrugSubsidyInd",
+        RifColumnType.CHAR,
+        Optional.of(1),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "medicaidDualEligibilityCode",
+        RifColumnType.CHAR,
+        Optional.of(2),
+        Optional.empty());
+
+    createEnrollmentFields(
+        lineEntity,
+        false,
+        false,
+        true,
+        TypeName.CHAR,
+        "partDLowIncomeCostShareGroupCode",
+        RifColumnType.CHAR,
+        Optional.of(2),
+        Optional.empty());
 
     TypeSpec lineEntityFinal = lineEntity.build();
     JavaFile lineEntityClassFile =
@@ -1578,5 +1806,145 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+  }
+
+  private static void createEnrollmentFields(
+      TypeSpec.Builder lineEntity,
+      boolean isId,
+      boolean isTransient,
+      boolean isColumnOptional,
+      TypeName fieldType,
+      String fieldName,
+      RifColumnType type,
+      Optional<Integer> columnLength,
+      Optional<Integer> columnScale) {
+    FieldSpec lineField =
+        FieldSpec.builder(
+                selectJavaFieldType(type, isColumnOptional, columnLength, columnScale),
+                fieldName,
+                Modifier.PRIVATE)
+            .addAnnotations(
+                createEnrollmentAnnotations(
+                    isId,
+                    isTransient,
+                    isColumnOptional,
+                    fieldName,
+                    type,
+                    columnLength,
+                    columnScale))
+            .build();
+    lineEntity.addField(lineField);
+
+    MethodSpec.Builder lineFieldGetter =
+        MethodSpec.methodBuilder(calculateGetterName(lineField))
+            .addModifiers(Modifier.PUBLIC)
+            .returns(selectJavaFieldType(type, isColumnOptional, columnLength, columnScale));
+    addGetterStatement(isColumnOptional, lineField, lineFieldGetter);
+    lineEntity.addMethod(lineFieldGetter.build());
+
+    MethodSpec.Builder lineFieldSetter =
+        MethodSpec.methodBuilder(calculateSetterName(lineField))
+            .addModifiers(Modifier.PUBLIC)
+            .returns(void.class)
+            .addParameter(
+                selectJavaFieldType(type, isColumnOptional, columnLength, columnScale),
+                lineField.name);
+    addSetterStatement(isColumnOptional, lineField, lineFieldSetter);
+    lineEntity.addMethod(lineFieldSetter.build());
+  }
+
+  private static List<AnnotationSpec> createEnrollmentAnnotations(
+      boolean isId,
+      boolean isTransient,
+      boolean isColumnOptional,
+      String fieldName,
+      RifColumnType type,
+      Optional<Integer> columnLength,
+      Optional<Integer> columnScale) {
+    LinkedList<AnnotationSpec> annotations = new LinkedList<>();
+
+    // Add an @Id annotation, if appropriate.
+    if (isId) {
+      AnnotationSpec.Builder idAnnotation = AnnotationSpec.builder(Id.class);
+      annotations.add(idAnnotation.build());
+    }
+    // Add an @Column annotation to every non-transient column.
+    if (!isTransient) {
+      AnnotationSpec.Builder columnAnnotation =
+          AnnotationSpec.builder(Column.class)
+              .addMember("name", "$S", "`" + fieldName + "`")
+              .addMember("nullable", "$L", isColumnOptional);
+      if (type == RifColumnType.CHAR && columnLength.isPresent()) {
+        columnAnnotation.addMember("length", "$L", columnLength.get());
+      } else if (type == RifColumnType.NUM) {
+        /*
+         * In SQL, the precision is the number of digits in the unscaled value, e.g.
+         * "123.45" has a precision of 5. The scale is the number of digits to the right
+         * of the decimal point, e.g. "123.45" has a scale of 2.
+         */
+
+        if (columnLength.isPresent() && columnScale.isPresent()) {
+          columnAnnotation.addMember("precision", "$L", columnLength.get());
+          columnAnnotation.addMember("scale", "$L", columnScale.get());
+        } else {
+          /*
+           * Unfortunately, Hibernate's SQL schema generation (HBM2DDL) doesn't correctly
+           * handle SQL numeric datatypes that don't have a defined precision and scale.
+           * What it _should_ do is represent those types in PostgreSQL as a "NUMERIC",
+           * but what it does instead is insert a default precision and scale as
+           * "NUMBER(19, 2)". The only way to force the correct behavior is to specify a
+           * columnDefinition, so we do that. This leads to incorrect behavior with HSQL
+           * (for different reasons), but fortunately that doesn't happen to cause
+           * problems with our tests.
+           */
+          StringBuilder columnDefinition = new StringBuilder();
+          columnDefinition.append("numeric");
+          if (columnLength.isPresent() || columnScale.isPresent()) {
+            columnDefinition.append('(');
+            if (columnLength.isPresent()) {
+              columnDefinition.append(columnLength.get());
+            }
+            if (columnScale.isPresent()) {
+              columnDefinition.append(", ");
+              columnDefinition.append(columnScale.get());
+            }
+            columnDefinition.append(')');
+          }
+          columnAnnotation.addMember("columnDefinition", "$S", columnDefinition.toString());
+        }
+      }
+      annotations.add(columnAnnotation.build());
+    } else {
+      annotations.add(AnnotationSpec.builder(Transient.class).build());
+    }
+
+    return annotations;
+  }
+
+  private static TypeName selectJavaFieldType(
+      RifColumnType type,
+      boolean isColumnOptional,
+      Optional<Integer> columnLength,
+      Optional<Integer> columnScale) {
+    if (type == RifColumnType.CHAR
+        && columnLength.orElse(Integer.MAX_VALUE) == 1
+        && !isColumnOptional) return TypeName.CHAR;
+    else if (type == RifColumnType.CHAR
+        && columnLength.orElse(Integer.MAX_VALUE) == 1
+        && isColumnOptional) return ClassName.get(Character.class);
+    else if (type == RifColumnType.CHAR) return ClassName.get(String.class);
+    else if (type == RifColumnType.DATE && columnLength.orElse(0) == 8)
+      return ClassName.get(LocalDate.class);
+    else if (type == RifColumnType.TIMESTAMP && columnLength.orElse(0) == 20)
+      return ClassName.get(Instant.class);
+    else if (type == RifColumnType.NUM && columnScale.orElse(Integer.MAX_VALUE) > 0)
+      return ClassName.get(BigDecimal.class);
+    else if (type == RifColumnType.NUM
+        && columnScale.orElse(Integer.MAX_VALUE) == 0
+        && !isColumnOptional) return TypeName.INT;
+    else if (type == RifColumnType.NUM
+        && columnScale.orElse(Integer.MAX_VALUE) == 0
+        && isColumnOptional) return ClassName.get(Integer.class);
+    else throw new IllegalArgumentException("Unhandled field type: " + type.name());
   }
 }
