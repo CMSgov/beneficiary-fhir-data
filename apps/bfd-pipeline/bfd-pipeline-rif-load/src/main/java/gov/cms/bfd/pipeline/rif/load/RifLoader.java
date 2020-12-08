@@ -71,7 +71,6 @@ import org.apache.commons.csv.CSVPrinter;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.hibernate.tool.schema.Action;
-import org.joda.time.DateTime;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
@@ -622,251 +621,226 @@ public final class RifLoader implements AutoCloseable {
    * @param beneficiaryRecord the {@link Beneficiary} record being processed
    */
   private static void updateEnrollment(EntityManager entityManager, Beneficiary beneficiaryRecord) {
-    List<Enrollment> enrollments = new ArrayList<Enrollment>();
-    String date = null;
 
     if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
-      date = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().toString();
-    } else {
-      date = DateTime.now().year().toString();
+      String date = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().toString();
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "01"),
+              beneficiaryRecord.getEntitlementBuyInJanInd(),
+              beneficiaryRecord.getFipsStateCntyJanCode(),
+              beneficiaryRecord.getHmoIndicatorJanInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityJanCode(),
+              beneficiaryRecord.getMedicareStatusJanCode(),
+              beneficiaryRecord.getPartCContractNumberJanId(),
+              beneficiaryRecord.getPartCPbpNumberJanId(),
+              beneficiaryRecord.getPartCPlanTypeJanCode(),
+              beneficiaryRecord.getPartDContractNumberJanId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupJanCode(),
+              beneficiaryRecord.getPartDPbpNumberJanId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
+              beneficiaryRecord.getPartDSegmentNumberJanId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "02"),
+              beneficiaryRecord.getEntitlementBuyInFebInd(),
+              beneficiaryRecord.getFipsStateCntyFebCode(),
+              beneficiaryRecord.getHmoIndicatorFebInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityFebCode(),
+              beneficiaryRecord.getMedicareStatusFebCode(),
+              beneficiaryRecord.getPartCContractNumberFebId(),
+              beneficiaryRecord.getPartCPbpNumberFebId(),
+              beneficiaryRecord.getPartCPlanTypeFebCode(),
+              beneficiaryRecord.getPartDContractNumberFebId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupFebCode(),
+              beneficiaryRecord.getPartDPbpNumberFebId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyFebInd(),
+              beneficiaryRecord.getPartDSegmentNumberFebId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "03"),
+              beneficiaryRecord.getEntitlementBuyInMarInd(),
+              beneficiaryRecord.getFipsStateCntyMarCode(),
+              beneficiaryRecord.getHmoIndicatorMarInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityMarCode(),
+              beneficiaryRecord.getMedicareStatusMarCode(),
+              beneficiaryRecord.getPartCContractNumberMarId(),
+              beneficiaryRecord.getPartCPbpNumberMarId(),
+              beneficiaryRecord.getPartCPlanTypeMarCode(),
+              beneficiaryRecord.getPartDContractNumberMarId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupMarCode(),
+              beneficiaryRecord.getPartDPbpNumberMarId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyMarInd(),
+              beneficiaryRecord.getPartDSegmentNumberMarId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "04"),
+              beneficiaryRecord.getEntitlementBuyInAprInd(),
+              beneficiaryRecord.getFipsStateCntyAprCode(),
+              beneficiaryRecord.getHmoIndicatorAprInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityAprCode(),
+              beneficiaryRecord.getMedicareStatusAprCode(),
+              beneficiaryRecord.getPartCContractNumberAprId(),
+              beneficiaryRecord.getPartCPbpNumberAprId(),
+              beneficiaryRecord.getPartCPlanTypeAprCode(),
+              beneficiaryRecord.getPartDContractNumberAprId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupAprCode(),
+              beneficiaryRecord.getPartDPbpNumberAprId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyAprInd(),
+              beneficiaryRecord.getPartDSegmentNumberAprId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "05"),
+              beneficiaryRecord.getEntitlementBuyInMayInd(),
+              beneficiaryRecord.getFipsStateCntyMayCode(),
+              beneficiaryRecord.getHmoIndicatorMayInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityMayCode(),
+              beneficiaryRecord.getMedicareStatusMayCode(),
+              beneficiaryRecord.getPartCContractNumberMayId(),
+              beneficiaryRecord.getPartCPbpNumberMayId(),
+              beneficiaryRecord.getPartCPlanTypeMayCode(),
+              beneficiaryRecord.getPartDContractNumberMayId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupMayCode(),
+              beneficiaryRecord.getPartDPbpNumberMayId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyMayInd(),
+              beneficiaryRecord.getPartDSegmentNumberMayId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "06"),
+              beneficiaryRecord.getEntitlementBuyInJunInd(),
+              beneficiaryRecord.getFipsStateCntyJunCode(),
+              beneficiaryRecord.getHmoIndicatorJunInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityJunCode(),
+              beneficiaryRecord.getMedicareStatusJunCode(),
+              beneficiaryRecord.getPartCContractNumberJunId(),
+              beneficiaryRecord.getPartCPbpNumberJunId(),
+              beneficiaryRecord.getPartCPlanTypeJunCode(),
+              beneficiaryRecord.getPartDContractNumberJunId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupJunCode(),
+              beneficiaryRecord.getPartDPbpNumberJunId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyJunInd(),
+              beneficiaryRecord.getPartDSegmentNumberJunId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "07"),
+              beneficiaryRecord.getEntitlementBuyInJulInd(),
+              beneficiaryRecord.getFipsStateCntyJulCode(),
+              beneficiaryRecord.getHmoIndicatorJulInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityJulCode(),
+              beneficiaryRecord.getMedicareStatusJulCode(),
+              beneficiaryRecord.getPartCContractNumberJulId(),
+              beneficiaryRecord.getPartCPbpNumberJulId(),
+              beneficiaryRecord.getPartCPlanTypeJulCode(),
+              beneficiaryRecord.getPartDContractNumberJulId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupJulCode(),
+              beneficiaryRecord.getPartDPbpNumberJulId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyJulInd(),
+              beneficiaryRecord.getPartDSegmentNumberJulId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "08"),
+              beneficiaryRecord.getEntitlementBuyInAugInd(),
+              beneficiaryRecord.getFipsStateCntyAugCode(),
+              beneficiaryRecord.getHmoIndicatorAugInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityAugCode(),
+              beneficiaryRecord.getMedicareStatusAugCode(),
+              beneficiaryRecord.getPartCContractNumberAugId(),
+              beneficiaryRecord.getPartCPbpNumberAugId(),
+              beneficiaryRecord.getPartCPlanTypeAugCode(),
+              beneficiaryRecord.getPartDContractNumberAugId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupAugCode(),
+              beneficiaryRecord.getPartDPbpNumberAugId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyAugInd(),
+              beneficiaryRecord.getPartDSegmentNumberAugId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "09"),
+              beneficiaryRecord.getEntitlementBuyInSeptInd(),
+              beneficiaryRecord.getFipsStateCntySeptCode(),
+              beneficiaryRecord.getHmoIndicatorSeptInd(),
+              beneficiaryRecord.getMedicaidDualEligibilitySeptCode(),
+              beneficiaryRecord.getMedicareStatusSeptCode(),
+              beneficiaryRecord.getPartCContractNumberSeptId(),
+              beneficiaryRecord.getPartCPbpNumberSeptId(),
+              beneficiaryRecord.getPartCPlanTypeSeptCode(),
+              beneficiaryRecord.getPartDContractNumberSeptId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupSeptCode(),
+              beneficiaryRecord.getPartDPbpNumberSeptId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidySeptInd(),
+              beneficiaryRecord.getPartDSegmentNumberSeptId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "10"),
+              beneficiaryRecord.getEntitlementBuyInOctInd(),
+              beneficiaryRecord.getFipsStateCntyOctCode(),
+              beneficiaryRecord.getHmoIndicatorOctInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityOctCode(),
+              beneficiaryRecord.getMedicareStatusOctCode(),
+              beneficiaryRecord.getPartCContractNumberOctId(),
+              beneficiaryRecord.getPartCPbpNumberOctId(),
+              beneficiaryRecord.getPartCPlanTypeOctCode(),
+              beneficiaryRecord.getPartDContractNumberOctId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupOctCode(),
+              beneficiaryRecord.getPartDPbpNumberOctId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyOctInd(),
+              beneficiaryRecord.getPartDSegmentNumberOctId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "11"),
+              beneficiaryRecord.getEntitlementBuyInNovInd(),
+              beneficiaryRecord.getFipsStateCntyNovCode(),
+              beneficiaryRecord.getHmoIndicatorNovInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityNovCode(),
+              beneficiaryRecord.getMedicareStatusNovCode(),
+              beneficiaryRecord.getPartCContractNumberNovId(),
+              beneficiaryRecord.getPartCPbpNumberNovId(),
+              beneficiaryRecord.getPartCPlanTypeNovCode(),
+              beneficiaryRecord.getPartDContractNumberNovId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupNovCode(),
+              beneficiaryRecord.getPartDPbpNumberNovId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyNovInd(),
+              beneficiaryRecord.getPartDSegmentNumberNovId()));
+
+      entityManager.merge(
+          getEnrollment(
+              beneficiaryRecord,
+              String.format("%s-%s", date, "12"),
+              beneficiaryRecord.getEntitlementBuyInDecInd(),
+              beneficiaryRecord.getFipsStateCntyDecCode(),
+              beneficiaryRecord.getHmoIndicatorDecInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityDecCode(),
+              beneficiaryRecord.getMedicareStatusDecCode(),
+              beneficiaryRecord.getPartCContractNumberDecId(),
+              beneficiaryRecord.getPartCPbpNumberDecId(),
+              beneficiaryRecord.getPartCPlanTypeDecCode(),
+              beneficiaryRecord.getPartDContractNumberDecId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupDecCode(),
+              beneficiaryRecord.getPartDPbpNumberDecId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
+              beneficiaryRecord.getPartDSegmentNumberDecId()));
     }
-
-    /*  enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-01",
-               beneficiaryRecord.getFipsStateCntyJanCode(),
-               beneficiaryRecord.getMedicareStatusJanCode(),
-               beneficiaryRecord.getEntitlementBuyInJanInd(),
-               beneficiaryRecord.getHmoIndicatorJanInd(),
-               beneficiaryRecord.getPartCContractNumberJanId(),
-               beneficiaryRecord.getPartCPbpNumberJanId(),
-               beneficiaryRecord.getPartCPlanTypeJanCode(),
-               beneficiaryRecord.getPartDContractNumberJanId(),
-               beneficiaryRecord.getPartDPbpNumberJanId(),
-               beneficiaryRecord.getPartDSegmentNumberJanId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityJanCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupJanCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-01",
-               beneficiaryRecord.getFipsStateCntyJanCode(),
-               beneficiaryRecord.getMedicareStatusJanCode(),
-               beneficiaryRecord.getEntitlementBuyInJanInd(),
-               beneficiaryRecord.getHmoIndicatorJanInd(),
-               beneficiaryRecord.getPartCContractNumberJanId(),
-               beneficiaryRecord.getPartCPbpNumberJanId(),
-               beneficiaryRecord.getPartCPlanTypeJanCode(),
-               beneficiaryRecord.getPartDContractNumberJanId(),
-               beneficiaryRecord.getPartDPbpNumberJanId(),
-               beneficiaryRecord.getPartDSegmentNumberJanId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityJanCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupJanCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-02",
-               beneficiaryRecord.getFipsStateCntyFebCode(),
-               beneficiaryRecord.getMedicareStatusFebCode(),
-               beneficiaryRecord.getEntitlementBuyInFebInd(),
-               beneficiaryRecord.getHmoIndicatorFebInd(),
-               beneficiaryRecord.getPartCContractNumberFebId(),
-               beneficiaryRecord.getPartCPbpNumberFebId(),
-               beneficiaryRecord.getPartCPlanTypeFebCode(),
-               beneficiaryRecord.getPartDContractNumberFebId(),
-               beneficiaryRecord.getPartDPbpNumberFebId(),
-               beneficiaryRecord.getPartDSegmentNumberFebId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyFebInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityFebCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupFebCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-03",
-               beneficiaryRecord.getFipsStateCntyMarCode(),
-               beneficiaryRecord.getMedicareStatusMarCode(),
-               beneficiaryRecord.getEntitlementBuyInMarInd(),
-               beneficiaryRecord.getHmoIndicatorMarInd(),
-               beneficiaryRecord.getPartCContractNumberMarId(),
-               beneficiaryRecord.getPartCPbpNumberMarId(),
-               beneficiaryRecord.getPartCPlanTypeMarCode(),
-               beneficiaryRecord.getPartDContractNumberMarId(),
-               beneficiaryRecord.getPartDPbpNumberMarId(),
-               beneficiaryRecord.getPartDSegmentNumberMarId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyMarInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityMarCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupMarCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-04",
-               beneficiaryRecord.getFipsStateCntyAprCode(),
-               beneficiaryRecord.getMedicareStatusAprCode(),
-               beneficiaryRecord.getEntitlementBuyInAprInd(),
-               beneficiaryRecord.getHmoIndicatorAprInd(),
-               beneficiaryRecord.getPartCContractNumberAprId(),
-               beneficiaryRecord.getPartCPbpNumberAprId(),
-               beneficiaryRecord.getPartCPlanTypeAprCode(),
-               beneficiaryRecord.getPartDContractNumberAprId(),
-               beneficiaryRecord.getPartDPbpNumberAprId(),
-               beneficiaryRecord.getPartDSegmentNumberAprId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyAprInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityAprCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupAprCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-05",
-               beneficiaryRecord.getFipsStateCntyMayCode(),
-               beneficiaryRecord.getMedicareStatusMayCode(),
-               beneficiaryRecord.getEntitlementBuyInMayInd(),
-               beneficiaryRecord.getHmoIndicatorMayInd(),
-               beneficiaryRecord.getPartCContractNumberMayId(),
-               beneficiaryRecord.getPartCPbpNumberMayId(),
-               beneficiaryRecord.getPartCPlanTypeMayCode(),
-               beneficiaryRecord.getPartDContractNumberMayId(),
-               beneficiaryRecord.getPartDPbpNumberMayId(),
-               beneficiaryRecord.getPartDSegmentNumberMayId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyMayInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityMayCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupMayCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-06",
-               beneficiaryRecord.getFipsStateCntyJunCode(),
-               beneficiaryRecord.getMedicareStatusJunCode(),
-               beneficiaryRecord.getEntitlementBuyInJunInd(),
-               beneficiaryRecord.getHmoIndicatorJunInd(),
-               beneficiaryRecord.getPartCContractNumberJunId(),
-               beneficiaryRecord.getPartCPbpNumberJunId(),
-               beneficiaryRecord.getPartCPlanTypeJunCode(),
-               beneficiaryRecord.getPartDContractNumberJunId(),
-               beneficiaryRecord.getPartDPbpNumberJunId(),
-               beneficiaryRecord.getPartDSegmentNumberJunId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyJunInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityJunCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupJunCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-07",
-               beneficiaryRecord.getFipsStateCntyJulCode(),
-               beneficiaryRecord.getMedicareStatusJulCode(),
-               beneficiaryRecord.getEntitlementBuyInJulInd(),
-               beneficiaryRecord.getHmoIndicatorJulInd(),
-               beneficiaryRecord.getPartCContractNumberJulId(),
-               beneficiaryRecord.getPartCPbpNumberJulId(),
-               beneficiaryRecord.getPartCPlanTypeJulCode(),
-               beneficiaryRecord.getPartDContractNumberJulId(),
-               beneficiaryRecord.getPartDPbpNumberJulId(),
-               beneficiaryRecord.getPartDSegmentNumberJulId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyJulInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityJulCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupJulCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-08",
-               beneficiaryRecord.getFipsStateCntyAugCode(),
-               beneficiaryRecord.getMedicareStatusAugCode(),
-               beneficiaryRecord.getEntitlementBuyInAugInd(),
-               beneficiaryRecord.getHmoIndicatorAugInd(),
-               beneficiaryRecord.getPartCContractNumberAugId(),
-               beneficiaryRecord.getPartCPbpNumberAugId(),
-               beneficiaryRecord.getPartCPlanTypeAugCode(),
-               beneficiaryRecord.getPartDContractNumberAugId(),
-               beneficiaryRecord.getPartDPbpNumberAugId(),
-               beneficiaryRecord.getPartDSegmentNumberAugId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyAugInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityAugCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupAugCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-09",
-               beneficiaryRecord.getFipsStateCntySeptCode(),
-               beneficiaryRecord.getMedicareStatusSeptCode(),
-               beneficiaryRecord.getEntitlementBuyInSeptInd(),
-               beneficiaryRecord.getHmoIndicatorSeptInd(),
-               beneficiaryRecord.getPartCContractNumberSeptId(),
-               beneficiaryRecord.getPartCPbpNumberSeptId(),
-               beneficiaryRecord.getPartCPlanTypeSeptCode(),
-               beneficiaryRecord.getPartDContractNumberSeptId(),
-               beneficiaryRecord.getPartDPbpNumberSeptId(),
-               beneficiaryRecord.getPartDSegmentNumberSeptId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidySeptInd(),
-               beneficiaryRecord.getMedicaidDualEligibilitySeptCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupSeptCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-10",
-               beneficiaryRecord.getFipsStateCntyOctCode(),
-               beneficiaryRecord.getMedicareStatusOctCode(),
-               beneficiaryRecord.getEntitlementBuyInOctInd(),
-               beneficiaryRecord.getHmoIndicatorOctInd(),
-               beneficiaryRecord.getPartCContractNumberOctId(),
-               beneficiaryRecord.getPartCPbpNumberOctId(),
-               beneficiaryRecord.getPartCPlanTypeOctCode(),
-               beneficiaryRecord.getPartDContractNumberOctId(),
-               beneficiaryRecord.getPartDPbpNumberOctId(),
-               beneficiaryRecord.getPartDSegmentNumberOctId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyOctInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityOctCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupOctCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-11",
-               beneficiaryRecord.getFipsStateCntyNovCode(),
-               beneficiaryRecord.getMedicareStatusNovCode(),
-               beneficiaryRecord.getEntitlementBuyInNovInd(),
-               beneficiaryRecord.getHmoIndicatorNovInd(),
-               beneficiaryRecord.getPartCContractNumberNovId(),
-               beneficiaryRecord.getPartCPbpNumberNovId(),
-               beneficiaryRecord.getPartCPlanTypeNovCode(),
-               beneficiaryRecord.getPartDContractNumberNovId(),
-               beneficiaryRecord.getPartDPbpNumberNovId(),
-               beneficiaryRecord.getPartDSegmentNumberNovId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyNovInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityNovCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupNovCode()));
-
-       enrollments.add(
-           new Enrollment(
-               beneficiaryRecord,
-               date + "-12",
-               beneficiaryRecord.getFipsStateCntyDecCode(),
-               beneficiaryRecord.getMedicareStatusDecCode(),
-               beneficiaryRecord.getEntitlementBuyInDecInd(),
-               beneficiaryRecord.getHmoIndicatorDecInd(),
-               beneficiaryRecord.getPartCContractNumberDecId(),
-               beneficiaryRecord.getPartCPbpNumberDecId(),
-               beneficiaryRecord.getPartCPlanTypeDecCode(),
-               beneficiaryRecord.getPartDContractNumberDecId(),
-               beneficiaryRecord.getPartDPbpNumberDecId(),
-               beneficiaryRecord.getPartDSegmentNumberDecId(),
-               beneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
-               beneficiaryRecord.getMedicaidDualEligibilityDecCode(),
-               beneficiaryRecord.getPartDLowIncomeCostShareGroupDecCode()));
-    */
-
-    entityManager.persist(enrollments);
   }
 
   /**
@@ -928,6 +902,42 @@ public final class RifLoader implements AutoCloseable {
     }
 
     return false;
+  }
+
+  public static Enrollment getEnrollment(
+      Beneficiary parentBeneficiary,
+      String yearMonth,
+      Optional<Character> entitlementBuyInInd,
+      Optional<String> fipsStateCntyCode,
+      Optional<Character> hmoIndicatorInd,
+      Optional<String> medicaidDualEligibilityCode,
+      Optional<String> medicareStatusCode,
+      Optional<String> partCContractNumberId,
+      Optional<String> partCPbpNumberId,
+      Optional<String> partCPlanTypeCode,
+      Optional<String> partDContractNumberId,
+      Optional<String> partDLowIncomeCostShareGroupCode,
+      Optional<String> partDPbpNumberId,
+      Optional<Character> partDRetireeDrugSubsidyInd,
+      Optional<String> partDSegmentNumberId) {
+    Enrollment enrollment = new Enrollment();
+    enrollment.setParentBeneficiary(parentBeneficiary);
+    enrollment.setYearMonth(yearMonth);
+    enrollment.setEntitlementBuyInInd(entitlementBuyInInd);
+    enrollment.setFipsStateCntyCode(fipsStateCntyCode);
+    enrollment.setHmoIndicatorInd(hmoIndicatorInd);
+    enrollment.setMedicaidDualEligibilityCode(medicaidDualEligibilityCode);
+    enrollment.setMedicareStatusCode(medicareStatusCode);
+    enrollment.setPartCContractNumberId(partCContractNumberId);
+    enrollment.setPartCPbpNumberId(partCPbpNumberId);
+    enrollment.setPartCPbpNumberId(partCPbpNumberId);
+    enrollment.setPartDContractNumberId(partDContractNumberId);
+    enrollment.setPartDLowIncomeCostShareGroupCode(partDLowIncomeCostShareGroupCode);
+    enrollment.setPartDPbpNumberId(partDPbpNumberId);
+    enrollment.setPartDRetireeDrugSubsidyInd(partDRetireeDrugSubsidyInd);
+    enrollment.setPartDSegmentNumberId(partDSegmentNumberId);
+
+    return enrollment;
   }
 
   /**

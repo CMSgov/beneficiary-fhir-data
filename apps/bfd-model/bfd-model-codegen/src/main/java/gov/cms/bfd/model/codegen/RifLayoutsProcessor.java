@@ -354,7 +354,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      */
     TypeSpec headerEntity = generateHeaderEntity(mappingSpec);
 
-    TypeSpec enrollmentEntity = generateEnrollmentEntity();
+    if (mappingSpec.getHasEnrollments()) {
+      generateEnrollmentEntity(mappingSpec);
+    }
 
     /*
      * Then, create code that can be used to parse incoming RIF rows into
@@ -553,13 +555,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     return lineEntityFinal;
   }
 
-  private TypeSpec generateEnrollmentEntity() throws IOException {
+  private TypeSpec generateEnrollmentEntity(MappingSpec mappingSpec) throws IOException {
 
     // Create the Entity class.
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
     AnnotationSpec tableAnnotation =
         AnnotationSpec.builder(Table.class).addMember("name", "$S", "`Enrollments`").build();
-    TypeSpec.Builder lineEntity =
+    TypeSpec.Builder enrollmentEntity =
         TypeSpec.classBuilder("Enrollment")
             .addAnnotation(entityAnnotation)
             .addAnnotation(
@@ -574,11 +576,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .addModifiers(Modifier.PUBLIC);
 
     // Create the @IdClass needed for the composite primary key.
-    TypeSpec.Builder lineIdClass =
+    TypeSpec.Builder enrollmentIdClass =
         TypeSpec.classBuilder("EnrollmentId")
             .addSuperinterface(Serializable.class)
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-    lineIdClass.addField(
+    enrollmentIdClass.addField(
         FieldSpec.builder(
                 long.class, "serialVersionUID", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$L", 1L)
@@ -587,32 +589,33 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeName parentClaimIdFieldType = ClassName.get(String.class);
     FieldSpec.Builder parentIdField =
         FieldSpec.builder(parentClaimIdFieldType, "parentBeneficiary", Modifier.PRIVATE);
-    lineIdClass.addField(parentIdField.build());
+    enrollmentIdClass.addField(parentIdField.build());
     MethodSpec.Builder parentGetter =
         MethodSpec.methodBuilder("getParentBeneficiary")
             .addStatement("return $N", "parentBeneficiary")
             .returns(parentClaimIdFieldType);
-    lineIdClass.addMethod(parentGetter.build());
+    enrollmentIdClass.addMethod(parentGetter.build());
     // Add a field to that @IdClass class for the line number.
 
     TypeName lineNumberFieldType = ClassName.get(String.class);
     FieldSpec.Builder lineNumberIdField =
         FieldSpec.builder(lineNumberFieldType, "yearMonth", Modifier.PRIVATE);
-    lineIdClass.addField(lineNumberIdField.build());
+    enrollmentIdClass.addField(lineNumberIdField.build());
     MethodSpec.Builder lineNumberGetter =
         MethodSpec.methodBuilder("get" + capitalize("yearMonth"))
             .addStatement("return $N", "yearMonth")
             .returns(lineNumberFieldType);
-    lineIdClass.addMethod(lineNumberGetter.build());
+    enrollmentIdClass.addMethod(lineNumberGetter.build());
 
     // Add hashCode() and equals(...) to that @IdClass.
-    lineIdClass.addMethod(generateHashCodeMethod(parentIdField.build(), lineNumberIdField.build()));
-    lineIdClass.addMethod(
+    enrollmentIdClass.addMethod(
+        generateHashCodeMethod(parentIdField.build(), lineNumberIdField.build()));
+    enrollmentIdClass.addMethod(
         generateEqualsMethod(
-            ClassName.get(Object.class), parentIdField.build(), lineNumberIdField.build()));
+            mappingSpec.getEnrollmentEntity(), parentIdField.build(), lineNumberIdField.build()));
 
     // Finalize the @IdClass and nest it inside the Entity class.
-    lineEntity.addType(lineIdClass.build());
+    enrollmentEntity.addType(enrollmentIdClass.build());
 
     // Add a field and accessor to the "line" Entity for the parent.
     FieldSpec parentClaimField =
@@ -633,14 +636,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                             "%s_%s_to_%s", "Enrollments", "parentBeneficiary", "Beneficiary"))
                     .build())
             .build();
-    lineEntity.addField(parentClaimField);
+    enrollmentEntity.addField(parentClaimField);
     MethodSpec parentClaimGetter =
         MethodSpec.methodBuilder(calculateGetterName(parentClaimField))
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return $N", "parentBeneficiary")
             .returns(ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"))
             .build();
-    lineEntity.addMethod(parentClaimGetter);
+    enrollmentEntity.addMethod(parentClaimGetter);
     MethodSpec.Builder parentClaimSetter =
         MethodSpec.methodBuilder(calculateSetterName(parentClaimField))
             .addModifiers(Modifier.PUBLIC)
@@ -648,10 +651,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .addParameter(
                 ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"), parentClaimField.name);
     addSetterStatement(false, parentClaimField, parentClaimSetter);
-    lineEntity.addMethod(parentClaimSetter.build());
+    enrollmentEntity.addMethod(parentClaimSetter.build());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         true,
         false,
         false,
@@ -662,7 +665,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -673,7 +676,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -684,7 +687,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -695,7 +698,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -706,7 +709,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -717,7 +720,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -728,7 +731,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -739,7 +742,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -750,7 +753,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -761,7 +764,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -772,7 +775,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -783,7 +786,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -794,7 +797,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.empty());
 
     createEnrollmentFields(
-        lineEntity,
+        enrollmentEntity,
         false,
         false,
         true,
@@ -804,12 +807,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(2),
         Optional.empty());
 
-    TypeSpec lineEntityFinal = lineEntity.build();
-    JavaFile lineEntityClassFile =
-        JavaFile.builder("gov.cms.bfd.model.rif", lineEntityFinal).build();
-    lineEntityClassFile.writeTo(processingEnv.getFiler());
+    TypeSpec enrollmentEntityFinal = enrollmentEntity.build();
+    JavaFile enrollmentEntityClassFile =
+        JavaFile.builder("gov.cms.bfd.model.rif", enrollmentEntityFinal).build();
+    enrollmentEntityClassFile.writeTo(processingEnv.getFiler());
 
-    return lineEntityFinal;
+    return enrollmentEntityFinal;
   }
 
   /**
@@ -1838,7 +1841,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     MethodSpec.Builder lineFieldGetter =
         MethodSpec.methodBuilder(calculateGetterName(lineField))
             .addModifiers(Modifier.PUBLIC)
-            .returns(selectJavaFieldType(type, isColumnOptional, columnLength, columnScale));
+            .returns(selectJavaPropertyType(type, isColumnOptional, columnLength, columnScale));
     addGetterStatement(isColumnOptional, lineField, lineFieldGetter);
     lineEntity.addMethod(lineFieldGetter.build());
 
@@ -1847,7 +1850,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(
-                selectJavaFieldType(type, isColumnOptional, columnLength, columnScale),
+                selectJavaPropertyType(type, isColumnOptional, columnLength, columnScale),
                 lineField.name);
     addSetterStatement(isColumnOptional, lineField, lineFieldSetter);
     lineEntity.addMethod(lineFieldSetter.build());
@@ -1946,5 +1949,18 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         && columnScale.orElse(Integer.MAX_VALUE) == 0
         && isColumnOptional) return ClassName.get(Integer.class);
     else throw new IllegalArgumentException("Unhandled field type: " + type.name());
+  }
+
+  private static TypeName selectJavaPropertyType(
+      RifColumnType type,
+      boolean isColumnOptional,
+      Optional<Integer> columnLength,
+      Optional<Integer> columnScale) {
+    if (!isColumnOptional)
+      return selectJavaFieldType(type, isColumnOptional, columnLength, columnScale);
+    else
+      return ParameterizedTypeName.get(
+          ClassName.get(Optional.class),
+          selectJavaFieldType(type, isColumnOptional, columnLength, columnScale));
   }
 }
