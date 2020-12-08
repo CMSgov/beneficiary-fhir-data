@@ -930,7 +930,7 @@ public final class RifLoader implements AutoCloseable {
     enrollment.setMedicareStatusCode(medicareStatusCode);
     enrollment.setPartCContractNumberId(partCContractNumberId);
     enrollment.setPartCPbpNumberId(partCPbpNumberId);
-    enrollment.setPartCPbpNumberId(partCPbpNumberId);
+    enrollment.setPartCPlanTypeCode(partCPlanTypeCode);
     enrollment.setPartDContractNumberId(partDContractNumberId);
     enrollment.setPartDLowIncomeCostShareGroupCode(partDLowIncomeCostShareGroupCode);
     enrollment.setPartDPbpNumberId(partDPbpNumberId);
