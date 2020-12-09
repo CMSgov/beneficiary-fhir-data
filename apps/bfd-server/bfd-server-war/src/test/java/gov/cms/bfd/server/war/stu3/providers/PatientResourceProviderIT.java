@@ -1668,6 +1668,106 @@ public final class PatientResourceProviderIT {
     Assert.assertTrue(mbiUnhashedPresent);
   }
 
+  /**
+   * Regression test for part of BFD-525, which verifies that duplicate entries are not returned
+   * when 1) plain-text identifiers are requested, 2) a beneficiary has multiple historical
+   * identifiers, and 3) paging is requested. (This oddly specific combo had been bugged earlier and
+   * was quite tricky to resolve).
+   */
+  @Test
+  public void
+      searchForExistingPatientByPartDContractNumIncludeIdentifiersTrueWithPagingAndMultipleMbis() {
+    ServerTestUtils.loadData(
+        Arrays.asList(
+            StaticRifResource.SAMPLE_A_BENES,
+            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
+            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+    extraParamsInterceptor.setIncludeIdentifiers("mbi");
+    fhirClient.registerInterceptor(extraParamsInterceptor);
+
+    // Should return a single match
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .count(1)
+            .returnBundle(Bundle.class)
+            .execute();
+
+    // Verify that the bene wasn't duplicated.
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getEntry().size());
+
+    // Double-check that the bene has multiple identifiers.
+    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+    Assert.assertEquals(
+        3,
+        patientFromSearchResult.getIdentifier().stream()
+            .filter(
+                i ->
+                    TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED.equals(
+                        i.getSystem()))
+            .count());
+  }
+
+  /**
+   * Regression test for part of BFD-525, which verifies that duplicate entries are not returned
+   * when 1) plain-text identifiers are requested, 2) a beneficiary has multiple historical
+   * identifiers, and 3) paging is not requested. (This oddly specific combo had been bugged earlier
+   * and was quite tricky to resolve).
+   */
+  @Test
+  public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrueAndMultipleMbis() {
+    ServerTestUtils.loadData(
+        Arrays.asList(
+            StaticRifResource.SAMPLE_A_BENES,
+            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
+            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+    extraParamsInterceptor.setIncludeIdentifiers("mbi");
+    fhirClient.registerInterceptor(extraParamsInterceptor);
+
+    // Should return a single match
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    // Verify that the bene wasn't duplicated.
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getEntry().size());
+
+    // Double-check that the bene has multiple identifiers.
+    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+    Assert.assertEquals(
+        3,
+        patientFromSearchResult.getIdentifier().stream()
+            .filter(
+                i ->
+                    TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED.equals(
+                        i.getSystem()))
+            .count());
+  }
+
   @Test
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
     List<Object> loadedRecords =

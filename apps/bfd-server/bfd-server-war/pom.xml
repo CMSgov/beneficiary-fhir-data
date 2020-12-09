@@ -116,6 +116,13 @@
 		</dependency>
 
 		<dependency>
+			<!-- Provides the @Inject annotation. Does NOT provide dependency injection;
+				just the standardized annotation for it. -->
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+		<dependency>
 			<!-- We mostly use Spring to ensure that our JPA EntityManagers are properly 
 				managed. -->
 			<groupId>org.springframework</groupId>
