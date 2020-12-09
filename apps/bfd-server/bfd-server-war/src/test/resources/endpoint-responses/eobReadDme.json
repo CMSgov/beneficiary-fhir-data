@@ -261,8 +261,8 @@
       "url" : "http://hl7.org/fhir/sid/ndc",
       "valueCoding" : {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "551545779",
-        "display" : "Acetaminophen - ACETAMINOPHEN"
+        "code" : "665561945",
+        "display" : "Hand E San - ALCOHOL"
       }
     } ],
     "sequence" : 1,
