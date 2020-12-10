@@ -132,6 +132,26 @@ public final class SamhsaMatcherTest {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
+   * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+   *
+   * @throws FHIRException (indicates problem with test data)
+   */
+  @Test
+  public void matchCarrierClaimsByCptProcedureForNewCodes() throws FHIRException {
+    SamhsaMatcher matcher = new SamhsaMatcher();
+    String SAMPLE_SAMHSA_CPT_NEW_CODE = "G2067";
+
+    ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
+    Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
+    sampleEobService.setCode(SAMPLE_SAMHSA_CPT_NEW_CODE);
+
+    Assert.assertTrue(matcher.test(sampleEob));
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#DME} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *

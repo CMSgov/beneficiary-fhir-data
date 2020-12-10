@@ -20,7 +20,7 @@ Review the [README](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/
 ### Contributing changes
 
 Contributions to the BFD are welcome from any party inside CMS.
-Small changes like "good first issues" can be submitted for consideration without any additional process.
+Small changes like "good first issues" can be submitted for consideration without any additional process. This [LGTM resource](https://lgtm.com/projects/g/CMSgov/beneficiary-fhir-data/?mode=list) provides candidates for "good first issues". 
 
 Any [substantive change must go though an RFC process](#proposing-substantive-changes) before work on the change itself can start.
 
