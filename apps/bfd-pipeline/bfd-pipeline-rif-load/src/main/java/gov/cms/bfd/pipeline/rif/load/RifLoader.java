@@ -523,23 +523,26 @@ public final class RifLoader implements AutoCloseable {
 
           if (recordInDb == null) {
             loadAction = LoadAction.INSERTED;
-            entityManager.persist(record);
-            Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
 
             if (recordsIsBeneficiary) {
               updateEnrollment(entityManager, (Beneficiary) record);
             }
+
+            entityManager.persist(record);
+            Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
           } else {
             loadAction = LoadAction.DID_NOTHING;
           }
         } else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
-            entityManager.persist(record);
 
             if (recordsIsBeneficiary) {
               updateEnrollment(entityManager, (Beneficiary) record);
             }
+
+            entityManager.persist(record);
+
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
 
@@ -552,11 +555,12 @@ public final class RifLoader implements AutoCloseable {
                   entityManager, (Beneficiary) record, loadedBatchBuilder.getTimestamp());
             }
 
-            entityManager.merge(record);
-
             if (recordsIsBeneficiary) {
               updateEnrollment(entityManager, (Beneficiary) record);
             }
+
+            entityManager.merge(record);
+
           } else {
             throw new BadCodeMonkeyException(
                 String.format(
@@ -624,8 +628,9 @@ public final class RifLoader implements AutoCloseable {
 
     if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
       String date = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().toString();
+      List<Enrollment> enrollments = new LinkedList<Enrollment>();
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "01"),
@@ -643,7 +648,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
               beneficiaryRecord.getPartDSegmentNumberJanId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "02"),
@@ -661,7 +666,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyFebInd(),
               beneficiaryRecord.getPartDSegmentNumberFebId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "03"),
@@ -679,7 +684,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyMarInd(),
               beneficiaryRecord.getPartDSegmentNumberMarId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "04"),
@@ -697,7 +702,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyAprInd(),
               beneficiaryRecord.getPartDSegmentNumberAprId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "05"),
@@ -715,7 +720,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyMayInd(),
               beneficiaryRecord.getPartDSegmentNumberMayId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "06"),
@@ -733,7 +738,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyJunInd(),
               beneficiaryRecord.getPartDSegmentNumberJunId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "07"),
@@ -751,7 +756,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyJulInd(),
               beneficiaryRecord.getPartDSegmentNumberJulId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "08"),
@@ -769,7 +774,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyAugInd(),
               beneficiaryRecord.getPartDSegmentNumberAugId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "09"),
@@ -787,7 +792,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidySeptInd(),
               beneficiaryRecord.getPartDSegmentNumberSeptId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "10"),
@@ -805,7 +810,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyOctInd(),
               beneficiaryRecord.getPartDSegmentNumberOctId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "11"),
@@ -823,7 +828,7 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyNovInd(),
               beneficiaryRecord.getPartDSegmentNumberNovId()));
 
-      entityManager.merge(
+      enrollments.add(
           getEnrollment(
               beneficiaryRecord,
               String.format("%s-%s", date, "12"),
@@ -840,6 +845,8 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDPbpNumberDecId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
               beneficiaryRecord.getPartDSegmentNumberDecId()));
+
+      beneficiaryRecord.setEnrollments(enrollments);
     }
   }
 

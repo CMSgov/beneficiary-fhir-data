@@ -1012,6 +1012,15 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .returns(childFieldType)
               .build();
       headerEntityClass.addMethod(childGetter);
+
+      MethodSpec childSetter =
+          MethodSpec.methodBuilder("setEnrollments")
+              .addModifiers(Modifier.PUBLIC)
+              .returns(void.class)
+              .addParameter(childFieldType, "enrollments")
+              .addStatement("this.$N = ($T)$N", "enrollments", childFieldType, "enrollments")
+              .build();
+      headerEntityClass.addMethod(childSetter);
     }
 
     // Add the parent-to-child join field and accessor for an inner join
