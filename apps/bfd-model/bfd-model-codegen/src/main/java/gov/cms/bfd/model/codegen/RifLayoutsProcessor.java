@@ -443,7 +443,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .filter(f -> mappingSpec.getHeaderEntityIdField().equals(f.getJavaFieldName()))
             .findAny()
             .get();
-    TypeName parentClaimIdFieldType = selectJavaFieldType(parentClaimRifField);
+    TypeName parentClaimIdFieldType =
+        selectJavaFieldType(
+            parentClaimRifField.getRifColumnType(),
+            parentClaimRifField.isRifColumnOptional(),
+            parentClaimRifField.getRifColumnLength(),
+            parentClaimRifField.getRifColumnScale());
     FieldSpec.Builder parentIdField =
         FieldSpec.builder(
             parentClaimIdFieldType, mappingSpec.getLineEntityParentField(), Modifier.PRIVATE);
@@ -460,7 +465,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .filter(f -> f.getJavaFieldName().equals(mappingSpec.getLineEntityLineNumberField()))
             .findFirst()
             .get();
-    TypeName lineNumberFieldType = selectJavaFieldType(rifLineNumberField);
+    TypeName lineNumberFieldType =
+        selectJavaFieldType(
+            rifLineNumberField.getRifColumnType(),
+            rifLineNumberField.isRifColumnOptional(),
+            rifLineNumberField.getRifColumnLength(),
+            rifLineNumberField.getRifColumnScale());
     FieldSpec.Builder lineNumberIdField =
         FieldSpec.builder(
             lineNumberFieldType, mappingSpec.getLineEntityLineNumberField(), Modifier.PRIVATE);
@@ -526,7 +536,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       FieldSpec lineField =
           FieldSpec.builder(
-                  selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
+                  selectJavaFieldType(
+                      rifField.getRifColumnType(),
+                      rifField.isRifColumnOptional(),
+                      rifField.getRifColumnLength(),
+                      rifField.getRifColumnScale()),
+                  rifField.getJavaFieldName(),
+                  Modifier.PRIVATE)
               .addAnnotations(createAnnotations(mappingSpec, rifField))
               .build();
       lineEntity.addField(lineField);
@@ -534,7 +550,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       MethodSpec.Builder lineFieldGetter =
           MethodSpec.methodBuilder(calculateGetterName(lineField))
               .addModifiers(Modifier.PUBLIC)
-              .returns(selectJavaPropertyType(rifField));
+              .returns(
+                  selectJavaPropertyType(
+                      rifField.getRifColumnType(),
+                      rifField.isRifColumnOptional(),
+                      rifField.getRifColumnLength(),
+                      rifField.getRifColumnScale()));
       addGetterStatement(rifField, lineField, lineFieldGetter);
       lineEntity.addMethod(lineFieldGetter.build());
 
@@ -542,7 +563,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           MethodSpec.methodBuilder(calculateSetterName(lineField))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
-              .addParameter(selectJavaPropertyType(rifField), lineField.name);
+              .addParameter(
+                  selectJavaPropertyType(
+                      rifField.getRifColumnType(),
+                      rifField.isRifColumnOptional(),
+                      rifField.getRifColumnLength(),
+                      rifField.getRifColumnScale()),
+                  lineField.name);
       addSetterStatement(rifField, lineField, lineFieldSetter);
       lineEntity.addMethod(lineFieldSetter.build());
     }
@@ -901,7 +928,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       FieldSpec headerField =
           FieldSpec.builder(
-                  selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
+                  selectJavaFieldType(
+                      rifField.getRifColumnType(),
+                      rifField.isRifColumnOptional(),
+                      rifField.getRifColumnLength(),
+                      rifField.getRifColumnScale()),
+                  rifField.getJavaFieldName(),
+                  Modifier.PRIVATE)
               .addAnnotations(createAnnotations(mappingSpec, rifField))
               .build();
       headerEntityClass.addField(headerField);
@@ -909,7 +942,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       MethodSpec.Builder headerFieldGetter =
           MethodSpec.methodBuilder(calculateGetterName(headerField))
               .addModifiers(Modifier.PUBLIC)
-              .returns(selectJavaPropertyType(rifField));
+              .returns(
+                  selectJavaPropertyType(
+                      rifField.getRifColumnType(),
+                      rifField.isRifColumnOptional(),
+                      rifField.getRifColumnLength(),
+                      rifField.getRifColumnScale()));
       addGetterStatement(rifField, headerField, headerFieldGetter);
       headerEntityClass.addMethod(headerFieldGetter.build());
 
@@ -917,7 +955,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           MethodSpec.methodBuilder(calculateSetterName(headerField))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
-              .addParameter(selectJavaPropertyType(rifField), headerField.name);
+              .addParameter(
+                  selectJavaPropertyType(
+                      rifField.getRifColumnType(),
+                      rifField.isRifColumnOptional(),
+                      rifField.getRifColumnLength(),
+                      rifField.getRifColumnScale()),
+                  headerField.name);
       addSetterStatement(rifField, headerField, headerFieldSetter);
       headerEntityClass.addMethod(headerFieldSetter.build());
     }
@@ -929,7 +973,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     for (RifField addlDatabaseField : mappingSpec.getHeaderEntityAdditionalDatabaseFields()) {
       FieldSpec headerField =
           FieldSpec.builder(
-                  selectJavaFieldType(addlDatabaseField),
+                  selectJavaFieldType(
+                      addlDatabaseField.getRifColumnType(),
+                      addlDatabaseField.isRifColumnOptional(),
+                      addlDatabaseField.getRifColumnLength(),
+                      addlDatabaseField.getRifColumnScale()),
                   addlDatabaseField.getJavaFieldName(),
                   Modifier.PRIVATE)
               .addAnnotations(createAnnotations(mappingSpec, addlDatabaseField))
@@ -939,7 +987,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       MethodSpec.Builder headerFieldGetter =
           MethodSpec.methodBuilder(calculateGetterName(headerField))
               .addModifiers(Modifier.PUBLIC)
-              .returns(selectJavaPropertyType(addlDatabaseField));
+              .returns(
+                  selectJavaPropertyType(
+                      addlDatabaseField.getRifColumnType(),
+                      addlDatabaseField.isRifColumnOptional(),
+                      addlDatabaseField.getRifColumnLength(),
+                      addlDatabaseField.getRifColumnScale()));
       addGetterStatement(addlDatabaseField, headerField, headerFieldGetter);
       headerEntityClass.addMethod(headerFieldGetter.build());
 
@@ -947,7 +1000,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           MethodSpec.methodBuilder(calculateSetterName(headerField))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
-              .addParameter(selectJavaPropertyType(addlDatabaseField), headerField.name);
+              .addParameter(
+                  selectJavaPropertyType(
+                      addlDatabaseField.getRifColumnType(),
+                      addlDatabaseField.isRifColumnOptional(),
+                      addlDatabaseField.getRifColumnLength(),
+                      addlDatabaseField.getRifColumnScale()),
+                  headerField.name);
       addSetterStatement(addlDatabaseField, headerField, headerFieldSetter);
       headerEntityClass.addMethod(headerFieldSetter.build());
     }
@@ -1501,47 +1560,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     hashCodeMethod.addStatement("return true");
 
     return hashCodeMethod.build();
-  }
-
-  /**
-   * @param rifField the {@link RifField} to select the corresponding Java type for
-   * @return the {@link TypeName} of the Java type that should be used to represent the specified
-   *     {@link RifField} in a JPA entity
-   */
-  private static TypeName selectJavaFieldType(RifField rifField) {
-    if (rifField.getRifColumnType() == RifColumnType.CHAR
-        && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) == 1
-        && !rifField.isRifColumnOptional()) return TypeName.CHAR;
-    else if (rifField.getRifColumnType() == RifColumnType.CHAR
-        && rifField.getRifColumnLength().orElse(Integer.MAX_VALUE) == 1
-        && rifField.isRifColumnOptional()) return ClassName.get(Character.class);
-    else if (rifField.getRifColumnType() == RifColumnType.CHAR) return ClassName.get(String.class);
-    else if (rifField.getRifColumnType() == RifColumnType.DATE
-        && rifField.getRifColumnLength().orElse(0) == 8) return ClassName.get(LocalDate.class);
-    else if (rifField.getRifColumnType() == RifColumnType.TIMESTAMP
-        && rifField.getRifColumnLength().orElse(0) == 20) return ClassName.get(Instant.class);
-    else if (rifField.getRifColumnType() == RifColumnType.NUM
-        && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) > 0)
-      return ClassName.get(BigDecimal.class);
-    else if (rifField.getRifColumnType() == RifColumnType.NUM
-        && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0
-        && !rifField.isRifColumnOptional()) return TypeName.INT;
-    else if (rifField.getRifColumnType() == RifColumnType.NUM
-        && rifField.getRifColumnScale().orElse(Integer.MAX_VALUE) == 0
-        && rifField.isRifColumnOptional()) return ClassName.get(Integer.class);
-    else throw new IllegalArgumentException("Unhandled field type: " + rifField);
-  }
-
-  /**
-   * @param rifField the {@link RifField} to select the corresponding Java getter/setter type for
-   * @return the {@link TypeName} of the Java type that should be used to represent the specified
-   *     {@link RifField}'s getter/setter in a JPA entity
-   */
-  private static TypeName selectJavaPropertyType(RifField rifField) {
-    if (!rifField.isRifColumnOptional()) return selectJavaFieldType(rifField);
-    else
-      return ParameterizedTypeName.get(
-          ClassName.get(Optional.class), selectJavaFieldType(rifField));
   }
 
   /**

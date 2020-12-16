@@ -627,13 +627,14 @@ public final class RifLoader implements AutoCloseable {
   private static void updateEnrollment(EntityManager entityManager, Beneficiary beneficiaryRecord) {
 
     if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
-      String date = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().toString();
-      List<Enrollment> enrollments = new LinkedList<Enrollment>();
 
-      enrollments.add(
+      String year = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().toString();
+      List<Enrollment> currentYearEnrollments = new LinkedList<Enrollment>();
+
+      Enrollment enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "01"),
+              String.format("%s-%s", year, "01"),
               beneficiaryRecord.getEntitlementBuyInJanInd(),
               beneficiaryRecord.getFipsStateCntyJanCode(),
               beneficiaryRecord.getHmoIndicatorJanInd(),
@@ -646,12 +647,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupJanCode(),
               beneficiaryRecord.getPartDPbpNumberJanId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
-              beneficiaryRecord.getPartDSegmentNumberJanId()));
+              beneficiaryRecord.getPartDSegmentNumberJanId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "02"),
+              String.format("%s-%s", year, "02"),
               beneficiaryRecord.getEntitlementBuyInFebInd(),
               beneficiaryRecord.getFipsStateCntyFebCode(),
               beneficiaryRecord.getHmoIndicatorFebInd(),
@@ -664,12 +669,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupFebCode(),
               beneficiaryRecord.getPartDPbpNumberFebId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyFebInd(),
-              beneficiaryRecord.getPartDSegmentNumberFebId()));
+              beneficiaryRecord.getPartDSegmentNumberFebId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "03"),
+              String.format("%s-%s", year, "03"),
               beneficiaryRecord.getEntitlementBuyInMarInd(),
               beneficiaryRecord.getFipsStateCntyMarCode(),
               beneficiaryRecord.getHmoIndicatorMarInd(),
@@ -682,12 +691,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupMarCode(),
               beneficiaryRecord.getPartDPbpNumberMarId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyMarInd(),
-              beneficiaryRecord.getPartDSegmentNumberMarId()));
+              beneficiaryRecord.getPartDSegmentNumberMarId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "04"),
+              String.format("%s-%s", year, "04"),
               beneficiaryRecord.getEntitlementBuyInAprInd(),
               beneficiaryRecord.getFipsStateCntyAprCode(),
               beneficiaryRecord.getHmoIndicatorAprInd(),
@@ -700,12 +713,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupAprCode(),
               beneficiaryRecord.getPartDPbpNumberAprId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyAprInd(),
-              beneficiaryRecord.getPartDSegmentNumberAprId()));
+              beneficiaryRecord.getPartDSegmentNumberAprId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "05"),
+              String.format("%s-%s", year, "05"),
               beneficiaryRecord.getEntitlementBuyInMayInd(),
               beneficiaryRecord.getFipsStateCntyMayCode(),
               beneficiaryRecord.getHmoIndicatorMayInd(),
@@ -718,12 +735,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupMayCode(),
               beneficiaryRecord.getPartDPbpNumberMayId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyMayInd(),
-              beneficiaryRecord.getPartDSegmentNumberMayId()));
+              beneficiaryRecord.getPartDSegmentNumberMayId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "06"),
+              String.format("%s-%s", year, "06"),
               beneficiaryRecord.getEntitlementBuyInJunInd(),
               beneficiaryRecord.getFipsStateCntyJunCode(),
               beneficiaryRecord.getHmoIndicatorJunInd(),
@@ -736,12 +757,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupJunCode(),
               beneficiaryRecord.getPartDPbpNumberJunId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyJunInd(),
-              beneficiaryRecord.getPartDSegmentNumberJunId()));
+              beneficiaryRecord.getPartDSegmentNumberJunId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "07"),
+              String.format("%s-%s", year, "07"),
               beneficiaryRecord.getEntitlementBuyInJulInd(),
               beneficiaryRecord.getFipsStateCntyJulCode(),
               beneficiaryRecord.getHmoIndicatorJulInd(),
@@ -754,12 +779,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupJulCode(),
               beneficiaryRecord.getPartDPbpNumberJulId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyJulInd(),
-              beneficiaryRecord.getPartDSegmentNumberJulId()));
+              beneficiaryRecord.getPartDSegmentNumberJulId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "08"),
+              String.format("%s-%s", year, "08"),
               beneficiaryRecord.getEntitlementBuyInAugInd(),
               beneficiaryRecord.getFipsStateCntyAugCode(),
               beneficiaryRecord.getHmoIndicatorAugInd(),
@@ -772,12 +801,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupAugCode(),
               beneficiaryRecord.getPartDPbpNumberAugId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyAugInd(),
-              beneficiaryRecord.getPartDSegmentNumberAugId()));
+              beneficiaryRecord.getPartDSegmentNumberAugId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "09"),
+              String.format("%s-%s", year, "09"),
               beneficiaryRecord.getEntitlementBuyInSeptInd(),
               beneficiaryRecord.getFipsStateCntySeptCode(),
               beneficiaryRecord.getHmoIndicatorSeptInd(),
@@ -790,12 +823,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupSeptCode(),
               beneficiaryRecord.getPartDPbpNumberSeptId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidySeptInd(),
-              beneficiaryRecord.getPartDSegmentNumberSeptId()));
+              beneficiaryRecord.getPartDSegmentNumberSeptId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "10"),
+              String.format("%s-%s", year, "10"),
               beneficiaryRecord.getEntitlementBuyInOctInd(),
               beneficiaryRecord.getFipsStateCntyOctCode(),
               beneficiaryRecord.getHmoIndicatorOctInd(),
@@ -808,12 +845,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupOctCode(),
               beneficiaryRecord.getPartDPbpNumberOctId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyOctInd(),
-              beneficiaryRecord.getPartDSegmentNumberOctId()));
+              beneficiaryRecord.getPartDSegmentNumberOctId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "11"),
+              String.format("%s-%s", year, "11"),
               beneficiaryRecord.getEntitlementBuyInNovInd(),
               beneficiaryRecord.getFipsStateCntyNovCode(),
               beneficiaryRecord.getHmoIndicatorNovInd(),
@@ -826,12 +867,16 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupNovCode(),
               beneficiaryRecord.getPartDPbpNumberNovId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyNovInd(),
-              beneficiaryRecord.getPartDSegmentNumberNovId()));
+              beneficiaryRecord.getPartDSegmentNumberNovId());
 
-      enrollments.add(
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", date, "12"),
+              String.format("%s-%s", year, "12"),
               beneficiaryRecord.getEntitlementBuyInDecInd(),
               beneficiaryRecord.getFipsStateCntyDecCode(),
               beneficiaryRecord.getHmoIndicatorDecInd(),
@@ -844,9 +889,25 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDLowIncomeCostShareGroupDecCode(),
               beneficiaryRecord.getPartDPbpNumberDecId(),
               beneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
-              beneficiaryRecord.getPartDSegmentNumberDecId()));
+              beneficiaryRecord.getPartDSegmentNumberDecId());
 
-      beneficiaryRecord.setEnrollments(enrollments);
+      if (enrollmentMonthly != null) {
+        currentYearEnrollments.add(enrollmentMonthly);
+      }
+
+      if (currentYearEnrollments.size() >= 1) {
+        List<Enrollment> currentYearEnrollmentsPrevious =
+            beneficiaryRecord.getEnrollments().stream()
+                .filter(e -> e.getYearMonth().contains(year + "-"))
+                .collect(Collectors.toList());
+        List<Enrollment> currentEnrollments = beneficiaryRecord.getEnrollments();
+        for (Enrollment previousEnrollment : currentYearEnrollmentsPrevious) {
+          currentEnrollments.remove(previousEnrollment);
+        }
+
+        currentEnrollments.addAll(currentYearEnrollments);
+        beneficiaryRecord.setEnrollments(currentEnrollments);
+      }
     }
   }
 
@@ -927,22 +988,39 @@ public final class RifLoader implements AutoCloseable {
       Optional<String> partDPbpNumberId,
       Optional<Character> partDRetireeDrugSubsidyInd,
       Optional<String> partDSegmentNumberId) {
-    Enrollment enrollment = new Enrollment();
-    enrollment.setParentBeneficiary(parentBeneficiary);
-    enrollment.setYearMonth(yearMonth);
-    enrollment.setEntitlementBuyInInd(entitlementBuyInInd);
-    enrollment.setFipsStateCntyCode(fipsStateCntyCode);
-    enrollment.setHmoIndicatorInd(hmoIndicatorInd);
-    enrollment.setMedicaidDualEligibilityCode(medicaidDualEligibilityCode);
-    enrollment.setMedicareStatusCode(medicareStatusCode);
-    enrollment.setPartCContractNumberId(partCContractNumberId);
-    enrollment.setPartCPbpNumberId(partCPbpNumberId);
-    enrollment.setPartCPlanTypeCode(partCPlanTypeCode);
-    enrollment.setPartDContractNumberId(partDContractNumberId);
-    enrollment.setPartDLowIncomeCostShareGroupCode(partDLowIncomeCostShareGroupCode);
-    enrollment.setPartDPbpNumberId(partDPbpNumberId);
-    enrollment.setPartDRetireeDrugSubsidyInd(partDRetireeDrugSubsidyInd);
-    enrollment.setPartDSegmentNumberId(partDSegmentNumberId);
+
+    Enrollment enrollment = null;
+
+    if (entitlementBuyInInd.isPresent()
+        || fipsStateCntyCode.isPresent()
+        || hmoIndicatorInd.isPresent()
+        || medicaidDualEligibilityCode.isPresent()
+        || medicareStatusCode.isPresent()
+        || partCContractNumberId.isPresent()
+        || partCPbpNumberId.isPresent()
+        || partCPlanTypeCode.isPresent()
+        || partDContractNumberId.isPresent()
+        || partDLowIncomeCostShareGroupCode.isPresent()
+        || partDPbpNumberId.isPresent()
+        || partDRetireeDrugSubsidyInd.isPresent()
+        || partDSegmentNumberId.isPresent()) {
+      enrollment = new Enrollment();
+      enrollment.setParentBeneficiary(parentBeneficiary);
+      enrollment.setYearMonth(yearMonth);
+      enrollment.setEntitlementBuyInInd(entitlementBuyInInd);
+      enrollment.setFipsStateCntyCode(fipsStateCntyCode);
+      enrollment.setHmoIndicatorInd(hmoIndicatorInd);
+      enrollment.setMedicaidDualEligibilityCode(medicaidDualEligibilityCode);
+      enrollment.setMedicareStatusCode(medicareStatusCode);
+      enrollment.setPartCContractNumberId(partCContractNumberId);
+      enrollment.setPartCPbpNumberId(partCPbpNumberId);
+      enrollment.setPartCPlanTypeCode(partCPlanTypeCode);
+      enrollment.setPartDContractNumberId(partDContractNumberId);
+      enrollment.setPartDLowIncomeCostShareGroupCode(partDLowIncomeCostShareGroupCode);
+      enrollment.setPartDPbpNumberId(partDPbpNumberId);
+      enrollment.setPartDRetireeDrugSubsidyInd(partDRetireeDrugSubsidyInd);
+      enrollment.setPartDSegmentNumberId(partDSegmentNumberId);
+    }
 
     return enrollment;
   }

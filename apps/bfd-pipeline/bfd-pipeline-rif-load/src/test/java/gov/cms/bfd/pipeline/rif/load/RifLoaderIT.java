@@ -234,7 +234,7 @@ public final class RifLoaderIT {
                     lastUpdated.after(Date.from(Instant.now().minus(1, ChronoUnit.MINUTES))));
               });
 
-      assertEnrollments(beneficiaryFromDb);
+      assertEnrollments(beneficiaryFromDb, 12);
 
       CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, "9991831999");
       Assert.assertEquals('N', carrierRecordFromDb.getFinalAction());
@@ -319,6 +319,31 @@ public final class RifLoaderIT {
       if (entityManager != null) entityManager.close();
     }
   }
+
+  /* @Test
+  public void loadEnrollmentUpdates() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(
+        dataSource,
+        Arrays.asList(
+            StaticRifResourceGroup.SAMPLE_U_BENES_REFERENCE_YEAR_CHANGE.getResources()));
+
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      assertEnrollments(beneficiaryFromDb, 12);
+
+
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  } */
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
    * StaticRifResourceGroup#SAMPLE_B} data.
@@ -683,10 +708,10 @@ public final class RifLoaderIT {
             defaultOptions.getFixupThreads()));
   }
 
-  public static void assertEnrollments(Beneficiary beneficiaryFromDb) {
+  public static void assertEnrollments(Beneficiary beneficiaryFromDb, int enrollmentSize) {
     List<Enrollment> enrollments = beneficiaryFromDb.getEnrollments();
 
-    Assert.assertEquals(12, enrollments.size());
+    Assert.assertEquals(enrollmentSize, enrollments.size());
 
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
