@@ -909,7 +909,7 @@ public final class RifLoader implements AutoCloseable {
             for (Enrollment previousEnrollment : currentYearEnrollmentsPrevious) {
               currentEnrollmentsWithUpdates.remove(previousEnrollment);
             }
-          }
+          } 
         } else {
           currentEnrollmentsWithUpdates = new LinkedList<Enrollment>();
         }
