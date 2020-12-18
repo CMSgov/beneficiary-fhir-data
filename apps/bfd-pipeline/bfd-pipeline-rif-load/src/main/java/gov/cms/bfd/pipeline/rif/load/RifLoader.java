@@ -553,9 +553,6 @@ public final class RifLoader implements AutoCloseable {
             if (recordsIsBeneficiary) {
               updateBeneficaryHistory(
                   entityManager, (Beneficiary) record, loadedBatchBuilder.getTimestamp());
-            }
-
-            if (recordsIsBeneficiary) {
               updateEnrollment(entityManager, (Beneficiary) record);
             }
 
@@ -629,7 +626,7 @@ public final class RifLoader implements AutoCloseable {
     if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
 
       String year = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().toString();
-      List<Enrollment> currentYearEnrollments = new LinkedList<Enrollment>();
+      List<Enrollment> currentYearEnrollments = new ArrayList<Enrollment>();
 
       Enrollment enrollmentMonthly =
           getEnrollment(
@@ -895,18 +892,20 @@ public final class RifLoader implements AutoCloseable {
         currentYearEnrollments.add(enrollmentMonthly);
       }
 
-      if (currentYearEnrollments.size() >= 1) {
+      if (currentYearEnrollments.size() > 0) {
+        List<Enrollment> currentEnrollmentsWithUpdates = beneficiaryRecord.getEnrollments();
         List<Enrollment> currentYearEnrollmentsPrevious =
             beneficiaryRecord.getEnrollments().stream()
                 .filter(e -> e.getYearMonth().contains(year + "-"))
                 .collect(Collectors.toList());
-        List<Enrollment> currentEnrollments = beneficiaryRecord.getEnrollments();
-        for (Enrollment previousEnrollment : currentYearEnrollmentsPrevious) {
-          currentEnrollments.remove(previousEnrollment);
-        }
 
-        currentEnrollments.addAll(currentYearEnrollments);
-        beneficiaryRecord.setEnrollments(currentEnrollments);
+        if (currentYearEnrollmentsPrevious.size() > 0) {
+          for (Enrollment previousEnrollment : currentYearEnrollmentsPrevious) {
+            currentEnrollmentsWithUpdates.remove(previousEnrollment);
+          }
+        }
+        currentEnrollmentsWithUpdates.addAll(currentYearEnrollments);
+        beneficiaryRecord.setEnrollments(currentEnrollmentsWithUpdates);
       }
     }
   }
