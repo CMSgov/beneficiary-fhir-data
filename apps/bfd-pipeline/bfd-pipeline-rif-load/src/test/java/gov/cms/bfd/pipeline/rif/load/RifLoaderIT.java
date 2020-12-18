@@ -234,8 +234,6 @@ public final class RifLoaderIT {
                     lastUpdated.after(Date.from(Instant.now().minus(1, ChronoUnit.MINUTES))));
               });
 
-      assertEnrollments(beneficiaryFromDb, 12);
-
       CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, "9991831999");
       Assert.assertEquals('N', carrierRecordFromDb.getFinalAction());
       // DateThrough inserted with value 10-27-1999
@@ -335,11 +333,11 @@ public final class RifLoaderIT {
           Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
           Assert.assertEquals(beneficiaryFromDb.getEnrollments().size(), 12);
 
-          RifLoaderTestUtils.pauseMillis(10);
           loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
+          RifLoaderTestUtils.pauseMillis(10);
           beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-          Assert.assertEquals(beneficiaryFromDb.getEnrollments().size(), 24);
+          Assert.assertEquals(24, beneficiaryFromDb.getEnrollments().size());
 
           // Verify that the loaded list was updated properly
           final List<LoadedFile> afterLoadedFiles =
