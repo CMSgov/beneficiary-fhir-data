@@ -319,50 +319,65 @@ public final class RifLoaderIT {
   }
 
   @Test
-  public void loadEnrollmentUpdates() {
-    RifLoaderTestUtils.doTestWithDb(
-        (dataSource, entityManager) -> {
-          // Verify that a loaded files exsits
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-          final List<LoadedFile> beforeLoadedFiles =
-              RifLoaderTestUtils.findLoadedFiles(entityManager);
-          Assert.assertTrue("Expected to have at least one file", beforeLoadedFiles.size() > 0);
-          LoadedFile beforeLoadedFile = beforeLoadedFiles.get(0);
-          LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
+  public void loadInitialEnrollmentShouldCount12() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-          Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-          Assert.assertEquals(beneficiaryFromDb.getEnrollments().size(), 12);
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Assert.assertEquals(12, beneficiaryFromDb.getEnrollments().size());
 
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
 
-          RifLoaderTestUtils.pauseMillis(10);
-          beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-          Assert.assertEquals(24, beneficiaryFromDb.getEnrollments().size());
+  @Test
+  public void loadInitialEnrollmentShouldCount24() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
-          // Verify that the loaded list was updated properly
-          final List<LoadedFile> afterLoadedFiles =
-              RifLoaderTestUtils.findLoadedFiles(entityManager);
-          Assert.assertTrue(
-              "Expected to have more loaded files",
-              beforeLoadedFiles.size() < afterLoadedFiles.size());
-          final LoadedFile afterLoadedFile = afterLoadedFiles.get(0);
-          final LoadedFile afterOldestFile = afterLoadedFiles.get(afterLoadedFiles.size() - 1);
-          Assert.assertEquals(
-              "Expected same oldest file",
-              beforeOldestFile.getLoadedFileId(),
-              afterOldestFile.getLoadedFileId());
-          Assert.assertTrue(
-              "Expected range to expand",
-              beforeLoadedFile.getCreated().before(afterLoadedFile.getCreated()));
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
 
-          RifLoaderTestUtils.pauseMillis(10);
-          loadSample(
-              dataSource,
-              Arrays.asList(
-                  StaticRifResourceGroup.SAMPLE_U_BENES_REFERENCE_YEAR_CHANGE.getResources()));
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Assert.assertEquals(24, beneficiaryFromDb.getEnrollments().size());
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
 
-          beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-        });
+  @Test
+  public void loadInitialEnrollmentShouldCount20SinceThereIsAUpdateOf8Months() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    loadSample(
+        dataSource,
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
+
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Assert.assertEquals(20, beneficiaryFromDb.getEnrollments().size());
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
   }
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link

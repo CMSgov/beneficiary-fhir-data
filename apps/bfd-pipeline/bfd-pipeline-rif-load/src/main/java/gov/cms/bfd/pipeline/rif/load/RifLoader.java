@@ -902,14 +902,14 @@ public final class RifLoader implements AutoCloseable {
           currentEnrollmentsWithUpdates = beneficiaryFromDb.getEnrollments();
           List<Enrollment> currentYearEnrollmentsPrevious =
               beneficiaryFromDb.getEnrollments().stream()
-                  .filter(e -> e.getYearMonth().contains(year + "-"))
+                  .filter(e -> e.getYearMonth().contains(year))
                   .collect(Collectors.toList());
 
           if (currentYearEnrollmentsPrevious.size() > 0) {
             for (Enrollment previousEnrollment : currentYearEnrollmentsPrevious) {
               currentEnrollmentsWithUpdates.remove(previousEnrollment);
             }
-          } 
+          }
         } else {
           currentEnrollmentsWithUpdates = new LinkedList<Enrollment>();
         }
