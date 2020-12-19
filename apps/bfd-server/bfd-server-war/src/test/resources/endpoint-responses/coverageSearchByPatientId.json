@@ -53,7 +53,7 @@
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
-        "valueDate" : "2019"
+        "valueDate" : "2018"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
         "valueCoding" : {
@@ -269,7 +269,7 @@
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
-        "valueDate" : "2019"
+        "valueDate" : "2018"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
         "valueCoding" : {
@@ -742,7 +742,7 @@
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
-        "valueDate" : "2019"
+        "valueDate" : "2018"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
         "valueCoding" : {
@@ -1232,7 +1232,7 @@
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
-        "valueDate" : "2019"
+        "valueDate" : "2018"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
         "valueCoding" : {
