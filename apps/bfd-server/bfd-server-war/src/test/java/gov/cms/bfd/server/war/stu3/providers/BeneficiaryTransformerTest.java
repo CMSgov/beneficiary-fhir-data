@@ -362,9 +362,12 @@ public final class BeneficiaryTransformerTest {
     if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(
           CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), patient);
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
+    if (beneficiary.getEnrollments().size() > 0) {
+      Optional<String> year =
+          Optional.of(beneficiary.getEnrollments().get(0).getYearMonth().substring(0, 4));
       TransformerTestUtils.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), patient);
+          CcwCodebookVariable.RFRNC_YR, year, patient);
+    }
 
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), patient);
   }
