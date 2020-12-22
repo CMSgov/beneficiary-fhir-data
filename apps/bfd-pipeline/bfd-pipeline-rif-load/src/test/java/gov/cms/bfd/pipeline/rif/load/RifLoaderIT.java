@@ -331,6 +331,7 @@ public final class RifLoaderIT {
       entityManager = entityManagerFactory.createEntityManager();
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
       Assert.assertEquals(12, beneficiaryFromDb.getEnrollments().size());
+      assertEnrollments(beneficiaryFromDb);
 
     } finally {
       if (entityManager != null) entityManager.close();
@@ -379,6 +380,7 @@ public final class RifLoaderIT {
       if (entityManager != null) entityManager.close();
     }
   }
+
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
    * StaticRifResourceGroup#SAMPLE_B} data.
@@ -595,6 +597,7 @@ public final class RifLoaderIT {
           rifFileRecords,
           error -> {
             failureCount.incrementAndGet();
+            Assert.assertEquals("", error.getMessage());
             LOGGER.warn("Record(s) failed to load.", error);
           },
           result -> {
@@ -743,261 +746,273 @@ public final class RifLoaderIT {
             defaultOptions.getFixupThreads()));
   }
 
-  public static void assertEnrollments(Beneficiary beneficiaryFromDb, int enrollmentSize) {
+  public static void assertEnrollments(Beneficiary beneficiaryFromDb) {
     List<Enrollment> enrollments = beneficiaryFromDb.getEnrollments();
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "01",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        1,
         enrollments.get(0),
-        beneficiaryFromDb.getEntitlementBuyInJanInd().get(),
-        beneficiaryFromDb.getFipsStateCntyJanCode().get(),
-        beneficiaryFromDb.getHmoIndicatorJanInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityJanCode().get(),
-        beneficiaryFromDb.getMedicareStatusJanCode().get(),
-        beneficiaryFromDb.getPartCContractNumberJanId().get(),
-        beneficiaryFromDb.getPartCPbpNumberJanId().get(),
-        beneficiaryFromDb.getPartCPlanTypeJanCode().get(),
-        beneficiaryFromDb.getPartDContractNumberJanId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJanCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberJanId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyJanInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberJanId().get());
+        beneficiaryFromDb.getEntitlementBuyInJanInd(),
+        beneficiaryFromDb.getFipsStateCntyJanCode(),
+        beneficiaryFromDb.getHmoIndicatorJanInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityJanCode(),
+        beneficiaryFromDb.getMedicareStatusJanCode(),
+        beneficiaryFromDb.getPartCContractNumberJanId(),
+        beneficiaryFromDb.getPartCPbpNumberJanId(),
+        beneficiaryFromDb.getPartCPlanTypeJanCode(),
+        beneficiaryFromDb.getPartDContractNumberJanId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJanCode(),
+        beneficiaryFromDb.getPartDPbpNumberJanId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyJanInd(),
+        beneficiaryFromDb.getPartDSegmentNumberJanId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "02",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        2,
         enrollments.get(1),
-        beneficiaryFromDb.getEntitlementBuyInFebInd().get(),
-        beneficiaryFromDb.getFipsStateCntyFebCode().get(),
-        beneficiaryFromDb.getHmoIndicatorFebInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityFebCode().get(),
-        beneficiaryFromDb.getMedicareStatusFebCode().get(),
-        beneficiaryFromDb.getPartCContractNumberFebId().get(),
-        beneficiaryFromDb.getPartCPbpNumberFebId().get(),
-        beneficiaryFromDb.getPartCPlanTypeFebCode().get(),
-        beneficiaryFromDb.getPartDContractNumberFebId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupFebCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberFebId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyFebInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberFebId().get());
+        beneficiaryFromDb.getEntitlementBuyInFebInd(),
+        beneficiaryFromDb.getFipsStateCntyFebCode(),
+        beneficiaryFromDb.getHmoIndicatorFebInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityFebCode(),
+        beneficiaryFromDb.getMedicareStatusFebCode(),
+        beneficiaryFromDb.getPartCContractNumberFebId(),
+        beneficiaryFromDb.getPartCPbpNumberFebId(),
+        beneficiaryFromDb.getPartCPlanTypeFebCode(),
+        beneficiaryFromDb.getPartDContractNumberFebId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupFebCode(),
+        beneficiaryFromDb.getPartDPbpNumberFebId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyFebInd(),
+        beneficiaryFromDb.getPartDSegmentNumberFebId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "03",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        3,
         enrollments.get(2),
-        beneficiaryFromDb.getEntitlementBuyInMarInd().get(),
-        beneficiaryFromDb.getFipsStateCntyMarCode().get(),
-        beneficiaryFromDb.getHmoIndicatorMarInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityMarCode().get(),
-        beneficiaryFromDb.getMedicareStatusMarCode().get(),
-        beneficiaryFromDb.getPartCContractNumberMarId().get(),
-        beneficiaryFromDb.getPartCPbpNumberMarId().get(),
-        beneficiaryFromDb.getPartCPlanTypeMarCode().get(),
-        beneficiaryFromDb.getPartDContractNumberMarId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupMarCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberMarId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyMarInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberMarId().get());
+        beneficiaryFromDb.getEntitlementBuyInMarInd(),
+        beneficiaryFromDb.getFipsStateCntyMarCode(),
+        beneficiaryFromDb.getHmoIndicatorMarInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityMarCode(),
+        beneficiaryFromDb.getMedicareStatusMarCode(),
+        beneficiaryFromDb.getPartCContractNumberMarId(),
+        beneficiaryFromDb.getPartCPbpNumberMarId(),
+        beneficiaryFromDb.getPartCPlanTypeMarCode(),
+        beneficiaryFromDb.getPartDContractNumberMarId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupMarCode(),
+        beneficiaryFromDb.getPartDPbpNumberMarId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyMarInd(),
+        beneficiaryFromDb.getPartDSegmentNumberMarId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "04",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        4,
         enrollments.get(3),
-        beneficiaryFromDb.getEntitlementBuyInAprInd().get(),
-        beneficiaryFromDb.getFipsStateCntyAprCode().get(),
-        beneficiaryFromDb.getHmoIndicatorAprInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityAprCode().get(),
-        beneficiaryFromDb.getMedicareStatusAprCode().get(),
-        beneficiaryFromDb.getPartCContractNumberAprId().get(),
-        beneficiaryFromDb.getPartCPbpNumberAprId().get(),
-        beneficiaryFromDb.getPartCPlanTypeAprCode().get(),
-        beneficiaryFromDb.getPartDContractNumberAprId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupAprCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberAprId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyAprInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberAprId().get());
+        beneficiaryFromDb.getEntitlementBuyInAprInd(),
+        beneficiaryFromDb.getFipsStateCntyAprCode(),
+        beneficiaryFromDb.getHmoIndicatorAprInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityAprCode(),
+        beneficiaryFromDb.getMedicareStatusAprCode(),
+        beneficiaryFromDb.getPartCContractNumberAprId(),
+        beneficiaryFromDb.getPartCPbpNumberAprId(),
+        beneficiaryFromDb.getPartCPlanTypeAprCode(),
+        beneficiaryFromDb.getPartDContractNumberAprId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupAprCode(),
+        beneficiaryFromDb.getPartDPbpNumberAprId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyAprInd(),
+        beneficiaryFromDb.getPartDSegmentNumberAprId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "05",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        5,
         enrollments.get(4),
-        beneficiaryFromDb.getEntitlementBuyInMayInd().get(),
-        beneficiaryFromDb.getFipsStateCntyMayCode().get(),
-        beneficiaryFromDb.getHmoIndicatorMayInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityMayCode().get(),
-        beneficiaryFromDb.getMedicareStatusMayCode().get(),
-        beneficiaryFromDb.getPartCContractNumberMayId().get(),
-        beneficiaryFromDb.getPartCPbpNumberMayId().get(),
-        beneficiaryFromDb.getPartCPlanTypeMayCode().get(),
-        beneficiaryFromDb.getPartDContractNumberMayId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupMayCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberMayId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyMayInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberMayId().get());
+        beneficiaryFromDb.getEntitlementBuyInMayInd(),
+        beneficiaryFromDb.getFipsStateCntyMayCode(),
+        beneficiaryFromDb.getHmoIndicatorMayInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityMayCode(),
+        beneficiaryFromDb.getMedicareStatusMayCode(),
+        beneficiaryFromDb.getPartCContractNumberMayId(),
+        beneficiaryFromDb.getPartCPbpNumberMayId(),
+        beneficiaryFromDb.getPartCPlanTypeMayCode(),
+        beneficiaryFromDb.getPartDContractNumberMayId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupMayCode(),
+        beneficiaryFromDb.getPartDPbpNumberMayId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyMayInd(),
+        beneficiaryFromDb.getPartDSegmentNumberMayId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "06",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        6,
         enrollments.get(5),
-        beneficiaryFromDb.getEntitlementBuyInJunInd().get(),
-        beneficiaryFromDb.getFipsStateCntyJunCode().get(),
-        beneficiaryFromDb.getHmoIndicatorJunInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityJunCode().get(),
-        beneficiaryFromDb.getMedicareStatusJunCode().get(),
-        beneficiaryFromDb.getPartCContractNumberJunId().get(),
-        beneficiaryFromDb.getPartCPbpNumberJunId().get(),
-        beneficiaryFromDb.getPartCPlanTypeJunCode().get(),
-        beneficiaryFromDb.getPartDContractNumberJunId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJunCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberJunId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyJunInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberJunId().get());
+        beneficiaryFromDb.getEntitlementBuyInJunInd(),
+        beneficiaryFromDb.getFipsStateCntyJunCode(),
+        beneficiaryFromDb.getHmoIndicatorJunInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityJunCode(),
+        beneficiaryFromDb.getMedicareStatusJunCode(),
+        beneficiaryFromDb.getPartCContractNumberJunId(),
+        beneficiaryFromDb.getPartCPbpNumberJunId(),
+        beneficiaryFromDb.getPartCPlanTypeJunCode(),
+        beneficiaryFromDb.getPartDContractNumberJunId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJunCode(),
+        beneficiaryFromDb.getPartDPbpNumberJunId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyJunInd(),
+        beneficiaryFromDb.getPartDSegmentNumberJunId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "07",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        7,
         enrollments.get(6),
-        beneficiaryFromDb.getEntitlementBuyInJulInd().get(),
-        beneficiaryFromDb.getFipsStateCntyJulCode().get(),
-        beneficiaryFromDb.getHmoIndicatorJulInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityJulCode().get(),
-        beneficiaryFromDb.getMedicareStatusJulCode().get(),
-        beneficiaryFromDb.getPartCContractNumberJulId().get(),
-        beneficiaryFromDb.getPartCPbpNumberJulId().get(),
-        beneficiaryFromDb.getPartCPlanTypeJulCode().get(),
-        beneficiaryFromDb.getPartDContractNumberJulId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJulCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberJulId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyJulInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberJulId().get());
+        beneficiaryFromDb.getEntitlementBuyInJulInd(),
+        beneficiaryFromDb.getFipsStateCntyJulCode(),
+        beneficiaryFromDb.getHmoIndicatorJulInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityJulCode(),
+        beneficiaryFromDb.getMedicareStatusJulCode(),
+        beneficiaryFromDb.getPartCContractNumberJulId(),
+        beneficiaryFromDb.getPartCPbpNumberJulId(),
+        beneficiaryFromDb.getPartCPlanTypeJulCode(),
+        beneficiaryFromDb.getPartDContractNumberJulId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJulCode(),
+        beneficiaryFromDb.getPartDPbpNumberJulId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyJulInd(),
+        beneficiaryFromDb.getPartDSegmentNumberJulId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "08",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        8,
         enrollments.get(7),
-        beneficiaryFromDb.getEntitlementBuyInAugInd().get(),
-        beneficiaryFromDb.getFipsStateCntyAugCode().get(),
-        beneficiaryFromDb.getHmoIndicatorAugInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityAugCode().get(),
-        beneficiaryFromDb.getMedicareStatusAugCode().get(),
-        beneficiaryFromDb.getPartCContractNumberAugId().get(),
-        beneficiaryFromDb.getPartCPbpNumberAugId().get(),
-        beneficiaryFromDb.getPartCPlanTypeAugCode().get(),
-        beneficiaryFromDb.getPartDContractNumberAugId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupAugCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberAugId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyAugInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberAugId().get());
+        beneficiaryFromDb.getEntitlementBuyInAugInd(),
+        beneficiaryFromDb.getFipsStateCntyAugCode(),
+        beneficiaryFromDb.getHmoIndicatorAugInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityAugCode(),
+        beneficiaryFromDb.getMedicareStatusAugCode(),
+        beneficiaryFromDb.getPartCContractNumberAugId(),
+        beneficiaryFromDb.getPartCPbpNumberAugId(),
+        beneficiaryFromDb.getPartCPlanTypeAugCode(),
+        beneficiaryFromDb.getPartDContractNumberAugId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupAugCode(),
+        beneficiaryFromDb.getPartDPbpNumberAugId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyAugInd(),
+        beneficiaryFromDb.getPartDSegmentNumberAugId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "09",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        9,
         enrollments.get(8),
-        beneficiaryFromDb.getEntitlementBuyInSeptInd().get(),
-        beneficiaryFromDb.getFipsStateCntySeptCode().get(),
-        beneficiaryFromDb.getHmoIndicatorSeptInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilitySeptCode().get(),
-        beneficiaryFromDb.getMedicareStatusSeptCode().get(),
-        beneficiaryFromDb.getPartCContractNumberSeptId().get(),
-        beneficiaryFromDb.getPartCPbpNumberSeptId().get(),
-        beneficiaryFromDb.getPartCPlanTypeSeptCode().get(),
-        beneficiaryFromDb.getPartDContractNumberSeptId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupSeptCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberSeptId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidySeptInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberSeptId().get());
+        beneficiaryFromDb.getEntitlementBuyInSeptInd(),
+        beneficiaryFromDb.getFipsStateCntySeptCode(),
+        beneficiaryFromDb.getHmoIndicatorSeptInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilitySeptCode(),
+        beneficiaryFromDb.getMedicareStatusSeptCode(),
+        beneficiaryFromDb.getPartCContractNumberSeptId(),
+        beneficiaryFromDb.getPartCPbpNumberSeptId(),
+        beneficiaryFromDb.getPartCPlanTypeSeptCode(),
+        beneficiaryFromDb.getPartDContractNumberSeptId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupSeptCode(),
+        beneficiaryFromDb.getPartDPbpNumberSeptId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidySeptInd(),
+        beneficiaryFromDb.getPartDSegmentNumberSeptId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "10",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        10,
         enrollments.get(9),
-        beneficiaryFromDb.getEntitlementBuyInOctInd().get(),
-        beneficiaryFromDb.getFipsStateCntyOctCode().get(),
-        beneficiaryFromDb.getHmoIndicatorOctInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityOctCode().get(),
-        beneficiaryFromDb.getMedicareStatusOctCode().get(),
-        beneficiaryFromDb.getPartCContractNumberOctId().get(),
-        beneficiaryFromDb.getPartCPbpNumberOctId().get(),
-        beneficiaryFromDb.getPartCPlanTypeOctCode().get(),
-        beneficiaryFromDb.getPartDContractNumberOctId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupOctCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberOctId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyOctInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberOctId().get());
+        beneficiaryFromDb.getEntitlementBuyInOctInd(),
+        beneficiaryFromDb.getFipsStateCntyOctCode(),
+        beneficiaryFromDb.getHmoIndicatorOctInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityOctCode(),
+        beneficiaryFromDb.getMedicareStatusOctCode(),
+        beneficiaryFromDb.getPartCContractNumberOctId(),
+        beneficiaryFromDb.getPartCPbpNumberOctId(),
+        beneficiaryFromDb.getPartCPlanTypeOctCode(),
+        beneficiaryFromDb.getPartDContractNumberOctId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupOctCode(),
+        beneficiaryFromDb.getPartDPbpNumberOctId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyOctInd(),
+        beneficiaryFromDb.getPartDSegmentNumberOctId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "11",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        11,
         enrollments.get(10),
-        beneficiaryFromDb.getEntitlementBuyInNovInd().get(),
-        beneficiaryFromDb.getFipsStateCntyNovCode().get(),
-        beneficiaryFromDb.getHmoIndicatorNovInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityNovCode().get(),
-        beneficiaryFromDb.getMedicareStatusNovCode().get(),
-        beneficiaryFromDb.getPartCContractNumberNovId().get(),
-        beneficiaryFromDb.getPartCPbpNumberNovId().get(),
-        beneficiaryFromDb.getPartCPlanTypeNovCode().get(),
-        beneficiaryFromDb.getPartDContractNumberNovId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupNovCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberNovId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyNovInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberNovId().get());
+        beneficiaryFromDb.getEntitlementBuyInNovInd(),
+        beneficiaryFromDb.getFipsStateCntyNovCode(),
+        beneficiaryFromDb.getHmoIndicatorNovInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityNovCode(),
+        beneficiaryFromDb.getMedicareStatusNovCode(),
+        beneficiaryFromDb.getPartCContractNumberNovId(),
+        beneficiaryFromDb.getPartCPbpNumberNovId(),
+        beneficiaryFromDb.getPartCPlanTypeNovCode(),
+        beneficiaryFromDb.getPartDContractNumberNovId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupNovCode(),
+        beneficiaryFromDb.getPartDPbpNumberNovId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyNovInd(),
+        beneficiaryFromDb.getPartDSegmentNumberNovId());
 
     checkEnrollments(
-        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().toString(),
-        "12",
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        12,
         enrollments.get(11),
-        beneficiaryFromDb.getEntitlementBuyInDecInd().get(),
-        beneficiaryFromDb.getFipsStateCntyDecCode().get(),
-        beneficiaryFromDb.getHmoIndicatorDecInd().get(),
-        beneficiaryFromDb.getMedicaidDualEligibilityDecCode().get(),
-        beneficiaryFromDb.getMedicareStatusDecCode().get(),
-        beneficiaryFromDb.getPartCContractNumberDecId().get(),
-        beneficiaryFromDb.getPartCPbpNumberDecId().get(),
-        beneficiaryFromDb.getPartCPlanTypeDecCode().get(),
-        beneficiaryFromDb.getPartDContractNumberDecId().get(),
-        beneficiaryFromDb.getPartDLowIncomeCostShareGroupDecCode().get(),
-        beneficiaryFromDb.getPartDPbpNumberDecId().get(),
-        beneficiaryFromDb.getPartDRetireeDrugSubsidyDecInd().get(),
-        beneficiaryFromDb.getPartDSegmentNumberDecId().get());
+        beneficiaryFromDb.getEntitlementBuyInDecInd(),
+        beneficiaryFromDb.getFipsStateCntyDecCode(),
+        beneficiaryFromDb.getHmoIndicatorDecInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityDecCode(),
+        beneficiaryFromDb.getMedicareStatusDecCode(),
+        beneficiaryFromDb.getPartCContractNumberDecId(),
+        beneficiaryFromDb.getPartCPbpNumberDecId(),
+        beneficiaryFromDb.getPartCPlanTypeDecCode(),
+        beneficiaryFromDb.getPartDContractNumberDecId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupDecCode(),
+        beneficiaryFromDb.getPartDPbpNumberDecId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyDecInd(),
+        beneficiaryFromDb.getPartDSegmentNumberDecId());
   }
 
   public static void checkEnrollments(
-      String referenceYear,
-      String month,
+      int referenceYear,
+      int month,
       Enrollment enrollment,
-      Character entitlementBuyInInd,
-      String fipsStateCntyCode,
-      Character hmoIndicatorInd,
-      String medicaidDualEligibilityCode,
-      String medicareStatusCode,
-      String partCContractNumberId,
-      String partCPbpNumberId,
-      String partCPlanTypeCode,
-      String partDContractNumberId,
-      String partDLowIncomeCostShareGroupCode,
-      String partDPbpNumberId,
-      Character partDRetireeDrugSubsidyInd,
-      String partDSegmentNumberId) {
+      Optional<Character> entitlementBuyInInd,
+      Optional<String> fipsStateCntyCode,
+      Optional<Character> hmoIndicatorInd,
+      Optional<String> medicaidDualEligibilityCode,
+      Optional<String> medicareStatusCode,
+      Optional<String> partCContractNumberId,
+      Optional<String> partCPbpNumberId,
+      Optional<String> partCPlanTypeCode,
+      Optional<String> partDContractNumberId,
+      Optional<String> partDLowIncomeCostShareGroupCode,
+      Optional<String> partDPbpNumberId,
+      Optional<Character> partDRetireeDrugSubsidyInd,
+      Optional<String> partDSegmentNumberId) {
 
-    Assert.assertEquals(String.format("%s-%s", referenceYear, month), enrollment.getYearMonth());
-    Assert.assertEquals(entitlementBuyInInd, enrollment.getEntitlementBuyInInd().get());
-    Assert.assertEquals(fipsStateCntyCode, enrollment.getFipsStateCntyCode().get());
-    Assert.assertEquals(hmoIndicatorInd, enrollment.getHmoIndicatorInd().get());
+    Assert.assertEquals(LocalDate.of(referenceYear, month, 1), enrollment.getYearMonth());
     Assert.assertEquals(
-        medicaidDualEligibilityCode, enrollment.getMedicaidDualEligibilityCode().get());
-    Assert.assertEquals(medicareStatusCode, enrollment.getMedicareStatusCode().get());
-    Assert.assertEquals(partCContractNumberId, enrollment.getPartCContractNumberId().get());
-    Assert.assertEquals(partCPbpNumberId, enrollment.getPartCPbpNumberId().get());
-    Assert.assertEquals(partCPlanTypeCode, enrollment.getPartCPlanTypeCode().get());
-    Assert.assertEquals(partDContractNumberId, enrollment.getPartDContractNumberId().get());
+        entitlementBuyInInd.orElse(null), enrollment.getEntitlementBuyInInd().orElse(null));
     Assert.assertEquals(
-        partDLowIncomeCostShareGroupCode, enrollment.getPartDLowIncomeCostShareGroupCode().get());
-    Assert.assertEquals(partDPbpNumberId, enrollment.getPartDPbpNumberId().get());
+        fipsStateCntyCode.orElse(null), enrollment.getFipsStateCntyCode().orElse(null));
+    Assert.assertEquals(hmoIndicatorInd.orElse(null), enrollment.getHmoIndicatorInd().orElse(null));
     Assert.assertEquals(
-        partDRetireeDrugSubsidyInd, enrollment.getPartDRetireeDrugSubsidyInd().get());
-    Assert.assertEquals(partDSegmentNumberId, enrollment.getPartDSegmentNumberId().get());
+        medicaidDualEligibilityCode.orElse(null),
+        enrollment.getMedicaidDualEligibilityCode().orElse(null));
+    Assert.assertEquals(
+        medicareStatusCode.orElse(null), enrollment.getMedicareStatusCode().orElse(null));
+    Assert.assertEquals(
+        partCContractNumberId.orElse(null), enrollment.getPartCContractNumberId().orElse(null));
+    Assert.assertEquals(
+        partCPbpNumberId.orElse(null), enrollment.getPartCPbpNumberId().orElse(null));
+    Assert.assertEquals(
+        partCPlanTypeCode.orElse(null), enrollment.getPartCPlanTypeCode().orElse(null));
+    Assert.assertEquals(
+        partDContractNumberId.orElse(null), enrollment.getPartDContractNumberId().orElse(null));
+    Assert.assertEquals(
+        partDLowIncomeCostShareGroupCode.orElse(null),
+        enrollment.getPartDLowIncomeCostShareGroupCode().orElse(null));
+    Assert.assertEquals(
+        partDPbpNumberId.orElse(null), enrollment.getPartDPbpNumberId().orElse(null));
+    Assert.assertEquals(
+        partDRetireeDrugSubsidyInd.orElse(null),
+        enrollment.getPartDRetireeDrugSubsidyInd().orElse(null));
+    Assert.assertEquals(
+        partDSegmentNumberId.orElse(null), enrollment.getPartDSegmentNumberId().orElse(null));
   }
   /**
    * Clear the MBI hash fields in the db

@@ -35,6 +35,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -625,13 +626,13 @@ public final class RifLoader implements AutoCloseable {
 
     if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
 
-      String year = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().toString();
+      int year = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().intValue();
       List<Enrollment> currentYearEnrollments = new ArrayList<Enrollment>();
 
       Enrollment enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "01"),
+              LocalDate.of(year, 1, 1),
               beneficiaryRecord.getEntitlementBuyInJanInd(),
               beneficiaryRecord.getFipsStateCntyJanCode(),
               beneficiaryRecord.getHmoIndicatorJanInd(),
@@ -653,7 +654,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "02"),
+              LocalDate.of(year, 2, 1),
               beneficiaryRecord.getEntitlementBuyInFebInd(),
               beneficiaryRecord.getFipsStateCntyFebCode(),
               beneficiaryRecord.getHmoIndicatorFebInd(),
@@ -675,7 +676,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "03"),
+              LocalDate.of(year, 3, 1),
               beneficiaryRecord.getEntitlementBuyInMarInd(),
               beneficiaryRecord.getFipsStateCntyMarCode(),
               beneficiaryRecord.getHmoIndicatorMarInd(),
@@ -697,7 +698,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "04"),
+              LocalDate.of(year, 4, 1),
               beneficiaryRecord.getEntitlementBuyInAprInd(),
               beneficiaryRecord.getFipsStateCntyAprCode(),
               beneficiaryRecord.getHmoIndicatorAprInd(),
@@ -719,7 +720,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "05"),
+              LocalDate.of(year, 5, 1),
               beneficiaryRecord.getEntitlementBuyInMayInd(),
               beneficiaryRecord.getFipsStateCntyMayCode(),
               beneficiaryRecord.getHmoIndicatorMayInd(),
@@ -741,7 +742,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "06"),
+              LocalDate.of(year, 6, 1),
               beneficiaryRecord.getEntitlementBuyInJunInd(),
               beneficiaryRecord.getFipsStateCntyJunCode(),
               beneficiaryRecord.getHmoIndicatorJunInd(),
@@ -763,7 +764,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "07"),
+              LocalDate.of(year, 7, 1),
               beneficiaryRecord.getEntitlementBuyInJulInd(),
               beneficiaryRecord.getFipsStateCntyJulCode(),
               beneficiaryRecord.getHmoIndicatorJulInd(),
@@ -785,7 +786,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "08"),
+              LocalDate.of(year, 8, 1),
               beneficiaryRecord.getEntitlementBuyInAugInd(),
               beneficiaryRecord.getFipsStateCntyAugCode(),
               beneficiaryRecord.getHmoIndicatorAugInd(),
@@ -807,7 +808,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "09"),
+              LocalDate.of(year, 9, 1),
               beneficiaryRecord.getEntitlementBuyInSeptInd(),
               beneficiaryRecord.getFipsStateCntySeptCode(),
               beneficiaryRecord.getHmoIndicatorSeptInd(),
@@ -829,7 +830,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "10"),
+              LocalDate.of(year, 10, 1),
               beneficiaryRecord.getEntitlementBuyInOctInd(),
               beneficiaryRecord.getFipsStateCntyOctCode(),
               beneficiaryRecord.getHmoIndicatorOctInd(),
@@ -851,7 +852,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "11"),
+              LocalDate.of(year, 11, 1),
               beneficiaryRecord.getEntitlementBuyInNovInd(),
               beneficiaryRecord.getFipsStateCntyNovCode(),
               beneficiaryRecord.getHmoIndicatorNovInd(),
@@ -873,7 +874,7 @@ public final class RifLoader implements AutoCloseable {
       enrollmentMonthly =
           getEnrollment(
               beneficiaryRecord,
-              String.format("%s-%s", year, "12"),
+              LocalDate.of(year, 12, 1),
               beneficiaryRecord.getEntitlementBuyInDecInd(),
               beneficiaryRecord.getFipsStateCntyDecCode(),
               beneficiaryRecord.getHmoIndicatorDecInd(),
@@ -902,7 +903,7 @@ public final class RifLoader implements AutoCloseable {
           currentEnrollmentsWithUpdates = beneficiaryFromDb.getEnrollments();
           List<Enrollment> currentYearEnrollmentsPrevious =
               beneficiaryFromDb.getEnrollments().stream()
-                  .filter(e -> e.getYearMonth().contains(year))
+                  .filter(e -> year == e.getYearMonth().getYear())
                   .collect(Collectors.toList());
 
           if (currentYearEnrollmentsPrevious.size() > 0) {
@@ -983,7 +984,7 @@ public final class RifLoader implements AutoCloseable {
 
   public static Enrollment getEnrollment(
       Beneficiary parentBeneficiary,
-      String yearMonth,
+      LocalDate yearMonth,
       Optional<Character> entitlementBuyInInd,
       Optional<String> fipsStateCntyCode,
       Optional<Character> hmoIndicatorInd,
