@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimColumn;
 import gov.cms.bfd.model.rif.DMEClaimLine;
+import gov.cms.bfd.model.rif.Enrollment;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimColumn;
 import gov.cms.bfd.model.rif.HHAClaimLine;
@@ -842,9 +843,25 @@ public final class TransformerUtils {
   static Extension createExtensionDate(
       CcwCodebookVariable ccwVariable, Optional<BigDecimal> dateYear) {
 
+    String stringDate = dateYear.get().toString() + "-01-01";
+    return createDate(ccwVariable, stringDate);
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param dateYear the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
+   *     specified input values
+   */
+  static Extension createExtensionDate(CcwCodebookVariable ccwVariable, String dateYear) {
+
+    return createDate(ccwVariable, dateYear);
+  }
+
+  static Extension createDate(CcwCodebookVariable ccwVariable, String dateYear) {
     Extension extension = null;
     try {
-      String stringDate = dateYear.get().toString() + "-01-01";
+      String stringDate = dateYear + "-01-01";
       Date date1 = new SimpleDateFormat("yyyy-MM-dd").parse(stringDate);
       DateType dateYearValue = new DateType(date1, TemporalPrecisionEnum.YEAR);
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
@@ -852,7 +869,7 @@ public final class TransformerUtils {
 
     } catch (ParseException e) {
       throw new InvalidRifValueException(
-          String.format("Unable to parse reference year: '%s'.", dateYear.get()), e);
+          String.format("Unable to parse reference year: '%s'. %s", dateYear, e));
     }
 
     return extension;
@@ -3206,5 +3223,98 @@ public final class TransformerUtils {
         }
       }
     };
+  }
+
+  public static String getReferenceYear(String yearMonth) {
+    return yearMonth.substring(0, 4);
+  }
+
+  public static void transformMedicaidDualEligibility(
+      String month, Enrollment enrollment, IAnyResource resource, List<Extension> extensions) {
+    // Monthly Medicare-Medicaid dual eligibility codes
+    if (month.equals("01") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_01,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("02") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_02,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("03") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_03,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("04") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_04,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("05") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_05,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("06") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_06,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("07") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_07,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("08") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_08,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("09") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_09,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("10") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_10,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("11") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_11,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
+    if (month.equals("12") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+      extensions.add(
+          TransformerUtils.createExtensionCoding(
+              resource,
+              CcwCodebookVariable.DUAL_12,
+              enrollment.getMedicaidDualEligibilityCode().get()));
+    }
   }
 }

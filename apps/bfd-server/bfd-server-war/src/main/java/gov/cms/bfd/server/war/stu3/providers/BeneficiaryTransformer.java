@@ -2,10 +2,12 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.Enrollment;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -207,96 +209,30 @@ final class BeneficiaryTransformer {
       name.addGiven(String.valueOf(beneficiary.getNameMiddleInitial().get()));
 
     // The reference year of the enrollment data
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionDate(
-              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
-    }
+    List<Enrollment> enrollments = beneficiary.getEnrollments();
+    if (!enrollments.isEmpty()) {
+      String referenceYear = TransformerUtils.getReferenceYear(enrollments.get(0).getYearMonth());
+      if (!Strings.isNullOrEmpty(referenceYear)) {
+        patient.addExtension(
+            TransformerUtils.createExtensionDate(CcwCodebookVariable.RFRNC_YR, referenceYear));
+      }
 
-    // Monthly Medicare-Medicaid dual eligibility codes
-    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_01,
-              beneficiary.getMedicaidDualEligibilityJanCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_02,
-              beneficiary.getMedicaidDualEligibilityFebCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_03,
-              beneficiary.getMedicaidDualEligibilityMarCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_04,
-              beneficiary.getMedicaidDualEligibilityAprCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_05,
-              beneficiary.getMedicaidDualEligibilityMayCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_06,
-              beneficiary.getMedicaidDualEligibilityJunCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_07,
-              beneficiary.getMedicaidDualEligibilityJulCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_08,
-              beneficiary.getMedicaidDualEligibilityAugCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_09,
-              beneficiary.getMedicaidDualEligibilitySeptCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_10,
-              beneficiary.getMedicaidDualEligibilityOctCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_11,
-              beneficiary.getMedicaidDualEligibilityNovCode()));
-    }
-    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
-      patient.addExtension(
-          TransformerUtils.createExtensionCoding(
-              patient,
-              CcwCodebookVariable.DUAL_12,
-              beneficiary.getMedicaidDualEligibilityDecCode()));
+      // I dunno if i like this..
+      List<Extension> extensions = new ArrayList<Extension>();
+      beneficiary
+          .getEnrollments()
+          .forEach(
+              enrollment -> {
+                String month = enrollment.getYearMonth().substring(6, 7);
+                TransformerUtils.transformMedicaidDualEligibility(
+                    month, enrollment, patient, extensions);
+              });
+
+      if (extensions.size() > 0) {
+        List<Extension> patientExtensions = patient.getExtension();
+        patientExtensions.addAll(extensions);
+        patient.setExtension(patientExtensions);
+      }
     }
 
     return patient;

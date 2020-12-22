@@ -29,6 +29,7 @@ import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -131,6 +132,8 @@ public final class PatientResourceProvider implements IResourceProvider {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
+
+    root.fetch(Beneficiary_.enrollments, JoinType.LEFT);
 
     if (hasHICN(includeIdentifiersValues))
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
@@ -314,18 +317,18 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   private String partDFieldFor(CcwCodebookVariable month) {
-    if (month == CcwCodebookVariable.PTDCNTRCT01) return "partDContractNumberJanId";
-    if (month == CcwCodebookVariable.PTDCNTRCT02) return "partDContractNumberFebId";
-    if (month == CcwCodebookVariable.PTDCNTRCT03) return "partDContractNumberMarId";
-    if (month == CcwCodebookVariable.PTDCNTRCT04) return "partDContractNumberAprId";
-    if (month == CcwCodebookVariable.PTDCNTRCT05) return "partDContractNumberMayId";
-    if (month == CcwCodebookVariable.PTDCNTRCT06) return "partDContractNumberJunId";
-    if (month == CcwCodebookVariable.PTDCNTRCT07) return "partDContractNumberJulId";
-    if (month == CcwCodebookVariable.PTDCNTRCT08) return "partDContractNumberAugId";
-    if (month == CcwCodebookVariable.PTDCNTRCT09) return "partDContractNumberSeptId";
-    if (month == CcwCodebookVariable.PTDCNTRCT10) return "partDContractNumberOctId";
-    if (month == CcwCodebookVariable.PTDCNTRCT11) return "partDContractNumberNovId";
-    if (month == CcwCodebookVariable.PTDCNTRCT12) return "partDContractNumberDecId";
+    if (month == CcwCodebookVariable.PTDCNTRCT01) return "01";
+    if (month == CcwCodebookVariable.PTDCNTRCT02) return "02";
+    if (month == CcwCodebookVariable.PTDCNTRCT03) return "03";
+    if (month == CcwCodebookVariable.PTDCNTRCT04) return "04";
+    if (month == CcwCodebookVariable.PTDCNTRCT05) return "05";
+    if (month == CcwCodebookVariable.PTDCNTRCT06) return "06";
+    if (month == CcwCodebookVariable.PTDCNTRCT07) return "07";
+    if (month == CcwCodebookVariable.PTDCNTRCT08) return "08";
+    if (month == CcwCodebookVariable.PTDCNTRCT09) return "09";
+    if (month == CcwCodebookVariable.PTDCNTRCT10) return "10";
+    if (month == CcwCodebookVariable.PTDCNTRCT11) return "11";
+    if (month == CcwCodebookVariable.PTDCNTRCT12) return "12";
     throw new InvalidRequestException(
         "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
   }
@@ -343,6 +346,8 @@ public final class PatientResourceProvider implements IResourceProvider {
       TokenParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
+    // Will default to current year if not supplied
+    String contractYearField = String.valueOf(LocalDateTime.now().getYear());
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
     String contractMonthField = partDFieldFor(partDContractMonth);
     String contractCode = coverageId.getValueNotNull();
@@ -356,7 +361,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
-          queryBeneficiaryIds(contractMonthField, contractCode, paging)
+          queryBeneficiaryIds(contractMonthField, contractYearField, contractCode, paging)
               .setMaxResults(paging.getPageSize() + 1)
               .getResultList();
 
@@ -364,7 +369,8 @@ public final class PatientResourceProvider implements IResourceProvider {
       return queryBeneficiariesByIds(ids, includedIdentifiers).getResultList();
     } else {
       // Fetch benes and their histories in one query
-      return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
+      return queryBeneficiariesBy(
+              contractMonthField, contractYearField, contractCode, paging, includedIdentifiers)
           .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
@@ -380,8 +386,13 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
-      String field, String value, PatientLinkBuilder paging, List<String> identifiers) {
-    String joinsClause = "";
+      String contractMonthField,
+      String contractYearField,
+      String partDContractId,
+      PatientLinkBuilder paging,
+      List<String> identifiers) {
+    String yearMonth = getYearMonth(contractYearField, contractMonthField);
+    String joinsClause = "inner join fetch b.enrollments ";
     if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
@@ -389,25 +400,27 @@ public final class PatientResourceProvider implements IResourceProvider {
       String query =
           "select distinct b from Beneficiary b "
               + joinsClause
-              + "where b."
-              + field
-              + " = :value and b.beneficiaryId > :cursor "
+              + "where e.partDContractNumberId"
+              + " = :partDContractId and e.yearMonth = :yearMonth and b.beneficiaryId > :cursor "
               + "order by b.beneficiaryId asc";
 
       return entityManager
           .createQuery(query, Beneficiary.class)
-          .setParameter("value", value)
+          .setParameter("partDContractId", partDContractId)
+          .setParameter("yearMonth", yearMonth)
           .setParameter("cursor", paging.getCursor());
     } else {
       String query =
           "select distinct b from Beneficiary b "
               + joinsClause
-              + "where b."
-              + field
-              + " = :value "
+              + "where e.partDContractNumberId"
+              + " = :partDContractId and e.yearMonth = :yearMonth "
               + "order by b.beneficiaryId asc";
 
-      return entityManager.createQuery(query, Beneficiary.class).setParameter("value", value);
+      return entityManager
+          .createQuery(query, Beneficiary.class)
+          .setParameter("partDContractId", partDContractId)
+          .setParameter("yearMonth", yearMonth);
     }
   }
 
@@ -420,28 +433,34 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<String> queryBeneficiaryIds(
-      String field, String value, PatientLinkBuilder paging) {
+      String contractMonthField,
+      String contractYearField,
+      String partDContractId,
+      PatientLinkBuilder paging) {
+    String yearMonth = getYearMonth(contractYearField, contractMonthField);
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
-          "select b.beneficiaryId from Beneficiary b "
-              + "where b."
-              + field
-              + " = :value and b.beneficiaryId > :cursor "
+          "select b.beneficiaryId from Beneficiary b inner join fetch b.enrollments "
+              + "where e.partDContractNumberId"
+              + " = :partDContractId and e.yearMonth = :yearMonth and b.beneficiaryId > :cursor "
               + "order by b.beneficiaryId asc";
 
       return entityManager
           .createQuery(query, String.class)
-          .setParameter("value", value)
+          .setParameter("partDContractId", partDContractId)
+          .setParameter("yearMonth", yearMonth)
           .setParameter("cursor", paging.getCursor());
     } else {
       String query =
-          "select b.beneficiaryId from Beneficiary b "
-              + "where b."
-              + field
-              + " = :value "
+          "select b.beneficiaryId from Beneficiary b inner join fetch b.enrollments "
+              + "where e.partDContractNumberId"
+              + " = :partDContractId and e.yearMonth = :yearMonth "
               + "order by b.beneficiaryId asc";
 
-      return entityManager.createQuery(query, String.class).setParameter("value", value);
+      return entityManager
+          .createQuery(query, String.class)
+          .setParameter("partDContractId", partDContractId)
+          .setParameter("yearMonth", yearMonth);
     }
   }
 
@@ -454,12 +473,12 @@ public final class PatientResourceProvider implements IResourceProvider {
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIds(
       List<String> ids, List<String> identifiers) {
-    String joinsClause = "";
+    String joinsClause = "left join fetch b.enrollments ";
     if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
     String query =
-        "select distinct b from Beneficiary b "
+        "select distinct b from Beneficiary b  "
             + joinsClause
             + "where b.beneficiaryId in :ids "
             + "order by b.beneficiaryId asc";
@@ -846,6 +865,16 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (coverageId.getValueNotNull().length() != 5)
       throw new InvalidRequestException(
           "Unsupported query parameter value: " + coverageId.getValueNotNull());
+  }
+
+  public static String getYearMonth(String contractMonthField, String contractYearField) {
+    if (contractMonthField == null)
+      throw new InvalidRequestException("Unsupported query parameter qualifier for contract month");
+    if (contractMonthField.length() != 4)
+      throw new InvalidRequestException(
+          "Unsupported query parameter value for reference year: " + contractYearField);
+
+    return String.format("%s-%s", contractYearField, contractMonthField);
   }
 
   /**
