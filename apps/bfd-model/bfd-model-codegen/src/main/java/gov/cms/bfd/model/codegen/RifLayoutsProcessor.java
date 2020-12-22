@@ -622,9 +622,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .addStatement("return $N", "parentBeneficiary")
             .returns(parentBeneficiaryIdFieldType);
     enrollmentIdClass.addMethod(parentGetter.build());
-    // Add a field to that @IdClass class for the line number.
 
-    TypeName yearMonthFieldType = ClassName.get(Date.class);
+    // Add a field to that @IdClass class for the month.
+    TypeName yearMonthFieldType = ClassName.get(LocalDate.class);
     FieldSpec.Builder yearMonthIdField =
         FieldSpec.builder(yearMonthFieldType, "yearMonth", Modifier.PRIVATE);
     enrollmentIdClass.addField(yearMonthIdField.build());
