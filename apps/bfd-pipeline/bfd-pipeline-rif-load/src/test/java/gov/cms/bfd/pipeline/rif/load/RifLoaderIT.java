@@ -331,6 +331,7 @@ public final class RifLoaderIT {
       entityManager = entityManagerFactory.createEntityManager();
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
       Assert.assertEquals(12, beneficiaryFromDb.getEnrollments().size());
+      assertEnrollments(beneficiaryFromDb);
 
     } finally {
       if (entityManager != null) entityManager.close();
@@ -595,6 +596,7 @@ public final class RifLoaderIT {
           rifFileRecords,
           error -> {
             failureCount.incrementAndGet();
+            Assert.assertEquals("", error.getMessage());
             LOGGER.warn("Record(s) failed to load.", error);
           },
           result -> {
@@ -743,7 +745,7 @@ public final class RifLoaderIT {
             defaultOptions.getFixupThreads()));
   }
 
-  public static void assertEnrollments(Beneficiary beneficiaryFromDb, int enrollmentSize) {
+  public static void assertEnrollments(Beneficiary beneficiaryFromDb) {
     List<Enrollment> enrollments = beneficiaryFromDb.getEnrollments();
 
     checkEnrollments(
