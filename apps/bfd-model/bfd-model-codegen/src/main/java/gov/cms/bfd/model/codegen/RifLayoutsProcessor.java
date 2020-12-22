@@ -613,39 +613,39 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .initializer("$L", 1L)
             .build());
 
-    TypeName parentClaimIdFieldType = ClassName.get(String.class);
+    TypeName parentBeneficiaryIdFieldType = ClassName.get(String.class);
     FieldSpec.Builder parentIdField =
-        FieldSpec.builder(parentClaimIdFieldType, "parentBeneficiary", Modifier.PRIVATE);
+        FieldSpec.builder(parentBeneficiaryIdFieldType, "parentBeneficiary", Modifier.PRIVATE);
     enrollmentIdClass.addField(parentIdField.build());
     MethodSpec.Builder parentGetter =
         MethodSpec.methodBuilder("getParentBeneficiary")
             .addStatement("return $N", "parentBeneficiary")
-            .returns(parentClaimIdFieldType);
+            .returns(parentBeneficiaryIdFieldType);
     enrollmentIdClass.addMethod(parentGetter.build());
     // Add a field to that @IdClass class for the line number.
 
-    TypeName lineNumberFieldType = ClassName.get(String.class);
-    FieldSpec.Builder lineNumberIdField =
-        FieldSpec.builder(lineNumberFieldType, "yearMonth", Modifier.PRIVATE);
-    enrollmentIdClass.addField(lineNumberIdField.build());
-    MethodSpec.Builder lineNumberGetter =
+    TypeName yearMonthFieldType = ClassName.get(Date.class);
+    FieldSpec.Builder yearMonthIdField =
+        FieldSpec.builder(yearMonthFieldType, "yearMonth", Modifier.PRIVATE);
+    enrollmentIdClass.addField(yearMonthIdField.build());
+    MethodSpec.Builder yearMonthGetter =
         MethodSpec.methodBuilder("get" + capitalize("yearMonth"))
             .addStatement("return $N", "yearMonth")
-            .returns(lineNumberFieldType);
-    enrollmentIdClass.addMethod(lineNumberGetter.build());
+            .returns(yearMonthFieldType);
+    enrollmentIdClass.addMethod(yearMonthGetter.build());
 
     // Add hashCode() and equals(...) to that @IdClass.
     enrollmentIdClass.addMethod(
-        generateHashCodeMethod(parentIdField.build(), lineNumberIdField.build()));
+        generateHashCodeMethod(parentIdField.build(), yearMonthIdField.build()));
     enrollmentIdClass.addMethod(
         generateEqualsMethod(
-            mappingSpec.getEnrollmentEntity(), parentIdField.build(), lineNumberIdField.build()));
+            mappingSpec.getEnrollmentEntity(), parentIdField.build(), yearMonthIdField.build()));
 
     // Finalize the @IdClass and nest it inside the Entity class.
     enrollmentEntity.addType(enrollmentIdClass.build());
 
     // Add a field and accessor to the "line" Entity for the parent.
-    FieldSpec parentClaimField =
+    FieldSpec parentBeneficiaryField =
         FieldSpec.builder(
                 ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"),
                 "parentBeneficiary",
@@ -663,32 +663,31 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                             "%s_%s_to_%s", "Enrollments", "parentBeneficiary", "Beneficiary"))
                     .build())
             .build();
-    enrollmentEntity.addField(parentClaimField);
-    MethodSpec parentClaimGetter =
-        MethodSpec.methodBuilder(calculateGetterName(parentClaimField))
+    enrollmentEntity.addField(parentBeneficiaryField);
+    MethodSpec parentBeneficiaryGetter =
+        MethodSpec.methodBuilder(calculateGetterName(parentBeneficiaryField))
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return $N", "parentBeneficiary")
             .returns(ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"))
             .build();
-    enrollmentEntity.addMethod(parentClaimGetter);
-    MethodSpec.Builder parentClaimSetter =
-        MethodSpec.methodBuilder(calculateSetterName(parentClaimField))
+    enrollmentEntity.addMethod(parentBeneficiaryGetter);
+    MethodSpec.Builder parentBeneficiarySetter =
+        MethodSpec.methodBuilder(calculateSetterName(parentBeneficiaryField))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(
-                ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"), parentClaimField.name);
-    addSetterStatement(false, parentClaimField, parentClaimSetter);
-    enrollmentEntity.addMethod(parentClaimSetter.build());
+                ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"), parentBeneficiaryField.name);
+    addSetterStatement(false, parentBeneficiaryField, parentBeneficiarySetter);
+    enrollmentEntity.addMethod(parentBeneficiarySetter.build());
 
     createEnrollmentFields(
         enrollmentEntity,
         true,
         false,
         false,
-        TypeName.CHAR,
         "yearMonth",
-        RifColumnType.CHAR,
-        Optional.of(7),
+        RifColumnType.DATE,
+        Optional.of(8),
         Optional.empty());
 
     createEnrollmentFields(
@@ -696,7 +695,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "fipsStateCntyCode",
         RifColumnType.CHAR,
         Optional.of(5),
@@ -707,7 +705,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "medicareStatusCode",
         RifColumnType.CHAR,
         Optional.of(2),
@@ -718,7 +715,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "entitlementBuyInInd",
         RifColumnType.CHAR,
         Optional.of(1),
@@ -729,7 +725,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "hmoIndicatorInd",
         RifColumnType.CHAR,
         Optional.of(1),
@@ -740,7 +735,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "partCContractNumberId",
         RifColumnType.CHAR,
         Optional.of(5),
@@ -751,7 +745,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "partCPbpNumberId",
         RifColumnType.CHAR,
         Optional.of(3),
@@ -762,7 +755,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "partCPlanTypeCode",
         RifColumnType.CHAR,
         Optional.of(3),
@@ -773,7 +765,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "partDContractNumberId",
         RifColumnType.CHAR,
         Optional.of(5),
@@ -784,7 +775,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "partDPbpNumberId",
         RifColumnType.CHAR,
         Optional.of(3),
@@ -795,7 +785,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "partDSegmentNumberId",
         RifColumnType.CHAR,
         Optional.of(3),
@@ -806,7 +795,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "partDRetireeDrugSubsidyInd",
         RifColumnType.CHAR,
         Optional.of(1),
@@ -817,7 +805,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "medicaidDualEligibilityCode",
         RifColumnType.CHAR,
         Optional.of(2),
@@ -828,7 +815,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         false,
         false,
         true,
-        TypeName.CHAR,
         "partDLowIncomeCostShareGroupCode",
         RifColumnType.CHAR,
         Optional.of(2),
@@ -1843,7 +1829,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       boolean isId,
       boolean isTransient,
       boolean isColumnOptional,
-      TypeName fieldType,
       String fieldName,
       RifColumnType type,
       Optional<Integer> columnLength,
