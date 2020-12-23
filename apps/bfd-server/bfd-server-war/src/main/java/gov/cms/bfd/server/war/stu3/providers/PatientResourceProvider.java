@@ -401,7 +401,7 @@ public final class PatientResourceProvider implements IResourceProvider {
           "select distinct b from Beneficiary b "
               + joinsClause
               + "where e.partDContractNumberId"
-              + " = :partDContractId and e.yearMonth = :yearMonth and b.beneficiaryId > :cursor "
+              + " = :partDContractId and e.yearMonth = ':yearMonth' and b.beneficiaryId > :cursor "
               + "order by b.beneficiaryId asc";
 
       return entityManager
@@ -414,7 +414,7 @@ public final class PatientResourceProvider implements IResourceProvider {
           "select distinct b from Beneficiary b "
               + joinsClause
               + "where e.partDContractNumberId"
-              + " = :partDContractId and e.yearMonth = :yearMonth "
+              + " = :partDContractId and e.yearMonth = ':yearMonth' "
               + "order by b.beneficiaryId asc";
 
       return entityManager
@@ -442,7 +442,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       String query =
           "select b.beneficiaryId from Beneficiary b inner join fetch b.enrollments "
               + "where e.partDContractNumberId"
-              + " = :partDContractId and e.yearMonth = :yearMonth and b.beneficiaryId > :cursor "
+              + " = :partDContractId and e.yearMonth = ':yearMonth' and b.beneficiaryId > :cursor "
               + "order by b.beneficiaryId asc";
 
       return entityManager
@@ -454,7 +454,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       String query =
           "select b.beneficiaryId from Beneficiary b inner join fetch b.enrollments "
               + "where e.partDContractNumberId"
-              + " = :partDContractId and e.yearMonth = :yearMonth "
+              + " = :partDContractId and e.yearMonth = ':yearMonth' "
               + "order by b.beneficiaryId asc";
 
       return entityManager
