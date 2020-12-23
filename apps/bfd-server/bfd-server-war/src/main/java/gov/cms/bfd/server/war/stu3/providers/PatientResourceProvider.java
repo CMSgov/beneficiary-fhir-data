@@ -874,7 +874,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       throw new InvalidRequestException(
           "Unsupported query parameter value for reference year: " + contractYearField);
 
-    return String.format("%s-%s", contractYearField, contractMonthField);
+    return String.format("%s-%s-01", contractYearField, contractMonthField);
   }
 
   /**
