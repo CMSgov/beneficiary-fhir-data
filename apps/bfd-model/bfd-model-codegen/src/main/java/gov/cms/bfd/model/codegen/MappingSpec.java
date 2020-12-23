@@ -33,7 +33,7 @@ public final class MappingSpec {
   private String headerEntityIdField;
   private String headerEntityGeneratedIdField;
   private boolean hasLines = false;
-  private boolean hasEnrollments = false;
+  private boolean hasBeneficiaryMonthly = false;
   private String lineTable;
   private List<String> headerEntityTransientFields;
   private List<RifField> headerEntityAdditionalDatabaseFields;
@@ -163,13 +163,13 @@ public final class MappingSpec {
    * @return <code>true</code> if the RIF layout has child line fields that should be stored
    *     separately from its parent header fields, <code>false</code> if not
    */
-  public boolean getHasEnrollments() {
-    return hasEnrollments;
+  public boolean getHasBeneficiaryMonthly() {
+    return hasBeneficiaryMonthly;
   }
 
-  /** @param hasLines the new value for {@link #getHasEnrollments()} */
-  public MappingSpec setHasEnrollments(boolean hasEnrollments) {
-    this.hasEnrollments = hasEnrollments;
+  /** @param hasLines the new value for {@link #setHasBeneficiaryMonthly()} */
+  public MappingSpec setHasBeneficiaryMonthly(boolean hasBeneficiaryMonthly) {
+    this.hasBeneficiaryMonthly = hasBeneficiaryMonthly;
     return this;
   }
 
@@ -203,9 +203,9 @@ public final class MappingSpec {
    * @return the name of the JPA {@link Entity} class that will be used to store data from this RIF
    *     layout for the line fields, if any
    */
-  public ClassName getEnrollmentEntity() {
-    if (!hasEnrollments) throw new IllegalStateException();
-    return ClassName.get(packageName, "Enrollment");
+  public ClassName getBeneficiaryMonthlyEntity() {
+    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
+    return ClassName.get(packageName, "BeneficiaryMonthly");
   }
 
   /**
@@ -247,8 +247,8 @@ public final class MappingSpec {
    *     be used to store and refer to the child {@link #getEnrollmentEntity()} {@link Entity}s, if
    *     any
    */
-  public String getEnrollmentEntityParentField() {
-    if (!hasEnrollments) throw new IllegalStateException();
+  public String getBeneficiaryMonthlyEntityParentField() {
+    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
     return "parentBeneficiary";
   }
 
@@ -265,8 +265,8 @@ public final class MappingSpec {
    * @return the name of the field in the {@link #getEntityEnrollmentField()} {@link Entity} that
    *     should be used for the identifying line number, if any
    */
-  public String getEntityEnrollmentField() {
-    if (!hasEnrollments) throw new IllegalStateException();
+  public String getEntityBeneficiaryMonthlyField() {
+    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
     return "yearMonth";
   }
 

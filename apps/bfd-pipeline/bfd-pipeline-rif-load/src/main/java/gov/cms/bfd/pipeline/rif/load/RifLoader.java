@@ -8,10 +8,10 @@ import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryCsvWriter;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimCsvWriter;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.model.rif.Enrollment;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedBatchBuilder;
 import gov.cms.bfd.model.rif.LoadedFile;
@@ -526,7 +526,7 @@ public final class RifLoader implements AutoCloseable {
             loadAction = LoadAction.INSERTED;
 
             if (recordsIsBeneficiary) {
-              updateEnrollment(entityManager, (Beneficiary) record);
+              updateBeneficiaryMonthly(entityManager, (Beneficiary) record);
             }
 
             entityManager.persist(record);
@@ -539,7 +539,7 @@ public final class RifLoader implements AutoCloseable {
             loadAction = LoadAction.INSERTED;
 
             if (recordsIsBeneficiary) {
-              updateEnrollment(entityManager, (Beneficiary) record);
+              updateBeneficiaryMonthly(entityManager, (Beneficiary) record);
             }
 
             entityManager.persist(record);
@@ -554,7 +554,7 @@ public final class RifLoader implements AutoCloseable {
             if (recordsIsBeneficiary) {
               updateBeneficaryHistory(
                   entityManager, (Beneficiary) record, loadedBatchBuilder.getTimestamp());
-              updateEnrollment(entityManager, (Beneficiary) record);
+              updateBeneficiaryMonthly(entityManager, (Beneficiary) record);
             }
 
             entityManager.merge(record);
@@ -615,22 +615,23 @@ public final class RifLoader implements AutoCloseable {
   }
 
   /**
-   * Ensures that a {@link Enrollment} record is created or updated for the specified {@link
+   * Ensures that a {@link BeneficiaryMonthly} record is created or updated for the specified {@link
    * Beneficiary}, if that {@link Beneficiary} already exists and is just being updated.
    *
    * @param entityManager the {@link EntityManager} to use
    * @param loadAction the {@link Loadaction} record being processed
    * @param beneficiaryRecord the {@link Beneficiary} record being processed
    */
-  private static void updateEnrollment(EntityManager entityManager, Beneficiary beneficiaryRecord) {
+  private static void updateBeneficiaryMonthly(
+      EntityManager entityManager, Beneficiary beneficiaryRecord) {
 
     if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
 
       int year = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().intValue();
-      List<Enrollment> currentYearEnrollments = new ArrayList<Enrollment>();
+      List<BeneficiaryMonthly> currentYearBeneficiaryMonthly = new ArrayList<BeneficiaryMonthly>();
 
-      Enrollment enrollmentMonthly =
-          getEnrollment(
+      BeneficiaryMonthly beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 1, 1),
               beneficiaryRecord.getEntitlementBuyInJanInd(),
@@ -647,12 +648,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
               beneficiaryRecord.getPartDSegmentNumberJanId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 2, 1),
               beneficiaryRecord.getEntitlementBuyInFebInd(),
@@ -669,12 +670,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyFebInd(),
               beneficiaryRecord.getPartDSegmentNumberFebId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 3, 1),
               beneficiaryRecord.getEntitlementBuyInMarInd(),
@@ -691,12 +692,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyMarInd(),
               beneficiaryRecord.getPartDSegmentNumberMarId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 4, 1),
               beneficiaryRecord.getEntitlementBuyInAprInd(),
@@ -713,12 +714,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyAprInd(),
               beneficiaryRecord.getPartDSegmentNumberAprId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 5, 1),
               beneficiaryRecord.getEntitlementBuyInMayInd(),
@@ -735,12 +736,11 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyMayInd(),
               beneficiaryRecord.getPartDSegmentNumberMayId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
-
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 6, 1),
               beneficiaryRecord.getEntitlementBuyInJunInd(),
@@ -757,12 +757,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyJunInd(),
               beneficiaryRecord.getPartDSegmentNumberJunId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 7, 1),
               beneficiaryRecord.getEntitlementBuyInJulInd(),
@@ -779,12 +779,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyJulInd(),
               beneficiaryRecord.getPartDSegmentNumberJulId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 8, 1),
               beneficiaryRecord.getEntitlementBuyInAugInd(),
@@ -801,12 +801,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyAugInd(),
               beneficiaryRecord.getPartDSegmentNumberAugId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 9, 1),
               beneficiaryRecord.getEntitlementBuyInSeptInd(),
@@ -823,12 +823,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidySeptInd(),
               beneficiaryRecord.getPartDSegmentNumberSeptId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 10, 1),
               beneficiaryRecord.getEntitlementBuyInOctInd(),
@@ -845,12 +845,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyOctInd(),
               beneficiaryRecord.getPartDSegmentNumberOctId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 11, 1),
               beneficiaryRecord.getEntitlementBuyInNovInd(),
@@ -867,12 +867,12 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyNovInd(),
               beneficiaryRecord.getPartDSegmentNumberNovId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      enrollmentMonthly =
-          getEnrollment(
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
               beneficiaryRecord,
               LocalDate.of(year, 12, 1),
               beneficiaryRecord.getEntitlementBuyInDecInd(),
@@ -889,34 +889,34 @@ public final class RifLoader implements AutoCloseable {
               beneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
               beneficiaryRecord.getPartDSegmentNumberDecId());
 
-      if (enrollmentMonthly != null) {
-        currentYearEnrollments.add(enrollmentMonthly);
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
 
-      if (currentYearEnrollments.size() > 0) {
-        List<Enrollment> currentEnrollmentsWithUpdates;
+      if (currentYearBeneficiaryMonthly.size() > 0) {
+        List<BeneficiaryMonthly> currentBeneficiaryMonthlyWithUpdates;
 
         Beneficiary beneficiaryFromDb =
             entityManager.find(Beneficiary.class, beneficiaryRecord.getBeneficiaryId());
 
-        if (beneficiaryFromDb != null && beneficiaryFromDb.getEnrollments().size() > 0) {
-          currentEnrollmentsWithUpdates = beneficiaryFromDb.getEnrollments();
-          List<Enrollment> currentYearEnrollmentsPrevious =
-              beneficiaryFromDb.getEnrollments().stream()
+        if (beneficiaryFromDb != null && beneficiaryFromDb.getBeneficiaryMonthlys().size() > 0) {
+          currentBeneficiaryMonthlyWithUpdates = beneficiaryFromDb.getBeneficiaryMonthlys();
+          List<BeneficiaryMonthly> currentYearBeneficiaryMonthlyPrevious =
+              beneficiaryFromDb.getBeneficiaryMonthlys().stream()
                   .filter(e -> year == e.getYearMonth().getYear())
                   .collect(Collectors.toList());
 
-          if (currentYearEnrollmentsPrevious.size() > 0) {
-            for (Enrollment previousEnrollment : currentYearEnrollmentsPrevious) {
-              currentEnrollmentsWithUpdates.remove(previousEnrollment);
+          if (currentYearBeneficiaryMonthlyPrevious.size() > 0) {
+            for (BeneficiaryMonthly previousEnrollment : currentYearBeneficiaryMonthlyPrevious) {
+              currentBeneficiaryMonthlyWithUpdates.remove(previousEnrollment);
             }
           }
         } else {
-          currentEnrollmentsWithUpdates = new LinkedList<Enrollment>();
+          currentBeneficiaryMonthlyWithUpdates = new LinkedList<BeneficiaryMonthly>();
         }
 
-        currentEnrollmentsWithUpdates.addAll(currentYearEnrollments);
-        beneficiaryRecord.setEnrollments(currentEnrollmentsWithUpdates);
+        currentBeneficiaryMonthlyWithUpdates.addAll(currentYearBeneficiaryMonthly);
+        beneficiaryRecord.setBeneficiaryMonthlys(currentBeneficiaryMonthlyWithUpdates);
       }
     }
   }
@@ -982,7 +982,7 @@ public final class RifLoader implements AutoCloseable {
     return false;
   }
 
-  public static Enrollment getEnrollment(
+  public static BeneficiaryMonthly getBeneficiaryMonthly(
       Beneficiary parentBeneficiary,
       LocalDate yearMonth,
       Optional<Character> entitlementBuyInInd,
@@ -999,7 +999,7 @@ public final class RifLoader implements AutoCloseable {
       Optional<Character> partDRetireeDrugSubsidyInd,
       Optional<String> partDSegmentNumberId) {
 
-    Enrollment enrollment = null;
+    BeneficiaryMonthly beneficiaryMonthly = null;
 
     if (entitlementBuyInInd.isPresent()
         || fipsStateCntyCode.isPresent()
@@ -1014,25 +1014,25 @@ public final class RifLoader implements AutoCloseable {
         || partDPbpNumberId.isPresent()
         || partDRetireeDrugSubsidyInd.isPresent()
         || partDSegmentNumberId.isPresent()) {
-      enrollment = new Enrollment();
-      enrollment.setParentBeneficiary(parentBeneficiary);
-      enrollment.setYearMonth(yearMonth);
-      enrollment.setEntitlementBuyInInd(entitlementBuyInInd);
-      enrollment.setFipsStateCntyCode(fipsStateCntyCode);
-      enrollment.setHmoIndicatorInd(hmoIndicatorInd);
-      enrollment.setMedicaidDualEligibilityCode(medicaidDualEligibilityCode);
-      enrollment.setMedicareStatusCode(medicareStatusCode);
-      enrollment.setPartCContractNumberId(partCContractNumberId);
-      enrollment.setPartCPbpNumberId(partCPbpNumberId);
-      enrollment.setPartCPlanTypeCode(partCPlanTypeCode);
-      enrollment.setPartDContractNumberId(partDContractNumberId);
-      enrollment.setPartDLowIncomeCostShareGroupCode(partDLowIncomeCostShareGroupCode);
-      enrollment.setPartDPbpNumberId(partDPbpNumberId);
-      enrollment.setPartDRetireeDrugSubsidyInd(partDRetireeDrugSubsidyInd);
-      enrollment.setPartDSegmentNumberId(partDSegmentNumberId);
+      beneficiaryMonthly = new BeneficiaryMonthly();
+      beneficiaryMonthly.setParentBeneficiary(parentBeneficiary);
+      beneficiaryMonthly.setYearMonth(yearMonth);
+      beneficiaryMonthly.setEntitlementBuyInInd(entitlementBuyInInd);
+      beneficiaryMonthly.setFipsStateCntyCode(fipsStateCntyCode);
+      beneficiaryMonthly.setHmoIndicatorInd(hmoIndicatorInd);
+      beneficiaryMonthly.setMedicaidDualEligibilityCode(medicaidDualEligibilityCode);
+      beneficiaryMonthly.setMedicareStatusCode(medicareStatusCode);
+      beneficiaryMonthly.setPartCContractNumberId(partCContractNumberId);
+      beneficiaryMonthly.setPartCPbpNumberId(partCPbpNumberId);
+      beneficiaryMonthly.setPartCPlanTypeCode(partCPlanTypeCode);
+      beneficiaryMonthly.setPartDContractNumberId(partDContractNumberId);
+      beneficiaryMonthly.setPartDLowIncomeCostShareGroupCode(partDLowIncomeCostShareGroupCode);
+      beneficiaryMonthly.setPartDPbpNumberId(partDPbpNumberId);
+      beneficiaryMonthly.setPartDRetireeDrugSubsidyInd(partDRetireeDrugSubsidyInd);
+      beneficiaryMonthly.setPartDSegmentNumberId(partDSegmentNumberId);
     }
 
-    return enrollment;
+    return beneficiaryMonthly;
   }
 
   /**

@@ -200,7 +200,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                           "MedicareBeneficiaryIdHistory",
                           "medicareBeneficiaryIdHistories")))
               .setHasLines(false)
-              .setHasEnrollments(true));
+              .setHasBeneficiaryMonthly(true));
       /*
        * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
        * DB), as they won't ever have changed data. We should change the RIF layout to
@@ -232,7 +232,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   createDetailsForAdditionalDatabaseFields(
                       Arrays.asList("hicnUnhashed", "mbiHash")))
               .setHasLines(false)
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
 
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -242,7 +242,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("MedicareBeneficiaryIdHistory")
               .setHeaderEntityIdField("medicareBeneficiaryIdKey")
               .setHasLines(false)
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
 
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -251,7 +251,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderTable("PartDEvents")
               .setHeaderEntityIdField("eventId")
               .setHasLines(false)
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.carrierSheet()))
@@ -260,7 +260,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
               .setLineTable("CarrierClaimLines")
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.inpatientSheet()))
@@ -269,7 +269,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
               .setLineTable("InpatientClaimLines")
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.outpatientSheet()))
@@ -278,7 +278,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
               .setLineTable("OutpatientClaimLines")
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hhaSheet()))
@@ -287,7 +287,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
               .setLineTable("HHAClaimLines")
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.dmeSheet()))
@@ -296,7 +296,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
               .setLineTable("DMEClaimLines")
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.hospiceSheet()))
@@ -305,7 +305,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
               .setLineTable("HospiceClaimLines")
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
       mappingSpecs.add(
           new MappingSpec(annotatedPackage.getQualifiedName().toString())
               .setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.snfSheet()))
@@ -314,7 +314,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .setHeaderEntityIdField("claimId")
               .setHasLines(true)
               .setLineTable("SNFClaimLines")
-              .setHasEnrollments(false));
+              .setHasBeneficiaryMonthly(false));
     } finally {
       if (spreadsheetWorkbook != null) spreadsheetWorkbook.close();
     }
@@ -354,8 +354,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
      */
     TypeSpec headerEntity = generateHeaderEntity(mappingSpec);
 
-    if (mappingSpec.getHasEnrollments()) {
-      generateEnrollmentEntity(mappingSpec);
+    if (mappingSpec.getHasBeneficiaryMonthly()) {
+      generateBeneficiaryMonthlyEntity(mappingSpec);
     }
 
     /*
@@ -582,32 +582,32 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     return lineEntityFinal;
   }
 
-  private TypeSpec generateEnrollmentEntity(MappingSpec mappingSpec) throws IOException {
+  private TypeSpec generateBeneficiaryMonthlyEntity(MappingSpec mappingSpec) throws IOException {
 
     // Create the Entity class.
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
     AnnotationSpec tableAnnotation =
-        AnnotationSpec.builder(Table.class).addMember("name", "$S", "`Enrollments`").build();
-    TypeSpec.Builder enrollmentEntity =
-        TypeSpec.classBuilder("Enrollment")
+        AnnotationSpec.builder(Table.class).addMember("name", "$S", "`BeneficiaryMonthly`").build();
+    TypeSpec.Builder beneficiaryMonthlyEntity =
+        TypeSpec.classBuilder("BeneficiaryMonthly")
             .addAnnotation(entityAnnotation)
             .addAnnotation(
                 AnnotationSpec.builder(IdClass.class)
                     .addMember(
                         "value",
                         "$T.class",
-                        ClassName.get("gov.cms.bfd.model.rif", "Enrollment")
-                            .nestedClass("EnrollmentId"))
+                        ClassName.get("gov.cms.bfd.model.rif", "BeneficiaryMonthly")
+                            .nestedClass("BeneficiaryMonthlyId"))
                     .build())
             .addAnnotation(tableAnnotation)
             .addModifiers(Modifier.PUBLIC);
 
     // Create the @IdClass needed for the composite primary key.
-    TypeSpec.Builder enrollmentIdClass =
-        TypeSpec.classBuilder("EnrollmentId")
+    TypeSpec.Builder beneficiaryMonthlyIdClass =
+        TypeSpec.classBuilder("BeneficiaryMonthlyId")
             .addSuperinterface(Serializable.class)
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-    enrollmentIdClass.addField(
+    beneficiaryMonthlyIdClass.addField(
         FieldSpec.builder(
                 long.class, "serialVersionUID", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             .initializer("$L", 1L)
@@ -616,33 +616,35 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     TypeName parentBeneficiaryIdFieldType = ClassName.get(String.class);
     FieldSpec.Builder parentIdField =
         FieldSpec.builder(parentBeneficiaryIdFieldType, "parentBeneficiary", Modifier.PRIVATE);
-    enrollmentIdClass.addField(parentIdField.build());
+    beneficiaryMonthlyIdClass.addField(parentIdField.build());
     MethodSpec.Builder parentGetter =
         MethodSpec.methodBuilder("getParentBeneficiary")
             .addStatement("return $N", "parentBeneficiary")
             .returns(parentBeneficiaryIdFieldType);
-    enrollmentIdClass.addMethod(parentGetter.build());
+    beneficiaryMonthlyIdClass.addMethod(parentGetter.build());
 
     // Add a field to that @IdClass class for the month.
     TypeName yearMonthFieldType = ClassName.get(LocalDate.class);
     FieldSpec.Builder yearMonthIdField =
         FieldSpec.builder(yearMonthFieldType, "yearMonth", Modifier.PRIVATE);
-    enrollmentIdClass.addField(yearMonthIdField.build());
+    beneficiaryMonthlyIdClass.addField(yearMonthIdField.build());
     MethodSpec.Builder yearMonthGetter =
         MethodSpec.methodBuilder("get" + capitalize("yearMonth"))
             .addStatement("return $N", "yearMonth")
             .returns(yearMonthFieldType);
-    enrollmentIdClass.addMethod(yearMonthGetter.build());
+    beneficiaryMonthlyIdClass.addMethod(yearMonthGetter.build());
 
     // Add hashCode() and equals(...) to that @IdClass.
-    enrollmentIdClass.addMethod(
+    beneficiaryMonthlyIdClass.addMethod(
         generateHashCodeMethod(parentIdField.build(), yearMonthIdField.build()));
-    enrollmentIdClass.addMethod(
+    beneficiaryMonthlyIdClass.addMethod(
         generateEqualsMethod(
-            mappingSpec.getEnrollmentEntity(), parentIdField.build(), yearMonthIdField.build()));
+            mappingSpec.getBeneficiaryMonthlyEntity(),
+            parentIdField.build(),
+            yearMonthIdField.build()));
 
     // Finalize the @IdClass and nest it inside the Entity class.
-    enrollmentEntity.addType(enrollmentIdClass.build());
+    beneficiaryMonthlyEntity.addType(beneficiaryMonthlyIdClass.build());
 
     // Add a field and accessor to the "line" Entity for the parent.
     FieldSpec parentBeneficiaryField =
@@ -660,17 +662,18 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                         "@$T(name = $S)",
                         ForeignKey.class,
                         String.format(
-                            "%s_%s_to_%s", "Enrollments", "parentBeneficiary", "Beneficiary"))
+                            "%s_%s_to_%s",
+                            "BeneficiaryMonthly", "parentBeneficiary", "Beneficiary"))
                     .build())
             .build();
-    enrollmentEntity.addField(parentBeneficiaryField);
+    beneficiaryMonthlyEntity.addField(parentBeneficiaryField);
     MethodSpec parentBeneficiaryGetter =
         MethodSpec.methodBuilder(calculateGetterName(parentBeneficiaryField))
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return $N", "parentBeneficiary")
             .returns(ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"))
             .build();
-    enrollmentEntity.addMethod(parentBeneficiaryGetter);
+    beneficiaryMonthlyEntity.addMethod(parentBeneficiaryGetter);
     MethodSpec.Builder parentBeneficiarySetter =
         MethodSpec.methodBuilder(calculateSetterName(parentBeneficiaryField))
             .addModifiers(Modifier.PUBLIC)
@@ -678,10 +681,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .addParameter(
                 ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"), parentBeneficiaryField.name);
     addSetterStatement(false, parentBeneficiaryField, parentBeneficiarySetter);
-    enrollmentEntity.addMethod(parentBeneficiarySetter.build());
+    beneficiaryMonthlyEntity.addMethod(parentBeneficiarySetter.build());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         true,
         false,
         false,
@@ -690,8 +693,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(8),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -700,8 +703,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(5),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -710,8 +713,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(2),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -720,8 +723,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(1),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -730,8 +733,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(1),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -740,8 +743,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(5),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -750,8 +753,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(3),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -760,8 +763,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(3),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -770,8 +773,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(5),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -780,8 +783,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(3),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -790,8 +793,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(3),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -800,8 +803,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(1),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -810,8 +813,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(2),
         Optional.empty());
 
-    createEnrollmentFields(
-        enrollmentEntity,
+    createBeneficiaryMonthlyFields(
+        beneficiaryMonthlyEntity,
         false,
         false,
         true,
@@ -820,12 +823,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         Optional.of(2),
         Optional.empty());
 
-    TypeSpec enrollmentEntityFinal = enrollmentEntity.build();
-    JavaFile enrollmentEntityClassFile =
-        JavaFile.builder("gov.cms.bfd.model.rif", enrollmentEntityFinal).build();
-    enrollmentEntityClassFile.writeTo(processingEnv.getFiler());
+    TypeSpec beneficiaryMonthlyEntityFinal = beneficiaryMonthlyEntity.build();
+    JavaFile beneficiaryMonthlyClassFile =
+        JavaFile.builder("gov.cms.bfd.model.rif", beneficiaryMonthlyEntityFinal).build();
+    beneficiaryMonthlyClassFile.writeTo(processingEnv.getFiler());
 
-    return enrollmentEntityFinal;
+    return beneficiaryMonthlyEntityFinal;
   }
 
   /**
@@ -1028,42 +1031,44 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     }
 
     // Add the parent-to-child join field and accessor, if appropriate.
-    if (mappingSpec.getHasEnrollments()) {
+    if (mappingSpec.getHasBeneficiaryMonthly()) {
 
       ParameterizedTypeName childFieldType =
-          ParameterizedTypeName.get(ClassName.get(List.class), mappingSpec.getEnrollmentEntity());
+          ParameterizedTypeName.get(
+              ClassName.get(List.class), mappingSpec.getBeneficiaryMonthlyEntity());
 
       FieldSpec.Builder childField =
-          FieldSpec.builder(childFieldType, "enrollments", Modifier.PRIVATE)
+          FieldSpec.builder(childFieldType, "beneficiaryMonthlys", Modifier.PRIVATE)
               .initializer("new $T<>()", LinkedList.class);
 
       childField.addAnnotation(
           AnnotationSpec.builder(OneToMany.class)
-              .addMember("mappedBy", "$S", mappingSpec.getEnrollmentEntityParentField())
+              .addMember("mappedBy", "$S", mappingSpec.getBeneficiaryMonthlyEntityParentField())
               .addMember("orphanRemoval", "$L", true)
               .addMember("fetch", "$T.EAGER", FetchType.class)
               .addMember("cascade", "$T.ALL", CascadeType.class)
               .build());
       childField.addAnnotation(
           AnnotationSpec.builder(OrderBy.class)
-              .addMember("value", "$S", mappingSpec.getEntityEnrollmentField() + " ASC")
+              .addMember("value", "$S", mappingSpec.getEntityBeneficiaryMonthlyField() + " ASC")
               .build());
       headerEntityClass.addField(childField.build());
 
       MethodSpec childGetter =
-          MethodSpec.methodBuilder("getEnrollments")
+          MethodSpec.methodBuilder("getBeneficiaryMonthlys")
               .addModifiers(Modifier.PUBLIC)
-              .addStatement("return $N", "enrollments")
+              .addStatement("return $N", "beneficiaryMonthlys")
               .returns(childFieldType)
               .build();
       headerEntityClass.addMethod(childGetter);
 
       MethodSpec childSetter =
-          MethodSpec.methodBuilder("setEnrollments")
+          MethodSpec.methodBuilder("setBeneficiaryMonthlys")
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
-              .addParameter(childFieldType, "enrollments")
-              .addStatement("this.$N = ($T)$N", "enrollments", childFieldType, "enrollments")
+              .addParameter(childFieldType, "beneficiaryMonthlys")
+              .addStatement(
+                  "this.$N = ($T)$N", "beneficiaryMonthlys", childFieldType, "beneficiaryMonthlys")
               .build();
       headerEntityClass.addMethod(childSetter);
     }
@@ -1824,7 +1829,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     }
   }
 
-  private static void createEnrollmentFields(
+  private static void createBeneficiaryMonthlyFields(
       TypeSpec.Builder lineEntity,
       boolean isId,
       boolean isTransient,
@@ -1839,7 +1844,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 fieldName,
                 Modifier.PRIVATE)
             .addAnnotations(
-                createEnrollmentAnnotations(
+                createBeneficiaryMonthlyAnnotations(
                     isId,
                     isTransient,
                     isColumnOptional,
@@ -1868,7 +1873,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     lineEntity.addMethod(lineFieldSetter.build());
   }
 
-  private static List<AnnotationSpec> createEnrollmentAnnotations(
+  private static List<AnnotationSpec> createBeneficiaryMonthlyAnnotations(
       boolean isId,
       boolean isTransient,
       boolean isColumnOptional,

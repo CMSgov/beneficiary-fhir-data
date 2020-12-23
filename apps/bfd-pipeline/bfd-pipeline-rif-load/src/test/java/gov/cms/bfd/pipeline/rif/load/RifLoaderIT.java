@@ -5,9 +5,9 @@ import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.model.rif.Enrollment;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
@@ -330,8 +330,8 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      Assert.assertEquals(12, beneficiaryFromDb.getEnrollments().size());
-      assertEnrollments(beneficiaryFromDb);
+      Assert.assertEquals(12, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      assertBeneficiaryMonthly(beneficiaryFromDb);
 
     } finally {
       if (entityManager != null) entityManager.close();
@@ -352,7 +352,7 @@ public final class RifLoaderIT {
       entityManager = entityManagerFactory.createEntityManager();
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      Assert.assertEquals(24, beneficiaryFromDb.getEnrollments().size());
+      Assert.assertEquals(24, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
       if (entityManager != null) entityManager.close();
     }
@@ -375,7 +375,7 @@ public final class RifLoaderIT {
       entityManager = entityManagerFactory.createEntityManager();
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      Assert.assertEquals(20, beneficiaryFromDb.getEnrollments().size());
+      Assert.assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
       if (entityManager != null) entityManager.close();
     }
@@ -746,13 +746,13 @@ public final class RifLoaderIT {
             defaultOptions.getFixupThreads()));
   }
 
-  public static void assertEnrollments(Beneficiary beneficiaryFromDb) {
-    List<Enrollment> enrollments = beneficiaryFromDb.getEnrollments();
+  public static void assertBeneficiaryMonthly(Beneficiary beneficiaryFromDb) {
+    List<BeneficiaryMonthly> beneficiaryMonthly = beneficiaryFromDb.getBeneficiaryMonthlys();
 
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         1,
-        enrollments.get(0),
+        beneficiaryMonthly.get(0),
         beneficiaryFromDb.getEntitlementBuyInJanInd(),
         beneficiaryFromDb.getFipsStateCntyJanCode(),
         beneficiaryFromDb.getHmoIndicatorJanInd(),
@@ -770,7 +770,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         2,
-        enrollments.get(1),
+        beneficiaryMonthly.get(1),
         beneficiaryFromDb.getEntitlementBuyInFebInd(),
         beneficiaryFromDb.getFipsStateCntyFebCode(),
         beneficiaryFromDb.getHmoIndicatorFebInd(),
@@ -788,7 +788,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         3,
-        enrollments.get(2),
+        beneficiaryMonthly.get(2),
         beneficiaryFromDb.getEntitlementBuyInMarInd(),
         beneficiaryFromDb.getFipsStateCntyMarCode(),
         beneficiaryFromDb.getHmoIndicatorMarInd(),
@@ -806,7 +806,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         4,
-        enrollments.get(3),
+        beneficiaryMonthly.get(3),
         beneficiaryFromDb.getEntitlementBuyInAprInd(),
         beneficiaryFromDb.getFipsStateCntyAprCode(),
         beneficiaryFromDb.getHmoIndicatorAprInd(),
@@ -824,7 +824,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         5,
-        enrollments.get(4),
+        beneficiaryMonthly.get(4),
         beneficiaryFromDb.getEntitlementBuyInMayInd(),
         beneficiaryFromDb.getFipsStateCntyMayCode(),
         beneficiaryFromDb.getHmoIndicatorMayInd(),
@@ -842,7 +842,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         6,
-        enrollments.get(5),
+        beneficiaryMonthly.get(5),
         beneficiaryFromDb.getEntitlementBuyInJunInd(),
         beneficiaryFromDb.getFipsStateCntyJunCode(),
         beneficiaryFromDb.getHmoIndicatorJunInd(),
@@ -860,7 +860,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         7,
-        enrollments.get(6),
+        beneficiaryMonthly.get(6),
         beneficiaryFromDb.getEntitlementBuyInJulInd(),
         beneficiaryFromDb.getFipsStateCntyJulCode(),
         beneficiaryFromDb.getHmoIndicatorJulInd(),
@@ -878,7 +878,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         8,
-        enrollments.get(7),
+        beneficiaryMonthly.get(7),
         beneficiaryFromDb.getEntitlementBuyInAugInd(),
         beneficiaryFromDb.getFipsStateCntyAugCode(),
         beneficiaryFromDb.getHmoIndicatorAugInd(),
@@ -896,7 +896,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         9,
-        enrollments.get(8),
+        beneficiaryMonthly.get(8),
         beneficiaryFromDb.getEntitlementBuyInSeptInd(),
         beneficiaryFromDb.getFipsStateCntySeptCode(),
         beneficiaryFromDb.getHmoIndicatorSeptInd(),
@@ -914,7 +914,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         10,
-        enrollments.get(9),
+        beneficiaryMonthly.get(9),
         beneficiaryFromDb.getEntitlementBuyInOctInd(),
         beneficiaryFromDb.getFipsStateCntyOctCode(),
         beneficiaryFromDb.getHmoIndicatorOctInd(),
@@ -932,7 +932,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         11,
-        enrollments.get(10),
+        beneficiaryMonthly.get(10),
         beneficiaryFromDb.getEntitlementBuyInNovInd(),
         beneficiaryFromDb.getFipsStateCntyNovCode(),
         beneficiaryFromDb.getHmoIndicatorNovInd(),
@@ -950,7 +950,7 @@ public final class RifLoaderIT {
     checkEnrollments(
         beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
         12,
-        enrollments.get(11),
+        beneficiaryMonthly.get(11),
         beneficiaryFromDb.getEntitlementBuyInDecInd(),
         beneficiaryFromDb.getFipsStateCntyDecCode(),
         beneficiaryFromDb.getHmoIndicatorDecInd(),
@@ -969,7 +969,7 @@ public final class RifLoaderIT {
   public static void checkEnrollments(
       int referenceYear,
       int month,
-      Enrollment enrollment,
+      BeneficiaryMonthly enrollment,
       Optional<Character> entitlementBuyInInd,
       Optional<String> fipsStateCntyCode,
       Optional<Character> hmoIndicatorInd,
