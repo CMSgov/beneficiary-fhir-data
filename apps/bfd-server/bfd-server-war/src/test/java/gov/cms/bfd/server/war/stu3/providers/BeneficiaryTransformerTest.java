@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.Enrollment;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -359,16 +360,26 @@ public final class BeneficiaryTransformerTest {
           patient.getName().get(0).getGiven().get(1).toString());
     Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());
 
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), patient);
-    if (beneficiary.getEnrollments().size() > 0) {
-      Optional<String> year =
-          Optional.of(beneficiary.getEnrollments().get(0).getYearMonth().substring(0, 4));
-      TransformerTestUtils.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, year, patient);
-    }
+    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
+      Optional<Enrollment> febEnrollment =
+          beneficiary.getEnrollments().stream()
+              .filter(line -> line.getYearMonth().getMonthValue() == 2)
+              .findFirst();
+      if (febEnrollment.isPresent()) {
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.DUAL_02,
+            febEnrollment.get().getMedicaidDualEligibilityCode().orElse(null),
+            patient);
+      }
+      if (beneficiary.getEnrollments().size() > 0) {
+        Optional<String> year =
+            Optional.of(
+                String.valueOf(beneficiary.getEnrollments().get(0).getYearMonth().getYear()));
+        TransformerTestUtils.assertExtensionDateYearEquals(
+            CcwCodebookVariable.RFRNC_YR, year, patient);
+      }
 
-    TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), patient);
+      TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), patient);
+    }
   }
 }

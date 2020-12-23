@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.Enrollment;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -104,17 +105,30 @@ public final class CoverageTransformerTest {
     if (beneficiary.getPartATerminationCode().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(
           CcwCodebookVariable.A_TRM_CD, beneficiary.getPartATerminationCode(), coverage);
-    if (beneficiary.getEntitlementBuyInAprInd().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.BUYIN04, beneficiary.getEntitlementBuyInAprInd(), coverage);
 
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), coverage);
+    if (beneficiary.getEntitlementBuyInAprInd().isPresent()) {
+      Optional<Enrollment> aprEnrollment =
+          beneficiary.getEnrollments().stream()
+              .filter(f -> f.getYearMonth().getMonthValue() == 4)
+              .findFirst();
+      if (aprEnrollment.isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.BUYIN04,
+            aprEnrollment.get().getEntitlementBuyInInd().get(),
+            coverage);
+    }
 
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
-      TransformerTestUtils.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);
+    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
+      Optional<Enrollment> febEnrollment =
+          beneficiary.getEnrollments().stream()
+              .filter(f -> f.getYearMonth().getMonthValue() == 2)
+              .findFirst();
+      if (febEnrollment.isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.DUAL_02,
+            febEnrollment.get().getMedicaidDualEligibilityCode().get(),
+            coverage);
+    }
   }
 
   /**
@@ -148,17 +162,29 @@ public final class CoverageTransformerTest {
       TransformerTestUtils.assertExtensionCodingEquals(
           CcwCodebookVariable.B_TRM_CD, beneficiary.getPartBTerminationCode(), coverage);
 
-    if (beneficiary.getEntitlementBuyInAprInd().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.BUYIN04, beneficiary.getEntitlementBuyInAprInd(), coverage);
+    if (beneficiary.getEntitlementBuyInAprInd().isPresent()) {
+      Optional<Enrollment> aprEnrollment =
+          beneficiary.getEnrollments().stream()
+              .filter(f -> f.getYearMonth().getMonthValue() == 4)
+              .findFirst();
+      if (aprEnrollment.isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.BUYIN04,
+            aprEnrollment.get().getEntitlementBuyInInd().get(),
+            coverage);
+    }
 
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), coverage);
-
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
-      TransformerTestUtils.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);
+    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
+      Optional<Enrollment> febEnrollment =
+          beneficiary.getEnrollments().stream()
+              .filter(f -> f.getYearMonth().getMonthValue() == 2)
+              .findFirst();
+      if (febEnrollment.isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.DUAL_02,
+            febEnrollment.get().getMedicaidDualEligibilityCode().get(),
+            coverage);
+    }
   }
 
   /**
@@ -181,29 +207,48 @@ public final class CoverageTransformerTest {
     Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
-    if (beneficiary.getPartCContractNumberAugId().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTC_CNTRCT_ID_08,
-          beneficiary.getPartCContractNumberAugId(),
-          coverage);
-    if (beneficiary.getPartCPbpNumberAugId().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTC_PBP_ID_08, beneficiary.getPartCPbpNumberAugId(), coverage);
-    if (beneficiary.getPartCPlanTypeAugCode().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTC_PLAN_TYPE_CD_08, beneficiary.getPartCPlanTypeAugCode(), coverage);
+    Optional<Enrollment> augEnrollment =
+        beneficiary.getEnrollments().stream()
+            .filter(f -> f.getYearMonth().getMonthValue() == 8)
+            .findFirst();
 
-    if (beneficiary.getHmoIndicatorFebInd().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.HMO_IND_02, beneficiary.getHmoIndicatorFebInd(), coverage);
+    if (augEnrollment.isPresent()) {
 
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), coverage);
+      if (beneficiary.getPartCContractNumberAugId().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.PTC_CNTRCT_ID_08,
+            augEnrollment.get().getPartCContractNumberId().get(),
+            coverage);
+      if (beneficiary.getPartCPbpNumberAugId().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.PTC_PBP_ID_08,
+            augEnrollment.get().getPartCPbpNumberId().get(),
+            coverage);
+      if (beneficiary.getPartCPlanTypeAugCode().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.PTC_PLAN_TYPE_CD_08,
+            augEnrollment.get().getPartCPlanTypeCode().get(),
+            coverage);
+    }
 
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
-      TransformerTestUtils.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);
+    Optional<Enrollment> febEnrollment =
+        beneficiary.getEnrollments().stream()
+            .filter(f -> f.getYearMonth().getMonthValue() == 2)
+            .findFirst();
+
+    if (febEnrollment.isPresent()) {
+      if (beneficiary.getHmoIndicatorFebInd().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.HMO_IND_02,
+            febEnrollment.get().getHmoIndicatorInd().get(),
+            coverage);
+
+      if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.DUAL_02,
+            febEnrollment.get().getMedicaidDualEligibilityCode().get(),
+            coverage);
+    }
   }
 
   /**
@@ -230,31 +275,61 @@ public final class CoverageTransformerTest {
     Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
-    if (beneficiary.getPartDContractNumberAugId().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTDCNTRCT08, beneficiary.getPartDContractNumberAugId(), coverage);
-    if (beneficiary.getPartDPbpNumberAugId().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTDPBPID08, beneficiary.getPartDPbpNumberAugId(), coverage);
-    if (beneficiary.getPartDSegmentNumberAugId().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.SGMTID08, beneficiary.getPartDSegmentNumberAugId(), coverage);
+    Optional<Enrollment> augEnrollment =
+        beneficiary.getEnrollments().stream()
+            .filter(f -> f.getYearMonth().getMonthValue() == 8)
+            .findFirst();
 
-    if (beneficiary.getPartDLowIncomeCostShareGroupFebCode().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.CSTSHR02,
-          beneficiary.getPartDLowIncomeCostShareGroupFebCode(),
-          coverage);
-    if (beneficiary.getPartDRetireeDrugSubsidyJanInd().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.RDSIND01, beneficiary.getPartDRetireeDrugSubsidyJanInd(), coverage);
+    if (augEnrollment.isPresent()) {
+      if (beneficiary.getPartDContractNumberAugId().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.PTDCNTRCT08,
+            augEnrollment.get().getPartDContractNumberId().get(),
+            coverage);
+      if (beneficiary.getPartDPbpNumberAugId().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.PTDPBPID08,
+            augEnrollment.get().getPartDPbpNumberId().get(),
+            coverage);
+      if (beneficiary.getPartDSegmentNumberAugId().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.SGMTID08,
+            augEnrollment.get().getPartDSegmentNumberId().get(),
+            coverage);
+    }
 
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtils.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), coverage);
+    Optional<Enrollment> febEnrollment =
+        beneficiary.getEnrollments().stream()
+            .filter(f -> f.getYearMonth().getMonthValue() == 2)
+            .findFirst();
 
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
-      TransformerTestUtils.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);
+    if (febEnrollment.isPresent()) {
+
+      if (beneficiary.getPartDLowIncomeCostShareGroupFebCode().isPresent()) {
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.CSTSHR02,
+            febEnrollment.get().getPartDLowIncomeCostShareGroupCode().get(),
+            coverage);
+      }
+
+      if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.DUAL_02,
+            febEnrollment.get().getMedicaidDualEligibilityCode().get(),
+            coverage);
+      }
+    }
+    Optional<Enrollment> janEnrollment =
+        beneficiary.getEnrollments().stream()
+            .filter(f -> f.getYearMonth().getMonthValue() == 1)
+            .findFirst();
+
+    if (janEnrollment.isPresent()) {
+      if (beneficiary.getPartDRetireeDrugSubsidyJanInd().isPresent())
+        TransformerTestUtils.assertExtensionCodingEquals(
+            CcwCodebookVariable.RDSIND01,
+            janEnrollment.get().getPartDRetireeDrugSubsidyInd().get(),
+            coverage);
+    }
   }
 }

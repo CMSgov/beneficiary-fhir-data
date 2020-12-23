@@ -148,7 +148,7 @@ final class CoverageTransformer {
     // The reference year of the enrollment data
     List<Enrollment> enrollments = beneficiary.getEnrollments();
     if (!enrollments.isEmpty()) {
-      String referenceYear = TransformerUtils.getReferenceYear(enrollments.get(0).getYearMonth());
+      String referenceYear = String.valueOf(enrollments.get(0).getYearMonth().getYear());
       if (!Strings.isNullOrEmpty(referenceYear)) {
         coverage.addExtension(
             TransformerUtils.createExtensionDate(CcwCodebookVariable.RFRNC_YR, referenceYear));
@@ -161,7 +161,7 @@ final class CoverageTransformer {
           .getEnrollments()
           .forEach(
               enrollment -> {
-                String month = enrollment.getYearMonth().substring(6, 7);
+                int month = enrollment.getYearMonth().getMonthValue();
                 TransformerUtils.transformMedicaidDualEligibility(
                     month, enrollment, coverage, medicaidDualEligibilities);
                 transformEntitlementBuyInIndicators(coverage, enrollment, month, buyInIndicators);
@@ -235,7 +235,7 @@ final class CoverageTransformer {
     // The reference year of the enrollment data
     List<Enrollment> enrollments = beneficiary.getEnrollments();
     if (!enrollments.isEmpty()) {
-      String referenceYear = TransformerUtils.getReferenceYear(enrollments.get(0).getYearMonth());
+      String referenceYear = String.valueOf(enrollments.get(0).getYearMonth().getYear());
       if (!Strings.isNullOrEmpty(referenceYear)) {
         coverage.addExtension(
             TransformerUtils.createExtensionDate(CcwCodebookVariable.RFRNC_YR, referenceYear));
@@ -248,7 +248,7 @@ final class CoverageTransformer {
           .getEnrollments()
           .forEach(
               enrollment -> {
-                String month = enrollment.getYearMonth().substring(6, 7);
+                int month = enrollment.getYearMonth().getMonthValue();
                 TransformerUtils.transformMedicaidDualEligibility(
                     month, enrollment, coverage, medicaidDualEligibilities);
                 transformEntitlementBuyInIndicators(coverage, enrollment, month, buyInIndicators);
@@ -304,7 +304,7 @@ final class CoverageTransformer {
     // The reference year of the enrollment data
     List<Enrollment> enrollments = beneficiary.getEnrollments();
     if (!enrollments.isEmpty()) {
-      String referenceYear = TransformerUtils.getReferenceYear(enrollments.get(0).getYearMonth());
+      String referenceYear = String.valueOf(enrollments.get(0).getYearMonth().getYear());
       if (!Strings.isNullOrEmpty(referenceYear)) {
         coverage.addExtension(
             TransformerUtils.createExtensionDate(CcwCodebookVariable.RFRNC_YR, referenceYear));
@@ -320,7 +320,7 @@ final class CoverageTransformer {
           .getEnrollments()
           .forEach(
               enrollment -> {
-                String month = enrollment.getYearMonth().substring(6, 7);
+                int month = enrollment.getYearMonth().getMonthValue();
                 transformPartCContractNumber(coverage, enrollment, month, partCContractNumbers);
                 transformPartCPbpNumbers(coverage, enrollment, month, partCPbpNumbers);
                 transformPartCPlanTypeCode(coverage, enrollment, month, partCPlanTypeCodes);
@@ -394,7 +394,7 @@ final class CoverageTransformer {
     // The reference year of the enrollment data
     List<Enrollment> enrollments = beneficiary.getEnrollments();
     if (!enrollments.isEmpty()) {
-      String referenceYear = TransformerUtils.getReferenceYear(enrollments.get(0).getYearMonth());
+      String referenceYear = String.valueOf(enrollments.get(0).getYearMonth().getYear());
       if (!Strings.isNullOrEmpty(referenceYear)) {
         coverage.addExtension(
             TransformerUtils.createExtensionDate(CcwCodebookVariable.RFRNC_YR, referenceYear));
@@ -411,7 +411,7 @@ final class CoverageTransformer {
           .getEnrollments()
           .forEach(
               enrollment -> {
-                String month = enrollment.getYearMonth().substring(6, 7);
+                int month = enrollment.getYearMonth().getMonthValue();
                 transformPartDContractNumbers(coverage, enrollment, month, partDContractNumbers);
                 transformPartDPbpNumbers(coverage, enrollment, month, partDPbpNumbers);
                 transformPartDSegmentNumbers(coverage, enrollment, month, partDSegmentNumbers);
@@ -460,65 +460,65 @@ final class CoverageTransformer {
    * @return {@link Coverage} resource for the
    */
   private static void transformEntitlementBuyInIndicators(
-      Coverage coverage, Enrollment enrollment, String month, List<Extension> buyInIndicators) {
+      Coverage coverage, Enrollment enrollment, int month, List<Extension> buyInIndicators) {
 
     // Medicare Entitlement Buy In Indicator
-    if (month.equals("01") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 1 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN01, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("02") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 2 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN02, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("03") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 3 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN03, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("04") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 4 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN04, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("05") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 5 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN05, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("06") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 6 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN06, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("07") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 7 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN07, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("08") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 8 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN08, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("09") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 9 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN09, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("10") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 10 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN10, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("11") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 11 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN11, enrollment.getEntitlementBuyInInd().get()));
     }
-    if (month.equals("12") && enrollment.getEntitlementBuyInInd().isPresent()) {
+    if (month == 12 && enrollment.getEntitlementBuyInInd().isPresent()) {
       buyInIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN12, enrollment.getEntitlementBuyInInd().get()));
@@ -526,89 +526,86 @@ final class CoverageTransformer {
   }
 
   private static void transformPartCContractNumber(
-      Coverage coverage,
-      Enrollment enrollment,
-      String month,
-      List<Extension> partCContractNumbers) {
+      Coverage coverage, Enrollment enrollment, int month, List<Extension> partCContractNumbers) {
     // Contract Number
-    if (month.equals("01") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 1 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_01,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("02") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 2 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_02,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("03") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 3 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_03,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("04") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 4 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_04,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("05") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 5 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_05,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("06") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 6 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_06,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("07") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 7 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_07,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("08") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 8 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_08,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("09") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 9 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_09,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("10") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 10 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_10,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("11") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 11 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_CNTRCT_ID_11,
               enrollment.getPartCContractNumberId().get()));
     }
-    if (month.equals("12") && enrollment.getPartCContractNumberId().isPresent()) {
+    if (month == 12 && enrollment.getPartCContractNumberId().isPresent()) {
       partCContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
@@ -618,64 +615,64 @@ final class CoverageTransformer {
   }
 
   private static void transformPartCPbpNumbers(
-      Coverage coverage, Enrollment enrollment, String month, List<Extension> partCPbpNumbers) {
+      Coverage coverage, Enrollment enrollment, int month, List<Extension> partCPbpNumbers) {
     // PBP
-    if (month.equals("01") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 1 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_01, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("02") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 2 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_02, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("03") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 3 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_03, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("04") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 4 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_04, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("05") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 5 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_05, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("06") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 6 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_06, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("07") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 7 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_07, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("08") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 8 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_08, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("09") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 9 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_09, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("10") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 10 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_10, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("11") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 11 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_11, enrollment.getPartCPbpNumberId().get()));
     }
-    if (month.equals("12") && enrollment.getPartCPbpNumberId().isPresent()) {
+    if (month == 12 && enrollment.getPartCPbpNumberId().isPresent()) {
       partCPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_12, enrollment.getPartCPbpNumberId().get()));
@@ -683,86 +680,86 @@ final class CoverageTransformer {
   }
 
   private static void transformPartCPlanTypeCode(
-      Coverage coverage, Enrollment enrollment, String month, List<Extension> partCPlanTypes) {
+      Coverage coverage, Enrollment enrollment, int month, List<Extension> partCPlanTypes) {
     // Plan Type
-    if (month.equals("01") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 1 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_01,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("02") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 2 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_02,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("03") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 3 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_03,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("04") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 4 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_04,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("05") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 5 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_05,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("06") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 6 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_06,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("07") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 7 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_07,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("08") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 8 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_08,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("09") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 9 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_09,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("10") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 10 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_10,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("11") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 11 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_11,
               enrollment.getPartCPlanTypeCode().get()));
     }
-    if (month.equals("12") && enrollment.getPartCPlanTypeCode().isPresent()) {
+    if (month == 12 && enrollment.getPartCPlanTypeCode().isPresent()) {
       partCPlanTypes.add(
           TransformerUtils.createExtensionCoding(
               coverage,
@@ -772,64 +769,64 @@ final class CoverageTransformer {
   }
 
   private static void transformHmoIndicators(
-      Coverage coverage, Enrollment enrollment, String month, List<Extension> hmoIndicators) {
+      Coverage coverage, Enrollment enrollment, int month, List<Extension> hmoIndicators) {
     // Monthly Medicare Advantage (MA) enrollment indicators:
-    if (month.equals("01") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 1 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_01, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("02") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 2 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_02, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("03") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 3 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_03, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("04") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 4 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_04, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("05") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 5 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_05, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("06") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 6 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_06, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("07") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 7 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_07, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("08") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 8 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_08, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("09") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 9 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_09, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("10") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 10 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_10, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("11") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 11 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_11, enrollment.getHmoIndicatorInd().get()));
     }
-    if (month.equals("12") && enrollment.getHmoIndicatorInd().isPresent()) {
+    if (month == 12 && enrollment.getHmoIndicatorInd().isPresent()) {
       hmoIndicators.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_12, enrollment.getHmoIndicatorInd().get()));
@@ -837,89 +834,86 @@ final class CoverageTransformer {
   }
 
   private static void transformPartDContractNumbers(
-      Coverage coverage,
-      Enrollment enrollment,
-      String month,
-      List<Extension> partDContractNumbers) {
+      Coverage coverage, Enrollment enrollment, int month, List<Extension> partDContractNumbers) {
     // Contract Number
-    if (month.equals("01") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 1 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT01,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("02") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 2 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT02,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("03") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 3 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT03,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("04") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 4 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT04,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("05") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 5 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT05,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("06") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 6 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT06,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("07") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 7 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT07,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("08") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 8 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT08,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("09") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 9 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT09,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("10") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 10 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT10,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("11") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 11 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.PTDCNTRCT11,
               enrollment.getPartDContractNumberId().get()));
     }
-    if (month.equals("12") && enrollment.getPartDContractNumberId().isPresent()) {
+    if (month == 12 && enrollment.getPartDContractNumberId().isPresent()) {
       partDContractNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage,
@@ -929,64 +923,64 @@ final class CoverageTransformer {
   }
 
   private static void transformPartDPbpNumbers(
-      Coverage coverage, Enrollment enrollment, String month, List<Extension> partDPbpNumbers) {
+      Coverage coverage, Enrollment enrollment, int month, List<Extension> partDPbpNumbers) {
     // PBP
-    if (month.equals("01") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 1 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID01, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("02") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 2 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID02, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("03") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 3 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID03, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("04") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 4 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID04, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("05") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 5 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID05, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("06") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 6 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID06, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("07") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 7 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID07, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("08") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 8 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID08, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("09") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 9 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID09, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("10") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 10 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID10, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("11") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 11 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID11, enrollment.getPartDPbpNumberId().get()));
     }
-    if (month.equals("12") && enrollment.getPartDPbpNumberId().isPresent()) {
+    if (month == 12 && enrollment.getPartDPbpNumberId().isPresent()) {
       partDPbpNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID12, enrollment.getPartDPbpNumberId().get()));
@@ -994,65 +988,65 @@ final class CoverageTransformer {
   }
 
   private static void transformPartDSegmentNumbers(
-      Coverage coverage, Enrollment enrollment, String month, List<Extension> partDSegmentNumbers) {
+      Coverage coverage, Enrollment enrollment, int month, List<Extension> partDSegmentNumbers) {
 
     // Segment Number
-    if (month.equals("01") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 1 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID01, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("02") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 2 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID02, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("03") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 3 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID03, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("04") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 4 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID04, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("05") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 5 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID05, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("06") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 6 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID06, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("07") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 7 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID07, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("08") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 8 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID08, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("09") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 9 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID09, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("10") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 10 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID10, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("11") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 11 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID11, enrollment.getPartDSegmentNumberId().get()));
     }
-    if (month.equals("12") && enrollment.getPartDSegmentNumberId().isPresent()) {
+    if (month == 12 && enrollment.getPartDSegmentNumberId().isPresent()) {
       partDSegmentNumbers.add(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID12, enrollment.getPartDSegmentNumberId().get()));
@@ -1062,87 +1056,87 @@ final class CoverageTransformer {
   private static void transformPartDLowIncomeCostShareGroups(
       Coverage coverage,
       Enrollment enrollment,
-      String month,
+      int month,
       List<Extension> partDLowIncomeCostShareGroups) {
     // Monthly cost sharing group
-    if (month.equals("01") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 1 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR01,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("02") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 2 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR02,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("03") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 3 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR03,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("04") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 4 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR04,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("05") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 5 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR05,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("06") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 6 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR06,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("07") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 7 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR07,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("08") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 8 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR08,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("09") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 9 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR09,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("10") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 10 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR10,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("11") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 11 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.CSTSHR11,
               enrollment.getPartDLowIncomeCostShareGroupCode().get()));
     }
-    if (month.equals("12") && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
+    if (month == 12 && enrollment.getPartDLowIncomeCostShareGroupCode().isPresent()) {
       partDLowIncomeCostShareGroups.add(
           TransformerUtils.createExtensionCoding(
               coverage,
@@ -1154,87 +1148,87 @@ final class CoverageTransformer {
   private static void transformPartDRetireeDrugSubsidy(
       Coverage coverage,
       Enrollment enrollment,
-      String month,
+      int month,
       List<Extension> partDRetireeDrugSubsidy) {
     // Monthly Part D Retiree Drug Subsidy Indicators
-    if (month.equals("01") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 1 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND01,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("02") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 2 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND02,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("03") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 3 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND03,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("04") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 4 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND04,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("05") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 5 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND05,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("06") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 6 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND06,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("07") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 7 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND07,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("08") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 8 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND08,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("09") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 9 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND09,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("10") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 10 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND10,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("11") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 11 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,
               CcwCodebookVariable.RDSIND11,
               enrollment.getPartDRetireeDrugSubsidyInd().get()));
     }
-    if (month.equals("12") && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
+    if (month == 12 && enrollment.getPartDRetireeDrugSubsidyInd().isPresent()) {
       partDRetireeDrugSubsidy.add(
           TransformerUtils.createExtensionCoding(
               coverage,

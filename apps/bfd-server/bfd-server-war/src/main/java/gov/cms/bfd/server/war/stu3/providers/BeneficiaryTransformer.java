@@ -211,7 +211,7 @@ final class BeneficiaryTransformer {
     // The reference year of the enrollment data
     List<Enrollment> enrollments = beneficiary.getEnrollments();
     if (!enrollments.isEmpty()) {
-      String referenceYear = TransformerUtils.getReferenceYear(enrollments.get(0).getYearMonth());
+      String referenceYear = String.valueOf(enrollments.get(0).getYearMonth().getYear());
       if (!Strings.isNullOrEmpty(referenceYear)) {
         patient.addExtension(
             TransformerUtils.createExtensionDate(CcwCodebookVariable.RFRNC_YR, referenceYear));
@@ -223,9 +223,8 @@ final class BeneficiaryTransformer {
           .getEnrollments()
           .forEach(
               enrollment -> {
-                String month = enrollment.getYearMonth().substring(6, 7);
                 TransformerUtils.transformMedicaidDualEligibility(
-                    month, enrollment, patient, extensions);
+                    enrollment.getYearMonth().getMonthValue(), enrollment, patient, extensions);
               });
 
       if (extensions.size() > 0) {

@@ -3230,86 +3230,86 @@ public final class TransformerUtils {
   }
 
   public static void transformMedicaidDualEligibility(
-      String month, Enrollment enrollment, IAnyResource resource, List<Extension> extensions) {
+      int month, Enrollment enrollment, IAnyResource resource, List<Extension> extensions) {
     // Monthly Medicare-Medicaid dual eligibility codes
-    if (month.equals("01") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 1 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_01,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("02") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 2 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_02,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("03") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 3 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_03,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("04") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 4 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_04,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("05") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 5 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_05,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("06") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 6 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_06,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("07") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 7 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_07,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("08") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 8 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_08,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("09") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 9 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_09,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("10") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 10 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_10,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("11") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 11 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
               CcwCodebookVariable.DUAL_11,
               enrollment.getMedicaidDualEligibilityCode().get()));
     }
-    if (month.equals("12") && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
+    if (month == 12 && enrollment.getMedicaidDualEligibilityCode().isPresent()) {
       extensions.add(
           TransformerUtils.createExtensionCoding(
               resource,
