@@ -26,7 +26,10 @@ create table "BeneficiaryMonthly" (
 ${logic.tablespaces-escape} tablespace "beneficiarymonthly_ts"
 ;
 
+/* Give read_only_bb role read access to "BeneficiaryMonthly" and svc_bfd_pipeline_role full access. These roles are shared by our API server and pipeline service accounts. */
 
+GRANT SELECT ON TABLE public."BeneficiaryMonthly" TO read_only_bb;
+GRANT ALL ON TABLE public."BeneficiaryMonthly" TO svc_bfd_pipeline_role;
 
 INSERT INTO "BeneficiaryMonthly" 
     SELECT  "beneficiaryId", TO_DATE(CONCAT("beneEnrollmentReferenceYear", '/01/01'), 'YYYY/MM/DD') as "yearMonth", "fipsStateCntyJanCode",
