@@ -1595,6 +1595,8 @@ public final class PatientResourceProviderIT {
 
   @Test
   public void searchForExistingPatientByPartDContractNum() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = createFhirClient();
 
     // Should return a single match
