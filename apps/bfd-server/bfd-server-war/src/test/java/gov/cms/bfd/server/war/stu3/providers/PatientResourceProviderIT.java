@@ -1904,6 +1904,38 @@ public final class PatientResourceProviderIT {
     testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
   }
 
+  @Test
+  public void searchForExistingPatientByPartDContractNumAndYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // Should return a single match
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrnc_yr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getEntry().size());
+  }
+
   /**
    * Test the set of lastUpdated values
    *

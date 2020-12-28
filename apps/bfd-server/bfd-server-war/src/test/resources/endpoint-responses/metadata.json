@@ -98,6 +98,14 @@
         "type" : "token",
         "documentation" : "Part D coverage type"
       }, {
+        "name" : "_has:Coverage",
+        "type" : "token",
+        "documentation" : "Part D coverage type"
+      }, {
+        "name" : "_has:Coverage",
+        "type" : "token",
+        "documentation" : "Part D reference year"
+      }, {
         "name" : "_id",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
@@ -109,6 +117,10 @@
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "cursor",
+        "type" : "string",
+        "documentation" : "The cursor used for result pagination"
       }, {
         "name" : "cursor",
         "type" : "string",
