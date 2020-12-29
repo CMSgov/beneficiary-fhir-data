@@ -1838,8 +1838,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * @param isColumnOptional determines if the field is optional {@link boolean}
    * @param fieldName specifies the fieldname {@link String}
    * @param type specifies the field type {@link RifColumnType}
-   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types this represents the total number of digits that can be stored
-   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this represents how many of the total digits (see `columnLength`) are to the right of the decimal point
+   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types
+   *     this represents the total number of digits that can be stored
+   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
+   *     represents how many of the total digits (see `columnLength`) are to the right of the
+   *     decimal point
    */
   private static void createBeneficiaryMonthlyFields(
       TypeSpec.Builder lineEntity,
@@ -1969,8 +1972,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *
    * @param type specifies the field type {@link RifColumnType}
    * @param isColumnOptional determines if the field is optional {@link boolean}
-   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types this represents the total number of digits that can be stored
-   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this represents how many of the total digits (see `columnLength`) are to the right of the decimal point
+   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types
+   *     this represents the total number of digits that can be stored
+   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this
+   *     represents how many of the total digits (see `columnLength`) are to the right of the
+   *     decimal point
    */
   private static TypeName selectJavaFieldType(
       RifColumnType type,
