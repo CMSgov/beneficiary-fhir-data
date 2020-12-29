@@ -492,7 +492,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesByPartDContractCodeAndYearMonth(
-              contractMonthField, contractCode, paging, includedIdentifiers)
+              contractCode, yearMonth, paging, includedIdentifiers)
           .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
@@ -584,7 +584,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByPartDContractCodeAndYearMonth(
       String contractCode, String yearMonth, PatientLinkBuilder paging, List<String> identifiers) {
-    String joinsClause = "inner join fetch b.beneficiaryMonthlys bm ";
+    String joinsClause = "inner join b.beneficiaryMonthlys bm ";
     if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
@@ -592,7 +592,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       String query =
           "select distinct b from Beneficiary b "
               + joinsClause
-              + "where bm.partDContractNumberId = :contractCode "
+              + "where bm.partDContractNumberId = :contractCode and "
               + "bm.yearMonth = :yearMonth "
               + "and b.beneficiaryId > :cursor "
               + "order by b.beneficiaryId asc";
@@ -606,7 +606,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       String query =
           "select distinct b from Beneficiary b "
               + joinsClause
-              + "where bm.partDContractNumberId = :contractCode "
+              + "where bm.partDContractNumberId = :contractCode and "
               + "bm.yearMonth = :yearMonth "
               + "order by b.beneficiaryId asc";
 
@@ -629,8 +629,8 @@ public final class PatientResourceProvider implements IResourceProvider {
       String contractCode, String yearMonth, PatientLinkBuilder paging) {
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
-          "select b.beneficiaryId from Beneficiary b inner join BeneficiaryMonthly bm ON b.beneficiaryId = bm.parentBeneficiary "
-              + "where bm.partDContractNumberId = :contractCode "
+          "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
+              + "where bm.partDContractNumberId = :contractCode and "
               + "bm.yearMonth = :yearMonth and b.beneficiaryId > :cursor "
               + "order by b.beneficiaryId asc";
 
@@ -641,8 +641,8 @@ public final class PatientResourceProvider implements IResourceProvider {
           .setParameter("cursor", paging.getCursor());
     } else {
       String query =
-          "select b.beneficiaryId from Beneficiary b inner join BeneficiaryMonthly bm ON b.beneficiaryId = bm.parentBeneficiary "
-              + "where bm.partDContractNumberId = :contractCode "
+          "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
+              + "where bm.partDContractNumberId = :contractCode and "
               + "bm.yearMonth = :yearMonth "
               + "order by b.beneficiaryId asc";
 
@@ -682,7 +682,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(
       List<String> ids, List<String> identifiers) {
-    String joinsClause = "left join fetch b.beneficiaryMonthlys ";
+    String joinsClause = "inner join b.beneficiaryMonthlys bm ";
     if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 

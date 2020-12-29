@@ -1936,6 +1936,39 @@ public final class PatientResourceProviderIT {
     Assert.assertEquals(1, searchResults.getEntry().size());
   }
 
+  @Test
+  public void searchForNonExistingPatientByPartDContractNumAndYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // Should return a single match
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrnc_yr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2010"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(null, searchResults.getEntry().get(0).getResource());
+    Assert.assertEquals(0, searchResults.getEntry().size());
+  }
+
   /**
    * Test the set of lastUpdated values
    *

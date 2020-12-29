@@ -950,6 +950,29 @@ public final class TransformerUtils {
    *     Coding} to represent the specified input values
    */
   static Extension createExtensionCoding(
+      IAnyResource rootResource,
+      CcwCodebookVariable ccwVariable,
+      String yearMonth,
+      Optional<?> code) {
+    if (!code.isPresent()) throw new IllegalArgumentException();
+
+    Coding coding = createCoding(rootResource, ccwVariable, code.get());
+
+    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    Extension extension = new Extension(extensionUrl, coding);
+
+    return extension;
+  }
+
+  /**
+   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
+   *     will be contained in
+   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
+   *     Coding} to represent the specified input values
+   */
+  static Extension createExtensionCoding(
       IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object code) {
     // Jumping through hoops to cope with overloaded method:
     Optional<?> codeOptional = code instanceof Optional ? (Optional<?>) code : Optional.of(code);
