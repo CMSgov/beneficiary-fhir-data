@@ -469,6 +469,9 @@ public final class PatientResourceProvider implements IResourceProvider {
     String contractYearField =
         referenceYear.getSystem().substring(referenceYear.getSystem().lastIndexOf('/') + 1);
 
+    if (contractYearField == "2010")
+      throw new InvalidRequestException("A null or empty year is not supported");
+
     String contractCode = coverageId.getValueNotNull();
 
     String yearMonth = getFormattedYearMonth(contractYearField, contractMonthField);
