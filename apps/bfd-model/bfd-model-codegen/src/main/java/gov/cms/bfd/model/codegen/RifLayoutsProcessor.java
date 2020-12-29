@@ -1896,8 +1896,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * @param isColumnOptional determines if the field is optional {@link boolean}
    * @param fieldName specifies the fieldname {@link String}
    * @param type specifies the field type {@link RifColumnType}
-   * @param columnLength specifies the column length {@link Optional<Integer>}
-   * @param columnScale specifies the column scale {@link Optional<Integer>}
+   * @param columnLength specifies the column length {@link Optional<Integer>}, for numeric types this represents the total number of digits that can be stored
+   * @param columnScale specifies the column scale {@link Optional<Integer>}, for numeric types this represents how many of the total digits (see `columnLength`) are to the right of the decimal point
    */
   private static List<AnnotationSpec> createBeneficiaryMonthlyAnnotations(
       boolean isId,
