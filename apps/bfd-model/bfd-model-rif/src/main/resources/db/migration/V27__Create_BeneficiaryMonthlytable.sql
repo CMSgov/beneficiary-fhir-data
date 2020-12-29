@@ -1,6 +1,5 @@
 /*
- * The column doesn't have a default value to avoid updating the column on migration. The pipeline server
- * will populate the column as new beneficaries are added or existing beneficaries are updated. 
+ * The pipeline server will populate the table as new beneficaries are added or existing beneficaries are updated. 
  */
 
 ${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
@@ -26,8 +25,11 @@ create table "BeneficiaryMonthly" (
 ${logic.tablespaces-escape} tablespace "beneficiarymonthly_ts"
 ;
 
-
-
+/*
+ * Per the CCW folks, the beneEnrollmentReferenceYear column is null for newer bene records that
+ * haven't received data from all sources yet. There are over a million such records, which is a bit concerning,
+ * but that will be addressed in a separate ticket, if needed.
+ */
 INSERT INTO "BeneficiaryMonthly" 
     SELECT  "beneficiaryId", TO_DATE(CONCAT("beneEnrollmentReferenceYear", '/01/01'), 'YYYY/MM/DD') as "yearMonth", "fipsStateCntyJanCode",
     "medicareStatusJanCode", "entitlementBuyInJanInd", "hmoIndicatorJanInd",
@@ -61,7 +63,7 @@ INSERT INTO "BeneficiaryMonthly"
     "partCContractNumberAprId", "partCPbpNumberAprId", "partCPlanTypeAprCode",
     "partDContractNumberAprId", "partDPbpNumberAprId", "partDSegmentNumberAprId",
     "partDRetireeDrugSubsidyAprInd", "medicaidDualEligibilityAprCode", "partDLowIncomeCostShareGroupAprCode"
-	FROM "Beneficiaries"
+  FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
 INSERT INTO "BeneficiaryMonthly" 
@@ -136,6 +138,7 @@ INSERT INTO "BeneficiaryMonthly"
 	FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
+
 alter table "BeneficiaryMonthly" 
-  add constraint "BeneficiaryMonthly_parentClaim_to_Beneficiary" foreign key ("parentBeneficiary") 
+  add constraint "BeneficiaryMonthly_parentBeneficiary_to_Beneficiary" foreign key ("parentBeneficiary") 
   references "Beneficiaries";
