@@ -63,7 +63,7 @@ INSERT INTO "BeneficiaryMonthly"
     "partCContractNumberAprId", "partCPbpNumberAprId", "partCPlanTypeAprCode",
     "partDContractNumberAprId", "partDPbpNumberAprId", "partDSegmentNumberAprId",
     "partDRetireeDrugSubsidyAprInd", "medicaidDualEligibilityAprCode", "partDLowIncomeCostShareGroupAprCode"
-  FROM "Beneficiaries"
+    FROM "Beneficiaries"
 	WHERE "beneEnrollmentReferenceYear" is not null;
 
 INSERT INTO "BeneficiaryMonthly" 
