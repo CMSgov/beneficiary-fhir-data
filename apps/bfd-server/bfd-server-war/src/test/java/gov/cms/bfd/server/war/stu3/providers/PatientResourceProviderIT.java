@@ -1955,7 +1955,7 @@ public final class PatientResourceProviderIT {
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
             .where(
-                new TokenClientParam("_has:Coverage.rfrnc_yr")
+                new TokenClientParam("_has:Coverage.rfrncyr")
                     .exactly()
                     .systemAndIdentifier(
                         TransformerUtils.calculateVariableReferenceUrl(

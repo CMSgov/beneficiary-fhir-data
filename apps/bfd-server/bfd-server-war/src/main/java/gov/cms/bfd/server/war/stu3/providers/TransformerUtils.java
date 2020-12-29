@@ -956,9 +956,10 @@ public final class TransformerUtils {
       Optional<?> code) {
     if (!code.isPresent()) throw new IllegalArgumentException();
 
-    Coding coding = createCoding(rootResource, ccwVariable, code.get());
+    Coding coding = createCoding(rootResource, ccwVariable, yearMonth, code.get());
 
-    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    String extensionUrl =
+        String.format("%s/%s", calculateVariableReferenceUrl(ccwVariable), yearMonth);
     Extension extension = new Extension(extensionUrl, coding);
 
     return extension;
@@ -1043,6 +1044,35 @@ public final class TransformerUtils {
    */
   private static Coding createCoding(
       IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object code) {
+    /*
+     * The code parameter is an Object to avoid needing multiple copies of this and related methods.
+     * This if-else block is the price to be paid for that, though.
+     */
+    String codeString;
+    if (code instanceof Character) codeString = ((Character) code).toString();
+    else if (code instanceof String) codeString = code.toString().trim();
+    else throw new BadCodeMonkeyException("Unsupported: " + code);
+
+    String system = calculateVariableReferenceUrl(ccwVariable);
+
+    String display;
+    if (ccwVariable.getVariable().getValueGroups().isPresent())
+      display = calculateCodingDisplay(rootResource, ccwVariable, codeString).orElse(null);
+    else display = null;
+
+    return new Coding(system, codeString, display);
+  }
+
+  /**
+   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
+   *     be contained in
+   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param yearMonth the value to use for {@link String} for yearMonth
+   * @param code the value to use for {@link Coding#getCode()}
+   * @return the output {@link Coding} for the specified input values
+   */
+  private static Coding createCoding(
+      IAnyResource rootResource, CcwCodebookVariable ccwVariable, String yearMonth, Object code) {
     /*
      * The code parameter is an Object to avoid needing multiple copies of this and related methods.
      * This if-else block is the price to be paid for that, though.

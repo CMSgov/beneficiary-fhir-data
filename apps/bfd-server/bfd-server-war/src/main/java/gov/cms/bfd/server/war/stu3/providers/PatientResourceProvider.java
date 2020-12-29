@@ -313,7 +313,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       @RequiredParam(name = "_has:Coverage.extension")
           @Description(shortDefinition = "Part D coverage type")
           TokenParam coverageId,
-      @RequiredParam(name = "_has:Coverage.rfrnc_yr")
+      @RequiredParam(name = "_has:Coverage.rfrncyr")
           @Description(shortDefinition = "Part D reference year")
           TokenParam referenceYear,
       @OptionalParam(name = "cursor")
@@ -470,6 +470,9 @@ public final class PatientResourceProvider implements IResourceProvider {
         referenceYear.getSystem().substring(referenceYear.getSystem().lastIndexOf('/') + 1);
 
     if (contractYearField == "2010")
+      throw new InvalidRequestException("A null or empty year is not supported");
+
+    if (contractYearField != "2010")
       throw new InvalidRequestException("A null or empty year is not supported");
 
     String contractCode = coverageId.getValueNotNull();
