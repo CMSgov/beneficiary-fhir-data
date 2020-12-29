@@ -271,7 +271,7 @@ public class SpringConfiguration {
   /** @return the {@link Properties} to configure Hibernate and JPA with */
   private Properties jpaProperties() {
     Properties extraProperties = new Properties();
-    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
+    extraProperties.put(AvailableSettings.HBM2DDL_AUTO, Action.UPDATE);
 
     /*
      * These configuration settings will set Hibernate to log all SQL

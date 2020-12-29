@@ -1,6 +1,5 @@
 /*
- * The column doesn't have a default value to avoid updating the column on migration. The pipeline server
- * will populate the column as new beneficaries are added or existing beneficaries are updated. 
+ * The pipeline server will populate the table as new beneficaries are added or existing beneficaries are updated. 
  */
 
 ${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
@@ -26,7 +25,7 @@ create table "BeneficiaryMonthly" (
 ${logic.tablespaces-escape} tablespace "beneficiarymonthly_ts"
 ;
 
-
+/* we don't know why there are null values for this column, but we'll figure that out later in a different story." */
 
 INSERT INTO "BeneficiaryMonthly" 
     SELECT  "beneficiaryId", TO_DATE(CONCAT("beneEnrollmentReferenceYear", '/01/01'), 'YYYY/MM/DD') as "yearMonth", "fipsStateCntyJanCode",
@@ -137,6 +136,6 @@ INSERT INTO "BeneficiaryMonthly"
     WHERE "beneEnrollmentReferenceYear" is not null;
 
 alter table "BeneficiaryMonthly" 
-  add constraint "BeneficiaryMonthly_parentClaim_to_Beneficiary" foreign key ("parentBeneficiary") 
+  add constraint "BeneficiaryMonthly_parentBeneficiary_to_Beneficiary" foreign key ("parentBeneficiary") 
   references "Beneficiaries";
 
