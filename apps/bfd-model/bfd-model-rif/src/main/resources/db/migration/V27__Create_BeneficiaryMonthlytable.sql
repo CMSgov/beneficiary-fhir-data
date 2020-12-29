@@ -25,8 +25,11 @@ create table "BeneficiaryMonthly" (
 ${logic.tablespaces-escape} tablespace "beneficiarymonthly_ts"
 ;
 
-/* we don't know why there are null values for this column, but we'll figure that out later in a different story." */
-
+/*
+ * Per the CCW folks, the beneEnrollmentReferenceYear column is null for newer bene records that
+ * haven't received data from all sources yet. There are over a million such records, which is a bit concerning,
+ * but that will be addressed in a separate ticket, if needed.
+ */
 INSERT INTO "BeneficiaryMonthly" 
     SELECT  "beneficiaryId", TO_DATE(CONCAT("beneEnrollmentReferenceYear", '/01/01'), 'YYYY/MM/DD') as "yearMonth", "fipsStateCntyJanCode",
     "medicareStatusJanCode", "entitlementBuyInJanInd", "hmoIndicatorJanInd",
