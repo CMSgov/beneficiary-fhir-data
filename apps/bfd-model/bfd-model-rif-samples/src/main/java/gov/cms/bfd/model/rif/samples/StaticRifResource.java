@@ -153,6 +153,9 @@ public enum StaticRifResource {
   SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS(
       resourceUrl("rif-static-samples/sample-u-with-8-months.txt"), RifFileType.BENEFICIARY, 1),
 
+  SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS(
+      resourceUrl("rif-static-samples/sample-u-with-9-months.txt"), RifFileType.BENEFICIARY, 1),
+
   SAMPLE_U_BENES_UNCHANGED(
       resourceUrl("rif-static-samples/sample-u-unchanged-beneficiaries.txt"),
       RifFileType.BENEFICIARY,

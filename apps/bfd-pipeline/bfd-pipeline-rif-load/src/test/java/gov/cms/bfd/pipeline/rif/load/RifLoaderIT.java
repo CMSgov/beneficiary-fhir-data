@@ -381,6 +381,94 @@ public final class RifLoaderIT {
     }
   }
 
+  @Test
+  public void loadInitialEnrollmentShouldCount21SinceThereIsAUpdateOf8MonthsAndAUpdateOf9Months() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    loadSample(
+        dataSource,
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
+
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Assert.assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+
+      BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
+      Assert.assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
+      Assert.assertEquals("C", augustMonthly.getEntitlementBuyInInd().get().toString());
+      Assert.assertEquals("AA", augustMonthly.getFipsStateCntyCode().get());
+      Assert.assertFalse(augustMonthly.getHmoIndicatorInd().isPresent());
+      Assert.assertEquals("AA", augustMonthly.getMedicaidDualEligibilityCode().get());
+      Assert.assertEquals("AA", augustMonthly.getMedicareStatusCode().get());
+      Assert.assertEquals("C", augustMonthly.getPartCContractNumberId().get());
+      Assert.assertEquals("C", augustMonthly.getPartCPbpNumberId().get());
+      Assert.assertEquals("C", augustMonthly.getPartCPlanTypeCode().get());
+      Assert.assertEquals("C", augustMonthly.getPartDContractNumberId().get());
+      Assert.assertEquals("AA", augustMonthly.getPartDLowIncomeCostShareGroupCode().get());
+      Assert.assertFalse(augustMonthly.getPartDPbpNumberId().isPresent());
+      Assert.assertEquals("C", augustMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      Assert.assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
+
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+
+    loadSample(
+        dataSource,
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS.getResources()));
+
+    options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(options);
+    entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Assert.assertEquals(21, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
+      Assert.assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
+      Assert.assertEquals("C", augustMonthly.getEntitlementBuyInInd().get().toString());
+      Assert.assertEquals("AA", augustMonthly.getFipsStateCntyCode().get());
+      // Updated in file
+      Assert.assertEquals("C", augustMonthly.getHmoIndicatorInd().get().toString());
+      Assert.assertEquals("AA", augustMonthly.getMedicaidDualEligibilityCode().get());
+      Assert.assertEquals("AA", augustMonthly.getMedicareStatusCode().get());
+      Assert.assertEquals("C", augustMonthly.getPartCContractNumberId().get());
+      Assert.assertEquals("C", augustMonthly.getPartCPbpNumberId().get());
+      Assert.assertEquals("C", augustMonthly.getPartCPlanTypeCode().get());
+      Assert.assertEquals("C", augustMonthly.getPartDContractNumberId().get());
+      Assert.assertEquals("AA", augustMonthly.getPartDLowIncomeCostShareGroupCode().get());
+      Assert.assertFalse(augustMonthly.getPartDPbpNumberId().isPresent());
+      Assert.assertEquals("C", augustMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      Assert.assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
+
+      BeneficiaryMonthly septMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(20);
+      Assert.assertEquals("2019-09-01", septMonthly.getYearMonth().toString());
+      Assert.assertFalse(septMonthly.getEntitlementBuyInInd().isPresent());
+      Assert.assertFalse(septMonthly.getFipsStateCntyCode().isPresent());
+      Assert.assertFalse(septMonthly.getHmoIndicatorInd().isPresent());
+      Assert.assertEquals("AA", septMonthly.getMedicaidDualEligibilityCode().get());
+      Assert.assertFalse(septMonthly.getMedicareStatusCode().isPresent());
+      Assert.assertFalse(septMonthly.getPartCContractNumberId().isPresent());
+      Assert.assertFalse(septMonthly.getPartCPbpNumberId().isPresent());
+      Assert.assertFalse(septMonthly.getPartCPlanTypeCode().isPresent());
+      Assert.assertFalse(septMonthly.getPartDContractNumberId().isPresent());
+      Assert.assertFalse(septMonthly.getPartDLowIncomeCostShareGroupCode().isPresent());
+      Assert.assertFalse(septMonthly.getPartDPbpNumberId().isPresent());
+      Assert.assertEquals("C", septMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      Assert.assertFalse(septMonthly.getPartDSegmentNumberId().isPresent());
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
+
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
    * StaticRifResourceGroup#SAMPLE_B} data.

@@ -1829,6 +1829,18 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     }
   }
 
+  /**
+   * Creates the fields for the BeneficiaryMonthly class in the model rif
+   *
+   * @param lineEntity helps build the entity {@link TypeSpec.Builder}
+   * @param isId determines if the field is an id field
+   * @param isTransient determines if the field is transient {@link boolean}
+   * @param isColumnOptional determines if the field is optional {@link boolean}
+   * @param fieldName specifies the fieldname {@link String}
+   * @param type specifies the field type {@link RifColumnType}
+   * @param columnLength specifies the column length {@link Optional<Integer>}
+   * @param columnScale specifies the column scale {@link Optional<Integer>}
+   */
   private static void createBeneficiaryMonthlyFields(
       TypeSpec.Builder lineEntity,
       boolean isId,
@@ -1873,6 +1885,17 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     lineEntity.addMethod(lineFieldSetter.build());
   }
 
+  /**
+   * Creates the fields for the BeneficiaryMonthly annotations in the model rif
+   *
+   * @param isId determines if the field is an id field
+   * @param isTransient determines if the field is transient {@link boolean}
+   * @param isColumnOptional determines if the field is optional {@link boolean}
+   * @param fieldName specifies the fieldname {@link String}
+   * @param type specifies the field type {@link RifColumnType}
+   * @param columnLength specifies the column length {@link Optional<Integer>}
+   * @param columnScale specifies the column scale {@link Optional<Integer>}
+   */
   private static List<AnnotationSpec> createBeneficiaryMonthlyAnnotations(
       boolean isId,
       boolean isTransient,
@@ -1941,6 +1964,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     return annotations;
   }
 
+  /**
+   * Selects the java field type
+   *
+   * @param type specifies the field type {@link RifColumnType}
+   * @param isColumnOptional determines if the field is optional {@link boolean}
+   * @param columnLength specifies the column length {@link Optional<Integer>}
+   * @param columnScale specifies the column scale {@link Optional<Integer>}
+   */
   private static TypeName selectJavaFieldType(
       RifColumnType type,
       boolean isColumnOptional,
@@ -1968,6 +1999,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     else throw new IllegalArgumentException("Unhandled field type: " + type.name());
   }
 
+  /**
+   * Selects the java property type
+   *
+   * @param type specifies the field type {@link RifColumnType}
+   * @param isColumnOptional determines if the field is optional {@link boolean}
+   * @param columnLength specifies the column length {@link Optional<Integer>}
+   * @param columnScale specifies the column scale {@link Optional<Integer>}
+   */
   private static TypeName selectJavaPropertyType(
       RifColumnType type,
       boolean isColumnOptional,
