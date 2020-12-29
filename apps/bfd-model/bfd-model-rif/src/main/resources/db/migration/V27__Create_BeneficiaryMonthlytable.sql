@@ -36,8 +36,8 @@ INSERT INTO "BeneficiaryMonthly"
     "partCContractNumberJanId", "partCPbpNumberJanId", "partCPlanTypeJanCode",
     "partDContractNumberJanId", "partDPbpNumberJanId", "partDSegmentNumberJanId",
     "partDRetireeDrugSubsidyJanInd", "medicaidDualEligibilityJanCode", "partDLowIncomeCostShareGroupJanCode"
-	FROM "Beneficiaries"
-	WHERE "beneEnrollmentReferenceYear" is not null;
+  FROM "Beneficiaries"
+  WHERE "beneEnrollmentReferenceYear" is not null;
 
 INSERT INTO "BeneficiaryMonthly" 
     SELECT  "beneficiaryId", TO_DATE(CONCAT("beneEnrollmentReferenceYear", '/02/01'), 'YYYY/MM/DD') as "yearMonth", "fipsStateCntyFebCode",
