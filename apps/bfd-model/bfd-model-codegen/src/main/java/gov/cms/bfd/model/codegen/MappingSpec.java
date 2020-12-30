@@ -167,7 +167,7 @@ public final class MappingSpec {
     return hasBeneficiaryMonthly;
   }
 
-  /** @param hasLines the new value for {@link #setHasBeneficiaryMonthly()} */
+  /** @param hasBeneficiaryMonthly the new value for {@link #setHasBeneficiaryMonthly()} */
   public MappingSpec setHasBeneficiaryMonthly(boolean hasBeneficiaryMonthly) {
     this.hasBeneficiaryMonthly = hasBeneficiaryMonthly;
     return this;
