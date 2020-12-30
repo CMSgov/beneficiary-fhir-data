@@ -5,6 +5,7 @@ import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.LoadedBatch;
@@ -316,6 +317,185 @@ public final class RifLoaderIT {
       if (entityManager != null) entityManager.close();
     }
   }
+
+  /*
+   * This test checks that all enrollment data for the year has been loaded into the beneficiary
+   * monthly table and checks each month to make sure the correct values are there.
+   */
+  @Test
+  public void loadInitialEnrollmentShouldCount12() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    // Loads sample A Data
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      // Checks all 12 months are in beneficiary monthlys for that beneficiary
+      Assert.assertEquals(12, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      // Checks every month in the beneficiary monthly table
+      assertBeneficiaryMonthly(beneficiaryFromDb);
+
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
+
+  /*
+   * This test checks that all enrollment data for 2 years has been loaded into the beneficiary
+   * monthly table.
+   */
+  @Test
+  public void loadInitialEnrollmentShouldCount24() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    // Loads first year of data
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    // Loads second year of data
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      // Checks to make sure we have 2 years or 24 months of data
+      Assert.assertEquals(24, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
+
+  /*
+   * This test checks that all enrollment data for 2 years has been loaded into the beneficiary
+   * monthly table and than does an update of 8 years without the 4 other months for the year
+   */
+  @Test
+  public void loadInitialEnrollmentShouldCount20SinceThereIsAUpdateOf8Months() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    // Loads first year of data
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    // Loads second year of data
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    // Loads  second year of data with only 8 months
+    loadSample(
+        dataSource,
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
+
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      // Checks to make sure we only have 20 months of data
+      Assert.assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
+
+  /*
+   * This test checks that all enrollment data for month july in its 2 year is updated when there is data
+   * for august that comes in.
+   */
+  @Test
+  public void loadInitialEnrollmentShouldCount21SinceThereIsAUpdateOf8MonthsAndAUpdateOf9Months() {
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    // Load first year of data
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    // Load 8 months of data in year two
+    loadSample(
+        dataSource,
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
+
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    EntityManagerFactory entityManagerFactory =
+        RifLoaderTestUtils.createEntityManagerFactory(options);
+    EntityManager entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Assert.assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+
+      BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
+      Assert.assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
+      Assert.assertEquals("C", augustMonthly.getEntitlementBuyInInd().get().toString());
+      Assert.assertEquals("AA", augustMonthly.getFipsStateCntyCode().get());
+      Assert.assertFalse(augustMonthly.getHmoIndicatorInd().isPresent());
+      Assert.assertEquals("AA", augustMonthly.getMedicaidDualEligibilityCode().get());
+      Assert.assertEquals("AA", augustMonthly.getMedicareStatusCode().get());
+      Assert.assertEquals("C", augustMonthly.getPartCContractNumberId().get());
+      Assert.assertEquals("C", augustMonthly.getPartCPbpNumberId().get());
+      Assert.assertEquals("C", augustMonthly.getPartCPlanTypeCode().get());
+      Assert.assertEquals("C", augustMonthly.getPartDContractNumberId().get());
+      Assert.assertEquals("AA", augustMonthly.getPartDLowIncomeCostShareGroupCode().get());
+      Assert.assertFalse(augustMonthly.getPartDPbpNumberId().isPresent());
+      Assert.assertEquals("C", augustMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      Assert.assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
+
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+    // Load 9 months of data in year two with some data updated in july
+    loadSample(
+        dataSource,
+        Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS.getResources()));
+
+    options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(options);
+    entityManager = null;
+    try {
+      entityManager = entityManagerFactory.createEntityManager();
+
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Assert.assertEquals(21, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
+      Assert.assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
+      Assert.assertEquals("C", augustMonthly.getEntitlementBuyInInd().get().toString());
+      Assert.assertEquals("AA", augustMonthly.getFipsStateCntyCode().get());
+      // Updated in file
+      Assert.assertEquals("C", augustMonthly.getHmoIndicatorInd().get().toString());
+      Assert.assertEquals("AA", augustMonthly.getMedicaidDualEligibilityCode().get());
+      Assert.assertEquals("AA", augustMonthly.getMedicareStatusCode().get());
+      Assert.assertEquals("C", augustMonthly.getPartCContractNumberId().get());
+      Assert.assertEquals("C", augustMonthly.getPartCPbpNumberId().get());
+      Assert.assertEquals("C", augustMonthly.getPartCPlanTypeCode().get());
+      Assert.assertEquals("C", augustMonthly.getPartDContractNumberId().get());
+      Assert.assertEquals("AA", augustMonthly.getPartDLowIncomeCostShareGroupCode().get());
+      Assert.assertFalse(augustMonthly.getPartDPbpNumberId().isPresent());
+      Assert.assertEquals("C", augustMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      Assert.assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
+
+      BeneficiaryMonthly septMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(20);
+      Assert.assertEquals("2019-09-01", septMonthly.getYearMonth().toString());
+      Assert.assertFalse(septMonthly.getEntitlementBuyInInd().isPresent());
+      Assert.assertFalse(septMonthly.getFipsStateCntyCode().isPresent());
+      Assert.assertFalse(septMonthly.getHmoIndicatorInd().isPresent());
+      Assert.assertEquals("AA", septMonthly.getMedicaidDualEligibilityCode().get());
+      Assert.assertFalse(septMonthly.getMedicareStatusCode().isPresent());
+      Assert.assertFalse(septMonthly.getPartCContractNumberId().isPresent());
+      Assert.assertFalse(septMonthly.getPartCPbpNumberId().isPresent());
+      Assert.assertFalse(septMonthly.getPartCPlanTypeCode().isPresent());
+      Assert.assertFalse(septMonthly.getPartDContractNumberId().isPresent());
+      Assert.assertFalse(septMonthly.getPartDLowIncomeCostShareGroupCode().isPresent());
+      Assert.assertFalse(septMonthly.getPartDPbpNumberId().isPresent());
+      Assert.assertEquals("C", septMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      Assert.assertFalse(septMonthly.getPartDSegmentNumberId().isPresent());
+    } finally {
+      if (entityManager != null) entityManager.close();
+    }
+  }
+
   /**
    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
    * StaticRifResourceGroup#SAMPLE_B} data.
@@ -680,6 +860,274 @@ public final class RifLoaderIT {
             defaultOptions.getFixupThreads()));
   }
 
+  public static void assertBeneficiaryMonthly(Beneficiary beneficiaryFromDb) {
+    List<BeneficiaryMonthly> beneficiaryMonthly = beneficiaryFromDb.getBeneficiaryMonthlys();
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        1,
+        beneficiaryMonthly.get(0),
+        beneficiaryFromDb.getEntitlementBuyInJanInd(),
+        beneficiaryFromDb.getFipsStateCntyJanCode(),
+        beneficiaryFromDb.getHmoIndicatorJanInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityJanCode(),
+        beneficiaryFromDb.getMedicareStatusJanCode(),
+        beneficiaryFromDb.getPartCContractNumberJanId(),
+        beneficiaryFromDb.getPartCPbpNumberJanId(),
+        beneficiaryFromDb.getPartCPlanTypeJanCode(),
+        beneficiaryFromDb.getPartDContractNumberJanId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJanCode(),
+        beneficiaryFromDb.getPartDPbpNumberJanId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyJanInd(),
+        beneficiaryFromDb.getPartDSegmentNumberJanId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        2,
+        beneficiaryMonthly.get(1),
+        beneficiaryFromDb.getEntitlementBuyInFebInd(),
+        beneficiaryFromDb.getFipsStateCntyFebCode(),
+        beneficiaryFromDb.getHmoIndicatorFebInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityFebCode(),
+        beneficiaryFromDb.getMedicareStatusFebCode(),
+        beneficiaryFromDb.getPartCContractNumberFebId(),
+        beneficiaryFromDb.getPartCPbpNumberFebId(),
+        beneficiaryFromDb.getPartCPlanTypeFebCode(),
+        beneficiaryFromDb.getPartDContractNumberFebId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupFebCode(),
+        beneficiaryFromDb.getPartDPbpNumberFebId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyFebInd(),
+        beneficiaryFromDb.getPartDSegmentNumberFebId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        3,
+        beneficiaryMonthly.get(2),
+        beneficiaryFromDb.getEntitlementBuyInMarInd(),
+        beneficiaryFromDb.getFipsStateCntyMarCode(),
+        beneficiaryFromDb.getHmoIndicatorMarInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityMarCode(),
+        beneficiaryFromDb.getMedicareStatusMarCode(),
+        beneficiaryFromDb.getPartCContractNumberMarId(),
+        beneficiaryFromDb.getPartCPbpNumberMarId(),
+        beneficiaryFromDb.getPartCPlanTypeMarCode(),
+        beneficiaryFromDb.getPartDContractNumberMarId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupMarCode(),
+        beneficiaryFromDb.getPartDPbpNumberMarId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyMarInd(),
+        beneficiaryFromDb.getPartDSegmentNumberMarId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        4,
+        beneficiaryMonthly.get(3),
+        beneficiaryFromDb.getEntitlementBuyInAprInd(),
+        beneficiaryFromDb.getFipsStateCntyAprCode(),
+        beneficiaryFromDb.getHmoIndicatorAprInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityAprCode(),
+        beneficiaryFromDb.getMedicareStatusAprCode(),
+        beneficiaryFromDb.getPartCContractNumberAprId(),
+        beneficiaryFromDb.getPartCPbpNumberAprId(),
+        beneficiaryFromDb.getPartCPlanTypeAprCode(),
+        beneficiaryFromDb.getPartDContractNumberAprId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupAprCode(),
+        beneficiaryFromDb.getPartDPbpNumberAprId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyAprInd(),
+        beneficiaryFromDb.getPartDSegmentNumberAprId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        5,
+        beneficiaryMonthly.get(4),
+        beneficiaryFromDb.getEntitlementBuyInMayInd(),
+        beneficiaryFromDb.getFipsStateCntyMayCode(),
+        beneficiaryFromDb.getHmoIndicatorMayInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityMayCode(),
+        beneficiaryFromDb.getMedicareStatusMayCode(),
+        beneficiaryFromDb.getPartCContractNumberMayId(),
+        beneficiaryFromDb.getPartCPbpNumberMayId(),
+        beneficiaryFromDb.getPartCPlanTypeMayCode(),
+        beneficiaryFromDb.getPartDContractNumberMayId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupMayCode(),
+        beneficiaryFromDb.getPartDPbpNumberMayId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyMayInd(),
+        beneficiaryFromDb.getPartDSegmentNumberMayId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        6,
+        beneficiaryMonthly.get(5),
+        beneficiaryFromDb.getEntitlementBuyInJunInd(),
+        beneficiaryFromDb.getFipsStateCntyJunCode(),
+        beneficiaryFromDb.getHmoIndicatorJunInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityJunCode(),
+        beneficiaryFromDb.getMedicareStatusJunCode(),
+        beneficiaryFromDb.getPartCContractNumberJunId(),
+        beneficiaryFromDb.getPartCPbpNumberJunId(),
+        beneficiaryFromDb.getPartCPlanTypeJunCode(),
+        beneficiaryFromDb.getPartDContractNumberJunId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJunCode(),
+        beneficiaryFromDb.getPartDPbpNumberJunId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyJunInd(),
+        beneficiaryFromDb.getPartDSegmentNumberJunId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        7,
+        beneficiaryMonthly.get(6),
+        beneficiaryFromDb.getEntitlementBuyInJulInd(),
+        beneficiaryFromDb.getFipsStateCntyJulCode(),
+        beneficiaryFromDb.getHmoIndicatorJulInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityJulCode(),
+        beneficiaryFromDb.getMedicareStatusJulCode(),
+        beneficiaryFromDb.getPartCContractNumberJulId(),
+        beneficiaryFromDb.getPartCPbpNumberJulId(),
+        beneficiaryFromDb.getPartCPlanTypeJulCode(),
+        beneficiaryFromDb.getPartDContractNumberJulId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupJulCode(),
+        beneficiaryFromDb.getPartDPbpNumberJulId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyJulInd(),
+        beneficiaryFromDb.getPartDSegmentNumberJulId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        8,
+        beneficiaryMonthly.get(7),
+        beneficiaryFromDb.getEntitlementBuyInAugInd(),
+        beneficiaryFromDb.getFipsStateCntyAugCode(),
+        beneficiaryFromDb.getHmoIndicatorAugInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityAugCode(),
+        beneficiaryFromDb.getMedicareStatusAugCode(),
+        beneficiaryFromDb.getPartCContractNumberAugId(),
+        beneficiaryFromDb.getPartCPbpNumberAugId(),
+        beneficiaryFromDb.getPartCPlanTypeAugCode(),
+        beneficiaryFromDb.getPartDContractNumberAugId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupAugCode(),
+        beneficiaryFromDb.getPartDPbpNumberAugId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyAugInd(),
+        beneficiaryFromDb.getPartDSegmentNumberAugId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        9,
+        beneficiaryMonthly.get(8),
+        beneficiaryFromDb.getEntitlementBuyInSeptInd(),
+        beneficiaryFromDb.getFipsStateCntySeptCode(),
+        beneficiaryFromDb.getHmoIndicatorSeptInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilitySeptCode(),
+        beneficiaryFromDb.getMedicareStatusSeptCode(),
+        beneficiaryFromDb.getPartCContractNumberSeptId(),
+        beneficiaryFromDb.getPartCPbpNumberSeptId(),
+        beneficiaryFromDb.getPartCPlanTypeSeptCode(),
+        beneficiaryFromDb.getPartDContractNumberSeptId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupSeptCode(),
+        beneficiaryFromDb.getPartDPbpNumberSeptId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidySeptInd(),
+        beneficiaryFromDb.getPartDSegmentNumberSeptId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        10,
+        beneficiaryMonthly.get(9),
+        beneficiaryFromDb.getEntitlementBuyInOctInd(),
+        beneficiaryFromDb.getFipsStateCntyOctCode(),
+        beneficiaryFromDb.getHmoIndicatorOctInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityOctCode(),
+        beneficiaryFromDb.getMedicareStatusOctCode(),
+        beneficiaryFromDb.getPartCContractNumberOctId(),
+        beneficiaryFromDb.getPartCPbpNumberOctId(),
+        beneficiaryFromDb.getPartCPlanTypeOctCode(),
+        beneficiaryFromDb.getPartDContractNumberOctId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupOctCode(),
+        beneficiaryFromDb.getPartDPbpNumberOctId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyOctInd(),
+        beneficiaryFromDb.getPartDSegmentNumberOctId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        11,
+        beneficiaryMonthly.get(10),
+        beneficiaryFromDb.getEntitlementBuyInNovInd(),
+        beneficiaryFromDb.getFipsStateCntyNovCode(),
+        beneficiaryFromDb.getHmoIndicatorNovInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityNovCode(),
+        beneficiaryFromDb.getMedicareStatusNovCode(),
+        beneficiaryFromDb.getPartCContractNumberNovId(),
+        beneficiaryFromDb.getPartCPbpNumberNovId(),
+        beneficiaryFromDb.getPartCPlanTypeNovCode(),
+        beneficiaryFromDb.getPartDContractNumberNovId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupNovCode(),
+        beneficiaryFromDb.getPartDPbpNumberNovId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyNovInd(),
+        beneficiaryFromDb.getPartDSegmentNumberNovId());
+
+    checkEnrollments(
+        beneficiaryFromDb.getBeneEnrollmentReferenceYear().get().intValue(),
+        12,
+        beneficiaryMonthly.get(11),
+        beneficiaryFromDb.getEntitlementBuyInDecInd(),
+        beneficiaryFromDb.getFipsStateCntyDecCode(),
+        beneficiaryFromDb.getHmoIndicatorDecInd(),
+        beneficiaryFromDb.getMedicaidDualEligibilityDecCode(),
+        beneficiaryFromDb.getMedicareStatusDecCode(),
+        beneficiaryFromDb.getPartCContractNumberDecId(),
+        beneficiaryFromDb.getPartCPbpNumberDecId(),
+        beneficiaryFromDb.getPartCPlanTypeDecCode(),
+        beneficiaryFromDb.getPartDContractNumberDecId(),
+        beneficiaryFromDb.getPartDLowIncomeCostShareGroupDecCode(),
+        beneficiaryFromDb.getPartDPbpNumberDecId(),
+        beneficiaryFromDb.getPartDRetireeDrugSubsidyDecInd(),
+        beneficiaryFromDb.getPartDSegmentNumberDecId());
+  }
+
+  public static void checkEnrollments(
+      int referenceYear,
+      int month,
+      BeneficiaryMonthly enrollment,
+      Optional<Character> entitlementBuyInInd,
+      Optional<String> fipsStateCntyCode,
+      Optional<Character> hmoIndicatorInd,
+      Optional<String> medicaidDualEligibilityCode,
+      Optional<String> medicareStatusCode,
+      Optional<String> partCContractNumberId,
+      Optional<String> partCPbpNumberId,
+      Optional<String> partCPlanTypeCode,
+      Optional<String> partDContractNumberId,
+      Optional<String> partDLowIncomeCostShareGroupCode,
+      Optional<String> partDPbpNumberId,
+      Optional<Character> partDRetireeDrugSubsidyInd,
+      Optional<String> partDSegmentNumberId) {
+
+    Assert.assertEquals(LocalDate.of(referenceYear, month, 1), enrollment.getYearMonth());
+    Assert.assertEquals(
+        entitlementBuyInInd.orElse(null), enrollment.getEntitlementBuyInInd().orElse(null));
+    Assert.assertEquals(
+        fipsStateCntyCode.orElse(null), enrollment.getFipsStateCntyCode().orElse(null));
+    Assert.assertEquals(hmoIndicatorInd.orElse(null), enrollment.getHmoIndicatorInd().orElse(null));
+    Assert.assertEquals(
+        medicaidDualEligibilityCode.orElse(null),
+        enrollment.getMedicaidDualEligibilityCode().orElse(null));
+    Assert.assertEquals(
+        medicareStatusCode.orElse(null), enrollment.getMedicareStatusCode().orElse(null));
+    Assert.assertEquals(
+        partCContractNumberId.orElse(null), enrollment.getPartCContractNumberId().orElse(null));
+    Assert.assertEquals(
+        partCPbpNumberId.orElse(null), enrollment.getPartCPbpNumberId().orElse(null));
+    Assert.assertEquals(
+        partCPlanTypeCode.orElse(null), enrollment.getPartCPlanTypeCode().orElse(null));
+    Assert.assertEquals(
+        partDContractNumberId.orElse(null), enrollment.getPartDContractNumberId().orElse(null));
+    Assert.assertEquals(
+        partDLowIncomeCostShareGroupCode.orElse(null),
+        enrollment.getPartDLowIncomeCostShareGroupCode().orElse(null));
+    Assert.assertEquals(
+        partDPbpNumberId.orElse(null), enrollment.getPartDPbpNumberId().orElse(null));
+    Assert.assertEquals(
+        partDRetireeDrugSubsidyInd.orElse(null),
+        enrollment.getPartDRetireeDrugSubsidyInd().orElse(null));
+    Assert.assertEquals(
+        partDSegmentNumberId.orElse(null), enrollment.getPartDSegmentNumberId().orElse(null));
+  }
   /**
    * Clear the MBI hash fields in the db
    *
