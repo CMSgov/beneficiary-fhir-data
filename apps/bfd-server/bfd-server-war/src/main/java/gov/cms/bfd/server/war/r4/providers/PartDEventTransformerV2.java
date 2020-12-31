@@ -53,11 +53,7 @@ final class PartDEventTransformerV2 {
 
     eob.getMeta()
         .addProfile(
-<<<<<<< HEAD
             "https://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy");
-=======
-            "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy");
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
 
     // Common group level fields between all claim types
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
@@ -156,28 +152,12 @@ final class PartDEventTransformerV2 {
     BigDecimal planPaidAmountAdjudicationValue;
     if (claimGroup.getDrugCoverageStatusCode() == 'C') {
       planPaidAmountAdjudicationCategory =
-<<<<<<< HEAD
-<<<<<<< HEAD
           TransformerUtilsV2.createAdjudicationCategory(
-=======
-          TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-          TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
               CcwCodebookVariable.CVRD_D_PLAN_PD_AMT, "benefit", "Benefit Amount");
       planPaidAmountAdjudicationValue = claimGroup.getPartDPlanCoveredPaidAmount();
     } else {
       planPaidAmountAdjudicationCategory =
-<<<<<<< HEAD
-<<<<<<< HEAD
           TransformerUtilsV2.createAdjudicationCategory(
-=======
-          TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-          TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
               CcwCodebookVariable.NCVRD_PLAN_PD_AMT, "noncovered", "Noncovered");
       planPaidAmountAdjudicationValue = claimGroup.getPartDPlanNonCoveredPaidAmount();
     }
@@ -192,15 +172,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-<<<<<<< HEAD
-<<<<<<< HEAD
             TransformerUtilsV2.createAdjudicationCategory(
-=======
-            TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-            TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
                 CcwCodebookVariable.GDC_BLW_OOPT_AMT, "coinsurance", "Coinsurance"))
         .setAmount(
             TransformerUtilsV2.createMoney(claimGroup.getGrossCostBelowOutOfPocketThreshold()));
@@ -208,15 +180,7 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-<<<<<<< HEAD
-<<<<<<< HEAD
             TransformerUtilsV2.createAdjudicationCategory(
-=======
-            TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-            TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
                 CcwCodebookVariable.GDC_ABV_OOPT_AMT, "coinsurance", "Coinsurance"))
         .setAmount(
             TransformerUtilsV2.createMoney(claimGroup.getGrossCostAboveOutOfPocketThreshold()));
@@ -224,60 +188,28 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-<<<<<<< HEAD
-<<<<<<< HEAD
             TransformerUtilsV2.createAdjudicationCategory(
-=======
-            TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-            TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
                 CcwCodebookVariable.PTNT_PAY_AMT, "paidbypatient", "Paid by patient"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getPatientPaidAmount()));
 
     rxItem
         .addAdjudication()
         .setCategory(
-<<<<<<< HEAD
-<<<<<<< HEAD
             TransformerUtilsV2.createAdjudicationCategory(
-=======
-            TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-            TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
                 CcwCodebookVariable.OTHR_TROOP_AMT, "priorpayerpaid", "Prior payer paid"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getOtherTrueOutOfPocketPaidAmount()));
 
     rxItem
         .addAdjudication()
         .setCategory(
-<<<<<<< HEAD
-<<<<<<< HEAD
             TransformerUtilsV2.createAdjudicationCategory(
-=======
-            TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-            TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
                 CcwCodebookVariable.LICS_AMT, "discount", "Discount"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getLowIncomeSubsidyPaidAmount()));
 
     rxItem
         .addAdjudication()
         .setCategory(
-<<<<<<< HEAD
-<<<<<<< HEAD
             TransformerUtilsV2.createAdjudicationCategory(
-=======
-            TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-            TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
                 CcwCodebookVariable.PLRO_AMT, "priorpayerpaid", "Prior payer paid"))
         .setAmount(
             TransformerUtilsV2.createMoney(
@@ -286,30 +218,14 @@ final class PartDEventTransformerV2 {
     rxItem
         .addAdjudication()
         .setCategory(
-<<<<<<< HEAD
-<<<<<<< HEAD
             TransformerUtilsV2.createAdjudicationCategory(
-=======
-            TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-            TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
                 CcwCodebookVariable.TOT_RX_CST_AMT, "drugcost", "Drug cost"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getTotalPrescriptionCost()));
 
     rxItem
         .addAdjudication()
         .setCategory(
-<<<<<<< HEAD
-<<<<<<< HEAD
             TransformerUtilsV2.createAdjudicationCategory(
-=======
-            TransformerUtilsV2.createAdjudicationCategoryV2(
->>>>>>> 2221a444... CARIN-BB Code Systems and Value Sets
-=======
-            TransformerUtilsV2.createAdjudicationCategory(
->>>>>>> 7791923c... C4BB and FHIR Claims Values Sets
                 CcwCodebookVariable.RPTD_GAP_DSCNT_NUM, "discount", "Discount"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getGapDiscountAmount()));
 
