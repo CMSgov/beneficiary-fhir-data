@@ -388,6 +388,7 @@ public final class TransformerConstants {
    */
   public static final String CARIN_ADJUDICATION_CODE =
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
+      
   /**
    * C4BB Resource Profile: C4BB ExplanationOfBenefit Inpatient Institutional<a
    * href="https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-C4BB-ExplanationOfBenefit-Inpatient-Institutional.html">
