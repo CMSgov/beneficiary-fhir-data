@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -52,7 +53,7 @@ final class PartDEventTransformerV2 {
 
     eob.getMeta()
         .addProfile(
-            "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy");
+            "https://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy");
 
     // Common group level fields between all claim types
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
@@ -265,27 +266,51 @@ final class PartDEventTransformerV2 {
             TransformerUtilsV2.createExtensionQuantity(
                 CcwCodebookVariable.DAYS_SUPLY_NUM, claimGroup.getDaysSupply()));
 
-    // TODO CBBD-241 - This code was commented out because values other than
-    // "01"
-    // were coming thru
-    // such as "07". Need to discuss with Karl if this check needs to be
-    // here -
-
     /*
-     * if (claimGroup.serviceProviderIdQualiferCode == null ||
-     * !claimGroup.serviceProviderIdQualiferCode.equalsIgnoreCase("01"))
-     * throw new InvalidRifValueException(
-     * "Service Provider ID Qualifier Code is invalid: " +
-     * claimGroup.serviceProviderIdQualiferCode);
+     * This chart is to dosplay the different code values for the different service provider id qualifer
+     * codes below
+     *   Code	    Code value
+     *   01        National Provider Identifier (NPI)
+     *   06        Unique Physician Identification Number (UPIN)
+     *   07        National Council for Prescription Drug Programs (NCPDP) provider identifier
+     *   08        State license number   11
+     *   Federal tax number   99        Other
      */
 
+    IdentifierType identifierType;
+
     if (!claimGroup.getServiceProviderId().isEmpty()) {
-      eob.setProvider(
-          TransformerUtilsV2.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
-      eob.setFacility(
-          TransformerUtilsV2.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+      switch (claimGroup.getServiceProviderIdQualiferCode()) {
+        case "01":
+          identifierType = IdentifierType.NPI;
+          break;
+        case "06":
+          identifierType = IdentifierType.UPIN;
+          break;
+        case "07":
+          identifierType = IdentifierType.NCPDP;
+          break;
+        case "08":
+          identifierType = IdentifierType.SL;
+          break;
+        case "11":
+          identifierType = IdentifierType.FTN;
+          break;
+        default:
+          identifierType = null;
+          break;
+      }
+
+
+      if (identifierType != null) {
+        eob.setProvider(
+            TransformerUtilsV2.createIdentifierReference(
+                TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+        eob.setFacility(
+            TransformerUtilsV2.createIdentifierReference(
+                TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+      }
+
       eob.getFacility()
           .addExtension(
               TransformerUtilsV2.createExtensionCoding(
