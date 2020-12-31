@@ -367,7 +367,7 @@ public final class TransformerUtilsV2 {
     if (identifierValue == null) throw new IllegalArgumentException();
 
     CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType.addCoding().setCode("uc").setSystem(TransformerConstants.C4BB_IDENTIFIER_TYPE);
+    claimCodeType.addCoding().setCode("uc").setSystem(TransformerConstants.CARIN_IDENTIFIER_TYPE);
 
     Identifier identifier =
         new Identifier()
@@ -543,7 +543,7 @@ public final class TransformerUtilsV2 {
     Coding caringCoding =
         new Coding()
             .setCode("info")
-            .setSystem(TransformerConstants.C4BB_SUPPORTING_INFO_TYPE)
+            .setSystem(TransformerConstants.CARIN_SUPPORTING_INFO_TYPE)
             .setDisplay("Information");
     Coding cmsBBcoding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
 
@@ -647,7 +647,7 @@ public final class TransformerUtilsV2 {
 
     categoryConcept
         .addCoding()
-        .setSystem(TransformerConstants.C4BB_ADJUDICATION_CODE)
+        .setSystem(TransformerConstants.CARIN_ADJUDICATION_CODE)
         .setCode(carinAdjuCode)
         .setDisplay(carinAdjuCodeDisplay);
 
