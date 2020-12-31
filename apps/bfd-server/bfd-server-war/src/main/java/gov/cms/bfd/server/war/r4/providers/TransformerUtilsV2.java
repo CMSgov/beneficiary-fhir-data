@@ -421,7 +421,7 @@ public final class TransformerUtilsV2 {
     if (identifierValue == null) throw new IllegalArgumentException();
 
     CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType.addCoding().setCode("uc").setSystem(TransformerConstants.C4BB_IDENTIFIER_TYPE);
+    claimCodeType.addCoding().setCode("uc").setSystem(TransformerConstants.CARIN_IDENTIFIER_TYPE);
 
     Identifier identifier =
         new Identifier()
