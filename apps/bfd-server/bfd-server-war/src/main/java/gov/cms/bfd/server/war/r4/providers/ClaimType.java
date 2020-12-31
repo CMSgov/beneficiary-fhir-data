@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,20 +27,23 @@ public enum ClaimType {
       PartDEvent.class,
       PartDEvent_.eventId,
       PartDEvent_.beneficiaryId,
+      (entity) -> ((PartDEvent) entity).getPrescriptionFillDate(),
       PartDEventTransformerV2::transform);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;
   private final SingularAttribute<?, String> entityBeneficiaryIdAttribute;
+  private final Function<Object, LocalDate> serviceEndAttributeFunction;
   private final BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer;
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 
   /**
    * Enum constant constructor.
    *
-   * @param entityClass the value to use for {@link #getEntityClass()}
-   * @param entityIdAttribute the value to use for {@link #getEntityIdAttribute()}
-   * @param entityBeneficiaryIdAttribute the value to use for {@link
+   * <p>am entityClass the value to use for {@link #getEntityClass()}
+   *
+   * @param entityIdAtt ibute the value to u e for {@link #getEntityIdAttribute()}
+   * @param entityBeneficiaryIdA tribute the value to use for {@link
    *     #getEntityBeneficiaryIdAttribute()}
    * @param transformer the value to use for {@link #getTransformer()}
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
@@ -48,11 +52,13 @@ public enum ClaimType {
       Class<?> entityClass,
       SingularAttribute<?, ?> entityIdAttribute,
       SingularAttribute<?, String> entityBeneficiaryIdAttribute,
+      Function<Object, LocalDate> serviceEndAttributeFunction,
       BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
     this.entityBeneficiaryIdAttribute = entityBeneficiaryIdAttribute;
+    this.serviceEndAttributeFunction = serviceEndAttributeFunction;
     this.transformer = transformer;
     this.entityLazyAttributes =
         entityLazyAttributes != null
@@ -83,6 +89,15 @@ public enum ClaimType {
 
   /**
    * @return the {@link Function} to use to transform the JPA {@link Entity} instances into FHIR
+   * @return the {@link Function} to use to retrieve the {@link LocalDate} to use for service date
+   *     filter
+   */
+  public Function<Object, LocalDate> getServiceEndAttributeFunction() {
+    return serviceEndAttributeFunction;
+  }
+
+  /**
+   * @return the {@link BiFunction} to use to transform the JPA {@link Entity} instances into FHIR
    *     {@link ExplanationOfBenefit} instances
    */
   public BiFunction<MetricRegistry, Object, ExplanationOfBenefit> getTransformer() {

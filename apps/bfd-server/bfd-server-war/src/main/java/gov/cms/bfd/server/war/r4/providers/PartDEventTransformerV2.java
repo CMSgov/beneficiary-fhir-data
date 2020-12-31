@@ -301,7 +301,6 @@ final class PartDEventTransformerV2 {
           break;
       }
 
-
       if (identifierType != null) {
         eob.setProvider(
             TransformerUtilsV2.createIdentifierReference(
