@@ -143,6 +143,80 @@ This additional exploration work will need to be balanced against the **more urg
   need to actually _ship_ the partial backfill solution, though.
 
 
+#### Design Option A: Hacky Approach
+
+I'm just mentioning this one for completeness' sake, as it is not suitable to a recurring need like this will be
+  (we may need to run a partial backfill quarterly, going forwards).
+That said, one approach is to just build a custom version of the BFD Pipeline where:
+
+* most fields are `Optional`
+* most of the tests are removed (as they will fail to compile given the `Optional` change)
+* the BFD Server is not built
+* `RifLoader` was configured to **only** run `_MERGE` data sets
+
+The BFD team would also have to carefully orchestrate things to ensure
+  that this custom build was produced and deployed at the correct time,
+  and then reverted/undeployed back to the normal BFD Pipeline after the backfill was complete.
+
+Why is this approach a bad idea?
+Well, as mentioned, it's very manual and would have to be repeated from scratch every quarter.
+Being so manual, it's extremely error-prone, which is bad by itself,
+  but given how painful a DB restore would be, is just far too risky.
+
+
+#### Design Option B: Overhaul the Existing Code
+
+The second-most minimal approach would be to update the existing code to add a couple new layers to the ETL:
+
+1. Create separate structs/classes to represent parsed RIF records.
+2. Add a RIF-to-JPA entity mapping layer in that supports both partial and full loads.
+
+That's a brief description for some incredibly complex work.
+It'd require extensiive changes and extensions to our automatic source code generation,
+  which is by far the trickiest bit of code we have.
+
+There are a number of risks with this approach:
+
+* It's a lot of tedious and tricky work.
+    * This is true of all our options, but still worth mentioning.
+* It risks some performance degradation,
+    as moving data through those extra layers will require a lot of additional memory copies, GC pressure, etc.
+* Keeping the changes current/merged with the main branch in Git will be very difficult.
+
+That said, it's not a _bad_ approach if the backfill is the only thing we want to try and address.
+
+
+#### Design Option C: Create a New Pipeline
+
+This is the most far-reaching option: create a new BFD Pipeline application that
+  not only supports the partial backfill need
+  but also is architecturally in line with other needs we have coming for BFD's ETL.
+So far, those needs are:
+
+A. Support `_MERGE` data sets from the CCW to partially backfill new fields into older claims.
+B. Better orchestrate DB schema upgrades, to reduce the large risk and personnel stress that they currently incur.
+C. Provide more metadata and automatic generation of code and resources,
+     which can be consumed downstream to improve our internal and external developer documentation.
+D. Support data sources beyond just the CCW.
+E. Support our potential future performance and size scaling needs,
+     as the amounts and types of data being managed by BFD continues to increase.
+F. Automatically orchestrate with the current BFD Pipeline application
+     to ensure that only one ETL process is running at a time,
+     in order to avoid creating data races.
+
+There are a number of risks with this approach:
+
+* It's a lot of complex architectural and implementation work.
+    * I mean, it sounds like a lot of fun to _me_, but that's kinda' my thing.
+    * The risks of errors remina high, but those risks can be fully mitigated with an adequate focus on testing.
+* It took a while to tune the current ETL system to achieve its current level of performance.
+  Unless the lessons from that effort are carried forward into this work,
+    this approach risks performance degradation.
+* This will require a solid & consistent investment of time and effort from one or more senior engineers.
+    * This risk can be mitigated by keeping the initial prototypes small and flexible,
+        to prove out and test the approach before too much investment is made into a full implementation.
+
+
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
