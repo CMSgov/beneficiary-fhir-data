@@ -1,9 +1,9 @@
 # RFC Proposal
 [RFC Proposal]: #rfc-proposal
 
-* RFC Proposal ID: `0008-partial-backfill-ccw` (fill me in with a unique ident)
+* RFC Proposal ID: `0008-partial-backfill-ccw`
 * Start Date: 2020-01-04
-* RFC PR: [rust-lang/rfcs#0000](https://github.com/rust-lang/rfcs/pull/0000)
+* RFC PR: [CMSgov/beneficiary-fhir-data#427](https://github.com/CMSgov/beneficiary-fhir-data/pull/427)
 * JIRA Ticket(s):
     * [BFD-589: Epic: Partial Backfill of CCW Records](https://jira.cms.gov/browse/BFD-589)
 
