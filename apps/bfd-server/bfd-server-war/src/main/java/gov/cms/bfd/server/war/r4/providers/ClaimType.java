@@ -40,8 +40,7 @@ public enum ClaimType {
   /**
    * Enum constant constructor.
    *
-   * <p>am entityClass the value to use for {@link #getEntityClass()}
-   *
+   * @param entityClass the value to use for {@link #getEntityClass()}
    * @param entityIdAtt ibute the value to u e for {@link #getEntityIdAttribute()}
    * @param entityBeneficiaryIdA tribute the value to use for {@link
    *     #getEntityBeneficiaryIdAttribute()}
