@@ -176,7 +176,7 @@ public final class RifLoader implements AutoCloseable {
 
     Map<String, Object> hibernateProperties = new HashMap<>();
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, jdbcDataSource);
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.NONE);
+    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
     hibernateProperties.put(
         org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
 
@@ -896,6 +896,8 @@ public final class RifLoader implements AutoCloseable {
       if (currentYearBeneficiaryMonthly.size() > 0) {
         List<BeneficiaryMonthly> currentBeneficiaryMonthlyWithUpdates;
 
+        // TODO enforce RIF invariant elsewhere: no repeats of same record/PK in same RIF file
+        // allowed
         Beneficiary beneficiaryFromDb =
             entityManager.find(Beneficiary.class, beneficiaryRecord.getBeneficiaryId());
 
@@ -906,10 +908,8 @@ public final class RifLoader implements AutoCloseable {
                   .filter(e -> year == e.getYearMonth().getYear())
                   .collect(Collectors.toList());
 
-          if (currentYearBeneficiaryMonthlyPrevious.size() > 0) {
-            for (BeneficiaryMonthly previousEnrollment : currentYearBeneficiaryMonthlyPrevious) {
-              currentBeneficiaryMonthlyWithUpdates.remove(previousEnrollment);
-            }
+          for (BeneficiaryMonthly previousEnrollment : currentYearBeneficiaryMonthlyPrevious) {
+            currentBeneficiaryMonthlyWithUpdates.remove(previousEnrollment);
           }
         } else {
           currentBeneficiaryMonthlyWithUpdates = new LinkedList<BeneficiaryMonthly>();

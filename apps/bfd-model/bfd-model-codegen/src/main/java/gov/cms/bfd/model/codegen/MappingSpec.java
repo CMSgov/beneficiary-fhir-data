@@ -167,7 +167,7 @@ public final class MappingSpec {
     return hasBeneficiaryMonthly;
   }
 
-  /** @param hasLines the new value for {@link #setHasBeneficiaryMonthly()} */
+  /** @param hasBeneficiaryMonthly the new value for {@link #setHasBeneficiaryMonthly()} */
   public MappingSpec setHasBeneficiaryMonthly(boolean hasBeneficiaryMonthly) {
     this.hasBeneficiaryMonthly = hasBeneficiaryMonthly;
     return this;
@@ -243,9 +243,9 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the name of the field in the {@link #getEnrollmentEntity()} {@link Entity} that should
-   *     be used to store and refer to the child {@link #getEnrollmentEntity()} {@link Entity}s, if
-   *     any
+   * @return the name of the field in the {@link #getBeneficiaryMonthlyEntityParentField()} {@link
+   *     Entity} that should be used to store and refer to the parentBeneficiary {@link
+   *     #getBeneficiaryMonthlyEntityParentField()} {@link Entity}s, if any
    */
   public String getBeneficiaryMonthlyEntityParentField() {
     if (!hasBeneficiaryMonthly) throw new IllegalStateException();
@@ -262,8 +262,8 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the name of the field in the {@link #getEntityEnrollmentField()} {@link Entity} that
-   *     should be used for the identifying line number, if any
+   * @return the name of the field in the {@link #getEntityBeneficiaryMonthlyField()} {@link Entity}
+   *     that should be used for the identifying yearMonth, if any
    */
   public String getEntityBeneficiaryMonthlyField() {
     if (!hasBeneficiaryMonthly) throw new IllegalStateException();
