@@ -1080,6 +1080,118 @@ final class CoverageTransformerV2 {
               CcwCodebookVariable.PTDCNTRCT12,
               beneficiary.getPartDContractNumberDecId()));
     }
+
+    // Beneficiary Monthly Data
+    beneficiary
+        .getBeneficiaryMonthlys()
+        .forEach(
+            beneMonthly -> {
+              int month = beneMonthly.getYearMonth().getMonthValue();
+              String yearMonth =
+                  String.format(
+                      "%s-%s",
+                      String.valueOf(beneMonthly.getYearMonth().getYear()), String.valueOf(month));
+
+              switch (month) {
+                case 1:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT01,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 2:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT02,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 3:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT03,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 4:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT04,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 5:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT05,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 6:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT06,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 7:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT07,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 8:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT08,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 9:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT09,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 10:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT10,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 11:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT11,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+                case 12:
+                  coverage.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          coverage,
+                          CcwCodebookVariable.PTDCNTRCT12,
+                          yearMonth,
+                          beneMonthly.getPartDContractNumberId()));
+                  break;
+              }
+            });
+
     // PBP
     if (beneficiary.getPartDPbpNumberJanId().isPresent()) {
       coverage.addExtension(

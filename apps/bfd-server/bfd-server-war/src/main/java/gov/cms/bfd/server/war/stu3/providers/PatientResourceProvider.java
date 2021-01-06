@@ -30,6 +30,7 @@ import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -176,6 +177,35 @@ public final class PatientResourceProvider implements IResourceProvider {
     return patient;
   }
 
+  @Search
+  public Bundle searchByCoverageContract(
+      // This is very explicit as a place holder until this kind
+      // of relational search is more common.
+      @OptionalParam(name = "_has:Coverage.extension")
+          @Description(shortDefinition = "Part D coverage type")
+          TokenParam coverageId,
+      @OptionalParam(name = "_has:Coverage.rfrncyr")
+          @Description(shortDefinition = "Part D reference year")
+          TokenParam referenceYear,
+      @OptionalParam(name = "cursor")
+          @Description(shortDefinition = "The cursor used for result pagination")
+          String cursor,
+      RequestDetails requestDetails) {
+    /*
+     * HAPI's @Search request routing appears to be borked, so we're doing it manually here,
+     * instead. Figure out which of the two coverage search methods to invoke, and then just do so.
+     */
+    if (coverageId != null && referenceYear == null) {
+      return searchByCoverageContractByFieldName(coverageId, cursor, requestDetails);
+    } else if (coverageId != null && referenceYear != null) {
+      return searchByCoverageContractAndYearMonth(
+          coverageId, referenceYear, cursor, requestDetails);
+    } else {
+      // whatever the spec says we're supposed to do: a 404 and/or OperationOutcome
+      throw new IllegalStateException();
+    }
+  }
+
   /**
    * Adds support for the FHIR "search" operation for {@link Patient}s, allowing users to search by
    * {@link Patient#getId()}.
@@ -251,8 +281,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     return bundle;
   }
 
-  @Search
-  public Bundle searchByCoverageContract(
+  public Bundle searchByCoverageContractByFieldName(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
@@ -306,19 +335,12 @@ public final class PatientResourceProvider implements IResourceProvider {
     return bundle;
   }
 
-  @Search
   public Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      @RequiredParam(name = "_has:Coverage.extension")
-          @Description(shortDefinition = "Part D coverage type")
-          TokenParam coverageId,
-      @RequiredParam(name = "_has:Coverage.rfrncyr")
-          @Description(shortDefinition = "Part D reference year")
-          TokenParam referenceYear,
-      @OptionalParam(name = "cursor")
-          @Description(shortDefinition = "The cursor used for result pagination")
-          String cursor,
+      TokenParam coverageId,
+      TokenParam referenceYear,
+      String cursor,
       RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
@@ -466,18 +488,11 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
     String contractMonthField = partDFieldByMonth(partDContractMonth);
-    String contractYearField =
-        referenceYear.getSystem().substring(referenceYear.getSystem().lastIndexOf('/') + 1);
-
-    /*     if (contractYearField == "2010")
-      throw new InvalidRequestException("A null or empty year is not supported");
-
-    if (contractYearField != "2010")
-      throw new InvalidRequestException("A null or empty year is not supported"); */
+    String contractYearField = referenceYear.getValueNotNull();
 
     String contractCode = coverageId.getValueNotNull();
 
-    String yearMonth = getFormattedYearMonth(contractYearField, contractMonthField);
+    LocalDate yearMonth = getFormattedYearMonth(contractYearField, contractMonthField);
 
     // Fetching with joins is not compatible with setMaxResults as explained in this post:
     // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
@@ -589,7 +604,10 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByPartDContractCodeAndYearMonth(
-      String contractCode, String yearMonth, PatientLinkBuilder paging, List<String> identifiers) {
+      String contractCode,
+      LocalDate yearMonth,
+      PatientLinkBuilder paging,
+      List<String> identifiers) {
     String joinsClause = "inner join b.beneficiaryMonthlys bm ";
     if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
@@ -632,7 +650,7 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<String> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
-      String contractCode, String yearMonth, PatientLinkBuilder paging) {
+      String contractCode, LocalDate yearMonth, PatientLinkBuilder paging) {
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
           "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
@@ -1092,12 +1110,15 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
   }
 
-  private static String getFormattedYearMonth(String contractYear, String contractMonth) {
+  private static LocalDate getFormattedYearMonth(String contractYear, String contractMonth) {
     if (Strings.isNullOrEmpty(contractYear))
       throw new InvalidRequestException("A null or empty year is not supported");
     if (Strings.isNullOrEmpty(contractMonth))
       throw new InvalidRequestException("A null or empty month is not supported");
+    if (contractYear.length() != 4)
+      throw new InvalidRequestException("A invalid year is not supported");
 
-    return String.format("%s-%s-%s", contractYear, contractMonth, "01");
+    String localDateString = String.format("%s-%s-%s", contractYear, contractMonth, "01");
+    return LocalDate.parse(localDateString);
   }
 }

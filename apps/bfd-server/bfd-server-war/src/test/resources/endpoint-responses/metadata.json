@@ -100,10 +100,6 @@
       }, {
         "name" : "_has:Coverage",
         "type" : "token",
-        "documentation" : "Part D coverage type"
-      }, {
-        "name" : "_has:Coverage",
-        "type" : "token",
         "documentation" : "Part D reference year"
       }, {
         "name" : "_id",
@@ -117,10 +113,6 @@
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
-      }, {
-        "name" : "cursor",
-        "type" : "string",
-        "documentation" : "The cursor used for result pagination"
       }, {
         "name" : "cursor",
         "type" : "string",

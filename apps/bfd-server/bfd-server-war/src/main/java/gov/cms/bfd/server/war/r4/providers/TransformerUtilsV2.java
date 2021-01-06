@@ -470,6 +470,30 @@ public final class TransformerUtilsV2 {
    *     Coding} to represent the specified input values
    */
   static Extension createExtensionCoding(
+      IAnyResource rootResource,
+      CcwCodebookVariable ccwVariable,
+      String yearMonth,
+      Optional<?> code) {
+    if (!code.isPresent()) throw new IllegalArgumentException();
+
+    Coding coding = createCoding(rootResource, ccwVariable, yearMonth, code.get());
+
+    String extensionUrl =
+        String.format("%s/%s", calculateVariableReferenceUrl(ccwVariable), yearMonth);
+    Extension extension = new Extension(extensionUrl, coding);
+
+    return extension;
+  }
+
+  /**
+   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
+   *     will be contained in
+   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
+   *     Coding} to represent the specified input values
+   */
+  static Extension createExtensionCoding(
       IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object code) {
     // Jumping through hoops to cope with overloaded method:
     Optional<?> codeOptional = code instanceof Optional ? (Optional<?>) code : Optional.of(code);
@@ -1361,5 +1385,34 @@ public final class TransformerUtilsV2 {
     return new IdDt(
         Coverage.class.getSimpleName(),
         String.format("%s-%s", medicareSegment.getUrlPrefix(), beneficiaryId));
+  }
+
+  /**
+   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
+   *     be contained in
+   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param yearMonth the value to use for {@link String} for yearMonth
+   * @param code the value to use for {@link Coding#getCode()}
+   * @return the output {@link Coding} for the specified input values
+   */
+  private static Coding createCoding(
+      IAnyResource rootResource, CcwCodebookVariable ccwVariable, String yearMonth, Object code) {
+    /*
+     * The code parameter is an Object to avoid needing multiple copies of this and related methods.
+     * This if-else block is the price to be paid for that, though.
+     */
+    String codeString;
+    if (code instanceof Character) codeString = ((Character) code).toString();
+    else if (code instanceof String) codeString = code.toString().trim();
+    else throw new BadCodeMonkeyException("Unsupported: " + code);
+
+    String system = calculateVariableReferenceUrl(ccwVariable);
+
+    String display;
+    if (ccwVariable.getVariable().getValueGroups().isPresent())
+      display = calculateCodingDisplay(rootResource, ccwVariable, codeString).orElse(null);
+    else display = null;
+
+    return new Coding(system, codeString, display);
   }
 }
