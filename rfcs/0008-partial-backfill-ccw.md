@@ -216,6 +216,34 @@ There are a number of risks with this approach:
     * This risk can be mitigated by keeping the initial prototypes small and flexible,
         to prove out and test the approach before too much investment is made into a full implementation.
 
+Something that will need to explored and decided on with this option is whether
+  to go with a bespoke ETL application that feeds directly into the database
+  or to instead build on top of open source orchestration and messaging platforms,
+  such as [Apache Airflow](https://airflow.apache.org/) for orchestration
+  and [Apache Kafka](https://kafka.apache.org/) for pub/sub messaging.
+Here's how I'm framing this question right now,
+  when I reach out and ask other folks for their input:
+
+> This year, we need to add some major new functionality to our data/ETL pipeline,
+>   to meet new business needs.
+> It’s enough of a change from before that it’s one of those rare (for me)
+>   “well, maybe we should just rewrite it,” moments.
+>
+> I’m considering moving towards something more dependent on frameworks, such as Airflow and/or Kafka.
+> What we have right now is reasonably simple bespoke code (Java).
+> But we’re going to need to orchestrate several different types of ETL and ensure (best we can, anyways)
+>   that the end result is consistent & safe and I suspect that Airflow and/or Kafka may help.
+> We’re an AWS-only shop, if that matters.
+>
+> Does anyone here have experience with those two frameworks/tools for use in ETL and have opinions?
+>
+> FWIW, I’m normally pretty anti-framework for ETL;
+>   most frameworks I’ve tried in the past required so much custom code, anyways,
+>   that it was hard to see the point —
+>   especially once you account for all the time you’ll spend debugging the tools.
+
+It's worth noting that AWS does appear to offer managed variants for both Airflow and Kafka.
+
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
