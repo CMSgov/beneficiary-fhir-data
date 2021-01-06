@@ -240,7 +240,7 @@ public final class TransformerConstants {
   public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Federal tax number";
 
   /**
-   * The {@link Coding#getSystem()} for "The Unified Code for Units of Mesaure (UCUM)", a
+   * The {@link Coding#getSystem()} for "The Unified Code for Units of Measure (UCUM)", a
    * standardized coding system for basic units of measure.
    */
   public static final String CODING_SYSTEM_UCUM = "http://unitsofmeasure.org";
@@ -319,42 +319,42 @@ public final class TransformerConstants {
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
 
   /**
-   * CARIN Code System Display value for Patient Identifier Type <a
+   * CARIN Code System Display Value for Patient Identifier Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
    * C4BB Identifier Type</a>
    */
   public static final String PATIENT_PI_ID_DISPLAY = "Patient internal identifier";
 
   /**
-   * CARIN Code System Display value for Patient Identifier Type <a
+   * CARIN Code System Display Value for Patient Identifier Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
    * C4BB Identifier Type</a>
    */
   public static final String PATIENT_MR_ID_DISPLAY = "Medical record number";
 
   /**
-   * CARIN Code System Display value for Patient Identifier Type <a
+   * CARIN Code System Display Value for Patient Identifier Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
    * C4BB Identifier Type</a>
    */
   public static final String PATIENT_MC_ID_DISPLAY = "Patient's Medicare number";
 
   /**
-   * US Core Value Set URL for Race Category, unknown <a href=
+   * US Core Value Set URL for Race Category unknown <a href=
    * "https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">ValueSet Omb Race
    * Category</a>
    */
   public static final String HL7_RACE_UNKNOWN_CODE = "UNK";
 
   /**
-   * US Core Value Set URL for Race Category, unknown <a
+   * US Core Value Set URL for Race Category unknown <a
    * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">ValueSet Omb Race
    * Category</a>
    */
   public static final String HL7_RACE_UNKNOWN_DISPLAY = "Unknown";
 
   /**
-   * CodeSystem URL for US Core Race <a
+   * US Core Code System URL for Race Category <a
    * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">CodeSystem: US Core
    * Race</a>
    */
@@ -362,7 +362,7 @@ public final class TransformerConstants {
       "http://hl7.org/fhir/us/core/ValueSet/omb-race-category";
 
   /**
-   * ValueSet URL for CARIN Identifier Type <a href=
+   * CARIN Value Set URL for Identifier Type <a href=
    * "http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">ValueSet: C4BB
    * Identifier Type</a>
    */

@@ -1342,7 +1342,7 @@ public final class TransformerUtilsV2 {
    * Sets the lastUpdated value in the resource.
    *
    * @param resource is the FHIR resource to set lastUpdate
-   * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUdpated.
+   * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUpdated.
    */
   public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
     resource

@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * This FHIR {@link IResourceProvider} adds support for STU3 {@link ExplanationOfBenefit} resources,
+ * This FHIR {@link IResourceProvider} adds support for R4 {@link ExplanationOfBenefit} resources,
  * derived from the CCW claims.
  */
 @Component
