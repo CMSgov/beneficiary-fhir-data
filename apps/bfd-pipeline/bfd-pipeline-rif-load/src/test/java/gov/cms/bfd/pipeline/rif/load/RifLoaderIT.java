@@ -712,7 +712,6 @@ public final class RifLoaderIT {
           rifFileRecords,
           error -> {
             failureCount.incrementAndGet();
-            Assert.assertEquals("", error.getMessage());
             LOGGER.warn("Record(s) failed to load.", error);
           },
           result -> {

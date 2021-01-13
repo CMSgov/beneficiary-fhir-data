@@ -31,6 +31,7 @@ import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -507,9 +508,13 @@ public final class PatientResourceProvider implements IResourceProvider {
               .setMaxResults(paging.getPageSize() + 1)
               .getResultList();
 
-      // Fetch the benes using the ids
-      return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids, includedIdentifiers)
-          .getResultList();
+      if (ids.isEmpty()) {
+        return new ArrayList<Beneficiary>();
+      } else {
+        // Fetch the benes using the ids
+        return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids, includedIdentifiers)
+            .getResultList();
+      }
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesByPartDContractCodeAndYearMonth(
