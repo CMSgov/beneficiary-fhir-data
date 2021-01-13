@@ -278,7 +278,7 @@ TODO
 ## Prior Art
 [Prior Art]: #prior-art
 
-TODO
+<!--
 
 Discuss prior art, both the good and the bad, in relation to this proposal.
 A few examples of what this can include are:
@@ -300,6 +300,82 @@ If there is no prior art, that is fine - your ideas are interesting to us whethe
 
 Note that while precedent set by other programs is some motivation, it does not on its own motivate an RFC.
 Please also take into consideration that we (and the government in general) sometimes intentionally diverge from common "best practices".
+
+-->
+
+TODO: Discuss BFD Insights' approach (AWS Glue, I think?).
+
+The following discussion is very relevant to this RFC:
+  [Hacker News: How to Become a Data Engineer in 2021](https://news.ycombinator.com/item?id=25728198).
+
+Here are my notes from the original article:
+
+* Older tools such as Informatica, Pentaho, and Talend are characterized as legacy approaches.
+* I don't really buy the assertin that data engineers need to be practiced with
+    a DB's underlying DB structures and algorithms, e.g. B-trees.
+  That said, I would agree that they should be at least passingly familiar with them.
+    * I think the most important insight from this is really related to index caching:
+        modern DBs will try to keep "hot" index pages cached in memory
+        and may exhibit pathological behavior when they can't.
+      Which portions of the trees are likely to be "hot"?
+      The upper levels of the tree, as bounded by the system's page size.
+    * This insight has been particularly important when interacting with PostgreSQL's query planner.
+      If the DB determines that it can't keep "enough" index pages in memory, it will refuse to use the index.
+      In addition to being frustrating due to the poor visibility developers have into this behavior,
+        it also cautions against viewing table partiioning as a silver bullet:
+        there's no reason to assume that simply having more, smaller index trees will perform any better.
+      And on the flip side, it points towards DB sharding as potentially being necessary in the future.
+      If our indices ever outgrow what we can fit into memory on large RDS instances,
+        sharding seems like a likely (albeit expensive) solution.
+      To be clear, I'm still of the opinion that we're a long way away from needing to shard,
+        but it's worth keeping in mind for the future,
+        in addition to evaluating alternative DB platforms.
+* Both the article and discussion repeatedly make the point that SQL is an essential technology.
+  This rings true: it is still clearly the best tool for many data problems.
+* The article calls out Python's poor performance as a concern.
+  I share this concern, but think it's nevertheless worth exploring Airflow and other Python-based options.
+* When reading the article's "Big Data Tools" section it's worth keeping in mind
+    what problems _we_ are trying to solve for BFD.
+* Problems we don't have:
+    * We can _invent_ an event streaming problem for ourselves but we don't intrinsically _need_ to apply that technique.
+    * We don't have much in the way of data processing to do.
+    * We don't need an analytics platform.
+* Problems we do have:
+    * We're doing a massive amount of very simple ETL under modest time constraints.
+    * Actually, it's mostly "EL" not "ETL": we don't want to apply many data transformations at load time.
+      If we had to reload/reprocess all records every time we changed our mapping we would be in a very bad place.
+* It's also worth keeping in mind the scale of our systems:
+  We have terabytes of data but **not** petabytes.
+  Billions of records but **not** trillions.
+  We're not really a big data system, as such.
+  Instead, BFD is just a data-lake-sized online database, heavily optimized to support a limited number of query types.
+
+Here are my notes from the article's discussion on HN:
+
+* Lots of mentions of Snowflake, though that doesn't seem germane to the problems we're looking at here.
+  (Worth considering later, though.)
+* [dbt](https://www.getdbt.com/) sounds interesting, but again: we don't want to do much transformation prior to load.
+    * If we ever wanted to dual-purpose the DB as an analytics platform, I think we should look at dbt.
+* [Fivetran](https://fivetran.com/) sounds interesting, but appears to not offer a hosted option,
+    and is thus a non-starter, unless/until they get FedRAMP'd.
+* It references this,
+    [Emerging Architectures for Modern Data Infrastructure](https://a16z.com/2020/10/15/the-emerging-architectures-for-modern-data-infrastructure/),
+    which is interesting in general, but also has the a useful new (to me) acronym:
+    "ELT" for "extract, then load, then transform" and calls it out as being less brittle than traditional ETL.
+  Nice term for capturing what we do in BFD.
+* A comment mentioned "Data Vault", which turned out to be an interesting read:
+    [Data vault modeling](https://en.wikipedia.org/wiki/Data_vault_modeling).
+  I'm not sold on the suggested storage structure, but the underlying philosophy makes sense.
+* These two comments ring true: <https://news.ycombinator.com/item?id=25733701>
+    and <https://news.ycombinator.com/item?id=25732147>.
+  Developers uncomfortable with SQL should be encouraged and supported to "push through" that.
+* [AWS Step Functions](https://aws.amazon.com/step-functions/) appear to be the preferred approach
+    when going serverless.
+* As a complete sidenote, I wandered across this very useful article while reading this discussion and related items:
+    [We’re All Using Airflow Wrong and How to Fix It](https://medium.com/bluecore-engineering/were-all-using-airflow-wrong-and-how-to-fix-it-a56f14cb0753).
+  It makes the case that Airflow's built-in operators are buggy and hard to debug
+    and argues for instead using just the Kubernetes operator to run custom code for every task.
+  It's a compelling argument, especially since we could just as easily substitute in Docker, instead.
 
 
 ## Future Possibilities
