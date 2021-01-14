@@ -104,10 +104,10 @@ help_message(){
   -t, --test Verifies that all files in the search path can be decrypted using the keyfile identified
     in the $VAULT_KEYFILE_ID.
   -h, --help  Display this help message and exit.
-  [Optional] --current-keyfile Path to a keyfile that was previously used to encrypt files.
-  [Optional] --new-keyfile Path to a keyfile that you want rekey files with.
-  [Optional] --skip-s3 Do not upload or download keyfiles from AWS S3.
-  [Optional] --output-dir Path to export the new keyfile to.
+  --current-keyfile Path to a keyfile that was previously used to encrypt files.
+  --new-keyfile Path to a keyfile that you want rekey files with.
+  --skip-s3 If this flag is present we will not upload or download keyfiles from AWS S3.
+  --output-dir Path to export the new keyfile to.
 
   Notes:
   This script makes heavy use of environment variables in addition to the above options. This is to
@@ -271,13 +271,14 @@ rekey(){
 
 # rekeys files found in $search_path
 rekey_files(){
+  local f
+  
   # search for ansible vault encrypted files
-  for f in $(find "$SEARCH_PATH" -type f); do
-    # and add them to the found_files array
+  while IFS= read -r f; do
     if [[ $(sed -n "/^\$ANSIBLE_VAULT\;/p;q" "$f") ]]; then
       found_files+=("$f")
     fi
-  done
+  done < <(find "$SEARCH_PATH" -type f)
 
   # exit if no files were found
   if [[ "${#found_files[@]}" -lt 1 ]]; then
@@ -317,16 +318,21 @@ test_decrypt(){
 # $1 is a path or file to test (recursive if it's a path)
 # $2 is the key to use to decrypt. 
 test_all_files(){
+  local f
   local flagged
   flagged=false
+  
+  # if $1 is a file test it and stop, else test all files found in path $1
   if [[ -f $1 ]]; then
     # it's a single file
     test_decrypt "$1" "$2" || flagged=true
   else
-    # recursive search and test
-    for f in $(find "$SEARCH_PATH" -type f); do
-      test_decrypt "$f" "$2" || flagged=true
-    done
+    # recursively search and test all files found in $SEARCH_PATH
+    while IFS= read -r f; do
+      if [[ $(sed -n "/^\$ANSIBLE_VAULT\;/p;q" "$f") ]]; then
+        test_decrypt "$f" "$2" || flagged=true
+      fi
+    done < <(find "$SEARCH_PATH" -type f)
   fi
   if [[ "$flagged" == "true" ]]; then
     return 1
