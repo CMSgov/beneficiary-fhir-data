@@ -34,8 +34,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -397,35 +399,56 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   private String partDFieldFor(CcwCodebookVariable month) {
-    if (month == CcwCodebookVariable.PTDCNTRCT01) return "partDContractNumberJanId";
-    if (month == CcwCodebookVariable.PTDCNTRCT02) return "partDContractNumberFebId";
-    if (month == CcwCodebookVariable.PTDCNTRCT03) return "partDContractNumberMarId";
-    if (month == CcwCodebookVariable.PTDCNTRCT04) return "partDContractNumberAprId";
-    if (month == CcwCodebookVariable.PTDCNTRCT05) return "partDContractNumberMayId";
-    if (month == CcwCodebookVariable.PTDCNTRCT06) return "partDContractNumberJunId";
-    if (month == CcwCodebookVariable.PTDCNTRCT07) return "partDContractNumberJulId";
-    if (month == CcwCodebookVariable.PTDCNTRCT08) return "partDContractNumberAugId";
-    if (month == CcwCodebookVariable.PTDCNTRCT09) return "partDContractNumberSeptId";
-    if (month == CcwCodebookVariable.PTDCNTRCT10) return "partDContractNumberOctId";
-    if (month == CcwCodebookVariable.PTDCNTRCT11) return "partDContractNumberNovId";
-    if (month == CcwCodebookVariable.PTDCNTRCT12) return "partDContractNumberDecId";
+
+    Map<CcwCodebookVariable, String> mapOfMonth =
+        new HashMap<CcwCodebookVariable, String>() {
+          {
+            put(CcwCodebookVariable.PTDCNTRCT01, "partDContractNumberJanId");
+            put(CcwCodebookVariable.PTDCNTRCT02, "partDContractNumberFebId");
+            put(CcwCodebookVariable.PTDCNTRCT03, "partDContractNumberMarId");
+            put(CcwCodebookVariable.PTDCNTRCT04, "partDContractNumberAprId");
+            put(CcwCodebookVariable.PTDCNTRCT05, "partDContractNumberMayId");
+            put(CcwCodebookVariable.PTDCNTRCT06, "partDContractNumberJunId");
+            put(CcwCodebookVariable.PTDCNTRCT07, "partDContractNumberJulId");
+            put(CcwCodebookVariable.PTDCNTRCT08, "partDContractNumberAugId");
+            put(CcwCodebookVariable.PTDCNTRCT09, "partDContractNumberSeptId");
+            put(CcwCodebookVariable.PTDCNTRCT10, "partDContractNumberOctId");
+            put(CcwCodebookVariable.PTDCNTRCT11, "partDContractNumberNovId");
+            put(CcwCodebookVariable.PTDCNTRCT12, "partDContractNumberDecId");
+          }
+        };
+
+    if (mapOfMonth.containsKey(month)) {
+      return mapOfMonth.get(month);
+    }
+
     throw new InvalidRequestException(
         "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
   }
 
   private String partDFieldByMonth(CcwCodebookVariable month) {
-    if (month == CcwCodebookVariable.PTDCNTRCT01) return "01";
-    if (month == CcwCodebookVariable.PTDCNTRCT02) return "02";
-    if (month == CcwCodebookVariable.PTDCNTRCT03) return "03";
-    if (month == CcwCodebookVariable.PTDCNTRCT04) return "04";
-    if (month == CcwCodebookVariable.PTDCNTRCT05) return "05";
-    if (month == CcwCodebookVariable.PTDCNTRCT06) return "06";
-    if (month == CcwCodebookVariable.PTDCNTRCT07) return "07";
-    if (month == CcwCodebookVariable.PTDCNTRCT08) return "08";
-    if (month == CcwCodebookVariable.PTDCNTRCT09) return "09";
-    if (month == CcwCodebookVariable.PTDCNTRCT10) return "10";
-    if (month == CcwCodebookVariable.PTDCNTRCT11) return "11";
-    if (month == CcwCodebookVariable.PTDCNTRCT12) return "12";
+
+    Map<CcwCodebookVariable, String> mapOfMonth =
+        new HashMap<CcwCodebookVariable, String>() {
+          {
+            put(CcwCodebookVariable.PTDCNTRCT01, "01");
+            put(CcwCodebookVariable.PTDCNTRCT02, "02");
+            put(CcwCodebookVariable.PTDCNTRCT03, "03");
+            put(CcwCodebookVariable.PTDCNTRCT04, "04");
+            put(CcwCodebookVariable.PTDCNTRCT05, "05");
+            put(CcwCodebookVariable.PTDCNTRCT06, "06");
+            put(CcwCodebookVariable.PTDCNTRCT07, "07");
+            put(CcwCodebookVariable.PTDCNTRCT08, "08");
+            put(CcwCodebookVariable.PTDCNTRCT09, "09");
+            put(CcwCodebookVariable.PTDCNTRCT10, "10");
+            put(CcwCodebookVariable.PTDCNTRCT11, "11");
+            put(CcwCodebookVariable.PTDCNTRCT12, "12");
+          }
+        };
+
+    if (mapOfMonth.containsKey(month)) {
+      return mapOfMonth.get(month);
+    }
     throw new InvalidRequestException(
         "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
   }

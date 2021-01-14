@@ -11,7 +11,9 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -1092,103 +1094,31 @@ final class CoverageTransformerV2 {
                       "%s-%s",
                       String.valueOf(beneMonthly.getYearMonth().getYear()), String.valueOf(month));
 
-              switch (month) {
-                case 1:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT01,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 2:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT02,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 3:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT03,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 4:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT04,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 5:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT05,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 6:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT06,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 7:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT07,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 8:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT08,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 9:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT09,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 10:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT10,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 11:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT11,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
-                case 12:
-                  coverage.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          coverage,
-                          CcwCodebookVariable.PTDCNTRCT12,
-                          yearMonth,
-                          beneMonthly.getPartDContractNumberId()));
-                  break;
+              Map<Integer, CcwCodebookVariable> mapOfMonth =
+                  new HashMap<Integer, CcwCodebookVariable>() {
+                    {
+                      put(1, CcwCodebookVariable.PTDCNTRCT01);
+                      put(2, CcwCodebookVariable.PTDCNTRCT02);
+                      put(3, CcwCodebookVariable.PTDCNTRCT03);
+                      put(4, CcwCodebookVariable.PTDCNTRCT04);
+                      put(5, CcwCodebookVariable.PTDCNTRCT05);
+                      put(6, CcwCodebookVariable.PTDCNTRCT06);
+                      put(7, CcwCodebookVariable.PTDCNTRCT07);
+                      put(8, CcwCodebookVariable.PTDCNTRCT08);
+                      put(9, CcwCodebookVariable.PTDCNTRCT09);
+                      put(10, CcwCodebookVariable.PTDCNTRCT10);
+                      put(11, CcwCodebookVariable.PTDCNTRCT11);
+                      put(12, CcwCodebookVariable.PTDCNTRCT12);
+                    }
+                  };
+
+              if (mapOfMonth.containsKey(month)) {
+                coverage.addExtension(
+                    TransformerUtilsV2.createExtensionCoding(
+                        coverage,
+                        mapOfMonth.get(month),
+                        yearMonth,
+                        beneMonthly.getPartDContractNumberId()));
               }
             });
 

@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
@@ -15,7 +14,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.io.File;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -1934,12 +1932,6 @@ public final class PatientResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    try {
-      ObjectMapper ObjectMapper = new ObjectMapper();
-      ObjectMapper.writeValue(new File("./car.json"), searchResults);
-    } catch (Exception ex) {
-
-    }
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getEntry().size());
   }
