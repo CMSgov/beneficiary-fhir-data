@@ -8,7 +8,7 @@ import java.util.Optional;
 
 /** A HAPI {@link IClientInterceptor} that allows us to add HTTP headers to our requests. */
 public class ExtraParamsInterceptor implements IClientInterceptor {
-  private RequestHeaders rh;
+  private RequestHeaders requestHeader;
   // private IHttpRequest theRequest;
   // private String includeIdentifiersValues = "";
   // private String includeAddressValues = "";
@@ -19,7 +19,8 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
     // String headerAddressValue = includeAddressValues;
 
     // inject headers values
-    rh.getNVPairs()
+    requestHeader
+        .getNVPairs()
         .forEach(
             (n, v) -> {
               theRequest.addHeader(n, v.toString());
@@ -38,7 +39,7 @@ public class ExtraParamsInterceptor implements IClientInterceptor {
     // nothing needed here
   }
 
-  public void setHeaders(RequestHeaders rh) {
-    this.rh = rh;
+  public void setHeaders(RequestHeaders requestHeader) {
+    this.requestHeader = requestHeader;
   }
 }

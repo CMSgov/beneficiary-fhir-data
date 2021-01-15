@@ -204,11 +204,11 @@ public final class PatientResourceProviderIT {
    * @param includeAddressValues header value
    */
   public void assertExistingPatientIncludeIdentifiersExpected(
-      boolean expectingHicn, boolean expectingMbi, RequestHeaders rh) {
+      boolean expectingHicn, boolean expectingMbi, RequestHeaders requestHeader) {
 
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = createFhirClient(rh);
+    IGenericClient fhirClient = createFhirClient(requestHeader);
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -220,7 +220,7 @@ public final class PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, rh);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, requestHeader);
 
     /*
      * Ensure the unhashed values for HICN and MBI are present.
@@ -256,13 +256,13 @@ public final class PatientResourceProviderIT {
   public void readExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    RequestHeaders rh =
+    RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(
             PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "true",
             PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
             "true");
-    IGenericClient fhirClient = createFhirClient(rh);
+    IGenericClient fhirClient = createFhirClient(requestHeader);
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -274,7 +274,7 @@ public final class PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, rh);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, requestHeader);
 
     /*
      * Ensure the unhashed values for HICN and MBI are present.
@@ -1961,24 +1961,24 @@ public final class PatientResourceProviderIT {
    * @return the client
    */
   public static IGenericClient createFhirClient(String idHdrVal, String addrHdrVal) {
-    RequestHeaders rh =
+    RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(
             PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             idHdrVal,
             PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
             addrHdrVal);
-    return createFhirClient(rh);
+    return createFhirClient(requestHeader);
   }
   /**
    * helper
    *
    * @return the client with extra params registered
    */
-  public static IGenericClient createFhirClient(RequestHeaders rh) {
+  public static IGenericClient createFhirClient(RequestHeaders requestHeader) {
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    if (rh != null) {
+    if (requestHeader != null) {
       ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-      extraParamsInterceptor.setHeaders(rh);
+      extraParamsInterceptor.setHeaders(requestHeader);
       fhirClient.registerInterceptor(extraParamsInterceptor);
     }
     return fhirClient;
