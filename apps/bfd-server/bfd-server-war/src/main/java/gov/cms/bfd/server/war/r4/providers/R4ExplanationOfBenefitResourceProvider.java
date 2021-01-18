@@ -137,7 +137,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
     String eobIdClaimIdText = eobIdMatcher.group(2);
 
-    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    Operation operation = new Operation(Operation.Endpoint.V2_EOB);
     operation.setOption("by", "id");
     operation.publishOperationName();
 

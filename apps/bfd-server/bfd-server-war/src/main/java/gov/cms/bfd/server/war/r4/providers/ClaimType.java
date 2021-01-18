@@ -19,8 +19,8 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
- * Enumerates the various Blue Button claim types that are supported by {@link
- * R4ExplanationOfBenefitResourceProvider}.
+ * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
+ * {@link R4ExplanationOfBenefitResourceProvider}.
  */
 public enum ClaimType {
   PDE(
