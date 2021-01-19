@@ -2,10 +2,14 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
+import gov.cms.bfd.server.war.commons.IdentifierType;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -25,6 +29,7 @@ final class PartDEventTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
+  @Trace
   static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
     Timer.Context timer =
         metricRegistry
@@ -243,27 +248,51 @@ final class PartDEventTransformer {
             TransformerUtils.createExtensionQuantity(
                 CcwCodebookVariable.DAYS_SUPLY_NUM, claimGroup.getDaysSupply()));
 
-    // TODO CBBD-241 - This code was commented out because values other than
-    // "01"
-    // were coming thru
-    // such as "07". Need to discuss with Karl if this check needs to be
-    // here -
-
     /*
-     * if (claimGroup.serviceProviderIdQualiferCode == null ||
-     * !claimGroup.serviceProviderIdQualiferCode.equalsIgnoreCase("01"))
-     * throw new InvalidRifValueException(
-     * "Service Provider ID Qualifier Code is invalid: " +
-     * claimGroup.serviceProviderIdQualiferCode);
+     * This chart is to dosplay the different code values for the different service provider id qualifer
+     * codes below
+     *   Code	    Code value
+     *   01        National Provider Identifier (NPI)
+     *   06        Unique Physician Identification Number (UPIN)
+     *   07        National Council for Prescription Drug Programs (NCPDP) provider identifier
+     *   08        State license number
+     *   11        Federal tax number
+     *   99        Other
      */
 
+    IdentifierType identifierType;
+
     if (!claimGroup.getServiceProviderId().isEmpty()) {
-      eob.setOrganization(
-          TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
-      eob.setFacility(
-          TransformerUtils.createIdentifierReference(
-              TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
+      switch (claimGroup.getServiceProviderIdQualiferCode()) {
+        case "01":
+          identifierType = IdentifierType.NPI;
+          break;
+        case "06":
+          identifierType = IdentifierType.UPIN;
+          break;
+        case "07":
+          identifierType = IdentifierType.NCPDP;
+          break;
+        case "08":
+          identifierType = IdentifierType.SL;
+          break;
+        case "11":
+          identifierType = IdentifierType.FTN;
+          break;
+        default:
+          identifierType = null;
+          break;
+      }
+
+      if (identifierType != null) {
+        eob.setOrganization(
+            TransformerUtils.createIdentifierReference(
+                identifierType, claimGroup.getServiceProviderId()));
+        eob.setFacility(
+            TransformerUtils.createIdentifierReference(
+                identifierType, claimGroup.getServiceProviderId()));
+      }
+
       eob.getFacility()
           .addExtension(
               TransformerUtils.createExtensionCoding(
@@ -354,6 +383,7 @@ final class PartDEventTransformer {
           CcwCodebookVariable.SUBMSN_CLR_CD,
           claimGroup.getSubmissionClarificationCode());
 
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }

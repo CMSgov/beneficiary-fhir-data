@@ -2,11 +2,15 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaimLine;
-import gov.cms.bfd.server.war.stu3.providers.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.CCWProcedure;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
@@ -24,6 +28,7 @@ final class OutpatientClaimTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
+  @Trace
   static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
     Timer.Context timer =
         metricRegistry
@@ -225,7 +230,7 @@ final class OutpatientClaimTransformer {
       TransformerUtils.addDiagnosisCode(
           eob,
           Diagnosis.from(
-                  claimGroup.getDiagnosisAdmission2Code(),
+                  claimGroup.getDiagnosisAdmission3Code(),
                   claimGroup.getDiagnosisAdmission3CodeVersion(),
                   DiagnosisLabel.REASONFORVISIT)
               .get());
@@ -448,11 +453,15 @@ final class OutpatientClaimTransformer {
           claimLine.getRevenueCenterRenderingPhysicianNPI());
 
       // set revenue center status indicator codes for the claim
-      item.getRevenue()
-          .addExtension(
-              TransformerUtils.createExtensionCoding(
-                  eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, claimLine.getStatusCode()));
+      // Dt: 6-18-20 Handling for optional status code claim line: BFD-252
+      if (claimLine.getStatusCode().isPresent()) {
+        item.getRevenue()
+            .addExtension(
+                TransformerUtils.createExtensionCoding(
+                    eob, CcwCodebookVariable.REV_CNTR_STUS_IND_CD, claimLine.getStatusCode()));
+      }
     }
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }

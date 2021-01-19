@@ -1,4 +1,6 @@
 locals {
+  azs         = ["us-east-1a"]
+  env_config  = {env=var.env_config.env, tags=var.env_config.tags, azs=local.azs}
   tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
   is_prod     = substr(var.env_config.env, 0, 4) == "prod" 
 }
@@ -6,7 +8,7 @@ locals {
 # IAM: Setup Role, Profile and Policies for Jenkins
 
 resource "aws_iam_role" "jenkins" {
-  name = "bfd-mgmt-jenkins"
+  name = "bfd-${var.env_config.env}-jenkins"
 
   assume_role_policy = <<EOF
 {
@@ -26,12 +28,12 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "jenkins_profile" {
-  name = "bfd-jenkins"
+  name = "bfd-${var.env_config.env}-jenkins"
   role = "${aws_iam_role.jenkins.name}"
 }
 
 resource "aws_iam_policy" "jenkins_volume" {
-  name        = "bfd-jenkins-volume"
+  name        = "bfd-${var.env_config.env}-jenkins-volume"
   description = "Jenkins Data Volume Policy"
 
   policy = <<EOF
@@ -62,7 +64,7 @@ resource "aws_iam_role_policy_attachment" "jenkins_volume" {
 }
 
 resource "aws_iam_policy" "jenkins_boundary" {
-  name        = "bfd-jenkins-permission-boundary"
+  name        = "bfd-${var.env_config.env}-jenkins-permission-boundary"
   description = "Jenkins Permission Boundary Policy"
   path        = "/"
 
@@ -139,31 +141,9 @@ resource "aws_iam_policy" "jenkins_boundary" {
 EOT
 }
 
-### Add Jenkins user to group and attach policy to group
-
-data "aws_iam_group" "managed_service" {
-  group_name = "managed-service"
-}
-
-data "aws_iam_user" "jenkins" {
-  user_name = "VZG9"
-}
-
-resource "aws_iam_group_membership" "managed_service_group" {
-  name = "managed-service-group-membership"
-
-  users = [
-    "${data.aws_iam_user.jenkins.user_name}",
-  ]
-
-  group = "${data.aws_iam_group.managed_service.group_name}"
-}
-
-resource "aws_iam_policy_attachment" "jenkins_policy_boundary" {
-  name       = "bfd-jenkins-permission-boundary"
+resource "aws_iam_role_policy_attachment" "jenkins_boundary" {
+  role       = "${aws_iam_role.jenkins.name}"
   policy_arn = "${aws_iam_policy.jenkins_boundary.arn}"
-
-  groups = ["${data.aws_iam_group.managed_service.group_name}"]
 }
 
 ### Lock Down Packer SG for Jenkins, Data App and Data Server
@@ -190,7 +170,7 @@ data "aws_vpc" "managed_vpc" {
 }
 
 resource "aws_security_group" "packer_sg" {
-  name        = "packer_sg"
+  name        = "bfd-${var.env_config.env}-packer_sg"
   description = "Allow traffic to Packer Instances"
   vpc_id      = "${var.vpc_id}"
 
@@ -273,48 +253,56 @@ resource "aws_security_group" "app" {
 }
 
 ##
-# Launch configuration
+# Launch template
 ##
+resource "aws_launch_template" "main" {
+  name                          = "bfd-${var.env_config.env}-${var.role}"
+  description                   = "Template for the ${var.env_config.env} environment ${var.role} servers"
+  vpc_security_group_ids        = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], aws_security_group.app[*].id)
+  key_name                      = var.launch_config.key_name
+  image_id                      = var.launch_config.ami_id
+  instance_type                 = var.launch_config.instance_type
+  ebs_optimized                 = true
 
-resource "aws_launch_configuration" "main" {
-  # Generate a new config on every revision
-  name_prefix                 = "bfd-${var.env_config.env}-${var.role}-"
-  security_groups             = concat([aws_security_group.base.id], aws_security_group.app[*].id)
-  key_name                    = var.launch_config.key_name
-  image_id                    = var.launch_config.ami_id
-  instance_type               = var.launch_config.instance_type
-  associate_public_ip_address = false
-  iam_instance_profile        = var.launch_config.profile
-  placement_tenancy           = local.is_prod ? "dedicated" : "default"
+  iam_instance_profile {
+    name                        = "bfd-${var.env_config.env}-jenkins"
+  }
 
-  user_data                   = templatefile("${path.module}/../templates/user_data.tpl", {
-    env    = var.env_config.env
-  })
+  placement {
+    tenancy                     = local.is_prod ? "dedicated" : "default"
+  }
 
-  lifecycle {
-    create_before_destroy = true
+  monitoring {
+    enabled = false
   }
 }
+
 
 ##
 # Autoscaling group
 ##
 resource "aws_autoscaling_group" "main" {
-  # Generate a new config on every revision
-  name_prefix               = "bfd-${aws_launch_configuration.main.name}"
+  # Generate a new group on every revision of the launch template. 
+  # This does a simple version of a blue/green deployment
+  #
+  name                      = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
   desired_capacity          = var.asg_config.desired
   max_size                  = var.asg_config.max
   min_size                  = var.asg_config.min
 
-  min_elb_capacity          = var.asg_config.desired
-  wait_for_elb_capacity     = var.asg_config.desired
-  wait_for_capacity_timeout = "10m"
+  # If an lb is defined, wait for the ELB 
+  min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
+  wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
-  health_check_grace_period = 300
+  health_check_grace_period = 400
   health_check_type         = var.lb_config == null ? "EC2" : "ELB" # Failures of ELB healthchecks are asg failures
   vpc_zone_identifier       = data.aws_subnet.app_subnets[*].id
-  launch_configuration      = aws_launch_configuration.main.name
-  target_group_arns         = var.lb_config == null ? [] : [var.lb_config.tg_arn]
+  load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
+
+  launch_template {
+    name                    = aws_launch_template.main.name
+    version                 = aws_launch_template.main.latest_version
+  }
 
   enabled_metrics = [
     "GroupMinSize",
@@ -341,4 +329,9 @@ resource "aws_autoscaling_group" "main" {
     value                 = "bfd-${var.env_config.env}-${var.role}"
     propagate_at_launch   = true
   }
+
+  lifecycle {
+    create_before_destroy = false
+  }
 }
+

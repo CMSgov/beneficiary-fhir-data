@@ -5,8 +5,7 @@
 #
 
 locals {
-  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=aws_route53_zone.local_zone.id }
+  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=aws_route53_zone.local_zone.id, azs=var.env_config.azs}
 }
 
 # VPC
@@ -14,11 +13,11 @@ locals {
 data "aws_vpc" "main" {
   filter {
     name = "tag:Name"
-    values = ["bfd-${var.env_config.env}-vpc"]
+    values = ["bfd-mgmt-vpc"]
   }
 }
 
-# Subnets
+# Subnets for App
 data "aws_subnet_ids" "app_subnets" {
   vpc_id = data.aws_vpc.main.id
 
@@ -27,15 +26,12 @@ data "aws_subnet_ids" "app_subnets" {
   }
 }
 
-data "aws_subnet" "selected" {
-  count = length(data.aws_subnet_ids.app_subnets.ids)
-  id    = tolist(data.aws_subnet_ids.app_subnets.ids)[count.index]
-}
-
+#
 # KMS 
 #
 # The customer master key is created outside of this script
 #
+
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
@@ -44,28 +40,31 @@ data "aws_kms_key" "master_key" {
 #
 # Find the security group for the Cisco VPN
 #
+
 data "aws_security_group" "vpn" {
   filter {
     name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-vpn-private"]
+    values      = ["bfd-mgmt-vpn-private"]
   }
 }
 
 # Find the management group
 #
+
 data "aws_security_group" "tools" {
   filter {
     name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-enterprise-tools"]
+    values      = ["bfd-mgmt-enterprise-tools"]
   }
 }
 
 # Find the tools group 
 #
+
 data "aws_security_group" "management" {
   filter {
     name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-remote-management"]
+    values      = ["bfd-mgmt-remote-management"]
   }
 }
 
@@ -77,6 +76,7 @@ data "aws_security_group" "management" {
 #
 # Build a VPC private local zone for CNAME records
 #
+
 resource "aws_route53_zone" "local_zone" {
   name    = "bfd-${var.env_config.env}.local"
   vpc {
@@ -84,20 +84,11 @@ resource "aws_route53_zone" "local_zone" {
   }
 }
 
-# S3 Admin bucket for logs and other adminstrative 
-#
-module "admin" {
-  source              = "../resources/s3"
-  role                = "admin"
-  env_config          = local.env_config
-  kms_key_id          = data.aws_kms_key.master_key.arn
-  acl                 = "log-delivery-write"
-}
-
 # IAM policy to allow read access to ansible vault password
 #
+
 resource "aws_iam_policy" "ansible_vault_pw_ro_s3" {
-  name        = "bfd-ansible-vault-pw-ro-s3"
+  name        = "bfd-${var.env_config.env}-ansible-vault-pw-ro-s3"
   description = "ansible vault pw read only S3 policy"
 
   policy = <<EOF
@@ -121,25 +112,46 @@ resource "aws_iam_policy" "ansible_vault_pw_ro_s3" {
 EOF
 }
 
-# S3 bucket for Build Artifacts
+# S3 Admin bucket for adminstrative stuff
 #
-module "artifacts" {
+
+module "admin" { 
   source              = "../resources/s3"
-  role                = "artifacts"
+  role                = "admin"
   env_config          = local.env_config
   kms_key_id          = data.aws_kms_key.master_key.arn
-  log_bucket          = module.admin.id
+  log_bucket          = module.logs.id
 }
 
-# EBS Volume for Jenkins Data
+# S3 bucket for logs 
+#
+
+module "logs" { 
+  source              = "../resources/s3"
+  role                = "logs"
+  env_config          = local.env_config
+  acl                 = "log-delivery-write"  # For AWS bucket logs
+  kms_key_id          = null                  # Use AWS encryption to support AWS Agents writing to this bucket
+}
+
+# EFS Resource, Mount and Security Group for Jenkins 
+
+module "efs" {
+  source          = "../resources/efs"
+  env_config      = local.env_config
+  role            = "jenkins"
+  layer           = "app"
+}
 
 resource "aws_ebs_volume" "jenkins_data" {
-  availability_zone = data.aws_subnet.selected[0].availability_zone
+  availability_zone = local.env_config.azs
   size              = 1000
   type              = "gp2"
+  encrypted         = true
+  kms_key_id        = data.aws_kms_key.master_key.arn
 
   tags = {
-    Name       = "bfd-mgmt-jenkins-data-master"
+    Name       = "bfd-${var.env_config.env}-jenkins-data"
     cpm_backup = "4HR Daily Weekly Monthly"
   }
 }
@@ -147,7 +159,7 @@ resource "aws_ebs_volume" "jenkins_data" {
 # IAM Roles, Profiles and Policies for Packer
 
 resource "aws_iam_role" "packer" {
-  name = "bfd-packer"
+  name = "bfd-${var.env_config.env}-packer"
 
   assume_role_policy = <<EOF
 {
@@ -168,12 +180,12 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "packer" {
-  name = "bfd-packer"
+  name = "bfd-${var.env_config.env}-packer"
   role = aws_iam_role.packer.name
 }
 
 resource "aws_iam_policy" "packer_s3" {
-  name = "bfd-packer-s3"
+  name = "bfd-${var.env_config.env}-packer-s3"
   description = "packer S3 Policy"
 
   policy = <<EOF
@@ -205,4 +217,63 @@ EOF
 resource "aws_iam_role_policy_attachment" "packer_S3" {
   role       = aws_iam_role.packer.name
   policy_arn = aws_iam_policy.packer_s3.arn
+}
+
+resource "aws_iam_role_policy_attachment" "packer_EFS" {
+  role       = aws_iam_role.packer.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess"
+}
+
+# IAM policy, user, and attachment to allow GitHub Actions
+# to perform app integration testing against S3
+
+resource "aws_iam_user" "github_actions" {
+  name       = "bfd-${var.env_config.env}-github-actions"
+}
+
+resource "aws_iam_user_policy_attachment" "github_actions_s3its" {
+  user       = aws_iam_user.github_actions.name
+  policy_arn = aws_iam_policy.github_actions_s3its.arn
+}
+
+resource "aws_iam_policy" "github_actions_s3its" {
+  name        = "bfd-${var.env_config.env}-github-actions-s3its"
+  description = "GitHub Actions policy for S3 integration tests"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BFDGitHubActionsS3ITs",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:ListAllMyBuckets"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    },
+    {
+      "Sid": "BFDGitHubActionsS3ITsBucket",
+      "Action": [
+        "s3:DeleteBucket",
+        "s3:HeadBucket",
+        "s3:ListBucket"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::bb-test-*"
+    },
+    {
+      "Sid": "BFDGitHubActionsS3ITsObject",
+      "Action": [
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::bb-test-*/*"
+    }
+  ]
+}
+EOF
 }

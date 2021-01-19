@@ -60,16 +60,20 @@ public final class RequestResponseLoggingFilter implements Filter {
     // Record the request type.
     MDC.put(computeMdcKey("request_type"), request.getClass().getName());
 
+    // Set the default Operation (will hopefully be customized further in specific handler methods).
+    Operation operation = new Operation(Operation.Endpoint.OTHER);
+
     if (request instanceof HttpServletRequest) {
       HttpServletRequest servletRequest = (HttpServletRequest) request;
 
       // Record the basic request components.
-      MDC.put(computeMdcKey("request.http_method"), servletRequest.getMethod());
-      MDC.put(computeMdcKey("request.url"), servletRequest.getRequestURL().toString());
-      MDC.put(computeMdcKey("request.uri"), servletRequest.getRequestURI());
-      MDC.put(computeMdcKey("request.query_string"), servletRequest.getQueryString());
+      operation = new Operation(Operation.Endpoint.matchByHttpUri(servletRequest));
+      MDC.put(computeMdcRequestKey("http_method"), servletRequest.getMethod());
+      MDC.put(computeMdcRequestKey("url"), servletRequest.getRequestURL().toString());
+      MDC.put(computeMdcRequestKey("uri"), servletRequest.getRequestURI());
+      MDC.put(computeMdcRequestKey("query_string"), servletRequest.getQueryString());
       MDC.put(
-          computeMdcKey("request.clientSSL.DN"),
+          computeMdcRequestKey("clientSSL.DN"),
           getClientSslPrincipalDistinguishedName(servletRequest));
 
       // Record the request headers.
@@ -77,12 +81,15 @@ public final class RequestResponseLoggingFilter implements Filter {
       while (headerNames.hasMoreElements()) {
         String headerName = headerNames.nextElement();
         List<String> headerValues = Collections.list(servletRequest.getHeaders(headerName));
-        if (headerValues.isEmpty()) MDC.put(computeMdcKey("request.header." + headerName), "");
+        if (headerValues.isEmpty()) MDC.put(computeMdcRequestKey("header." + headerName), "");
         else if (headerValues.size() == 1)
-          MDC.put(computeMdcKey("request.header." + headerName), headerValues.get(0));
-        else MDC.put(computeMdcKey("request.header." + headerName), headerValues.toString());
+          MDC.put(computeMdcRequestKey("header." + headerName), headerValues.get(0));
+        else MDC.put(computeMdcRequestKey("header." + headerName), headerValues.toString());
       }
     }
+
+    // Publish the Operation name for monitoring systems.
+    operation.publishOperationName();
   }
 
   /**
@@ -91,6 +98,15 @@ public final class RequestResponseLoggingFilter implements Filter {
    */
   private static String computeMdcKey(String keySuffix) {
     return String.format("%s.%s", "http_access", keySuffix);
+  }
+
+  /**
+   * @param keySuffix the suffix to build a full MDC key for
+   * @return the key to use for {@link MDC#put(String, String)}, for an access log entry that's
+   *     related to the HTTP request
+   */
+  public static String computeMdcRequestKey(String keySuffix) {
+    return String.format("%s.%s", computeMdcKey("request"), keySuffix);
   }
 
   /**

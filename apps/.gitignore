@@ -1,3 +1,6 @@
 # Ignore Maven output folders here and in children. Please note that if someone tries to create a
 # Java package named 'target', they're going to have a bad time as a result of this.
 **/target/
+
+# Ignore IntelliJ configuration files
+*.iml

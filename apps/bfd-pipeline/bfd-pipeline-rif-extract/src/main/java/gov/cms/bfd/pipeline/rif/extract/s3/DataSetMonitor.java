@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.rif.extract.s3;
 
 import com.codahale.metrics.MetricRegistry;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.pipeline.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;

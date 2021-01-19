@@ -17,6 +17,12 @@ variable "log_bucket" {
   type        = string
 }
 
+variable "is_public" {
+  description = "If true, the LB is created as a public LB"
+  type        = bool
+  default     = false
+}
+
 variable "ingress" {
   description = "Ingress port and cidr blocks"
   type        = object({description=string, port=number, cidr_blocks=list(string)})

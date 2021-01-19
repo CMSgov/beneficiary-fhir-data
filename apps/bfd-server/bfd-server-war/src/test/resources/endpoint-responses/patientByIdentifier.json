@@ -14,6 +14,9 @@
     "resource" : {
       "resourceType" : "Patient",
       "id" : "567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/race",
         "valueCoding" : {
@@ -23,7 +26,7 @@
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
-        "valueDate" : "2019"
+        "valueDate" : "2018"
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
         "valueCoding" : {
@@ -110,6 +113,9 @@
         }
       } ],
       "identifier" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+        "value" : "82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c"
+      }, {
         "system" : "https://bluebutton.cms.gov/resources/variables/bene_id",
         "value" : "567834"
       } ],

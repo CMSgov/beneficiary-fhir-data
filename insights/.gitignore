@@ -1,0 +1,10 @@
+# Python stuff
+*.lock
+**/*.pyc
+**/__pycache__
+**/venv/*
+
+# VSCode
+.vscode/*
+*.code-workspace
+

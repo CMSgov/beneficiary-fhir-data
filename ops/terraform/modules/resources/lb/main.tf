@@ -48,7 +48,7 @@ resource "aws_elb" "main" {
   name                  = "bfd-${var.env_config.env}-${var.role}"
   tags                  = local.tags
 
-  internal              = true
+  internal              = !var.is_public
   subnets               = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
   security_groups       = [aws_security_group.lb.id]
 

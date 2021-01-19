@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "snf-777777777",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
     "valueMoney" : {
@@ -470,7 +473,7 @@
   } ],
   "procedure" : [ {
     "sequence" : 1,
-    "date" : "2016-01-16T00:00:00-06:00",
+    "date" : "2016-01-16T00:00:00-08:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-9-cm",

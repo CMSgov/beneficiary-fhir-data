@@ -3,11 +3,6 @@ variable "env_config" {
   type        = object({env=string, tags=map(string), vpc_id=string, zone_id=string, azs=list(string)})
 }
 
-// variable "app_subnets" {
-//   type        = list(string)
-//   description = "App Subnets to use for the jenkins application"
-// }
-
 variable "vpn_security_group_id" {
   type        = string
   description = "Security group that provides access via VPN"
@@ -45,9 +40,16 @@ variable "role" {
 }
 
 variable "vpc_id" {}
-  
+
+variable "jenkins_instance_size" {
+  type              = string
+  description       = "The EC2 instance size to use"
+  default           = "c5.xlarge"
+}
+
 variable "lb_config" {
   description = "Load balancer information"
-  type        = object({name=string, tg_arn=string, port=number})
+  type        = object({name=string, port=number, sg=string})
   default     = null
 }
+

@@ -14,6 +14,9 @@
     "resource" : {
       "resourceType" : "Coverage",
       "id" : "part-a-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
         "valueCoding" : {
@@ -47,6 +50,93 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
           "code" : "0",
           "display" : "Not Terminated"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+        "valueDate" : "2018"
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/buyin01",
@@ -160,6 +250,9 @@
     "resource" : {
       "resourceType" : "Coverage",
       "id" : "part-b-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
         "valueCoding" : {
@@ -173,6 +266,93 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/b_trm_cd",
           "code" : "0",
           "display" : "Not Terminated"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+        "valueDate" : "2018"
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/buyin01",
@@ -281,6 +461,9 @@
     "resource" : {
       "resourceType" : "Coverage",
       "id" : "part-c-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ptc_cntrct_id_01",
         "valueCoding" : {
@@ -557,6 +740,93 @@
           "code" : "0",
           "display" : "Not a member of an HMO"
         }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+        "valueDate" : "2018"
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
       } ],
       "status" : "active",
       "type" : {
@@ -577,6 +847,9 @@
     "resource" : {
       "resourceType" : "Coverage",
       "id" : "part-d-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
       "extension" : [ {
         "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
         "valueCoding" : {
@@ -956,6 +1229,93 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/rdsind12",
           "code" : "N",
           "display" : "No employer subsidization for the retired beneficiary"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+        "valueDate" : "2018"
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+          "code" : "**",
+          "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
         }
       } ],
       "status" : "active",

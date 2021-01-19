@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "inpatient-333333222222",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
     "valueMoney" : {
@@ -531,6 +534,12 @@
         "code" : "external-first",
         "display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."
       } ]
+    }, {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+        "code" : "principal",
+        "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
+      } ]
     } ]
   }, {
     "extension" : [ {
@@ -558,7 +567,7 @@
   } ],
   "procedure" : [ {
     "sequence" : 1,
-    "date" : "2016-01-16T00:00:00-06:00",
+    "date" : "2016-01-16T00:00:00-08:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -567,7 +576,7 @@
     }
   }, {
     "sequence" : 2,
-    "date" : "2016-01-16T00:00:00-06:00",
+    "date" : "2016-01-16T00:00:00-08:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -576,7 +585,7 @@
     }
   }, {
     "sequence" : 3,
-    "date" : "2016-01-15T00:00:00-06:00",
+    "date" : "2016-01-15T00:00:00-08:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -585,7 +594,7 @@
     }
   }, {
     "sequence" : 4,
-    "date" : "2016-01-17T00:00:00-06:00",
+    "date" : "2016-01-17T00:00:00-08:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -594,7 +603,7 @@
     }
   }, {
     "sequence" : 5,
-    "date" : "2016-01-24T00:00:00-06:00",
+    "date" : "2016-01-24T00:00:00-08:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -603,7 +612,7 @@
     }
   }, {
     "sequence" : 6,
-    "date" : "2016-01-24T00:00:00-06:00",
+    "date" : "2016-01-24T00:00:00-08:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",

@@ -26,10 +26,6 @@
 
 /*
  * Optionality:
- * - Deploy Env:
- *     - HealthAPT or CCS (exclusive)
- *     - hhsdevcloud (included in CCS deploys)
- *     - deploy Jenkins (optional, both envs)
  * - Performance Tests:
  *     - Default: 2 workers, 60 seconds
  *     - Extended: 4 workers, 300 seconds
@@ -43,7 +39,7 @@ properties([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
 		booleanParam(name: 'deploy_management', description: 'Whether to deploy/redeploy the management environment, which includes Jenkins. May cause the job to end early, if Jenkins is restarted.', defaultValue: false),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
-		booleanParam(name: 'deploy_hhsdevcloud', description: 'Whether to deploy to the hhsdevcloud/"old sandbox" environment.', defaultValue: false),
+		//booleanParam(name: 'deploy_hhsdevcloud', description: 'Whether to deploy to the hhsdevcloud/"old sandbox" environment.', defaultValue: false),
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
 		//booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false),
 		//booleanParam(name: 'deploy_to_prod', description: 'Whether to run the Ansible plays for PROD systems (without prompting first, which is the default behavior).', defaultValue: false)
@@ -66,27 +62,13 @@ stage('Prepare') {
 		// Grab the commit that triggered the build.
 		checkout scm
 
-		// Deployment varies a bit by environment: are we running in the CCS?
-		if (env.JENKINS_URL.contains('cmscloud')) {
-			deployEnvironment = 'ccs'
-		} else {
-			deployEnvironment = 'healthapt'
-		}
-
 		// Load the child Jenkinsfiles.
 		scriptForApps = load('apps/build.groovy')
-		if (deployEnvironment == 'healthapt') {
-			scriptForDeploys = load('ops/deploy-healthapt.groovy')
-		} else if (deployEnvironment == 'ccs') {
-			scriptForDeploys = load('ops/deploy-ccs.groovy')
-		}
-		scriptForDeploysHhsdevcloud = load('ops/deploy-hhsdevcloud.groovy')
+		scriptForDeploys = load('ops/deploy-ccs.groovy')
 
 		// Find the most current AMI IDs (if any).
 		amiIds = null
-		if (deployEnvironment == 'ccs') {
-			amiIds = scriptForDeploys.findAmis()
-		}
+		amiIds = scriptForDeploys.findAmis()
 
 		// These variables track our decision on whether or not to deploy to prod-like envs.
 		canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
@@ -111,17 +93,15 @@ stage('Set Branch Name') {
 	}
 }
 
-if (deployEnvironment == 'ccs') {
-	stage('Build Platinum AMI') {
-		if (params.build_platinum || amiIds.platinumAmiId == null) {
-			milestone(label: 'stage_build_platinum_ami_start')
+stage('Build Platinum AMI') {
+	if (params.build_platinum || amiIds.platinumAmiId == null) {
+		milestone(label: 'stage_build_platinum_ami_start')
 
-			node {
-				amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
-			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
+		node {
+			amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 		}
+	} else {
+		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
 	}
 }
 
@@ -149,13 +129,11 @@ stage('Build Apps') {
 }
 
 
-if (deployEnvironment == 'ccs') {
-	stage('Build App AMIs for TEST') {
-		milestone(label: 'stage_build_app_amis_test_start')
+stage('Build App AMIs') {
+	milestone(label: 'stage_build_app_amis_test_start')
 
-		node {
-			amiIds = scriptForDeploys.buildAppAmis('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
-		}
+	node {
+		amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
 	}
 }
 
@@ -194,35 +172,7 @@ stage('Manual Approval') {
 	}
 }
 
-stage('Deploy to hhsdevcloud') {
-	if (willDeployToProdEnvs && params.deploy_hhsdevcloud) {
-		lock(resource: 'env_hhsdevcloud', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_hhsdevcloud')
-
-			node {
-				scriptForDeploysHhsdevcloud.deploy(appBuildResults)
-			}
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to hhsdevcloud')
-	}
-}
-
-if (deployEnvironment == 'ccs') {
-	stage('Build App AMIs for prod-sbx') {
-		if (willDeployToProdEnvs) {
-			milestone(label: 'stage_build_app_amis_prod-sbx_start')
-
-			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
-			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod-sbx')
-		}
-	}
-}
-
-stage('Deploy to prod-sbx') {
+stage('Deploy to PROD-SBX') {
 	if (willDeployToProdEnvs) {
 		lock(resource: 'env_prod_sbx', inversePrecendence: true) {
 			milestone(label: 'stage_deploy_prod_sbx_start')
@@ -236,21 +186,7 @@ stage('Deploy to prod-sbx') {
 	}
 }
 
-if (deployEnvironment == 'ccs') {
-	stage('Build App AMIs for prod') {
-		if (willDeployToProdEnvs) {
-			milestone(label: 'stage_build_app_amis_prod_start')
-
-			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
-			}
-		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod')
-		}
-	}
-}
-
-stage('Deploy to prod') {
+stage('Deploy to PROD') {
 	if (willDeployToProdEnvs) {
 		lock(resource: 'env_prod', inversePrecendence: true) {
 			milestone(label: 'stage_deploy_prod_start')

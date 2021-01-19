@@ -3,6 +3,7 @@
 .*
 !.gitignore
 !.gitattributes
+!.github
 
 # OSX system files
 .DS_Store

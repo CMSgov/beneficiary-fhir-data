@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "dme-2188888888",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "contained" : [ {
     "resourceType" : "ReferralRequest",
     "id" : "1",
@@ -258,8 +261,8 @@
       "url" : "http://hl7.org/fhir/sid/ndc",
       "valueCoding" : {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "46122005000",
-        "display" : "Childrens Acetaminophen Cherry - ACETAMINOPHEN"
+        "code" : "667159747",
+        "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
       }
     } ],
     "sequence" : 1,

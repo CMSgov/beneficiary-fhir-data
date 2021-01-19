@@ -1,0 +1,9 @@
+---
+- name: Configure - Lockable Resources Plugin
+  jenkins_script:
+    url: "{{ jenkins_url_local }}"
+    user: "{{ jenkins_dynamic_admin_username | default(omit) }}"
+    password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
+    script: "{{ lookup('template', 'templates/configureJobs.groovy.j2') }}"
+  register: jenkins_script_jobs
+  changed_when: "(jenkins_script_jobs is success) and 'Changed' in jenkins_script_jobs.output"

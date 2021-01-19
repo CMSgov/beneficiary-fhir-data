@@ -1,16 +1,112 @@
 # API Changelog
 
+## BCDA-3872: Add service-date query parameter on ExplanationOfBenefit resources
+A new optional query parameter has been added to ExplanationOfBenefit searches that will filter the returned results by type their respective service dates.
+
+Some examples:
+
+* Query for claims data that fall between 1999-10-27 and 2016-01-27 (inclusive)
+  ```
+  /v1/fhir/ExplanationOfBenefit?service-date=ge1999-10-27&service-date=le2016-01-27
+  ```
+* Query for claims data that occurred before the EOY 2020
+  ```
+  /v1/fhir/ExplanationOfBenefit?service-date=le2020-12-31
+  ```
+
+If the new parameter is not included, all EOBs will still be returned:
+
+For more details, please see the associated [RFC].(https://github.com/CMSgov/beneficiary-fhir-data/blob/master/rfcs/0007-service-date-filter.md)
+
+## BFD-8: Add and map coverage fields dual01..dual12 and rfrnc_yr to the coverage resource
+
+The dual_01..dual12 and rfnrc_yr are essentially coverage related fields and need to be included in the coverage resource. Previously, these fields were only available on the patient resource and when beneficiaries choose to redact their demographic data, downstream consumers lose these vital eligibility fields thus the need to add them to the coverage resource. In future versions of the API, we'll want to consider removing these from the patient resource. 
+
+## BLUEBUTTON-1843: HAPI 4.1.0 Upgrade
+
+As part of the upgrade of the HAPI package used by the BFD, the FHIR version was changed from `3.0.1` to `3.0.2`. 
+This is a minor FHIR version change. 
+
+The `CapabilitiesStatement` resource returned by the metadata endpoint reflects this change. 
+In the resource the `fhirVersion` field changed and the profile path changed from:
+```
+"reference" : "http://hl7.org/fhir/StructureDefinition/<Resource Type>"
+```
+to:
+```
+"reference" : "http://hl7.org/fhir/Profile/<Resource Type>"
+```
+
 ## BLUEBUTTON-1679: Hashed HICN needs to be removed from Patient Resource
 
-The Hashed HICN identifier is removed from the Patient resource response. This is to ensure that we are in compliance for the HICN rule by January 1st. This is to leave no traces of the HICN-hash in any external facing data requests to BFD. 
+The Hashed HICN identifier is removed from the Patient resource response. This is to ensure that we are in compliance for the HICN rule. This is to leave no traces of the HICN-hash in any external facing data requests to BFD. 
 
-The following is an example of the identifier that is removed from the response:
+For internal facing requests using the `IncludeIdentifiers` header, the Hashed HICN identifier will still be included in the response for the following values: [ "true", "hicn" ]. 
+
+The following is an example of the identifier that is NO LONGER included in external facing responses:
 
     <identifier>
        <system value="https://bluebutton.cms.gov/resources/identifier/hicn-hash"></system>
        <value value="96228a57f37efea543f4f370f96f1dbf01c3e3129041dba3ea4367545507c6e7"></value>
     </identifier>
 
+## BLUEBUTTON-1784: Search for patients by ptdcntrct
+
+The Patient resource supports searching a part D Contract Number for a given month:
+
+Requests using this feature should be of the form `v1/fhir/Patient/?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct<month code>|<contract id>`.
+For example: `v1/fhir/Patient/?_has:Coverage.extension=https://bluebutton.cms.gov/resources/variables/ptdcntrct02|S0000`
+
+#### valid parameter systems:
+```
+https://bluebutton.cms.gov/resources/variables/ptdcntrct01
+https://bluebutton.cms.gov/resources/variables/ptdcntrct02
+https://bluebutton.cms.gov/resources/variables/ptdcntrct03
+https://bluebutton.cms.gov/resources/variables/ptdcntrct04
+https://bluebutton.cms.gov/resources/variables/ptdcntrct05
+https://bluebutton.cms.gov/resources/variables/ptdcntrct06
+https://bluebutton.cms.gov/resources/variables/ptdcntrct07
+https://bluebutton.cms.gov/resources/variables/ptdcntrct08
+https://bluebutton.cms.gov/resources/variables/ptdcntrct09
+https://bluebutton.cms.gov/resources/variables/ptdcntrct10
+https://bluebutton.cms.gov/resources/variables/ptdcntrct11
+https://bluebutton.cms.gov/resources/variables/ptdcntrct12
+```
+
+## BLUEBUTTON-1536: Extend `IncludeIdentifiers` header options for the Patient Resource
+
+The `IncludeIdentifiers` header has been extended to handle values of [ "true", "hicn", "mbi' ]. 
+
+To enable this, set an "`IncludeIdentifiers: <value>`" HTTP header in the `/Patient` request.
+
+Multiple values can be seperated by a comma (","). For example, "`IncludeIdentifiers: hicn,mbi`" .
+
+The following table describes the response behaviors:
+
+
+HEADER: IncludeIdentifier | Response Behavior
+--- | ---
+\<blank\> | omit HICN and MBI
+false | omit HICN and MBI
+true | include HICN and MBI
+hicn | include HICN
+mbi | include MBI
+hicn,mbi or mbi,hicn | include HICN and MBI
+\<any invalid value\> | Throws an InvalidRequest exception (400 HTTP status code)
+
+
+## BLUEBUTTON-1506: Support for _Since Parameter
+
+Support for `_lastUpdated` as a search parameter is added for resources. RFC-0004 explains the details of the changes.
+
+
+## BLUEBUTTON-1516: Support searching the Patient resource by hashed MBI
+
+The Patient resource supports searching by a hashed MBI identifier:
+
+```
+https://bluebutton.cms.gov/resources/identifier/mbi-hash
+```
 
 ## BLUEBUTTON-1191: Allow Filtering of EOB Searches by type
 

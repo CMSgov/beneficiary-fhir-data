@@ -1,0 +1,11 @@
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence.
+@karlmdavis @jzulim
+
+/rfcs @karlmdavis @jzulim @dshekhar18
+
+/ops @jzulim @keithdadkins
+
+/apps @karlmdavis @cbrunefearless @dshekhar18 @jzulim
