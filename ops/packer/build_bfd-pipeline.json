@@ -2,7 +2,7 @@
   "variables": {
     "source_ami": "",
     "subnet_id": "",
-    "env": ""
+    "vault_password_file": ""
   },
   "builders": [{
       "type": "amazon-ebs",
@@ -18,10 +18,10 @@
           "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
-      "ami_name": "bfd-etl-{{user `env`}}-{{isotime \"20060102030405\"}}",
+      "ami_name": "bfd-etl-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
       "tags": {
-        "Name": "bfd-etl-{{user `env`}}-{{isotime \"20060102030405\"}}",
+        "Name": "bfd-etl-{{isotime \"20060102030405\"}}",
         "Application": "BFD",
         "Environment": "{{user `env`}}",
         "Function": "ETL APP SERVER",
@@ -53,7 +53,7 @@
   ],
   "post-processors": [{
     "type": "manifest",
-    "output": "manifest_{{user `env`}}_data-pipeline.json",
+    "output": "manifest_data-pipeline.json",
     "strip_path": true
   }]
 }

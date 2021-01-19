@@ -1,6 +1,9 @@
 {
   "resourceType" : "Patient",
   "id" : "567834",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/race",
     "valueCoding" : {
@@ -10,7 +13,7 @@
     }
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
-    "valueDate" : "2019"
+    "valueDate" : "2018"
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
     "valueCoding" : {

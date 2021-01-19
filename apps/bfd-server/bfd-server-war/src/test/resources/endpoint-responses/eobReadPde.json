@@ -1,6 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "id" : "pde-89",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
   "identifier" : [ {
     "system" : "https://bluebutton.cms.gov/resources/variables/pde_id",
     "value" : "89"
@@ -27,6 +30,13 @@
   },
   "organization" : {
     "identifier" : {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "code" : "NPI",
+          "display" : "National Provider Identifier"
+        } ]
+      },
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "value" : "1023011079"
     },
@@ -42,6 +52,13 @@
       }
     } ],
     "identifier" : {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "code" : "NPI",
+          "display" : "National Provider Identifier"
+        } ]
+      },
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "value" : "1023011079"
     },
@@ -281,8 +298,8 @@
     "service" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "49035044700",
-        "display" : "Childrens Acetaminophen - ACETAMINOPHEN"
+        "code" : "667159747",
+        "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
       } ]
     },
     "servicedDate" : "2015-05-12",

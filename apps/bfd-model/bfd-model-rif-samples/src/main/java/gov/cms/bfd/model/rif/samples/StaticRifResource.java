@@ -1,9 +1,9 @@
 package gov.cms.bfd.model.rif.samples;
 
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -35,6 +35,11 @@ public enum StaticRifResource {
 
   SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY(
       resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory.txt"),
+      RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
+      1),
+
+  SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA(
+      resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory-extra.txt"),
       RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
       1),
 
@@ -144,6 +149,17 @@ public enum StaticRifResource {
 
   SAMPLE_U_BENES(
       resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
+
+  SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS(
+      resourceUrl("rif-static-samples/sample-u-with-8-months.txt"), RifFileType.BENEFICIARY, 1),
+
+  SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS(
+      resourceUrl("rif-static-samples/sample-u-with-9-months.txt"), RifFileType.BENEFICIARY, 1),
+
+  SAMPLE_U_BENES_UNCHANGED(
+      resourceUrl("rif-static-samples/sample-u-unchanged-beneficiaries.txt"),
+      RifFileType.BENEFICIARY,
+      1),
 
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 
@@ -266,6 +282,41 @@ public enum StaticRifResource {
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2016.rif"),
       RifFileType.PDE,
       145526),
+
+  SYNTHETIC_OUTPATIENT_1999_1999(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-1999-1999.rif"),
+      RifFileType.OUTPATIENT,
+      20744),
+
+  SYNTHETIC_OUTPATIENT_2000_1999(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2000-1999.rif"),
+      RifFileType.OUTPATIENT,
+      22439),
+
+  SYNTHETIC_OUTPATIENT_2001_1999(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2001-1999.rif"),
+      RifFileType.OUTPATIENT,
+      23241),
+
+  SYNTHETIC_OUTPATIENT_2002_2000(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2002-2000.rif"),
+      RifFileType.OUTPATIENT,
+      24575),
+
+  SYNTHETIC_OUTPATIENT_2014_2014(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2014-2014.rif"),
+      RifFileType.OUTPATIENT,
+      25194),
+
+  SYNTHETIC_OUTPATIENT_2015_2014(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2015-2014.rif"),
+      RifFileType.OUTPATIENT,
+      26996),
+
+  SYNTHETIC_OUTPATIENT_2016_2014(
+      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2016-2014.rif"),
+      RifFileType.OUTPATIENT,
+      27955),
 
   SAMPLE_MCT_BENES(
       resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),

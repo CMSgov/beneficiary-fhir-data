@@ -23,9 +23,10 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides various generic utilities. -->
-			<groupId>com.justdavis.karl.jessentials</groupId>
-			<artifactId>jessentials-misc</artifactId>
+			<!-- Just useful. -->
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>24.1.1-jre</version>
 		</dependency>
 
 		<dependency>

@@ -4,8 +4,10 @@
 #
 
 locals {
-  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
+  env_config      = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=var.azs}
+  port            = 443
+  cw_period       = 60    # Seconds
+  cw_eval_periods = 3
 }
 
 # Find resources defined outside this script 
@@ -16,7 +18,7 @@ locals {
 data "aws_vpc" "main" {
   filter {
     name = "tag:Name"
-    values = ["bfd-${var.env_config.env}-vpc"]
+    values = ["bfd-mgmt-vpc"]
   }
 }
 
@@ -31,12 +33,12 @@ data "aws_route53_zone" "local_zone" {
 #
 data "aws_caller_identity" "current" {}
 
-data "aws_s3_bucket" "artifacts" {
-  bucket = "bfd-${var.env_config.env}-artifacts-${data.aws_caller_identity.current.account_id}"
-}
-
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
+}
+
+data "aws_s3_bucket" "logs" {
+  bucket = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
 
 # Other Security Groups
@@ -46,7 +48,7 @@ data "aws_s3_bucket" "admin" {
 data "aws_security_group" "vpn" {
   filter {
     name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-vpn-private"]
+    values      = ["bfd-mgmt-vpn-private"]
   }
 }
 
@@ -55,7 +57,7 @@ data "aws_security_group" "vpn" {
 data "aws_security_group" "tools" {
   filter {
     name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-enterprise-tools"]
+    values      = ["bfd-mgmt-enterprise-tools"]
   }
 }
 
@@ -64,7 +66,7 @@ data "aws_security_group" "tools" {
 data "aws_security_group" "remote" {
   filter {
     name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-remote-management"]
+    values      = ["bfd-mgmt-remote-management"]
   }
 }
 
@@ -73,57 +75,38 @@ data "aws_security_group" "remote" {
 // #
 // # LB for the Jenkins Server
 // #
+
 module "jenkins_lb" {
   source = "../resources/lb"
-  load_balancer_type = "network"
-  env_config      = local.env_config
-  role            = "jenkins"
-  layer           = "app"
-  log_bucket      = data.aws_s3_bucket.admin.id
-  ingress_port    = 443
-  egress_port     = 443
+
+  env_config            = local.env_config
+  role                  = "jenkins"
+  layer                 = "dmz"
+  log_bucket            = data.aws_s3_bucket.admin.id
+  is_public             = var.is_public
+
+  ingress = var.is_public ? {
+    description   = "Public Internet access"
+    port          = 443
+    cidr_blocks   = ["0.0.0.0/0"]
+  } : {
+    description   = "From Self, and VPN"
+    port          = 443
+    cidr_blocks   = concat([data.aws_vpc.main.cidr_block], ["10.0.0.0/8"])
+  }
+
+  egress = {
+    description   = "To VPC instances"
+    port          = local.port
+    cidr_blocks   = [data.aws_vpc.main.cidr_block]
+  }   
 }
-// # Jenkins Module (ELB, ASG, EC2, IAM)
-// 
-// # Autoscale group for the FHIR server
-// #
-// module "jenkins_asg" {
-//   source = "../resources/asg"
-// 
-//   env_config      = local.env_config
-//   role            = "jenkins"
-//   layer           = "app"
-//   lb_config       = module.jenkins_lb.lb_config
-// 
-//   # Initial size is one server per AZ
-//   asg_config      = {
-//     min           = 3/length(local.azs)
-//     max           = 3/length(local.azs)
-//     desired       = 3/length(local.azs)
-//     sns_topic_arn = ""
-//   }
-// 
-//   # TODO: Dummy values to get started
-//   launch_config   = {
-//     instance_type = var.instance_size 
-//     ami_id        = var.jenkins_ami 
-//     key_name      = var.jenkins_key_name 
-//     profile       = module.jenkins_iam.profile
-//   }
-// 
-//   mgmt_config     = {
-//     vpn_sg        = data.aws_security_group.vpn.id
-//     tool_sg       = data.aws_security_group.tools.id
-//     remote_sg     = data.aws_security_group.remote.id
-//     ci_cidrs      = ["10.252.40.0/21"]
-//   }
-// }
 
 module "jenkins" {
   source = "../resources/jenkins"
   env_config            = local.env_config
   vpc_id                = data.aws_vpc.main.id
-  vpn_security_group_id = var.vpn_security_group_id
+  vpn_security_group_id = data.aws_security_group.vpn.id
   ami_id                = var.jenkins_ami
   key_name              = var.jenkins_key_name
   layer                 = "app"
@@ -140,7 +123,7 @@ module "jenkins" {
 
   # TODO: Dummy values to get started
   launch_config   = {
-    instance_type = var.instance_size
+    instance_type = var.jenkins_instance_size
     ami_id        = var.jenkins_ami 
     key_name      = var.jenkins_key_name
     profile       = "bfd-jenkins"

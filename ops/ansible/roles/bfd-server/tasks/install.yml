@@ -24,154 +24,17 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
-# TODO: This can be removed once we've fully migrated away from JBoss.
-# The first time we dpeloy the new Jetty-based server, we need to ensure that JBoss is stopped first (if it already exists).
-- name: Stop Existing BFD Server Service
-  service:
-    name: "{{ data_server_appserver_service }}"
-    state: stopped
-  become: true
-  ignore_errors: true
-
 - name: Copy BFD Server Launcher
   copy:
     src: "{{ data_server_launcher }}"
     dest: "{{ data_server_dir }}/{{ data_server_launcher | basename }}"
   become: true
-  notify:
-    - 'Restart BFD Server Service'
 
 - name: Copy BFD Server WAR
   copy:
     src: "{{ data_server_war }}"
     dest: "{{ data_server_dir }}/{{ data_server_war | basename }}"
   become: true
-  notify:
-    - 'Restart BFD Server Service'
-
-- name: Copy App Server Launcher Script
-  template:
-    src: bfd-server.sh.j2
-    dest: "{{ data_server_dir }}/bfd-server.sh"
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
-    mode: u=rwx,g=rwx,o=rx
-  become: true
-  notify:
-    - 'Restart BFD Server Service'
-
-- name: Create BFD Server Service Definition
-  template:
-    src: bluebutton-appserver.service.j2
-    dest: "/etc/systemd/system/{{ data_server_appserver_service }}.service"
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-  become: true
-  notify:
-    - 'Enable BFD Server Service'
-    - 'Restart BFD Server Service'
-
-- name: Check for BFD Server SSL Keystore
-  stat:
-    path: "{{ data_server_dir }}/bluebutton-appserver-keystore.jks"
-  register: stat_appserver_keystore
-  changed_when: false
-  become: true
-
-- name: Create BFD Server SSL Keystore
-  command: "keytool -genkeypair -alias server {{ data_server_ssl_server_genkeypair_args }} -keystore {{ data_server_dir }}/bluebutton-appserver-keystore.jks -storepass changeit -keypass changeit"
-  when: stat_appserver_keystore.stat.isreg is not defined
-  become: true
-  become_user: "{{ data_server_user }}"
-  no_log: true  # Ensure that the key args aren't logged if this command fails.
-  notify:
-    - 'Restart BFD Server Service'
-
-# TODO: Export server's public cert and publish to S3 or somesuch (so the frontend and others can pick it up).
-
-- name: Secure BFD Server SSL Keystore
-  file:
-    path: "{{ data_server_dir }}/bluebutton-appserver-keystore.jks"
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
-    mode: u=rw,g=,o=
-  become: true
-  notify:
-    - 'Restart BFD Server Service'
-
-- name: Create BFD Server SSL Truststore Working Directory
-  file:
-    state: directory
-    path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work"
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
-    mode: u=rwx,g=rwx,o=rx
-  become: true
-
-- name: Delete Previous BFD Server SSL Truststore Working Copy
-  file:
-    state: absent
-    path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
-  changed_when: false
-  become: true
-
-- name: Create Empty App Server SSL Truststore Working Copy
-  command: "{{ item }}"
-  with_items:
-    - "keytool -genkeypair -alias fake -dname cn=fake -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
-    - "keytool -delete -alias fake -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit -keypass changeit"
-  changed_when: false
-  become: true
-  become_user: "{{ data_server_user }}"
-
-- name: Save App Server SSL Truststore Certificates
-  copy:
-    content: "{{ item.certificate }}"
-    dest: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
-  with_items: "{{ data_server_ssl_client_certificates }}"
-  changed_when: false
-  become: true
-  become_user: "{{ data_server_user }}"
-
-- name: Save App Server SSL Truststore Certificate Authorities
-  copy:
-    content: "{{ item.certificate }}"
-    dest: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
-  with_items: "{{ data_server_ssl_client_cas }}"
-  changed_when: false
-  become: true
-  become_user: "{{ data_server_user }}"
-
-- name: Import Certificates into App Server SSL Truststore Working Copy
-  java_cert:
-    cert_alias: "{{ item.alias }}"
-    cert_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt"
-    keystore_pass: changeit
-    keystore_path: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
-  with_items: "{{ data_server_ssl_client_certificates }}"
-  changed_when: false
-  become: true
-  become_user: "{{ data_server_user }}"
-
-- name: Import Certificate Authorities into App Server SSL Truststore Working Copy
-  command: "keytool -importcert -noprompt -trustcacerts -alias {{ item.alias }} -file {{ data_server_dir }}/bluebutton-appserver-truststore-work/{{ item.alias }}.crt -keypass changeit -keystore {{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks -storepass changeit"
-  with_items: "{{ data_server_ssl_client_cas }}"
-  changed_when: false
-  become: true
-  become_user: "{{ data_server_user }}"
-
-- name: Update App Server SSL Truststore
-  copy:
-    remote_src: true
-    src: "{{ data_server_dir }}/bluebutton-appserver-truststore-work/bluebutton-appserver-truststore.jks"
-    dest: "{{ data_server_dir }}/bluebutton-appserver-truststore.jks"
-    owner: "{{ data_server_user }}"
-    group: "{{ data_server_user }}"
-    mode: u=rw,g=rw,o=r
-  become: true
-  notify:
-    - 'Restart BFD Server Service'
 
 # FIXME: Switch to the maven_artifact module after we move to the CCS.
 - name: Download New Relic Java Agent Bundle
@@ -186,14 +49,51 @@
     creates: /tmp/newrelic
     remote_src: true
 
+- name: Create New Relic Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  loop:
+    - "{{ data_server_dir }}/newrelic"
+    - "{{ data_server_dir }}/newrelic/extensions"
+
 - name: Copy New Relic Java Agent
   copy:
     src: /tmp/newrelic/newrelic.jar
-    dest: "{{ data_server_dir }}/newrelic.jar"
+    dest: "{{ data_server_dir }}/newrelic/newrelic.jar"
     remote_src: true
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=r,o=r
   become: true
-  notify:
-    - 'Restart BFD Server Service'
+
+- name: Configure New Relic Extensions
+  template:
+    src: 'newrelic_tracing.xml.j2'
+    dest: "{{ data_server_dir }}/newrelic/extensions/tracing.xml"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=r,o=r
+  become: true
+
+### Logrotate Stuff
+- name: Configure bfd-server Log Rotation
+  template:
+    src: 'bfd-server.j2'
+    dest: /etc/logrotate.d/bfd-server
+  become: true
+
+- name: Add selinux file context to allow log rotation
+  sefcontext:
+    target: "{{ data_server_dir }}(/.*json|/.*log)?"
+    setype: var_log_t
+    state: present
+  become: true
+
+- name: Apply selinux file context
+  command: "restorecon -rv {{ data_server_dir }}"
+  become: true

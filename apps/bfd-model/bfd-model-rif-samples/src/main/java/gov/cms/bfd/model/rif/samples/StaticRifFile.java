@@ -1,10 +1,10 @@
 package gov.cms.bfd.model.rif.samples;
 
-import com.justdavis.karl.misc.exceptions.unchecked.UncheckedIoException;
 import gov.cms.bfd.model.rif.RifFile;
 import gov.cms.bfd.model.rif.RifFileType;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -46,7 +46,7 @@ final class StaticRifFile implements RifFile {
     try {
       return staticRifResource.getResourceUrl().openStream();
     } catch (IOException e) {
-      throw new UncheckedIoException(e);
+      throw new UncheckedIOException(e);
     }
   }
 

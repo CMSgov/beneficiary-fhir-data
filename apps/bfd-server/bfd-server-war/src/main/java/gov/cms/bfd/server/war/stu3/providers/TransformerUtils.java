@@ -3,9 +3,8 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.codebook.model.Variable;
@@ -32,8 +31,16 @@ import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
+import gov.cms.bfd.server.war.commons.CCWProcedure;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.IdentifierType;
+import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer.CurrencyIdentifier;
-import gov.cms.bfd.server.war.stu3.providers.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +62,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -63,7 +71,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -142,9 +149,6 @@ public final class TransformerUtils {
   /** Stores the diagnosis ICD codes and their display values */
   private static Map<String, String> icdMap = null;
 
-  /** Tracks the diagnosis ICD codes that have already had code lookup failures. */
-  private static final Set<String> icdLookupMissingFailures = new HashSet<>();
-
   /** Stores the procedure codes and their display values */
   private static Map<String, String> procedureMap = null;
 
@@ -171,9 +175,8 @@ public final class TransformerUtils {
       Optional<? extends Number> amountValue) {
     /*
      * TODO Once we switch to STU4 (expected >= Q3 2018), remap these to the new
-     * `ExplanationOfBenefit.total` field. In anticipation of that, the
-     * CcwCodebookVariable param here is named `category`: right now it's used for
-     * the `Extension.url` but can be changed to
+     * `ExplanationOfBenefit.total` field. In anticipation of that, the CcwCodebookVariable param
+     * here is named `category`: right now it's used for the `Extension.url` but can be changed to
      * `ExplanationOfBenefit.total.category` once this mapping is moved to STU4.
      */
 
@@ -310,6 +313,13 @@ public final class TransformerUtils {
                 ctc ->
                     practitionerIdSystem.equals(ctc.getProvider().getIdentifier().getSystem())
                         && practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
+            .filter(ctc -> ctc.hasRole())
+            .filter(
+                ctc ->
+                    careTeamRole.toCode().equals(ctc.getRole().getCodingFirstRep().getCode())
+                        && careTeamRole
+                            .getSystem()
+                            .equals(ctc.getRole().getCodingFirstRep().getSystem()))
             .findAny()
             .orElse(null);
 
@@ -332,8 +342,10 @@ public final class TransformerUtils {
     }
 
     // Link the EOB.item to the care team entry (if it isn't already).
-    if (!eobItem.getCareTeamLinkId().contains(careTeamEntry.getSequence())) {
-      eobItem.addCareTeamLinkId(careTeamEntry.getSequence());
+    final int careTeamEntrySequence = careTeamEntry.getSequence();
+    if (eobItem.getCareTeamLinkId().stream()
+        .noneMatch(id -> id.getValue() == careTeamEntrySequence)) {
+      eobItem.addCareTeamLinkId(careTeamEntrySequence);
     }
 
     return careTeamEntry;
@@ -660,9 +672,9 @@ public final class TransformerUtils {
    */
   static Date convertToDate(LocalDate localDate) {
     /*
-     * We use the system TZ here to ensure that the date doesn't shift at all, as
-     * FHIR will just use this as an unzoned Date (I think, and if not, it's almost
-     * certainly using the same TZ as this system).
+     * We use the system TZ here to ensure that the date doesn't shift at all, as FHIR will just use
+     * this as an unzoned Date (I think, and if not, it's almost certainly using the same TZ as this
+     * system).
      */
     return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
@@ -700,8 +712,37 @@ public final class TransformerUtils {
    * @return a {@link Reference} with the specified {@link Identifier}
    */
   static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
+
     return new Reference()
         .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+        .setDisplay(retrieveNpiCodeDisplay(identifierValue));
+  }
+
+  /**
+   * @param identifierType the {@link gov.cms.bfd.server.war.stu3.providers.IdentifierType}
+   * @param identifierValue the {@link Identifier#getValue()} to use in {@link
+   *     Reference#getIdentifier()}
+   * @return a {@link Reference} with the specified {@link Identifier}
+   */
+  static Reference createIdentifierReference(
+      IdentifierType identifierType, String identifierValue) {
+
+    Reference reference = new Reference();
+    Coding coding =
+        new Coding()
+            .setSystem(identifierType.getSystem())
+            .setCode(identifierType.getCode())
+            .setDisplay(identifierType.getDisplay());
+    List<Coding> codingList = new ArrayList<Coding>();
+    codingList.add(coding);
+
+    CodeableConcept codeableConcept = new CodeableConcept().setCoding(codingList);
+    return reference
+        .setIdentifier(
+            new Identifier()
+                .setSystem(identifierType.getSystem())
+                .setValue(identifierValue)
+                .setType(codeableConcept))
         .setDisplay(retrieveNpiCodeDisplay(identifierValue));
   }
 
@@ -980,8 +1021,8 @@ public final class TransformerUtils {
   private static Coding createCoding(
       IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object code) {
     /*
-     * The code parameter is an Object to avoid needing multiple copies of this and
-     * related methods. This if-else block is the price to be paid for that, though.
+     * The code parameter is an Object to avoid needing multiple copies of this and related methods.
+     * This if-else block is the price to be paid for that, though.
      */
     String codeString;
     if (code instanceof Character) codeString = ((Character) code).toString();
@@ -1029,11 +1070,10 @@ public final class TransformerUtils {
    */
   static CodeableConcept createAdjudicationCategory(CcwCodebookVariable ccwVariable) {
     /*
-     * Adjudication.category is mapped a bit differently than other
-     * Codings/CodeableConcepts: they all share the same Coding.system and use the
-     * CcwCodebookVariable reference URL as their Coding.code. This looks weird, but
-     * makes it easy for API developers to find more information about what the
-     * specific adjudication they're looking at means.
+     * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
+     * all share the same Coding.system and use the CcwCodebookVariable reference URL as their
+     * Coding.code. This looks weird, but makes it easy for API developers to find more information
+     * about what the specific adjudication they're looking at means.
      */
 
     String conceptCode = calculateVariableReferenceUrl(ccwVariable);
@@ -1086,12 +1126,12 @@ public final class TransformerUtils {
       throw new BadCodeMonkeyException("No display values for Variable: " + ccwVariable);
 
     /*
-     * We know that the specified CCW Variable is coded, but there's no guarantee
-     * that the Coding's code matches one of the known/allowed Variable values: data
-     * is messy. When that happens, we log the event and return normally. The log
-     * event will at least allow for further investigation, if warranted. Also,
-     * there's a chance that the CCW Variable data itself is messy, and that the
-     * Coding's code matches more than one value -- we just log those events, too.
+     * We know that the specified CCW Variable is coded, but there's no guarantee that the Coding's
+     * code matches one of the known/allowed Variable values: data is messy. When that happens, we
+     * log the event and return normally. The log event will at least allow for further
+     * investigation, if warranted. Also, there's a chance that the CCW Variable data itself is
+     * messy, and that the Coding's code matches more than one value -- we just log those events,
+     * too.
      */
     List<Value> matchingVariableValues =
         ccwVariable.getVariable().getValueGroups().get().stream()
@@ -1428,8 +1468,9 @@ public final class TransformerUtils {
     // diagnosisRelatedGroupCd
     if (diagnosisRelatedGroupCd.isPresent()) {
       /*
-       * FIXME This is an invalid DiagnosisComponent, since it's missing a (required)
-       * ICD code. Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this field so if this is updated you'll need to update that as well.
+       * FIXME This is an invalid DiagnosisComponent, since it's missing a (required) ICD code.
+       * Instead, stick the DRG on the claim's primary/first diagnosis. SamhsaMatcher uses this
+       * field so if this is updated you'll need to update that as well.
        */
       eob.addDiagnosis()
           .setPackageCode(
@@ -1609,8 +1650,8 @@ public final class TransformerUtils {
         createExtensionCoding(eob, CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode));
 
     /*
-     * Referrals are represented as contained resources, since they share the
-     * lifecycle and identity of their containing EOB.
+     * Referrals are represented as contained resources, since they share the lifecycle and identity
+     * of their containing EOB.
      */
     if (referringPhysicianNpi.isPresent()) {
       ReferralRequest referral = new ReferralRequest();
@@ -1869,9 +1910,9 @@ public final class TransformerUtils {
 
     if (nationalDrugCodeQualifierCode.isPresent()) {
       /*
-       * TODO: Is NDC count only ever present when line quantity isn't set? Depending
-       * on that, it may be that we should stop using this as an extension and instead
-       * set the code & system on the FHIR quantity field.
+       * TODO: Is NDC count only ever present when line quantity isn't set? Depending on that, it
+       * may be that we should stop using this as an extension and instead set the code & system on
+       * the FHIR quantity field.
        */
       // TODO Shouldn't this be part of the same Extension with the NDC code itself?
       Extension drugQuantityExtension =
@@ -2185,13 +2226,10 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring if-blocks.
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
      */
-    Consumer<Optional<Diagnosis>> diagnosisAdder =
-        d -> {
-          if (d.isPresent()) diagnoses.add(d.get());
-        };
+    Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
 
     diagnosisAdder.accept(
         Diagnosis.from(
@@ -2213,6 +2251,75 @@ public final class TransformerUtils {
     return diagnoses;
   }
 
+  /**
+   * Extract the Diagnosis values for codes 1-12
+   *
+   * @param diagnosisAdmittingCode
+   * @param diagnosisAdmittingCodeVersion
+   * @param diagnosisPrincipalCode
+   * @param diagnosisPrincipalCodeVersion
+   * @param diagnosis1Code through diagnosis12Code
+   * @param diagnosis1CodeVersion through diagnosis12CodeVersion
+   * @return the {@link Diagnosis}es that can be extracted from the specified
+   */
+  public static List<Diagnosis> extractDiagnoses1Thru12(
+      Optional<String> diagnosisAdmittingCode,
+      Optional<Character> diagnosisAdmittingCodeVersion,
+      Optional<String> diagnosisPrincipalCode,
+      Optional<Character> diagnosisPrincipalCodeVersion,
+      Optional<String> diagnosis1Code,
+      Optional<Character> diagnosis1CodeVersion,
+      Optional<String> diagnosis2Code,
+      Optional<Character> diagnosis2CodeVersion,
+      Optional<String> diagnosis3Code,
+      Optional<Character> diagnosis3CodeVersion,
+      Optional<String> diagnosis4Code,
+      Optional<Character> diagnosis4CodeVersion,
+      Optional<String> diagnosis5Code,
+      Optional<Character> diagnosis5CodeVersion,
+      Optional<String> diagnosis6Code,
+      Optional<Character> diagnosis6CodeVersion,
+      Optional<String> diagnosis7Code,
+      Optional<Character> diagnosis7CodeVersion,
+      Optional<String> diagnosis8Code,
+      Optional<Character> diagnosis8CodeVersion,
+      Optional<String> diagnosis9Code,
+      Optional<Character> diagnosis9CodeVersion,
+      Optional<String> diagnosis10Code,
+      Optional<Character> diagnosis10CodeVersion,
+      Optional<String> diagnosis11Code,
+      Optional<Character> diagnosis11CodeVersion,
+      Optional<String> diagnosis12Code,
+      Optional<Character> diagnosis12CodeVersion) {
+    List<Diagnosis> diagnoses = new LinkedList<>();
+
+    /*
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
+     */
+    Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
+    diagnosisAdder.accept(
+        Diagnosis.from(
+            diagnosisAdmittingCode, diagnosisAdmittingCodeVersion, DiagnosisLabel.ADMITTING));
+    diagnosisAdder.accept(
+        Diagnosis.from(
+            diagnosisPrincipalCode, diagnosisPrincipalCodeVersion, DiagnosisLabel.PRINCIPAL));
+    diagnosisAdder.accept(
+        Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion, DiagnosisLabel.PRINCIPAL));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis2Code, diagnosis2CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis3Code, diagnosis3CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis4Code, diagnosis4CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis5Code, diagnosis5CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis6Code, diagnosis6CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis7Code, diagnosis7CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis8Code, diagnosis8CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis9Code, diagnosis9CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis10Code, diagnosis10CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis11Code, diagnosis11CodeVersion));
+    diagnosisAdder.accept(Diagnosis.from(diagnosis12Code, diagnosis12CodeVersion));
+
+    return diagnoses;
+  }
   /**
    * Extract the Diagnosis values for codes 13-25
    *
@@ -2250,8 +2357,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring if-blocks.
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
         d -> {
@@ -2314,8 +2421,8 @@ public final class TransformerUtils {
     List<Diagnosis> diagnoses = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring if-blocks.
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
         d -> {
@@ -2455,8 +2562,8 @@ public final class TransformerUtils {
     List<CCWProcedure> ccwProcedures = new LinkedList<>();
 
     /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than
-     * requiring if-blocks.
+     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
+     * if-blocks.
      */
     Consumer<Optional<CCWProcedure>> ccwProcedureAdder =
         p -> {
@@ -2585,10 +2692,9 @@ public final class TransformerUtils {
     if (icdCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire ICD file the first time and put in a Map
     if (icdMap == null) {
@@ -2624,9 +2730,9 @@ public final class TransformerUtils {
         final BufferedReader icdCodesIn =
             new BufferedReader(new InputStreamReader(icdCodeDisplayStream))) {
       /*
-       * We want to extract the ICD Diagnosis codes and display values and put in a
-       * map for easy retrieval to get the display value icdColumns[1] is
-       * DGNS_DESC(i.e. 7840 code is HEADACHE description)
+       * We want to extract the ICD Diagnosis codes and display values and put in a map for easy
+       * retrieval to get the display value icdColumns[1] is DGNS_DESC(i.e. 7840 code is HEADACHE
+       * description)
        */
       String line = "";
       icdCodesIn.readLine();
@@ -2652,10 +2758,9 @@ public final class TransformerUtils {
     if (npiCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire NPI file the first time and put in a Map
     if (npiMap == null) {
@@ -2693,13 +2798,12 @@ public final class TransformerUtils {
         final BufferedReader npiCodesIn =
             new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
       /*
-       * We want to extract the NPI codes and display values and put in a map for easy
-       * retrieval to get the display value-- npiColumns[0] is the NPI Code,
-       * npiColumns[4] is the NPI Organization Code, npiColumns[8] is the NPI provider
-       * name prefix, npiColumns[6] is the NPI provider first name, npiColumns[7] is
-       * the NPI provider middle name, npiColumns[5] is the NPI provider last name,
-       * npiColumns[9] is the NPI provider suffix name, npiColumns[10] is the NPI
-       * provider credential.
+       * We want to extract the NPI codes and display values and put in a map for easy retrieval to
+       * get the display value-- npiColumns[0] is the NPI Code, npiColumns[4] is the NPI
+       * Organization Code, npiColumns[8] is the NPI provider name prefix, npiColumns[6] is the NPI
+       * provider first name, npiColumns[7] is the NPI provider middle name, npiColumns[5] is the
+       * NPI provider last name, npiColumns[9] is the NPI provider suffix name, npiColumns[10] is
+       * the NPI provider credential.
        */
       String line = "";
       npiCodesIn.readLine();
@@ -2739,10 +2843,9 @@ public final class TransformerUtils {
     if (procedureCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire Procedure code file the first time and put in a Map
     if (procedureMap == null) {
@@ -2779,9 +2882,9 @@ public final class TransformerUtils {
         final BufferedReader procedureCodesIn =
             new BufferedReader(new InputStreamReader(procedureCodeDisplayStream))) {
       /*
-       * We want to extract the procedure codes and display values and put in a map
-       * for easy retrieval to get the display value icdColumns[0] is PRCDR_CD;
-       * icdColumns[1] is PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
+       * We want to extract the procedure codes and display values and put in a map for easy
+       * retrieval to get the display value icdColumns[0] is PRCDR_CD; icdColumns[1] is
+       * PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
        */
       String line = "";
       procedureCodesIn.readLine();
@@ -2806,16 +2909,15 @@ public final class TransformerUtils {
   public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
 
     /*
-     * Handle bad data (e.g. our random test data) if drug code is empty or
-     * length is less than 9 characters
+     * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
+     * characters
      */
     if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire NDC file the first time and put in a Map
     if (ndcProductMap == null) {
@@ -2858,10 +2960,10 @@ public final class TransformerUtils {
         final BufferedReader ndcProductsIn =
             new BufferedReader(new InputStreamReader(ndcProductStream))) {
       /*
-       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the
-       * FDA Products file (fda_products_utf8.tsv is in /target/classes directory) and
-       * put in a Map for easy retrieval to get the display value which is a
-       * combination of PROPRIETARYNAME & SUBSTANCENAME
+       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
+       * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
+       * retrieval to get the display value which is a combination of PROPRIETARYNAME &
+       * SUBSTANCENAME
        */
       String line = "";
       ndcProductsIn.readLine();
@@ -2908,41 +3010,84 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param pagingArgs a {@link PagingArguments} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param resourceType the {@link String} the resource being provided by the paging link
-   * @param identifier the {@link String} field the search is being performed on
-   * @param value the {@link String} value of the identifier being searched for
+   * Create a bundle from the entire search result
+   *
+   * @param paging contains the {@link OffsetLinkBuilder} information
    * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
    *     Patient}s, of which a portion or all will be added to the bundle based on the paging values
+   * @param transactionTime date for the bundle
    * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      PagingArguments pagingArgs,
-      String resourceType,
-      String identifier,
-      String value,
-      List<IBaseResource> resources) {
+      OffsetLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
     Bundle bundle = new Bundle();
-    if (pagingArgs.isPagingRequested()) {
+    if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
-       * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
-       * working correctly.
+       * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not working
+       * correctly.
        */
-      int endIndex =
-          Math.min(pagingArgs.getStartIndex() + pagingArgs.getPageSize(), resources.size());
-      List<IBaseResource> resourcesSubList =
-          resources.subList(pagingArgs.getStartIndex(), endIndex);
+      int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
+      List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
       bundle = TransformerUtils.addResourcesToBundle(bundle, resourcesSubList);
-      TransformerUtils.addPagingLinks(
-          pagingArgs, bundle, resourceType, identifier, value, resources.size());
+      paging.setTotal(resources.size()).addLinks(bundle);
     } else {
       bundle = TransformerUtils.addResourcesToBundle(bundle, resources);
     }
 
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole
+     * database. Because the filterManager's tracking of this timestamp is lazily updated for
+     * performance reason, the resources of the bundle may be after the filter manager's version of
+     * the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(transactionTime);
+    bundle
+        .getMeta()
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
     bundle.setTotal(resources.size());
+    return bundle;
+  }
+
+  /**
+   * Create a bundle from the entire search result
+   *
+   * @param resources a list of {@link ExplanationOfBenefit}s, {@link Coverage}s, or {@link
+   *     Patient}s, all of which will be added to the bundle
+   * @param paging contains the {@link LinkBuilder} information to add to the bundle
+   * @param transactionTime date for the bundle
+   * @return Returns a {@link Bundle} of either {@link ExplanationOfBenefit}s, {@link Coverage}s, or
+   *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
+   */
+  public static Bundle createBundle(
+      List<IBaseResource> resources, LinkBuilder paging, Date transactionTime) {
+    Bundle bundle = new Bundle();
+    TransformerUtils.addResourcesToBundle(bundle, resources);
+    paging.addLinks(bundle);
+    bundle.setTotalElement(
+        paging.isPagingRequested() ? new UnsignedIntType() : new UnsignedIntType(resources.size()));
+
+    /*
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole
+     * database. Because the filterManager's tracking of this timestamp is lazily updated for
+     * performance reason, the resources of the bundle may be after the filter manager's version of
+     * the timestamp.
+     */
+    Date maxBundleDate =
+        resources.stream()
+            .map(r -> r.getMeta().getLastUpdated())
+            .filter(Objects::nonNull)
+            .max(Date::compareTo)
+            .orElse(transactionTime);
+    bundle
+        .getMeta()
+        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
     return bundle;
   }
 
@@ -2958,92 +3103,7 @@ public final class TransformerUtils {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
     }
-
     return bundle;
-  }
-
-  /**
-   * @param pagingArgs a {@link PagingArguments} used to determine if paging is requested and the
-   *     parameters for doing so
-   * @param bundle the {@link Bundle} to which links are being added
-   * @param resource the {@link String} the resource being provided by the paging link
-   * @param searchByDesc the {@link String} field the search is being performed on
-   * @param identifier the {@link String} identifier being searched for
-   * @param numTotalResults the number of total resources matching the {@link
-   *     Beneficiary#getBeneficiaryId()}
-   */
-  public static void addPagingLinks(
-      PagingArguments pagingArgs,
-      Bundle bundle,
-      String resource,
-      String searchByDesc,
-      String identifier,
-      int numTotalResults) {
-
-    Integer pageSize = pagingArgs.getPageSize();
-    Integer startIndex = pagingArgs.getStartIndex();
-    String serverBase = pagingArgs.getServerBase();
-
-    bundle.addLink(
-        new BundleLinkComponent()
-            .setRelation(Constants.LINK_FIRST)
-            .setUrl(
-                createPagingLink(serverBase + resource, searchByDesc, identifier, 0, pageSize)));
-
-    if (startIndex + pageSize < numTotalResults) {
-      bundle.addLink(
-          new BundleLinkComponent()
-              .setRelation(Constants.LINK_NEXT)
-              .setUrl(
-                  createPagingLink(
-                      serverBase + resource,
-                      searchByDesc,
-                      identifier,
-                      startIndex + pageSize,
-                      pageSize)));
-    }
-
-    if (startIndex > 0) {
-      bundle.addLink(
-          new BundleLinkComponent()
-              .setRelation(Constants.LINK_PREVIOUS)
-              .setUrl(
-                  createPagingLink(
-                      serverBase + resource,
-                      searchByDesc,
-                      identifier,
-                      Math.max(startIndex - pageSize, 0),
-                      pageSize)));
-    }
-
-    /*
-     * This formula rounds numTotalResults down to the nearest multiple of pageSize
-     * that's less than and not equal to numTotalResults
-     */
-    int lastIndex;
-    try {
-      lastIndex = (numTotalResults - 1) / pageSize * pageSize;
-    } catch (ArithmeticException e) {
-      throw new InvalidRequestException(String.format("Invalid pageSize '%s'", pageSize));
-    }
-    bundle.addLink(
-        new BundleLinkComponent()
-            .setRelation(Constants.LINK_LAST)
-            .setUrl(
-                createPagingLink(
-                    serverBase + resource, searchByDesc, identifier, lastIndex, pageSize)));
-  }
-
-  /** @return Returns the URL string for a paging link. */
-  private static String createPagingLink(
-      String baseURL, String descriptor, String id, int startIndex, int theCount) {
-    StringBuilder b = new StringBuilder();
-    b.append(baseURL);
-    b.append(Constants.PARAM_COUNT + "=" + theCount);
-    b.append("&startIndex=" + startIndex);
-    b.append("&" + descriptor + "=" + id);
-
-    return b.toString();
   }
 
   /**
@@ -3084,5 +3144,67 @@ public final class TransformerUtils {
         String.format("%s.duration_milliseconds", keyPrefix),
         Long.toString(queryDurationNanoseconds / 1000000));
     MDC.put(String.format("%s.record_count", keyPrefix), Long.toString(recordCount));
+  }
+
+  /**
+   * Sets the lastUpdated value in the resource.
+   *
+   * @param resource is the FHIR resource to set lastUpdate
+   * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUdpated.
+   */
+  public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+    resource
+        .getMeta()
+        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
+  }
+
+  /**
+   * Sets the lastUpdated value in the resource if the passed in value is later than the current
+   * value.
+   *
+   * @param resource is the FHIR resource to update
+   * @param lastUpdated is the lastUpdated value from the entity
+   */
+  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+    lastUpdated.ifPresent(
+        newDate -> {
+          Date currentDate = resource.getMeta().getLastUpdated();
+          if (currentDate != null && newDate.after(currentDate)) {
+            resource.getMeta().setLastUpdated(newDate);
+          }
+        });
+  }
+
+  /**
+   * Work around for https://github.com/jamesagnew/hapi-fhir/issues/1585. HAPI will fill in the
+   * resource count as a total value when a Bundle has no total value.
+   *
+   * @param requestDetails of a resource provider
+   */
+  public static void workAroundHAPIIssue1585(RequestDetails requestDetails) {
+    // The hack is to remove the _count parameter from theDetails so that total is not modified.
+    Map<String, String[]> params = new HashMap<String, String[]>(requestDetails.getParameters());
+    if (params.remove(Constants.PARAM_COUNT) != null) {
+      // Remove _count parameter from the current request details
+      requestDetails.setParameters(params);
+    }
+  }
+
+  public static Consumer<Optional<Diagnosis>> addPrincipalDiagnosis(List<Diagnosis> diagnoses) {
+    return diagnosisToAdd -> {
+      if (diagnosisToAdd.isPresent()) {
+        Optional<Diagnosis> matchingDiagnosis =
+            diagnoses.stream()
+                .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
+                .findFirst();
+        if (matchingDiagnosis.isPresent()) {
+          // append labels
+          matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
+          diagnoses.add(matchingDiagnosis.get());
+        } else {
+          diagnoses.add(diagnosisToAdd.get());
+        }
+      }
+    };
   }
 }

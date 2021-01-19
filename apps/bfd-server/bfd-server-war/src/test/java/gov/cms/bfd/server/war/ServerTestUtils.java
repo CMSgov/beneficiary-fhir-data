@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
@@ -13,6 +14,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.rif.load.RifLoaderIdleTasks;
 import gov.cms.bfd.pipeline.rif.load.RifLoaderTestUtils;
 import java.io.FileReader;
 import java.io.IOException;
@@ -37,6 +39,7 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
@@ -250,8 +253,33 @@ public final class ServerTestUtils {
               recordsLoaded.add(result.getRifRecordEvent().getRecord());
             });
       }
-      LOGGER.info("Loaded RIF records: '{}'.");
+      LOGGER.info("Loaded RIF records: '{}'.", recordsLoaded.size());
       return recordsLoaded;
+    }
+  }
+
+  /**
+   * A wrapper for the entity manager logic and action. The executor is called within a transaction
+   *
+   * @param executor to call with an entity manager.
+   */
+  public static void doTransaction(Consumer<EntityManager> executor) {
+    final EntityManagerFactory entityManagerFactory = createEntityManagerFactory();
+    EntityManager em = null;
+    EntityTransaction tx = null;
+    try {
+      em = entityManagerFactory.createEntityManager();
+      tx = em.getTransaction();
+      tx.begin();
+      executor.accept(em);
+      tx.commit();
+    } finally {
+      if (tx != null && tx.isActive()) {
+        tx.rollback();
+        LOGGER.info("Rolling back a transaction");
+      }
+      if (em != null && em.isOpen()) em.close();
+      if (entityManagerFactory != null) entityManagerFactory.close();
     }
   }
 
@@ -272,6 +300,8 @@ public final class ServerTestUtils {
             if (t2.equals(Beneficiary.class)) return -1;
             if (t1.getSimpleName().endsWith("Line")) return -1;
             if (t2.getSimpleName().endsWith("Line")) return 1;
+            if (t1.equals(LoadedFile.class)) return 1;
+            if (t2.equals(LoadedFile.class)) return -1;
             return 0;
           };
       List<Class<?>> entityTypesInDeletionOrder =
@@ -348,7 +378,9 @@ public final class ServerTestUtils {
         RifLoaderTestUtils.HICN_HASH_PEPPER,
         dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
+        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED,
+        RifLoaderTestUtils.FIXUPS_ENABLED,
+        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
   }
 
   /**

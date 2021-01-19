@@ -7,6 +7,8 @@ import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -206,5 +208,8 @@ public final class DMEClaimTransformerTest {
         claimLine1.getHctHgbTestResult(),
         claimLine1.getCmsServiceTypeCode(),
         claimLine1.getNationalDrugCode());
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 }

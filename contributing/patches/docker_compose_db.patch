@@ -1,0 +1,16 @@
+diff --git a/apps/bfd-model/bfd-model-rif/src/main/java/gov/cms/bfd/model/rif/schema/DatabaseTestHelper.java b/apps/bfd-model/bfd-model-rif/src/main/java/gov/cms/bfd/model/rif/schema/DatabaseTestHelper.java
+index 5997d32f..1535d3e3 100644
+--- a/apps/bfd-model/bfd-model-rif/src/main/java/gov/cms/bfd/model/rif/schema/DatabaseTestHelper.java
++++ b/apps/bfd-model/bfd-model-rif/src/main/java/gov/cms/bfd/model/rif/schema/DatabaseTestHelper.java
+@@ -93,7 +93,10 @@ public final class DatabaseTestHelper {
+ 
+     // Try to prevent career-limiting moves.
+     String url = getTestDatabaseUrl();
+-    if (!url.contains("localhost") && !url.contains("127.0.0.1") && !url.contains("hsqldb:mem")) {
++    if (!url.contains("localhost")
++        && !url.contains("127.0.0.1")
++        && !url.contains("hsqldb:mem")
++        && !url.contains("local_bfddb")) {
+       throw new BadCodeMonkeyException("Our builds can only be run against local test DBs.");
+     }
+ 

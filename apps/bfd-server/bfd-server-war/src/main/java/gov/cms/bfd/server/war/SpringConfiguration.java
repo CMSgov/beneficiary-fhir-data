@@ -1,21 +1,21 @@
 package gov.cms.bfd.server.war;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -43,10 +43,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
 @ComponentScan(basePackageClasses = {ServerInitializer.class})
+@EnableScheduling
 public class SpringConfiguration {
   public static final String PROP_DB_URL = "bfdServer.db.url";
   public static final String PROP_DB_USERNAME = "bfdServer.db.username";
@@ -60,6 +62,12 @@ public class SpringConfiguration {
    * application.
    */
   static final String BLUEBUTTON_STU3_RESOURCE_PROVIDERS = "bluebuttonStu3ResourceProviders";
+
+  /**
+   * The {@link Bean#name()} for the {@link List} of R4 {@link IResourceProvider} beans for the
+   * application.
+   */
+  static final String BLUEBUTTON_R4_RESOURCE_PROVIDERS = "bluebuttonR4ResourceProviders";
 
   /**
    * Set this to <code>true</code> to have Hibernate log a ton of info on the SQL statements being
@@ -325,6 +333,21 @@ public class SpringConfiguration {
   }
 
   /**
+   * @param r4PatientResourceProvider the application's {@link R4PatientResourceProvider} bean
+   * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
+   */
+  @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
+  public List<IResourceProvider> r4ResourceProviders(
+      R4PatientResourceProvider r4PatientResourceProvider,
+      R4CoverageResourceProvider r4CoverageResourceProvider) {
+
+    List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
+    r4ResourceProviders.add(r4PatientResourceProvider);
+    r4ResourceProviders.add(r4CoverageResourceProvider);
+    return r4ResourceProviders;
+  }
+
+  /**
    * @return the {@link MetricRegistry} for the application, which can be used to collect statistics
    *     on the application's performance
    */
@@ -348,15 +371,5 @@ public class SpringConfiguration {
   public HealthCheckRegistry healthCheckRegistry() {
     HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
     return healthCheckRegistry;
-  }
-
-  /**
-   * @return an {@link IServerInterceptor} that will add some pretty syntax highlighting in
-   *     responses when a browser is detected
-   */
-  @Bean
-  public IServerInterceptor responseHighlighterInterceptor() {
-    ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
-    return retVal;
   }
 }

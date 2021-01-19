@@ -7,8 +7,11 @@ import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -39,8 +42,15 @@ public final class CarrierClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = CarrierClaimTransformer.transform(new MetricRegistry(), claim);
-    assertMatches(claim, eob);
+    claim.setLastUpdated(new Date());
+    ExplanationOfBenefit eobWithLastUpdated =
+        CarrierClaimTransformer.transform(new MetricRegistry(), claim);
+    assertMatches(claim, eobWithLastUpdated);
+
+    claim.setLastUpdated(null);
+    ExplanationOfBenefit eobWithoutLastUpdated =
+        CarrierClaimTransformer.transform(new MetricRegistry(), claim);
+    assertMatches(claim, eobWithoutLastUpdated);
   }
 
   /**
@@ -225,5 +235,8 @@ public final class CarrierClaimTransformerTest {
         claimLine1.getHctHgbTestResult(),
         claimLine1.getCmsServiceTypeCode(),
         claimLine1.getNationalDrugCode());
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 }

@@ -1,6 +1,6 @@
 package gov.cms.bfd.model.rif.schema;
 
-import com.justdavis.karl.misc.exceptions.unchecked.UncheckedSqlException;
+import gov.cms.bfd.sharedutils.exceptions.UncheckedSqlException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
