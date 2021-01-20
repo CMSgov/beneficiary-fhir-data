@@ -18,6 +18,10 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -175,8 +179,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
 
     Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
     operation.setOption("by", "beneficiary");
-    operation.publishOperationName();
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
+    operation.publishOperationName();
 
     return TransformerUtils.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());

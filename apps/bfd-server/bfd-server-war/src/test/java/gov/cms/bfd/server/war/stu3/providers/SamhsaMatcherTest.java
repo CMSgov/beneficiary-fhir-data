@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -124,6 +125,26 @@ public final class SamhsaMatcherTest {
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
     Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
     sampleEobService.setCode(SAMPLE_SAMHSA_CPT_CODE);
+
+    Assert.assertTrue(matcher.test(sampleEob));
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
+   * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+   *
+   * @throws FHIRException (indicates problem with test data)
+   */
+  @Test
+  public void matchCarrierClaimsByCptProcedureForNewCodes() throws FHIRException {
+    SamhsaMatcher matcher = new SamhsaMatcher();
+    String SAMPLE_SAMHSA_CPT_NEW_CODE = "G2067";
+
+    ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
+    Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
+    sampleEobService.setCode(SAMPLE_SAMHSA_CPT_NEW_CODE);
 
     Assert.assertTrue(matcher.test(sampleEob));
   }

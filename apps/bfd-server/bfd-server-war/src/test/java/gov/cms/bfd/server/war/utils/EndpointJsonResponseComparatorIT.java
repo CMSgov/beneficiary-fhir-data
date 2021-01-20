@@ -20,13 +20,13 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ClaimType;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
-import gov.cms.bfd.server.war.stu3.providers.MedicareSegment;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -285,6 +285,77 @@ public final class EndpointJsonResponseComparatorIT {
     ((ArrayNode) searchParamsArray).removeAll();
     for (int i = 0; i < searchParams.size(); i++) {
       ((ArrayNode) searchParamsArray).add((ObjectNode) searchParams.get(i));
+    }
+
+    String jsonResponse = null;
+    try {
+      jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
+    } catch (JsonProcessingException e) {
+      throw new UncheckedIOException(
+          "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
+    }
+    return jsonResponse;
+  }
+
+  /**
+   * FIXME: Additional workaround due to HAPI not always returning array elements in the same order
+   * for a specific searchParam {@link JsonArray} in the capability statement. This method is only
+   * necessary until the following issue has been resolved with HAPI:
+   * https://github.com/jamesagnew/hapi-fhir/issues/1183
+   *
+   * <p>Before: { "type" : [ {"coding" : [ {"system" :
+   * "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code" : "principal",
+   * "display" : "The single medical diagnosis that is most relevant to the patient's chief
+   * complaint or need for treatment." ] }, {"coding" : [ {"system" :
+   * "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code" :
+   * "external-first","display" : "The code used to identify the 1st external cause of injury,
+   * poisoning, or other adverse effect."} } ]} ]}
+   *
+   * <p>After: { "type" : [ {"coding" : [ {"system" :
+   * "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type", "code" :
+   * "external-first","display" : "The code used to identify the 1st external cause of injury,
+   * poisoning, or other adverse effect."} ] }, {"coding" : [ {"system" :
+   * "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type","code" : "principal",
+   * "display" : "The single medical diagnosis that is most relevant to the patient's chief
+   * complaint or need for treatment."} ]} ]}
+   *
+   * @param unsortedResponse the JSON string with an unsorted diagnosisType array
+   * @param parseStringAt the JSON string with the search string
+   * @return the JSON string with the sorted diagnosis type array
+   */
+  private static String sortDiagnosisTypes(String unsortedResponse, String parseStringAt) {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.writerWithDefaultPrettyPrinter();
+    JsonNode parsedJson = null;
+    try {
+      parsedJson = mapper.readTree(unsortedResponse);
+    } catch (IOException e) {
+      throw new UncheckedIOException(
+          "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
+    }
+
+    // This returns the DiagnosisType array node for the resource
+    JsonNode diagnosisTypeArray = parsedJson.at(parseStringAt);
+
+    Iterator<JsonNode> diagnosisTypeArrayIterator = diagnosisTypeArray.elements();
+    List<JsonNode> diagnosisTypes = new ArrayList<JsonNode>();
+    while (diagnosisTypeArrayIterator.hasNext()) {
+      diagnosisTypes.add(diagnosisTypeArrayIterator.next());
+    }
+
+    Collections.sort(
+        diagnosisTypes,
+        new Comparator<JsonNode>() {
+          public int compare(JsonNode node1, JsonNode node2) {
+            String name1 = node1.get("coding").get(0).get("code").toString();
+            String name2 = node2.get("coding").get(0).get("code").toString();
+            return name1.compareTo(name2);
+          }
+        });
+
+    ((ArrayNode) diagnosisTypeArray).removeAll();
+    for (int i = 0; i < diagnosisTypes.size(); i++) {
+      ((ArrayNode) diagnosisTypeArray).add((ObjectNode) diagnosisTypes.get(i));
     }
 
     String jsonResponse = null;
@@ -608,7 +679,7 @@ public final class EndpointJsonResponseComparatorIT {
         .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
         .returnBundle(Bundle.class)
         .execute();
-    return jsonInterceptor.getResponse();
+    return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/entry/3/resource/diagnosis/7/type");
   }
 
   /**
@@ -636,7 +707,7 @@ public final class EndpointJsonResponseComparatorIT {
         .count(8)
         .returnBundle(Bundle.class)
         .execute();
-    return jsonInterceptor.getResponse();
+    return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/entry/3/resource/diagnosis/7/type");
   }
 
   /**
@@ -766,7 +837,7 @@ public final class EndpointJsonResponseComparatorIT {
         .resource(ExplanationOfBenefit.class)
         .withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()))
         .execute();
-    return jsonInterceptor.getResponse();
+    return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/diagnosis/7/type");
   }
 
   /**

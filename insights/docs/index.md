@@ -6,6 +6,7 @@
 - [Security Model](security.md): Security model
 - [Dataflow](typical_workflow.md): Example dataflow
 - [Lessons Learned](lessons_learned.md): Notes for future developers
+- [Core Tables](core_tables.md): Design notes on the core tables
 
 # AB2D Docs
 - [Firehose](ab2d_firehose.md): Notes on how to setup a AB2D firehose

@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
 
-exec > >(tee -a /var/log/user_data.log 2>&1)
+# add a timestamp to this scripts log output and redirect to both console and logfile
+exec > >(
+	while read line; do
+	    echo $(date +"%Y-%m-%d %H:%M:%S")" - $${line}" | tee -a /var/log/user_data.log 2>&1
+	done
+)
 
 # Extend gold image defined root partition with all available free space
 sudo growpart /dev/nvme0n1 2

@@ -8,6 +8,8 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.Sex;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -338,7 +340,9 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
     Assert.assertEquals(beneficiary.getCountyCode(), patient.getAddress().get(0).getDistrict());
     Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
+
     if (beneficiary.getSex() == Sex.MALE.getCode())
       Assert.assertEquals(
           AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());

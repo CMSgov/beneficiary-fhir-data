@@ -2,6 +2,7 @@
 *.lock
 **/*.pyc
 **/__pycache__
+**/venv/*
 
 # VSCode
 .vscode/*

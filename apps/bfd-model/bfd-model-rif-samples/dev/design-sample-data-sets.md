@@ -323,6 +323,92 @@ The contract ID fields `PTD_CNTRCT_JAN_ID`...`PTD_CNTRCT_DEC_ID` (or `PTDCNTRCT0
         https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2015-2014.rif \
         https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-04-10-part-d-enrollment/synthetic-outpatient-2016-2014.rif
    ```
+   
+7. The following is a summary of the changes related to update  2020-05-21-synthetic-bene-updated-mbi:
+To denote that an MBI is synthetic in the BFD database, we are using the 2nd position character = "S". We are breaking the MBI standard format for just the 2nd character position for this purpose:
+https://www.cms.gov/Medicare/New-Medicare-Card/Understanding-the-MBI-with-Format.pdf
+However, we ran in to validation issues with 999 of the 30K records when updating the values in SLS and also accounting for that difference in the 2nd character position.
+These records had an "S" in the 3rd character position and were failing the validation.
+To resolve, the 3rd character position of those 999 MBI values was updated from "S" => "T".
+For example, the MBI value "8SS0A00AA00" was updated to "8ST0A00AA00"
+All MBI values are now updated to conform to the MBI standard format, with the exception of our special case to denote them as synthetic vs. real.
+
+  ``` 
+  $ wget \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/0_manifest.xml \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-beneficiary-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-beneficiary-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-beneficiary-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-1999-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-1999-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2000-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2000-2002.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2014-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-carrier-2014-2016.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-1999-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-1999-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2000-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2000-2002.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2014-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-inpatient-2014-2016.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2000-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2001-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2001-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2002-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2015-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-outpatient-2016-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-pde-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-pde-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-05-21-synthetic-bene-updated-mbi/synthetic-pde-2016.rif 
+  ``` 
+
+8. The following is a summary of the changes related to update  2020-11-02-New-Data-Fields:
+   Added new fields that we are sending over to CCW
+
+  ``` 
+  $ wget \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/0_manifest.xml \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-beneficiary-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-beneficiary-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-beneficiary-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-1999-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-1999-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-2000-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-2000-2002.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-2014-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-carrier-2014-2016.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-1999-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-1999-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-2000-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-2000-2001.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-2000-2002.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-2014-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-inpatient-2014-2016.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-outpatient-1999-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-outpatient-2000-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-outpatient-2001-1999.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-outpatient-2002-2000.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-outpatient-2014-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-outpatient-2015-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-outpatient-2016-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-pde-2014.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-pde-2015.rif \
+    https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields/synthetic-pde-2016.rif 
+  ``` 
 
 
 The synthetic data set was statistically validated and certified as fit for public use by CMS' Data Governance Board. The documentation from that is published here: [CMSgov/beneficiary-fhir-data:bfd-model-rif-samples/dev](./).
@@ -350,3 +436,16 @@ It was created via the following process:
 3. For each of those beneficiaries, randomly select Part D events from the synthetic data set to associate with them. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://confluence.cms.gov/pages/viewpage.action?pageId=172097602).
     * It so happens that MCT wants each beneficiary to have exactly 5 Part D events, but this appears to have been a mostly arbitrary decision.
 4. Adjust all other identifiers (`BENE_ID`, `CLM_ID`, `PDE_ID`, and `CLM_GRP_ID`) so that they don't conflict/collide with any other data sets.
+
+### `SAMPLE_MCT`: MCT-Compatible Test Data (Derived from Synthetic) Added 11 new beneficiaries and associated data with pde's
+
+**Location**: [CMSgov/bluebutton-data-model:bluebutton-data-model-rif-samples/src/main/resources/rif-static-samples/](https://github.com/CMSgov/bluebutton-data-model/tree/master/bluebutton-data-model-rif-samples/src/main/resources/rif-static-samples)
+
+The `SAMPLE_MCT` data set is a small data set created specifically to support the Medicare Coverage Tools (MCT) project (also known as the new "Medicare Plan Finder").
+
+It was created via the following process:
+
+1. Start with the synthetic data set from sample-mct-update-4-beneficiaries.txt.
+2. Randomly select 11 beneficiaries from the synthetic data set. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://jira.cms.gov/browse/BFD-326).  Adjust identifiers `BENE_ID` so that they don't conflict/collide with any other data sets.
+3. For each of those beneficiaries, randomly select Part D events from the synthetic data sample-mct-update-5-pde.txt set to associate with them. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://jira.cms.gov/browse/BFD-326).
+4. Adjust all other identifiers (`BENE_ID`, `PDE_ID`, and `CLM_GRP_ID`) so that they don't conflict/collide with any other data sets.

@@ -1,25 +1,280 @@
-MyMedicare.gov BlueButton Parent POM
+# Beneficiary FHIR Data Server (BFD)
 ====================================
 
-This repo just contains a Maven parent POM and some other build/dev resources that are shared by the CMS/MyMedicare.gov Java projects.
+## About
 
-## Development Environment
+Beneficiary FHIR Data (BFD) Server: The BFD Server is an internal backend system used at CMS to represent Medicare beneficiaries' demographic, enrollment, and claims data in [FHIR](https://www.hl7.org/fhir/overview.html) format.
 
-Going to work on this project or one of the other Blue Button Java projects? Great! You can follow the instructions in [Development Environment Setup](./dev/devenv-readme.md) to get going.
+### DASG Mission
+Drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare.
 
-## Releases
+### BFD Mission
+Enable the CMS Enterprise to drive innovation in data sharing so that beneficiaries and their healthcare partners have the data they need to make informed decisions about their healthcare.
 
-This project uses Maven's [maven-release-plugin](http://maven.apache.org/maven-release/maven-release-plugin/) for releases, and must be manually released by a developer with permissions to [its GitHub repo](https://github.com/HHSIDEAlab/bluebutton-parent-pom) and to [OSSRH](http://central.sonatype.org/pages/ossrh-guide.html) (which is used to ensure its releases land in Maven Central).
+### BFD Vision
+Provide a comprehensive, performant, and trustworthy platform to transform the way that the CMS enterprise shares and uses data.
 
-Run the following commands to perform a release:
+### License
 
-    $ mvn release:prepare release:perform
-    $ git push --all && git push --tags
-
-## License
-
-This project is in the worldwide [public domain](LICENSE.md). As stated in [CONTRIBUTING](CONTRIBUTING.md):
+This project is in the worldwide [public domain](LICENSE.md). As stated in [LICENSE](LICENSE.md):
 
 > This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
 >
 > All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest.
+
+## BFD User Documentation
+
+The following provide information on how to use BFD:
+
+* [Request Audit Headers](./docs/request-audit-headers.md):
+  This document details the HTTP headers that should be included when calling BFD,
+    to ensure that proper audit information is available to the BFD team.
+* [Request Options](./docs/request-options.md):
+  This document details the request options that can be used when calling BFD.
+
+## BFD Developer Documentation
+
+The following provide information on how to develop BFD:
+
+* [Sample Data Sets](./apps/bfd-model/bfd-model-rif-samples/dev/design-sample-data-sets.md):
+  This document details the various sample/test data sets available for use with the Blue Button Data/backend systems.
+
+## Development Environment Setup
+
+### AWS Credentials
+
+Many of the automated tests associated with the Blue Button framework use AWS resources.  Before running a build using Maven or importing projects into your Eclipse IDE, which will run a build automatically, please ensure the appropriate accounts and credentials are configured within your environment.  **This is necessary to prevent incurring unwanted charges on the wrong AWS account**.
+
+Below are links to detailed instructions on configuring your AWS credentials for your environment:
+
+  * [Configuration and Credential Files](http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html)
+
+### Github Configuration
+
+You will need to configure an SSH credential in order to clone the Blue Button repositories.  Instructions are thoroughly documented on Github but for convenience here are the relevant links:
+
+  * [Connecting to Github with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
+  * [Generating a new SSH key and adding it to the ssh-agent](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/)
+  * [Adding a new SSH key to your GitHub account](https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/)
+  * [Testing your SSH connection](https://help.github.com/articles/testing-your-ssh-connection/)
+
+### Cloning the Repository
+
+Clone the repository:
+```
+mkdir -p ~/workspaces/bfd/
+git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/beneficiary-fhir-data.git
+```
+
+### Setting up the FHIR server and DB with Docker
+
+Requirements: Docker
+
+Caution: Setting up your local environments requires git patches to run. Please make sure you `make unservable` and `make unloadadable` before you commit your changes to revert these patches.
+
+Let's begin!
+
+The instructions from here on should be run from the `contributing` directory located at /
+
+To simply run tests or execute other tasks in the BFD bring up the docker containers.
+Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory.
+
+- `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
+- (optional) `SYNTHETIC_DATA` specifies a folder where you have the full set of synthetic rif files.
+- (defaults to `/app`) `BFD_MOUNT_POINT` the path within the service container where the beneficiary-fhir-data directory will be mounted.
+
+Here's an example `.env` file that docker-compose could use:
+```
+BFD_DIR=../../beneficiary-fhir-data
+SYNTHETIC_DATA=../../synthetic-data
+```
+
+```
+make up
+```
+
+This brings services up in the background and displays the logs from the `bfd` container. Once the logs show that that the system is started (this can take a minute or so depending on your machine) the logs can be exited with Ctrl+C.
+
+Now the system can be interacted with. Here's an example of running tests for the `bfd-server` module.
+
+```
+docker-compose exec bfd bash
+cd /app/apps/bfd-server
+mvn verify
+```
+
+#### Serving the BFD
+
+To run the BFD locally in a way that will allow you and other systems to interact with it some modifications need to be made so that it serves on a consistent port. Caution: Since this changes the code in the repository (server-start.sh) please keep in mind not to commit these changes.
+
+These changes are contained in the file `contributing/patches/allow_local_port_config.patch` and can be applied with
+
+```
+make servable
+```
+To undo the changes run `make unservable`.
+
+Once the changes are applied the server needs to be started in order for them to take effect.
+Run `make up` if no docker containers are running or
+
+```
+make restart
+```
+
+if they're already running.
+
+The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'.
+
+In Chrome this can be done at `chrome://settings/certificates`. In Firefox it can be done at `about:preferences#privacy`, there is a button at the bottom called "View Certificates" that should give the option to import one.
+Note MacOS Users: To make this cert available to Chrome or Firefox you'll need to add this cert to the Keychain application.
+
+#### Loading data to work with
+
+First you'll want some synthetic data to load and work with. To fetch the synthetic data from a public S3 bucket:
+```
+make synthetic-data/*.rif
+```
+
+Tip: This will download to a folder within the contributing folder within the repo. Consider moving this synthetic data outside the repo and updating your .env file to point to this new location. It will save you some steps in the future.
+
+To load some data for the BFD to return first apply the patches that allow the system to load local data:
+
+Caution: Since this changes the code in the repository please keep in mind not to commit these changes and to be aware of them while making your own changes. Reverse them before you submit your changes.
+
+```make loadable```
+Then load the data
+```make load```
+This can take as long as an hour depending on your system.
+
+Once loaded going to a URL like [https://localhost:1337/v1/fhir/Patient/-19990000000001?_format=json](https://localhost:1337/v1/fhir/Patient/-19990000000001?_format=json) in your browser should show you some data.
+
+
+#### Integration with a downstream system
+
+An example of connecting http://github.com/cmsgov/bluebutton-web-server to the local BFD.
+
+`.env`
+```
+BB20_CONTEXT=../../bluebutton-web-server
+CERTSTORE=../../bb.dev/certstore
+BFD_DIR=../
+SYNTHETIC_DATA=./synthetic-data
+```
+
+`docker-compose.bb2.yml`
+
+```
+version: '3.3'
+
+services:
+  bbdb:
+    image: postgres
+    environment:
+      - POSTGRES_DB=bluebutton
+      - POSTGRES_PASSWORD=toor
+  bb20:
+    build:
+      context: ${BB20_CONTEXT}
+      dockerfile: Dockerfile
+    command: python3 manage.py runserver 0.0.0.0:8000
+    environment:
+      - DJANGO_SETTINGS_MODULE=hhs_oauth_server.settings.dev
+      - DJANGO_FHIR_CERTSTORE=/certstore
+      - DATABASES_CUSTOM=postgres://postgres:toor@bbdb:5432/bluebutton
+      - OAUTHLIB_INSECURE_TRANSPORT=true
+      - DJANGO_DEFAULT_SAMPLE_FHIR_ID="20140000008325"
+      - DJANGO_SECURE_SESSION=False
+      - DJANGO_MEDICARE_LOGIN_URI=http://127.0.0.1:8080?scope=openid%20profile&client_id=bluebutton
+      - DJANGO_SLS_USERINFO_ENDPOINT=http://msls:8080/userinfo
+      - DJANGO_SLS_TOKEN_ENDPOINT=http://msls:8080/token
+      - FHIR_URL=https://bfd.local:9954/v1/fhir/
+    ports:
+      - "8000:8000"
+    links:
+      - "bfd:bfd.local"
+    volumes:
+      - ${BB20_CONTEXT}:/code
+      - ${CERTSTORE}:/certstore
+    depends_on:
+      - bbdb
+```
+
+The BlueButton 2 system also requires an Identity Provider
+`docker-compose.msls.yml`
+```
+version: '3.3'
+
+services:
+
+  msls:
+    build:
+      context: ../../bb.dev/msls
+      dockerfile: Dockerfile
+    command: msls
+    ports:
+      - "8080:8080"
+```
+
+Bringing these systems up together:
+
+```
+docker-compose -f docker-compose.yml -f docker-compose.bb2.yml -f docker-compose.msls.yml up -d
+```
+
+```
+docker-compose -f docker-compose.bb2.yml exec bb2 ./docker-compose/migrate.sh
+```
+
+### Security
+
+We work with sensitive information: do not put any PHI or PII in the public repo for BFD.
+
+If you believe you’ve found or been made aware of a security vulnerability, please refer to the CMS Vulnerability Disclosure Policy (here is a [link](https://www.cms.gov/Research-Statistics-Data-and-Systems/CMS-Information-Technology/CIO-Directives-and-Policies/Downloads/CMS-Vulnerability-Disclosure-Policy.pdf) to the most recent version as of the time of this commit.
+
+### Eclipse Configuration
+
+The following instructions are to be executed from within the Eclipse IDE application to ensure proper configuration.
+
+#### Eclipse JDK
+
+Verify Eclipse is using the correct Java 8 JDK.
+
+1. Open **Window > Preferences**.
+1. Select **Java > Installed JREs**.
+1. If your JDK does not appear in the **Installed JREs** table add it by clicking the **Add** button, select **Standard VM** and locate your installation using the **Directory...** button.
+1. Ensure your JDK is selected in the **Installed JREs** table by checking the checkbox next to the JDK you wish to use.
+
+#### Eclipse Preferences
+
+If you're using Eclipse for development, you'll want to configure its preferences, as follows:
+
+1. Open **Window > Preferences**.
+1. Select **Maven**.
+    1. Enable **Download Artifact Sources**.
+    1. Enable **Download Artifact JavaDoc**.
+1. Select **Maven > Annotation Processing**.
+    1. Enable the **Automatically configure JDT APT** option.
+1. Select **Java > Code Style > Code Templates**.
+    1. Click **Import...** and select this project's [eclipse-codetemplates.xml](docs/assets/eclipse-codetemplates.xml) file.
+        * This configures the file, class, method, etc. comments on new items such that they match the existing style used in these projects.
+    1. Enable the **Automatically add comments for new methods and types** option.
+1. Select **Java > Code Style > Formatter**.
+    1. Click **Import...** and select this project's [eclipse-java-google-style.xml](docs/assets/eclipse-java-google-style.xml) file.
+        * This configures the Eclipse autoformatter (`ctrl+shift+f`) to (mostly) match the one used by the autoformatter that is applied during Maven builds.
+        * The [eclipse-java-google-style.xml](docs/assets/eclipse-java-google-style.xml) file was originally acquired from here: <https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml>.
+1. Select **Java > Editor > Save Actions**.
+    1. Enable the **Perform the selected actions on save** option.
+    1. Enable the **Format source code** option.
+1. Click **OK**.
+
+#### Importing Maven Projects into Eclipse
+
+The repository can easily be added to your Eclipse workspace using the **Import** feature.
+
+1. Open **File > Import...**.
+1. Select **Existing Maven Projects**.
+1. Specify the **Root Directory** using the **Browse...** button or by typing in a path: `~/workspaces/bfd/beneficiary-fhir-data.git`.
+1. Verify that it found the projects in the **Projects** table.
+1. Click **Finish**.
+1. The projects and packages you selected will now appear in the **Project Explorer** window.
+

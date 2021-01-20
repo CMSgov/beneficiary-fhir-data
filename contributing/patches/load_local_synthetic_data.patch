@@ -10,7 +10,7 @@ Subject: [PATCH] load local synthetic
  3 files changed, 228 insertions(+)
 
 diff --git a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
-index db11ae610..dc8fbc1bd 100644
+index 59c78855..8a097b96 100644
 --- a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
 +++ b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
 @@ -302,6 +302,161 @@ public enum StaticRifResource {
@@ -208,12 +208,12 @@ index db11ae610..dc8fbc1bd 100644
     * @param dataSetLocation the {@link TestDataSetLocation} of the file to get a local copy of
     * @param fileName the name of the specific file in the specified {@link TestDataSetLocation} to
 diff --git a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
-index 352569da7..603bccf9b 100644
+index a1401b55..a44fca81 100644
 --- a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
 +++ b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
-@@ -44,6 +44,39 @@ public enum StaticRifResourceGroup {
- 
-   SAMPLE_U(StaticRifResource.SAMPLE_U_BENES, StaticRifResource.SAMPLE_U_CARRIER),
+@@ -47,6 +47,39 @@ public enum StaticRifResourceGroup {
+   SAMPLE_U_BENES_UNCHANGED(
+       StaticRifResource.SAMPLE_U_BENES_UNCHANGED, StaticRifResource.SAMPLE_U_CARRIER),
  
 +  LOCAL_SYNTHETIC(
 +      StaticRifResource.LOCAL_SYNTHETIC_BENEFICIARY_1999,
@@ -252,13 +252,13 @@ index 352569da7..603bccf9b 100644
        StaticRifResource.SYNTHETIC_BENEFICIARY_1999,
        StaticRifResource.SYNTHETIC_BENEFICIARY_2000,
 diff --git a/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java b/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
-index 28f9a7de6..e014e361e 100644
+index a163268d..5378d8ce 100644
 --- a/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
 +++ b/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
-@@ -287,6 +287,21 @@ public final class RifLoaderIT {
-     loadSample(dataSource, StaticRifResourceGroup.SYNTHETIC_DATA);
+@@ -316,6 +316,20 @@ public final class RifLoaderIT {
+       if (entityManager != null) entityManager.close();
+     }
    }
- 
 +  /**
 +   * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
 +   * StaticRifResourceGroup#LOCAL_SYNTHETIC} data.
@@ -271,12 +271,11 @@ index 28f9a7de6..e014e361e 100644
 +        Runtime.getRuntime().maxMemory()),
 +    Runtime.getRuntime().maxMemory() >= 4500000000L); */
 +    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-+    loadSample(dataSource, StaticRifResourceGroup.LOCAL_SYNTHETIC);
++    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.LOCAL_SYNTHETIC.getResources()));
 +  }
-+
    /**
     * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
-    * StaticRifResourceGroup#SAMPLE_MCT} data.
+    * StaticRifResourceGroup#SAMPLE_B} data.
 -- 
 2.19.0
 

@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;

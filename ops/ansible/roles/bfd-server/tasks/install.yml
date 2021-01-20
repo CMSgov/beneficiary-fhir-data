@@ -86,3 +86,14 @@
     src: 'bfd-server.j2'
     dest: /etc/logrotate.d/bfd-server
   become: true
+
+- name: Add selinux file context to allow log rotation
+  sefcontext:
+    target: "{{ data_server_dir }}(/.*json|/.*log)?"
+    setype: var_log_t
+    state: present
+  become: true
+
+- name: Apply selinux file context
+  command: "restorecon -rv {{ data_server_dir }}"
+  become: true

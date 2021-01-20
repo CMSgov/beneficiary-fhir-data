@@ -3,12 +3,12 @@ package gov.cms.bfd.pipeline.rif.load;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryCsvWriter;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimCsvWriter;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
@@ -24,6 +24,7 @@ import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rif.load.RifRecordLoadResult.LoadAction;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -34,6 +35,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -506,6 +508,9 @@ public final class RifLoader implements AutoCloseable {
 
         LoadStrategy strategy = selectStrategy(recordAction);
         LoadAction loadAction;
+
+        boolean recordsIsBeneficiary = (record instanceof Beneficiary) ? true : false;
+
         if (strategy == LoadStrategy.INSERT_IDEMPOTENT) {
           // Check to see if record already exists.
           Timer.Context timerIdempotencyQuery =
@@ -519,6 +524,11 @@ public final class RifLoader implements AutoCloseable {
 
           if (recordInDb == null) {
             loadAction = LoadAction.INSERTED;
+
+            if (recordsIsBeneficiary) {
+              updateBeneficiaryMonthly(entityManager, (Beneficiary) record);
+            }
+
             entityManager.persist(record);
             Object recordInDbAfterUpdate = entityManager.find(record.getClass(), recordId);
           } else {
@@ -527,7 +537,13 @@ public final class RifLoader implements AutoCloseable {
         } else if (strategy == LoadStrategy.INSERT_UPDATE_NON_IDEMPOTENT) {
           if (rifRecordEvent.getRecordAction().equals(RecordAction.INSERT)) {
             loadAction = LoadAction.INSERTED;
+
+            if (recordsIsBeneficiary) {
+              updateBeneficiaryMonthly(entityManager, (Beneficiary) record);
+            }
+
             entityManager.persist(record);
+
           } else if (rifRecordEvent.getRecordAction().equals(RecordAction.UPDATE)) {
             loadAction = LoadAction.UPDATED;
 
@@ -535,12 +551,14 @@ public final class RifLoader implements AutoCloseable {
              * When beneficiaries are updated, we need to be careful to capture their
              * current/previous state as a BeneficiaryHistory record.
              */
-            if (record instanceof Beneficiary) {
+            if (recordsIsBeneficiary) {
               updateBeneficaryHistory(
                   entityManager, (Beneficiary) record, loadedBatchBuilder.getTimestamp());
+              updateBeneficiaryMonthly(entityManager, (Beneficiary) record);
             }
 
             entityManager.merge(record);
+
           } else {
             throw new BadCodeMonkeyException(
                 String.format(
@@ -597,6 +615,313 @@ public final class RifLoader implements AutoCloseable {
   }
 
   /**
+   * Ensures that a {@link BeneficiaryMonthly} record is created or updated for the specified {@link
+   * Beneficiary}, if that {@link Beneficiary} already exists and is just being updated.
+   *
+   * @param entityManager the {@link EntityManager} to use
+   * @param loadAction the {@link Loadaction} record being processed
+   * @param beneficiaryRecord the {@link Beneficiary} record being processed
+   */
+  private static void updateBeneficiaryMonthly(
+      EntityManager entityManager, Beneficiary beneficiaryRecord) {
+
+    if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
+
+      int year = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().intValue();
+      List<BeneficiaryMonthly> currentYearBeneficiaryMonthly = new ArrayList<BeneficiaryMonthly>();
+
+      BeneficiaryMonthly beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 1, 1),
+              beneficiaryRecord.getEntitlementBuyInJanInd(),
+              beneficiaryRecord.getFipsStateCntyJanCode(),
+              beneficiaryRecord.getHmoIndicatorJanInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityJanCode(),
+              beneficiaryRecord.getMedicareStatusJanCode(),
+              beneficiaryRecord.getPartCContractNumberJanId(),
+              beneficiaryRecord.getPartCPbpNumberJanId(),
+              beneficiaryRecord.getPartCPlanTypeJanCode(),
+              beneficiaryRecord.getPartDContractNumberJanId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupJanCode(),
+              beneficiaryRecord.getPartDPbpNumberJanId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
+              beneficiaryRecord.getPartDSegmentNumberJanId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 2, 1),
+              beneficiaryRecord.getEntitlementBuyInFebInd(),
+              beneficiaryRecord.getFipsStateCntyFebCode(),
+              beneficiaryRecord.getHmoIndicatorFebInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityFebCode(),
+              beneficiaryRecord.getMedicareStatusFebCode(),
+              beneficiaryRecord.getPartCContractNumberFebId(),
+              beneficiaryRecord.getPartCPbpNumberFebId(),
+              beneficiaryRecord.getPartCPlanTypeFebCode(),
+              beneficiaryRecord.getPartDContractNumberFebId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupFebCode(),
+              beneficiaryRecord.getPartDPbpNumberFebId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyFebInd(),
+              beneficiaryRecord.getPartDSegmentNumberFebId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 3, 1),
+              beneficiaryRecord.getEntitlementBuyInMarInd(),
+              beneficiaryRecord.getFipsStateCntyMarCode(),
+              beneficiaryRecord.getHmoIndicatorMarInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityMarCode(),
+              beneficiaryRecord.getMedicareStatusMarCode(),
+              beneficiaryRecord.getPartCContractNumberMarId(),
+              beneficiaryRecord.getPartCPbpNumberMarId(),
+              beneficiaryRecord.getPartCPlanTypeMarCode(),
+              beneficiaryRecord.getPartDContractNumberMarId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupMarCode(),
+              beneficiaryRecord.getPartDPbpNumberMarId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyMarInd(),
+              beneficiaryRecord.getPartDSegmentNumberMarId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 4, 1),
+              beneficiaryRecord.getEntitlementBuyInAprInd(),
+              beneficiaryRecord.getFipsStateCntyAprCode(),
+              beneficiaryRecord.getHmoIndicatorAprInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityAprCode(),
+              beneficiaryRecord.getMedicareStatusAprCode(),
+              beneficiaryRecord.getPartCContractNumberAprId(),
+              beneficiaryRecord.getPartCPbpNumberAprId(),
+              beneficiaryRecord.getPartCPlanTypeAprCode(),
+              beneficiaryRecord.getPartDContractNumberAprId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupAprCode(),
+              beneficiaryRecord.getPartDPbpNumberAprId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyAprInd(),
+              beneficiaryRecord.getPartDSegmentNumberAprId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 5, 1),
+              beneficiaryRecord.getEntitlementBuyInMayInd(),
+              beneficiaryRecord.getFipsStateCntyMayCode(),
+              beneficiaryRecord.getHmoIndicatorMayInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityMayCode(),
+              beneficiaryRecord.getMedicareStatusMayCode(),
+              beneficiaryRecord.getPartCContractNumberMayId(),
+              beneficiaryRecord.getPartCPbpNumberMayId(),
+              beneficiaryRecord.getPartCPlanTypeMayCode(),
+              beneficiaryRecord.getPartDContractNumberMayId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupMayCode(),
+              beneficiaryRecord.getPartDPbpNumberMayId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyMayInd(),
+              beneficiaryRecord.getPartDSegmentNumberMayId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 6, 1),
+              beneficiaryRecord.getEntitlementBuyInJunInd(),
+              beneficiaryRecord.getFipsStateCntyJunCode(),
+              beneficiaryRecord.getHmoIndicatorJunInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityJunCode(),
+              beneficiaryRecord.getMedicareStatusJunCode(),
+              beneficiaryRecord.getPartCContractNumberJunId(),
+              beneficiaryRecord.getPartCPbpNumberJunId(),
+              beneficiaryRecord.getPartCPlanTypeJunCode(),
+              beneficiaryRecord.getPartDContractNumberJunId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupJunCode(),
+              beneficiaryRecord.getPartDPbpNumberJunId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyJunInd(),
+              beneficiaryRecord.getPartDSegmentNumberJunId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 7, 1),
+              beneficiaryRecord.getEntitlementBuyInJulInd(),
+              beneficiaryRecord.getFipsStateCntyJulCode(),
+              beneficiaryRecord.getHmoIndicatorJulInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityJulCode(),
+              beneficiaryRecord.getMedicareStatusJulCode(),
+              beneficiaryRecord.getPartCContractNumberJulId(),
+              beneficiaryRecord.getPartCPbpNumberJulId(),
+              beneficiaryRecord.getPartCPlanTypeJulCode(),
+              beneficiaryRecord.getPartDContractNumberJulId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupJulCode(),
+              beneficiaryRecord.getPartDPbpNumberJulId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyJulInd(),
+              beneficiaryRecord.getPartDSegmentNumberJulId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 8, 1),
+              beneficiaryRecord.getEntitlementBuyInAugInd(),
+              beneficiaryRecord.getFipsStateCntyAugCode(),
+              beneficiaryRecord.getHmoIndicatorAugInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityAugCode(),
+              beneficiaryRecord.getMedicareStatusAugCode(),
+              beneficiaryRecord.getPartCContractNumberAugId(),
+              beneficiaryRecord.getPartCPbpNumberAugId(),
+              beneficiaryRecord.getPartCPlanTypeAugCode(),
+              beneficiaryRecord.getPartDContractNumberAugId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupAugCode(),
+              beneficiaryRecord.getPartDPbpNumberAugId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyAugInd(),
+              beneficiaryRecord.getPartDSegmentNumberAugId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 9, 1),
+              beneficiaryRecord.getEntitlementBuyInSeptInd(),
+              beneficiaryRecord.getFipsStateCntySeptCode(),
+              beneficiaryRecord.getHmoIndicatorSeptInd(),
+              beneficiaryRecord.getMedicaidDualEligibilitySeptCode(),
+              beneficiaryRecord.getMedicareStatusSeptCode(),
+              beneficiaryRecord.getPartCContractNumberSeptId(),
+              beneficiaryRecord.getPartCPbpNumberSeptId(),
+              beneficiaryRecord.getPartCPlanTypeSeptCode(),
+              beneficiaryRecord.getPartDContractNumberSeptId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupSeptCode(),
+              beneficiaryRecord.getPartDPbpNumberSeptId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidySeptInd(),
+              beneficiaryRecord.getPartDSegmentNumberSeptId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 10, 1),
+              beneficiaryRecord.getEntitlementBuyInOctInd(),
+              beneficiaryRecord.getFipsStateCntyOctCode(),
+              beneficiaryRecord.getHmoIndicatorOctInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityOctCode(),
+              beneficiaryRecord.getMedicareStatusOctCode(),
+              beneficiaryRecord.getPartCContractNumberOctId(),
+              beneficiaryRecord.getPartCPbpNumberOctId(),
+              beneficiaryRecord.getPartCPlanTypeOctCode(),
+              beneficiaryRecord.getPartDContractNumberOctId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupOctCode(),
+              beneficiaryRecord.getPartDPbpNumberOctId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyOctInd(),
+              beneficiaryRecord.getPartDSegmentNumberOctId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 11, 1),
+              beneficiaryRecord.getEntitlementBuyInNovInd(),
+              beneficiaryRecord.getFipsStateCntyNovCode(),
+              beneficiaryRecord.getHmoIndicatorNovInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityNovCode(),
+              beneficiaryRecord.getMedicareStatusNovCode(),
+              beneficiaryRecord.getPartCContractNumberNovId(),
+              beneficiaryRecord.getPartCPbpNumberNovId(),
+              beneficiaryRecord.getPartCPlanTypeNovCode(),
+              beneficiaryRecord.getPartDContractNumberNovId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupNovCode(),
+              beneficiaryRecord.getPartDPbpNumberNovId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyNovInd(),
+              beneficiaryRecord.getPartDSegmentNumberNovId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      beneficiaryMonthly =
+          getBeneficiaryMonthly(
+              beneficiaryRecord,
+              LocalDate.of(year, 12, 1),
+              beneficiaryRecord.getEntitlementBuyInDecInd(),
+              beneficiaryRecord.getFipsStateCntyDecCode(),
+              beneficiaryRecord.getHmoIndicatorDecInd(),
+              beneficiaryRecord.getMedicaidDualEligibilityDecCode(),
+              beneficiaryRecord.getMedicareStatusDecCode(),
+              beneficiaryRecord.getPartCContractNumberDecId(),
+              beneficiaryRecord.getPartCPbpNumberDecId(),
+              beneficiaryRecord.getPartCPlanTypeDecCode(),
+              beneficiaryRecord.getPartDContractNumberDecId(),
+              beneficiaryRecord.getPartDLowIncomeCostShareGroupDecCode(),
+              beneficiaryRecord.getPartDPbpNumberDecId(),
+              beneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
+              beneficiaryRecord.getPartDSegmentNumberDecId());
+
+      if (beneficiaryMonthly != null) {
+        currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
+      }
+
+      if (currentYearBeneficiaryMonthly.size() > 0) {
+        List<BeneficiaryMonthly> currentBeneficiaryMonthlyWithUpdates;
+
+        // TODO enforce RIF invariant elsewhere: no repeats of same record/PK in same RIF file
+        // allowed
+        Beneficiary beneficiaryFromDb =
+            entityManager.find(Beneficiary.class, beneficiaryRecord.getBeneficiaryId());
+
+        if (beneficiaryFromDb != null && beneficiaryFromDb.getBeneficiaryMonthlys().size() > 0) {
+          currentBeneficiaryMonthlyWithUpdates = beneficiaryFromDb.getBeneficiaryMonthlys();
+          List<BeneficiaryMonthly> currentYearBeneficiaryMonthlyPrevious =
+              beneficiaryFromDb.getBeneficiaryMonthlys().stream()
+                  .filter(e -> year == e.getYearMonth().getYear())
+                  .collect(Collectors.toList());
+
+          for (BeneficiaryMonthly previousEnrollment : currentYearBeneficiaryMonthlyPrevious) {
+            currentBeneficiaryMonthlyWithUpdates.remove(previousEnrollment);
+          }
+        } else {
+          currentBeneficiaryMonthlyWithUpdates = new LinkedList<BeneficiaryMonthly>();
+        }
+
+        currentBeneficiaryMonthlyWithUpdates.addAll(currentYearBeneficiaryMonthly);
+        beneficiaryRecord.setBeneficiaryMonthlys(currentBeneficiaryMonthlyWithUpdates);
+      }
+    }
+  }
+
+  /**
    * Ensures that a {@link BeneficiaryHistory} record is created for the specified {@link
    * Beneficiary}, if that {@link Beneficiary} already exists and is just being updated.
    *
@@ -609,7 +934,8 @@ public final class RifLoader implements AutoCloseable {
     Beneficiary oldBeneficiaryRecord =
         entityManager.find(Beneficiary.class, newBeneficiaryRecord.getBeneficiaryId());
 
-    if (oldBeneficiaryRecord != null) {
+    if (oldBeneficiaryRecord != null
+        && !isBeneficiaryHistoryEqual(newBeneficiaryRecord, oldBeneficiaryRecord)) {
       BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
       oldBeneCopy.setBeneficiaryId(oldBeneficiaryRecord.getBeneficiaryId());
       oldBeneCopy.setBirthDate(oldBeneficiaryRecord.getBirthDate());
@@ -617,10 +943,96 @@ public final class RifLoader implements AutoCloseable {
       oldBeneCopy.setHicnUnhashed(oldBeneficiaryRecord.getHicnUnhashed());
       oldBeneCopy.setSex(oldBeneficiaryRecord.getSex());
       oldBeneCopy.setMedicareBeneficiaryId(oldBeneficiaryRecord.getMedicareBeneficiaryId());
+      oldBeneCopy.setMbiHash(oldBeneficiaryRecord.getMbiHash());
+      oldBeneCopy.setMbiEffectiveDate(oldBeneficiaryRecord.getMbiEffectiveDate());
+      oldBeneCopy.setMbiObsoleteDate(oldBeneficiaryRecord.getMbiObsoleteDate());
       oldBeneCopy.setLastUpdated(batchTimestamp);
 
       entityManager.persist(oldBeneCopy);
     }
+  }
+
+  /**
+   * Ensures that a {@link Beneficiary} records for old and new benificiaries are equal or not
+   * equal.
+   *
+   * @param newBeneficiaryRecord the {@link Beneficiary} new record being processed
+   * @param oldBeneficiaryRecord the {@link Beneficiary} old record that was processed
+   */
+  static boolean isBeneficiaryHistoryEqual(
+      Beneficiary newBeneficiaryRecord, Beneficiary oldBeneficiaryRecord) {
+
+    if (newBeneficiaryRecord.getBirthDate().equals(oldBeneficiaryRecord.getBirthDate())
+        && newBeneficiaryRecord.getHicn().equals(oldBeneficiaryRecord.getHicn())
+        && newBeneficiaryRecord.getHicnUnhashed().equals(oldBeneficiaryRecord.getHicnUnhashed())
+        && newBeneficiaryRecord.getSex() == oldBeneficiaryRecord.getSex()
+        && newBeneficiaryRecord.getMbiHash().equals(oldBeneficiaryRecord.getMbiHash())
+        && newBeneficiaryRecord
+            .getMbiEffectiveDate()
+            .equals(oldBeneficiaryRecord.getMbiEffectiveDate())
+        && newBeneficiaryRecord
+            .getMbiObsoleteDate()
+            .equals(oldBeneficiaryRecord.getMbiObsoleteDate())
+        && newBeneficiaryRecord
+            .getMedicareBeneficiaryId()
+            .equals(oldBeneficiaryRecord.getMedicareBeneficiaryId())) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public static BeneficiaryMonthly getBeneficiaryMonthly(
+      Beneficiary parentBeneficiary,
+      LocalDate yearMonth,
+      Optional<Character> entitlementBuyInInd,
+      Optional<String> fipsStateCntyCode,
+      Optional<Character> hmoIndicatorInd,
+      Optional<String> medicaidDualEligibilityCode,
+      Optional<String> medicareStatusCode,
+      Optional<String> partCContractNumberId,
+      Optional<String> partCPbpNumberId,
+      Optional<String> partCPlanTypeCode,
+      Optional<String> partDContractNumberId,
+      Optional<String> partDLowIncomeCostShareGroupCode,
+      Optional<String> partDPbpNumberId,
+      Optional<Character> partDRetireeDrugSubsidyInd,
+      Optional<String> partDSegmentNumberId) {
+
+    BeneficiaryMonthly beneficiaryMonthly = null;
+
+    if (entitlementBuyInInd.isPresent()
+        || fipsStateCntyCode.isPresent()
+        || hmoIndicatorInd.isPresent()
+        || medicaidDualEligibilityCode.isPresent()
+        || medicareStatusCode.isPresent()
+        || partCContractNumberId.isPresent()
+        || partCPbpNumberId.isPresent()
+        || partCPlanTypeCode.isPresent()
+        || partDContractNumberId.isPresent()
+        || partDLowIncomeCostShareGroupCode.isPresent()
+        || partDPbpNumberId.isPresent()
+        || partDRetireeDrugSubsidyInd.isPresent()
+        || partDSegmentNumberId.isPresent()) {
+      beneficiaryMonthly = new BeneficiaryMonthly();
+      beneficiaryMonthly.setParentBeneficiary(parentBeneficiary);
+      beneficiaryMonthly.setYearMonth(yearMonth);
+      beneficiaryMonthly.setEntitlementBuyInInd(entitlementBuyInInd);
+      beneficiaryMonthly.setFipsStateCntyCode(fipsStateCntyCode);
+      beneficiaryMonthly.setHmoIndicatorInd(hmoIndicatorInd);
+      beneficiaryMonthly.setMedicaidDualEligibilityCode(medicaidDualEligibilityCode);
+      beneficiaryMonthly.setMedicareStatusCode(medicareStatusCode);
+      beneficiaryMonthly.setPartCContractNumberId(partCContractNumberId);
+      beneficiaryMonthly.setPartCPbpNumberId(partCPbpNumberId);
+      beneficiaryMonthly.setPartCPlanTypeCode(partCPlanTypeCode);
+      beneficiaryMonthly.setPartDContractNumberId(partDContractNumberId);
+      beneficiaryMonthly.setPartDLowIncomeCostShareGroupCode(partDLowIncomeCostShareGroupCode);
+      beneficiaryMonthly.setPartDPbpNumberId(partDPbpNumberId);
+      beneficiaryMonthly.setPartDRetireeDrugSubsidyInd(partDRetireeDrugSubsidyInd);
+      beneficiaryMonthly.setPartDSegmentNumberId(partDSegmentNumberId);
+    }
+
+    return beneficiaryMonthly;
   }
 
   /**

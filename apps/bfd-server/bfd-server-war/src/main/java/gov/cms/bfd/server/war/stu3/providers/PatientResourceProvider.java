@@ -22,6 +22,12 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.LinkBuilder;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
+import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -226,6 +232,18 @@ public final class PatientResourceProvider implements IResourceProvider {
       }
     }
 
+    /*
+     * Publish the operation name. Note: This is a bit later than we'd normally do this, as we need
+     * to override the operation name that was published by the possible call to read(...), above.
+     */
+    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    operation.setOption("by", "id");
+    operation.setOption(
+        "IncludeIdentifiers", returnIncludeIdentifiersValues(requestDetails).toString());
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
+    operation.publishOperationName();
+
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     Bundle bundle =
         TransformerUtils.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
@@ -255,6 +273,11 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     List<Beneficiary> matchingBeneficiaries =
         fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
+    boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
+    if (hasAnotherPage) {
+      matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
+      paging = new PatientLinkBuilder(paging, hasAnotherPage);
+    }
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
@@ -334,7 +357,7 @@ public final class PatientResourceProvider implements IResourceProvider {
       // Fetch ids
       List<String> ids =
           queryBeneficiaryIds(contractMonthField, contractCode, paging)
-              .setMaxResults(paging.getPageSize())
+              .setMaxResults(paging.getPageSize() + 1)
               .getResultList();
 
       // Fetch the benes using the ids
@@ -342,7 +365,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
-          .setMaxResults(paging.getPageSize())
+          .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
   }
@@ -364,7 +387,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
-          "select b from Beneficiary b "
+          "select distinct b from Beneficiary b "
               + joinsClause
               + "where b."
               + field
@@ -377,7 +400,7 @@ public final class PatientResourceProvider implements IResourceProvider {
           .setParameter("cursor", paging.getCursor());
     } else {
       String query =
-          "select b from Beneficiary b "
+          "select distinct b from Beneficiary b "
               + joinsClause
               + "where b."
               + field
@@ -436,7 +459,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
 
     String query =
-        "select b from Beneficiary b "
+        "select distinct b from Beneficiary b "
             + joinsClause
             + "where b.beneficiaryId in :ids "
             + "order by b.beneficiaryId asc";
@@ -494,6 +517,8 @@ public final class PatientResourceProvider implements IResourceProvider {
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "identifier");
     operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
 
     List<IBaseResource> patients;
@@ -583,44 +608,34 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     /*
      * Beneficiaries' HICN/MBIs can change over time and those past HICN/MBIs may land in
-     * BeneficiaryHistory records. Accordingly, we need to search for matching HICN/MBIs
-     * in both the Beneficiary and the BeneficiaryHistory records.
+     * BeneficiaryHistory records. Accordingly, we need to search for matching HICN/MBIs in both the
+     * Beneficiary and the BeneficiaryHistory records.
      *
-     * There's no sane way to do this in a single query with JPA 2.1, it appears: JPA
-     * doesn't support UNIONs and it doesn't support subqueries in FROM clauses. That
-     * said, the ideal query would look like this:
+     * There's no sane way to do this in a single query with JPA 2.1, it appears: JPA doesn't
+     * support UNIONs and it doesn't support subqueries in FROM clauses. That said, the ideal query
+     * would look like this:
      *
-     * SELECT     *
-     * FROM       (
-     *                            SELECT DISTINCT "beneficiaryId"
-     *                            FROM            "Beneficiaries"
-     *                            WHERE           "hicn" = :'hicn_hash'
-     *                            UNION
-     *                            SELECT DISTINCT "beneficiaryId"
-     *                            FROM            "BeneficiariesHistory"
-     *                            WHERE           "hicn" = :'hicn_hash') AS matching_benes
-     * INNER JOIN "Beneficiaries"
-     * ON         matching_benes."beneficiaryId" = "Beneficiaries"."beneficiaryId"
-     * LEFT JOIN  "BeneficiariesHistory"
-     * ON         "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId"
-     * LEFT JOIN  "MedicareBeneficiaryIdHistory"
-     * ON         "Beneficiaries"."beneficiaryId" = "MedicareBeneficiaryIdHistory"."beneficiaryId";
+     * SELECT * FROM ( SELECT DISTINCT "beneficiaryId" FROM "Beneficiaries" WHERE "hicn" =
+     * :'hicn_hash' UNION SELECT DISTINCT "beneficiaryId" FROM "BeneficiariesHistory" WHERE "hicn" =
+     * :'hicn_hash') AS matching_benes INNER JOIN "Beneficiaries" ON matching_benes."beneficiaryId"
+     * = "Beneficiaries"."beneficiaryId" LEFT JOIN "BeneficiariesHistory" ON
+     * "Beneficiaries"."beneficiaryId" = "BeneficiariesHistory"."beneficiaryId" LEFT JOIN
+     * "MedicareBeneficiaryIdHistory" ON "Beneficiaries"."beneficiaryId" =
+     * "MedicareBeneficiaryIdHistory"."beneficiaryId";
      *
-     * ... with the returned columns and JOINs being dynamic, depending on
-     * IncludeIdentifiers.
+     * ... with the returned columns and JOINs being dynamic, depending on IncludeIdentifiers.
      *
-     * In lieu of that, we run two queries: one to find HICN/MBI matches in
-     * BeneficiariesHistory, and a second to find BENE_ID or HICN/MBI matches in
-     * Beneficiaries (with all of their data, so we're ready to return the result).
-     * This is bad and dumb but I can't find a better working alternative.
+     * In lieu of that, we run two queries: one to find HICN/MBI matches in BeneficiariesHistory,
+     * and a second to find BENE_ID or HICN/MBI matches in Beneficiaries (with all of their data, so
+     * we're ready to return the result). This is bad and dumb but I can't find a better working
+     * alternative.
      *
-     * (I'll just note that I did also try JPA/Hibernate native SQL queries but
-     * couldn't get the joins or fetch groups to work with them.)
+     * (I'll just note that I did also try JPA/Hibernate native SQL queries but couldn't get the
+     * joins or fetch groups to work with them.)
      *
-     * If we want to fix this, we need to move identifiers out entirely to separate
-     * tables: BeneficiaryHicns and BeneficiaryMbis. We could then safely query these
-     * tables and join them back to Beneficiaries (and hopefully the optimizer will
-     * play nice, too).
+     * If we want to fix this, we need to move identifiers out entirely to separate tables:
+     * BeneficiaryHicns and BeneficiaryMbis. We could then safely query these tables and join them
+     * back to Beneficiaries (and hopefully the optimizer will play nice, too).
      */
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();

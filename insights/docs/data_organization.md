@@ -77,3 +77,11 @@ All user folders follow this convention.
 /users/<user-name>
 /users/<user-name>/query_results
 ```
+
+### Components
+The component names are used to provide a human readable name to independently running software. Each EC2 image or ECS container should have a component name, for example. There is a cross-project component table, so each component name needs to made unique by adding the project name. 
+
+```
+<project_name>.<component>
+```
+Examples: `bb2.web`, `dpc.api`, and `bcda.worker`
