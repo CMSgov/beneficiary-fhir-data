@@ -563,7 +563,7 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /**
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers encapsulated
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
