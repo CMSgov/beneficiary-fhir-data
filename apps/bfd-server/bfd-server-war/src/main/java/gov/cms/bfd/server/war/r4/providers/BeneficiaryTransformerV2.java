@@ -111,11 +111,24 @@ final class BeneficiaryTransformerV2 {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
 
       if (hicnUnhashedCurrent.isPresent())
-        addUnhashedIdentifier(
-            patient,
-            hicnUnhashedCurrent.get(),
-            TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
-            currentIdentifier);
+      
+            Period mbiPeriod = new Period();
+
+            if (beneficiary.getMbiEffectiveDate().isPresent()) {
+              TransformerUtilsV2.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
+            }
+      
+            if (beneficiary.getMbiObsoleteDate().isPresent()) {
+              TransformerUtilsV2.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
+            }
+      
+              addUnhashedIdentifier(
+                patient,
+                hicnUnhashedCurrent.get(),
+                TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
+                currentIdentifier, 
+                mbiPeriod);
+          }
 
       List<String> unhashedHicns = new ArrayList<String>();
       for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
@@ -170,6 +183,14 @@ final class BeneficiaryTransformerV2 {
 
     if (beneficiary.getBirthDate() != null) {
       patient.setBirthDate(TransformerUtilsV2.convertToDate(beneficiary.getBirthDate()));
+    }
+
+     // Death Date
+     if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
+      patient.setDeceased(
+          new DateTimeType(
+              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              TemporalPrecisionEnum.DAY));
     }
 
     char sex = beneficiary.getSex();
@@ -317,18 +338,34 @@ final class BeneficiaryTransformerV2 {
    * @param identifierCurrencyExtension the {@link Extension} to add to the {@link Identifier}
    */
   private static void addUnhashedIdentifier(
-      Patient patient, String value, String system, Extension identifierCurrencyExtension) {
+      Patient patient, String value, String system, Extension identifierCurrencyExtension, Period mbiPeriod) {
 
-    patient
-        .addIdentifier()
-        .setValue(value)
-        .setSystem(system)
-        .getType()
-        .addCoding()
-        .setCode("MC")
-        .setSystem(TransformerConstants.CARIN_IDENTIFIER_SYSTEM)
-        .setDisplay("Patient's Medicare Number")
-        .addExtension(identifierCurrencyExtension);
+    if(mbiPeriod != null){
+
+      patient
+      .addIdentifier()
+      .setValue(value)
+      .setSystem(system)
+      .setPeriod(mbiPeriod)
+      .getType()
+      .addCoding()
+      .setCode("MC")
+      .setSystem(TransformerConstants.CARIN_IDENTIFIER_SYSTEM)
+      .setDisplay("Patient's Medicare Number")
+      .addExtension(identifierCurrencyExtension);
+    }else{ 
+      patient
+      .addIdentifier()
+      .setValue(value)
+      .setSystem(system)
+      .getType()
+      .addCoding()
+      .setCode("MC")
+      .setSystem(TransformerConstants.CARIN_IDENTIFIER_SYSTEM)
+      .setDisplay("Patient's Medicare Number")
+      .addExtension(identifierCurrencyExtension);
+   
+      }
   }
 
   /** Enumerates the options for the currency of an {@link Identifier}. */
