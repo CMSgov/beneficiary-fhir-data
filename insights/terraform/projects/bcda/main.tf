@@ -55,7 +55,7 @@ module "glue_jobs" {
   project = local.project
   tags    = local.tags
 
-  # Setup access to both the AB2D and common moderate bucket
+  # Setup access to both the BCDA and common moderate bucket
   buckets = [
     { bucket = module.bucket.arn, cmk = module.bucket.bucket_cmk_arn },
     { bucket = data.aws_s3_bucket.moderate_bucket.arn, cmk = data.aws_kms_alias.moderate_cmk.arn }
