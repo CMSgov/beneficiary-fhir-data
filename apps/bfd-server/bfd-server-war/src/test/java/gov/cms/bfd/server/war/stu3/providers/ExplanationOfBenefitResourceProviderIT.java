@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -24,6 +25,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.pipeline.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rif.load.RifLoaderTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -36,6 +38,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -398,6 +402,43 @@ public final class ExplanationOfBenefitResourceProviderIT {
         .read()
         .resource(ExplanationOfBenefit.class)
         .withId(TransformerUtils.buildEobId(ClaimType.PDE, "1234"))
+        .execute();
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not
+   * exist in the DB using a negative ID.
+   */
+  @Test(expected = ResourceNotFoundException.class)
+  public void readEobForMissingNegativePartDEvent() {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // No data is loaded, so this should return nothing. Tests negative ID will pass regex pattern.
+    fhirClient
+        .read()
+        .resource(ExplanationOfBenefit.class)
+        .withId(TransformerUtils.buildEobId(ClaimType.PDE, "-1234"))
+        .execute();
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an
+   * invalid {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#IdParam} parameter.
+   */
+  @Test(expected = InvalidRequestException.class)
+  public void readEobForInvalidIdParamPartDEvent() {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // The IdParam is not valid, so this should return an exception.
+    fhirClient
+        .read()
+        .resource(ExplanationOfBenefit.class)
+        .withId(TransformerUtils.buildEobId(ClaimType.PDE, "-1?234"))
         .execute();
   }
 
@@ -1551,7 +1592,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneId)))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNull(
+    Assert.assertEquals(
+        "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
+        TransformerConstants.FALLBACK_LAST_UPDATED,
         filterToClaimType(searchAll, ClaimType.CARRIER).get(0).getMeta().getLastUpdated());
 
     // Find all EOBs with < now()
@@ -1563,10 +1606,12 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .lastUpdated(new DateRangeParam().setUpperBoundInclusive(new Date()))
             .returnBundle(Bundle.class)
             .execute();
-    Assert.assertNull(
+    Assert.assertEquals(
+        "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
+        TransformerConstants.FALLBACK_LAST_UPDATED,
         filterToClaimType(searchWithLessThan, ClaimType.CARRIER).get(0).getMeta().getLastUpdated());
     Assert.assertEquals(
-        "Expected the search for lastUpdated <= now() to include null lastUpdated resources",
+        "Expected the search for lastUpdated <= now() to include resources with fallback lastUpdated values",
         searchAll.getTotal(),
         searchWithLessThan.getTotal());
 
@@ -1585,6 +1630,52 @@ public final class ExplanationOfBenefitResourceProviderIT {
         "Expected the search for lastUpdated >= now()-100 to not include null lastUpdated resources",
         searchAll.getTotal() - 1,
         searchWithGreaterThan.getTotal());
+  }
+
+  @Test
+  public void searchEobWithServiceDate() {
+    Beneficiary beneficiary = loadSampleA();
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    // For SampleA data, we have the following service dates
+    // HHA 23-JUN-2015
+    // Hospice 30-JAN-2014
+    // Inpatient 27-JAN-2016
+    // Outpatient 24-JAN-2011
+    // SNF 18-DEC-2013
+    // Carrier 27-OCT-1999
+    // DME 03-FEB-2014
+    // PDE 12-MAY-2015
+
+    // TestName:serviceDate:ExpectedCount
+    List<Triple<String, String, Integer>> testCases =
+        ImmutableList.of(
+            ImmutableTriple.of("No service date filter", "", 8),
+            ImmutableTriple.of(
+                "Contains all", "service-date=ge1999-10-27&service-date=le2016-01-27", 8),
+            ImmutableTriple.of("Contains none - upper bound", "service-date=gt2016-01-27", 0),
+            ImmutableTriple.of("Contains none - lower bound", "service-date=lt1999-10-27", 0),
+            ImmutableTriple.of(
+                "Exclusive check - no earliest/latest",
+                "service-date=gt1999-10-27&service-date=lt2016-01-27",
+                6),
+            ImmutableTriple.of(
+                "Year end 2015 inclusive check (using last day of 2015)",
+                "service-date=le2015-12-31",
+                7),
+            ImmutableTriple.of(
+                "Year end 2014 exclusive check (using first day of 2015)",
+                "service-date=lt2015-01-01",
+                5));
+
+    testCases.forEach(
+        testCase -> {
+          Bundle bundle =
+              fetchWithServiceDate(
+                  fhirClient, beneficiary.getBeneficiaryId(), testCase.getMiddle());
+          Assert.assertNotNull(bundle);
+          Assert.assertEquals(
+              testCase.getLeft(), testCase.getRight().intValue(), bundle.getTotal());
+        });
   }
 
   /** Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after each test case. */
@@ -1726,5 +1817,15 @@ public final class ExplanationOfBenefitResourceProviderIT {
               .setParameter("claimId", claimId)
               .executeUpdate();
         });
+  }
+
+  private Bundle fetchWithServiceDate(
+      IGenericClient fhirClient, String id, String serviceEndParam) {
+    String url =
+        "ExplanationOfBenefit?patient=Patient%2F"
+            + id
+            + (serviceEndParam.isEmpty() ? "" : "&" + serviceEndParam)
+            + "&_format=application%2Fjson%2Bfhir";
+    return fhirClient.search().byUrl(url).returnBundle(Bundle.class).execute();
   }
 }

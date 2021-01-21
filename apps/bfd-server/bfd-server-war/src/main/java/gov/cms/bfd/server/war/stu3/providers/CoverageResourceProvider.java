@@ -18,6 +18,10 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -45,8 +49,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public final class CoverageResourceProvider implements IResourceProvider {
-  /** A {@link Pattern} that will match the {@link Coverage#getId()}s used in this application. */
-  private static final Pattern COVERAGE_ID_PATTERN = Pattern.compile("(.*)-(\\p{Alnum}+)");
+  /**
+   * A {@link Pattern} that will match the {@link Coverage#getId()}s used in this application, e.g.
+   * <code>part-a-1234</code> or <code>part-a--1234</code> (for negative IDs).
+   */
+  private static final Pattern COVERAGE_ID_PATTERN =
+      Pattern.compile("(\\p{Alnum}+-\\p{Alnum})-(-?\\p{Alnum}+)");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProvider.class);
 
@@ -105,7 +113,9 @@ public final class CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     Matcher coverageIdMatcher = COVERAGE_ID_PATTERN.matcher(coverageIdText);
-    if (!coverageIdMatcher.matches()) throw new ResourceNotFoundException(coverageId);
+    if (!coverageIdMatcher.matches())
+      throw new IllegalArgumentException("Unsupported ID pattern: " + coverageIdText);
+
     String coverageIdSegmentText = coverageIdMatcher.group(1);
     Optional<MedicareSegment> coverageIdSegment =
         MedicareSegment.selectByUrlPrefix(coverageIdSegmentText);
@@ -165,12 +175,14 @@ public final class CoverageResourceProvider implements IResourceProvider {
       coverages = new LinkedList<IBaseResource>();
     }
 
-    PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/Coverage?");
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Coverage?");
 
     Operation operation = new Operation(Operation.Endpoint.V1_COVERAGE);
     operation.setOption("by", "beneficiary");
-    operation.publishOperationName();
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
+    operation.publishOperationName();
 
     return TransformerUtils.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());

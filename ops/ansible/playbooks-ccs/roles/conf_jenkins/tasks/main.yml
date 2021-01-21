@@ -41,14 +41,14 @@
   register: shell_jenkins_config_misc
   changed_when: "(shell_jenkins_config_misc is success) and 'Changed' in shell_jenkins_config_misc.output"
 
-- name: Configure Security Recommendations
+- name: Install Maven with Autoinstaller
   jenkins_script:
     url: "{{ jenkins_url_local }}"
     user: "{{ jenkins_dynamic_admin_username | default(omit) }}"
     password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
-    script: "{{ lookup('template', 'templates/configSecrec.groovy.j2') }}"
-  register: shell_jenkins_security_recommendations
-  changed_when: "(shell_jenkins_security_recommendations is success) and 'Changed' in shell_jenkins_security_recommendations.output"
+    script: "{{ lookup('template', 'templates/configMavenAutoinstaller.groovy.j2') }}"
+  register: jenkins_script_maven
+  changed_when: "(jenkins_script_maven is success) and 'Changed' in jenkins_script_maven.output"
 
 - name: Configure File Provider Plugin
   jenkins_script:
@@ -58,15 +58,6 @@
     script: "{{ lookup('template', 'templates/configureFileProvider.groovy.j2') }}"
   register: jenkins_script_file_provider
   changed_when: "(jenkins_script_file_provider is success) and 'Changed' in jenkins_script_file_provider.output"
-
- - name: Install Maven with Autoinstaller
-   jenkins_script:
-     url: "{{ jenkins_url_local }}"
-     user: "{{ jenkins_dynamic_admin_username | default(omit) }}"
-     password: "{{ jenkins_dynamic_admin_password | default(omit) }}"
-     script: "{{ lookup('template', 'templates/configMavenAutoinstaller.groovy.j2') }}"
-   register: jenkins_script_maven
-   changed_when: "(jenkins_script_maven is success) and 'Changed' in jenkins_script_maven.output"
   
 - name: Configure GitHub Settings
   jenkins_script:

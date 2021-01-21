@@ -3,30 +3,61 @@
 # Installs additional build and deploy tools
 ###
 
-- name: Install tfenv to manage terrfaorm
+- name: Install tfenv to manage terraform
   git:
     repo: https://github.com/tfutils/tfenv.git 
-    dest: ~/.tfenv
+    dest: /usr/bin/.tfenv
 
 - name: Create symlinks for tfenv
   file:
-    src: ~/.tfenv/bin/tfenv
+    src: /usr/bin/.tfenv/bin/tfenv
     dest: /usr/bin/tfenv
     mode: '0755'
     state: link
     
 - name: Link tfenv tf wrapper. 
   file:
-    src: ~/.tfenv/bin/terraform
+    src: /usr/bin/.tfenv/bin/terraform
     dest: /usr/bin/terraform
     mode: '0755'
     state: link
 
 - name: Install terraform 
-  shell: tfenv install 0.12.5
+  shell: tfenv install {{ tf_version }}
   
 - name: Install packer
   unarchive:
     src: https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip
     dest: /usr/bin
     remote_src: yes
+
+- name: Install - AWS CLI
+  pip:
+    name: "awscli"
+
+- name: Create .aws directory in the home directory
+  file:
+    path: "{{ jenkins_home }}/.aws/"
+    state: directory
+    owner: "jenkins"
+    group: "jenkins"
+    mode: 0755
+
+- name: Copy the aws config file to the box
+  become: yes
+  template:
+    src: ../templates/aws_config.j2
+    dest: "{{ jenkins_home }}/.aws/config"
+    owner: "jenkins"
+    group: "jenkins"
+    mode: 0600
+
+- name: Install - jq
+  yum:
+    name: 
+      - jq
+
+- name: Install nfs-utils
+  yum:
+    name:
+      - nfs-utils

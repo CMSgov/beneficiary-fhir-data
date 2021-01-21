@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -20,8 +21,16 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -30,6 +39,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -57,9 +67,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
   /**
    * A {@link Pattern} that will match the {@link ExplanationOfBenefit#getId()}s used in this
-   * application.
+   * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
-  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(\\p{Alnum}+)");
+  private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -119,7 +129,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     if (eobIdText == null || eobIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
     Matcher eobIdMatcher = EOB_ID_PATTERN.matcher(eobIdText);
-    if (!eobIdMatcher.matches()) throw new ResourceNotFoundException(eobId);
+    if (!eobIdMatcher.matches())
+      throw new IllegalArgumentException("Unsupported ID pattern: " + eobIdText);
+
     String eobIdTypeText = eobIdMatcher.group(1);
     Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
@@ -175,6 +187,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    *     SamhsaMatcher} to filter out all SAMHSA-related claims from the results
    * @param lastUpdated an {@link OptionalParam} that specifies a date range for the lastUpdated
    *     field.
+   * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
+   *     ExplanationOfBenefit}s that completed
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
@@ -198,6 +212,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
       @OptionalParam(name = "_lastUpdated")
           @Description(shortDefinition = "Include resources last updated in the given range")
           DateRangeParam lastUpdated,
+      @OptionalParam(name = "service-date")
+          @Description(shortDefinition = "Include resources that completed in the given range")
+          DateRangeParam serviceDate,
       RequestDetails requestDetails) {
     /*
      * startIndex is an optional parameter here because it must be declared in the
@@ -208,12 +225,23 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
     String beneficiaryId = patient.getIdPart();
     Set<ClaimType> claimTypes = parseTypeParam(type);
-    PageLinkBuilder paging = new PageLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
+    OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
     Operation operation = new Operation(Operation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");
-    operation.setOption("types", claimTypes.toString());
+    operation.setOption(
+        "types",
+        (claimTypes.size() == ClaimType.values().length)
+            ? "*"
+            : claimTypes.stream()
+                .sorted(Comparator.comparing(ClaimType::name))
+                .collect(Collectors.toList())
+                .toString());
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
+    operation.setOption(
+        "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
+    operation.setOption(
+        "service-date", Boolean.toString(serviceDate != null && !serviceDate.isEmpty()));
     operation.publishOperationName();
 
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
@@ -232,38 +260,44 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
       eobs.addAll(
           transformToEobs(
               ClaimType.CARRIER,
-              findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId, lastUpdated)));
+              findClaimTypeByPatient(ClaimType.CARRIER, beneficiaryId, lastUpdated, serviceDate)));
     if (claimTypes.contains(ClaimType.DME))
       eobs.addAll(
           transformToEobs(
-              ClaimType.DME, findClaimTypeByPatient(ClaimType.DME, beneficiaryId, lastUpdated)));
+              ClaimType.DME,
+              findClaimTypeByPatient(ClaimType.DME, beneficiaryId, lastUpdated, serviceDate)));
     if (claimTypes.contains(ClaimType.HHA))
       eobs.addAll(
           transformToEobs(
-              ClaimType.HHA, findClaimTypeByPatient(ClaimType.HHA, beneficiaryId, lastUpdated)));
+              ClaimType.HHA,
+              findClaimTypeByPatient(ClaimType.HHA, beneficiaryId, lastUpdated, serviceDate)));
     if (claimTypes.contains(ClaimType.HOSPICE))
       eobs.addAll(
           transformToEobs(
               ClaimType.HOSPICE,
-              findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId, lastUpdated)));
+              findClaimTypeByPatient(ClaimType.HOSPICE, beneficiaryId, lastUpdated, serviceDate)));
     if (claimTypes.contains(ClaimType.INPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.INPATIENT,
-              findClaimTypeByPatient(ClaimType.INPATIENT, beneficiaryId, lastUpdated)));
+              findClaimTypeByPatient(
+                  ClaimType.INPATIENT, beneficiaryId, lastUpdated, serviceDate)));
     if (claimTypes.contains(ClaimType.OUTPATIENT))
       eobs.addAll(
           transformToEobs(
               ClaimType.OUTPATIENT,
-              findClaimTypeByPatient(ClaimType.OUTPATIENT, beneficiaryId, lastUpdated)));
+              findClaimTypeByPatient(
+                  ClaimType.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate)));
     if (claimTypes.contains(ClaimType.PDE))
       eobs.addAll(
           transformToEobs(
-              ClaimType.PDE, findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated)));
+              ClaimType.PDE,
+              findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated, serviceDate)));
     if (claimTypes.contains(ClaimType.SNF))
       eobs.addAll(
           transformToEobs(
-              ClaimType.SNF, findClaimTypeByPatient(ClaimType.SNF, beneficiaryId, lastUpdated)));
+              ClaimType.SNF,
+              findClaimTypeByPatient(ClaimType.SNF, beneficiaryId, lastUpdated, serviceDate)));
 
     if (Boolean.parseBoolean(excludeSamhsa)) filterSamhsa(eobs);
 
@@ -306,7 +340,10 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Trace
   private <T> List<T> findClaimTypeByPatient(
-      ClaimType claimType, String patientId, DateRangeParam lastUpdated) {
+      ClaimType claimType,
+      String patientId,
+      DateRangeParam lastUpdated,
+      DateRangeParam serviceDate) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery((Class) claimType.getEntityClass());
     Root root = criteria.from(claimType.getEntityClass());
@@ -322,7 +359,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     }
     criteria.where(wherePredicate);
 
-    List claimEntities = null;
+    List<T> claimEntities = null;
     Long eobsByBeneIdQueryNanoSeconds = null;
     Timer.Context timerEobQuery =
         metricRegistry
@@ -341,6 +378,34 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
           String.format("eobs_by_bene_id.%s", claimType.name().toLowerCase()),
           eobsByBeneIdQueryNanoSeconds,
           claimEntities == null ? 0 : claimEntities.size());
+    }
+
+    if (claimEntities != null && serviceDate != null && !serviceDate.isEmpty()) {
+      final Date lowerBound = serviceDate.getLowerBoundAsInstant();
+      final Date upperBound = serviceDate.getUpperBoundAsInstant();
+      final java.util.function.Predicate<LocalDate> lowerBoundCheck =
+          lowerBound == null
+              ? (date) -> true
+              : (date) ->
+                  compareLocalDate(
+                      date,
+                      lowerBound.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                      serviceDate.getLowerBound().getPrefix());
+      final java.util.function.Predicate<LocalDate> upperBoundCheck =
+          upperBound == null
+              ? (date) -> true
+              : (date) ->
+                  compareLocalDate(
+                      date,
+                      upperBound.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                      serviceDate.getUpperBound().getPrefix());
+      return claimEntities.stream()
+          .filter(
+              entity ->
+                  lowerBoundCheck.test(claimType.getServiceEndAttributeFunction().apply(entity))
+                      && upperBoundCheck.test(
+                          claimType.getServiceEndAttributeFunction().apply(entity)))
+          .collect(Collectors.toList());
     }
 
     return claimEntities;
@@ -370,6 +435,37 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     while (eobsIter.hasNext()) {
       ExplanationOfBenefit eob = (ExplanationOfBenefit) eobsIter.next();
       if (samhsaMatcher.test(eob)) eobsIter.remove();
+    }
+  }
+
+  /**
+   * Compares {@link LocalDate} a against {@link LocalDate} using the supplied {@link
+   * ParamPrefixEnum}
+   *
+   * @param a
+   * @param b
+   * @param prefix prefix to use. Supported: {@link ParamPrefixEnum#GREATERTHAN_OR_EQUALS}, {@link
+   *     ParamPrefixEnum#GREATERTHAN}, {@link ParamPrefixEnum#LESSTHAN_OR_EQUALS}, {@link
+   *     ParamPrefixEnum#LESSTHAN}
+   * @return true if the comparison between a and b returned true.
+   * @throws {@link IllegalArgumentException} if caller supplied an unsupported prefix
+   */
+  private boolean compareLocalDate(
+      @Nullable LocalDate a, @Nullable LocalDate b, ParamPrefixEnum prefix) {
+    if (a == null || b == null) {
+      return false;
+    }
+    switch (prefix) {
+      case GREATERTHAN_OR_EQUALS:
+        return !a.isBefore(b);
+      case GREATERTHAN:
+        return a.isAfter(b);
+      case LESSTHAN_OR_EQUALS:
+        return !a.isAfter(b);
+      case LESSTHAN:
+        return a.isBefore(b);
+      default:
+        throw new IllegalArgumentException(String.format("Unsupported prefix supplied %s", prefix));
     }
   }
 

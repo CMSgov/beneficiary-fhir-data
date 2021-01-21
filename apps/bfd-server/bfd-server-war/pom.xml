@@ -65,6 +65,14 @@
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 			<version>${hapi-fhir.version}</version>
 		</dependency>
+		
+		<dependency>
+			<!-- At least one "structures" JAR must also be included -->
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<version>${hapi-fhir.version}</version>
+		</dependency>
+		
 		<dependency>
 			<!-- This dependency includes the server HAPI-FHIR classes -->
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -107,6 +115,13 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+			<!-- Provides the @Inject annotation. Does NOT provide dependency injection;
+				just the standardized annotation for it. -->
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
 		<dependency>
 			<!-- We mostly use Spring to ensure that our JPA EntityManagers are properly 
 				managed. -->
@@ -208,7 +223,7 @@
 			<!-- Used for Bloom filters -->
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sketch_2.12</artifactId>
-			<version>2.4.4</version>
+			<version>2.4.7</version>
 		</dependency>
 	</dependencies>
 

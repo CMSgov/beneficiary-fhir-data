@@ -253,6 +253,8 @@ public class RifLoaderIdleTasks {
    * @return true if done with this task.
    */
   public boolean doInitialTask() {
+    if (!options.isFixupsEnabled()) return true;
+
     final EntityManager em = entityManagerFactory.createEntityManager();
 
     final Long beneficiaryCount =

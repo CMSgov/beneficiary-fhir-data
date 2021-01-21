@@ -176,24 +176,6 @@ createOrUpdateFileCredentials(
   )
 )
 
-createOrUpdateStringCredentials(
-  new org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl(
-    com.cloudbees.plugins.credentials.CredentialsScope.GLOBAL,
-    'proxy-host',
-    'The HTTP/S proxy server host to use.',
-    hudson.util.Secret.fromString('{{ vault_proxy_host }}')
-  )
-)
-
-createOrUpdateStringCredentials(
-  new org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl(
-    com.cloudbees.plugins.credentials.CredentialsScope.GLOBAL,
-    'proxy-port',
-    'The HTTP/S proxy server port to use.',
-    hudson.util.Secret.fromString('{{ vault_proxy_port }}')
-  )
-)
-
 projectNames = [
   'bluebutton-parent-pom',
   'bluebutton-data-model',

@@ -6,6 +6,7 @@
 locals {
   azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
   env_config        = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
+  is_prod           = substr(var.env_config.env, 0, 4) == "prod"
   port              = 7443
   cw_period         = 60    # Seconds
   cw_eval_periods   = 3
@@ -19,7 +20,8 @@ locals {
       "bfd-prod-vpc-to-mct-prod-vpc", "bfd-prod-vpc-to-mct-prod-dr-vpc", 
       "bfd-prod-vpc-to-dpc-prod-vpc", 
       "bfd-prod-vpc-to-bluebutton-prod", 
-      "bfd-prod-vpc-to-bcda-prod-vpc"
+      "bfd-prod-vpc-to-bcda-prod-vpc",
+      "bfd-prod-to-ab2d-prod"
     ],
     prod-sbx        = [
       "bfd-prod-sbx-to-bcda-dev", "bfd-prod-sbx-to-bcda-test", "bfd-prod-sbx-to-bcda-sbx", "bfd-prod-sbx-to-bcda-opensbx",
@@ -86,26 +88,35 @@ data "aws_sns_topic" "cloudwatch_ok" {
   name  = "bfd-${var.env_config.env}-cloudwatch-ok"
 }
 
-# RDS Replicas
-#
-data "aws_db_instance" "replica" {
-  count                   = 3
-  db_instance_identifier  = "bfd-${var.env_config.env}-replica${count.index+1}"
-}
+# # RDS Replicas
+# #
+# data "aws_db_instance" "replica" {
+#   count                   = 3
+#   db_instance_identifier  = "bfd-${var.env_config.env}-replica${count.index+1}"
+# }
 
-# RDS Security Groups
-#
-data "aws_security_group" "db_primary" {
-  filter {
-    name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-master-rds"]
-  }
-}
+# # RDS Security Groups
+# #
+# data "aws_security_group" "db_primary" {
+#   filter {
+#     name        = "tag:Name"
+#     values      = ["bfd-${var.env_config.env}-master-rds"]
+#   }
+# }
 
-data "aws_security_group" "db_replicas" {
+# data "aws_security_group" "db_replicas" {
+#   filter {
+#     name        = "tag:Name"
+#     values      = ["bfd-${var.env_config.env}-rds"]
+#   }
+# }
+
+# Aurora security group
+#
+data "aws_security_group" "aurora_cluster" {
   filter {
-    name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-rds"]
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-aurora-cluster"]
   }
 }
 
@@ -221,9 +232,9 @@ module "fhir_asg" {
 
   # Initial size is one server per AZ
   asg_config        = {
-    min             = length(local.azs)
+    min             = local.is_prod ? 2*length(local.azs): length(local.azs)
     max             = 8*length(local.azs)
-    desired         = length(local.azs)
+    desired         = local.is_prod ? 2*length(local.azs): length(local.azs)
     sns_topic_arn   = ""
     instance_warmup = 430
   }
@@ -231,7 +242,7 @@ module "fhir_asg" {
   launch_config   = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
     instance_type   = "m5.xlarge"             # Use reserve instances
-    volume_size     = 100 # GB
+    volume_size     = 60 # GB
     ami_id          = var.fhir_ami 
     key_name        = var.ssh_key_name 
 
@@ -243,8 +254,8 @@ module "fhir_asg" {
   }
 
   db_config       = {
-    db_sg         = data.aws_security_group.db_replicas.id
-    role          = "replica"
+    db_sg         = data.aws_security_group.aurora_cluster.id
+    role          = "aurora cluster"
   }
 
   mgmt_config     = {
@@ -325,6 +336,10 @@ module "bfd_server_metrics_ab2d" {
 
 # FHIR server alarms, partner specific
 #
+
+# TODO: Deprecate this alarm in favor of metric math expression to more accurately
+# represet our error budget
+#
 module "bfd_server_alarm_all_500s" {
   source = "../resources/bfd_server_alarm"
 
@@ -334,68 +349,52 @@ module "bfd_server_alarm_all_500s" {
     alarm_name       = "all-500s"
     partner_name     = "all"
     metric_prefix    = "http-requests/count-500"
-    eval_periods     = "1"
-    period           = "300"
+    eval_periods     = "15"
+    period           = "60"
+    datapoints       = "15"
     statistic        = "Sum"
     ext_statistic    = null
-    threshold        = "20.0"
+    threshold        = "8.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
 }
 
-module "bfd_server_alarm_all_eob_4s" {
+module "bfd_server_alarm_all_eob_6s-p95" {
   source = "../resources/bfd_server_alarm"
 
   env    = var.env_config.env
 
   alarm_config = {
-    alarm_name       = "all-eob-4s"
+    alarm_name       = "all-eob-6s-p95"
     partner_name     = "all"
     metric_prefix    = "http-requests/latency/eobAll"
-    eval_periods     = "1"
-    period           = "900"
+    eval_periods     = "15"
+    period           = "60"
+    datapoints       = "15"
     statistic        = null
-    ext_statistic    = "p90"
-    threshold        = "4000.0"
-    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-  }
-}
-
-module "bfd_server_alarm_all_eob_6s" {
-  source = "../resources/bfd_server_alarm"
-
-  env    = var.env_config.env
-
-  alarm_config = {
-    alarm_name       = "all-eob-6s"
-    partner_name     = "all"
-    metric_prefix    = "http-requests/latency/eobAll"
-    eval_periods     = "1"
-    period           = "3600"
-    statistic        = null
-    ext_statistic    = "p99"
+    ext_statistic    = "p95"
     threshold        = "6000.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
 }
 
-module "bfd_server_alarm_mct_eob_6s" {
+module "bfd_server_alarm_mct_eob_3s_p95" {
   source = "../resources/bfd_server_alarm"
 
   env    = var.env_config.env
 
   alarm_config = {
-    alarm_name       = "mct-eob-6s"
+    alarm_name       = "mct-eob-3s-p95"
     partner_name     = "mct"
     metric_prefix    = "http-requests/latency/eobAll"
-    eval_periods     = "1"
-    period           = "900"
+    eval_periods     = "15"
+    period           = "60"
+    datapoints       = "15"
     statistic        = null
-    ext_statistic    = "p99"
-    threshold        = "6000.0"
+    ext_statistic    = "p95"
+    threshold        = "3000.0"
     alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
     ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
   }
@@ -418,7 +417,7 @@ module "bfd_pipeline" {
   }
 
   db_config       = {
-    db_sg         = data.aws_security_group.db_primary.id
+    db_sg         = data.aws_security_group.aurora_cluster.id
   }
 
   mgmt_config     = {

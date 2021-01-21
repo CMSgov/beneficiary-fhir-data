@@ -52,3 +52,4 @@ variable "lb_config" {
   type        = object({name=string, port=number, sg=string})
   default     = null
 }
+

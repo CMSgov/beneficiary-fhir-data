@@ -1,10 +1,10 @@
 package gov.cms.bfd.model.rif.samples;
 
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.rif.BeneficiaryColumn;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.parse.RifParsingUtils;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;

@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
@@ -25,10 +24,16 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -70,6 +75,9 @@ import org.junit.Assert;
  * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer}).
  */
 final class TransformerTestUtils {
+  /* Do this very slow operation once */
+  private static final FhirContext fhirContext = FhirContext.forDstu3();
+
   /**
    * @param categoryVariable the {@link CcwCodebookVariable} for the {@link Extension#getUrl()} to
    *     find and verify
@@ -334,7 +342,10 @@ final class TransformerTestUtils {
       ExplanationOfBenefit eob) {
     CareTeamComponent careTeamEntry =
         findCareTeamEntryForProviderIdentifier(
-            TransformerConstants.CODING_NPI_US, expectedPractitioner, eob.getCareTeam());
+            TransformerConstants.CODING_NPI_US,
+            expectedPractitioner,
+            expectedCareTeamRole,
+            eob.getCareTeam());
     Assert.assertNotNull(careTeamEntry);
     assertCodingEquals(
         expectedCareTeamRole.getSystem(),
@@ -909,12 +920,7 @@ final class TransformerTestUtils {
    * @param resource the FHIR {@link Resource} to check
    */
   static void assertNoEncodedOptionals(Resource resource) {
-    FhirContext fhirContext = FhirContext.forDstu3();
     String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource);
-    String encodedResourceJson = fhirContext.newJsonParser().encodeResourceToString(resource);
-    System.out.println(encodedResourceXml);
-    System.out.println(encodedResourceJson);
-
     Assert.assertFalse(encodedResourceXml.contains("Optional"));
   }
 
@@ -1014,6 +1020,22 @@ final class TransformerTestUtils {
   }
 
   /**
+   * Does the role of the care team component match what is expected
+   *
+   * @param expectedRole expected role; maybe empty
+   * @param actualComponent the Care Team Component to test
+   * @return iff it matches or expected role is empty
+   */
+  private static boolean doesCareTeamComponentMatchRole(
+      ClaimCareteamrole expectedRole, CareTeamComponent actualComponent) {
+    if (expectedRole == null) return true;
+    if (!actualComponent.hasRole()) return false;
+    final Coding actualRole = actualComponent.getRole().getCodingFirstRep();
+    return actualRole.getCode().equals(expectedRole.toCode())
+        && actualRole.getSystem().equals(ClaimCareteamrole.NULL.getSystem());
+  }
+
+  /**
    * @param expectedProviderNpi the {@link Identifier#getValue()} of the provider to find a matching
    *     {@link CareTeamComponent} for
    * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
@@ -1024,7 +1046,7 @@ final class TransformerTestUtils {
   static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        TransformerConstants.CODING_NPI_US, expectedProviderNpi, careTeam);
+        TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
   }
 
   /**
@@ -1040,6 +1062,7 @@ final class TransformerTestUtils {
   private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedIdentifierSystem,
       String expectedIdentifierValue,
+      ClaimCareteamrole expectedRole,
       List<CareTeamComponent> careTeam) {
     Optional<CareTeamComponent> careTeamEntry =
         careTeam.stream()
@@ -1047,6 +1070,7 @@ final class TransformerTestUtils {
                 ctc ->
                     doesReferenceMatchIdentifier(
                         expectedIdentifierSystem, expectedIdentifierValue, ctc.getProvider()))
+            .filter(ctc -> doesCareTeamComponentMatchRole(expectedRole, ctc))
             .findFirst();
     return careTeamEntry.orElse(null);
   }
@@ -1700,7 +1724,9 @@ final class TransformerTestUtils {
       Optional<String> attendingPhysicianNpi,
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
-      Optional<String> fiscalIntermediaryNumber) {
+      Optional<String> fiscalIntermediaryNumber,
+      Optional<String> fiDocumentClaimControlNumber,
+      Optional<String> fiOriginalClaimControlNumber) {
 
     TransformerTestUtils.assertReferenceIdentifierEquals(
         TransformerConstants.CODING_NPI_US, organizationNpi.get(), eob.getOrganization());
@@ -1761,6 +1787,7 @@ final class TransformerTestUtils {
       BigDecimal totalChargeAmount,
       BigDecimal nonCoveredChargeAmount,
       BigDecimal unitCount,
+      String claimControlNum,
       Optional<BigDecimal> nationalDrugCodeQuantity,
       Optional<String> nationalDrugCodeQualifierCode,
       Optional<String> revenueCenterRenderingPhysicianNPI,
@@ -1836,6 +1863,7 @@ final class TransformerTestUtils {
 
     TransformerTestUtils.assertCareTeamEquals(
         operatingPhysicianNpi.get(), ClaimCareteamrole.ASSIST, eob);
+
     TransformerTestUtils.assertCareTeamEquals(
         otherPhysicianNpi.get(), ClaimCareteamrole.OTHER, eob);
 
@@ -2008,13 +2036,23 @@ final class TransformerTestUtils {
   static void assertLastUpdatedEquals(
       Optional<Date> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
-      final Date lastUpdated = expectedDateTime.get();
-      Assert.assertEquals(
-          "Expect lastUpdated to be equal",
-          actualResource.getMeta().getLastUpdated().toInstant(),
-          lastUpdated.toInstant());
+      /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
+       * use one instance of an IT DB with the same resources for most tests.
+       * The actual resources a test finds may have a lastUpdated value slightly after the time the test wrote it
+       * because another test over wrote the same resource.
+       * To handle this case, dates that are within a second of each other match.
+       */
+      final Instant expectedLastUpdated = expectedDateTime.get().toInstant();
+      final Instant actualLastUpdated = actualResource.getMeta().getLastUpdated().toInstant();
+      final Duration diff = Duration.between(expectedLastUpdated, actualLastUpdated);
+      Assert.assertTrue(
+          "Expect the actual lastUpdated to be equal or after the loaded resources",
+          diff.compareTo(Duration.ofSeconds(1)) <= 0);
     } else {
-      Assert.assertNull("Expect lastUpdated to be null", actualResource.getMeta().getLastUpdated());
+      Assert.assertEquals(
+          "Expect lastUpdated to be the fallback value",
+          TransformerConstants.FALLBACK_LAST_UPDATED,
+          actualResource.getMeta().getLastUpdated());
     }
   }
 }

@@ -1,3 +1,4 @@
+${jsonencode(
 {
   "Version": "2012-10-17",
   "Id": "bfd-${env}-${name}-kms-policy",
@@ -7,8 +8,7 @@
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          %{ for admin in admins ~}"${admin}",%{ endfor ~}
-          "${root}"
+          for arn in concat(admins, root) : "${arn}"
         ]
       },
       "Action": [
@@ -21,13 +21,13 @@
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-          %{ for idx, role in roles ~}"${role}"%{ if idx + 1 != length(roles) ~},%{ endif ~}%{ endfor ~}
+          for arn in concat(readers, writers) : "${arn}"
         ]
       },
       "Action": [
         "kms:Encrypt",
         "kms:Decrypt",
-        "kms:ReEncrypt",
+        "kms:ReEncrypt*",
         "kms:GenerateDataKey*",
         "kms:DescribeKey"
       ],
@@ -35,3 +35,4 @@
     }
   ]
 }
+)}

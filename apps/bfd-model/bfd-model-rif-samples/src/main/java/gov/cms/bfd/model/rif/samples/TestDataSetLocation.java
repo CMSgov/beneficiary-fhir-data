@@ -2,7 +2,7 @@ package gov.cms.bfd.model.rif.samples;
 
 /** Enumerates the locations of various test data sets in S3. */
 public enum TestDataSetLocation {
-  SYNTHETIC_DATA("bfd-public-test-data", "data-synthetic/2020-1-25-mbi-with-negative-ids"),
+  SYNTHETIC_DATA("bfd-public-test-data", "data-synthetic/2020-04-10-part-d-enrollment"),
   DUMMY_DATA_1000000_BENES("data-random/1000000-beneficiaries-2017-10-21T00:00:00.000Z"),
 
   DUMMY_DATA_100000_BENES("data-random/100000-beneficiaries-2017-10-21T00:00:00.000Z"),

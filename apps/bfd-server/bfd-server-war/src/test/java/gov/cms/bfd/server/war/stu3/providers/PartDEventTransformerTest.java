@@ -6,6 +6,9 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.IdentifierType;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.sql.Date;
@@ -30,6 +33,64 @@ public final class PartDEventTransformerTest {
    */
   @Test
   public void transformSampleARecord() throws FHIRException {
+    PartDEvent claim = getPartDEventClaim();
+    ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
+    assertMatches(claim, eob);
+  }
+
+  @Test
+  public void transformSampleARecordWithNPI() throws FHIRException {
+    String serviceProviderIdQualiferCode = "01";
+    String serviceProviderCode = IdentifierType.NPI.getSystem();
+    checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
+  }
+
+  @Test
+  public void transformSampleARecordWithUPIN() throws FHIRException {
+    String serviceProviderIdQualiferCode = "06";
+    String serviceProviderCode = IdentifierType.UPIN.getSystem();
+    checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
+  }
+
+  @Test
+  public void transformSampleARecordWithNCPDP() throws FHIRException {
+    String serviceProviderIdQualiferCode = "07";
+    String serviceProviderCode = IdentifierType.NCPDP.getSystem();
+    checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
+  }
+
+  @Test
+  public void transformSampleARecordWithStateLicenseNumber() throws FHIRException {
+    String serviceProviderIdQualiferCode = "08";
+    String serviceProviderCode = IdentifierType.SL.getSystem();
+    checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
+  }
+
+  @Test
+  public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
+    String serviceProviderIdQualiferCode = "11";
+    String serviceProviderCode = IdentifierType.FTN.getSystem();
+    checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.PartDEventTransformer#transform(com.codahale.metrics.MetricRegistry,
+   * Object)} works as expected when run against the {@link String serviceProviderIdQualiferCode}
+   * and {@link String serviceProviderCode}.
+   */
+  private void checkOrgAndFacility(
+      String serviceProviderIdQualiferCode, String serviceProviderCode) {
+    PartDEvent claim = getPartDEventClaim();
+    claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
+    ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
+    TransformerTestUtils.assertReferenceEquals(
+        serviceProviderCode, claim.getServiceProviderId(), eob.getOrganization());
+    TransformerTestUtils.assertReferenceEquals(
+        serviceProviderCode, claim.getServiceProviderId(), eob.getFacility());
+  }
+
+  private PartDEvent getPartDEventClaim() {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     PartDEvent claim =
@@ -39,10 +100,8 @@ public final class PartDEventTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = PartDEventTransformer.transform(new MetricRegistry(), claim);
-    assertMatches(claim, eob);
+    return claim;
   }
-
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
    * the specified {@link PartDEvent}.
@@ -224,7 +283,7 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), "Childrens Acetaminophen - ACETAMINOPHEN");
+          claim.getNationalDrugCode(), "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

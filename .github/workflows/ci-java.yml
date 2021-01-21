@@ -1,14 +1,10 @@
 name: 'CI - Java'
-on:
-  pull_request:
-    paths:
-      - apps/**
+on: pull_request
 jobs:
   mvn-job:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
-      matrix:
-        java_version: [1.8]
+      matrix: 
         mvn_command: ['verify', 'com.coveo:fmt-maven-plugin:check']
     steps:
       - name: 'Configure AWS credentials'
@@ -22,7 +18,9 @@ jobs:
       - name: 'Setup JDK'
         uses: actions/setup-java@v1
         with:
-          java-version: ${{ matrix.java_version }}
+          java-version: '1.8.0.252'
+          # Pinning this version as version 262 causes AuthenticationIT tests to fail
+          # See BFD-332.
       - name: 'Generate maven toolchain config'
         run: |
           cat << EOF > ~/.m2/toolchains.xml
@@ -30,7 +28,7 @@ jobs:
             <toolchain>
               <type>jdk</type>
               <provides>
-                <version>${{ matrix.java_version }}</version>
+                <version>1.8</version>
                 <vendor>OpenJDK</vendor>
               </provides>
               <configuration>

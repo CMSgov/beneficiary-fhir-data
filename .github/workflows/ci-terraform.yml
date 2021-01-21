@@ -1,8 +1,5 @@
 name: 'CI - Terraform'
-on:
-  pull_request:
-    paths:
-      - ops/terraform/**
+on: pull_request
 jobs:
   tf-validate:
     runs-on: ubuntu-latest

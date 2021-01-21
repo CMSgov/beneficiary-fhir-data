@@ -149,6 +149,12 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && s.contains(" join ")
                 && s.contains("\"hicn\"="))),
 
+    BENE_BY_COVERAGE(
+        "bene_by_coverage",
+        (s ->
+            s.contains("from \"Beneficiaries\"")
+                && s.contains("where beneficiar0_.\"partDContractNumber"))),
+
     EOBS_BY_BENE_ID_CARRIER(
         "eobs_by_bene_id.carrier", (s -> s.contains(" from \"CarrierClaims\" "))),
 

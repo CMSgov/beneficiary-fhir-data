@@ -7,8 +7,16 @@ locals {
 
   pipeline_messages_error = {
     period       = "300"
+    eval_periods = "10"
+    threshold    = "0"
+    datapoints   = "10"
+  }
+
+  pipeline_messages_datasetfailed = {
+    period       = "300"
     eval_periods = "1"
     threshold    = "0"
+    datapoints   = "1"
   }
 
   alarm_actions  = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
@@ -42,6 +50,19 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
   }
 }
 
+resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-count" {
+  name            = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/datasetfailed"
+  pattern         = "[date, time, java_thread, level = \"ERROR\", java_class, message = \"*Data set failed with an unhandled error*\"]"
+  log_group_name  = local.log_groups.messages
+
+  metric_transformation {
+    name          = "messages/count/datasetfailed"
+    namespace     = "bfd-${var.env_config.env}/bfd-pipeline"
+    value         = "1"
+    default_value = "0"
+  }
+}
+
 # CloudWatch metric alarms
 #
 resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
@@ -49,9 +70,9 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = local.pipeline_messages_error.eval_periods
   period              = local.pipeline_messages_error.period
-  statistic           = "Maximum"
+  statistic           = "Sum"
   threshold           = local.pipeline_messages_error.threshold
-  alarm_description   = "Pipeline errors detected within ${local.pipeline_messages_error.period} seconds in APP-ENV: bfd-${var.env_config.env}"
+  alarm_description   = "Pipeline errors detected over ${local.pipeline_messages_error.eval_periods} evaluation periods of ${local.pipeline_messages_error.period} seconds in APP-ENV: bfd-${var.env_config.env}"
 
   metric_name         = "messages/count/error"
   namespace           = "bfd-${var.env_config.env}/bfd-pipeline"
@@ -59,7 +80,26 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
   alarm_actions       = local.is_prod ? local.alarm_actions : []
   ok_actions          = local.is_prod ? local.ok_actions : []
 
-  datapoints_to_alarm = "1"
+  datapoints_to_alarm = local.pipeline_messages_error.datapoints
+  treat_missing_data  = "notBreaching"
+}
+
+resource "aws_cloudwatch_metric_alarm" "pipeline-messages-datasetfailed" {
+  alarm_name          = "bfd-${var.env_config.env}-pipeline-messages-datasetfailed"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = local.pipeline_messages_datasetfailed.eval_periods
+  period              = local.pipeline_messages_datasetfailed.period
+  statistic           = "Sum"
+  threshold           = local.pipeline_messages_datasetfailed.threshold
+  alarm_description   = "Data set processing failed, pipeline has shut down in APP-ENV: bfd-${var.env_config.env}"
+
+  metric_name         = "messages/count/datasetfailed"
+  namespace           = "bfd-${var.env_config.env}/bfd-pipeline"
+
+  alarm_actions       = local.is_prod ? local.alarm_actions : []
+  ok_actions          = local.is_prod ? local.ok_actions : []
+
+  datapoints_to_alarm = local.pipeline_messages_datasetfailed.datapoints
   treat_missing_data  = "notBreaching"
 }
 

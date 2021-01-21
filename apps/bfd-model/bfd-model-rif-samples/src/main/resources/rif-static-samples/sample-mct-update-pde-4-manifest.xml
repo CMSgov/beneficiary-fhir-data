@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v8"
+	timestamp="2020-07-28T07:00:00Z" sequenceId="0">
+
+	<entry name="sample-mct-update-4-pde.txt" type="BENEFICIARY" />
+
+</dataSetManifest>

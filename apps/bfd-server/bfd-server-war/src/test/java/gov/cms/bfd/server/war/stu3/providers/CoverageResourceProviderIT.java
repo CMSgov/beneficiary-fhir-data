@@ -3,10 +3,13 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -73,8 +76,8 @@ public final class CoverageResourceProviderIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for {@link Beneficiary}-derived {@link Coverage}s that do not exist in the
-   * DB.
+   * works as expected for {@link Beneficiary}-derived {@link Coverage}s that do not exist in the DB
+   * (with both positive and negative IDs).
    */
   @Test
   public void readCoveragesForMissingBeneficiary() {
@@ -107,14 +110,41 @@ public final class CoverageResourceProviderIT {
     }
     Assert.assertNotNull(exception);
 
+    // Tests negative ID will pass regex pattern for valid coverageId.
     exception = null;
     try {
       fhirClient
           .read()
           .resource(Coverage.class)
-          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, "1234"))
+          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_D, "-1234"))
           .execute();
     } catch (ResourceNotFoundException e) {
+      exception = e;
+    }
+    Assert.assertNotNull(exception);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for {@link Beneficiary}-derived {@link Coverage}s that has an invalid {@link
+   * gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider#IdParam} parameter.
+   */
+  @Test
+  public void readCoveragesForInvalidIdParam() {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // Parameter is invalid, should throw exception
+    InvalidRequestException exception;
+
+    exception = null;
+    try {
+      fhirClient
+          .read()
+          .resource(Coverage.class)
+          .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, "1?234"))
+          .execute();
+    } catch (InvalidRequestException e) {
       exception = e;
     }
     Assert.assertNotNull(exception);

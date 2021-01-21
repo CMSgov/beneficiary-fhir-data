@@ -3,10 +3,12 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -137,6 +139,99 @@ final class CoverageTransformer {
               coverage, CcwCodebookVariable.A_TRM_CD, beneficiary.getPartATerminationCode()));
     }
 
+    // The reference year of the enrollment data
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionDate(
+              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+    }
+
+    // Monthly Medicare-Medicaid dual eligibility codes
+    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_01,
+              beneficiary.getMedicaidDualEligibilityJanCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_02,
+              beneficiary.getMedicaidDualEligibilityFebCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_03,
+              beneficiary.getMedicaidDualEligibilityMarCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_04,
+              beneficiary.getMedicaidDualEligibilityAprCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_05,
+              beneficiary.getMedicaidDualEligibilityMayCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_06,
+              beneficiary.getMedicaidDualEligibilityJunCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_07,
+              beneficiary.getMedicaidDualEligibilityJulCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_08,
+              beneficiary.getMedicaidDualEligibilityAugCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_09,
+              beneficiary.getMedicaidDualEligibilitySeptCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_10,
+              beneficiary.getMedicaidDualEligibilityOctCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_11,
+              beneficiary.getMedicaidDualEligibilityNovCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_12,
+              beneficiary.getMedicaidDualEligibilityDecCode()));
+    }
+
     transformEntitlementBuyInIndicators(coverage, beneficiary);
     TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
@@ -190,6 +285,99 @@ final class CoverageTransformer {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.B_TRM_CD, beneficiary.getPartBTerminationCode()));
+    }
+
+    // The reference year of the enrollment data
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionDate(
+              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+    }
+
+    // Monthly Medicare-Medicaid dual eligibility codes
+    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_01,
+              beneficiary.getMedicaidDualEligibilityJanCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_02,
+              beneficiary.getMedicaidDualEligibilityFebCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_03,
+              beneficiary.getMedicaidDualEligibilityMarCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_04,
+              beneficiary.getMedicaidDualEligibilityAprCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_05,
+              beneficiary.getMedicaidDualEligibilityMayCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_06,
+              beneficiary.getMedicaidDualEligibilityJunCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_07,
+              beneficiary.getMedicaidDualEligibilityJulCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_08,
+              beneficiary.getMedicaidDualEligibilityAugCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_09,
+              beneficiary.getMedicaidDualEligibilitySeptCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_10,
+              beneficiary.getMedicaidDualEligibilityOctCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_11,
+              beneficiary.getMedicaidDualEligibilityNovCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_12,
+              beneficiary.getMedicaidDualEligibilityDecCode()));
     }
 
     transformEntitlementBuyInIndicators(coverage, beneficiary);
@@ -524,6 +712,99 @@ final class CoverageTransformer {
               coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd()));
     }
     TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
+
+    // The reference year of the enrollment data
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionDate(
+              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+    }
+
+    // Monthly Medicare-Medicaid dual eligibility codes
+    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_01,
+              beneficiary.getMedicaidDualEligibilityJanCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_02,
+              beneficiary.getMedicaidDualEligibilityFebCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_03,
+              beneficiary.getMedicaidDualEligibilityMarCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_04,
+              beneficiary.getMedicaidDualEligibilityAprCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_05,
+              beneficiary.getMedicaidDualEligibilityMayCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_06,
+              beneficiary.getMedicaidDualEligibilityJunCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_07,
+              beneficiary.getMedicaidDualEligibilityJulCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_08,
+              beneficiary.getMedicaidDualEligibilityAugCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_09,
+              beneficiary.getMedicaidDualEligibilitySeptCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_10,
+              beneficiary.getMedicaidDualEligibilityOctCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_11,
+              beneficiary.getMedicaidDualEligibilityNovCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_12,
+              beneficiary.getMedicaidDualEligibilityDecCode()));
+    }
 
     timer.stop();
     return coverage;
@@ -943,6 +1224,100 @@ final class CoverageTransformer {
               CcwCodebookVariable.RDSIND12,
               beneficiary.getPartDRetireeDrugSubsidyDecInd()));
     }
+
+    // The reference year of the enrollment data
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionDate(
+              CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear()));
+    }
+
+    // Monthly Medicare-Medicaid dual eligibility codes
+    if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_01,
+              beneficiary.getMedicaidDualEligibilityJanCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_02,
+              beneficiary.getMedicaidDualEligibilityFebCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityMarCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_03,
+              beneficiary.getMedicaidDualEligibilityMarCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityAprCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_04,
+              beneficiary.getMedicaidDualEligibilityAprCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityMayCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_05,
+              beneficiary.getMedicaidDualEligibilityMayCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityJunCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_06,
+              beneficiary.getMedicaidDualEligibilityJunCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityJulCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_07,
+              beneficiary.getMedicaidDualEligibilityJulCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityAugCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_08,
+              beneficiary.getMedicaidDualEligibilityAugCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilitySeptCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_09,
+              beneficiary.getMedicaidDualEligibilitySeptCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityOctCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_10,
+              beneficiary.getMedicaidDualEligibilityOctCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityNovCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_11,
+              beneficiary.getMedicaidDualEligibilityNovCode()));
+    }
+    if (beneficiary.getMedicaidDualEligibilityDecCode().isPresent()) {
+      coverage.addExtension(
+          TransformerUtils.createExtensionCoding(
+              coverage,
+              CcwCodebookVariable.DUAL_12,
+              beneficiary.getMedicaidDualEligibilityDecCode()));
+    }
+
     TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();

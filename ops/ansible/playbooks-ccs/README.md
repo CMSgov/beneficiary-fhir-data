@@ -1,67 +1,55 @@
 # __BFD OPS__
 
-This folder currently hosts DevOps related code (Ansible, Packer, Terraform, etc). I suspect this organization can be revisited once the monorepo is in place. Until then, things could live here. 
+This folder currently hosts Ansible plays and tasks. 
 
 ## ANSIBLE
 
 Project and Directory Structure
 - We are using the suggested directory structure provided by the Ansible community: https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html#directory-layout
 
-### Jenkins Playbooks 
-##### To Do
- 1. Research ssh pipelining issue, currently turned off across entire playbook. 
- 2. Install Cloudwatch agent and configure.
- 3. Configure Splunk Agent 
- 4. Setup SSH Access, currently using bfd-jenkins key. Located in team keybase. 
-   - option 1: https://aws.amazon.com/blogs/compute/new-using-amazon-ec2-instance-connect-for-ssh-access-to-your-ec2-instances/
- 5. Automate via groovy the setup of docker name and location in global tools settings.
- 6. Consider moving to Jenkins in Docker. 
+## Jenkins Playbooks 
 
-#### New Jenkins Installation
+### New Jenkins Installation
 __Name: build_jenkins.yml__<br>
 __Summary:__ This playbook and associated roles configures a CCS Gold Image with specific prerequsities and then apache, jenkins and BFD specific configuration. 
 
-##### High Level Usage Instructions
+#### High Level Usage Instructions
  - Requirements: 
    - Local Environment 
      - CCS VPN Connection with proper profile. 
     - AWS CLI authentication setup for the BFD AWS Account with admin privs. 
     - Tools: Packer, Ansible
    - A Gold Image ID provided by the CCS (GDIT)
-   - A previously created and formatted EBS volume
-     - Create EBS Volume within AWS (console or cli)
-       - Suggested configuration
-         - Name: Same as used for the variable {{ bfd-jenkins-ebs_name }} value in the playbook. 
-         - Type: General Purpose SSD (gp2)
-         - Size: >= 1000G 
-         - AZ: us-east-1(a-c)
-         - Encryption: Yes, use MGMT CMK
-         - Device: /dev/sdf 
-         - Filesystem: xfs 
-   - Build the Jenkins AMI from within the Ansible/ directory of the ops code (i.e. bfd-ops) by running the following command to build AND configure the Jenkins instance and volume for the first time. 
-     - *packer build -var 'source_ami=ami-12345678' -var 'subnet_id=subnet-0987654321' update_jenkins.json*
+   - A previously created EFS mount (this is completed with the Terraform `mgmt-stateful` module) 
+   - Subnet ID - changes with mgmt (us-east-1a) or mgmt-test (us-east-1c)
+   __STOP the current jenkins service on the live instance.__
+   - Build the Jenkins AMI from within the `ops/ansible/playbooks-ccs` directory of the ops code by running the following command to build AND configure the Jenkins instance and volume for the first time. 
+     - `packer build -var 'source_ami=ami-0f2d8f925de453e46' -var 'subnet_id=subnet-092c2a68bd18b34d1' - var 'env=mgmt' ../../packer/build_jenkins.json`
    - Note the AMI ID that was created. You'll update the terraform variables at a later stage to deploy this.
-   
-##### Post Installation Config 
-Visit Jenkins URL: https://builds.bfd-mgmt.cmscloud.local/jenkins and use credentials located in vault to login and configure the following:
- - Global Tool Chains Config - Configure Docker
-     - name: docker
-     - location: /var/lib 
 
-- Global Security Config - Enable Slave -> Master Access Control
-
-#### Update Jenkins Installation 
+### Update Jenkins Installation 
 
 __Name: update_jenkins.yml__<br>
-__Summary:__ This playbook and associated roles configures a CCS Gold Image with specific prerequsities and then apache, jenkins and BFD specific configuration. It essential applies all roles from the build_jenkins.yml playbook except for the configuration aspects which are stored on a persistent EBS volume and attached to this instance. 
+__Summary:__ This playbook and associated roles configures a CCS Gold Image with specific prerequsities and then apache, jenkins and BFD specific configuration. It essential applies all roles from the build_jenkins.yml playbook except for the configuration aspects which are stored on a persistent EFS volume and attached to this instance. 
 
-##### High Level Usage Instructions
+#### High Level Usage Instructions
  - Requirements: 
    - Local Environment 
      - CCS VPN Connection with proper profile. 
     - AWS CLI authentication setup for the BFD AWS Account with admin privs. 
     - Tools: Packer, Ansible
    - A Gold Image ID provided by the CCS (GDIT)
- - __example command__: from within the ansible directory and replacing the ami and subnet values that meet your deployment needs. 
+   - Subnet ID changes with mgmt (us-east-1a) or mgmt-test (us-east-1c)
+   __STOP the current jenkins service on the live instance.__
+ - __example command__: from within the `ops/ansible/playbooks-ccs` directory and replacing the ami and subnet values that meet your deployment needs. 
 
-*packer build -var 'source_ami=ami-12345678' -var 'subnet_id=subnet-0987654321' update_jenkins.json*
+- `packer build -var 'source_ami=ami-12345678' -var 'subnet_id=subnet-0987654321' - var 'env=mgmt' update_jenkins.json`
+
+### Jenkins Deployment
+- Update the terraform vars in Keybase (/infrastructure/secrets/terraform-vars) and supply the new AMI form the previous build or update packer job. 
+- Move into the `ops/terraform/env/mgmt, mgmt-test/stateless`
+- Run the following command: 
+- `terraform apply -var-file=/keybase/team/oeda_bfs/infrastructure/secrets/terraform-vars/mgmt-test/jenkins/terraform.tfvars`
+- You will see a new ASG and launch template being created. 
+
+
