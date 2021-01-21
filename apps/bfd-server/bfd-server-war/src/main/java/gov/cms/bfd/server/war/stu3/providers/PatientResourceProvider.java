@@ -1078,7 +1078,7 @@ public final class PatientResourceProvider implements IResourceProvider {
   public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
     String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
-    if (headerValues == null || headerValues == "") return Arrays.asList("");
+    if (Strings.isNullOrEmpty(headerValues)) return Arrays.asList("");
     else
       // Return values split on a comma with any whitespace, valid, distict, and sort
       return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream()
