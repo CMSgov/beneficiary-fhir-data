@@ -192,7 +192,7 @@ final class BeneficiaryTransformerV2 {
     if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
       patient.setDeceased(
           new DateTimeType(
-              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              TransformerUtilsV2.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
               TemporalPrecisionEnum.DAY));
     }
 
