@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A per request instance holds all resource (FHIR) request headers, such as: "includeIdentifiers"
@@ -19,14 +20,14 @@ public class RequestHeaders {
   private RequestHeaders(RequestDetails requestDetails) {
     this.requestDetails = requestDetails;
     // parse headers
-    PatientResourceProvider.FHIR_REQUEST_HEADERS.forEach(
+    CommonHeaders.FHIR_REQUEST_HEADERS.forEach(
         (h) -> {
           String v = this.requestDetails.getHeader(h);
-          if (h.equals(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS)) {
-            this.headerNVs.put(h, PatientResourceProvider.returnIncludeAddressFieldsValue(v));
+          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS)) {
+            this.headerNVs.put(h, returnIncludeAddressFieldsValue(v));
           }
-          if (h.equals(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
-            this.headerNVs.put(h, PatientResourceProvider.returnIncludeIdentifiersValues(v));
+          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
+            this.headerNVs.put(h, returnIncludeIdentifiersValues(v));
           }
         });
   }
@@ -75,14 +76,14 @@ public class RequestHeaders {
         curKey = null;
       }
     }
-    PatientResourceProvider.FHIR_REQUEST_HEADERS.forEach(
+    CommonHeaders.FHIR_REQUEST_HEADERS.forEach(
         (h) -> {
           String v = nvPairs.get(h);
-          if (h.equals(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS)) {
-            this.headerNVs.put(h, PatientResourceProvider.returnIncludeAddressFieldsValue(v));
+          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS)) {
+            this.headerNVs.put(h, returnIncludeAddressFieldsValue(v));
           }
-          if (h.equals(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
-            this.headerNVs.put(h, PatientResourceProvider.returnIncludeIdentifiersValues(v));
+          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
+            this.headerNVs.put(h, returnIncludeIdentifiersValues(v));
           }
         });
   }
@@ -146,12 +147,61 @@ public class RequestHeaders {
   }
 
   public boolean isHICNinIncludeIdentifiers() {
-    List<String> v = this.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS);
+    List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS);
     return v == null ? false : (v.contains("hicn") || v.contains("true"));
   }
 
   public boolean isMBIinIncludeIdentifiers() {
-    List<String> v = this.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS);
+    List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS);
     return v == null ? false : (v.contains("mbi") || v.contains("true"));
+  }
+
+  /**
+   * Return a TRUE / FALSE from VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS header
+   *
+   * @param headerValue a String containing Boolean value in string form
+   * @return True or False.
+   */
+  public static Boolean returnIncludeAddressFieldsValue(String headerValue) {
+    return (headerValue == null
+            || headerValue == ""
+            || headerValue.equalsIgnoreCase("FALSE")
+            || !headerValue.equalsIgnoreCase("TRUE"))
+        ? Boolean.FALSE
+        : Boolean.TRUE;
+  }
+
+  /**
+   * Return a valid List of values for the IncludeIdenfifiers header
+   *
+   * @param headerValues a String value containing the value of header
+   *     VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
+   * @return List of validated header values against the VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
+   *     list.
+   */
+  public static List<String> returnIncludeIdentifiersValues(String headerValues) {
+    if (headerValues == null
+        || headerValues.isEmpty()
+        || headerValues.trim().replaceAll("^\\[|\\]$", "").isEmpty()) return Arrays.asList("");
+    else {
+      // Return values split on a comma with any whitespace, valid, distict, and sort
+      return Arrays.asList(
+              headerValues.trim().replaceAll("^\\[|\\]$", "").toLowerCase().split("\\s*,\\s*"))
+          .stream()
+          .peek(
+              c -> {
+                if (!CommonHeaders.VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
+                  throw new InvalidRequestException(
+                      "Unsupported "
+                          + CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS
+                          + " Header Value: |"
+                          + c
+                          + "|, "
+                          + headerValues);
+              })
+          .distinct()
+          .sorted()
+          .collect(Collectors.toList());
+    }
   }
 }

@@ -22,11 +22,13 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -60,7 +62,7 @@ import org.springframework.stereotype.Component;
  * the CCW beneficiaries.
  */
 @Component
-public final class PatientResourceProvider implements IResourceProvider {
+public final class PatientResourceProvider implements IResourceProvider, CommonHeaders {
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    */
@@ -273,11 +275,9 @@ public final class PatientResourceProvider implements IResourceProvider {
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "coverageContract");
-    // need to confirm if all headers of this nature participate in OPTION tracking
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
-    // BFD379: do address fields participate in mathing?
     List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(coverageId, requestHeader, paging);
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
@@ -563,7 +563,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /**
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are encapsulated
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -577,7 +578,8 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /**
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers encapsulated
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getMbiHash()} ()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
@@ -592,7 +594,8 @@ public final class PatientResourceProvider implements IResourceProvider {
   /**
    * @param hash the {@link Beneficiary} hash value to match
    * @param hashType a string to represent the hash type (used for logging purposes)
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers encapsulated
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @param beneficiaryHashField the JPA location of the beneficiary hash field
    * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
@@ -781,77 +784,6 @@ public final class PatientResourceProvider implements IResourceProvider {
   public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
   public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
   public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
-
-  /**
-   * The header key used to determine which header should be used. See {@link
-   * #RequestHeaders.getValue(<header-name>)} for details.
-   */
-  public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
-
-  /**
-   * The header key used to determine whether include derived addresses. See {@link
-   * ##RequestHeaders.getValue(<header-name>)} for details.
-   */
-  public static final String HEADER_NAME_INCLUDE_ADDRESS_FIELDS = "IncludeAddressFields";
-
-  public static final List<String> FHIR_REQUEST_HEADERS =
-      Arrays.asList(HEADER_NAME_INCLUDE_ADDRESS_FIELDS, HEADER_NAME_INCLUDE_IDENTIFIERS);
-
-  /**
-   * The List of valid values for the {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
-   * #RequestHeaders.getValue()} for details.
-   */
-  public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
-      Arrays.asList("true", "false", "hicn", "mbi");
-
-  /**
-   * Return a TRUE / FALSE from VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS header
-   *
-   * @param headerValue a String containing Boolean value in string form
-   * @return True or False.
-   */
-  public static Boolean returnIncludeAddressFieldsValue(String headerValue) {
-    return (headerValue == null
-            || headerValue == ""
-            || headerValue.equalsIgnoreCase("FALSE")
-            || !headerValue.equalsIgnoreCase("TRUE"))
-        ? Boolean.FALSE
-        : Boolean.TRUE;
-  }
-
-  /**
-   * Return a valid List of values for the IncludeIdenfifiers header
-   *
-   * @param headerValues a String value containing the value of header
-   *     VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
-   * @return List of validated header values against the VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS
-   *     list.
-   */
-  public static List<String> returnIncludeIdentifiersValues(String headerValues) {
-    if (headerValues == null
-        || headerValues.isEmpty()
-        || headerValues.trim().replaceAll("^\\[|\\]$", "").isEmpty()) return Arrays.asList("");
-    else {
-      // Return values split on a comma with any whitespace, valid, distict, and sort
-      return Arrays.asList(
-              headerValues.trim().replaceAll("^\\[|\\]$", "").toLowerCase().split("\\s*,\\s*"))
-          .stream()
-          .peek(
-              c -> {
-                if (!VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS.contains(c))
-                  throw new InvalidRequestException(
-                      "Unsupported "
-                          + HEADER_NAME_INCLUDE_IDENTIFIERS
-                          + " Header Value: |"
-                          + c
-                          + "|, "
-                          + headerValues);
-              })
-          .distinct()
-          .sorted()
-          .collect(Collectors.toList());
-    }
-  }
 
   /**
    * Check that coverageId value is valid
