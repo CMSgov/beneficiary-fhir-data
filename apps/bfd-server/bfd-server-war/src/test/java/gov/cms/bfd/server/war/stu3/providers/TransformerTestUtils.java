@@ -2013,8 +2013,8 @@ final class TransformerTestUtils {
         TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode);
     Assert.assertEquals(
         String.format("NDC code '%s' display value mismatch: ", nationalDrugCode),
-        nationalDrugCodeDisplayValueActual,
-        nationalDrugCodeDisplayValue);
+        nationalDrugCodeDisplayValue,
+        nationalDrugCodeDisplayValueActual);
   }
 
   /**
