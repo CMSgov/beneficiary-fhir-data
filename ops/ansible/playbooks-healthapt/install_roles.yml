@@ -1,8 +1,0 @@
----
-# Run the following command against this file to install all of the Ansible roles required by this project:
-# 
-#     $ pipenv run ansible-galaxy install --force --role-file=install_roles.yml
-
-# https://galaxy.ansible.com/karlmdavis/jenkins2/
-# Installs and configures Jenkins 2.
-- src: karlmdavis.jenkins2
