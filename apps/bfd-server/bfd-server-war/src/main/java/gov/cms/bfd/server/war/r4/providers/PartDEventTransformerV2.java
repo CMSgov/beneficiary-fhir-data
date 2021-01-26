@@ -294,7 +294,7 @@ final class PartDEventTransformerV2 {
           identifierType = IdentifierType.SL;
           break;
         case "11":
-          identifierType = IdentifierType.FTN;
+          identifierType = IdentifierType.TAX;
           break;
         default:
           identifierType = null;
