@@ -41,7 +41,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEMP=`getopt \
 	j:m:v:t:u:e: \
 	$*`
-#if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
+if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
 # Note the quotes around `$TEMP': they are essential!
 eval set -- "$TEMP"
