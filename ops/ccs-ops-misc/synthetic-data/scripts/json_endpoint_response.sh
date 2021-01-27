@@ -16,11 +16,11 @@ curl_eobs() {
   sudo curl --fail --silent -o /dev/null --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/ExplanationOfBenefit?patient='$1'&_format=application%2Fjson%2Bfhir'
 }
 
-psqlhost="bfd-test-aurora-node-0.clyryngdhnko.us-east-1.rds.amazonaws.com"   # Database host
-psqluser="svc_bfd_pipeline_0"   # Database username
+psqlhost=""   # Database host
+psqluser=""   # Database username
 psqlport=5432  # Database port
-psqlpass="R7RJ5BG4tZxKejf\$!CR&CYxh"  # Database password
-psqldb="fhirdb"   # Database name
+psqlpass=""  # Database password
+psqldb=""   # Database name
 
 psql "host=$psqlhost port=$psqlport dbname=$psqldb user=$psqluser password=$psqlpass" -P "footer=off"  -t -c 'SELECT "beneficiaryId" FROM public."Beneficiaries"  limit 1' --output=results.txt
 
