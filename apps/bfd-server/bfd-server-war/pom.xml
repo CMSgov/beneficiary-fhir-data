@@ -345,7 +345,7 @@
 								<argument>${project.build.directory}</argument>
 								<argument>-u</argument>
 								<argument>${its.db.url}</argument>
-                <argument>-e</argument>
+								<argument>-e</argument>
 								<argument>${local.v2.enabled}</argument>
 							</arguments>
 
