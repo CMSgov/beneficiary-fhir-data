@@ -48,7 +48,7 @@ eval set -- "$TEMP"
 
 # Parse the getopt results.
 javaHome=""
-maxHeapArg="-Xmx5g"
+maxHeapArg="-Xmx4g"
 visualVm=""
 targetDirectory=
 dbUrl="jdbc:bfd-test:hsqldb:mem"
@@ -65,7 +65,7 @@ while true; do
 			targetDirectory="$2"; shift 2 ;;
 		-u )
 			dbUrl="$2"; shift 2 ;;
-    -e )
+		-e )
 			v2Enabled="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;

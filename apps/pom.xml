@@ -93,8 +93,8 @@
 		<its.db.username></its.db.username>
 		<its.db.password></its.db.password>
 
-    <!-- Whether the V2 endpoints should be enabled -->
-    <local.v2.enabled>true</local.v2.enabled>
+		<!-- Whether the V2 endpoints should be enabled -->
+		<local.v2.enabled>true</local.v2.enabled>
 	</properties>
 
 	<dependencyManagement>
