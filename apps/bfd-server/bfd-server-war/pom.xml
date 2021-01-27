@@ -346,7 +346,7 @@
 								<argument>-u</argument>
 								<argument>${its.db.url}</argument>
                 <argument>-e</argument>
-								<argument>${v2.enabled}</argument>
+								<argument>${local.v2.enabled}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
