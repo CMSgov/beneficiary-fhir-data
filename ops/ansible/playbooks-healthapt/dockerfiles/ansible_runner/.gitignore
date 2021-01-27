@@ -1,6 +1,0 @@
-# Ignore any not-cleaned-up temp files from the Docker build.
-requirements.txt
-install_roles.yml
-
-# Ignore Docker images exported by the build.
-ansible_runner.tgz

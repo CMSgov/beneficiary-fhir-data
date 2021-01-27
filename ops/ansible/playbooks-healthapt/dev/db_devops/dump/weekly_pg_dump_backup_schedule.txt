@@ -1,3 +1,0 @@
--bash-4.2$ crontab -l |grep pg_dump
-## weekly pg_dump backups of fhirdb tables
-00 17 * * 2 /var/lib/pgsql/scripts/pg_dumps/fhirdb/fhirdb_database_tables_dumps.sh  > /var/lib/pgsql/scripts/logs/fhirdb_database_tables_dumps.log 2>&1
