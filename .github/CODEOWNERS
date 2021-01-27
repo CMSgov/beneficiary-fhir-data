@@ -2,10 +2,16 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-@karlmdavis @jzulim
+@jzulim @cbrunefearless @mackec1 @keithdadkins
 
-/rfcs @karlmdavis @jzulim @dshekhar18
+/rfcs @jzulim @cbrunefearless @mackec1
 
-/ops @jzulim @keithdadkins
+/ops @jzulim @keithdadkins @njdister 
 
-/apps @karlmdavis @cbrunefearless @dshekhar18 @jzulim
+/apps @jzulim @cbrunefearless @mackec1
+
+/insights @jzulim @keithdadkins @njdister
+
+/insights/terraform/projects/bcda @msnook @orenfromberg
+/insights/terraform/projects/ab2d @lailasharshar @nflearl @wnyffenegger
+/insights/terraform/projects/bb2 @dtisza1 @njdister @jzulim
