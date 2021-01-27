@@ -169,7 +169,7 @@ BFD_PORT="${serverPortHttps}" \
 	"${maxHeapArg}" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
-  "-DbfdServer.v2.enabled=${v2Enabled}" \
+	"-DbfdServer.v2.enabled=${v2Enabled}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \
