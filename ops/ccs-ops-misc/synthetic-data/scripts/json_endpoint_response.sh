@@ -20,7 +20,7 @@ psqlhost=""   # Database host
 psqluser=""   # Database username
 psqlport=5432  # Database port
 psqlpass=""  # Database password
-psqldb=""   # Database name
+psqldb=""   # Database
 
 psql "host=$psqlhost port=$psqlport dbname=$psqldb user=$psqluser password=$psqlpass" -P "footer=off"  -t -c 'SELECT "beneficiaryId" FROM public."Beneficiaries"  limit 1' --output=results.txt
 
