@@ -66,7 +66,7 @@ public class V2Server extends RestfulServer {
 
     // Lightly customize the capability provider to set publisher name.
     ServerCapabilityStatementProvider capabilityStatementProvider =
-        new ServerCapabilityStatementProvider(this);
+        new ServerCapabilityStatementProvider();
     capabilityStatementProvider.setPublisher(CAPABILITIES_PUBLISHER);
     setServerConformanceProvider(capabilityStatementProvider);
   }
@@ -94,7 +94,7 @@ public class V2Server extends RestfulServer {
      * global history.
      */
     List<Object> plainProviders = new ArrayList<>();
-    setPlainProviders(plainProviders);
+    registerProvider(plainProviders);
 
     /*
      * Register the HAPI server interceptors that have been configured in
