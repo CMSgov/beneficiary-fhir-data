@@ -1,0 +1,4 @@
+---
+- include_tasks: "install_jenkins.yml"
+- include_tasks: "install_tools.yml"
+- include_tasks: "configure_jenkins.yml"

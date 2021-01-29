@@ -1,0 +1,68 @@
+---
+###
+# Install prereqs for Jenkins, install and apply launch settings.
+###
+- name: Install Pre-requisites
+  yum:
+    name:
+      # The `-devel` variant is the JDK (instead of just the JRE).
+      - java-1.8.0-openjdk-devel
+      - git
+  become: true
+
+- name: Use Jenkins LTS
+  set_fact:
+    jenkins_yum_gpgkey_url: "{{ '%s/%s/jenkins.io.key' % (jenkins_packages_url_base, jenkins_yum_repo_flavor) }}"
+    jenkins_yum_repo_baseurl: "{{ '%s/%s' % (jenkins_packages_url_base, jenkins_yum_repo_flavor) }}"
+    jenkins_yum_repo_name: "jenkins"
+
+- name: Remove Unused Jenkins YUM Repositories
+  yum_repository:
+    name: "{{ item }}"
+    state: absent
+  become: true
+  with_items:
+    - 'Jenkins'
+    - 'Jenkins-stable'
+
+- name: Add Jenkins YUM Repository
+  yum_repository:
+    name: "{{ jenkins_yum_repo_name }}"
+    description: 'Jenkins release repo from https://jenkins.io/download/.'
+    baseurl: "{{ jenkins_yum_repo_baseurl }}"
+    gpgcheck: true
+    gpgkey: "{{ jenkins_yum_gpgkey_url }}"
+    proxy: "{{ '_none_' if jenkins_packages_repo_yum_disable_proxy == true else omit }}"
+    state: present
+  become: true
+
+- name: Jenkins Install
+  yum:
+    name: jenkins
+    # Setting this to 'latest' is perhaps debatable, but it seems silly not to
+    # since this plugin also updates all of the Jenkins plugins automatically.
+    state: "{{ 'latest' if jenkins_release_update else 'present' }}"
+    update_cache: "{{ true if jenkins_release_update else false }}"
+  become: true
+
+- name: Configure Jenkins Launch Settings
+  lineinfile:
+    path: /etc/sysconfig/jenkins
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    mode: u=rw,g=,o=r
+  become: true
+  with_items:
+    - regexp: '^JENKINS_JAVA_OPTIONS='
+      # Note: The setup wizard has to be disabled before Jenkins runs the first
+      # time. Fortunately, the RHEL packages don't automatically start the
+      # Jenkins service after install, so we have time to address this.
+      line: "JENKINS_JAVA_OPTIONS=\"-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false {{ '' if (jenkins_http_proxy_server | default('') | trim) == '' else '-Dhttp.proxyHost={0} -Dhttps.proxyHost={0}'.format(jenkins_http_proxy_server) }} {{ '' if (jenkins_http_proxy_port | default('') | trim) == '' else '-Dhttp.proxyPort={0} -Dhttps.proxyPort={0}'.format(jenkins_http_proxy_port) }} {{ '' if (jenkins_http_proxy_no_proxy_hosts | default('') | trim) == '' else '-Dhttp.nonProxyHosts={}'.format(jenkins_http_proxy_no_proxy_hosts | join('|')) }} -DsessionTimeout={{ jenkins_session_timeout }} {{ jenkins_java_args_extra }}\""
+    - regexp: '^JENKINS_PORT='
+      line: "JENKINS_PORT={{ jenkins_port }}"
+    - regexp: '^JENKINS_HOME='
+      line: "JENKINS_HOME=\"{{ jenkins_home }}\""
+    - regexp: '^JENKINS_ARGS='
+      line: "JENKINS_ARGS=\"--prefix={{ jenkins_context_path }}\""
+  notify:
+    - "Restart Jenkins"

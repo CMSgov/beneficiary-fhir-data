@@ -1,0 +1,70 @@
+---
+# Used for tracking update process
+state_file: "{{ jenkins_home }}/init.groovy.d/STATE"
+
+# Which Jenkins release line to use: must be either 'long_term_support' or
+# 'weekly'.
+# FIXME: Default should probably be Long Term Support, but that would not be
+# backwards compatible with earlier versions of this role.
+jenkins_release_line: 'long_term_support'
+jenkins_yum_repo_flavor: 'redhat-stable'
+
+# If `true`, the Jenkins package (YUM, APT, etc.) will be upgraded to the latest
+# version when this role is run.
+jenkins_release_update: true
+
+# The directory that will be used as the home directory for the Jenkins service
+# account. Cannot be modified, due to limitations in the Jenkins installers.
+jenkins_home_default: '/var/lib/jenkins'
+
+# The location that will be used to store the Jenkins configuration and data.
+jenkins_home: "{{ jenkins_home_default }}"
+
+# Jenkins doesn't (and shouldn't) run as root, so this must be over 1024.
+jenkins_port: 8080
+
+# The context path that Jenkins will be hosted at, e.g. '/foo' in
+# 'http://localhost:8080/foo'. Leave as '' to host at root path.
+jenkins_context_path: '/jenkins'
+
+# The external URL that users will use to access Jenkins. Gets set in the
+# Jenkins config and used in emails, webhooks, etc.
+# If this is left empty/None, the configuration will not be set and Jenkins
+# will try to auto-discover this (which won't work correctly if it's proxied).
+jenkins_url_external: ''
+
+# The number of minutes before Jenkins sessions timeout, i.e. how long logins
+# are valid for. Defaults to 30 minutes. Can be set to `0` to never timeout.
+# Reference: <https://stackoverflow.com/a/31809977/1851299>
+jenkins_session_timeout: '30'
+
+# Timeout when installing/updating plugins (in seconds).
+jenkins_plugins_timeout: 60
+
+# How many times to retry failed plugin installs/upgrades.
+jenkins_plugins_retries: 3
+
+# If `true`, the Jenkins plugins will be updated when this role is run.
+# (Note that missing plugins will always be installed.)
+jenkins_plugins_update: true
+
+# Additional options that will be added to JAVA_ARGS
+jenkins_java_args_extra: ''
+
+##
+# These should only be modified if custom/local mirrors of the YUM, APT, and/or
+# plugins repositories are being used.
+##
+
+# The base URL of the custom YUM/APT repo to be used (the portion that's shared
+# by the signing key and packages).
+jenkins_packages_url_base: 'https://pkg.jenkins.io'
+
+# Set to `true` to add a `proxy: _none_` setting for the YUM repo.
+jenkins_packages_repo_yum_disable_proxy: true
+
+jenkins_admin_username: test
+jenkins_admin_password: supersecret
+
+# The version of Terraform to install and use.
+tf_version: '0.12.30'

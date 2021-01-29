@@ -2,6 +2,14 @@
 ###
 # Here we are installing the minimal security updates. Set warn to false. Unable to use yum module for minimal sec updates. 
 ###
+
+# This broken repo causes builds to fail
+- name: Remove failing Salt repo
+  yum_repository:
+    name: "salt-2019.2"
+    state: absent
+  become: true
+
 - name: Apply security patches
   become: yes
   shell: yum update-minimal --security -y

@@ -1,0 +1,80 @@
+---
+###
+# Configure/harden an existing jenkins deployment and update/install required plugins.
+# We are using an (idempotent) groovy init script for a few reasons:
+# 1. The jenkins_plugin module is broken on FIPS enabled rhel7 servers.
+# 2. A lot of the previous groovy scripts used in {install|configure}_jenkins roles
+#    were breaking due to deprecatation and changes in jenkins.
+# This is a stop-gap role to be used until we can migrate to a hosted CI/CD solution.
+#
+###
+
+# Fire any pending restart handlers now, as we need Jenkins to be running.
+- meta: flush_handlers
+
+- name: Create Jenkins Init Script Directory
+  # Reference: https://wiki.jenkins-ci.org/display/JENKINS/Post-initialization+script
+  file:
+    path: "{{ jenkins_home }}/init.groovy.d"
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: 0755
+  become: true
+
+- name: Create state file to track progress
+  file:
+    path: "{{ state_file }}"
+    owner: jenkins
+    group: jenkins
+    force: true
+    mode: u=rw,g=rw,o=r
+    state: touch
+  become: true
+
+- name: Install groovy script
+  template:
+    src: configureJenkins.groovy.j2
+    dest: '{{ jenkins_home }}/init.groovy.d/configureJenkins.groovy'
+    owner: jenkins
+    group: jenkins
+    mode: u=rwx,g=rwx,o=r
+  become: true
+  notify: "Restart Jenkins"
+
+- meta: flush_handlers
+
+- name: Wait for Jenkins to finish updating
+  shell: |
+    stateFile="$STATE_FILE"
+    while true; do
+      state="$(cat "$stateFile")"
+      case "$state" in
+        UPDATING)
+          sleep 1
+        ;;
+        RESTARTING)
+          sudo systemctl restart jenkins
+          echo "" > "$stateFile"
+        ;;
+        READY)
+          echo "READY"
+          break
+        ;;
+      esac
+    done
+  environment:
+    STATE_FILE: "{{ state_file }}"
+  register: result
+  until: result.rc == 0
+  retries: 300
+  delay: 1
+  notify: "Wait for Jenkins HTTP Port"
+
+- meta: flush_handlers
+
+- name: Cleaning up
+  file:
+    state: absent
+    path: "{{ jenkins_home }}/init.groovy.d"
+  become: true

@@ -1,0 +1,26 @@
+---
+- name: Restart Service 'jenkins'
+  service:
+    name: jenkins
+    state: restarted
+  notify: Wait for Jenkins HTTP Port
+  become: true
+  listen: "Restart Jenkins"
+
+- name: Wait for Jenkins HTTP Port
+  wait_for:
+    port: "{{ jenkins_port }}"
+  notify: Wait for Jenkins HTTP OK
+  # Enforce propagation of the handlers chain:
+  changed_when: true
+
+- name: Wait for Jenkins HTTP OK
+  uri:
+    url: "http://localhost:{{ jenkins_port }}{{ jenkins_context_path | default('') }}/login"
+    status_code: 200
+  environment:
+    no_proxy: localhost
+  register: jenkins_login_page
+  until: jenkins_login_page.status == 200
+  retries: 60
+  delay: 1

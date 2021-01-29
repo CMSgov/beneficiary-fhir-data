@@ -1,19 +1,16 @@
 ---
-##
-# Updates the existing BFD Build Server, Jenkins
-##
-- name: Update Build Server Jenkins
+- name: Update Jenkins
   hosts: all
   user: ec2-user
   become: true
   gather_facts: no
   vars_files:
-    - host_vars/builds.bfd-mgmt.cmscloud.local/vault.yml
+    - host_vars/builds.bfd-{{ env }}.cmscloud.local/vault.yml
     - vars/000_cross_env_vars.yml
+    - vars/jenkins_vars.yml
   vars:
     ansible_ssh_pipelining: no
     env: '{{ env }}'
-
   tasks:
     - import_role:
         name: rhel_prep
@@ -30,7 +27,7 @@
     - import_role:
         name: build_install_apache
     - import_role:
-        name: install_jenkins
+        name: update_jenkins
     - import_role:
         name: cloudwatch-agent-instrumented
 

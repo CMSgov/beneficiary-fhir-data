@@ -1,12 +1,14 @@
 ---
 ##
-# Ansible pipelining will not work if `requiretty` is forced for sudo. Please see rhel_prep role for details. 
+# Ansible pipelining will not work if `requiretty` is forced for sudo.
+# Please see rhel_prep role for details. 
 ##
   
-# Requires Python and pip
-- name: Install latest version of Ansible via pip
-  pip: 
+# pip is taking 20 to 30 minutes and up to install ansible, just use yum
+- name: Install latest version of Ansible via yum
+  yum: 
     name: ansible 
+    state: latest
 
 - name: Install latest version of git
   yum:

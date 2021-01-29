@@ -1,0 +1,144 @@
+import jenkins.install.*
+import jenkins.model.*
+import hudson.security.*
+import java.util.logging.ConsoleHandler
+import java.util.logging.FileHandler
+import java.util.logging.SimpleFormatter
+import java.util.logging.LogManager
+import jenkins.model.Jenkins
+
+def logsDir = new File(Jenkins.instance.rootDir, "logs")
+
+if(!logsDir.exists()){
+    println "--> creating log dir";
+    logsDir.mkdirs();
+}
+
+def loggerInitScript = LogManager.getLogManager().getLogger("");
+FileHandler handlerInitScript = new FileHandler(logsDir.absolutePath + "/jenkins-init-script.log", 1024 * 1024, 10, true);
+
+handlerInitScript.setFormatter(new SimpleFormatter());
+loggerInitScript.addHandler (new ConsoleHandler());
+loggerInitScript.addHandler(handlerInitScript);
+
+// Stop here unless we were triggered by an ansible update run
+def stateFile = new File("{{ state_file }}")
+if (stateFile.exists()){
+  stateFile.write("UPDATING")
+} else {
+  return
+}
+
+// Get ready
+j = Jenkins.get()
+needRestart = false
+
+// disable setup wizard unless jenkins has already been configured
+if (j.getInstallState() != InstallState.RUNNING){
+    j.setInstallState(InstallState.INITIAL_SETUP_COMPLETED)
+    needRestart = true
+}
+ 
+// disable slave agent port since we only run a single master
+if (j.slaveAgentPort != -1) {
+    j.slaveAgentPort = -1
+    j.save()
+}
+
+// disable ssh server
+ssh = j.getDescriptor("org.jenkinsci.main.modules.sshd.SSHD")
+if (ssh){
+    ssh.stop()
+    ssh.setPort(-1)
+    ssh.save()
+}
+
+// Install plugins
+ucUpdated = false
+installedPlugins = []
+def installPlugin(String p) {
+    // make sure update site is current
+    if (ucUpdated == false){
+        j.updateCenter.updateAllSites()
+        sleep(5000) //TODO
+        ucUpdated = true
+    }
+
+    // get the plugin from the uc
+    // TODO how to gracefully handle missing plugins
+    def j = Jenkins.get()
+    def plugin = j.updateCenter.getPlugin(p)
+
+    // install plugin dependencies
+    if (plugin.dependencies){
+        plugin.dependencies.each {dep ->
+            installPlugin(dep.key)
+        }
+    }
+
+    // install and/or update the plugin
+    def alreadyInstalledPlugin = j.pluginManager.getPlugin(p)
+    if (alreadyInstalledPlugin){
+        if (!alreadyInstalledPlugin.active){
+            alreadyInstalledPlugin.enable()
+            j.save()
+            needRestart = true
+        }
+    }
+    if (!alreadyInstalledPlugin || alreadyInstalledPlugin.hasUpdate()) {
+        def job = plugin.deploy(false)
+        def tryCount = 300
+        while (!job.isDone() && tryCount > 0) {
+            sleep(1000)
+            tryCount -= 1
+        }
+        if (job.done) {
+            installedPlugins.add(p)
+            if (alreadyInstalledPlugin){
+                alreadyInstalledPlugin.enabled ?: alreadyInstalledPlugin.enable()
+            }
+            needRestart = true
+        } else {
+            job.cancel()
+            needRestart = true
+        }
+    }
+}
+
+// ensure our required plugins are installed and up to date
+def pluginList = [ {% for plugin in required_plugins %}'{{ plugin }}'{{ "," if not loop.last else "" }} {% endfor %} ]
+pluginList.each {plugin ->
+    installPlugin(plugin)
+}
+
+// update any other out of date plugins
+j.pluginManager.plugins.each { plugin ->
+    if (plugin.hasUpdate()){
+        installPlugin(plugin.shortName)
+    }
+}
+
+// use Jenkins' own user database for auth and add our admin user
+def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+hudsonRealm.createAccount('{{ vault_jenkins_admin_username }}','{{ vault_jenkins_admin_password }}')
+j.setSecurityRealm(hudsonRealm)
+j.save()
+
+// enable matrix auth strat and give our admin user full control
+try {
+    def Class matrixClass = Class.forName("hudson.security.GlobalMatrixAuthorizationStrategy")
+    Object matrix = matrixClass.newInstance()
+    matrix.add(Jenkins.ADMINISTER, '{{ vault_jenkins_admin_username }}')
+    j.setAuthorizationStrategy(matrix)
+    j.save()
+} catch(ClassNotFoundException e) {
+    // this means matrix-auth plugin is not installed/active yet because we need to restart
+    needRestart = true
+}
+if (needRestart){
+    stateFile.write("RESTARTING")
+    return
+} else {
+    stateFile.write("READY")
+    return
+}
