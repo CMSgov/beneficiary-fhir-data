@@ -61,10 +61,8 @@ public final class RifParsingUtils {
    */
   public static CSVParser createCsvParser(
       CSVFormat csvFormat, InputStream fileStream, Charset charset) {
+
     InputStream fileStreamStrippedOfBackslashes = new ReplacingInputStream(fileStream, "\\|", "|");
-    // if (!IOUtils.contentEquals(fileStream, fileStreamStrippedOfBackslashes)) {
-    // LOGGER.info("A backslashed was encountered and stripped.");
-    // }
 
     BOMInputStream fileStreamWithoutBom =
         new BOMInputStream(fileStreamStrippedOfBackslashes, false);
