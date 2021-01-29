@@ -17,6 +17,7 @@ import java.util.Optional;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.poi.util.ReplacingInputStream;
 
 /** Contains some shared utility code for parsing RIF files. */
 public final class RifParsingUtils {
@@ -56,7 +57,8 @@ public final class RifParsingUtils {
    */
   public static CSVParser createCsvParser(
       CSVFormat csvFormat, InputStream fileStream, Charset charset) {
-    BOMInputStream fileStreamWithoutBom = new BOMInputStream(fileStream, false);
+    InputStream is = new ReplacingInputStream(fileStream, "\\|", "|");
+    BOMInputStream fileStreamWithoutBom = new BOMInputStream(is, false);
     InputStreamReader reader = new InputStreamReader(fileStreamWithoutBom, charset);
 
     try {
