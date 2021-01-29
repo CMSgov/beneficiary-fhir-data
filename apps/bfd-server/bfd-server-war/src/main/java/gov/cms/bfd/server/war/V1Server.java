@@ -93,7 +93,8 @@ public class V1Server extends RestfulServer {
      * support for non-resource-type methods, such as transaction, and
      * global history.
      */
-    List<Object> plainProviders = new ArrayList<>();
+		List<Object> plainProviders = new ArrayList<>();
+		// TODO: Refactor to use registerProviders. The current method is deprecated. 
     setPlainProviders(plainProviders);
 
     /*
