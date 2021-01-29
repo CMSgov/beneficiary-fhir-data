@@ -4,7 +4,7 @@
 
 1. Make sure the changeset can be reviewed, keep it's scope and size succinct 
 2. Make sure your branch is from your fork and has a meaningful name
-3. Update the PR title: `BLUEBUTTON-99999 Add Awesomeness`
+3. Update the PR title: `BFD-99999: Add Awesomeness`
 4. Edit the text below - do not leave placeholders in the text.
 4.1. Remove sections that you don't feel apply
 5. Add any other details that will be helpful for the reviewers: details description, screenshots, etc
@@ -31,7 +31,7 @@
 
 <!-- For example: replace xxx with the JIRA ticket number: -->
 
-- [BLUEBUTTON-xxx](https://jira.cms.gov/browse/BLUEBUTTON-xxx)
+- [BFD-xxx](https://jira.cms.gov/browse/BFD-xxx)
 
 ### Security Implications
 
