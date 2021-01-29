@@ -66,7 +66,7 @@ public class V2Server extends RestfulServer {
 
     // Lightly customize the capability provider to set publisher name.
     ServerCapabilityStatementProvider capabilityStatementProvider =
-        new ServerCapabilityStatementProvider(this);
+        new ServerCapabilityStatementProvider();
     capabilityStatementProvider.setPublisher(CAPABILITIES_PUBLISHER);
     setServerConformanceProvider(capabilityStatementProvider);
   }
