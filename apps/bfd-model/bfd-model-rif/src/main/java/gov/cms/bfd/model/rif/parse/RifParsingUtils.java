@@ -18,9 +18,12 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.poi.util.ReplacingInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Contains some shared utility code for parsing RIF files. */
 public final class RifParsingUtils {
+  private static final Logger LOGGER = LoggerFactory.getLogger(RifParsingUtils.class);
   /** The {@link CSVFormat} for RIF file parsing/writing. */
   public static final CSVFormat CSV_FORMAT =
       CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
@@ -46,6 +49,7 @@ public final class RifParsingUtils {
    */
   public static CSVParser createCsvParser(CSVFormat csvFormat, RifFile file) {
     String displayName = file.getDisplayName();
+    LOGGER.info(String.format("File: {0} is ready for csv parser", displayName));
     return createCsvParser(csvFormat, file.open(), file.getCharset());
   }
 
@@ -57,8 +61,13 @@ public final class RifParsingUtils {
    */
   public static CSVParser createCsvParser(
       CSVFormat csvFormat, InputStream fileStream, Charset charset) {
-    InputStream is = new ReplacingInputStream(fileStream, "\\|", "|");
-    BOMInputStream fileStreamWithoutBom = new BOMInputStream(is, false);
+    InputStream fileStreamStrippedOfBackslashes = new ReplacingInputStream(fileStream, "\\|", "|");
+    // if (!IOUtils.contentEquals(fileStream, fileStreamStrippedOfBackslashes)) {
+    // LOGGER.info("A backslashed was encountered and stripped.");
+    // }
+
+    BOMInputStream fileStreamWithoutBom =
+        new BOMInputStream(fileStreamStrippedOfBackslashes, false);
     InputStreamReader reader = new InputStreamReader(fileStreamWithoutBom, charset);
 
     try {
