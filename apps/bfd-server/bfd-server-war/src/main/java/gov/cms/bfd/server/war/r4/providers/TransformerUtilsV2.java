@@ -366,7 +366,8 @@ public final class TransformerUtilsV2 {
    *     {@link Identifier}
    * @return the output {@link Identifier}
    */
-  static Identifier createClaimIdentifier(CcwCodebookInterface ccwVariable, String identifierValue) {
+  static Identifier createClaimIdentifier(
+      CcwCodebookInterface ccwVariable, String identifierValue) {
     if (identifierValue == null) throw new IllegalArgumentException();
 
     CodeableConcept claimCodeType = new CodeableConcept();
