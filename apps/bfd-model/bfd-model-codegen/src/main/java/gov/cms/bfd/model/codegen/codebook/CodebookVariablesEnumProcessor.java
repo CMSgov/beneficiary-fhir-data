@@ -10,6 +10,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
+import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Codebook;
 import gov.cms.bfd.model.codebook.model.Variable;
 import gov.cms.bfd.model.codebook.unmarshall.CodebookVariableReader;
@@ -121,11 +122,12 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
     logNote(annotatedPackage, "Processing package annotated with: '%s'.", annotation);
 
     Map<String, Variable> variablesById = CodebookVariableReader.buildVariablesMappedById();
-
     ClassName variableEnumName =
         ClassName.get(annotatedPackage.getQualifiedName().toString(), annotation.enumName());
     TypeSpec.Builder variablesEnumType =
-        TypeSpec.enumBuilder(variableEnumName).addModifiers(Modifier.PUBLIC);
+        TypeSpec.enumBuilder(variableEnumName)
+            .addModifiers(Modifier.PUBLIC)
+            .addSuperinterface(CcwCodebookInterface.class);
 
     variablesEnumType.addJavadoc(
         "Enumerates the known CCW {@link $T} {@link $T}s, as extracted from the codebook"
