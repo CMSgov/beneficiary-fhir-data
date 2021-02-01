@@ -37,3 +37,24 @@ Configure Jenkins (First Time) - Manage Jenkins - To login use username and pass
    name: docker
    location: /var/lib 
   
+
+## Updating 2021 update instructions
+
+Please use `scripts/jenkins.sh` to update existing jenkins deployments until further notice.
+
+## To Upgrade
+
+```bash
+# move into the ops scripts directory
+cd ~/projects/beneficiary-fhir-data/ops/ccs-ops-misc/scripts
+
+# copy and source the jenkins.env from kb (get with someone for the path)
+cp /path/to/jenkins.env .env
+source .env
+
+# build the ami
+./jenkins.sh --build-ami
+
+# take note of the ami from the output and deploy with
+./jenkins.sh --jenkins-ami 'ami-idfromabovestep' deploy
+```
