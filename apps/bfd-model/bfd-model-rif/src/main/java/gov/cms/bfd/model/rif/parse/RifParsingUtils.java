@@ -49,7 +49,6 @@ public final class RifParsingUtils {
    */
   public static CSVParser createCsvParser(CSVFormat csvFormat, RifFile file) {
     String displayName = file.getDisplayName();
-    LOGGER.info(String.format("File: {0} is ready for csv parser", displayName));
     return createCsvParser(csvFormat, file.open(), file.getCharset());
   }
 
@@ -61,12 +60,10 @@ public final class RifParsingUtils {
    */
   public static CSVParser createCsvParser(
       CSVFormat csvFormat, InputStream fileStream, Charset charset) {
-
-    InputStream fileStreamStrippedOfBackslashes = new ReplacingInputStream(fileStream, "\\|", "|");
-
-    BOMInputStream fileStreamWithoutBom =
-        new BOMInputStream(fileStreamStrippedOfBackslashes, false);
-    InputStreamReader reader = new InputStreamReader(fileStreamWithoutBom, charset);
+    BOMInputStream fileStreamWithoutBom = new BOMInputStream(fileStream, false);
+    InputStream fileStreamStrippedOfBackslashes =
+        new ReplacingInputStream(fileStreamWithoutBom, "\\|", "|");
+    InputStreamReader reader = new InputStreamReader(fileStreamStrippedOfBackslashes, charset);
 
     try {
       CSVParser parser = new CSVParser(reader, csvFormat);
