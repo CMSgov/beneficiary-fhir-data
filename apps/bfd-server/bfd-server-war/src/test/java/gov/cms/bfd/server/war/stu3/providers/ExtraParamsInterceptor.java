@@ -1,34 +1,42 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import java.io.IOException;
+import java.util.Optional;
 
-/**
- * An interceptor class to add headers to requests for supplying additional parameters to FHIR
- * "read" operations. The operation only allows for certain parameters to be sent (e.g. {@link
- * RequestDetails}) so we add headers with our own parameters to the request in order to make use of
- * them.
- */
+/** A HAPI {@link IClientInterceptor} that allows us to add HTTP headers to our requests. */
 public class ExtraParamsInterceptor implements IClientInterceptor {
+  private Optional<String> includeIdentifiersValue = Optional.empty();
 
-  private String includeIdentifiersValues = "";
-
+  /**
+   * @see
+   *     ca.uhn.fhir.rest.client.api.IClientInterceptor#interceptRequest(ca.uhn.fhir.rest.client.api.IHttpRequest)
+   */
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
-    String headerValue = includeIdentifiersValues;
-    theRequest.addHeader(PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, headerValue);
+    if (includeIdentifiersValue.isPresent())
+      theRequest.addHeader(
+          PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, includeIdentifiersValue.get());
   }
 
+  /**
+   * @see
+   *     ca.uhn.fhir.rest.client.api.IClientInterceptor#interceptResponse(ca.uhn.fhir.rest.client.api.IHttpResponse)
+   */
   @Override
   public void interceptResponse(IHttpResponse theResponse) throws IOException {
-    // TODO Auto-generated method stub
-
+    // nothing needed here
   }
 
-  public void setIncludeIdentifiers(String includeIdentifiersValues) {
-    this.includeIdentifiersValues = includeIdentifiersValues;
+  /**
+   * Sets the {@link PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} header for any/all
+   * requests using this {@link ExtraParamsInterceptor}.
+   *
+   * @param includeIdentifiersValue the value to supply in the HTTP header
+   */
+  public void setIncludeIdentifiers(String includeIdentifiersValue) {
+    this.includeIdentifiersValue = Optional.of(includeIdentifiersValue);
   }
 }
