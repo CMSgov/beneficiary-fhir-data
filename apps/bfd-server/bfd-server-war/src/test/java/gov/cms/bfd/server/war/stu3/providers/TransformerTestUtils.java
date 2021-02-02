@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
@@ -133,7 +134,7 @@ final class TransformerTestUtils {
    * @return the {@link AdjudicationComponent} that was found and verified
    */
   static AdjudicationComponent assertAdjudicationAmountEquals(
-      CcwCodebookVariable ccwVariable,
+      CcwCodebookInterface ccwVariable,
       BigDecimal expectedAmount,
       List<AdjudicationComponent> actuals) {
     CodeableConcept expectedCategory = TransformerUtils.createAdjudicationCategory(ccwVariable);
@@ -160,7 +161,7 @@ final class TransformerTestUtils {
    * @param actuals the actual {@link AdjudicationComponent}s to verify
    */
   static void assertAdjudicationReasonEquals(
-      CcwCodebookVariable ccwVariable,
+      CcwCodebookInterface ccwVariable,
       Optional<?> expectedReasonCode,
       List<AdjudicationComponent> actuals) {
     CodeableConcept expectedCategory = TransformerUtils.createAdjudicationCategory(ccwVariable);
@@ -187,7 +188,7 @@ final class TransformerTestUtils {
    * @param actuals the actual {@link AdjudicationComponent}s to verify
    */
   static void assertAdjudicationReasonEquals(
-      CcwCodebookVariable ccwVariable,
+      CcwCodebookInterface ccwVariable,
       Object expectedReasonCode,
       List<AdjudicationComponent> actuals) {
     // Jumping through hoops to cope with overloaded method:
@@ -447,7 +448,7 @@ final class TransformerTestUtils {
    * @param actualConcept the FHIR {@link CodeableConcept} to verify
    */
   static void assertHasCoding(
-      CcwCodebookVariable ccwVariable, Object expectedCode, CodeableConcept actualConcept) {
+      CcwCodebookInterface ccwVariable, Object expectedCode, CodeableConcept actualConcept) {
     // Jumping through hoops to cope with overloaded method:
     Optional<?> expectedCodeCast =
         expectedCode instanceof Optional ? (Optional<?>) expectedCode : Optional.of(expectedCode);
@@ -460,7 +461,7 @@ final class TransformerTestUtils {
    * @param actualConcept the FHIR {@link CodeableConcept} to verify
    */
   static void assertHasCoding(
-      CcwCodebookVariable ccwVariable, Optional<?> expectedCode, CodeableConcept actualConcept) {
+      CcwCodebookInterface ccwVariable, Optional<?> expectedCode, CodeableConcept actualConcept) {
     String expectedCodingSystem = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
     Optional<Coding> codingForSystem =
         actualConcept.getCoding().stream()
@@ -478,7 +479,7 @@ final class TransformerTestUtils {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertExtensionIdentifierEquals(
-      CcwCodebookVariable ccwVariable, String expectedValue, IBaseHasExtensions actualElement) {
+      CcwCodebookInterface ccwVariable, String expectedValue, IBaseHasExtensions actualElement) {
     assertExtensionIdentifierEquals(ccwVariable, Optional.of(expectedValue), actualElement);
   }
 
@@ -489,7 +490,7 @@ final class TransformerTestUtils {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertExtensionIdentifierEquals(
-      CcwCodebookVariable ccwVariable,
+      CcwCodebookInterface ccwVariable,
       Optional<String> expectedValue,
       IBaseHasExtensions actualElement) {
     String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
@@ -511,7 +512,7 @@ final class TransformerTestUtils {
    */
   // FIXME rename this and friends to include "Value"
   static void assertExtensionQuantityEquals(
-      CcwCodebookVariable ccwVariable, Number expectedValue, IBaseHasExtensions actualElement) {
+      CcwCodebookInterface ccwVariable, Number expectedValue, IBaseHasExtensions actualElement) {
     assertExtensionQuantityEquals(ccwVariable, Optional.of(expectedValue), actualElement);
   }
 
@@ -522,7 +523,7 @@ final class TransformerTestUtils {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertExtensionQuantityEquals(
-      CcwCodebookVariable ccwVariable,
+      CcwCodebookInterface ccwVariable,
       Optional<? extends Number> expectedValue,
       IBaseHasExtensions actualElement) {
     String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
@@ -545,8 +546,8 @@ final class TransformerTestUtils {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertQuantityUnitInfoEquals(
-      CcwCodebookVariable ccwVariableForQuantity,
-      CcwCodebookVariable ccwVariableForUnit,
+      CcwCodebookInterface ccwVariableForQuantity,
+      CcwCodebookInterface ccwVariableForUnit,
       Object expectedUnitCode,
       IBaseHasExtensions actualElement) {
     String expectedExtensionUrl =
@@ -580,8 +581,8 @@ final class TransformerTestUtils {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertQuantityUnitInfoEquals(
-      CcwCodebookVariable ccwVariableForQuantity,
-      CcwCodebookVariable ccwVariableForUnit,
+      CcwCodebookInterface ccwVariableForQuantity,
+      CcwCodebookInterface ccwVariableForUnit,
       Optional<?> expectedUnitCode,
       IBaseHasExtensions actualElement) {
     String expectedExtensionUrl =
@@ -603,7 +604,7 @@ final class TransformerTestUtils {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertExtensionCodingEquals(
-      CcwCodebookVariable ccwVariable, Object expectedCode, IBaseHasExtensions actualElement) {
+      CcwCodebookInterface ccwVariable, Object expectedCode, IBaseHasExtensions actualElement) {
     // Jumping through hoops to cope with overloaded method:
     Optional<?> expectedCodeCast =
         expectedCode instanceof Optional ? (Optional<?>) expectedCode : Optional.of(expectedCode);
@@ -619,7 +620,9 @@ final class TransformerTestUtils {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertExtensionCodingEquals(
-      CcwCodebookVariable ccwVariable, Optional<?> expectedCode, IBaseHasExtensions actualElement) {
+      CcwCodebookInterface ccwVariable,
+      Optional<?> expectedCode,
+      IBaseHasExtensions actualElement) {
     String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
     String expectedCodingSystem = expectedExtensionUrl;
     Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
@@ -660,7 +663,7 @@ final class TransformerTestUtils {
    * @param actualElement the FHIR element to find and verify the {@link Extension} of
    */
   static void assertExtensionDateYearEquals(
-      CcwCodebookVariable ccwVariable,
+      CcwCodebookInterface ccwVariable,
       Optional<?> expectedDateYear,
       IBaseHasExtensions actualElement) {
     String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
@@ -725,7 +728,7 @@ final class TransformerTestUtils {
    * @param actual the actual {@link Identifier} to verify
    */
   static void assertIdentifierEquals(
-      CcwCodebookVariable ccwVariable, String expectedValue, Identifier actual) {
+      CcwCodebookInterface ccwVariable, String expectedValue, Identifier actual) {
     if (expectedValue == null) throw new IllegalArgumentException();
 
     Assert.assertNotNull(actual);
@@ -753,7 +756,7 @@ final class TransformerTestUtils {
    * @param actualIdentifiers the actual {@link Identifier}s to verify a match can be found within
    */
   private static void assertHasIdentifier(
-      CcwCodebookVariable ccwVariable, String expectedValue, List<Identifier> actualIdentifiers) {
+      CcwCodebookInterface ccwVariable, String expectedValue, List<Identifier> actualIdentifiers) {
     if (expectedValue == null) throw new IllegalArgumentException();
 
     Assert.assertNotNull(actualIdentifiers);
@@ -958,7 +961,7 @@ final class TransformerTestUtils {
    * @param actualReference the actual {@link Reference} to verify
    */
   private static void assertReferenceIdentifierEquals(
-      CcwCodebookVariable ccwVariable, String expectedIdentifierValue, Reference actualReference) {
+      CcwCodebookInterface ccwVariable, String expectedIdentifierValue, Reference actualReference) {
     Assert.assertTrue("Bad reference: " + actualReference, actualReference.hasIdentifier());
     Assert.assertEquals(
         TransformerUtils.calculateVariableReferenceUrl(ccwVariable),
@@ -1115,7 +1118,7 @@ final class TransformerTestUtils {
    *     {@link Coding}, <code>false</code> if it does not
    */
   static boolean isCodeInConcept(
-      CcwCodebookVariable ccwVariable, Object expectedCode, CodeableConcept actualConcept) {
+      CcwCodebookInterface ccwVariable, Object expectedCode, CodeableConcept actualConcept) {
     String expectedCodeString;
     if (expectedCode instanceof String) expectedCodeString = (String) expectedCode;
     else if (expectedCode instanceof Character)
@@ -1141,7 +1144,7 @@ final class TransformerTestUtils {
    *     {@link Coding}, <code>false</code> if it does not
    */
   static boolean isCodeInConcept(
-      CcwCodebookVariable ccwVariable, Optional<?> expectedCode, CodeableConcept actualConcept) {
+      CcwCodebookInterface ccwVariable, Optional<?> expectedCode, CodeableConcept actualConcept) {
     if (!expectedCode.isPresent()) throw new IllegalArgumentException();
     return isCodeInConcept(ccwVariable, expectedCode.get(), actualConcept);
   }
@@ -1292,7 +1295,7 @@ final class TransformerTestUtils {
    *     fail with an {@link AssertionFailedError})
    */
   private static BenefitComponent assertHasBenefitComponent(
-      CcwCodebookVariable ccwVariable, ExplanationOfBenefit eob) {
+      CcwCodebookInterface ccwVariable, ExplanationOfBenefit eob) {
     // We only ever map one root EOB.benefitBalance.
     BenefitBalanceComponent benefitBalanceComponent = eob.getBenefitBalanceFirstRep();
     Assert.assertNotNull(benefitBalanceComponent);
@@ -2013,8 +2016,8 @@ final class TransformerTestUtils {
         TransformerUtils.retrieveFDADrugCodeDisplay(nationalDrugCode);
     Assert.assertEquals(
         String.format("NDC code '%s' display value mismatch: ", nationalDrugCode),
-        nationalDrugCodeDisplayValueActual,
-        nationalDrugCodeDisplayValue);
+        nationalDrugCodeDisplayValue,
+        nationalDrugCodeDisplayValueActual);
   }
 
   /**

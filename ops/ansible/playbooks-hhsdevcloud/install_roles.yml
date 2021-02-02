@@ -1,4 +1,0 @@
----
-# Run the following command against this file to install all of the Ansible roles required by this project:
-# 
-#     $ pipenv run ansible-galaxy install --force --role-file=install_roles.yml

@@ -24,6 +24,18 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
       "value" : "6666"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "2718813985998"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+      "value" : "38875439343923937"
+    }
   } ],
   "identifier" : [ {
     "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -92,6 +104,16 @@
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "2014-10-10"
+  }, {
+    "sequence" : 2,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
         "code" : "https://bluebutton.cms.gov/resources/variables/nch_ptnt_stus_ind_cd",
         "display" : "NCH Patient Status Indicator Code"
       } ]
@@ -104,7 +126,7 @@
       } ]
     }
   }, {
-    "sequence" : 2,
+    "sequence" : 3,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -120,7 +142,7 @@
       } ]
     }
   }, {
-    "sequence" : 3,
+    "sequence" : 4,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -136,7 +158,7 @@
       } ]
     }
   }, {
-    "sequence" : 4,
+    "sequence" : 5,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",

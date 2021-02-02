@@ -1,3 +1,0 @@
-# Under NO CIRCUMSTANCES should test certificates ever be committed to this
-# project. Worst idea ever.
-*.pem
