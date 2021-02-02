@@ -70,8 +70,8 @@ final class BeneficiaryTransformerV2 {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersValues the includeIdentifiers header values to use
-   * @param includeAddressFields the boolean flag includeAddressFields derived from header
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
   @Trace
@@ -89,9 +89,8 @@ final class BeneficiaryTransformerV2 {
 
   /**
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersValues the includeIdentifiers header values to use
-   * @param includeAddressFields the includeAddressFields flag derived from header - used to
-   *     determine if derived address info shall be included or not
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
   private static Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {

@@ -340,7 +340,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    * entity mappings are fetched as well
    *
    * @param coverageId coverage type
-   * @param includedIdentifiers list from the includeIdentifier header
+   * @param requestHeader, see {@link RequestHeaders} the holder that contains all supported
+   *     resource request headers
    * @param paging specified
    * @return the beneficiaries
    */

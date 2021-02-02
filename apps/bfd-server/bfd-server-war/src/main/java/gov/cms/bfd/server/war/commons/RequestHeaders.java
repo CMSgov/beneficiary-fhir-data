@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 /**
  * A per request instance holds all resource (FHIR) request headers, such as: "includeIdentifiers"
- * {@link PatientResourceProvider#HEADER_NAME_INCLUDE_IDENTIFIERS} "includeAddressFields" {@link
- * PatientResourceProvider#HEADER_NAME_INCLUDE_ADDRESS_FIELDS} which serve as part of BFD API
+ * {@link #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} "includeAddressFields" {@link
+ * #CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS} which serve as part of BFD API
  */
 public class RequestHeaders {
   RequestDetails requestDetails;
@@ -117,6 +117,13 @@ public class RequestHeaders {
     return new RequestHeaders(hdrValues);
   }
 
+  /**
+   * get header value by given header name.
+   *
+   * @param <T> the header value type
+   * @param hdrName the header name
+   * @return the header value casted to its type
+   */
   public <T> T getValue(String hdrName) {
     Object v = this.headerNVs.get(hdrName);
     if (v != null) {
@@ -125,11 +132,19 @@ public class RequestHeaders {
     return null;
   }
 
+  /**
+   * public helper for headers name value pairs iteration
+   *
+   * @return a map of header name value pairs
+   */
   public Map<String, Object> getNVPairs() {
     return this.headerNVs;
   }
 
   /**
+   * public helper for headers name value pairs iteration with an excludion list (in the form of
+   * delimited string)
+   *
    * @param excludeHeaders list of headers to exclude when getting header/value pairs map
    * @return the map of all header/value with headers in exclude list removed
    */
@@ -146,11 +161,23 @@ public class RequestHeaders {
     return nvs;
   }
 
+  /**
+   * check if request contains header includeIdentifiers {@link
+   * #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'
+   *
+   * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
+   */
   public boolean isHICNinIncludeIdentifiers() {
     List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS);
     return v == null ? false : (v.contains("hicn") || v.contains("true"));
   }
 
+  /**
+   * check if request contains header includeIdentifiers {@link
+   * #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'mbi' or 'true'
+   *
+   * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
+   */
   public boolean isMBIinIncludeIdentifiers() {
     List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS);
     return v == null ? false : (v.contains("mbi") || v.contains("true"));

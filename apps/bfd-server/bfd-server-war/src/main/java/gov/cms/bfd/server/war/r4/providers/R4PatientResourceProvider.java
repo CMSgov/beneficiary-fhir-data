@@ -342,7 +342,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * entity mappings are fetched as well
    *
    * @param coverageId coverage type
-   * @param includedIdentifiers list from the includeIdentifier header
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @param paging specified
    * @return the beneficiaries
    */
@@ -789,19 +790,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
   public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
   public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
-
-  // /**
-  //  * The header key used to determine which header should be used. See {@link
-  //  * #RequestHeaders.getValue(<header-name>)} for details.
-  //  */
-  // public static final String HEADER_NAME_INCLUDE_IDENTIFIERS = "IncludeIdentifiers";
-
-  // /**
-  //  * The List of valid values for the {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header. See {@link
-  //  * #RequestHeaders.getValue()} for details.
-  //  */
-  // public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
-  //     Arrays.asList("true", "false", "hicn", "mbi");
 
   /**
    * Check that coverageId value is valid
