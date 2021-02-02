@@ -270,7 +270,7 @@ rekey(){
   [[ ! -f $1 || -z "$2" || -z "$3" ]] && error_exit "Cannot rekey $1"
   
   # update vault password in jenkins configs
-  dname="$(dirname $1)"
+  dname="$(dirname "$1")"
   bname="$(basename "$dname")"
   if [[ "$bname" == "builds.bfd-mgmt.cmscloud.local" ]] || [[ "$bname" == "builds.bfd-mgmt-test.cmscloud.local" ]]; then
     # decrypt, update the secret, and re-encrypt with the new key
