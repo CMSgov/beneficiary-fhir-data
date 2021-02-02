@@ -60,6 +60,8 @@ final class HospiceClaimTransformer {
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
 
+    TransformerUtils.mapEobWeeklyProcessDate(eob, claimGroup.getWeeklyProcessDate());
+
     // map eob type codes into FHIR
     TransformerUtils.mapEobType(
         eob,
@@ -86,7 +88,6 @@ final class HospiceClaimTransformer {
         Optional.of(claimGroup.getUtilizationDayCount()));
 
     if (claimGroup.getHospicePeriodCount().isPresent()) {
-      // TODO should this be benefitBalance?
       eob.getHospitalization()
           .addExtension(
               TransformerUtils.createExtensionQuantity(
@@ -106,7 +107,9 @@ final class HospiceClaimTransformer {
         claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiOriginalClaimControlNumber());
 
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(

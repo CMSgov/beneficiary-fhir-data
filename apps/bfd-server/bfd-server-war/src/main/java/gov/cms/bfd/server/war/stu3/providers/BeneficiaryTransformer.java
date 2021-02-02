@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -14,11 +15,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
 /**
@@ -51,9 +54,9 @@ import org.hl7.fhir.dstu3.model.Patient;
  * fields to the FHIR export - and your customers will receive for the first time - the following
  * fields:
  *
- * <p>CLM_UNCOMPD_CARE_PMT_AMT EFCTV_BGN_DT EFCTV_END_DT BENE_LINK_KEY CLM_CNTL_NUM
- * FI_DOC_CLM_CNTL_NUM FI_ORIG_CLM_CNTL_NUM TAX_NUM BENE_DEATH_DT NCH_WKLY_PROC_DT REV_CNTR_DT
- * IME_OP_CLM_VAL_AMT DSH_OP_CLM_VAL_AMT CLM_HOSPC_START_DT_ID NCH_BENE_DSCHRG_DT
+ * <p>CLM_UNCOMPD_CARE_PMT_AMT EFCTV_BGN_DT EFCTV_END_DT CLM_CNTL_NUM FI_DOC_CLM_CNTL_NUM
+ * FI_ORIG_CLM_CNTL_NUM BENE_DEATH_DT NCH_WKLY_PROC_DT REV_CNTR_DT IME_OP_CLM_VAL_AMT
+ * DSH_OP_CLM_VAL_AMT CLM_HOSPC_START_DT_ID NCH_BENE_DSCHRG_DT
  *
  * <p>Note that BB2.0 API will be filtering out all derived line address fields (1-6) and CITY_NAME.
  * Please announce this to your respective customer communities as you see fit. A list of which
@@ -85,6 +88,8 @@ final class BeneficiaryTransformer {
   /**
    * @param beneficiary the CCW {@link Beneficiary} to transform
    * @param includeIdentifiersValues the includeIdentifiers header values to use
+   * @param includeAddressFields the includeAddressFields flag derived from header - used to
+   *     determine if derived address info be included or not
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
   private static Patient transform(Beneficiary beneficiary, List<String> includeIdentifiersValues) {
@@ -106,10 +111,28 @@ final class BeneficiaryTransformer {
     }
 
     if (beneficiary.getMbiHash().isPresent()) {
-      patient
-          .addIdentifier()
-          .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
-          .setValue(beneficiary.getMbiHash().get());
+      Period mbiPeriod = new Period();
+
+      if (beneficiary.getMbiEffectiveDate().isPresent()) {
+        TransformerUtils.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
+      }
+
+      if (beneficiary.getMbiObsoleteDate().isPresent()) {
+        TransformerUtils.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
+      }
+
+      if (mbiPeriod.hasStart() || mbiPeriod.hasEnd()) {
+        patient
+            .addIdentifier()
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+            .setValue(beneficiary.getMbiHash().get())
+            .setPeriod(mbiPeriod);
+      } else {
+        patient
+            .addIdentifier()
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+            .setValue(beneficiary.getMbiHash().get());
+      }
     }
 
     Extension currentIdentifier =
@@ -184,6 +207,14 @@ final class BeneficiaryTransformer {
 
     if (beneficiary.getBirthDate() != null) {
       patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));
+    }
+
+    // Death Date
+    if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
+      patient.setDeceased(
+          new DateTimeType(
+              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              TemporalPrecisionEnum.DAY));
     }
 
     char sex = beneficiary.getSex();

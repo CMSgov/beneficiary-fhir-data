@@ -61,6 +61,8 @@ final class HHAClaimTransformer {
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
 
+    TransformerUtils.mapEobWeeklyProcessDate(eob, claimGroup.getWeeklyProcessDate());
+
     // map eob type codes into FHIR
     TransformerUtils.mapEobType(
         eob,
@@ -84,7 +86,9 @@ final class HHAClaimTransformer {
         claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiOriginalClaimControlNumber());
 
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(
