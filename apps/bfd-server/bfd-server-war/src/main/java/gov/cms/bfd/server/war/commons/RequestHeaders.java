@@ -55,14 +55,6 @@ public class RequestHeaders {
     Map<String, String> nvPairs = new HashMap<String, String>();
     String curKey = null;
     for (String s : hdrValues) {
-      if (s.startsWith("[")) {
-        String stackStr = "CALLSTACK:";
-        for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
-          stackStr = stackStr + ste.toString();
-        }
-        throw new InvalidRequestException(
-            "got header value with BRACKET: " + s + ", CALLSTACK:" + stackStr);
-      }
       if (curKey == null) {
         curKey = s;
         String pv = nvPairs.put(curKey, "");
