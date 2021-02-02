@@ -7,3 +7,7 @@
 
 # OSX system files
 .DS_Store
+
+# ignore sensitive files
+*.keyfile
+

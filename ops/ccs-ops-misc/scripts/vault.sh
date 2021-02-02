@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # vault.sh - ansible-vault helper script for rekeying and testing vault encrypted files in BFD.
 # Run this script with --help for more info.
+
 SCRIPT_NAME=${0##*/}
 
 ## ENV VARS
@@ -96,7 +97,7 @@ help_message(){
     can be decrypted with the default \$VAULT_KEYFILE_ID
   $> ./$SCRIPT_NAME --test --current-keyfile=/Volumes/secrets/foo ../foo.yml
     Test to see if ../foo.yml is an ansible-vault encrypted file that can be decrypted with foo.
-  $> ./$SCRIPT_NAME --rekey --skip-s3 --new-keyfile=foo --output-dir=. 
+  $> ./$SCRIPT_NAME --rekey --skip-s3 --new-keyfile "$(pwd)/foo.password" --output-dir=. 
 
   Options:
   -r, --rekey Rekeys (re-encrypts) ansible-vault encrypted files. By default, a new $KEY_LEN long
@@ -113,7 +114,7 @@ help_message(){
   This script makes heavy use of environment variables in addition to the above options. This is to
   allow easier automation and flexibility. If you choose to use environment variables, it's highly
   advised to add these to an environment file and source before calling the script. E.g.,
-    > source .env && ./$SCRIPT_NAME
+    > source .vault.env && ./$SCRIPT_NAME
     
   Please be mindful and do not polute your shell history with secrets. E.g., do not do
     > export CURRENT_KEY=s3cr3tpassw9rd ./$SCRIPT_NAME' <--BAD
@@ -165,9 +166,9 @@ load_current_key(){
   # if the user provided a keyfile, load the key from it and stop here
   if [[ -n "$CURRENT_KEYFILE" ]]; then
     local keyfile
-    keyfile=$(resolve_path "$CURRENT_KEYFILE")
-    CURRENT_KEY="$(cat "$CURRENT_KEYFILE")"
-    [[ -z "$CURRENT_KEY" ]] && error_exit "Could not load key from $CURRENT_KEYFILE"
+    keyfile="$(resolve_path "$CURRENT_KEYFILE")"
+    CURRENT_KEY="$(cat "$keyfile")"
+    [[ -z "$CURRENT_KEY" ]] && error_exit "Could not load current key from $CURRENT_KEYFILE"
     echo "Using user supplied key found in $CURRENT_KEYFILE"
     return
   fi
@@ -199,9 +200,9 @@ load_new_key(){
   # if a keyfile was provided by the user then load the key and stop here
   if [[ -n "$NEW_KEYFILE" ]]; then
     local keyfile
-    keyfile=$(resolve_path "$NEW_KEYFILE")
-    CURRENT_KEY=$(cat "$keyfile")
-    [[ -z "$NEW_KEY" ]] && error_exit "Could not load key from $NEW_KEYFILE"
+    keyfile="$(resolve_path "$NEW_KEYFILE")"
+    NEW_KEY=$(cat "$keyfile")
+    [[ -z "$NEW_KEY" ]] && error_exit "Could not load new key from $NEW_KEYFILE"
     echo "Rekeying with user supplied NEW_KEYFILE."
     return
   fi
@@ -262,11 +263,34 @@ export_file(){
 # $2 == current key
 # $3 == new key
 rekey(){
+  local dname
+  local bname
+  local sec
   # abort if no key is set or the file is invalid
   [[ ! -f $1 || -z "$2" || -z "$3" ]] && error_exit "Cannot rekey $1"
-
-  # else, rekey
-  ansible-vault rekey --vault-password-file=<(echo "$2") --new-vault-password=<(echo "$3") "$1" >/dev/null 2>&1
+  
+  # update vault password in jenkins configs
+  dname="$(dirname $1)"
+  bname="$(basename "$dname")"
+  if [[ "$bname" == "builds.bfd-mgmt.cmscloud.local" ]] || [[ "$bname" == "builds.bfd-mgmt-test.cmscloud.local" ]]; then
+    # decrypt, update the secret, and re-encrypt with the new key
+    printf "(updating secret in file)"
+    if ansible-vault decrypt --vault-password-file=<(echo "$2") "$1" >/dev/null 2>&1; then
+      sec="vault_jenkins_bluebutton_ansible_playbooks_data_ansible_vault_password: $3"
+      sec_escaped="$(echo "$sec" | sed -e 's/[\/&]/\\&/g')"
+      if ! sed -i "s/^vault_jenkins_bluebutton_ansible_playbooks_data_ansible_vault_password.*/$sec_escaped/" "$1"; then
+        error_exit "Unable to update secret in $1. Aborting."
+      fi
+    fi
+    if ansible-vault encrypt --vault-password-file=<(echo "$3") "$1" >/dev/null 2>&1; then
+      echo "OK"
+    else
+      error_exit "Error encrypting $1. Aborting."
+    fi
+  else
+    # just rekey
+    ansible-vault rekey --vault-password-file=<(echo "$2") --new-vault-password=<(echo "$3") "$1" >/dev/null 2>&1
+  fi
 }
 
 # rekeys files found in $search_path
