@@ -107,6 +107,36 @@ public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor} can correctly handle
+   * {@link StaticRifResource#SAMPLE_A_BENES}.
+   */
+  @Test
+  public void process1BeneRecordWithBackslash() {
+    RifFilesEvent filesEvent =
+        new RifFilesEvent(
+            Instant.now(), StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.toRifFile());
+    RifFilesProcessor processor = new RifFilesProcessor();
+    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
+    List<RifRecordEvent<?>> rifEventsList =
+        rifFileRecords.getRecords().collect(Collectors.toList());
+
+    Assert.assertEquals(
+        StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.getRecordCount(), rifEventsList.size());
+
+    RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+    Assert.assertEquals(
+        StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.getRifFileType(),
+        rifRecordEvent.getFileEvent().getFile().getFileType());
+    Assert.assertNotNull(rifRecordEvent.getRecord());
+    Assert.assertTrue(rifRecordEvent.getRecord() instanceof Beneficiary);
+
+    Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
+    Assert.assertEquals(beneRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
+    Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
+    Assert.assertEquals("DAEJEON SI 34867", beneRow.getDerivedMailingAddress4().get());
+  }
+
+  /**
+   * Ensures that {@link gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor} can correctly handle
    * {@link StaticRifResource#SAMPLE_A_BENEFICIARY_HISTORY}.
    */
   @Test
