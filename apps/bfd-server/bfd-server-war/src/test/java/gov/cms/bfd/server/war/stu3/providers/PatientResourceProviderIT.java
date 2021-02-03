@@ -13,6 +13,7 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.util.Arrays;
@@ -39,7 +40,7 @@ public final class PatientResourceProviderIT {
   public void readExistingPatient() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -51,7 +52,8 @@ public final class PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+    BeneficiaryTransformerTest.assertMatches(
+        beneficiary, patient, getRHwithIncldAddrFldHdr("false"));
   }
 
   /**
@@ -61,12 +63,14 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void readExistingPatientIncludeIdentifiersTrue() {
-    String includeIdentifiersValue = "true";
-    boolean expectingHicn = true;
-    boolean expectingMbi = true;
-
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_HICN,
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "true",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
   }
 
   /**
@@ -76,12 +80,14 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void readExistingPatientIncludeIdentifiersHicnMbi() {
-    String includeIdentifiersValue = "hicn,mbi";
-    boolean expectingHicn = true;
-    boolean expectingMbi = true;
-
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_HICN,
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "hicn,mbi",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
   }
 
   /**
@@ -91,12 +97,14 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void readExistingPatientIncludeIdentifiersHicn() {
-    String includeIdentifiersValue = "hicn";
-    boolean expectingHicn = true;
-    boolean expectingMbi = false;
-
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_HICN,
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "hicn",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
   }
 
   /**
@@ -106,12 +114,14 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void readExistingPatientIncludeIdentifiersMbi() {
-    String includeIdentifiersValue = "mbi";
-    boolean expectingHicn = false;
-    boolean expectingMbi = true;
-
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_EXPECT_MBI,
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "mbi",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
   }
 
   /**
@@ -121,12 +131,14 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void readExistingPatientIncludeIdentifiersFalse() {
-    String includeIdentifiersValue = "false";
-    boolean expectingHicn = false;
-    boolean expectingMbi = false;
-
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "false",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
   }
 
   /**
@@ -136,12 +148,14 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void readExistingPatientIncludeIdentifiersBlank() {
-    String includeIdentifiersValue = "";
-    boolean expectingHicn = false;
-    boolean expectingMbi = false;
-
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
   }
 
   /**
@@ -152,12 +166,14 @@ public final class PatientResourceProviderIT {
    */
   @Test(expected = InvalidRequestException.class)
   public void readExistingPatientIncludeIdentifiersInvalid1() {
-    String includeIdentifiersValue = "invalid-identifier-value";
-    boolean expectingHicn = false;
-    boolean expectingMbi = false;
-
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "invalid-identifier-value",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
   }
 
   /**
@@ -168,12 +184,14 @@ public final class PatientResourceProviderIT {
    */
   @Test(expected = InvalidRequestException.class)
   public void readExistingPatientIncludeIdentifiersInvalid2() {
-    String includeIdentifiersValue = "mbi,invalid-identifier-value";
-    boolean expectingHicn = false;
-    boolean expectingMbi = false;
-
     assertExistingPatientIncludeIdentifiersExpected(
-        includeIdentifiersValue, expectingHicn, expectingMbi);
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN,
+        PatientResourceProvider.CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI,
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "mbi,invalid-identifier-value",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
   }
 
   /**
@@ -184,16 +202,14 @@ public final class PatientResourceProviderIT {
    * @param includeIdentifiersValue header value
    * @param expectingHicn true if expecting a HICN
    * @param expectingMbi true if expecting a MBI
+   * @param includeAddressValues header value
    */
   public void assertExistingPatientIncludeIdentifiersExpected(
-      String includeIdentifiersValue, boolean expectingHicn, boolean expectingMbi) {
+      boolean expectingHicn, boolean expectingMbi, RequestHeaders requestHeader) {
 
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers(includeIdentifiersValue);
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient(requestHeader);
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -205,7 +221,7 @@ public final class PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, requestHeader);
 
     /*
      * Ensure the unhashed values for HICN and MBI are present.
@@ -241,10 +257,13 @@ public final class PatientResourceProviderIT {
   public void readExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "true",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true");
+    IGenericClient fhirClient = createFhirClient(requestHeader);
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -256,7 +275,7 @@ public final class PatientResourceProviderIT {
         fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
 
     Assert.assertNotNull(patient);
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patient);
+    BeneficiaryTransformerTest.assertMatches(beneficiary, patient, requestHeader);
 
     /*
      * Ensure the unhashed values for HICN and MBI are present.
@@ -285,8 +304,7 @@ public final class PatientResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readMissingPatient() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-
+    IGenericClient fhirClient = createFhirClient();
     // No data is loaded, so this should return nothing.
     fhirClient.read().resource(Patient.class).withId("1234").execute();
   }
@@ -300,7 +318,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByLogicalId() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -329,7 +347,8 @@ public final class PatientResourceProviderIT {
 
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(
+        beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
   }
 
   /**
@@ -342,10 +361,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByLogicalIdIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("true", "true");
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -395,10 +411,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByLogicalIdIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("false", "true");
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -447,7 +460,7 @@ public final class PatientResourceProviderIT {
   public void searchForPatientByLogicalIdWithPaging() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -485,7 +498,7 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void searchForMissingPatientByLogicalId() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -509,7 +522,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByHicnHash() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -541,7 +554,8 @@ public final class PatientResourceProviderIT {
 
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(
+        beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
   }
 
   /**
@@ -554,10 +568,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByHicnHashIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("true", "true");
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -615,7 +626,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_HICN_MULT_BENES.getResources())));
 
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Stream<Beneficiary> beneficiariesStream =
         loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r);
@@ -744,10 +755,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByHicnHashIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("false", "true");
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -799,7 +807,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByHicnHashWithPaging() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -823,7 +831,8 @@ public final class PatientResourceProviderIT {
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(
+        beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
 
     /*
      * Verify that only the first and last paging links exist, since there should
@@ -844,7 +853,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByHistoricalHicnHash() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     loadedRecords.stream()
         .filter(r -> r instanceof BeneficiaryHistory)
@@ -882,7 +891,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientWithNoHistory() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     loadedRecords.stream()
         .filter(r -> r instanceof Beneficiary)
@@ -920,10 +929,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("true", "true");
 
     loadedRecords.stream()
         .filter(r -> r instanceof Beneficiary)
@@ -958,7 +964,7 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void searchForMissingPatientByHicnHash() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -986,7 +992,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByMbiHash() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1019,7 +1025,8 @@ public final class PatientResourceProviderIT {
 
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(
+        beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
 
     String mbiHashIdentifier =
         patientFromSearchResult.getIdentifier().stream()
@@ -1043,10 +1050,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByMbiHashIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("true", "true");
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1105,7 +1109,7 @@ public final class PatientResourceProviderIT {
         ServerTestUtils.loadData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_HICN_MULT_BENES.getResources())));
 
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Stream<Beneficiary> beneficiariesStream =
         loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r);
@@ -1343,7 +1347,8 @@ public final class PatientResourceProviderIT {
               .findAny()
               .get();
       Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-      BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+      BeneficiaryTransformerTest.assertMatches(
+          beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
     }
   }
 
@@ -1357,10 +1362,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByMbiHashIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("false", "true");
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1413,7 +1415,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByMbiHashWithPaging() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1438,7 +1440,8 @@ public final class PatientResourceProviderIT {
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getTotal());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    BeneficiaryTransformerTest.assertMatches(beneficiary, patientFromSearchResult);
+    BeneficiaryTransformerTest.assertMatches(
+        beneficiary, patientFromSearchResult, getRHwithIncldAddrFldHdr("false"));
 
     /*
      * Verify that only the first and last paging links exist, since there should
@@ -1459,7 +1462,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByHistoricalMbiHash() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     loadedRecords.stream()
         .filter(r -> r instanceof BeneficiaryHistory)
@@ -1498,7 +1501,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByMbiWithNoHistory() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     loadedRecords.stream()
         .filter(r -> r instanceof Beneficiary)
@@ -1537,10 +1540,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByMbiWithNoHistoryIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("true", "true");
 
     loadedRecords.stream()
         .filter(r -> r instanceof Beneficiary)
@@ -1576,7 +1576,7 @@ public final class PatientResourceProviderIT {
    */
   @Test
   public void searchForMissingPatientByMbiHash() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -1598,7 +1598,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByPartDContractNum() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     // Should return a single match
     Bundle searchResults =
@@ -1623,10 +1623,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("true");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("true", "true");
 
     // Should return a single match
     Bundle searchResults =
@@ -1682,10 +1679,7 @@ public final class PatientResourceProviderIT {
             StaticRifResource.SAMPLE_A_BENES,
             StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
             StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("mbi");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("mbi", "true");
 
     // Should return a single match
     Bundle searchResults =
@@ -1732,10 +1726,7 @@ public final class PatientResourceProviderIT {
             StaticRifResource.SAMPLE_A_BENES,
             StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
             StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("mbi");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("mbi", "true");
 
     // Should return a single match
     Bundle searchResults =
@@ -1772,10 +1763,7 @@ public final class PatientResourceProviderIT {
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-    ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("false");
-    fhirClient.registerInterceptor(extraParamsInterceptor);
+    IGenericClient fhirClient = createFhirClient("false", "true");
 
     // Should return a single match
     Bundle searchResults =
@@ -1821,7 +1809,7 @@ public final class PatientResourceProviderIT {
   public void searchForPatientByPartDContractNumWithPaging() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     // Should return a single match
     Bundle searchResults =
@@ -1852,7 +1840,7 @@ public final class PatientResourceProviderIT {
 
   @Test
   public void searchForMissingPatientByPartDContractNum() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -1877,7 +1865,7 @@ public final class PatientResourceProviderIT {
   public void searchWithLastUpdated() {
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClient();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1933,5 +1921,67 @@ public final class PatientResourceProviderIT {
   @After
   public void cleanDatabaseServerAfterEachTestCase() {
     ServerTestUtils.cleanDatabaseServer();
+  }
+
+  /**
+   * test helper
+   *
+   * @param value of all include identifier values
+   * @return RequestHeaders instance derived from value
+   */
+  public static RequestHeaders getRHwithIncldIdntityHdr(String value) {
+    return RequestHeaders.getHeaderWrapper(
+        PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, value);
+  }
+
+  /**
+   * test helper
+   *
+   * @param value of all include address fields values
+   * @return RequestHeaders instance derived from value
+   */
+  public static RequestHeaders getRHwithIncldAddrFldHdr(String value) {
+    return RequestHeaders.getHeaderWrapper(
+        PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, value);
+  }
+
+  /**
+   * helper create a client w/o extra params
+   *
+   * @return the client
+   */
+  public static IGenericClient createFhirClient() {
+    return createFhirClient(null);
+  }
+
+  /**
+   * helper
+   *
+   * @param idHdrVal - includeIdentifiers header value
+   * @param addrHdrVal - includeAddressFields header value
+   * @return the client
+   */
+  public static IGenericClient createFhirClient(String idHdrVal, String addrHdrVal) {
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            idHdrVal,
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            addrHdrVal);
+    return createFhirClient(requestHeader);
+  }
+  /**
+   * helper
+   *
+   * @return the client with extra params registered
+   */
+  public static IGenericClient createFhirClient(RequestHeaders requestHeader) {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    if (requestHeader != null) {
+      ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+      extraParamsInterceptor.setHeaders(requestHeader);
+      fhirClient.registerInterceptor(extraParamsInterceptor);
+    }
+    return fhirClient;
   }
 }

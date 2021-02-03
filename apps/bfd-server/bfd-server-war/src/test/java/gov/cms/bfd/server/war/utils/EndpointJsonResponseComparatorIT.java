@@ -21,6 +21,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ClaimType;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
@@ -408,7 +409,12 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setHeaders(
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "hicn,mbi",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -460,7 +466,12 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setHeaders(
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "hicn,mbi",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -521,7 +532,12 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setHeaders(
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "hicn,mbi",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
