@@ -17,9 +17,13 @@ import java.util.Optional;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.input.BOMInputStream;
+import org.apache.poi.util.ReplacingInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Contains some shared utility code for parsing RIF files. */
 public final class RifParsingUtils {
+  private static final Logger LOGGER = LoggerFactory.getLogger(RifParsingUtils.class);
   /** The {@link CSVFormat} for RIF file parsing/writing. */
   public static final CSVFormat CSV_FORMAT =
       CSVFormat.EXCEL.withHeader().withDelimiter('|').withEscape('\\');
@@ -57,7 +61,9 @@ public final class RifParsingUtils {
   public static CSVParser createCsvParser(
       CSVFormat csvFormat, InputStream fileStream, Charset charset) {
     BOMInputStream fileStreamWithoutBom = new BOMInputStream(fileStream, false);
-    InputStreamReader reader = new InputStreamReader(fileStreamWithoutBom, charset);
+    InputStream fileStreamStrippedOfBackslashes =
+        new ReplacingInputStream(fileStreamWithoutBom, "\\|", "|");
+    InputStreamReader reader = new InputStreamReader(fileStreamStrippedOfBackslashes, charset);
 
     try {
       CSVParser parser = new CSVParser(reader, csvFormat);
