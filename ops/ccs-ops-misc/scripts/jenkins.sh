@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # jenkins.sh - Script to help with patching/updating existing jenkins instances.
 # Usage: see jenkins.sh [-h|--help]
-# set -x
+
 # We make use of a lot of env vars, but most should not be changed unless you know what
 # you are doing. The default .env file from kb is all you should need as the script
 # will walk you through the process and prompt you for items that may need to be overidden.
@@ -28,6 +28,7 @@ JENKINS_SUBNET=                                 # dynamically set
 
 
 # other vars used by the script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 required_vars=('SSH_USER' 'SSH_KEY_PATH')
 required_vars+=('PROD_ADMIN_S3_BUCKET' 'TEST_ADMIN_S3_BUCKET' 'ADMIN_S3_BUCKET')
 required_vars+=('JENKINS_AZS' 'JENKINS_KEY_NAME' 'JENKINS_INSTANCE_SIZE')
@@ -184,7 +185,7 @@ set_working_env(){
   PS3="Select an instance from ($JENKINS_ENV) you wish to target: "
   select ip in $(aws ec2 describe-instances \
   --query 'Reservations[].Instances[].[PrivateIpAddress,Tags[?Key==`Name`]| [0].Value]' \
-  --output table | grep "$selected_env" | awk '{print $2}' | grep -v "Abort" )
+  --output table | grep "$selected_env" | awk '{print $2}' | grep -v "Abort" | grep -v "None" )
   do
     target="$ip"
     break
@@ -196,15 +197,11 @@ set_working_env(){
 # $1 == command to run on remote system
 ssh_runner(){
   local cmd
-  local ssh_str
   local result
   cmd="$@"
-  ssh_str="ssh -q -i ${SSH_KEY_PATH} -oStrictHostKeyChecking=no -o IdentitiesOnly=yes -T ${SSH_USER}@${target} sudo ${cmd} || echo 'error'"
-  result="$($ssh_str)"
-  if [[ "$result" == "error" ]]; then
-    return 1
+  if ! ssh -q -i "$SSH_KEY_PATH" -oStrictHostKeyChecking=no -o IdentitiesOnly=yes -T "$SSH_USER"@"$target" sudo "$cmd"; then
+    error_exit "Could not execute ssh command. Aborting"
   fi
-  echo $result
 }
 
 # tests ssh connectiont to $target
@@ -253,30 +250,47 @@ wait_for_jenkins(){
 # $1 == 'stop' 'start' 'restart' or 'status'
 jenkins_ctl(){
   local timeout
-
+  case "$1" in
+    'stop') printf "Stopping Jenkins.. " ;;
+    'start') echo "Starting Jenkins.. " ;;
+    'restart') echo "Restarting Jenkins.. " ;;
+  esac
+  
   # get jenkins status
   jenkins_status="$(get_jenkins_status)"
   case "$1" in
     stop)
       if [[ "$jenkins_status" == "stopped" ]]; then
-        echo "Jenkins is stopped."
+        echo "OK"
       else
-        printf '%s' "Stopping Jenkins.. "
-        ssh_runner 'sudo systemctl stop jenkins' >/dev/null 2>&1  && echo "OK" || error_exit "Error stopping Jenkins. Aborting."
+        if ssh_runner 'sudo systemctl stop jenkins' >/dev/null 2>&1; then
+          echo "OK"
+        else
+          echo "FAIL"
+          error_exit "Error stopping Jenkins. Aborting."
+        fi
       fi
     ;;
     start)
       if [[ "$jenkins_status" == "running" ]]; then
-        echo "Jenkins is running."  
+        echo "OK"  
       else
-        printf '%s' "Starting Jenkins.. "
-        ssh_runner 'sudo systemctl start jenkins' >/dev/null 2>&1 && echo "OK" || error_exit "Error starting Jenkins. Aborting."
+        if ssh_runner 'sudo systemctl start jenkins' >/dev/null 2>&1; then
+          echo "OK"
+        else
+          echo "FAIL"
+          error_exit "Error starting Jenkins. Aborting."
+        fi
       fi
       wait_for_jenkins
     ;;
     restart)
-      printf '%s' "Restarting Jenkins.. "
-      ssh_runner 'sudo systemctl restart jenkins' >/dev/null 2>&1 && echo "OK" || error_exit "Error restarting Jenkins. Aborting."
+      if ssh_runner 'sudo systemctl restart jenkins' >/dev/null 2>&1; then
+        echo "OK"
+      else
+        echo "FAIL"
+        error_exit "Error restarting Jenkins. Aborting."
+      fi
       wait_for_jenkins
     ;;
     *)
@@ -285,6 +299,7 @@ jenkins_ctl(){
   esac
 }
 
+# generates a mostly random filename for backups
 gen_backup_name(){
   local backup_date
   local uuidstamp
@@ -293,6 +308,41 @@ gen_backup_name(){
   uuidstamp="$(uuidgen | cut -d'-' -f 1)" # 186215EA
   backup_name="${backup_date}-${uuidstamp}.tar.gz" # 2020-12-31-186215EA.keyfile
   printf '%s' "$backup_name"  
+}
+
+# shell commands to back up /var/lib/jenkins
+# $1 == backup file name
+backup_cmd(){
+  cat <<- _EOF_
+touch "/var/lib/jenkins/$1" && \
+sudo tar --exclude="/var/lib/jenkins/$1" -czvf "/var/lib/jenkins/$1" /var/lib/jenkins && \
+sudo aws s3 cp "/var/lib/jenkins/$1" "${ADMIN_S3_BUCKET}/jenkins/backups/$1" && \
+sudo rm "/var/lib/jenkins/$1"
+_EOF_
+}
+
+# optionally backup /var/lib/jenkins to admin bucket (10+ minutes easily)
+backup(){
+  local backup_name
+  local backup_cmd_str
+  echo "This will make a full backup of the entire /var/lib/jenkins home directory and will upload it to the admin s3 bucket."
+  echo "It will be large ~30GB compressed and will take 10+ minutes to complete."
+  if ! c_prompt "Continue? (y/n)"; then
+    error_exit "User aborted."
+  fi
+
+  # echo "Automatically backing up jenkins is a WIP. For now, ssh into $target and run the commands manually:"
+  backup_name="$(gen_backup_name)"
+  
+  # build our backup command
+  backup_cmd_str="$(backup_cmd "$backup_name")"
+  
+  # backup
+  if ssh_runner "$backup_cmd_str"; then
+    echo "Backup complete."
+  else
+    error_exit "Failed to backup jenkins. Aborting."
+  fi
 }
 
 # Gets the latest gold ami from aws
@@ -308,92 +358,49 @@ get_gold(){
     echo "$ami"
 }
 
-# shell commands to back up /var/lib/jenkins
-# $1 == backup file name
-backup_cmd(){
-  cat <<- _EOF_
-touch "/var/lib/jenkins/$1" && \
-sudo tar --exclude="/var/lib/jenkins/$1" -czf "/var/lib/jenkins/$1" /var/lib/jenkins && \
-sudo aws s3 cp "/var/lib/jenkins/$1" "${ADMIN_S3_BUCKET}/jenkins/backups/$1" && \
-sudo rm "/var/lib/jenkins/$1"
-_EOF_
-}
-
-# optionally backup /var/lib/jenkins to admin bucket (10+ minutes easily)
-backup(){
-  local backup_name
-  local backup_cmd_str
-
-  # prompt to backup.
-  # c_prompt "Backup Jenkins home (y/n)? (this can take some time to complete)" || return
-  # echo "Backing up $JENKINS_ENV jenkins home (/var/lib/jenkins) and uploading to admin S3"
-  # echo "Note. It's ok if Jenkins is running, but there will be little to no output during this long process so hang tight."
-  echo "Automatically backing up jenkins is a WIP. For now, ssh into $target and run the commands manually:"
-  backup_name="$(gen_backup_name)"
-  backup_cmd_str="$(backup_cmd $backup_name)"
-  echo "ssh -i ${SSH_KEY_PATH} ${SSH_USER}@${target}"
-  echo "# and then"
-  echo "sudo $backup_cmd_str"
-  # ssh_runner "$backup_cmd_str" && echo "Backup complete." || error_exit "Failed to backup jenkins. Aborting."
-}
-
-# builds the ami using packer
-packer_build(){
-  echo "Building AMI"
-  [[ "$JENKINS_ENV" == "prod" ]] && packer_env='mgmt'
-  [[ "$JENKINS_ENV" == "test" ]] && packer_env='mgmt-test'
-  cd ../../ansible/playbooks-ccs && \
-  packer build \
-    -var source_ami="$GOLD_AMI" \
-    -var subnet_id="$JENKINS_SUBNET" \
-    -var "env=$packer_env" \
-    ../../packer/update_jenkins.json
-}
-
 build_ami(){
   local packer_env
   local build_ami
-  local build_ami_cmd
   local timeout
+  [[ "$JENKINS_ENV" == "prod" ]] && packer_env='mgmt'
+  [[ "$JENKINS_ENV" == "test" ]] && packer_env='mgmt-test'
   if [[ -z "$GOLD_AMI" ]]; then
     GOLD_AMI="$(get_gold)"
   fi
-
-  c_prompt "Build a new Jenkins AMI? Note: we will STOP $JENKINS_ENV's jenkins instance during this somewhat lengthly process. Continue? (y/n)" || return
+  if [[ "$ACTION" != 'upgrade' ]]; then  
+    if ! c_prompt "Build a new Jenkins AMI? Note: we will need to stop jenkins ($JENKINS_INSTANCE) during this somewhat lengthly process. Continue? (y/n)"; then
+      error_exit "User aborted."
+    fi
+  fi
   
   # stop jenkins
   jenkins_ctl 'stop'
-  packer_build
   
-  echo "Now take note of the ami id and run the following to deploy it:"
-  echo "$progname --jenkins-ami='REPLACE WITH AMI ID' deploy"
-  
-  # build_ami="$(cd ../../ansible/playbooks-ccs && $build_ami_cmd)"
-  # # packer_cmd="packer build -var source_ami='$GOLD_AMI' -var subnet_id='$JENKINS_SUBNET' -var 'env=$packer_env'"
-  # # build_ami="$($packer_cmd ../../packer/update_jenkins.json)"
-  
-  # printf "Checking ami.. "
-  
-  # # dirty regex test
-  # re="^ami-(.*)"
-  # [[ $build_ami =~ $re ]] && echo "OK" || error_exit "Invalid ami '$build_ami'. Aborting."
-  
-  # printf "Ensuring AMI is available"
-  # timeout=30
-  # while true; do
-  #   printf '.'
-  #   if aws ec2 describe-images --image-ids="$build_ami" --query "Images[*].{st:State}" | grep -e "available" >/dev/null 2>&1; then
-  #     echo " OK"
-  #     break
-  #   fi
-  #   sleep 1
-  #   timeout-=1
-  #   [[ timeout -lt 1 ]] && error_exit "Failed to build ami $build_ami" 
-  # done
+  echo "Building AMI"
 
-  # restart jenkins unless we are deploying after
+  if cd ../../ansible/playbooks-ccs && packer build \
+    --machine-readable \
+    -var source_ami="$GOLD_AMI" \
+    -var subnet_id="$JENKINS_SUBNET" \
+    -var "env=$packer_env" \
+    ../../packer/update_jenkins.json | tee "${SCRIPT_DIR}/packer-build.log"
+  then
+    build_ami="$(tail -2 "${SCRIPT_DIR}/packer-build.log" | head -2 | awk 'match($0, /ami-.*/) { print substr($0, RSTART, RLENGTH) }')"
+  else
+    error_exit "Failed to build AMI. Exiting."
+  fi
+  
+  # quick and dirty regex test
+  re="^ami-(.*)"
+  [[ $build_ami =~ $re ]] || error_exit "Invalid ami id '$build_ami'. Aborting."
+  
   if [[ "$ACTION" != "upgrade" ]]; then
+    echo
+    echo "AMI $build_ami was built successfully."
     jenkins_ctl 'start'
+    echo "Done." && exit 0
+  else
+    JENKINS_AMI="$build_ami"
   fi
 }
 
@@ -401,6 +408,7 @@ build_ami(){
 # $1 == env to deploy (mgmt or mgmt-test)
 terraform_deploy(){
   jenkins_ctl 'stop'
+  
   # terraform init
   tfswitch -s 0.13 # backend was initialized with v0.13
   terraform apply \
@@ -413,7 +421,11 @@ terraform_deploy(){
 
 # deploys
 deploy(){
-  c_prompt "Deploy $JENKINS_AMI? Note that we will stop jenkins before deploying. Continue? (y/n)" || return
+  if [[ "$ACTION" != 'upgrade' ]]; then
+    if ! c_prompt "Deploy $JENKINS_AMI? Note: we will need to stop jenkins ($JENKINS_ENV) before deploying. Continue? (y/n)"; then
+      error_exit "User aborted."
+    fi
+  fi
   [[ -z "$JENKINS_AMI" ]] && error_exit "JENKINS_AMI is not set. Please set with --jenkins-ami=foo"
   [[ "$JENKINS_ENV" == "prod" ]] && cd ../../terraform/env/mgmt/stateless && terraform_deploy 'mgmt'
   [[ "$JENKINS_ENV" == "test" ]] && cd ../../terraform/env/mgmt-test/stateless && terraform_deploy 'mgmt-test'
@@ -421,16 +433,11 @@ deploy(){
 
 # builds an up-to-date ami and redeploys
 upgrade(){
-  backup && build_ami && deploy && echo "Upgrade complete."
+  if ! c_prompt "Build and deploy an upgraded Jenkins instance? Note: we will stop the existing $JENKINS_ENV instance during this somewhat lengthly process. Continue? (y/n)"; then
+    error_exit "User aborted."
+  fi
+  build_ami && deploy
 }
-
-# verifies we have all the needed requirements
-check_requirements(){
-  :
-  # can we ssh into the selected instance?
-  # can we hit s3?
-}
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ARG PARSING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 while [[ -n $1 ]]; do
@@ -471,13 +478,12 @@ while [[ -n $1 ]]; do
 done
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BEGIN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-check_requirements
 set_working_env
 
 # ensure all other required env vars are set
 ok=true
 for v in "${required_vars[@]}"; do
-  # "${!v}" gets the value of variable named v
+  # "${!v}" gets the value of the variable named in $v
   [[ -z "${!v}" ]] && echo "$v is not set" ok=false
 done
 if [[ "$ok" == "false" ]]; then
