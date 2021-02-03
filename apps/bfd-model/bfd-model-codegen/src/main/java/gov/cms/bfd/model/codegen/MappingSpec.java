@@ -62,7 +62,10 @@ public final class MappingSpec {
     return rifLayout;
   }
 
-  /** @param rifLayout the new value for {@link #getRifLayout()} */
+  /**
+   * @param rifLayout the new value for {@link #getRifLayout()}
+   * @return the {@link MappingSpec} whose rifLayout is set
+   */
   public MappingSpec setRifLayout(RifLayout rifLayout) {
     this.rifLayout = rifLayout;
     return this;
@@ -84,7 +87,10 @@ public final class MappingSpec {
     return ClassName.get(packageName, headerEntity);
   }
 
-  /** @param headerEntity the new value for {@link #getHeaderEntity()} */
+  /**
+   * @param headerEntity the new value for {@link #getHeaderEntity()}
+   * @return the {@link MappingSpec} whose headerEntity is set
+   */
   public MappingSpec setHeaderEntity(String headerEntity) {
     this.headerEntity = headerEntity;
     return this;
@@ -153,7 +159,10 @@ public final class MappingSpec {
     return hasLines;
   }
 
-  /** @param hasLines the new value for {@link #getHasLines()} */
+  /**
+   * @param hasLines the new value for {@link #getHasLines()}
+   * @return the {@link MappingSpec} whose hasLines is set
+   */
   public MappingSpec setHasLines(boolean hasLines) {
     this.hasLines = hasLines;
     return this;
@@ -167,7 +176,10 @@ public final class MappingSpec {
     return hasBeneficiaryMonthly;
   }
 
-  /** @param hasBeneficiaryMonthly the new value for {@link #setHasBeneficiaryMonthly()} */
+  /**
+   * @param hasBeneficiaryMonthly the new value for {@link #setHasBeneficiaryMonthly(boolean)}
+   * @return the {@link MappingSpec} whose hasBeneficiaryMonthly will be set
+   */
   public MappingSpec setHasBeneficiaryMonthly(boolean hasBeneficiaryMonthly) {
     this.hasBeneficiaryMonthly = hasBeneficiaryMonthly;
     return this;

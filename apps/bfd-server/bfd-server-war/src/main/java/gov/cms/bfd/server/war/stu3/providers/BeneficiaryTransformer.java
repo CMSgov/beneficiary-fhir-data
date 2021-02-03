@@ -8,6 +8,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.ArrayList;
@@ -67,19 +68,18 @@ final class BeneficiaryTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersValues the includeIdentifiers header values to use
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
   @Trace
   public static Patient transform(
-      MetricRegistry metricRegistry,
-      Beneficiary beneficiary,
-      List<String> includeIdentifiersValues) {
+      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders requestHeader) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform"))
             .time();
-    Patient patient = transform(beneficiary, includeIdentifiersValues);
+    Patient patient = transform(beneficiary, requestHeader);
     timer.stop();
 
     return patient;
@@ -87,12 +87,11 @@ final class BeneficiaryTransformer {
 
   /**
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersValues the includeIdentifiers header values to use
-   * @param includeAddressFields the includeAddressFields flag derived from header - used to
-   *     determine if derived address info be included or not
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(Beneficiary beneficiary, List<String> includeIdentifiersValues) {
+  private static Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
     Objects.requireNonNull(beneficiary);
 
     Patient patient = new Patient();
@@ -103,7 +102,7 @@ final class BeneficiaryTransformer {
             CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
 
     // Add hicn-hash identifier ONLY if raw hicn is requested.
-    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       patient
           .addIdentifier()
           .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
@@ -142,7 +141,7 @@ final class BeneficiaryTransformer {
     // Add lastUpdated
     TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
 
-    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
 
       if (hicnUnhashedCurrent.isPresent())
@@ -170,7 +169,7 @@ final class BeneficiaryTransformer {
       }
     }
 
-    if (PatientResourceProvider.hasMBI(includeIdentifiersValues)) {
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
 
       if (mbiUnhashedCurrent.isPresent())
@@ -199,11 +198,28 @@ final class BeneficiaryTransformer {
       }
     }
 
-    patient
-        .addAddress()
-        .setState(beneficiary.getStateCode())
-        .setDistrict(beneficiary.getCountyCode())
-        .setPostalCode(beneficiary.getPostalCode());
+    // support header includeAddressFields from downstream components e.g. BB2
+    // per requirement of BFD-379, BB2 always send header includeAddressFields = False
+    Boolean addrHdrVal =
+        requestHeader.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
+    if (addrHdrVal != null && addrHdrVal) {
+      patient
+          .addAddress()
+          .setState(beneficiary.getStateCode())
+          .setPostalCode(beneficiary.getPostalCode())
+          .setCity(beneficiary.getDerivedCityName().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress1().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress2().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress3().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress4().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress5().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress6().orElse(null));
+    } else {
+      patient
+          .addAddress()
+          .setState(beneficiary.getStateCode())
+          .setPostalCode(beneficiary.getPostalCode());
+    }
 
     if (beneficiary.getBirthDate() != null) {
       patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));
