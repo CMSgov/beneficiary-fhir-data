@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -15,11 +16,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
@@ -110,12 +113,25 @@ final class BeneficiaryTransformerV2 {
     if (R4PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
 
-      if (hicnUnhashedCurrent.isPresent())
+      if (hicnUnhashedCurrent.isPresent()) {
+
+        Period mbiPeriod = new Period();
+
+        if (beneficiary.getMbiEffectiveDate().isPresent()) {
+          TransformerUtilsV2.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
+        }
+
+        if (beneficiary.getMbiObsoleteDate().isPresent()) {
+          TransformerUtilsV2.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
+        }
+
         addUnhashedIdentifier(
             patient,
             hicnUnhashedCurrent.get(),
             TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
-            currentIdentifier);
+            currentIdentifier,
+            mbiPeriod);
+      }
 
       List<String> unhashedHicns = new ArrayList<String>();
       for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
@@ -170,6 +186,14 @@ final class BeneficiaryTransformerV2 {
 
     if (beneficiary.getBirthDate() != null) {
       patient.setBirthDate(TransformerUtilsV2.convertToDate(beneficiary.getBirthDate()));
+    }
+
+    // Death Date
+    if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
+      patient.setDeceased(
+          new DateTimeType(
+              TransformerUtilsV2.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              TemporalPrecisionEnum.DAY));
     }
 
     char sex = beneficiary.getSex();
@@ -329,6 +353,47 @@ final class BeneficiaryTransformerV2 {
         .setSystem(TransformerConstants.CARIN_IDENTIFIER_SYSTEM)
         .setDisplay("Patient's Medicare Number")
         .addExtension(identifierCurrencyExtension);
+  }
+
+  /**
+   * @param patient the FHIR {@link Patient} resource to add the {@link Identifier} to
+   * @param value the value for {@link Identifier#getValue()}
+   * @param system the value for {@link Identifier#getSystem()}
+   * @param identifierCurrencyExtension the {@link Extension} to add to the {@link Identifier}
+   * @param mbiPeriod the value for {@link Period}
+   */
+  private static void addUnhashedIdentifier(
+      Patient patient,
+      String value,
+      String system,
+      Extension identifierCurrencyExtension,
+      Period mbiPeriod) {
+
+    if (mbiPeriod != null) {
+
+      patient
+          .addIdentifier()
+          .setValue(value)
+          .setSystem(system)
+          .setPeriod(mbiPeriod)
+          .getType()
+          .addCoding()
+          .setCode("MC")
+          .setSystem(TransformerConstants.CARIN_IDENTIFIER_SYSTEM)
+          .setDisplay("Patient's Medicare Number")
+          .addExtension(identifierCurrencyExtension);
+    } else {
+      patient
+          .addIdentifier()
+          .setValue(value)
+          .setSystem(system)
+          .getType()
+          .addCoding()
+          .setCode("MC")
+          .setSystem(TransformerConstants.CARIN_IDENTIFIER_SYSTEM)
+          .setDisplay("Patient's Medicare Number")
+          .addExtension(identifierCurrencyExtension);
+    }
   }
 
   /** Enumerates the options for the currency of an {@link Identifier}. */

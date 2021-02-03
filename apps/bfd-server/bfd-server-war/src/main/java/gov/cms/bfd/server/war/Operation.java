@@ -105,6 +105,9 @@ public final class Operation {
     /** Handled by {@link R4CoverageResourceProvider}. */
     V2_COVERAGE("/v2/fhir/Coverage"),
 
+    /** Handled by {@link ExplanationOfBenefitResourceProvider}. */
+    V2_EOB("/v2/fhir/ExplanationOfBenefit"),
+
     /** Some other, unknown HTTP endpoint/operation. */
     OTHER(null);
 

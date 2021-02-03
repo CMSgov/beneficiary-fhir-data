@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
@@ -339,11 +340,13 @@ public class SpringConfiguration {
   @Bean(name = BLUEBUTTON_R4_RESOURCE_PROVIDERS)
   public List<IResourceProvider> r4ResourceProviders(
       R4PatientResourceProvider r4PatientResourceProvider,
-      R4CoverageResourceProvider r4CoverageResourceProvider) {
+      R4CoverageResourceProvider r4CoverageResourceProvider,
+      R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
+    r4ResourceProviders.add(r4EOBResourceProvider);
     return r4ResourceProviders;
   }
 
