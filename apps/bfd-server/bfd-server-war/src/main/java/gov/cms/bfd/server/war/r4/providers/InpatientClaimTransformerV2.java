@@ -379,6 +379,10 @@ public class InpatientClaimTransformerV2 {
           line.getRevenueCenterRenderingPhysicianNPI());
     }
 
+    // BENE_LRD_USED_CNT => ExplanationOfBenefit.benefitBalance.financial
+    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
+        eob, CcwCodebookVariable.BENE_LRD_USED_CNT, claimGroup.getLifetimeReservedDaysUsedCount());
+
     // Last Updated => ExplanationOfBenefit.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
 
