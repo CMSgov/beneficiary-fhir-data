@@ -2078,11 +2078,11 @@ public final class TransformerUtilsV2 {
       Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount) {
 
     // BENE_TOT_COINSRNC_DAYS_CNT => ExplanationOfBenefit.benefitBalance.financial
-    addBenefitBalanceFinancialMedicalAmt(
+    addBenefitBalanceFinancialMedicalInt(
         eob, CcwCodebookVariable.BENE_TOT_COINSRNC_DAYS_CNT, coinsuranceDayCount);
 
     // CLM_NON_UTLZTN_DAYS_CNT => ExplanationOfBenefit.benefitBalance.financial
-    addBenefitBalanceFinancialMedicalAmt(
+    addBenefitBalanceFinancialMedicalInt(
         eob, CcwCodebookVariable.CLM_NON_UTLZTN_DAYS_CNT, nonUtilizationDayCount);
 
     // NCH_BENE_IP_DDCTBL_AMT => ExplanationOfBenefit.benefitBalance.financial
@@ -2229,11 +2229,9 @@ public final class TransformerUtilsV2 {
   /** TODO: */
   static Optional<BenefitComponent> addBenefitBalanceFinancialMedicalAmt(
       ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> amt) {
-    if (amt.isPresent()) {
-      return Optional.of(addBenefitBalanceFinancialMedicalAmt(eob, financialType, amt.get()));
-    } else {
-      return Optional.empty();
-    }
+    return amt.isPresent()
+        ? Optional.of(addBenefitBalanceFinancialMedicalAmt(eob, financialType, amt.get()))
+        : Optional.empty();
   }
 
   /**
@@ -2255,11 +2253,9 @@ public final class TransformerUtilsV2 {
   /** TODO: */
   static Optional<BenefitComponent> addBenefitBalanceFinancialMedicalInt(
       ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> value) {
-    if (value.isPresent()) {
-      return Optional.of(addBenefitBalanceFinancialMedicalAmt(eob, financialType, value.get()));
-    } else {
-      return Optional.empty();
-    }
+    return value.isPresent()
+        ? Optional.of(addBenefitBalanceFinancialMedicalInt(eob, financialType, value.get()))
+        : Optional.empty();
   }
 
   /**
@@ -2298,23 +2294,38 @@ public final class TransformerUtilsV2 {
     return newBenefitBalance;
   }
 
-  /** TODO: This documentation was all wrong */
-  static void mapEobCommonGroupInpOutSNF(
+  static void mapCareTeam(
       ExplanationOfBenefit eob,
-      BigDecimal bloodDeductibleLiabilityAmount,
+      Optional<String> attendingPhysicianNpi,
       Optional<String> operatingPhysicianNpi,
       Optional<String> otherPhysicianNpi,
-      char claimQueryCode,
-      Optional<Character> mcoPaidSw) {
+      Optional<String> attendingPhysicianUpin,
+      Optional<String> operatingPhysicianUpin,
+      Optional<String> otherPhysicianUpin) {
 
-    // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM =>
-    // ExplanationOfBenefit.benefitBalance.financial
-    addBenefitBalanceFinancialMedicalAmt(
-        eob, CcwCodebookVariable.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM, bloodDeductibleLiabilityAmount);
+    // AT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
+    if (attendingPhysicianNpi.isPresent()) {
+      addCareTeamPractitioner(
+          eob,
+          null,
+          TransformerConstants.CODING_NPI_US,
+          attendingPhysicianNpi.get(),
+          ClaimCareteamrole.PRIMARY);
+    }
+
+    // AT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
+    if (attendingPhysicianUpin.isPresent()) {
+      addCareTeamPractitioner(
+          eob,
+          null,
+          TransformerConstants.CODING_UPIN,
+          attendingPhysicianUpin.get(),
+          ClaimCareteamrole.PRIMARY);
+    }
 
     // OP_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     if (operatingPhysicianNpi.isPresent()) {
-      TransformerUtilsV2.addCareTeamPractitioner(
+      addCareTeamPractitioner(
           eob,
           null,
           TransformerConstants.CODING_NPI_US,
@@ -2322,15 +2333,48 @@ public final class TransformerUtilsV2 {
           ClaimCareteamrole.ASSIST);
     }
 
+    // OP_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
+    if (operatingPhysicianUpin.isPresent()) {
+      addCareTeamPractitioner(
+          eob,
+          null,
+          TransformerConstants.CODING_UPIN,
+          operatingPhysicianUpin.get(),
+          ClaimCareteamrole.ASSIST);
+    }
+
     // OT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     if (otherPhysicianNpi.isPresent()) {
-      TransformerUtilsV2.addCareTeamPractitioner(
+      addCareTeamPractitioner(
           eob,
           null,
           TransformerConstants.CODING_NPI_US,
           otherPhysicianNpi.get(),
           ClaimCareteamrole.OTHER);
     }
+
+    // OT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
+    if (otherPhysicianUpin.isPresent()) {
+      addCareTeamPractitioner(
+          eob,
+          null,
+          TransformerConstants.CODING_UPIN,
+          otherPhysicianUpin.get(),
+          ClaimCareteamrole.OTHER);
+    }
+  }
+
+  /** TODO: This documentation was all wrong */
+  static void mapEobCommonGroupInpOutSNF(
+      ExplanationOfBenefit eob,
+      BigDecimal bloodDeductibleLiabilityAmount,
+      char claimQueryCode,
+      Optional<Character> mcoPaidSw) {
+
+    // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM =>
+    // ExplanationOfBenefit.benefitBalance.financial
+    addBenefitBalanceFinancialMedicalAmt(
+        eob, CcwCodebookVariable.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM, bloodDeductibleLiabilityAmount);
 
     // CLAIM_QUERY_CODE => ExplanationOfBenefit.extension
     eob.addExtension(
@@ -2374,7 +2418,6 @@ public final class TransformerUtilsV2 {
       String patientDischargeStatusCode,
       char claimServiceClassificationTypeCode,
       Optional<Character> claimPrimaryPayerCode,
-      Optional<String> attendingPhysicianNpi,
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber) {
@@ -2422,16 +2465,6 @@ public final class TransformerUtilsV2 {
           CcwCodebookVariable.NCH_PRMRY_PYR_CD,
           CcwCodebookVariable.NCH_PRMRY_PYR_CD,
           claimPrimaryPayerCode.get());
-    }
-
-    // AT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
-    if (attendingPhysicianNpi.isPresent()) {
-      TransformerUtilsV2.addCareTeamPractitioner(
-          eob,
-          null,
-          TransformerConstants.CODING_NPI_US,
-          attendingPhysicianNpi.get(),
-          ClaimCareteamrole.PRIMARY);
     }
 
     // CLM_TOT_CHRG_AMT => ExplanationOfBenefit.total.amount

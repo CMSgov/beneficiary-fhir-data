@@ -131,7 +131,7 @@ public class InpatientClaimTransformerV2 {
     // CLM_PASS_THRU_PER_DIEM_AMT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
         eob,
-        CcwCodebookVariable.CLM_NON_UTLZTN_DAYS_CNT,
+        CcwCodebookVariable.CLM_PASS_THRU_PER_DIEM_AMT,
         Optional.ofNullable(claimGroup.getPassThruPerDiemAmount()));
 
     // NCH_PROFNL_CMPNT_CHRG_AMT => ExplanationOfBenefit.benefitBalance.financial
@@ -183,6 +183,22 @@ public class InpatientClaimTransformerV2 {
         CcwCodebookVariable.NCH_DRG_OUTLIER_APRVD_PMT_AMT,
         claimGroup.getDrgOutlierApprovedPaymentAmount());
 
+    // Map care team
+    // AT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Primary)
+    // AT_PHYSN_UPIN    => ExplanationOfBenefit.careTeam.provider
+    // OP_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Assisting)
+    // OP_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider
+    // OT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Other)
+    // OT_PHYSN_UPIN    => ExplanationOfBenefit.careTeam.provider
+    TransformerUtilsV2.mapCareTeam(
+        eob,
+        claimGroup.getAttendingPhysicianNpi(),
+        claimGroup.getOperatingPhysicianNpi(),
+        claimGroup.getOtherPhysicianNpi(),
+        claimGroup.getAttendingPhysicianUpin(),
+        claimGroup.getOperatingPhysicianUpin(),
+        claimGroup.getOtherPhysicianUpin());
+
     // Common group level fields between Inpatient, Outpatient and SNF
     // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM   => ExplanationOfBenefit.benefitBalance.financial
     // OP_PHYSN_NPI                     => ExplanationOfBenefit.careTeam.provider (Assisting)
@@ -192,8 +208,6 @@ public class InpatientClaimTransformerV2 {
     TransformerUtilsV2.mapEobCommonGroupInpOutSNF(
         eob,
         claimGroup.getBloodDeductibleLiabilityAmount(),
-        claimGroup.getOperatingPhysicianNpi(),
-        claimGroup.getOtherPhysicianNpi(),
         claimGroup.getClaimQueryCode(),
         claimGroup.getMcoPaidSw());
 
@@ -217,13 +231,12 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getPatientDischargeStatusCode(),
         claimGroup.getClaimServiceClassificationTypeCode(),
         claimGroup.getClaimPrimaryPayerCode(),
-        claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
         claimGroup.getFiscalIntermediaryNumber());
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
+    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
         eob,
         CcwCodebookVariable.CLM_UTLZTN_DAY_CNT,
         Optional.of(claimGroup.getUtilizationDayCount()));
@@ -273,9 +286,14 @@ public class InpatientClaimTransformerV2 {
         CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
         claimGroup.getPatientStatusCd());
 
-    // CLM_PPS_CPTL_DRG_WT_NUM => => ExplanationOfBenefit.benefitBalance.financial
+    // TODO: Where is this value in `claimGroup`?
+    // CLM_PPS_CPTL_DRG_WT_NUM => ExplanationOfBenefit.benefitBalance.financial
     // TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(eob,
     // CcwCodebookVariable.CLM_PPS_CPTL_DRG_WT_NUM, claimGroup.get);
+
+    // BENE_LRD_USED_CNT => ExplanationOfBenefit.benefitBalance.financial
+    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
+        eob, CcwCodebookVariable.BENE_LRD_USED_CNT, claimGroup.getLifetimeReservedDaysUsedCount());
 
     // Last Updated => ExplanationOfBenefit.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
