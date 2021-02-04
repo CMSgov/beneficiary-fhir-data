@@ -181,11 +181,6 @@ public final class TransformerConstants {
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBPractitionerIdentifierType";
 
   /**
-   * System for encoding UPIN values
-   */
-  public static final String CODING_UPIN = "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBPractitionerIdentifierType";
-
-  /**
    * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is a UPIN.
    */
