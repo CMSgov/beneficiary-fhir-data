@@ -1087,7 +1087,7 @@ public final class TransformerUtils {
    * @return the output {@link Coding} for the specified input values
    */
   private static Coding createCoding(
-      IAnyResource rootResource, CcwCodebookInterfaceccwVariable, String yearMonth, Object code) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, String yearMonth, Object code) {
     /*
      * The code parameter is an Object to avoid needing multiple copies of this and related methods.
      * This if-else block is the price to be paid for that, though.

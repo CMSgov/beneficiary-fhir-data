@@ -890,6 +890,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     return includeIdentifiersValues.contains("mbi-hash")
         || includeIdentifiersValues.contains("true");
   }
+
   public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;
   public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
   public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
