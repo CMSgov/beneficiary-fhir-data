@@ -40,6 +40,20 @@
       "code" : "USD"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/ime_op_clm_val_amt",
+    "valueMoney" : {
+      "value" : 66125.51,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/clm_uncompd_care_pmt_amt",
+    "valueMoney" : {
+      "value" : 120.56,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
     "valueMoney" : {
       "value" : 112.0,
@@ -143,6 +157,18 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
       "value" : "8299"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "28486613848"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+      "value" : "261660474641024"
+    }
   } ],
   "identifier" : [ {
     "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -219,6 +245,16 @@
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "2016-02-26"
+  }, {
+    "sequence" : 2,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
         "code" : "https://bluebutton.cms.gov/resources/variables/nch_ptnt_stus_ind_cd",
         "display" : "NCH Patient Status Indicator Code"
       } ]
@@ -231,7 +267,7 @@
       } ]
     }
   }, {
-    "sequence" : 2,
+    "sequence" : 3,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -247,7 +283,7 @@
       } ]
     }
   }, {
-    "sequence" : 3,
+    "sequence" : 4,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -262,7 +298,7 @@
       } ]
     }
   }, {
-    "sequence" : 4,
+    "sequence" : 5,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -277,7 +313,7 @@
       "code" : "[pt_us]"
     }
   }, {
-    "sequence" : 5,
+    "sequence" : 6,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -293,7 +329,7 @@
       } ]
     }
   }, {
-    "sequence" : 6,
+    "sequence" : 7,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -309,7 +345,7 @@
       } ]
     }
   }, {
-    "sequence" : 7,
+    "sequence" : 8,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -325,7 +361,7 @@
       } ]
     }
   }, {
-    "sequence" : 8,
+    "sequence" : 9,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",

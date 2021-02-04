@@ -23,11 +23,13 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -65,7 +67,7 @@ import org.springframework.stereotype.Component;
  * the CCW beneficiaries.
  */
 @Component
-public final class PatientResourceProvider implements IResourceProvider {
+public final class PatientResourceProvider implements IResourceProvider, CommonHeaders {
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    */
@@ -126,21 +128,22 @@ public final class PatientResourceProvider implements IResourceProvider {
     String beneIdText = patientId.getIdPart();
     if (beneIdText == null || beneIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
-    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
-    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
 
-    if (hasHICN(includeIdentifiersValues))
+    if (requestHeader.isHICNinIncludeIdentifiers())
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
 
-    if (hasMBI(includeIdentifiersValues))
+    if (requestHeader.isMBIinIncludeIdentifiers())
       root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
@@ -160,23 +163,25 @@ public final class PatientResourceProvider implements IResourceProvider {
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
       TransformerUtils.recordQueryInMdc(
-          String.format("bene_by_id.include_%s", String.join("_", includeIdentifiersValues)),
+          String.format(
+              "bene_by_id.include_%s",
+              String.join(
+                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!hasHICN(includeIdentifiersValues)) {
+    if (!requestHeader.isHICNinIncludeIdentifiers()) {
       beneficiary.setHicnUnhashed(Optional.empty());
     }
 
     // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!hasMBI(includeIdentifiersValues)) {
+    if (!requestHeader.isMBIinIncludeIdentifiers()) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient =
-        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
+    Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;
   }
 
@@ -270,10 +275,12 @@ public final class PatientResourceProvider implements IResourceProvider {
      * Publish the operation name. Note: This is a bit later than we'd normally do this, as we need
      * to override the operation name that was published by the possible call to read(...), above.
      */
+
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
-    operation.setOption(
-        "IncludeIdentifiers", returnIncludeIdentifiersValues(requestDetails).toString());
+    // track all api hdrs
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
@@ -295,17 +302,16 @@ public final class PatientResourceProvider implements IResourceProvider {
           String cursor,
       RequestDetails requestDetails) {
     checkCoverageId(coverageId);
-    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
     checkPageSize(paging);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "coverageContract");
-    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
-    List<Beneficiary> matchingBeneficiaries =
-        fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
+    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(coverageId, requestHeader, paging);
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -317,17 +323,16 @@ public final class PatientResourceProvider implements IResourceProvider {
             .map(
                 beneficiary -> {
                   // Null out the unhashed HICNs if we're not supposed to be returning them
-                  if (!hasHICN(includeIdentifiersValues)) {
+                  if (!requestHeader.isHICNinIncludeIdentifiers()) {
                     beneficiary.setHicnUnhashed(Optional.empty());
                   }
                   // Null out the unhashed MBIs if we're not supposed to be returning
-                  if (!hasMBI(includeIdentifiersValues)) {
+                  if (!requestHeader.isMBIinIncludeIdentifiers()) {
                     beneficiary.setMedicareBeneficiaryId(Optional.empty());
                   }
 
                   Patient patient =
-                      BeneficiaryTransformer.transform(
-                          metricRegistry, beneficiary, includeIdentifiersValues);
+                      BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
                   return patient;
                 })
             .collect(Collectors.toList());
@@ -458,12 +463,13 @@ public final class PatientResourceProvider implements IResourceProvider {
    * entity mappings are fetched as well
    *
    * @param coverageId coverage type
-   * @param includedIdentifiers list from the includeIdentifier header
+   * @param requestHeader, see {@link RequestHeaders} the holder that contains all supported
+   *     resource request headers
    * @param paging specified
    * @return the beneficiaries
    */
   private List<Beneficiary> fetchBeneficiaries(
-      TokenParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
+      TokenParam coverageId, RequestHeaders requestHeader, PatientLinkBuilder paging) {
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
@@ -475,7 +481,8 @@ public final class PatientResourceProvider implements IResourceProvider {
     // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
     // with paging and then fetch full benes with joins.
     boolean useTwoSteps =
-        (hasHICN(includedIdentifiers) || hasMBI(includedIdentifiers)) && paging.isPagingRequested();
+        (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers())
+            && paging.isPagingRequested();
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
@@ -484,10 +491,10 @@ public final class PatientResourceProvider implements IResourceProvider {
               .getResultList();
 
       // Fetch the benes using the ids
-      return queryBeneficiariesByIds(ids, includedIdentifiers).getResultList();
+      return queryBeneficiariesByIds(ids, requestHeader).getResultList();
     } else {
       // Fetch benes and their histories in one query
-      return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
+      return queryBeneficiariesBy(contractMonthField, contractCode, paging, requestHeader)
           .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
@@ -557,10 +564,12 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
-      String field, String value, PatientLinkBuilder paging, List<String> identifiers) {
+      String field, String value, PatientLinkBuilder paging, RequestHeaders requestHeader) {
     String joinsClause = "";
-    if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
+    if (requestHeader.isMBIinIncludeIdentifiers())
+      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (requestHeader.isHICNinIncludeIdentifiers())
+      joinsClause += "left join fetch b.beneficiaryHistories ";
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
@@ -713,10 +722,12 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIds(
-      List<String> ids, List<String> identifiers) {
+      List<String> ids, RequestHeaders requestHeader) {
     String joinsClause = "";
-    if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
+    if (requestHeader.isMBIinIncludeIdentifiers())
+      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (requestHeader.isHICNinIncludeIdentifiers())
+      joinsClause += "left join fetch b.beneficiaryHistories ";
 
     String query =
         "select distinct b from Beneficiary b "
@@ -792,11 +803,11 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
-    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "identifier");
-    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
@@ -807,10 +818,10 @@ public final class PatientResourceProvider implements IResourceProvider {
       switch (identifier.getSystem()) {
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
-          patient = queryDatabaseByHicnHash(identifier.getValue(), includeIdentifiersValues);
+          patient = queryDatabaseByHicnHash(identifier.getValue(), requestHeader);
           break;
         case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
-          patient = queryDatabaseByMbiHash(identifier.getValue(), includeIdentifiersValues);
+          patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
           break;
         default:
           throw new InvalidRequestException(
@@ -833,43 +844,39 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /**
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *     value to use
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByHicnHash(String hicnHash, List<String> includeIdentifiersValues) {
+  private Patient queryDatabaseByHicnHash(String hicnHash, RequestHeaders requestHeader) {
     return queryDatabaseByHash(
-        hicnHash, "hicn", includeIdentifiersValues, Beneficiary_.hicn, BeneficiaryHistory_.hicn);
+        hicnHash, "hicn", Beneficiary_.hicn, BeneficiaryHistory_.hicn, requestHeader);
   }
 
   /**
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
-   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *     value to use
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getMbiHash()} ()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByMbiHash(String mbiHash, List<String> includeIdentifiersValues) {
+  private Patient queryDatabaseByMbiHash(String mbiHash, RequestHeaders requestHeader) {
     return queryDatabaseByHash(
-        mbiHash,
-        "mbi",
-        includeIdentifiersValues,
-        Beneficiary_.mbiHash,
-        BeneficiaryHistory_.mbiHash);
+        mbiHash, "mbi", Beneficiary_.mbiHash, BeneficiaryHistory_.mbiHash, requestHeader);
   }
 
   /**
    * @param hash the {@link Beneficiary} hash value to match
    * @param hashType a string to represent the hash type (used for logging purposes)
-   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *     value to use
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @param beneficiaryHashField the JPA location of the beneficiary hash field
    * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
@@ -881,9 +888,9 @@ public final class PatientResourceProvider implements IResourceProvider {
   private Patient queryDatabaseByHash(
       String hash,
       String hashType,
-      List<String> includeIdentifiersValues,
       SingularAttribute<Beneficiary, String> beneficiaryHashField,
-      SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField) {
+      SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField,
+      RequestHeaders requestHeader) {
     if (hash == null || hash.trim().isEmpty()) throw new IllegalArgumentException();
 
     /*
@@ -952,10 +959,10 @@ public final class PatientResourceProvider implements IResourceProvider {
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
 
-    if (hasHICN(includeIdentifiersValues))
+    if (requestHeader.isHICNinIncludeIdentifiers())
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
 
-    if (hasMBI(includeIdentifiersValues))
+    if (requestHeader.isMBIinIncludeIdentifiers())
       beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     beneMatches.select(beneMatchesRoot);
@@ -986,7 +993,8 @@ public final class PatientResourceProvider implements IResourceProvider {
       TransformerUtils.recordQueryInMdc(
           String.format(
               "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
-              String.join("_", includeIdentifiersValues)),
+              String.join(
+                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes.size());
     }
@@ -1010,17 +1018,16 @@ public final class PatientResourceProvider implements IResourceProvider {
     }
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!hasHICN(includeIdentifiersValues)) {
+    if (!requestHeader.isHICNinIncludeIdentifiers()) {
       beneficiary.setHicnUnhashed(Optional.empty());
     }
 
     // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!hasMBI(includeIdentifiersValues)) {
+    if (!requestHeader.isMBIinIncludeIdentifiers()) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient =
-        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
+    Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;
   }
 
@@ -1112,6 +1119,11 @@ public final class PatientResourceProvider implements IResourceProvider {
   public static boolean hasMBI(List<String> includeIdentifiersValues) {
     return includeIdentifiersValues.contains("mbi") || includeIdentifiersValues.contains("true");
   }
+
+  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;
+  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
+  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
+  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
 
   /**
    * Check that coverageId value is valid

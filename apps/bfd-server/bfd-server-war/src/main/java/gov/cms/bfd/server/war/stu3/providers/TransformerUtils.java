@@ -5,7 +5,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.codebook.model.Variable;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -121,24 +123,24 @@ public final class TransformerUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(TransformerUtils.class);
 
   /**
-   * Tracks the {@link CcwCodebookVariable}s that have already had code lookup failures due to
+   * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
    * missing {@link Value} matches. Why track this? To ensure that we don't spam log events for
    * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
    * were flooding our logs and filling up the drive.
    *
    * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
    */
-  private static final Set<CcwCodebookVariable> codebookLookupMissingFailures = new HashSet<>();
+  private static final Set<CcwCodebookInterface> codebookLookupMissingFailures = new HashSet<>();
 
   /**
-   * Tracks the {@link CcwCodebookVariable}s that have already had code lookup failures due to
+   * Tracks the {@link CcwCodebookInterface} that have already had code lookup failures due to
    * duplicate {@link Value} matches. Why track this? To ensure that we don't spam log events for
    * failed lookups over and over and over. This was needed to fix CBBF-162, where those log events
    * were flooding our logs and filling up the drive.
    *
    * @see #calculateCodingDisplay(IAnyResource, CcwCodebookVariable, String)
    */
-  private static final Set<CcwCodebookVariable> codebookLookupDuplicateFailures = new HashSet<>();
+  private static final Set<CcwCodebookInterface> codebookLookupDuplicateFailures = new HashSet<>();
 
   /** Stores the PRODUCTNDC and SUBSTANCENAME from the downloaded NDC file. */
   private static Map<String, String> ndcProductMap = null;
@@ -163,7 +165,7 @@ public final class TransformerUtils {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
-   * @param categoryVariable the {@link CcwCodebookVariable} to map to the adjudication's <code>
+   * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
    *     category</code>
    * @param amountValue the {@link Money#getValue()} for the adjudication total
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
@@ -171,7 +173,7 @@ public final class TransformerUtils {
    */
   static void addAdjudicationTotal(
       ExplanationOfBenefit eob,
-      CcwCodebookVariable categoryVariable,
+      CcwCodebookInterface categoryVariable,
       Optional<? extends Number> amountValue) {
     /*
      * TODO Once we switch to STU4 (expected >= Q3 2018), remap these to the new
@@ -189,14 +191,14 @@ public final class TransformerUtils {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
-   * @param categoryVariable the {@link CcwCodebookVariable} to map to the adjudication's <code>
+   * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
    *     category</code>
    * @param totalAmountValue the {@link Money#getValue()} for the adjudication total
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
    *     appropriate {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static void addAdjudicationTotal(
-      ExplanationOfBenefit eob, CcwCodebookVariable categoryVariable, Number totalAmountValue) {
+      ExplanationOfBenefit eob, CcwCodebookInterface categoryVariable, Number totalAmountValue) {
     addAdjudicationTotal(eob, categoryVariable, Optional.of(totalAmountValue));
   }
 
@@ -230,7 +232,7 @@ public final class TransformerUtils {
    * @param benefitCategory the {@link BenefitCategory} (see {@link
    *     BenefitBalanceComponent#getCategory()}) for the {@link BenefitBalanceComponent} that the
    *     new {@link BenefitComponent} should be part of
-   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   * @param financialType the {@link CcwCodebookInterface} to map to {@link
    *     BenefitComponent#getType()}
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
    *     appropriate {@link ExplanationOfBenefit#getBenefitBalance()} entry
@@ -238,7 +240,7 @@ public final class TransformerUtils {
   static BenefitComponent addBenefitBalanceFinancial(
       ExplanationOfBenefit eob,
       BenefitCategory benefitCategory,
-      CcwCodebookVariable financialType) {
+      CcwCodebookInterface financialType) {
     BenefitBalanceComponent eobPrimaryBenefitBalance =
         findOrAddBenefitBalance(eob, benefitCategory);
 
@@ -480,12 +482,12 @@ public final class TransformerUtils {
    * {@link ExplanationOfBenefit}.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface to map to {@link
    *     SupportingInformationComponent#getCategory()}
    * @return the newly-added {@link SupportingInformationComponent} entry
    */
   static SupportingInformationComponent addInformation(
-      ExplanationOfBenefit eob, CcwCodebookVariable categoryVariable) {
+      ExplanationOfBenefit eob, CcwCodebookInterface categoryVariable) {
     int maxSequence = eob.getInformation().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
 
     SupportingInformationComponent infoComponent = new SupportingInformationComponent();
@@ -505,9 +507,9 @@ public final class TransformerUtils {
    * based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
-   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   * @param codeSystemVariable the {@link CcwCodebookInterface} to map to the {@link
    *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
    * @param codeValue the value to map to the {@link Coding#getCode()} used in the {@link
    *     SupportingInformationComponent#getCode()}
@@ -515,8 +517,8 @@ public final class TransformerUtils {
    */
   static SupportingInformationComponent addInformationWithCode(
       ExplanationOfBenefit eob,
-      CcwCodebookVariable categoryVariable,
-      CcwCodebookVariable codeSystemVariable,
+      CcwCodebookInterface categoryVariable,
+      CcwCodebookInterface codeSystemVariable,
       Optional<?> codeValue) {
     SupportingInformationComponent infoComponent = addInformation(eob, categoryVariable);
 
@@ -534,9 +536,9 @@ public final class TransformerUtils {
    * based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
-   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   * @param codeSystemVariable the {@link CcwCodebookInterface} to map to the {@link
    *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
    * @param codeValue the value to map to the {@link Coding#getCode()} used in the {@link
    *     SupportingInformationComponent#getCode()}
@@ -544,8 +546,8 @@ public final class TransformerUtils {
    */
   static SupportingInformationComponent addInformationWithCode(
       ExplanationOfBenefit eob,
-      CcwCodebookVariable categoryVariable,
-      CcwCodebookVariable codeSystemVariable,
+      CcwCodebookInterface categoryVariable,
+      CcwCodebookInterface codeSystemVariable,
       Object codeValue) {
     return addInformationWithCode(
         eob, categoryVariable, codeSystemVariable, Optional.of(codeValue));
@@ -787,14 +789,14 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
    */
   static Extension createExtensionIdentifier(
-      CcwCodebookVariable ccwVariable, Optional<String> identifierValue) {
+      CcwCodebookInterface ccwVariable, Optional<String> identifierValue) {
     if (!identifierValue.isPresent()) throw new IllegalArgumentException();
 
     Identifier identifier = createIdentifier(ccwVariable, identifierValue.get());
@@ -806,24 +808,24 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
    */
   static Extension createExtensionIdentifier(
-      CcwCodebookVariable ccwVariable, String identifierValue) {
+      CcwCodebookInterface ccwVariable, String identifierValue) {
     return createExtensionIdentifier(ccwVariable, Optional.of(identifierValue));
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
    * @return the output {@link Identifier}
    */
-  static Identifier createIdentifier(CcwCodebookVariable ccwVariable, String identifierValue) {
+  static Identifier createIdentifier(CcwCodebookInterface ccwVariable, String identifierValue) {
     if (identifierValue == null) throw new IllegalArgumentException();
 
     Identifier identifier =
@@ -834,13 +836,26 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param systemUrl the url being mapped
+   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
+   *     {@link Identifier}
+   * @return the output {@link Identifier}
+   */
+  static Identifier createIdentifier(String systemUrl, String identifierValue) {
+    if (identifierValue == null) throw new IllegalArgumentException();
+
+    Identifier identifier = new Identifier().setSystem(systemUrl).setValue(identifierValue);
+    return identifier;
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param dateYear the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
    */
   static Extension createExtensionDate(
-      CcwCodebookVariable ccwVariable, Optional<BigDecimal> dateYear) {
+      CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
     try {
@@ -859,14 +874,14 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
    */
   static Extension createExtensionQuantity(
-      CcwCodebookVariable ccwVariable, Optional<? extends Number> quantityValue) {
+      CcwCodebookInterface ccwVariable, Optional<? extends Number> quantityValue) {
     if (!quantityValue.isPresent()) throw new IllegalArgumentException();
 
     Quantity quantity;
@@ -881,13 +896,13 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param quantityValue the value to use for {@link Coding#getCode()} for the resulting {@link
    *     Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
    */
-  static Extension createExtensionQuantity(CcwCodebookVariable ccwVariable, Number quantityValue) {
+  static Extension createExtensionQuantity(CcwCodebookInterface ccwVariable, Number quantityValue) {
     return createExtensionQuantity(ccwVariable, Optional.of(quantityValue));
   }
 
@@ -895,13 +910,13 @@ public final class TransformerUtils {
    * Sets the {@link Quantity} fields related to the unit for the amount: {@link
    * Quantity#getSystem()}, {@link Quantity#getCode()}, and {@link Quantity#getUnit()}.
    *
-   * @param ccwVariable the {@link CcwCodebookVariable} for the unit coding
+   * @param ccwVariable the {@link CcwCodebookInterface} for the unit coding
    * @param unitCode the value to use for {@link Quantity#getCode()}
    * @param rootResource the root FHIR {@link IAnyResource} that is being mapped
    * @param quantity the {@link Quantity} to modify
    */
   static void setQuantityUnitInfo(
-      CcwCodebookVariable ccwVariable,
+      CcwCodebookInterface ccwVariable,
       Optional<?> unitCode,
       IAnyResource rootResource,
       Quantity quantity) {
@@ -924,13 +939,13 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
    *     Coding} to represent the specified input values
    */
   static Extension createExtensionCoding(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, Optional<?> code) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
     if (!code.isPresent()) throw new IllegalArgumentException();
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
@@ -944,14 +959,14 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
    *     Coding} to represent the specified input values
    */
   static Extension createExtensionCoding(
       IAnyResource rootResource,
-      CcwCodebookVariable ccwVariable,
+      CcwCodebookInterface ccwVariable,
       String yearMonth,
       Optional<?> code) {
     if (!code.isPresent()) throw new IllegalArgumentException();
@@ -974,7 +989,7 @@ public final class TransformerUtils {
    *     Coding} to represent the specified input values
    */
   static Extension createExtensionCoding(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object code) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     // Jumping through hoops to cope with overloaded method:
     Optional<?> codeOptional = code instanceof Optional ? (Optional<?>) code : Optional.of(code);
     return createExtensionCoding(rootResource, ccwVariable, codeOptional);
@@ -983,13 +998,13 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting (single) {@link
    *     Coding}, wrapped within the resulting {@link CodeableConcept}
    * @return the output {@link CodeableConcept} for the specified input values
    */
   static CodeableConcept createCodeableConcept(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, Optional<?> code) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
     if (!code.isPresent()) throw new IllegalArgumentException();
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
@@ -1003,13 +1018,13 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting (single) {@link
    *     Coding}, wrapped within the resulting {@link CodeableConcept}
    * @return the output {@link CodeableConcept} for the specified input values
    */
   static CodeableConcept createCodeableConcept(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object code) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     // Jumping through hoops to cope with overloaded method:
     Optional<?> codeOptional = code instanceof Optional ? (Optional<?>) code : Optional.of(code);
     return createCodeableConcept(rootResource, ccwVariable, codeOptional);
@@ -1024,11 +1039,11 @@ public final class TransformerUtils {
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     CodeableConcept} will be contained in
    * @param codingSystem the {@link Coding#getSystem()} to use
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @return the output {@link CodeableConcept} for the specified input values
    */
   private static CodeableConcept createCodeableConceptForFieldId(
-      IAnyResource rootResource, String codingSystem, CcwCodebookVariable ccwVariable) {
+      IAnyResource rootResource, String codingSystem, CcwCodebookInterface ccwVariable) {
     String code = calculateVariableReferenceUrl(ccwVariable);
     Coding coding = new Coding(codingSystem, code, ccwVariable.getVariable().getLabel());
 
@@ -1038,12 +1053,12 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
   private static Coding createCoding(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object code) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     /*
      * The code parameter is an Object to avoid needing multiple copies of this and related methods.
      * This if-else block is the price to be paid for that, though.
@@ -1072,7 +1087,7 @@ public final class TransformerUtils {
    * @return the output {@link Coding} for the specified input values
    */
   private static Coding createCoding(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, String yearMonth, Object code) {
+      IAnyResource rootResource, CcwCodebookInterfaceccwVariable, String yearMonth, Object code) {
     /*
      * The code parameter is an Object to avoid needing multiple copies of this and related methods.
      * This if-else block is the price to be paid for that, though.
@@ -1095,21 +1110,21 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
   private static Coding createCoding(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, Optional<?> code) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
     return createCoding(rootResource, ccwVariable, code.get());
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
-   * @return the public URL at which documentation for the specified {@link CcwCodebookVariable} is
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
+   * @return the public URL at which documentation for the specified {@link CcwCodebookInterface} is
    *     published
    */
-  static String calculateVariableReferenceUrl(CcwCodebookVariable ccwVariable) {
+  static String calculateVariableReferenceUrl(CcwCodebookInterface ccwVariable) {
     return String.format(
         "%s/%s",
         TransformerConstants.BASE_URL_CCW_VARIABLES,
@@ -1117,11 +1132,11 @@ public final class TransformerUtils {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
-   *     specified {@link CcwCodebookVariable}
+   *     specified {@link CcwCodebookInterface}
    */
-  static CodeableConcept createAdjudicationCategory(CcwCodebookVariable ccwVariable) {
+  static CodeableConcept createAdjudicationCategory(CcwCodebookInterface ccwVariable) {
     /*
      * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
      * all share the same Coding.system and use the CcwCodebookVariable reference URL as their
@@ -1139,13 +1154,13 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
    *     AdjudicationComponent} will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param reasonCode the value to use for the {@link AdjudicationComponent#getReason()}'s {@link
    *     Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link AdjudicationComponent} for the specified input values
    */
   static AdjudicationComponent createAdjudicationWithReason(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, Object reasonCode) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object reasonCode) {
     // Cheating here, since they use the same URL.
     String categoryConceptCode = calculateVariableReferenceUrl(ccwVariable);
 
@@ -1163,15 +1178,15 @@ public final class TransformerUtils {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the FHIR {@link Coding#getCode()} value to determine a corresponding {@link
    *     Coding#getDisplay()} value for
    * @return the {@link Coding#getDisplay()} value to use for the specified {@link
-   *     CcwCodebookVariable} and {@link Coding#getCode()}, or {@link Optional#empty()} if no
+   *     CcwCodebookInterface} and {@link Coding#getCode()}, or {@link Optional#empty()} if no
    *     matching display value could be determined
    */
   private static Optional<String> calculateCodingDisplay(
-      IAnyResource rootResource, CcwCodebookVariable ccwVariable, String code) {
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, String code) {
     if (rootResource == null) throw new IllegalArgumentException();
     if (ccwVariable == null) throw new IllegalArgumentException();
     if (code == null) throw new IllegalArgumentException();
@@ -1197,24 +1212,42 @@ public final class TransformerUtils {
       if (!codebookLookupMissingFailures.contains(ccwVariable)) {
         // Note: The race condition here (from concurrent requests) is harmless.
         codebookLookupMissingFailures.add(ccwVariable);
-        LOGGER.info(
-            "No display value match found for {}.{} in resource '{}/{}'.",
-            CcwCodebookVariable.class.getSimpleName(),
-            ccwVariable.name(),
-            rootResource.getClass().getSimpleName(),
-            rootResource.getId());
+        if (ccwVariable instanceof CcwCodebookVariable) {
+          LOGGER.info(
+              "No display value match found for {}.{} in resource '{}/{}'.",
+              CcwCodebookVariable.class.getSimpleName(),
+              ccwVariable.name(),
+              rootResource.getClass().getSimpleName(),
+              rootResource.getId());
+        } else {
+          LOGGER.info(
+              "No display value match found for {}.{} in resource '{}/{}'.",
+              CcwCodebookMissingVariable.class.getSimpleName(),
+              ccwVariable.name(),
+              rootResource.getClass().getSimpleName(),
+              rootResource.getId());
+        }
       }
       return Optional.empty();
     } else if (matchingVariableValues.size() > 1) {
       if (!codebookLookupDuplicateFailures.contains(ccwVariable)) {
         // Note: The race condition here (from concurrent requests) is harmless.
         codebookLookupDuplicateFailures.add(ccwVariable);
-        LOGGER.info(
-            "Multiple display value matches found for {}.{} in resource '{}/{}'.",
-            CcwCodebookVariable.class.getSimpleName(),
-            ccwVariable.name(),
-            rootResource.getClass().getSimpleName(),
-            rootResource.getId());
+        if (ccwVariable instanceof CcwCodebookVariable) {
+          LOGGER.info(
+              "Multiple display value matches found for {}.{} in resource '{}/{}'.",
+              CcwCodebookVariable.class.getSimpleName(),
+              ccwVariable.name(),
+              rootResource.getClass().getSimpleName(),
+              rootResource.getId());
+        } else {
+          LOGGER.info(
+              "Multiple display value matches found for {}.{} in resource '{}/{}'.",
+              CcwCodebookMissingVariable.class.getSimpleName(),
+              ccwVariable.name(),
+              rootResource.getClass().getSimpleName(),
+              rootResource.getId());
+        }
       }
       return Optional.empty();
     } else {
@@ -1665,6 +1698,12 @@ public final class TransformerUtils {
     }
   }
 
+  // Weekly Process Date
+  static void mapEobWeeklyProcessDate(ExplanationOfBenefit eob, LocalDate weeklyProcessLocalDate) {
+    TransformerUtils.addInformation(eob, CcwCodebookVariable.NCH_WKLY_PROC_DT)
+        .setTiming(new DateType(TransformerUtils.convertToDate(weeklyProcessLocalDate)));
+  }
+
   /**
    * Transforms the common group level data elements between the {@link CarrierClaim} and {@link
    * DMEClaim} claim types to FHIR. The method parameter fields from {@link CarrierClaim} and {@link
@@ -1696,11 +1735,29 @@ public final class TransformerUtils {
       BigDecimal providerPaymentAmount,
       BigDecimal beneficiaryPaymentAmount,
       BigDecimal submittedChargeAmount,
-      BigDecimal allowedChargeAmount) {
+      BigDecimal allowedChargeAmount,
+      String claimDispositionCode,
+      Optional<String> claimCarrierControlNumber) {
 
     eob.addExtension(createExtensionIdentifier(CcwCodebookVariable.CARR_NUM, carrierNumber));
+
+    // Carrier Claim Control Number
+    if (claimCarrierControlNumber.isPresent()) {
+      eob.addExtension(
+          createExtensionIdentifier(
+              CcwCodebookMissingVariable.CARR_CLM_CNTL_NUM, claimCarrierControlNumber.get()));
+    }
+
     eob.addExtension(
         createExtensionCoding(eob, CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode));
+
+    if (claimCarrierControlNumber.isPresent()) {
+      eob.addExtension(
+          createExtensionIdentifier(CcwCodebookVariable.CARR_NUM, claimCarrierControlNumber.get()));
+    }
+
+    // Claim Disposition Code
+    eob.setDisposition(claimDispositionCode);
 
     /*
      * Referrals are represented as contained resources, since they share the lifecycle and identity
@@ -2006,6 +2063,7 @@ public final class TransformerUtils {
   static void mapEobCommonItemRevenueOutHHAHospice(
       ItemComponent item, Optional<LocalDate> revenueCenterDate, BigDecimal paymentAmount) {
 
+    // Revenue Center Date
     if (revenueCenterDate.isPresent()) {
       item.setServiced(new DateType().setValue(convertToDate(revenueCenterDate.get())));
     }
@@ -2107,7 +2165,9 @@ public final class TransformerUtils {
       Optional<String> attendingPhysicianNpi,
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
-      Optional<String> fiscalIntermediaryNumber) {
+      Optional<String> fiscalIntermediaryNumber,
+      Optional<String> fiDocumentClaimControlNumber,
+      Optional<String> fiOriginalClaimControlNumber) {
 
     if (organizationNpi.isPresent()) {
       eob.setOrganization(
@@ -2171,6 +2231,18 @@ public final class TransformerUtils {
       eob.addExtension(
           createExtensionIdentifier(CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber));
     }
+
+    if (fiDocumentClaimControlNumber.isPresent()) {
+      eob.addExtension(
+          createExtensionIdentifier(
+              CcwCodebookMissingVariable.FI_DOC_CLM_CNTL_NUM, fiDocumentClaimControlNumber.get()));
+    }
+
+    if (fiOriginalClaimControlNumber.isPresent()) {
+      eob.addExtension(
+          createExtensionIdentifier(
+              CcwCodebookMissingVariable.FI_ORIG_CLM_CNTL_NUM, fiOriginalClaimControlNumber.get()));
+    }
   }
 
   /**
@@ -2204,6 +2276,7 @@ public final class TransformerUtils {
             TransformerUtils.convertToDate(beneficiaryDischargeDate.get()),
             TemporalPrecisionEnum.DAY);
       }
+
       eob.setHospitalization(period);
     }
 

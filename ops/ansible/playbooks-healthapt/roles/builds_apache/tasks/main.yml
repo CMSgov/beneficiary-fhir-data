@@ -1,5 +1,0 @@
----
-
-- name: Install and Configure Apache
-  import_tasks: install_and_configure.yml
-

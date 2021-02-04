@@ -32,6 +32,15 @@ public final class ValueGroup {
   }
 
   /**
+   * Constructs a new {@link ValueGroup} instance for the CCWCodebookMissingVariable. Had to add new
+   * constructor for instantiation of the CCWCodebookInterface
+   */
+  public ValueGroup(List<String> description, List<Value> values) {
+    this.description = description;
+    this.values = values;
+  }
+
+  /**
    * @return a textual description that applies to all of the {@link Variable}s in this {@link
    *     ValueGroup}, with one paragraph per {@link List} entry, or <code>null</code> if there is no
    *     such description (which will only be the case for {@link Variable}s with a single {@link

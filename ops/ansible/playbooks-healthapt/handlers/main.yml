@@ -1,7 +1,0 @@
----
-
-- name: Restart awslogs Service
-  service:
-    name: awslogs
-    state: restarted
-  become: true
