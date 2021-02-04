@@ -2360,11 +2360,11 @@ public final class TransformerUtilsV2 {
       Optional<BigDecimal> claimPPSOldCapitalHoldHarmlessAmount) {
 
     // BENE_TOT_COINSRNC_DAYS_CNT => ExplanationOfBenefit.benefitBalance.financial
-    addBenefitBalanceFinancialMedicalAmt(
+    addBenefitBalanceFinancialMedicalInt(
         eob, CcwCodebookVariable.BENE_TOT_COINSRNC_DAYS_CNT, coinsuranceDayCount);
 
     // CLM_NON_UTLZTN_DAYS_CNT => ExplanationOfBenefit.benefitBalance.financial
-    addBenefitBalanceFinancialMedicalAmt(
+    addBenefitBalanceFinancialMedicalInt(
         eob, CcwCodebookVariable.CLM_NON_UTLZTN_DAYS_CNT, nonUtilizationDayCount);
 
     // NCH_BENE_IP_DDCTBL_AMT => ExplanationOfBenefit.benefitBalance.financial
@@ -2669,6 +2669,16 @@ public final class TransformerUtilsV2 {
         C4BBClaimInstitutionalCareTeamRole.OPERATING,
         operatingPhysicianUpin);
 
+    // OP_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
+    if (operatingPhysicianUpin.isPresent()) {
+      addCareTeamPractitioner(
+          eob,
+          null,
+          TransformerConstants.CODING_UPIN,
+          operatingPhysicianUpin.get(),
+          ClaimCareteamrole.ASSIST);
+    }
+
     // OT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
         eob,
@@ -2746,7 +2756,6 @@ public final class TransformerUtilsV2 {
       String patientDischargeStatusCode,
       char claimServiceClassificationTypeCode,
       Optional<Character> claimPrimaryPayerCode,
-      Optional<String> attendingPhysicianNpi,
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
