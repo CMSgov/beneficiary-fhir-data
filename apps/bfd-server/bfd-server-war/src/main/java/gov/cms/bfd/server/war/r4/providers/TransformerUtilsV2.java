@@ -544,22 +544,6 @@ public final class TransformerUtilsV2 {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
-   * @param ccwVariable the {@link CcwCodebookInterface} being coded
-   * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
-   * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
-   *     Coding} to represent the specified input values
-   */
-  static Extension createExtensionCoding(
-      IAnyResource rootResource, Optional<CcwCodebookVariable> ccwVariable, Optional<?> code) {
-    if (!ccwVariable.isPresent()) {
-      throw new IllegalArgumentException();
-    }
-    return createExtensionCoding(rootResource, ccwVariable.get(), code);
-  }
-
-  /**
-   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
-   *     will be contained in
    * @param ccwVariable the {@link CcwCodebookVariable} being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
@@ -1989,7 +1973,7 @@ public final class TransformerUtilsV2 {
               eob, CcwCodebookVariable.NCH_NEAR_LINE_REC_IDENT_CD, ccwNearLineRecordIdCode));
     }
   }
-  
+
   /**
    * @param eob the {@link ExplanationOfBenefit} to extract the id from
    * @return the <code>claimId</code> field value (e.g. from {@link CarrierClaim#getClaimId()})
