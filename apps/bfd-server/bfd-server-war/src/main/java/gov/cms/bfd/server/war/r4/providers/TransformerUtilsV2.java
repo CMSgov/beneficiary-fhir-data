@@ -704,8 +704,8 @@ public final class TransformerUtilsV2 {
   private static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     /*
-     * The code parameter is an Object to avoid needing multiple copies of this and
-     * related methods. This if-else block is the price to be paid for that, though.
+     * The code parameter is an Object to avoid needing multiple copies of this and related methods.
+     * This if-else block is the price to be paid for that, though.
      */
     String codeString;
     if (code instanceof Character) codeString = ((Character) code).toString();
@@ -803,11 +803,10 @@ public final class TransformerUtilsV2 {
   static CodeableConcept createAdjudicationCategory(
       CcwCodebookVariable ccwVariable, String carinAdjuCode, String carinAdjuCodeDisplay) {
     /*
-     * Adjudication.category is mapped a bit differently than other
-     * Codings/CodeableConcepts: they all share the same Coding.system and use the
-     * CcwCodebookVariable reference URL as their Coding.code. This looks weird, but
-     * makes it easy for API developers to find more information about what the
-     * specific adjudication they're looking at means.
+     * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
+     * all share the same Coding.system and use the CcwCodebookVariable reference URL as their
+     * Coding.code. This looks weird, but makes it easy for API developers to find more information
+     * about what the specific adjudication they're looking at means.
      */
 
     String conceptCode = calculateVariableReferenceUrl(ccwVariable);
@@ -1455,8 +1454,7 @@ public final class TransformerUtilsV2 {
     if (!drugCodeLookupMissingFailures.contains(claimDrugCode)) {
       drugCodeLookupMissingFailures.add(claimDrugCode);
       LOGGER.info(
-          "No national drug code value (PRODUCTNDC column) match found for drug code {} in"
-              + " resource {}.",
+          "No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
           claimDrugCode,
           "fda_products_utf8.tsv");
     }
@@ -1682,8 +1680,7 @@ public final class TransformerUtilsV2 {
    * @param requestDetails of a resource provider
    */
   public static void workAroundHAPIIssue1585(RequestDetails requestDetails) {
-    // The hack is to remove the _count parameter from theDetails so that total is
-    // not modified.
+    // The hack is to remove the _count parameter from theDetails so that total is not modified.
     Map<String, String[]> params = new HashMap<String, String[]>(requestDetails.getParameters());
     if (params.remove(Constants.PARAM_COUNT) != null) {
       // Remove _count parameter from the current request details
