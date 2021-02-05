@@ -2198,7 +2198,9 @@ public final class TransformerUtilsV2 {
   static BenefitComponent addBenefitBalanceFinancialMedicalAmt(
       ExplanationOfBenefit eob, CcwCodebookVariable financialType, BigDecimal amt) {
     // "1" is the code for MEDICAL in ExBenefitcategory
-    return addBenefitBalanceFinancial(eob, "1", financialType).setUsed(new Money().setValue(amt));
+    Money moneyAmt = new Money().setValue(amt).setCurrency(TransformerConstants.CODED_MONEY_USD);
+
+    return addBenefitBalanceFinancial(eob, "1", financialType).setUsed(moneyAmt);
   }
 
   /**
