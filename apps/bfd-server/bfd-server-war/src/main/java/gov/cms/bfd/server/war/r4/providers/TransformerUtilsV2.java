@@ -2180,7 +2180,7 @@ public final class TransformerUtilsV2 {
               eob, CcwCodebookVariable.NCH_NEAR_LINE_REC_IDENT_CD, ccwNearLineRecordIdCode));
     }
   }
-  
+
   /**
    * @param eob the {@link ExplanationOfBenefit} to extract the id from
    * @return the <code>claimId</code> field value (e.g. from {@link CarrierClaim#getClaimId()})
