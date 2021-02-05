@@ -303,7 +303,8 @@ public class InpatientClaimTransformerV2 {
 
   /**
    * @param claim the {@link InpatientClaim} to extract the {@link Diagnosis}es from
-   * @return the {@link Diagnosis}es that can be extracted from the specified {@link InpatientClaim}
+   * @return the {@link Diagnosis} list that can be extracted from the specified {@link
+   *     InpatientClaim}
    */
   private static List<Diagnosis> extractDiagnoses(InpatientClaim claim) {
     List<Optional<Diagnosis>> diagnosis = new ArrayList<>();

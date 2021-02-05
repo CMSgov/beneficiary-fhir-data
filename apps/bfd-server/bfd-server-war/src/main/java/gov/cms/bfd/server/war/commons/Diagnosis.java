@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -11,7 +11,7 @@ import java.util.Set;
 public final class Diagnosis extends IcdCode {
 
   private final Character presentOnAdmission;
-  private final CcwCodebookVariable presentOnAdmissionCode;
+  private final CcwCodebookInterface presentOnAdmissionCode;
   private final Set<DiagnosisLabel> labels;
 
   /**
@@ -46,7 +46,7 @@ public final class Diagnosis extends IcdCode {
    *     "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
    *     CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar fields) of the code's ICD
    *     version, if any
-   * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission}
+   * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission()}
    * @param labels the value to use for {@link #getLabels()}
    * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no <code>icdCode</code> was
    *     present
@@ -75,8 +75,9 @@ public final class Diagnosis extends IcdCode {
    *     "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
    *     CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar fields) of the code's ICD
    *     version, if any
-   * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission}
-   * @param presentOnAdmissionCode the Present on Admissions indicator code
+   * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission()}
+   * @param presentOnAdmissionCode the Present on Admissions indicator code {@link
+   *     #getPresentOnAdmissionCode()}
    * @param labels the value to use for {@link #getLabels()}
    * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no <code>icdCode</code> was
    *     present
@@ -85,7 +86,7 @@ public final class Diagnosis extends IcdCode {
       Optional<String> icdCode,
       Optional<Character> icdVersionCode,
       Optional<Character> presentOnAdmission,
-      Optional<CcwCodebookVariable> presentOnAdmissionCode,
+      Optional<CcwCodebookInterface> presentOnAdmissionCode,
       DiagnosisLabel... labels) {
     super(icdCode, icdVersionCode);
     Objects.requireNonNull(icdCode);
@@ -113,8 +114,8 @@ public final class Diagnosis extends IcdCode {
     return Optional.ofNullable(presentOnAdmission);
   }
 
-  /** @return the ICD presentOnAdmission indicator */
-  public Optional<CcwCodebookVariable> getPresentOnAdmissionCode() {
+  /** @return the ICD presentOnAdmission indicator code */
+  public Optional<CcwCodebookInterface> getPresentOnAdmissionCode() {
     return Optional.ofNullable(presentOnAdmissionCode);
   }
 
@@ -144,7 +145,7 @@ public final class Diagnosis extends IcdCode {
    *     "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
    *     CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar fields) of the code's ICD
    *     version, if any
-   * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission}
+   * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission()}
    * @param labels the value to use for {@link #getLabels()}
    * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no <code>code</code> was
    *     present
@@ -166,7 +167,9 @@ public final class Diagnosis extends IcdCode {
    *     "https://www.ccwdata.org/cs/groups/public/documents/datadictionary/prncpal_dgns_vrsn_cd.txt">
    *     CCW Data Dictionary: PRNCPAL_DGNS_VRSN_CD</a> and other similar fields) of the code's ICD
    *     version, if any
-   * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission}
+   * @param presentOnAdmission the value to use for {@link #getPresentOnAdmission()}
+   * @param presentOnAdmissionCode the Present on Admissions indicator code {@link
+   *     #getPresentOnAdmissionCode()}
    * @param labels the value to use for {@link #getLabels()}
    * @return the new {@link Diagnosis}, or {@link Optional#empty()} if no <code>code</code> was
    *     present
@@ -175,7 +178,7 @@ public final class Diagnosis extends IcdCode {
       Optional<String> icdCode,
       Optional<Character> icdVersionCode,
       Optional<Character> presentOnAdmission,
-      Optional<CcwCodebookVariable> presentOnAdmissionCode,
+      Optional<CcwCodebookInterface> presentOnAdmissionCode,
       DiagnosisLabel... labels) {
     if (!icdCode.isPresent()) {
       return Optional.empty();

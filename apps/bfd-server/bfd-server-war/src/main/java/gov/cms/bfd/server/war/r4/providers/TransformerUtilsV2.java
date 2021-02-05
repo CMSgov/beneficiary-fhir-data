@@ -78,6 +78,7 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
@@ -240,9 +241,9 @@ public final class TransformerUtilsV2 {
    */
   static Date convertToDate(LocalDate localDate) {
     /*
-     * We use the system TZ here to ensure that the date doesn't shift at all, as
-     * FHIR will just use this as an unzoned Date (I think, and if not, it's almost
-     * certainly using the same TZ as this system).
+     * We use the system TZ here to ensure that the date doesn't shift at all, as FHIR will just use
+     * this as an unzoned Date (I think, and if not, it's almost certainly using the same TZ as this
+     * system).
      */
     return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
@@ -373,13 +374,16 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
    *     {@link Identifier}
    * @return the output {@link Identifier}
    */
-  static Identifier createClaimIdentifier(CcwCodebookVariable ccwVariable, String identifierValue) {
-    if (identifierValue == null) throw new IllegalArgumentException();
+  static Identifier createClaimIdentifier(
+      CcwCodebookInterface ccwVariable, String identifierValue) {
+    if (identifierValue == null) {
+      throw new IllegalArgumentException();
+    }
 
     CodeableConcept claimCodeType = new CodeableConcept();
     claimCodeType
@@ -399,29 +403,6 @@ public final class TransformerUtilsV2 {
 
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
-   * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
-   *     {@link Identifier}
-   * @return the output {@link Identifier}
-   */
-  static Identifier createClaimIdentifier(
-      CcwCodebookInterface ccwVariable, String identifierValue) {
-    if (identifierValue == null) throw new IllegalArgumentException();
-
-    CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType.addCoding().setCode("uc").setSystem(TransformerConstants.CARIN_IDENTIFIER_TYPE);
-
-    Identifier identifier =
-        new Identifier()
-            .setSystem(calculateVariableReferenceUrl(ccwVariable))
-            .setValue(identifierValue)
-            .setType(claimCodeType);
-
-    return identifier;
-  }
-
-  /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
    * @param dateYear the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to represent the
    *     specified input values
@@ -454,12 +435,16 @@ public final class TransformerUtilsV2 {
    */
   static Extension createExtensionQuantity(
       CcwCodebookInterface ccwVariable, Optional<? extends Number> quantityValue) {
-    if (!quantityValue.isPresent()) throw new IllegalArgumentException();
+    if (!quantityValue.isPresent()) {
+      throw new IllegalArgumentException();
+    }
 
     Quantity quantity;
-    if (quantityValue.get() instanceof BigDecimal)
+    if (quantityValue.get() instanceof BigDecimal) {
       quantity = new Quantity().setValue((BigDecimal) quantityValue.get());
-    else throw new BadCodeMonkeyException();
+    } else {
+      throw new BadCodeMonkeyException();
+    }
 
     String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, quantity);
@@ -533,7 +518,7 @@ public final class TransformerUtilsV2 {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
    *     will be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
    * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
    *     Coding} to represent the specified input values
@@ -683,7 +668,7 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
+   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
    *     specified {@link CcwCodebookVariable}
    */
@@ -783,12 +768,12 @@ public final class TransformerUtilsV2 {
       throw new BadCodeMonkeyException("No display values for Variable: " + ccwVariable);
 
     /*
-     * We know that the specified CCW Variable is coded, but there's no guarantee
-     * that the Coding's code matches one of the known/allowed Variable values: data
-     * is messy. When that happens, we log the event and return normally. The log
-     * event will at least allow for further investigation, if warranted. Also,
-     * there's a chance that the CCW Variable data itself is messy, and that the
-     * Coding's code matches more than one value -- we just log those events, too.
+     * We know that the specified CCW Variable is coded, but there's no guarantee that the Coding's
+     * code matches one of the known/allowed Variable values: data is messy. When that happens, we
+     * log the event and return normally. The log event will at least allow for further
+     * investigation, if warranted. Also, there's a chance that the CCW Variable data itself is
+     * messy, and that the Coding's code matches more than one value -- we just log those events,
+     * too.
      */
     List<Value> matchingVariableValues =
         ccwVariable.getVariable().getValueGroups().get().stream()
@@ -1004,13 +989,14 @@ public final class TransformerUtilsV2 {
    */
   public static String retrieveIcdCodeDisplay(String icdCode) {
 
-    if (icdCode.isEmpty()) return null;
+    if (icdCode.isEmpty()) {
+      return null;
+    }
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire ICD file the first time and put in a Map
     if (icdMap == null) {
@@ -1046,9 +1032,9 @@ public final class TransformerUtilsV2 {
         final BufferedReader icdCodesIn =
             new BufferedReader(new InputStreamReader(icdCodeDisplayStream))) {
       /*
-       * We want to extract the ICD Diagnosis codes and display values and put in a
-       * map for easy retrieval to get the display value icdColumns[1] is
-       * DGNS_DESC(i.e. 7840 code is HEADACHE description)
+       * We want to extract the ICD Diagnosis codes and display values and put in a map for easy
+       * retrieval to get the display value icdColumns[1] is DGNS_DESC(i.e. 7840 code is HEADACHE
+       * description)
        */
       String line = "";
       icdCodesIn.readLine();
@@ -1074,10 +1060,9 @@ public final class TransformerUtilsV2 {
     if (npiCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire NPI file the first time and put in a Map
     if (npiMap == null) {
@@ -1115,13 +1100,12 @@ public final class TransformerUtilsV2 {
         final BufferedReader npiCodesIn =
             new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
       /*
-       * We want to extract the NPI codes and display values and put in a map for easy
-       * retrieval to get the display value-- npiColumns[0] is the NPI Code,
-       * npiColumns[4] is the NPI Organization Code, npiColumns[8] is the NPI provider
-       * name prefix, npiColumns[6] is the NPI provider first name, npiColumns[7] is
-       * the NPI provider middle name, npiColumns[5] is the NPI provider last name,
-       * npiColumns[9] is the NPI provider suffix name, npiColumns[10] is the NPI
-       * provider credential.
+       * We want to extract the NPI codes and display values and put in a map for easy retrieval to
+       * get the display value-- npiColumns[0] is the NPI Code, npiColumns[4] is the NPI
+       * Organization Code, npiColumns[8] is the NPI provider name prefix, npiColumns[6] is the NPI
+       * provider first name, npiColumns[7] is the NPI provider middle name, npiColumns[5] is the
+       * NPI provider last name, npiColumns[9] is the NPI provider suffix name, npiColumns[10] is
+       * the NPI provider credential.
        */
       String line = "";
       npiCodesIn.readLine();
@@ -1161,10 +1145,9 @@ public final class TransformerUtilsV2 {
     if (procedureCode.isEmpty()) return null;
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire Procedure code file the first time and put in a Map
     if (procedureMap == null) {
@@ -1201,9 +1184,9 @@ public final class TransformerUtilsV2 {
         final BufferedReader procedureCodesIn =
             new BufferedReader(new InputStreamReader(procedureCodeDisplayStream))) {
       /*
-       * We want to extract the procedure codes and display values and put in a map
-       * for easy retrieval to get the display value icdColumns[0] is PRCDR_CD;
-       * icdColumns[1] is PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
+       * We want to extract the procedure codes and display values and put in a map for easy
+       * retrieval to get the display value icdColumns[0] is PRCDR_CD; icdColumns[1] is
+       * PRCDR_DESC(i.e. 8295 is INJECT TENDON OF HAND description)
        */
       String line = "";
       procedureCodesIn.readLine();
@@ -1228,16 +1211,17 @@ public final class TransformerUtilsV2 {
   public static String retrieveFDADrugCodeDisplay(String claimDrugCode) {
 
     /*
-     * Handle bad data (e.g. our random test data) if drug code is empty or length
-     * is less than 9 characters
+     * Handle bad data (e.g. our random test data) if drug code is empty or length is less than 9
+     * characters
      */
-    if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9) return null;
+    if (claimDrugCode.isEmpty() || claimDrugCode.length() < 9) {
+      return null;
+    }
 
     /*
-     * There's a race condition here: we may initialize this static field more than
-     * once if multiple requests come in at the same time. However, the assignment
-     * is atomic, so the race and reinitialization is harmless other than maybe
-     * wasting a bit of time.
+     * There's a race condition here: we may initialize this static field more than once if multiple
+     * requests come in at the same time. However, the assignment is atomic, so the race and
+     * reinitialization is harmless other than maybe wasting a bit of time.
      */
     // read the entire NDC file the first time and put in a Map
     if (ndcProductMap == null) {
@@ -1281,10 +1265,10 @@ public final class TransformerUtilsV2 {
         final BufferedReader ndcProductsIn =
             new BufferedReader(new InputStreamReader(ndcProductStream))) {
       /*
-       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the
-       * FDA Products file (fda_products_utf8.tsv is in /target/classes directory) and
-       * put in a Map for easy retrieval to get the display value which is a
-       * combination of PROPRIETARYNAME & SUBSTANCENAME
+       * We want to extract the PRODUCTNDC and PROPRIETARYNAME/SUBSTANCENAME from the FDA Products
+       * file (fda_products_utf8.tsv is in /target/classes directory) and put in a Map for easy
+       * retrieval to get the display value which is a combination of PROPRIETARYNAME &
+       * SUBSTANCENAME
        */
       String line = "";
       ndcProductsIn.readLine();
@@ -1327,8 +1311,8 @@ public final class TransformerUtilsV2 {
     if (paging.isPagingRequested()) {
       /*
        * FIXME: Due to a bug in HAPI-FHIR described here
-       * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not
-       * working correctly.
+       * https://github.com/jamesagnew/hapi-fhir/issues/1074 paging for count=0 is not working
+       * correctly.
        */
       int endIndex = Math.min(paging.getStartIndex() + paging.getPageSize(), resources.size());
       List<IBaseResource> resourcesSubList = resources.subList(paging.getStartIndex(), endIndex);
@@ -1339,10 +1323,10 @@ public final class TransformerUtilsV2 {
     }
 
     /*
-     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time
-     * for the whole database. Because the filterManager's tracking of this
-     * timestamp is lazily updated for performance reason, the resources of the
-     * bundle may be after the filter manager's version of the timestamp.
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole
+     * database. Because the filterManager's tracking of this timestamp is lazily updated for
+     * performance reason, the resources of the bundle may be after the filter manager's version of
+     * the timestamp.
      */
     Date maxBundleDate =
         resources.stream()
@@ -1376,10 +1360,10 @@ public final class TransformerUtilsV2 {
         paging.isPagingRequested() ? new UnsignedIntType() : new UnsignedIntType(resources.size()));
 
     /*
-     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time
-     * for the whole database. Because the filterManager's tracking of this
-     * timestamp is lazily updated for performance reason, the resources of the
-     * bundle may be after the filter manager's version of the timestamp.
+     * Dev Note: the Bundle's lastUpdated timestamp is the known last update time for the whole
+     * database. Because the filterManager's tracking of this timestamp is lazily updated for
+     * performance reason, the resources of the bundle may be after the filter manager's version of
+     * the timestamp.
      */
     Date maxBundleDate =
         resources.stream()
@@ -1581,11 +1565,9 @@ public final class TransformerUtilsV2 {
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
         .setValue(claimGroupId);
 
-    // eob.getInsurance().setCoverage(referenceCoverage(beneficiaryId,
-    // coverageType));
+    // eob.getInsurance().setCoverage(referenceCoverage(beneficiaryId, coverageType));
 
-    // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage
-    // (reference)
+    // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage (reference)
     eob.addInsurance().setCoverage(referenceCoverage(beneficiaryId, coverageType));
 
     // BENE_ID => ExplanationOfBenefit.patient (reference)
@@ -1706,11 +1688,8 @@ public final class TransformerUtilsV2 {
       return careTeamEntry;
     }
 
-    // REDONE for R4: Link the EOB.item to the care team entry (if it isn't
-    // already).
-    // ExplanationOfBenefit.careTeam.sequence
-    // => ExplanationOfBenefit.item.careTeamSequence
-    if (!eobItem.getCareTeamSequence().contains(careTeamEntry.getSequence())) {
+    // ExplanationOfBenefit.careTeam.sequence => ExplanationOfBenefit.item.careTeamSequence
+    if (!eobItem.getCareTeamSequence().contains(new PositiveIntType(careTeamEntry.getSequence()))) {
       eobItem.addCareTeamSequence(careTeamEntry.getSequence());
     }
 
@@ -1746,6 +1725,20 @@ public final class TransformerUtilsV2 {
     return infoComponent;
   }
 
+  /**
+   * Returns a new {@link SupportingInformationComponent} that has been added to the specified
+   * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
+   * CcwCodebookVariable)}, this also sets the {@link SupportingInformationComponent#getCode()}
+   * based on the values provided.
+   *
+   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   *     SupportingInformationComponent#getCategory()}
+   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
+   * @param date the value to map to the {@link SupportingInformationComponent#getTiming()}
+   * @return the newly-added {@link SupportingInformationComponent} entry
+   */
   static SupportingInformationComponent addInformationWithDate(
       ExplanationOfBenefit eob,
       CcwCodebookVariable categoryVariable,
@@ -1757,9 +1750,7 @@ public final class TransformerUtilsV2 {
       throw new BadCodeMonkeyException();
     }
 
-    infoComponent.setTiming(new DateType(convertToDate(date.get())));
-
-    return infoComponent;
+    return infoComponent.setTiming(new DateType(convertToDate(date.get())));
   }
 
   /**
@@ -2102,8 +2093,7 @@ public final class TransformerUtilsV2 {
     addBenefitBalanceFinancialMedicalAmt(
         eob, CcwCodebookVariable.NCH_IP_TOT_DDCTN_AMT, totalDeductionAmount);
 
-    // CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT =>
-    // ExplanationOfBenefit.benefitBalance.financial
+    // CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(
         eob,
         CcwCodebookVariable.CLM_PPS_CPTL_DSPRPRTNT_SHR_AMT,
@@ -2125,8 +2115,7 @@ public final class TransformerUtilsV2 {
     addBenefitBalanceFinancialMedicalAmt(
         eob, CcwCodebookVariable.CLM_PPS_CPTL_OUTLIER_AMT, claimPPSCapitalOutlierAmount);
 
-    // CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT =>
-    // ExplanationOfBenefit.benefitBalance.financial
+    // CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(
         eob,
         CcwCodebookVariable.CLM_PPS_OLD_CPTL_HLD_HRMLS_AMT,
@@ -2199,12 +2188,15 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * TODO:
+   * Adds a {@link BenefitComponent} that has the passed in amount encoded in {@link
+   * BenefitComponent#getUsedMoney()}
    *
-   * @param eob
-   * @param financialType
-   * @param amt
-   * @return
+   * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
+   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   *     BenefitComponent#getType()}
+   * @param amt Money amount to map to {@link BenefitComponent#getUsedMoney()}
+   * @return the new {@link BenefitComponent} which will have already been added to the appropriate
+   *     {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static BenefitComponent addBenefitBalanceFinancialMedicalAmt(
       ExplanationOfBenefit eob, CcwCodebookVariable financialType, BigDecimal amt) {
@@ -2212,7 +2204,18 @@ public final class TransformerUtilsV2 {
     return addBenefitBalanceFinancial(eob, "1", financialType).setUsed(new Money().setValue(amt));
   }
 
-  /** TODO: */
+  /**
+   * Optionally adds a {@link BenefitComponent} that has the passed in amount encoded in {@link
+   * BenefitComponent#getUsedMoney()}
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
+   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   *     BenefitComponent#getType()}
+   * @param amt Money amount to map to {@link BenefitComponent#getUsedMoney()}
+   * @return the new {@link BenefitComponent} which will have already been added to the appropriate
+   *     {@link ExplanationOfBenefit#getBenefitBalance()} entry. Returns Empty if the amount wasn't
+   *     set.
+   */
   static Optional<BenefitComponent> addBenefitBalanceFinancialMedicalAmt(
       ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> amt) {
     return amt.isPresent()
@@ -2221,12 +2224,15 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * TODO:
+   * Adds a {@link BenefitComponent} that has the passed in amount encoded in {@link
+   * BenefitComponent#getUsedUnsignedIntType()}
    *
-   * @param eob
-   * @param financialType
-   * @param amt
-   * @return
+   * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
+   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   *     BenefitComponent#getType()}
+   * @param value Integral amount to map to {@link BenefitComponent#getUsedUnsignedIntType()}
+   * @return the new {@link BenefitComponent} which will have already been added to the appropriate
+   *     {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static BenefitComponent addBenefitBalanceFinancialMedicalInt(
       ExplanationOfBenefit eob, CcwCodebookVariable financialType, BigDecimal value) {
@@ -2236,7 +2242,18 @@ public final class TransformerUtilsV2 {
         .setUsed(new UnsignedIntType(value.intValue()));
   }
 
-  /** TODO: */
+  /**
+   * Optionally adds a {@link BenefitComponent} that has the passed in amount encoded in {@link
+   * BenefitComponent#getUsedUnsignedIntType()}
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
+   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   *     BenefitComponent#getType()}
+   * @param value Integral amount to map to {@link BenefitComponent#getUsedUnsignedIntType()}
+   * @return the new {@link BenefitComponent} which will have already been added to the appropriate
+   *     {@link ExplanationOfBenefit#getBenefitBalance()} entry. Returns Empty if the amount wasn't
+   *     set.
+   */
   static Optional<BenefitComponent> addBenefitBalanceFinancialMedicalInt(
       ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> value) {
     return value.isPresent()
@@ -2280,6 +2297,20 @@ public final class TransformerUtilsV2 {
     return newBenefitBalance;
   }
 
+  /**
+   * Handles mapping the following values to the appropriate member of {@link
+   * ExplanationOfBenefit#getCareTeam()}. This updates the passed in {@link ExplanationOfBenefit} in
+   * place.
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param attendingPhysicianNpi AT_PHYSN_NPI
+   * @param operatingPhysicianNpi OP_PHYSN_NPI
+   * @param otherPhysicianNpi OT_PHYSN_NPI
+   * @param attendingPhysicianUpin AT_PHYSN_UPIN
+   * @param operatingPhysicianUpin OP_PHYSN_UPIN
+   * @param otherPhysicianUpin OT_PHYSN_UPIN
+   */
   static void mapCareTeam(
       ExplanationOfBenefit eob,
       Optional<String> attendingPhysicianNpi,
@@ -2350,15 +2381,22 @@ public final class TransformerUtilsV2 {
     }
   }
 
-  /** TODO: This documentation was all wrong */
+  /**
+   * Transforms the common group level data elements between the {@link InpatientClaim} {@link
+   * OutpatientClaim} and {@link SNFClaim} claim types to FHIR.
+   *
+   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param bloodDeductibleLiabilityAmount NCH_BENE_BLOOD_DDCTBL_LBLTY_AM
+   * @param claimQueryCode CLAIM_QUERY_CODE
+   * @param mcoPaidSw CLM_MCO_PD_SW
+   */
   static void mapEobCommonGroupInpOutSNF(
       ExplanationOfBenefit eob,
       BigDecimal bloodDeductibleLiabilityAmount,
       char claimQueryCode,
       Optional<Character> mcoPaidSw) {
 
-    // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM =>
-    // ExplanationOfBenefit.benefitBalance.financial
+    // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(
         eob, CcwCodebookVariable.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM, bloodDeductibleLiabilityAmount);
 
@@ -2474,6 +2512,12 @@ public final class TransformerUtilsV2 {
      */
   }
 
+  /**
+   * Helper function to look up method names and optionally attempt to execute
+   *
+   * @return an Optional result, cast to the generic type. If the method did not exist, or
+   *     invocation failed, this returns {@link Optional#empty()}
+   */
   @SuppressWarnings("unchecked")
   private static <T> Optional<T> tryMethod(Object obj, String methodName) {
     try {
@@ -2487,10 +2531,23 @@ public final class TransformerUtilsV2 {
     }
   }
 
+  /**
+   * Generically attempts to retrieve a diagnosis from the current claim.
+   *
+   * @param substitution The methods to retrive diagnosis information all follow a similar pattern.
+   *     This value is used to substitute into that pattern when looking up the specific method to
+   *     retrive information with.
+   * @param claim Passed as an Object because there is no top level `Claim` class that claims derive
+   *     from
+   * @param ccw CCW Codebook value that represents which "PresentOnAdmissionCode" is being used.
+   *     Example: {@link CcwCodebookVariable#CLM_POA_IND_SW5}
+   * @param labels One or more labels to use when mapping the diagnosis.
+   * @return a {@link Diagnosis} or {@link Optional#empty()}
+   */
   public static Optional<Diagnosis> extractDiagnosis(
       String substitution,
       Object claim,
-      Optional<CcwCodebookVariable> ccw,
+      Optional<CcwCodebookInterface> ccw,
       DiagnosisLabel... labels) {
 
     Optional<String> code = tryMethod(claim, String.format("getDiagnosis%sCode", substitution));
@@ -2542,6 +2599,15 @@ public final class TransformerUtilsV2 {
     return diagnosisComponent.getSequenceElement().getValue();
   }
 
+  /**
+   * Generically attempts to retrieve a procedure from the current claim.
+   *
+   * @param procedure Procedure accessors all follow the same pattern except for an integer
+   *     difference. This value is used as a subtitution when looking up the method name.
+   * @param claim Passed as an Object because there is no top level `Claim` class that claims derive
+   *     from
+   * @return a {@link CCWProcedure} or {@link Optional#empty()}
+   */
   public static Optional<CCWProcedure> extractCCWProcedure(int procedure, Object claim) {
     Optional<String> code = tryMethod(claim, String.format("getProcedure%dCode", procedure));
     Optional<Character> codeVersion =
@@ -2574,7 +2640,7 @@ public final class TransformerUtilsV2 {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
-   * @param diagnosis the {@link Diagnosis} to add, if it's not already present
+   * @param procedure the {@link CCWProcedure} to add, if it's not already present
    * @return the {@link ProcedureComponent#getSequence()} of the existing or newly-added entry
    */
   static int addProcedureCode(ExplanationOfBenefit eob, CCWProcedure procedure) {
@@ -2612,6 +2678,11 @@ public final class TransformerUtilsV2 {
     return procedureComponent.getSequenceElement().getValue();
   }
 
+  /**
+   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @param stateCode the State code to map to the {@link Address} that will be inserted into {@link
+   *     ExplanationOfBenefit#getItem()}
+   */
   static void addStateCode(ExplanationOfBenefit eob, String stateCode) {
     Address address = new Address();
     address.setState(stateCode);
