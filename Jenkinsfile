@@ -54,11 +54,12 @@ def appBuildResults
 def amiIds
 def currentStage
 def gitCommitId
+def gitRepoUrl
 
 // send notifications to slack, email, etc
-def sendNotifications(String buildStatus = '', stageName = '', gitCommitId = ''){
-	// base url used to build a link to diffs TODO: dynamically grab this
-	def diffsUrl = "https://github.com/CMSgov/beneficiary-fhir-data/commit/"
+def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
+	// we will use this to display a link to diffs in the message. This assumes we are using git+https not git+ssh
+	def diffsUrl = "${gitRepoUrl}/commit/"
 
 	// buildStatus of NULL means success
 	if (!buildStatus) {
@@ -78,11 +79,9 @@ def sendNotifications(String buildStatus = '', stageName = '', gitCommitId = '')
 	// prettyfi messages
 	def msg = ''
 	switch (buildStatus){
+		case 'UNSTABLE':
 		case 'SUCCESS':
 			msg = 'COMPLETED SUCCESSFULLY'
-			break
-		case 'UNSTABLE':
-			msg = 'COMPLETED (unstable)'
 			break
 		case 'FAILED':
 		case 'FAILURE':
@@ -103,13 +102,21 @@ def sendNotifications(String buildStatus = '', stageName = '', gitCommitId = '')
 	def specificCause = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')
 	def startedBy = "${specificCause.shortDescription}".replaceAll("[\\[\\](){}]","")
 
-	// send slack message
-	def slackMsg = "BFD BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n" +
-			"\tJob: ${env.JOB_NAME} was ${startedBy.toLowerCase()} \n" +
-			"\tBranch: ${env.BRANCH_NAME == 'main' ? 'master' : env.BRANCH_NAME} \n"
-	if (gitCommitId){
-		slackMsg+="\tChanges: <${diffsUrl + gitCommitId}|GitHub> \n"
+	// build slack message
+	def slackMsg = ''
+	if (buildStatus == 'UNSTABLE'){
+		slackMsg = "UNSTABLE BFD BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
+	} else {
+		slackMsg = "BFD BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
 	}
+	slackMsg+="\tJob '${env.JOB_NAME}' (${startedBy.toLowerCase()}) \n"
+	slackMsg+="\tBranch: ${env.BRANCH_NAME == 'main' ? 'master' : env.BRANCH_NAME} \n"
+	if (gitCommitId){
+		// we will only have a gitCommitId if we've checked out the repo
+		slackMsg+="\tView changes <${diffsUrl + gitCommitId}|here> \n"
+	}
+
+	// send Slack messages
 	slackSend(color: buildColor, message: slackMsg)
 
 	// future notifications can go here. (email, other channels, etc)
@@ -137,6 +144,9 @@ try {
 
 			// Get the current commit id 
 			gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+
+			// Get the remote repo url. This assumes we are using git+https not git+ssh.
+			gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 		}
 	}
 
@@ -275,5 +285,5 @@ try {
 	currentBuild.result = "FAILURE"
 	throw ex
 } finally {
-	sendNotifications(currentBuild.currentResult, "${currentStage}", gitCommitId)
+	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
 }
