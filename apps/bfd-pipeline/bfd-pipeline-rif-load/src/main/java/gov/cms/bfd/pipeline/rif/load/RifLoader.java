@@ -672,35 +672,35 @@ public final class RifLoader implements AutoCloseable {
    * Ensures that a {@link BeneficiaryMonthly} record is created or updated for the specified {@link
    * Beneficiary}, if that {@link Beneficiary} already exists and is just being updated.
    *
-   * @param entityManager the {@link EntityManager} to use
-   * @param loadAction the {@link Loadaction} record being processed
-   * @param beneficiaryRecord the {@link Beneficiary} record being processed
+   * @param newBeneficiaryRecord the {@link Beneficiary} record being processed
+   * @param oldBeneficiaryRecord the previous/current version of the {@link Beneficiary} (as it
+   *     exists in the database before applying the specified {@link RifRecordEvent})
    */
   private static void updateBeneficiaryMonthly(
-      Beneficiary beneficiaryRecord, Optional<Beneficiary> beneficiaryFromDb) {
+      Beneficiary newBeneficiaryRecord, Optional<Beneficiary> oldBeneficiaryRecord) {
 
-    if (beneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
+    if (newBeneficiaryRecord.getBeneEnrollmentReferenceYear().isPresent()) {
 
-      int year = beneficiaryRecord.getBeneEnrollmentReferenceYear().get().intValue();
+      int year = newBeneficiaryRecord.getBeneEnrollmentReferenceYear().get().intValue();
       List<BeneficiaryMonthly> currentYearBeneficiaryMonthly = new ArrayList<BeneficiaryMonthly>();
 
       BeneficiaryMonthly beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 1, 1),
-              beneficiaryRecord.getEntitlementBuyInJanInd(),
-              beneficiaryRecord.getFipsStateCntyJanCode(),
-              beneficiaryRecord.getHmoIndicatorJanInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityJanCode(),
-              beneficiaryRecord.getMedicareStatusJanCode(),
-              beneficiaryRecord.getPartCContractNumberJanId(),
-              beneficiaryRecord.getPartCPbpNumberJanId(),
-              beneficiaryRecord.getPartCPlanTypeJanCode(),
-              beneficiaryRecord.getPartDContractNumberJanId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupJanCode(),
-              beneficiaryRecord.getPartDPbpNumberJanId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
-              beneficiaryRecord.getPartDSegmentNumberJanId());
+              newBeneficiaryRecord.getEntitlementBuyInJanInd(),
+              newBeneficiaryRecord.getFipsStateCntyJanCode(),
+              newBeneficiaryRecord.getHmoIndicatorJanInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityJanCode(),
+              newBeneficiaryRecord.getMedicareStatusJanCode(),
+              newBeneficiaryRecord.getPartCContractNumberJanId(),
+              newBeneficiaryRecord.getPartCPbpNumberJanId(),
+              newBeneficiaryRecord.getPartCPlanTypeJanCode(),
+              newBeneficiaryRecord.getPartDContractNumberJanId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupJanCode(),
+              newBeneficiaryRecord.getPartDPbpNumberJanId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyJanInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberJanId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -708,21 +708,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 2, 1),
-              beneficiaryRecord.getEntitlementBuyInFebInd(),
-              beneficiaryRecord.getFipsStateCntyFebCode(),
-              beneficiaryRecord.getHmoIndicatorFebInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityFebCode(),
-              beneficiaryRecord.getMedicareStatusFebCode(),
-              beneficiaryRecord.getPartCContractNumberFebId(),
-              beneficiaryRecord.getPartCPbpNumberFebId(),
-              beneficiaryRecord.getPartCPlanTypeFebCode(),
-              beneficiaryRecord.getPartDContractNumberFebId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupFebCode(),
-              beneficiaryRecord.getPartDPbpNumberFebId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyFebInd(),
-              beneficiaryRecord.getPartDSegmentNumberFebId());
+              newBeneficiaryRecord.getEntitlementBuyInFebInd(),
+              newBeneficiaryRecord.getFipsStateCntyFebCode(),
+              newBeneficiaryRecord.getHmoIndicatorFebInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityFebCode(),
+              newBeneficiaryRecord.getMedicareStatusFebCode(),
+              newBeneficiaryRecord.getPartCContractNumberFebId(),
+              newBeneficiaryRecord.getPartCPbpNumberFebId(),
+              newBeneficiaryRecord.getPartCPlanTypeFebCode(),
+              newBeneficiaryRecord.getPartDContractNumberFebId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupFebCode(),
+              newBeneficiaryRecord.getPartDPbpNumberFebId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyFebInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberFebId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -730,21 +730,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 3, 1),
-              beneficiaryRecord.getEntitlementBuyInMarInd(),
-              beneficiaryRecord.getFipsStateCntyMarCode(),
-              beneficiaryRecord.getHmoIndicatorMarInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityMarCode(),
-              beneficiaryRecord.getMedicareStatusMarCode(),
-              beneficiaryRecord.getPartCContractNumberMarId(),
-              beneficiaryRecord.getPartCPbpNumberMarId(),
-              beneficiaryRecord.getPartCPlanTypeMarCode(),
-              beneficiaryRecord.getPartDContractNumberMarId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupMarCode(),
-              beneficiaryRecord.getPartDPbpNumberMarId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyMarInd(),
-              beneficiaryRecord.getPartDSegmentNumberMarId());
+              newBeneficiaryRecord.getEntitlementBuyInMarInd(),
+              newBeneficiaryRecord.getFipsStateCntyMarCode(),
+              newBeneficiaryRecord.getHmoIndicatorMarInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityMarCode(),
+              newBeneficiaryRecord.getMedicareStatusMarCode(),
+              newBeneficiaryRecord.getPartCContractNumberMarId(),
+              newBeneficiaryRecord.getPartCPbpNumberMarId(),
+              newBeneficiaryRecord.getPartCPlanTypeMarCode(),
+              newBeneficiaryRecord.getPartDContractNumberMarId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupMarCode(),
+              newBeneficiaryRecord.getPartDPbpNumberMarId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyMarInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberMarId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -752,21 +752,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 4, 1),
-              beneficiaryRecord.getEntitlementBuyInAprInd(),
-              beneficiaryRecord.getFipsStateCntyAprCode(),
-              beneficiaryRecord.getHmoIndicatorAprInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityAprCode(),
-              beneficiaryRecord.getMedicareStatusAprCode(),
-              beneficiaryRecord.getPartCContractNumberAprId(),
-              beneficiaryRecord.getPartCPbpNumberAprId(),
-              beneficiaryRecord.getPartCPlanTypeAprCode(),
-              beneficiaryRecord.getPartDContractNumberAprId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupAprCode(),
-              beneficiaryRecord.getPartDPbpNumberAprId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyAprInd(),
-              beneficiaryRecord.getPartDSegmentNumberAprId());
+              newBeneficiaryRecord.getEntitlementBuyInAprInd(),
+              newBeneficiaryRecord.getFipsStateCntyAprCode(),
+              newBeneficiaryRecord.getHmoIndicatorAprInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityAprCode(),
+              newBeneficiaryRecord.getMedicareStatusAprCode(),
+              newBeneficiaryRecord.getPartCContractNumberAprId(),
+              newBeneficiaryRecord.getPartCPbpNumberAprId(),
+              newBeneficiaryRecord.getPartCPlanTypeAprCode(),
+              newBeneficiaryRecord.getPartDContractNumberAprId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupAprCode(),
+              newBeneficiaryRecord.getPartDPbpNumberAprId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyAprInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberAprId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -774,42 +774,42 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 5, 1),
-              beneficiaryRecord.getEntitlementBuyInMayInd(),
-              beneficiaryRecord.getFipsStateCntyMayCode(),
-              beneficiaryRecord.getHmoIndicatorMayInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityMayCode(),
-              beneficiaryRecord.getMedicareStatusMayCode(),
-              beneficiaryRecord.getPartCContractNumberMayId(),
-              beneficiaryRecord.getPartCPbpNumberMayId(),
-              beneficiaryRecord.getPartCPlanTypeMayCode(),
-              beneficiaryRecord.getPartDContractNumberMayId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupMayCode(),
-              beneficiaryRecord.getPartDPbpNumberMayId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyMayInd(),
-              beneficiaryRecord.getPartDSegmentNumberMayId());
+              newBeneficiaryRecord.getEntitlementBuyInMayInd(),
+              newBeneficiaryRecord.getFipsStateCntyMayCode(),
+              newBeneficiaryRecord.getHmoIndicatorMayInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityMayCode(),
+              newBeneficiaryRecord.getMedicareStatusMayCode(),
+              newBeneficiaryRecord.getPartCContractNumberMayId(),
+              newBeneficiaryRecord.getPartCPbpNumberMayId(),
+              newBeneficiaryRecord.getPartCPlanTypeMayCode(),
+              newBeneficiaryRecord.getPartDContractNumberMayId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupMayCode(),
+              newBeneficiaryRecord.getPartDPbpNumberMayId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyMayInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberMayId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
       }
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 6, 1),
-              beneficiaryRecord.getEntitlementBuyInJunInd(),
-              beneficiaryRecord.getFipsStateCntyJunCode(),
-              beneficiaryRecord.getHmoIndicatorJunInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityJunCode(),
-              beneficiaryRecord.getMedicareStatusJunCode(),
-              beneficiaryRecord.getPartCContractNumberJunId(),
-              beneficiaryRecord.getPartCPbpNumberJunId(),
-              beneficiaryRecord.getPartCPlanTypeJunCode(),
-              beneficiaryRecord.getPartDContractNumberJunId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupJunCode(),
-              beneficiaryRecord.getPartDPbpNumberJunId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyJunInd(),
-              beneficiaryRecord.getPartDSegmentNumberJunId());
+              newBeneficiaryRecord.getEntitlementBuyInJunInd(),
+              newBeneficiaryRecord.getFipsStateCntyJunCode(),
+              newBeneficiaryRecord.getHmoIndicatorJunInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityJunCode(),
+              newBeneficiaryRecord.getMedicareStatusJunCode(),
+              newBeneficiaryRecord.getPartCContractNumberJunId(),
+              newBeneficiaryRecord.getPartCPbpNumberJunId(),
+              newBeneficiaryRecord.getPartCPlanTypeJunCode(),
+              newBeneficiaryRecord.getPartDContractNumberJunId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupJunCode(),
+              newBeneficiaryRecord.getPartDPbpNumberJunId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyJunInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberJunId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -817,21 +817,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 7, 1),
-              beneficiaryRecord.getEntitlementBuyInJulInd(),
-              beneficiaryRecord.getFipsStateCntyJulCode(),
-              beneficiaryRecord.getHmoIndicatorJulInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityJulCode(),
-              beneficiaryRecord.getMedicareStatusJulCode(),
-              beneficiaryRecord.getPartCContractNumberJulId(),
-              beneficiaryRecord.getPartCPbpNumberJulId(),
-              beneficiaryRecord.getPartCPlanTypeJulCode(),
-              beneficiaryRecord.getPartDContractNumberJulId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupJulCode(),
-              beneficiaryRecord.getPartDPbpNumberJulId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyJulInd(),
-              beneficiaryRecord.getPartDSegmentNumberJulId());
+              newBeneficiaryRecord.getEntitlementBuyInJulInd(),
+              newBeneficiaryRecord.getFipsStateCntyJulCode(),
+              newBeneficiaryRecord.getHmoIndicatorJulInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityJulCode(),
+              newBeneficiaryRecord.getMedicareStatusJulCode(),
+              newBeneficiaryRecord.getPartCContractNumberJulId(),
+              newBeneficiaryRecord.getPartCPbpNumberJulId(),
+              newBeneficiaryRecord.getPartCPlanTypeJulCode(),
+              newBeneficiaryRecord.getPartDContractNumberJulId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupJulCode(),
+              newBeneficiaryRecord.getPartDPbpNumberJulId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyJulInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberJulId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -839,21 +839,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 8, 1),
-              beneficiaryRecord.getEntitlementBuyInAugInd(),
-              beneficiaryRecord.getFipsStateCntyAugCode(),
-              beneficiaryRecord.getHmoIndicatorAugInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityAugCode(),
-              beneficiaryRecord.getMedicareStatusAugCode(),
-              beneficiaryRecord.getPartCContractNumberAugId(),
-              beneficiaryRecord.getPartCPbpNumberAugId(),
-              beneficiaryRecord.getPartCPlanTypeAugCode(),
-              beneficiaryRecord.getPartDContractNumberAugId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupAugCode(),
-              beneficiaryRecord.getPartDPbpNumberAugId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyAugInd(),
-              beneficiaryRecord.getPartDSegmentNumberAugId());
+              newBeneficiaryRecord.getEntitlementBuyInAugInd(),
+              newBeneficiaryRecord.getFipsStateCntyAugCode(),
+              newBeneficiaryRecord.getHmoIndicatorAugInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityAugCode(),
+              newBeneficiaryRecord.getMedicareStatusAugCode(),
+              newBeneficiaryRecord.getPartCContractNumberAugId(),
+              newBeneficiaryRecord.getPartCPbpNumberAugId(),
+              newBeneficiaryRecord.getPartCPlanTypeAugCode(),
+              newBeneficiaryRecord.getPartDContractNumberAugId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupAugCode(),
+              newBeneficiaryRecord.getPartDPbpNumberAugId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyAugInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberAugId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -861,21 +861,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 9, 1),
-              beneficiaryRecord.getEntitlementBuyInSeptInd(),
-              beneficiaryRecord.getFipsStateCntySeptCode(),
-              beneficiaryRecord.getHmoIndicatorSeptInd(),
-              beneficiaryRecord.getMedicaidDualEligibilitySeptCode(),
-              beneficiaryRecord.getMedicareStatusSeptCode(),
-              beneficiaryRecord.getPartCContractNumberSeptId(),
-              beneficiaryRecord.getPartCPbpNumberSeptId(),
-              beneficiaryRecord.getPartCPlanTypeSeptCode(),
-              beneficiaryRecord.getPartDContractNumberSeptId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupSeptCode(),
-              beneficiaryRecord.getPartDPbpNumberSeptId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidySeptInd(),
-              beneficiaryRecord.getPartDSegmentNumberSeptId());
+              newBeneficiaryRecord.getEntitlementBuyInSeptInd(),
+              newBeneficiaryRecord.getFipsStateCntySeptCode(),
+              newBeneficiaryRecord.getHmoIndicatorSeptInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilitySeptCode(),
+              newBeneficiaryRecord.getMedicareStatusSeptCode(),
+              newBeneficiaryRecord.getPartCContractNumberSeptId(),
+              newBeneficiaryRecord.getPartCPbpNumberSeptId(),
+              newBeneficiaryRecord.getPartCPlanTypeSeptCode(),
+              newBeneficiaryRecord.getPartDContractNumberSeptId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupSeptCode(),
+              newBeneficiaryRecord.getPartDPbpNumberSeptId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidySeptInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberSeptId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -883,21 +883,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 10, 1),
-              beneficiaryRecord.getEntitlementBuyInOctInd(),
-              beneficiaryRecord.getFipsStateCntyOctCode(),
-              beneficiaryRecord.getHmoIndicatorOctInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityOctCode(),
-              beneficiaryRecord.getMedicareStatusOctCode(),
-              beneficiaryRecord.getPartCContractNumberOctId(),
-              beneficiaryRecord.getPartCPbpNumberOctId(),
-              beneficiaryRecord.getPartCPlanTypeOctCode(),
-              beneficiaryRecord.getPartDContractNumberOctId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupOctCode(),
-              beneficiaryRecord.getPartDPbpNumberOctId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyOctInd(),
-              beneficiaryRecord.getPartDSegmentNumberOctId());
+              newBeneficiaryRecord.getEntitlementBuyInOctInd(),
+              newBeneficiaryRecord.getFipsStateCntyOctCode(),
+              newBeneficiaryRecord.getHmoIndicatorOctInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityOctCode(),
+              newBeneficiaryRecord.getMedicareStatusOctCode(),
+              newBeneficiaryRecord.getPartCContractNumberOctId(),
+              newBeneficiaryRecord.getPartCPbpNumberOctId(),
+              newBeneficiaryRecord.getPartCPlanTypeOctCode(),
+              newBeneficiaryRecord.getPartDContractNumberOctId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupOctCode(),
+              newBeneficiaryRecord.getPartDPbpNumberOctId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyOctInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberOctId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -905,21 +905,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 11, 1),
-              beneficiaryRecord.getEntitlementBuyInNovInd(),
-              beneficiaryRecord.getFipsStateCntyNovCode(),
-              beneficiaryRecord.getHmoIndicatorNovInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityNovCode(),
-              beneficiaryRecord.getMedicareStatusNovCode(),
-              beneficiaryRecord.getPartCContractNumberNovId(),
-              beneficiaryRecord.getPartCPbpNumberNovId(),
-              beneficiaryRecord.getPartCPlanTypeNovCode(),
-              beneficiaryRecord.getPartDContractNumberNovId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupNovCode(),
-              beneficiaryRecord.getPartDPbpNumberNovId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyNovInd(),
-              beneficiaryRecord.getPartDSegmentNumberNovId());
+              newBeneficiaryRecord.getEntitlementBuyInNovInd(),
+              newBeneficiaryRecord.getFipsStateCntyNovCode(),
+              newBeneficiaryRecord.getHmoIndicatorNovInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityNovCode(),
+              newBeneficiaryRecord.getMedicareStatusNovCode(),
+              newBeneficiaryRecord.getPartCContractNumberNovId(),
+              newBeneficiaryRecord.getPartCPbpNumberNovId(),
+              newBeneficiaryRecord.getPartCPlanTypeNovCode(),
+              newBeneficiaryRecord.getPartDContractNumberNovId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupNovCode(),
+              newBeneficiaryRecord.getPartDPbpNumberNovId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyNovInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberNovId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -927,21 +927,21 @@ public final class RifLoader implements AutoCloseable {
 
       beneficiaryMonthly =
           getBeneficiaryMonthly(
-              beneficiaryRecord,
+              newBeneficiaryRecord,
               LocalDate.of(year, 12, 1),
-              beneficiaryRecord.getEntitlementBuyInDecInd(),
-              beneficiaryRecord.getFipsStateCntyDecCode(),
-              beneficiaryRecord.getHmoIndicatorDecInd(),
-              beneficiaryRecord.getMedicaidDualEligibilityDecCode(),
-              beneficiaryRecord.getMedicareStatusDecCode(),
-              beneficiaryRecord.getPartCContractNumberDecId(),
-              beneficiaryRecord.getPartCPbpNumberDecId(),
-              beneficiaryRecord.getPartCPlanTypeDecCode(),
-              beneficiaryRecord.getPartDContractNumberDecId(),
-              beneficiaryRecord.getPartDLowIncomeCostShareGroupDecCode(),
-              beneficiaryRecord.getPartDPbpNumberDecId(),
-              beneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
-              beneficiaryRecord.getPartDSegmentNumberDecId());
+              newBeneficiaryRecord.getEntitlementBuyInDecInd(),
+              newBeneficiaryRecord.getFipsStateCntyDecCode(),
+              newBeneficiaryRecord.getHmoIndicatorDecInd(),
+              newBeneficiaryRecord.getMedicaidDualEligibilityDecCode(),
+              newBeneficiaryRecord.getMedicareStatusDecCode(),
+              newBeneficiaryRecord.getPartCContractNumberDecId(),
+              newBeneficiaryRecord.getPartCPbpNumberDecId(),
+              newBeneficiaryRecord.getPartCPlanTypeDecCode(),
+              newBeneficiaryRecord.getPartDContractNumberDecId(),
+              newBeneficiaryRecord.getPartDLowIncomeCostShareGroupDecCode(),
+              newBeneficiaryRecord.getPartDPbpNumberDecId(),
+              newBeneficiaryRecord.getPartDRetireeDrugSubsidyDecInd(),
+              newBeneficiaryRecord.getPartDSegmentNumberDecId());
 
       if (beneficiaryMonthly != null) {
         currentYearBeneficiaryMonthly.add(beneficiaryMonthly);
@@ -950,11 +950,12 @@ public final class RifLoader implements AutoCloseable {
       if (currentYearBeneficiaryMonthly.size() > 0) {
         List<BeneficiaryMonthly> currentBeneficiaryMonthlyWithUpdates;
 
-        if (beneficiaryFromDb.isPresent()
-            && beneficiaryFromDb.get().getBeneficiaryMonthlys().size() > 0) {
-          currentBeneficiaryMonthlyWithUpdates = beneficiaryFromDb.get().getBeneficiaryMonthlys();
+        if (oldBeneficiaryRecord.isPresent()
+            && oldBeneficiaryRecord.get().getBeneficiaryMonthlys().size() > 0) {
+          currentBeneficiaryMonthlyWithUpdates =
+              oldBeneficiaryRecord.get().getBeneficiaryMonthlys();
           List<BeneficiaryMonthly> currentYearBeneficiaryMonthlyPrevious =
-              beneficiaryFromDb.get().getBeneficiaryMonthlys().stream()
+              oldBeneficiaryRecord.get().getBeneficiaryMonthlys().stream()
                   .filter(e -> year == e.getYearMonth().getYear())
                   .collect(Collectors.toList());
 
@@ -966,7 +967,7 @@ public final class RifLoader implements AutoCloseable {
         }
 
         currentBeneficiaryMonthlyWithUpdates.addAll(currentYearBeneficiaryMonthly);
-        beneficiaryRecord.setBeneficiaryMonthlys(currentBeneficiaryMonthlyWithUpdates);
+        newBeneficiaryRecord.setBeneficiaryMonthlys(currentBeneficiaryMonthlyWithUpdates);
       }
     }
   }
