@@ -54,11 +54,23 @@
       "value" : "61026"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+      "value" : "74655592568216"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
       "code" : "1",
       "display" : "Physician/supplier"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/carr_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/carr_num",
+      "value" : "74655592568216"
     }
   }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -145,6 +157,18 @@
   "referral" : {
     "reference" : "#1"
   },
+  "disposition" : "1",
+  "information" : [ {
+    "sequence" : 1,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "1999-11-06"
+  } ],
   "careTeam" : [ {
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",

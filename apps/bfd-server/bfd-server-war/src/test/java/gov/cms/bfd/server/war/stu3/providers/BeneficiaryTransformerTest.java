@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.*;
@@ -29,9 +30,10 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecord() {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("false");
     Patient patient =
-        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("false"));
-    assertMatches(beneficiary, patient);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
 
     Assert.assertEquals("Number of identifiers should be 2", 2, patient.getIdentifier().size());
 
@@ -53,14 +55,11 @@ public final class BeneficiaryTransformerTest {
   @Test
   public void transformSampleARecordWithIdentifiers() {
     Beneficiary beneficiary = loadSampleABeneficiary();
-
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("hicn,mbi");
     Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Arrays.asList("hicn", "mbi"));
-    assertMatches(beneficiary, patient);
-
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
-
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient,
@@ -91,13 +90,11 @@ public final class BeneficiaryTransformerTest {
   @Test
   public void transformSampleARecordWithIdentifiersTrue() {
     Beneficiary beneficiary = loadSampleABeneficiary();
-
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("true");
     Patient patient =
-        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("true"));
-    assertMatches(beneficiary, patient);
-
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
-
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient,
@@ -129,12 +126,11 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecordWithIdentifiersHicn() {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("hicn");
     Patient patient =
-        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("hicn"));
-    assertMatches(beneficiary, patient);
-
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
     Assert.assertEquals("Number of identifiers should be 6", 6, patient.getIdentifier().size());
-
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient,
@@ -172,12 +168,11 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecordWithIdentifiersMbi() {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("mbi");
     Patient patient =
-        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList("mbi"));
-    assertMatches(beneficiary, patient);
-
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
     Assert.assertEquals("Number of identifiers should be 4", 4, patient.getIdentifier().size());
-
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient,
@@ -228,17 +223,16 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecordWithLastUpdated() {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("");
     beneficiary.setLastUpdated(new Date());
     Patient patientWithLastUpdated =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList());
-    assertMatches(beneficiary, patientWithLastUpdated);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patientWithLastUpdated, requestHeader);
 
     beneficiary.setLastUpdated(null);
     Patient patientWithoutLastUpdated =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList());
-    assertMatches(beneficiary, patientWithoutLastUpdated);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patientWithoutLastUpdated, requestHeader);
   }
 
   /**
@@ -251,11 +245,10 @@ public final class BeneficiaryTransformerTest {
   public void transformSampleARecordWithoutLastUpdated() {
     Beneficiary beneficiary = loadSampleABeneficiary();
     beneficiary.setLastUpdated(null);
-
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("");
     Patient patient =
-        BeneficiaryTransformer.transform(
-            new MetricRegistry(), beneficiary, Collections.emptyList());
-    assertMatches(beneficiary, patient);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
   }
 
   /**
@@ -318,10 +311,70 @@ public final class BeneficiaryTransformerTest {
             .findFirst()
             .get();
     TransformerTestUtils.setAllOptionalsToEmpty(beneficiary);
-
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("");
     Patient patient =
-        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, Arrays.asList(""));
-    assertMatches(beneficiary, patient);
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
+  }
+
+  /**
+   * Notes for reviewer: for header related coverage, do not test on the combination of headers
+   * values if there is no correlation between the headers, hence removed includeAddressFields
+   * header tests out of includeIdentifiers header tests to speed up tests and keep the same level
+   * of coverage at the same time.
+   */
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer} works
+   * correctly when passed a {@link Beneficiary} where all {@link Optional} fields are set to {@link
+   * Optional#empty()} and includeAddressFields header take all possible values.
+   */
+  @Test
+  public void transformBeneficiaryWithIncludeAddressFieldsAllOptEmpty() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    Beneficiary beneficiary =
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    TransformerTestUtils.setAllOptionalsToEmpty(beneficiary);
+    RequestHeaders requestHeader = getRHwithIncldAddrFldHdr("true");
+    Patient patient =
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
+    requestHeader = getRHwithIncldAddrFldHdr("false");
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
+    requestHeader = getRHwithIncldAddrFldHdr("");
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
+    requestHeader = RequestHeaders.getHeaderWrapper();
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
+  }
+
+  /**
+   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer} works
+   * correctly when passed a {@link Beneficiary} with various includeAddressFields header values.
+   */
+  @Test
+  public void transformSampleARecordWithIncludeAddressFields() {
+    Beneficiary beneficiary = loadSampleABeneficiary();
+    RequestHeaders requestHeader = getRHwithIncldAddrFldHdr("true");
+    Patient patient =
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
+    requestHeader = getRHwithIncldAddrFldHdr("false");
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
+    requestHeader = getRHwithIncldAddrFldHdr("");
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
+    requestHeader = RequestHeaders.getHeaderWrapper();
+    patient = BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    assertMatches(beneficiary, patient, requestHeader);
   }
 
   /**
@@ -331,14 +384,11 @@ public final class BeneficiaryTransformerTest {
    * @param beneficiary the {@link Beneficiary} that the {@link Patient} was generated from
    * @param patient the {@link Patient} that was generated from the specified {@link Beneficiary}
    */
-  static void assertMatches(Beneficiary beneficiary, Patient patient) {
+  static void assertMatches(
+      Beneficiary beneficiary, Patient patient, RequestHeaders requestHeader) {
     TransformerTestUtils.assertNoEncodedOptionals(patient);
 
     Assert.assertEquals(beneficiary.getBeneficiaryId(), patient.getIdElement().getIdPart());
-    Assert.assertEquals(1, patient.getAddress().size());
-    Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
-    Assert.assertEquals(beneficiary.getCountyCode(), patient.getAddress().get(0).getDistrict());
-    Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
 
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
@@ -366,5 +416,70 @@ public final class BeneficiaryTransformerTest {
           CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), patient);
 
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), patient);
+
+    Boolean inclAddrFlds =
+        (Boolean)
+            requestHeader.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
+
+    if (inclAddrFlds != null && inclAddrFlds) {
+      Assert.assertEquals(1, patient.getAddress().size());
+      // assert address fields etc.
+      Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+      // assert CountyCode is no longer mapped
+      Assert.assertNull(patient.getAddress().get(0).getDistrict());
+      Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+      Assert.assertEquals(
+          beneficiary.getDerivedCityName().orElse(null), patient.getAddress().get(0).getCity());
+
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress1().orElse(""),
+          patient.getAddress().get(0).getLine().get(0).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress2().orElse(""),
+          patient.getAddress().get(0).getLine().get(1).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress3().orElse(""),
+          patient.getAddress().get(0).getLine().get(2).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress4().orElse(""),
+          patient.getAddress().get(0).getLine().get(3).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress5().orElse(""),
+          patient.getAddress().get(0).getLine().get(4).getValueNotNull());
+      Assert.assertEquals(
+          beneficiary.getDerivedMailingAddress6().orElse(""),
+          patient.getAddress().get(0).getLine().get(5).getValueNotNull());
+    } else {
+      Assert.assertEquals(1, patient.getAddress().size());
+      Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+      // assert CountyCode is no longer mapped
+      Assert.assertNull(patient.getAddress().get(0).getDistrict());
+      Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+      // assert address city name and line 0 - 5 fields etc.
+      Assert.assertNull(patient.getAddress().get(0).getCity());
+      Assert.assertEquals(0, patient.getAddress().get(0).getLine().size());
+    }
+  }
+
+  /**
+   * test helper
+   *
+   * @param value of all include identifier values
+   * @return RequestHeaders instance derived from value
+   */
+  public static RequestHeaders getRHwithIncldIdntityHdr(String value) {
+    return RequestHeaders.getHeaderWrapper(
+        PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, value);
+  }
+
+  /**
+   * test helper
+   *
+   * @param value of all include address fields values
+   * @return RequestHeaders instance derived from value
+   */
+  public static RequestHeaders getRHwithIncldAddrFldHdr(String value) {
+    return RequestHeaders.getHeaderWrapper(
+        PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, value);
   }
 }

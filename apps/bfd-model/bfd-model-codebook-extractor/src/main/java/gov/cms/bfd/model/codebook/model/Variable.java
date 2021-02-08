@@ -93,6 +93,35 @@ public final class Variable {
   }
 
   /**
+   * Constructs a new {@link Variable} instance for the CCWCodebookMissingVariable. Has to add new
+   * constructor for instantiation of the CCWCodebookInterface
+   */
+  public Variable(
+      String id,
+      String label,
+      List<String> description,
+      String shortName,
+      String longName,
+      VariableType type,
+      int length,
+      String source,
+      String valueFormat,
+      List<ValueGroup> valueGroups,
+      List<String> comment) {
+    this.id = id;
+    this.label = label;
+    this.description = description;
+    this.shortName = shortName;
+    this.longName = longName;
+    this.type = type;
+    this.length = length;
+    this.source = source;
+    this.valueFormat = valueFormat;
+    this.valueGroups = valueGroups;
+    this.comment = comment;
+  }
+
+  /**
    * This listener method is called automagically by JAXB after each {@link Variable} instance is
    * unmarshalled. See "Unmarshall Event Callbacks" in the {@link Unmarshaller} JavaDocs for
    * details.
