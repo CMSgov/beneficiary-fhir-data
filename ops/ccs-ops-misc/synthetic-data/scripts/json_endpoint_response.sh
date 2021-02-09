@@ -6,15 +6,30 @@
 # Stop after any failure
 set -e 
 
+  #host=localhost:7443 
+  #cert=/usr/local/bfd-server/bluebutton-backend-test-data-server-client-test-keypair.pem
+  host=prod-sbx.bfdcloud.net:443
+  cert=~/client_data_server_local_test_env_dpr_keypair.pem
+
 # Fetch EOBs 
 curl_eobs() {
   #echo $1
-  host=localhost:7443
-  cert=/usr/local/bfd-server/bluebutton-backend-test-data-server-client-test-keypair.pem
-  #host=prod-sbx.bfdcloud.net:443
-  #cert=~/client_data_server_local_test_env_dpr_keypair.pem
   sudo curl --fail --silent -o /dev/null --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/ExplanationOfBenefit?patient='$1'&_format=application%2Fjson%2Bfhir'
 }
+
+# Fetch Patient 
+curl_patient() {
+  #echo $1
+  sudo curl --fail --silent -o /dev/null --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/Patient/'$1'&_format=application%2Fjson%2Bfhir'
+}
+
+# Fetch Coverage 
+curl_coverage() {
+  #echo $1
+  sudo curl --fail --silent -o /dev/null --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/Coverage?beneficiary='$1'&_format=application%2Fjson%2Bfhir'
+}
+
+
 
 psqlhost=""   # Database host
 psqluser=""   # Database username
@@ -22,12 +37,12 @@ psqlport=5432  # Database port
 psqlpass=""  # Database password
 psqldb=""   # Database
 
-psql "host=$psqlhost port=$psqlport dbname=$psqldb user=$psqluser password=$psqlpass" -P "footer=off"  -t -c 'SELECT "beneficiaryId" FROM public."Beneficiaries"  limit 1' --output=results.txt
+psql "host=$psqlhost port=$psqlport dbname=$psqldb user=$psqluser password=$psqlpass" -P "footer=off"  -t -c "SELECT \"beneficiaryId\" FROM public.\"Beneficiaries\" WHERE \"beneficiaryId\" LIKE '-%'  limit 1" --output=input.txt
 
-input="results.txt"
+input="input.txt"
 while IFS= read -r line
 do
-  echo "$line"
+  curl_eobs $line >> results.txt
 done < "$input"
 
 rm $input
