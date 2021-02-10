@@ -1698,11 +1698,6 @@ public final class TransformerUtils {
     eob.addExtension(
         createExtensionCoding(eob, CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode));
 
-    if (claimCarrierControlNumber.isPresent()) {
-      eob.addExtension(
-          createExtensionIdentifier(CcwCodebookVariable.CARR_NUM, claimCarrierControlNumber.get()));
-    }
-
     // Claim Disposition Code
     eob.setDisposition(claimDispositionCode);
 
