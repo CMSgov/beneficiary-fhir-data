@@ -383,6 +383,70 @@ public class InpatientClaimTransformerV2 {
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
         eob, CcwCodebookVariable.BENE_LRD_USED_CNT, claimGroup.getLifetimeReservedDaysUsedCount());
 
+    // ClaimLine => ExplanationOfBenefit.item
+    for (InpatientClaimLine line : claimGroup.getLines()) {
+      ItemComponent item = TransformerUtilsV2.addItem(eob);
+
+      // Override the default sequence
+      // CLM_LINE_NUM => item.sequence
+      item.setSequence(line.getLineNumber().intValue());
+
+      // REV_CNTR => item.revenue
+      item.setRevenue(
+          TransformerUtilsV2.createCodeableConcept(
+              eob, CcwCodebookVariable.REV_CNTR, line.getRevenueCenter()));
+
+      // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue.extension
+      item.getRevenue()
+          .addExtension(
+              TransformerUtilsV2.createExtensionCoding(
+                  eob,
+                  CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
+                  line.getDeductibleCoinsuranceCd()));
+
+      // HCPCS_CD => item.productOrService
+      item.setProductOrService(
+          TransformerUtilsV2.createCodeableConcept(
+              eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
+
+      // REV_CNTR_UNIT_CNT => item.quantity
+      item.setQuantity(new SimpleQuantity().setValue(line.getUnitCount()));
+
+      // REV_CNTR_RATE_AMT => item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_RATE_AMT, line.getRateAmount());
+
+      // REV_CNTR_TOT_CHRG_AMT => item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT, line.getTotalChargeAmount());
+
+      // REV_CNTR_NCVRD_CHRG_AMT => item.addjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT, line.getNonCoveredChargeAmount());
+
+      // REV_CNTR_NDC_QTY_QLFR_CD => item.modifier
+      item.getModifier()
+          .add(
+              TransformerUtilsV2.createCodeableConcept(
+                  eob,
+                  CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
+                  line.getNationalDrugCodeQualifierCode()));
+
+      // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
+      TransformerUtilsV2.addCareTeamMember(
+          eob,
+          TransformerConstants.CODING_UPIN,
+          ClaimCareteamrole.OTHER,
+          line.getRevenueCenterRenderingPhysicianUPIN());
+
+      // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
+      TransformerUtilsV2.addCareTeamMember(
+          eob,
+          TransformerConstants.CODING_NPI_US,
+          ClaimCareteamrole.OTHER,
+          line.getRevenueCenterRenderingPhysicianNPI());
+    }
+
     // Last Updated => ExplanationOfBenefit.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
 
