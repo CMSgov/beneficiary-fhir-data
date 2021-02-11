@@ -2661,14 +2661,8 @@ public final class TransformerUtilsV2 {
         operatingPhysicianUpin);
 
     // OP_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
-    if (operatingPhysicianUpin.isPresent()) {
-      addCareTeamPractitioner(
-          eob,
-          null,
-          TransformerConstants.CODING_UPIN,
-          operatingPhysicianUpin.get(),
-          ClaimCareteamrole.ASSIST);
-    }
+    addCareTeamMember(
+        eob, TransformerConstants.CODING_UPIN, ClaimCareteamrole.ASSIST, operatingPhysicianUpin);
 
     // OT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
