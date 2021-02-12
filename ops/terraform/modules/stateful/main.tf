@@ -593,3 +593,14 @@ resource "aws_cloudwatch_log_group" "bfd_server_gc" {
   kms_key_id = data.aws_kms_key.master_key.arn
   tags       = var.env_config.tags
 }
+
+# BCDA EFT EFS
+#
+module "bcda_eft" {
+  source        = "../resources/bcda_eft"
+  env_config    = local.env_config
+  bcda_acct_num = var.bcda_acct_num
+  bcda_subnets  = var.bcda_subnets
+  role          = "etl"
+  layer         = "data"
+}

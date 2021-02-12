@@ -63,4 +63,8 @@ module "stateful" {
     write_accts       = ["arn:aws:iam::755619740999:root"]
     admin_users       = ["arn:aws:iam::577373831711:user/DS7H", "arn:aws:iam::577373831711:user/VZG9", "arn:aws:iam::577373831711:user/HWRI"]
   }
+
+  # BCDA EFT EFS vars
+  bcda_acct_num       = var.bcda_acct_num
+  bcda_subnets        = var.bcda_subnets
 }

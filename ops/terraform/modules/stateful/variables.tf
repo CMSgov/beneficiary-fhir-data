@@ -37,3 +37,13 @@ variable "medicare_opt_out_config" {
   description       = "Config for medicare opt out S3 bucket"
   type              = object({read_roles = list(string), write_accts = list(string), admin_users = list(string)})
 }
+
+variable "bcda_acct_num" {
+  description       = "BCDA AWS account number accessing EFT EFS file systems"
+  type              = string
+}
+
+variable "bcda_subnets" {
+  description       = "BCDA subnets requiring access to EFT EFS file systems"
+  type              = map(list(string))
+}
