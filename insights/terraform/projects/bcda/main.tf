@@ -171,7 +171,7 @@ data "archive_file" "bcda_load_partitions" {
 
 resource "aws_cloudwatch_event_rule" "main" {
   name                = "bcda_load_partitions"
-  description         = "Runs everfyday at 3AM GMT"
+  description         = "Runs everyday at 3AM GMT"
   schedule_expression = "cron(0 3 ? * * *)"
   is_enabled          = true
 }
