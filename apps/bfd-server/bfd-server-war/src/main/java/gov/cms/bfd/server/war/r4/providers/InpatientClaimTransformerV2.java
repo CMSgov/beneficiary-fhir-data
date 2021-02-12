@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 
@@ -58,10 +59,16 @@ public class InpatientClaimTransformerV2 {
   private static ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
-    // Setup the correct profile
+    // Required values not directly mapped
     eob.getMeta()
         .addProfile(
             "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional");
+
+    // "claim" => ExplanationOfBenefit.use
+    eob.setUse(Use.CLAIM);
+
+    // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
+    // eob.setOutcome(?)
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
@@ -228,7 +235,7 @@ public class InpatientClaimTransformerV2 {
     // CLM_MDCR_NON_PMT_RSN_CD  => ExplanationOfBenefit.extension
     // PTNT_DSCHRG_STUS_CD      => ExplanationOfBenefit.supportingInfo
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
-    // NCH_PRMRY_PYR_CD         => ??
+    // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // AT_PHYSN_NPI             => ExplanationOfBenefit.careTeam.provider (Primary)
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)

@@ -82,20 +82,7 @@ public class InpatientClaimTransformerV2Test {
           eob);
     }
 
-    /*
-    TODO: These are moved now
-
-    TransformerTestUtilsV2.assertAdjudicationTotalAmountEquals(
-        CcwCodebookVariable.CLM_PASS_THRU_PER_DIEM_AMT, claim.getPassThruPerDiemAmount(), eob);
-    TransformerTestUtilsV2.assertAdjudicationTotalAmountEquals(
-        CcwCodebookVariable.NCH_PROFNL_CMPNT_CHRG_AMT, claim.getProfessionalComponentCharge(), eob);
-    TransformerTestUtilsV2.assertAdjudicationTotalAmountEquals(
-        CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT, claim.getClaimTotalPPSCapitalAmount(), eob);
-    TransformerTestUtilsV2.assertAdjudicationTotalAmountEquals(
-        CcwCodebookVariable.IME_OP_CLM_VAL_AMT, claim.getIndirectMedicalEducationAmount(), eob);
-    TransformerTestUtilsV2.assertAdjudicationTotalAmountEquals(
-        CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claim.getDisproportionateShareAmount(), eob);
-        */
+    // TODO: finish tests based off V1
 
     // Test that the expected number of diagnoses are mapped
     Assert.assertEquals(9, eob.getDiagnosis().size());

@@ -2469,6 +2469,7 @@ public final class TransformerUtilsV2 {
               eob, CcwCodebookVariable.CLM_MDCR_NON_PMT_RSN_CD, claimNonPaymentReasonCode));
     }
 
+    // TODO: This should be getting mapped into `supportingInfo:discharge-status` slice
     // PTNT_DSCHRG_STUS_CD => ExplanationOfBenefit.supportingInfo
     if (!patientDischargeStatusCode.isEmpty()) {
       TransformerUtilsV2.addInformationWithCode(
@@ -2483,7 +2484,7 @@ public final class TransformerUtilsV2 {
         createExtensionCoding(
             eob, CcwCodebookVariable.CLM_SRVC_CLSFCTN_TYPE_CD, claimServiceClassificationTypeCode));
 
-    // NCH_PRMRY_PYR_CD => ??
+    // NCH_PRMRY_PYR_CD => ExplainationOfBenefit.supportingInfo
     if (claimPrimaryPayerCode.isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
@@ -2504,13 +2505,6 @@ public final class TransformerUtilsV2 {
 
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(eob, CcwCodebookVariable.PRPAYAMT, primaryPayerPaidAmount);
-
-    /**
-     * TODO: Map this later?
-     *
-     * <p>if (fiscalIntermediaryNumber.isPresent()) { eob.addExtension(
-     * createExtensionIdentifier(CcwCodebookVariable.FI_NUM, fiscalIntermediaryNumber)); }
-     */
   }
 
   /**
