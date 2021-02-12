@@ -168,3 +168,23 @@ data "archive_file" "bcda_load_partitions" {
   output_path = "${path.module}/lambda.zip"
   source_dir  = "${path.module}/lambda"
 }
+
+resource "aws_cloudwatch_event_rule" "main" {
+  name                = "bcda_load_partitions"
+  description         = "Runs everfyday at 3AM GMT"
+  schedule_expression = "cron(0 3 ? * * *)"
+  is_enabled          = true
+}
+
+resource "aws_cloudwatch_event_target" "main" {
+  rule = aws_cloudwatch_event_rule.main.name
+  arn  = aws_lambda_function.bcda_load_partitions.arn
+}
+
+resource "aws_lambda_permission" "main" {
+  statement_id_prefix = "BcdaLoadPartitions-AllowExecutionFromCloudWatch-"
+  action              = "lambda:InvokeFunction"
+  function_name       = "bcda_load_partitions"
+  principal           = "events.amazonaws.com"
+  source_arn          = aws_cloudwatch_event_rule.main.arn
+}
