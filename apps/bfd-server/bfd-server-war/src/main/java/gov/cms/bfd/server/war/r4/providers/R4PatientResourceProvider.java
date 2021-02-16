@@ -280,9 +280,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      * HAPI's @Search request routing appears to be borked, so we're doing it manually here,
      * instead. Figure out which of the two coverage search methods to invoke, and then just do so.
      */
-    if (coverageId != null && referenceYear == null) {
+
+    if (!Strings.isNullOrEmpty(coverageId.getValue())
+        && Strings.isNullOrEmpty(referenceYear.getValue())) {
       return searchByCoverageContractByFieldName(coverageId, cursor, requestDetails);
-    } else if (coverageId != null && referenceYear != null) {
+    } else if (!Strings.isNullOrEmpty(coverageId.getValue())
+        && !Strings.isNullOrEmpty(referenceYear.getValue())) {
       return searchByCoverageContractAndYearMonth(
           coverageId, referenceYear, cursor, requestDetails);
     } else {
