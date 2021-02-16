@@ -189,7 +189,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      @OptionalParam(name = "_has:Coverage.extension")
+      @RequiredParam(name = "_has:Coverage.extension")
           @Description(shortDefinition = "Part D coverage type")
           TokenParam coverageId,
       @OptionalParam(name = "_has:Coverage.rfrncyr")
@@ -204,8 +204,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
      * instead. Figure out which of the two coverage search methods to invoke, and then just do so.
      */
 
-    if (!Strings.isNullOrEmpty(coverageId.getValue())
-        && Strings.isNullOrEmpty(referenceYear.getValue())) {
+    if (!Strings.isNullOrEmpty(coverageId.getValue()) && referenceYear == null) {
       return searchByCoverageContractByFieldName(coverageId, cursor, requestDetails);
     } else if (!Strings.isNullOrEmpty(coverageId.getValue())
         && !Strings.isNullOrEmpty(referenceYear.getValue())) {
