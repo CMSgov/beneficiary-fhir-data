@@ -51,9 +51,7 @@ final class PartDEventTransformerV2 {
   private static ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
-    eob.getMeta()
-        .addProfile(
-            "https://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy");
+    eob.getMeta().addProfile(TransformerConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
 
     // Common group level fields between all claim types
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
