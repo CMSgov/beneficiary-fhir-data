@@ -45,7 +45,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -885,6 +884,19 @@ public final class TransformerUtilsV2 {
   static void addTotal(ExplanationOfBenefit eob, Optional<TotalComponent> total) {
     if (total.isPresent()) {
       eob.addTotal(total.get());
+    }
+  }
+
+  static <T> Optional<AdjudicationComponent> createAdjudicationWithReason(
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<T> reasonCode) {
+    return reasonCode.isPresent()
+        ? Optional.of(createAdjudicationWithReason(rootResource, ccwVariable, reasonCode.get()))
+        : Optional.empty();
+  }
+
+  static void addAdjudication(ItemComponent item, Optional<AdjudicationComponent> adjudication) {
+    if (adjudication.isPresent()) {
+      item.addAdjudication(adjudication.get());
     }
   }
 

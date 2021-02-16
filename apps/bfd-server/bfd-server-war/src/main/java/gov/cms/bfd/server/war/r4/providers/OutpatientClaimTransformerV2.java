@@ -19,9 +19,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
+import org.hl7.fhir.r4.model.DateType;
 
 /**
  * Transforms CCW {@link OutpatientClaim} instances into FHIR {@link ExplanationOfBenefit}
@@ -70,12 +68,9 @@ public class OutpatientClaimTransformerV2 {
     // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
     // eob.setOutcome(?)
 
-    // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
     // CLM_GRP_ID               => ExplanationOfBenefit.identifier
-    // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage (reference)
-    // BENE_ID                  => ExplanationOfBenefit.patient (reference)
     // FINAL_ACTION             => ExplanationOfBenefit.status
     // CLM_FROM_DT              => ExplanationOfBenefit.billablePeriod.start
     // CLM_THRU_DT              => ExplanationOfBenefit.billablePeriod.end
