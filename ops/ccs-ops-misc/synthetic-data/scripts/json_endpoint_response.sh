@@ -1,66 +1,70 @@
 #!/bin/bash 
 
-# This simple script is meant to test requesting EOBs while in an SSH session to a FHIR host in production
-# It is useful as a smoke test after a data load 
+# INSTRUCTIONS #
+# 1.  Uncomment and run part 1 of the script locally.. Fill in the database credentials and run the script
+# 2.  Comment out part 1 and uncomment out part 2 and copy the input.txt file as well as this script file over to the prod-sbx server
+
+
 
 # Stop after any failure
 set -e 
 
-  #host=localhost:7443 
-  #cert=/usr/local/bfd-server/bluebutton-backend-test-data-server-client-test-keypair.pem
-  host=prod-sbx.bfdcloud.net:443
-  cert=~/client_data_server_local_test_env_dpr_keypair.pem
 
-# Fetch EOBs 
-curl_eobs() {
-  #echo $1
-  sudo curl --fail --silent -o /dev/null --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/ExplanationOfBenefit?patient='$1'&_format=application%2Fjson%2Bfhir'
-}
 
-# Fetch Patient 
-curl_patient() {
-  #echo $1
-  sudo curl --fail --silent -o /dev/null --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/Patient/'$1'&_format=application%2Fjson%2Bfhir'
-}
+###### PART 1 ######
+#psqlhost=""   # Database host
+#psqluser=""   # Database username
+#psqlport=5432  # Database port
+#psqlpass=""  # Database password
+#psqldb=""   # Database
 
-# Fetch Coverage 
-curl_coverage() {
-  #echo $1
-  sudo curl --fail --silent -o /dev/null --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/Coverage?beneficiary='$1'&_format=application%2Fjson%2Bfhir'
-}
+#psql "host=$psqlhost port=$psqlport dbname=$psqldb user=$psqluser password=$psqlpass" -P "footer=off"  -t -c "SELECT \"beneficiaryId\" FROM public.\"Beneficiaries\" WHERE \"beneficiaryId\" LIKE '-%'" --output=input.txt
+
+###### END OF PART 1 ######
 
 
 
-psqlhost=""   # Database host
-psqluser=""   # Database username
-psqlport=5432  # Database port
-psqlpass=""  # Database password
-psqldb=""   # Database
+###### PART 2 ######
 
-psql "host=$psqlhost port=$psqlport dbname=$psqldb user=$psqluser password=$psqlpass" -P "footer=off"  -t -c "SELECT \"beneficiaryId\" FROM public.\"Beneficiaries\" WHERE \"beneficiaryId\" LIKE '-%'  limit 1" --output=input.txt
+#   host=localhost:7443
+#   cert=/usr/local/bfd-server/bluebutton-backend-test-data-server-client-test-keypair.pem
+#   #host=prod-sbx.bfdcloud.net:443
+#   #cert=~/client_data_server_local_test_env_dpr_keypair.pem
 
-input="input.txt"
-while IFS= read -r line
-do
-  curl_eobs $line >> results.txt
-done < "$input"
+# # Fetch EOBs 
+# curl_eobs() {
+#   sudo curl -sb -H "Accept: application/json" --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/ExplanationOfBenefit?patient='$1'&_format=application%2Fjson%2Bfhir'
+# }
 
-rm $input
+# # Fetch Patient 
+# curl_patient() {
+#   sudo curl -sb -H "Accept: application/json" --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/Patient/'$1'?_format=json'
+# }
 
-# echo 'Testing EOBs that failed before'
-# curl_eobs -19990000010000
-# curl_eobs -19990000009997
-# curl_eobs -19990000000161
-# echo 'Passed'
+# # Fetch Coverage 
+# curl_coverage() {
+#   sudo curl -sb -H "Accept: application/json" --insecure --cert-type pem --cert $cert 'https://'$host'/v1/fhir/Coverage?beneficiary='$1'&_format=application%2Fjson%2Bfhir'
+# }
 
-# echo 'About to fetch EOBs for each synthetic benficiary'
-
-# for i in $(seq -f "%05g" 1 10000); 
+# input="input.txt"
+# echo "{\"responses\":[" >> eob.json
+# echo "{\"responses\":[" >> coverage.json
+# echo "{\"responses\":[" >> patient.json
+# while IFS= read -r line
 # do
-#   echo 'Fetching EOBs for '$i' of 10000'
-#   curl_eobs -199900000$i
-#   curl_eobs -200000000$i
-#   curl_eobs -201400000$i
-# done
+#   curl_eobs $line >> eob.json
+#   curl_coverage $line >> coverage.json
+#   curl_patient $line >> patient.json
+#   echo "," >> eob.json
+# echo "," >> coverage.json
+# echo "," >> patient.json
+# done < "$input"
+
+# echo "]}" >> eob.json
+# echo "]}" >> coverage.json
+# echo "]}" >> patient.json
+
+###### END OF PART 2 ######
+
 
 # echo "All done successfully"
