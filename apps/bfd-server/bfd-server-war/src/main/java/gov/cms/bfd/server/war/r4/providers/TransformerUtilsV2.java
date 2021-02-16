@@ -54,7 +54,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -2686,18 +2685,6 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param stateCode the State code to map to the {@link Address} that will be inserted into {@link
-   *     ExplanationOfBenefit#getItem()}
-   */
-  static ItemComponent addStateCode(ExplanationOfBenefit eob, String stateCode) {
-    Address address = new Address();
-    address.setState(stateCode);
-
-    return addItem(eob).setLocation(address);
-  }
-
-  /**
    * Looks for an {@link Organization} with the given resource ID in {@link
    * ExplanationOfBenefit#getContained()} or adds one if it doesn't exist
    *
@@ -2766,5 +2753,26 @@ public final class TransformerUtilsV2 {
   /** Convenience function when passing non-optional values */
   static void addProviderSlice(ExplanationOfBenefit eob, C4BBIdentifierType type, String value) {
     addProviderSlice(eob, type, Optional.of(value));
+  }
+
+  /**
+   * Transforms the common group level data elements between the {@link InpatientClaim} {@link
+   * HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim types to FHIR. The method parameter
+   * fields from {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim}
+   * are listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
+   * InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
+   *
+   * @param eob the root {@link ExplanationOfBenefit} that the {@link ItemComponent} is part of
+   * @param item the {@link ItemComponent} to modify
+   * @param deductibleCoinsruanceCd REV_CNTR_DDCTBL_COINSRNC_CD
+   */
+  static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
+      ExplanationOfBenefit eob, ItemComponent item, Optional<Character> deductibleCoinsuranceCd) {
+    if (deductibleCoinsuranceCd.isPresent()) {
+      item.getRevenue()
+          .addExtension(
+              createExtensionCoding(
+                  eob, CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD, deductibleCoinsuranceCd));
+    }
   }
 }
