@@ -38,7 +38,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +47,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -748,6 +747,19 @@ public final class TransformerUtilsV2 {
     return adjudication;
   }
 
+  static <T> Optional<AdjudicationComponent> createAdjudicationWithReason(
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<T> reasonCode) {
+    return reasonCode.isPresent()
+        ? Optional.of(createAdjudicationWithReason(rootResource, ccwVariable, reasonCode.get()))
+        : Optional.empty();
+  }
+
+  static void addAdjudication(ItemComponent item, Optional<AdjudicationComponent> adjudication) {
+    if (adjudication.isPresent()) {
+      item.addAdjudication(adjudication.get());
+    }
+  }
+
   /**
    * Creates an {@link AdjudicationComponent} to add to an {@ItemComponent}
    *
@@ -958,50 +970,6 @@ public final class TransformerUtilsV2 {
     if (!dateFrom.isPresent()) return;
     if (!dateThrough.isPresent()) return;
     validatePeriodDates(dateFrom.get(), dateThrough.get());
-  }
-
-  /**
-   * @param eob the {@link ExplanationOfBenefit} that the HCPCS code is being mapped into
-   * @param item the {@link ItemComponent} that the HCPCS code is being mapped into
-   * @param hcpcsYear the {@link CcwCodebookInterface#CARR_CLM_HCPCS_YR_CD} identifying the HCPCS
-   *     code version in use
-   * @param hcpcs the {@link CcwCodebookInterface#HCPCS_CD} to be mapped
-   * @param hcpcsModifiers the {@link CcwCodebookInterface#HCPCS_1ST_MDFR_CD}, etc. values to be
-   *     mapped (if any)
-   */
-  static void mapHcpcs(
-      ExplanationOfBenefit eob,
-      ItemComponent item,
-      Optional<Character> hcpcsYear,
-      Optional<String> hcpcs,
-      List<Optional<String>> hcpcsModifiers) {
-    // Create and map all of the possible CodeableConcepts.
-    CodeableConcept hcpcsConcept =
-        hcpcs.isPresent()
-            ? createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcs.get())
-            : null;
-    if (hcpcsConcept != null) item.setProductOrService(hcpcsConcept);
-
-    List<CodeableConcept> hcpcsModifierConcepts = new ArrayList<>(4);
-    for (Optional<String> hcpcsModifier : hcpcsModifiers) {
-      if (!hcpcsModifier.isPresent()) continue;
-
-      CodeableConcept hcpcsModifierConcept =
-          createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsModifier.get());
-      hcpcsModifierConcepts.add(hcpcsModifierConcept);
-      item.addModifier(hcpcsModifierConcept);
-    }
-
-    // Set Coding.version for all of the mappings, if it's available.
-    Stream.concat(Arrays.asList(hcpcsConcept).stream(), hcpcsModifierConcepts.stream())
-        .forEach(
-            concept -> {
-              if (concept == null) return;
-              if (!hcpcsYear.isPresent()) return;
-
-              // Note: Only CARRIER and DME claims have the year/version field.
-              concept.getCodingFirstRep().setVersion(hcpcsYear.get().toString());
-            });
   }
 
   /**
@@ -2430,9 +2398,10 @@ public final class TransformerUtilsV2 {
     addBenefitBalanceFinancialMedicalAmt(
         eob, CcwCodebookVariable.NCH_BENE_BLOOD_DDCTBL_LBLTY_AM, bloodDeductibleLiabilityAmount);
 
-    // CLAIM_QUERY_CODE => ExplanationOfBenefit.extension
-    eob.addExtension(
-        createExtensionCoding(eob, CcwCodebookVariable.CLAIM_QUERY_CD, claimQueryCode));
+    // CLAIM_QUERY_CODE => ExplanationOfBenefit.billablePeriod.extension
+    eob.getBillablePeriod()
+        .addExtension(
+            createExtensionCoding(eob, CcwCodebookVariable.CLAIM_QUERY_CD, claimQueryCode));
 
     // CLM_MCO_PD_SW => ExplanationOfBenefit.supportingInfo.code
     if (mcoPaidSw.isPresent()) {
@@ -2621,6 +2590,19 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
+   * @param diagnosis the {@link Diagnosis} to add, if it's not already present
+   * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
+   */
+  static int addDiagnosisCode(ExplanationOfBenefit eob, Optional<Diagnosis> diagnosis) {
+    if (diagnosis.isPresent()) {
+      return addDiagnosisCode(eob, diagnosis.get());
+    } else {
+      return -1;
+    }
+  }
+
+  /**
    * Generically attempts to retrieve a procedure from the current claim.
    *
    * @param procedure Procedure accessors all follow the same pattern except for an integer
@@ -2800,6 +2782,98 @@ public final class TransformerUtilsV2 {
           .addExtension(
               createExtensionCoding(
                   eob, CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD, deductibleCoinsuranceCd));
+    }
+  }
+
+  /*
+   * @param claim the Claim to extract the {@link Diagnosis}es from
+   * @return the {@link Diagnosis} that can be extracted from the specified {@link InpatientClaim}
+   */
+  static List<Diagnosis> extractDiagnoses(Object claim) {
+    List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
+
+    // Handle the "special" diagnosis fields
+    diagnosis.add(extractDiagnosis("Admitting", claim, Optional.empty(), DiagnosisLabel.ADMITTING));
+    diagnosis.add(
+        extractDiagnosis(
+            "1",
+            claim,
+            Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
+            DiagnosisLabel.PRINCIPAL));
+    diagnosis.add(extractDiagnosis("Principal", claim, Optional.empty(), DiagnosisLabel.PRINCIPAL));
+
+    // Generically handle the rest (2-25)
+    final int FIRST_DIAG = 2;
+    final int LAST_DIAG = 25;
+
+    IntStream.range(FIRST_DIAG, LAST_DIAG + 1)
+        .mapToObj(
+            i -> {
+              return extractDiagnosis(
+                  String.valueOf(i),
+                  claim,
+                  Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)));
+            })
+        .forEach(diagnosis::add);
+
+    // Handle external diagnosis
+    diagnosis.add(
+        extractDiagnosis(
+            "External1",
+            claim,
+            Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
+            DiagnosisLabel.FIRSTEXTERNAL));
+    diagnosis.add(
+        extractDiagnosis("ExternalFirst", claim, Optional.empty(), DiagnosisLabel.FIRSTEXTERNAL));
+
+    // Generically handle the rest (2-12)
+    final int FIRST_EX_DIAG = 2;
+    final int LAST_EX_DIAG = 12;
+
+    IntStream.range(FIRST_EX_DIAG, LAST_EX_DIAG + 1)
+        .mapToObj(
+            i -> {
+              return extractDiagnosis(
+                  "External" + String.valueOf(i),
+                  claim,
+                  Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)));
+            })
+        .forEach(diagnosis::add);
+
+    // Some may be empty.  Convert from List<Optional<Diagnosis>> to List<Diagnosis>
+    return diagnosis.stream()
+        .filter(d -> d.isPresent())
+        .map(d -> d.get())
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * @param eob the {@link ExplanationOfBenefit} that the HCPCS code is being mapped into
+   * @param item the {@link ItemComponent} that the HCPCS code is being mapped into
+   * @param year the {@link CcwCodebookVariable#CARR_CLM_HCPCS_YR_CD} identifying the HCPCS code
+   *     version in use
+   * @param modifiers the {@link CcwCodebookVariable#HCPCS_1ST_MDFR_CD}, etc. values to be mapped
+   *     (if any)
+   */
+  static void mapHcpcs(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      Optional<Character> year,
+      List<Optional<String>> modifiers) {
+
+    for (Optional<String> hcpcsModifier : modifiers) {
+      if (hcpcsModifier.isPresent()) {
+        CodeableConcept modifier =
+            createCodeableConcept(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsModifier.get());
+
+        // Set Coding.version for all of the mappings, if it's available.
+        if (year.isPresent()) {
+          // Note: Only CARRIER and DME claims have the year/version field.
+          modifier.getCodingFirstRep().setVersion(year.get().toString());
+        }
+
+        item.addModifier(modifier);
+      }
     }
   }
 }
