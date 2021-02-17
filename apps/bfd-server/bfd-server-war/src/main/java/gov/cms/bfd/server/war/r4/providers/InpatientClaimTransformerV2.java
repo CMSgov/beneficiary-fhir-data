@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
@@ -318,23 +319,25 @@ public class InpatientClaimTransformerV2 {
       // CLM_LINE_NUM => item.sequence
       item.setSequence(line.getLineNumber().intValue());
 
+      // PRVDR_STATE_CD => ExplanationOfBenefit.item.locationAddress
+      item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
+
       // REV_CNTR => item.revenue
       item.setRevenue(
           TransformerUtilsV2.createCodeableConcept(
               eob, CcwCodebookVariable.REV_CNTR, line.getRevenueCenter()));
 
+      // Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue.extension
-      item.getRevenue()
-          .addExtension(
-              TransformerUtilsV2.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
-                  line.getDeductibleCoinsuranceCd()));
+      TransformerUtilsV2.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
+          eob, item, line.getDeductibleCoinsuranceCd());
 
       // HCPCS_CD => item.productOrService
-      item.setProductOrService(
-          TransformerUtilsV2.createCodeableConcept(
-              eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
+      if (line.getHcpcsCode().isPresent()) {
+        item.setProductOrService(
+            TransformerUtilsV2.createCodeableConcept(
+                eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
+      }
 
       // REV_CNTR_UNIT_CNT => item.quantity
       item.setQuantity(new SimpleQuantity().setValue(line.getUnitCount()));
@@ -352,32 +355,29 @@ public class InpatientClaimTransformerV2 {
           item, CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT, line.getNonCoveredChargeAmount());
 
       // REV_CNTR_NDC_QTY_QLFR_CD => item.modifier
-      item.getModifier()
-          .add(
-              TransformerUtilsV2.createCodeableConcept(
-                  eob,
-                  CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
-                  line.getNationalDrugCodeQualifierCode()));
+      if (line.getNationalDrugCodeQualifierCode().isPresent()) {
+        item.getModifier()
+            .add(
+                TransformerUtilsV2.createCodeableConcept(
+                    eob,
+                    CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
+                    line.getNationalDrugCodeQualifierCode()));
+      }
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
           TransformerConstants.CODING_UPIN,
-          ClaimCareteamrole.OTHER,
+          ClaimCareteamrole.PRIMARY,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
           TransformerConstants.CODING_NPI_US,
-          ClaimCareteamrole.OTHER,
+          ClaimCareteamrole.PRIMARY,
           line.getRevenueCenterRenderingPhysicianNPI());
     }
-
-    // This needs to be set after the above, since it goes into an `item` to ensure
-    // ensure the sequence is correct
-    // PRVDR_STATE_CD => ExplanationOfBenefit.item.locationAddress
-    TransformerUtilsV2.addStateCode(eob, claimGroup.getProviderStateCode());
 
     // Last Updated => ExplanationOfBenefit.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
