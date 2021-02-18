@@ -107,6 +107,36 @@ public final class RifFilesProcessorTest {
 
   /**
    * Ensures that {@link gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor} can correctly handle
+   * {@link StaticRifResource#SAMPLE_A_BENES}.
+   */
+  @Test
+  public void process1BeneRecordWithBackslash() {
+    RifFilesEvent filesEvent =
+        new RifFilesEvent(
+            Instant.now(), StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.toRifFile());
+    RifFilesProcessor processor = new RifFilesProcessor();
+    RifFileRecords rifFileRecords = processor.produceRecords(filesEvent.getFileEvents().get(0));
+    List<RifRecordEvent<?>> rifEventsList =
+        rifFileRecords.getRecords().collect(Collectors.toList());
+
+    Assert.assertEquals(
+        StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.getRecordCount(), rifEventsList.size());
+
+    RifRecordEvent<?> rifRecordEvent = rifEventsList.get(0);
+    Assert.assertEquals(
+        StaticRifResource.SAMPLE_A_BENES_WITH_BACKSLASH.getRifFileType(),
+        rifRecordEvent.getFileEvent().getFile().getFileType());
+    Assert.assertNotNull(rifRecordEvent.getRecord());
+    Assert.assertTrue(rifRecordEvent.getRecord() instanceof Beneficiary);
+
+    Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
+    Assert.assertEquals(beneRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
+    Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
+    Assert.assertEquals("DAEJEON SI 34867", beneRow.getDerivedMailingAddress4().get());
+  }
+
+  /**
+   * Ensures that {@link gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor} can correctly handle
    * {@link StaticRifResource#SAMPLE_A_BENEFICIARY_HISTORY}.
    */
   @Test
@@ -255,7 +285,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals("01", pdeRow.getPrescriberIdQualifierCode());
     Assert.assertEquals("1750384806", pdeRow.getPrescriberId());
     Assert.assertEquals(new BigDecimal(799999), pdeRow.getPrescriptionReferenceNumber());
-    Assert.assertEquals("665561945", pdeRow.getNationalDrugCode());
+    Assert.assertEquals("667159747", pdeRow.getNationalDrugCode());
     Assert.assertEquals("H9999", pdeRow.getPlanContractId());
     Assert.assertEquals("020", pdeRow.getPlanBenefitPackageId());
     Assert.assertEquals(1, pdeRow.getCompoundCode());
@@ -1034,7 +1064,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals('3', claimLine.getMtusCode().get().charValue());
     Assert.assertEquals(new BigDecimal("44.4"), claimLine.getHctHgbTestResult());
     Assert.assertEquals("R2", claimLine.getHctHgbTestTypeCode().get());
-    Assert.assertEquals("665561945", claimLine.getNationalDrugCode().get());
+    Assert.assertEquals("667159747", claimLine.getNationalDrugCode().get());
   }
 
   /**

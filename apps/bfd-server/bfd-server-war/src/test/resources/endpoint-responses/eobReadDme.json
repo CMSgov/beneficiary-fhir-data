@@ -56,6 +56,12 @@
       "value" : "99999"
     }
   }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+      "value" : "74655592568216"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
@@ -143,6 +149,18 @@
   "referral" : {
     "reference" : "#1"
   },
+  "disposition" : "01",
+  "information" : [ {
+    "sequence" : 1,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "2014-02-14"
+  } ],
   "careTeam" : [ {
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
@@ -261,8 +279,8 @@
       "url" : "http://hl7.org/fhir/sid/ndc",
       "valueCoding" : {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "665561945",
-        "display" : "Hand E San - ALCOHOL"
+        "code" : "667159747",
+        "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
       }
     } ],
     "sequence" : 1,

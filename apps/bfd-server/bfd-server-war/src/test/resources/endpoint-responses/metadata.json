@@ -98,6 +98,10 @@
         "type" : "token",
         "documentation" : "Part D coverage type"
       }, {
+        "name" : "_has:Coverage",
+        "type" : "token",
+        "documentation" : "Part D reference year"
+      }, {
         "name" : "_id",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
