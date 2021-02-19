@@ -54,6 +54,12 @@ the codebase.
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
+The BFD_FIELD_SELECTION header enables this feature.  A value of **ALL** is current behavior, will be the default
+(if header is missing) and indicates to return all EOB fields.  A value of **AB2D_VERSION1** indicates return only
+the fields specified in this proposal.  By using an enumerated type instead of a boolean, this allows for different
+results to be specified in the future should the need arise and for different consumers to have specific field selections
+encoded.
+
 The BeanUtils library can be utilized for transforming properties
 
 ```
@@ -64,10 +70,20 @@ The BeanUtils library can be utilized for transforming properties
 </dependency>
 ```
 
-A `private static final Map<String, SubfieldSelection>` of fields will need to be maintained in `TransformerUtils`. This will
-be the AB2D required fields in the FHIR object that gets sent back to the client. Just before the
-end of the method `findByPatient` in `ExplanationOfBenefitsResourceProvider` the `eobs` can be passed to a new
-method in `TransformerUtils`.
+A new class, `ResourceFieldSelector` located in **gov.cms.bfd.server.war.commons** exposes a public method
+
+```
+public enum FieldSelectorProfile {ALL, AB2D_VERSION1}
+
+static public ExplanationOfBenefit selectFields(ExplanationOfBenefit eob, FieldSelectorProfile fsProfile)
+```
+
+will be invoked by both
+`R4ExplanationOfBenefitsResourceProvider` and `ExplanationOfBenefitsResourceProvider` for additional post processing
+of the fields upon the final step of EOB processing.
+
+`FieldSelectorProfile` maintains a `private static final Map<String, SubfieldSelection>` of fields specifying the
+selected ones to return to the client for each instance of the enum.
 
 This method will be doing the bulk of the work for this RFC. The filtering will happen
 in this method where each field in the EOBs are visited. Reflection will be used to gain the list of all 
