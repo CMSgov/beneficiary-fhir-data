@@ -1,0 +1,11 @@
+---
+id: fhir_patient_v2
+name: 'FHIR Patient (v2)'
+type: fhir_r4_patient
+mapping: TODO
+fhir_profile: TODO
+# I almost think I don't need to write this manually; it should be derived from the mapping, right?
+#fields:
+#  id: ccw_bene_id
+#  identifier:
+#    - ccw_bene_id

@@ -1,0 +1,10 @@
+---
+id: rif_claims_carrier
+name: 'RIF: Carrier Claims'
+type: rif
+fields:
+  grouped:
+    - ccw_clm_id
+    - ccw_bene_id
+  ungrouped:
+    - ccw_clm_line_num
