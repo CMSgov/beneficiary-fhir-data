@@ -9,15 +9,16 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
+import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 
 /**
  * Transforms CCW {@link OutpatientClaim} instances into FHIR {@link ExplanationOfBenefit}
@@ -248,12 +249,6 @@ public class OutpatientClaimTransformerV2 {
           TransformerUtilsV2.createCodeableConcept(
               eob, CcwCodebookVariable.REV_CNTR, line.getRevenueCenterCode()));
 
-      // REV_CNTR_DT => item.servicedDate
-      if (line.getRevenueCenterDate().isPresent()) {
-        item.setServiced(
-            new DateType(TransformerUtilsV2.convertToDate(line.getRevenueCenterDate().get())));
-      }
-
       // REV_CNTR_1ST_ANSI_CD => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(
           item,
@@ -289,6 +284,92 @@ public class OutpatientClaimTransformerV2 {
               line.getHcpcsCode(),
               line.getHcpcsInitialModifierCode(),
               line.getHcpcsSecondModifierCode()));
+
+      // REV_CNTR_IDE_NDC_UPC_NUM => ExplanationOfBenefit.item.serviced.extension
+      if (line.getNationalDrugCode().isPresent()) {
+        item.getServiced()
+            .addExtension(
+                TransformerUtilsV2.createExtensionCoding(
+                    eob, CcwCodebookVariable.REV_CNTR_IDE_NDC_UPC_NUM, line.getNationalDrugCode()));
+      }
+
+      // REV_CNTR                   => ExplanationOfBenefit.item.revenue
+      // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.quantity
+      // REV_CNTR_NDC_QTY           => TODO: ??
+      // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
+      TransformerUtilsV2.mapEobCommonItemRevenue(
+          item,
+          eob,
+          line.getRevenueCenterCode(),
+          line.getRateAmount(),
+          line.getTotalChargeAmount(),
+          line.getNonCoveredChargeAmount(),
+          line.getUnitCount(),
+          line.getNationalDrugCodeQuantity(),
+          line.getNationalDrugCodeQualifierCode());
+
+      // REV_CNTR_BLOOD_DDCTBL_AMT => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_BLOOD_DDCTBL_AMT, line.getBloodDeductibleAmount());
+
+      // REV_CNTR_CASH_DDCTBL_AMT => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_CASH_DDCTBL_AMT, line.getCashDeductibleAmount());
+
+      // REV_CNTR_COINSRNC_WGE_ADJSTD_C => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item,
+          CcwCodebookVariable.REV_CNTR_COINSRNC_WGE_ADJSTD_C,
+          line.getWageAdjustedCoinsuranceAmount());
+
+      // REV_CNTR_RDCD_COINSRNC_AMT => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_RDCD_COINSRNC_AMT, line.getReducedCoinsuranceAmount());
+
+      // REV_CNTR_1ST_MSP_PD_AMT => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_1ST_MSP_PD_AMT, line.getFirstMspPaidAmount());
+
+      // REV_CNTR_2ND_MSP_PD_AMT => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_2ND_MSP_PD_AMT, line.getSecondMspPaidAmount());
+
+      // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT, line.getProviderPaymentAmount());
+
+      // REV_CNTR_BENE_PMT_AMT => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item, CcwCodebookVariable.REV_CNTR_BENE_PMT_AMT, line.getBenficiaryPaymentAmount());
+
+      // REV_CNTR_PTNT_RSPNSBLTY_PMT => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addItemAdjudicationAmt(
+          item,
+          CcwCodebookVariable.REV_CNTR_PTNT_RSPNSBLTY_PMT,
+          line.getPatientResponsibilityAmount());
+
+      // Common item level fields between Outpatient, HHA and Hospice
+      // REV_CNTR_DT              => ExplanationOfBenefit.item.servicedDate
+      // REV_CNTR_PMT_AMT_AMT     => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.mapEobCommonItemRevenueOutHHAHospice(
+          item, line.getRevenueCenterDate(), line.getPaymentAmount());
+
+      // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
+      TransformerUtilsV2.addCareTeamMember(
+          eob,
+          TransformerConstants.CODING_UPIN,
+          ClaimCareteamrole.OTHER,
+          line.getRevenueCenterRenderingPhysicianUPIN());
+
+      // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
+      TransformerUtilsV2.addCareTeamMember(
+          eob,
+          TransformerConstants.CODING_NPI_US,
+          ClaimCareteamrole.OTHER,
+          line.getRevenueCenterRenderingPhysicianNPI());
     }
 
     return eob;

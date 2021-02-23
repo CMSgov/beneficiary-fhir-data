@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
-import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 
 /**
@@ -315,10 +314,23 @@ public class InpatientClaimTransformerV2 {
       // PRVDR_STATE_CD => item.location
       item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
 
-      // REV_CNTR => item.revenue
-      item.setRevenue(
-          TransformerUtilsV2.createCodeableConcept(
-              eob, CcwCodebookVariable.REV_CNTR, line.getRevenueCenter()));
+      // REV_CNTR                   => ExplanationOfBenefit.item.revenue
+      // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.quantity
+      // REV_CNTR_NDC_QTY           => TODO: ??
+      // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
+      TransformerUtilsV2.mapEobCommonItemRevenue(
+          item,
+          eob,
+          line.getRevenueCenter(),
+          line.getRateAmount(),
+          line.getTotalChargeAmount(),
+          line.getNonCoveredChargeAmount(),
+          line.getUnitCount(),
+          line.getNationalDrugCodeQuantity(),
+          line.getNationalDrugCodeQualifierCode());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue.extension
       item.getRevenue()
@@ -332,29 +344,6 @@ public class InpatientClaimTransformerV2 {
       item.setProductOrService(
           TransformerUtilsV2.createCodeableConcept(
               eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
-
-      // REV_CNTR_UNIT_CNT => item.quantity
-      item.setQuantity(new SimpleQuantity().setValue(line.getUnitCount()));
-
-      // REV_CNTR_RATE_AMT => item.adjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_RATE_AMT, line.getRateAmount());
-
-      // REV_CNTR_TOT_CHRG_AMT => item.adjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT, line.getTotalChargeAmount());
-
-      // REV_CNTR_NCVRD_CHRG_AMT => item.addjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT, line.getNonCoveredChargeAmount());
-
-      // REV_CNTR_NDC_QTY_QLFR_CD => item.modifier
-      item.getModifier()
-          .add(
-              TransformerUtilsV2.createCodeableConcept(
-                  eob,
-                  CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
-                  line.getNationalDrugCodeQualifierCode()));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

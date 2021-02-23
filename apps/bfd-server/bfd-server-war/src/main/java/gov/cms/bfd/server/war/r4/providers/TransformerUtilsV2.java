@@ -82,6 +82,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
@@ -2874,6 +2875,113 @@ public final class TransformerUtilsV2 {
 
         item.addModifier(modifier);
       }
+    }
+  }
+
+  /**
+   * Transforms the common item level data elements between the {@link InpatientClaimLine} {@link
+   * OutpatientClaimLine} {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine}
+   * claim types to FHIR. The method parameter fields from {@link InpatientClaimLine} {@link
+   * OutpatientClaimLine} {@link HospiceClaimLine} {@link HHAClaimLine}and {@link SNFClaimLine} are
+   * listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
+   * InpatientClaimColumn} {@link OutpatientClaimColumn} {@link HopsiceClaimColumn} {@link
+   * HHAClaimColumn} and {@link SNFClaimColumn}).
+   *
+   * @param item the {@ ItemComponent} to modify
+   * @param eob the {@ ExplanationOfBenefit} to modify
+   * @param revenueCenterCode REV_CNTR,
+   * @param rateAmount REV_CNTR_RATE_AMT,
+   * @param totalChargeAmount REV_CNTR_TOT_CHRG_AMT,
+   * @param nonCoveredChargeAmount REV_CNTR_NCVRD_CHRG_AMT,
+   * @param unitCount REV_CNTR_UNIT_CNT,
+   * @param nationalDrugCodeQuantity REV_CNTR_NDC_QTY,
+   * @param nationalDrugCodeQualifierCode REV_CNTR_NDC_QTY_QLFR_CD,
+   * @return the {@link ItemComponent}
+   */
+  static ItemComponent mapEobCommonItemRevenue(
+      ItemComponent item,
+      ExplanationOfBenefit eob,
+      String revenueCenterCode,
+      BigDecimal rateAmount,
+      BigDecimal totalChargeAmount,
+      BigDecimal nonCoveredChargeAmount,
+      BigDecimal unitCount,
+      Optional<BigDecimal> nationalDrugCodeQuantity,
+      Optional<String> nationalDrugCodeQualifierCode) {
+
+    // REV_CNTR => ExplanationOfBenefit.item.revenue
+    item.setRevenue(createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR, revenueCenterCode));
+
+    // REV_CNTR_RATE_AMT => ExplanationOfBenefit.item.adjudication
+    addItemAdjudicationAmt(item, CcwCodebookVariable.REV_CNTR_RATE_AMT, rateAmount);
+
+    // REV_CNTR_TOT_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+    addItemAdjudicationAmt(item, CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT, totalChargeAmount);
+
+    // REV_CNTR_NCVRD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
+    addItemAdjudicationAmt(
+        item, CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT, nonCoveredChargeAmount);
+
+    // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.quantity
+    item.setQuantity(new SimpleQuantity().setValue(unitCount));
+
+    // REV_CNTR_NDC_QTY_QLFR_CD => ExplanationOfBenefit.item.modifier
+    if (nationalDrugCodeQualifierCode.isPresent()) {
+      item.getModifier()
+          .add(
+              TransformerUtilsV2.createCodeableConcept(
+                  eob,
+                  CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
+                  nationalDrugCodeQualifierCode));
+    }
+
+    // TODO: REV_CNTR_NDC_QTY needs to be mapped once mapping is updated
+
+    return item;
+  }
+
+  /**
+   * Transforms the common item level data elements between the {@link OutpatientClaimLine} {@link
+   * HospiceClaimLine} and {@link HHAClaimLine} claim types to FHIR. The method parameter fields
+   * from {@link OutpatientClaimLine} {@link HospiceClaimLine} and {@link HHAClaimLine} are listed
+   * below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
+   * OutpatientClaimColumn} {@link HopsiceClaimColumn} and {@link HHAClaimColumn}.
+   *
+   * @param item the {@ ItemComponent} to modify
+   * @param revenueCenterDate REV_CNTR_DT,
+   * @param paymentAmount REV_CNTR_PMT_AMT_AMT
+   */
+  static void mapEobCommonItemRevenueOutHHAHospice(
+      ItemComponent item, Optional<LocalDate> revenueCenterDate, BigDecimal paymentAmount) {
+
+    // Revenue Center Date
+    if (revenueCenterDate.isPresent()) {
+      item.setServiced(new DateType().setValue(convertToDate(revenueCenterDate.get())));
+    }
+
+    addItemAdjudicationAmt(item, CcwCodebookVariable.REV_CNTR_PMT_AMT_AMT, paymentAmount);
+  }
+
+  /**
+   * Transforms the common group level data elements between the {@link InpatientClaim} {@link
+   * HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim types to FHIR. The method parameter
+   * fields from {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim}
+   * are listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
+   * InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
+   *
+   * @param eob the root {@link ExplanationOfBenefit} that the {@link ItemComponent} is part of
+   * @param item the {@link ItemComponent} to modify
+   * @param deductibleCoinsruanceCd REV_CNTR_DDCTBL_COINSRNC_CD
+   */
+  static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
+      ExplanationOfBenefit eob, ItemComponent item, Optional<Character> deductibleCoinsuranceCd) {
+
+    if (deductibleCoinsuranceCd.isPresent()) {
+      // FIXME should this be an adjudication?
+      item.getRevenue()
+          .addExtension(
+              createExtensionCoding(
+                  eob, CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD, deductibleCoinsuranceCd));
     }
   }
 }
