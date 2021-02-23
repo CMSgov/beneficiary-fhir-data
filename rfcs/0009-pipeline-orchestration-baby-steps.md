@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0009-pipeline-orchestration-baby-steps`
 * Start Date: 2021-02-22
-* RFC PR: [CMSgov/beneficiary-fhir-data#TODO](https://github.com/CMSgov/beneficiary-fhir-data/pull/TODO)
+* RFC PR: [CMSgov/beneficiary-fhir-data#462](https://github.com/CMSgov/beneficiary-fhir-data/pull/462)
 * JIRA Ticket(s):
     * [BFD-652: Story: Improve BFD Pipeline Job Orchestration](https://jira.cms.gov/browse/BFD-652)
 
