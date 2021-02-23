@@ -397,29 +397,6 @@ public class InpatientClaimTransformerV2 {
           TransformerUtilsV2.createCodeableConcept(
               eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
 
-      // REV_CNTR_UNIT_CNT => item.quantity
-      item.setQuantity(new SimpleQuantity().setValue(line.getUnitCount()));
-
-      // REV_CNTR_RATE_AMT => item.adjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_RATE_AMT, line.getRateAmount());
-
-      // REV_CNTR_TOT_CHRG_AMT => item.adjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT, line.getTotalChargeAmount());
-
-      // REV_CNTR_NCVRD_CHRG_AMT => item.addjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT, line.getNonCoveredChargeAmount());
-
-      // REV_CNTR_NDC_QTY_QLFR_CD => item.modifier
-      item.getModifier()
-          .add(
-              TransformerUtilsV2.createCodeableConcept(
-                  eob,
-                  CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
-                  line.getNationalDrugCodeQualifierCode()));
-
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
