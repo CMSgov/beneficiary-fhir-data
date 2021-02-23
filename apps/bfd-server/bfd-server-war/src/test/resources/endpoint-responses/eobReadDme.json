@@ -69,12 +69,6 @@
       "display" : "Physician/supplier"
     }
   }, {
-    "url" : "https://bluebutton.cms.gov/resources/variables/carr_num",
-    "valueIdentifier" : {
-      "system" : "https://bluebutton.cms.gov/resources/variables/carr_num",
-      "value" : "74655592568216"
-    }
-  }, {
     "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
     "valueCoding" : {
       "system" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
