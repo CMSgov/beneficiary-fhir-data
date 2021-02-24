@@ -22,3 +22,5 @@
         name: install_java
     - import_role: 
         name: ops_tools
+    - import_role:
+        name: platinum_post
