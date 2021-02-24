@@ -7,8 +7,9 @@
 * JIRA Ticket(s):
     * [https://jira.cms.gov/browse/AB2D-1863](https://jira.cms.gov/browse/AB2D-1863)
 
-This proposal will suggest adding server side filtering to API calls that return EOBs to the client in order to 
-reduce on the amount of data that needs to be transferred. 
+This proposal adds field selection (i.e. projection) to API calls that return EOBs to the client in order to 
+reduce the amount of data serialized and transmitted.  This approach is designed to be more comprehensive and general,
+allowing for simplification of implementation.
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
@@ -43,7 +44,7 @@ invocation time.
 [Proposed Solution]: #proposed-solution
 
 The solution adds code in the BFD server to configure which fields AB2D requires.  Non-required fields are nulled out
-before being transformed in the result.  The specific set of required fields should remain stable
+before being serialized in the result.  The specific set of required fields should remain stable
 and not require modifications.
 
 The filtering will need to happen towards the end of processing. This is to avoid
@@ -54,139 +55,73 @@ the codebase.
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
-The BFD_FIELD_SELECTION header enables this feature.  A value of **ALL** is current behavior, will be the default
-(if header is missing) and indicates to return all EOB fields.  A value of **AB2D_VERSION1** indicates return only
-the fields specified in this proposal.  By using an enumerated type instead of a boolean, this allows for different
-results to be specified in the future should the need arise and for different consumers to have specific field selections
-encoded.
+The FIELD_SELECTION_PROFILE header enables this feature.  A value of **ALL** is current behavior, will be the default
+(if header is missing) and indicates to return all EOB fields.  A value of **AB2D_STU3_VERSION1** indicates return only
+the fields specified in this proposal for a **STU3** request.  A value of **AB2D_R4_VERSION1** indicates return only
+the fields specified in this proposal for a **R4** request.  A HTTP Status of 400 is returned if there is a mismatch
+between the profile given and the invoked endpoint (R4 vs. STU3).
 
-The BeanUtils library can be utilized for transforming properties
+Returned fields from ItemDef are specifically enumerated in the tables below.  Only specified fields have values.  All
+other fields are either null or an appropriate default (such as 0).  If a field represents an object, all fields of
+that object unless there is a specific definition in the profile sub-selecting desired fields.
 
-```
-<dependency>
-    <groupId>commons-beanutils</groupId>
-    <artifactId>commons-beanutils</artifactId>
-    <version>1.9.4</version>
-</dependency>
-```
+#### AB2D_STU3_VERSION1 Profile
 
-A new class, `ResourceFieldSelector` located in **gov.cms.bfd.server.war.commons** exposes a public method
+| ItemDef Field |
+| ------------- |
+| sequence |
+| careTeamLinkId |
+| service |
+| serviced |
+| location |
+| quantity |
 
-```
-public enum FieldSelectorProfile {ALL, AB2D_VERSION1}
+| EOB Field |
+| --------- |
+| patient |
+| provider |
+| organization |
+| facility |
+| type |
+| resourceType |
+| diagnosis |
+| procedure |
+| item |
+| careTeam |
+| identifier |
 
-static public ExplanationOfBenefit selectFields(ExplanationOfBenefit eob, FieldSelectorProfile fsProfile)
-```
+#### AB2D_R4_VERSION1 Profile
 
-will be invoked by both
-`R4ExplanationOfBenefitsResourceProvider` and `ExplanationOfBenefitsResourceProvider` for additional post processing
-of the fields upon the final step of EOB processing.
+For a given ItemDef, the following fields are specifically returned.  If new fields are added in the future,
+they are ignored.  If a field represents an object, all fields of that object are return unless that object type 
 
-`FieldSelectorProfile` maintains a `private static final Map<String, SubfieldSelection>` of fields specifying the
-selected ones to return to the client for each instance of the enum.
+| ItemDef Field |
+| ------------- |
+| sequence |
+| careTeamSequence |
+| productOrService |
+| serviced |
+| location |
+| quantity
 
-This method will be doing the bulk of the work for this RFC. The filtering will happen
-in this method where each field in the EOBs are visited. Reflection will be used to gain the list of all 
-fields in the object we are interested in (ExplanationOfBenefits). If the field matches a name in the allowed list it will 
-be allowed to stay, otherwise it will be nulled out. Every field in the object will need to be visited so that we don't miss any
-fields.
-
-Fields that represent objects are recursed into, applying the same field selection approach.
-
-```
-    private enum WhichFields {ALL, EXPLICIT}
-
-    private static class SubfieldSelection {
-        final WhichFields pickMe;
-        final Map<String, SubfieldSelection> explictFields;
-
-        public SubfieldSelection() {
-            this.pickMe = WhichFields.ALL;
-            explictFields = Collections.emptyMap();
-        }
-
-        public SubfieldSelection(Map<String, SubfieldSelection> explictFields) {
-            this.pickMe = WhichFields.EXPLICIT;
-            this.explictFields = explictFields;
-        }
-
-        public void addField(String fieldName) {
-            explictFields.put(fieldName, wildCard);
-        }
-
-        public WhichFields getPickMe() {
-            return pickMe;
-        }
-
-        public Map<String, SubfieldSelection> getExplictFields() {
-            return explictFields;
-        }
-    }
-
-    private static final SubfieldSelection wildCard = new SubfieldSelection();
-
-    private static final Map<String, SubfieldSelection> eobFieldSelection = new HashMap<>();
-
-    static {
-        eobFieldSelection.put("patient", wildCard);
-        eobFieldSelection.put("provider", wildCard);
-        eobFieldSelection.put("organization", wildCard);
-        eobFieldSelection.put("facility", wildCard);
-        eobFieldSelection.put("type", wildCard);
-        eobFieldSelection.put("resourceType", wildCard);
-        eobFieldSelection.put("diagnosis", wildCard);
-        eobFieldSelection.put("procedure", wildCard);
-        eobFieldSelection.put("item", buildItemDef());
-        eobFieldSelection.put("careTeam", wildCard);
-        eobFieldSelection.put("identifier", wildCard);
-    }
-
-    private static SubfieldSelection buildItemDef() {
-        Map<String, SubfieldSelection> itemMap = new HashMap<>();
-        itemMap.put("service", wildCard);
-        itemMap.put("quantity", wildCard);
-        itemMap.put("servicedPeriod", wildCard);
-        itemMap.put("location", wildCard);
-        itemMap.put("careTeamLinkId", wildCard);
-        itemMap.put("sequence", wildCard);
-        return new SubfieldSelection(itemMap);
-    }
-    
-    // Entry point
-    public static void filterEOBs(List<ExplanationOfBenefit> eobs) {
-        for (ExplanationOfBenefit eob : eobs) {
-            trimFields(eob, eobFieldSelection);
-        }
-    }
-
-    private static void trimFields(Object objToTrim, Map<String, SubfieldSelection> fieldMapping) {
-        Field[] fields = objToTrim.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            // Do not return this field, null it out.
-            if (!fieldMapping.containsKey(field.getName())) {
-                PropertyUtils.setProperty(objToTrim, field.getName(), null);
-                continue;
-            }
-
-            // Return the entire field in the results
-            SubfieldSelection selection = fieldMapping.get(field.getName());
-            if (selection.getPickMe() == WhichFields.ALL) {
-                continue;
-            }
-
-            // Return a subset of the fields of the object referenced.
-            trimFieldsThrowException(objToTrim, field, selection);
-        }
-    }
-
-    private static void trimFieldsThrowException(Object objToTrim, Field field, SubfieldSelection selection) {
-        try {
-            trimFields(field.get(objToTrim), selection.getExplictFields());
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        }
-    }
-``` 
+| EOB Field |
+| --------- |
+| identifier |
+| type |
+| meta |
+| text |
+| language |
+| id |
+| implicitRules |
+| patient |
+| provider |
+| facility |
+| careTeam |
+| diagnosis |
+| procedure |
+| billablePeriod |
+| item |
+| status |
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
