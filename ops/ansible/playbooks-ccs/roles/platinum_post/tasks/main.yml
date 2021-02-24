@@ -4,7 +4,7 @@
 # remove the failing aide cron job
 - name: 'Ensure failing aide cron job is removed.'
   become: true
-  ansible.builtin.cron:
+  cron:
     name: "run AIDE check"
     state: absent
 
