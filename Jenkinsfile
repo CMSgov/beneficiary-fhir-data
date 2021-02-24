@@ -147,6 +147,9 @@ try {
 
 			// Get the remote repo url. This assumes we are using git+https not git+ssh.
 			gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
+
+			// Send notifications that the build has started
+			sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 		}
 	}
 
