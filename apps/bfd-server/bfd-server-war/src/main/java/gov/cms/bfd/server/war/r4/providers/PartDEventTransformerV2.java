@@ -36,7 +36,10 @@ final class PartDEventTransformerV2 {
             .timer(MetricRegistry.name(PartDEventTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(claim instanceof PartDEvent)) throw new BadCodeMonkeyException();
+    if (!(claim instanceof PartDEvent)) {
+      throw new BadCodeMonkeyException();
+    }
+
     ExplanationOfBenefit eob = transformClaim((PartDEvent) claim);
 
     timer.stop();
@@ -56,6 +59,14 @@ final class PartDEventTransformerV2 {
             "https://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy");
 
     // Common group level fields between all claim types
+    // Claim Type + Claim ID
+    //                  => ExplanationOfBenefit.id
+    // PDE_ID           => ExplanationOfBenefit.identifier
+    // CLM_GRP_ID       => ExplanationOfBenefit.identifier
+    // BENE_ID + Coverage Type
+    //                  => ExplanationOfBenefit.insurance.coverage (reference)
+    // BENE_ID          => ExplanationOfBenefit.patient (reference)
+    // FINAL_ACTION     => ExplanationOfBenefit.status
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
         eob,
         claimGroup.getEventId(),
@@ -68,33 +79,41 @@ final class PartDEventTransformerV2 {
         Optional.empty(),
         claimGroup.getFinalAction());
 
+    // RX_SRVC_RFRNC_NUM => ExplanationOfBenefit.identifier
     eob.addIdentifier(
         TransformerUtilsV2.createIdentifier(
             CcwCodebookVariable.RX_SRVC_RFRNC_NUM,
             claimGroup.getPrescriptionReferenceNumber().toPlainString()));
 
     // map eob type codes into FHIR
+    // EOB Type               => ExplanationOfBenefit.type.coding
+    // Claim Type  (pharmacy) => ExplanationOfBenefit.type.coding
     TransformerUtilsV2.mapEobType(eob, ClaimType.PDE, Optional.empty(), Optional.empty());
 
+    // PLAN_CNTRCT_REC_ID => ExplanationOfBenefit.insurance.coverage.extension
     eob.addInsurance()
         .getCoverage()
         .addExtension(
             TransformerUtilsV2.createExtensionIdentifier(
                 CcwCodebookVariable.PLAN_CNTRCT_REC_ID, claimGroup.getPlanContractId()));
 
+    // PLAN_PBP_REC_NUM => ExplanationOfBenefit.insurance.coverage.extension
     eob.addInsurance()
         .getCoverage()
         .addExtension(
             TransformerUtilsV2.createExtensionIdentifier(
                 CcwCodebookVariable.PLAN_PBP_REC_NUM, claimGroup.getPlanBenefitPackageId()));
 
+    // PD_DT => ExplanationOfBenefit.payment.date
     if (claimGroup.getPaymentDate().isPresent()) {
       eob.getPayment().setDate(TransformerUtilsV2.convertToDate(claimGroup.getPaymentDate().get()));
     }
 
     ItemComponent rxItem = eob.addItem();
+    // 1 => ExplanationOfBenefit.item.sequence
     rxItem.setSequence(1);
 
+    // CMPND_CD => ExplanationOfBenefit.item.programCode
     ExplanationOfBenefit.DetailComponent detail = new ExplanationOfBenefit.DetailComponent();
     switch (claimGroup.getCompoundCode()) {
         // COMPOUNDED
@@ -108,6 +127,7 @@ final class PartDEventTransformerV2 {
                     .setCode(V3ActCode.RXCINV.toCode())
                     .setDisplay(V3ActCode.RXCINV.getDisplay()));
         break;
+
         // NOT_COMPOUNDED
       case 1:
         /*
@@ -121,12 +141,14 @@ final class PartDEventTransformerV2 {
                     .setCode(V3ActCode.RXDINV.toCode())
                     .setDisplay(V3ActCode.RXDINV.getDisplay()));
         break;
+
         // NOT_SPECIFIED
       case 0:
         /*
          * Pharmacy dispense invoice not specified - do not set a value
          */
         break;
+
       default:
         /*
          * Unexpected value encountered - compound code should be either
@@ -139,6 +161,7 @@ final class PartDEventTransformerV2 {
 
     rxItem.addDetail(detail);
 
+    // SRVC_DT => ExplanationOfBenefit.item.servicedDate
     rxItem.setServiced(
         new DateType()
             .setValue(TransformerUtilsV2.convertToDate(claimGroup.getPrescriptionFillDate())));
@@ -161,6 +184,8 @@ final class PartDEventTransformerV2 {
               CcwCodebookVariable.NCVRD_PLAN_PD_AMT, "noncovered", "Noncovered");
       planPaidAmountAdjudicationValue = claimGroup.getPartDPlanNonCoveredPaidAmount();
     }
+
+    // CVRD_D_PLAN_PD_AMT | NCVRD_PLAN_PD_AMT => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(planPaidAmountAdjudicationCategory)
@@ -169,6 +194,7 @@ final class PartDEventTransformerV2 {
                 eob, CcwCodebookVariable.DRUG_CVRG_STUS_CD, claimGroup.getDrugCoverageStatusCode()))
         .setAmount(TransformerUtilsV2.createMoney(planPaidAmountAdjudicationValue));
 
+    // GDC_BLW_OOPT_AMT => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(
@@ -177,6 +203,7 @@ final class PartDEventTransformerV2 {
         .setAmount(
             TransformerUtilsV2.createMoney(claimGroup.getGrossCostBelowOutOfPocketThreshold()));
 
+    // GDC_ABV_OOPT_AMT => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(
@@ -185,6 +212,7 @@ final class PartDEventTransformerV2 {
         .setAmount(
             TransformerUtilsV2.createMoney(claimGroup.getGrossCostAboveOutOfPocketThreshold()));
 
+    // PTNT_PAY_AMT => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(
@@ -192,6 +220,7 @@ final class PartDEventTransformerV2 {
                 CcwCodebookVariable.PTNT_PAY_AMT, "paidbypatient", "Paid by patient"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getPatientPaidAmount()));
 
+    // OTHR_TROOP_AMT => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(
@@ -199,6 +228,7 @@ final class PartDEventTransformerV2 {
                 CcwCodebookVariable.OTHR_TROOP_AMT, "priorpayerpaid", "Prior payer paid"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getOtherTrueOutOfPocketPaidAmount()));
 
+    // LICS_AMT => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(
@@ -206,6 +236,7 @@ final class PartDEventTransformerV2 {
                 CcwCodebookVariable.LICS_AMT, "discount", "Discount"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getLowIncomeSubsidyPaidAmount()));
 
+    // PLRO_AMT => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(
@@ -215,6 +246,7 @@ final class PartDEventTransformerV2 {
             TransformerUtilsV2.createMoney(
                 claimGroup.getPatientLiabilityReductionOtherPaidAmount()));
 
+    // TOT_RX_CST_AMT => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(
@@ -222,6 +254,7 @@ final class PartDEventTransformerV2 {
                 CcwCodebookVariable.TOT_RX_CST_AMT, "drugcost", "Drug cost"))
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getTotalPrescriptionCost()));
 
+    // RPTD_GAP_DSCNT_NUM => ExplanationOfBenefit.item.adjudication.amount
     rxItem
         .addAdjudication()
         .setCategory(
@@ -230,10 +263,15 @@ final class PartDEventTransformerV2 {
         .setAmount(TransformerUtilsV2.createMoney(claimGroup.getGapDiscountAmount()));
 
     if (claimGroup.getPrescriberIdQualifierCode() == null
-        || !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01"))
+        || !claimGroup.getPrescriberIdQualifierCode().equalsIgnoreCase("01")) {
       throw new InvalidRifValueException(
           "Prescriber ID Qualifier Code is invalid: " + claimGroup.getPrescriberIdQualifierCode());
+    }
 
+    // PRSCRBR_ID   => ExplanationOfBenefit.careTeam.provider
+    // "primary"    => ExplanationOfBenefit.careTeam.role
+    // ExplanationOfBenefit.careTeam.sequence
+    //              => ExplanationOfBenefit.item.careTeamSequence
     if (claimGroup.getPrescriberId() != null) {
       TransformerUtilsV2.addCareTeamPractitioner(
           eob,
@@ -243,6 +281,7 @@ final class PartDEventTransformerV2 {
           ClaimCareteamrole.PRIMARY);
     }
 
+    // PROD_SRVC_ID => ExplanationOfBenefit.item.productOrService
     rxItem.setProductOrService(
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_NDC,
@@ -250,16 +289,19 @@ final class PartDEventTransformerV2 {
             TransformerUtilsV2.retrieveFDADrugCodeDisplay(claimGroup.getNationalDrugCode()),
             claimGroup.getNationalDrugCode()));
 
+    // QTY_DSPNSD_NUM => ExplanationOfBenefit.item.quantity
     SimpleQuantity quantityDispensed = new SimpleQuantity();
     quantityDispensed.setValue(claimGroup.getQuantityDispensed());
     rxItem.setQuantity(quantityDispensed);
 
+    // FILL_NUM => ExplanationOfBenefit.item.quantity.extension
     rxItem
         .getQuantity()
         .addExtension(
             TransformerUtilsV2.createExtensionQuantity(
                 CcwCodebookVariable.FILL_NUM, claimGroup.getFillNumber()));
 
+    // DAYS_SUPLY_NUM => ExplanationOfBenefit.item.quantity.extension
     rxItem
         .getQuantity()
         .addExtension(
@@ -301,6 +343,8 @@ final class PartDEventTransformerV2 {
           break;
       }
 
+      // SRVC_PRVDR_ID => ExplanationOfBenefit.facility
+      // SRVC_PRVDR_ID => ExplanationOfBenefit.provider
       if (identifierType != null) {
         eob.setProvider(
             TransformerUtilsV2.createIdentifierReference(
@@ -310,6 +354,7 @@ final class PartDEventTransformerV2 {
                 TransformerConstants.CODING_NPI_US, claimGroup.getServiceProviderId()));
       }
 
+      // PHRMCY_SRVC_TYPE_CD => ExplanationOfBenefit.facility.extension
       eob.getFacility()
           .addExtension(
               TransformerUtilsV2.createExtensionCoding(
@@ -320,86 +365,107 @@ final class PartDEventTransformerV2 {
      * Storing code values in EOB.information below
      */
 
+    // DAW_PROD_SLCTN_CD => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.addInformationWithCode(
         eob,
         CcwCodebookVariable.DAW_PROD_SLCTN_CD,
         CcwCodebookVariable.DAW_PROD_SLCTN_CD,
         claimGroup.getDispenseAsWrittenProductSelectionCode());
 
-    if (claimGroup.getDispensingStatusCode().isPresent())
+    // DAW_PROD_SLCTN_CD => ExplanationOfBenefit.supportingInfo.code
+    if (claimGroup.getDispensingStatusCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
           CcwCodebookVariable.DSPNSNG_STUS_CD,
           CcwCodebookVariable.DSPNSNG_STUS_CD,
           claimGroup.getDispensingStatusCode());
+    }
 
+    // DRUG_CVRG_STUS_CD => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.addInformationWithCode(
         eob,
         CcwCodebookVariable.DRUG_CVRG_STUS_CD,
         CcwCodebookVariable.DRUG_CVRG_STUS_CD,
         claimGroup.getDrugCoverageStatusCode());
 
-    if (claimGroup.getAdjustmentDeletionCode().isPresent())
+    // ADJSTMT_DLTN_CD => => ExplanationOfBenefit.supportingInfo.code
+    if (claimGroup.getAdjustmentDeletionCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
           CcwCodebookVariable.ADJSTMT_DLTN_CD,
           CcwCodebookVariable.ADJSTMT_DLTN_CD,
           claimGroup.getAdjustmentDeletionCode());
+    }
 
-    if (claimGroup.getNonstandardFormatCode().isPresent())
+    // NSTD_FRMT_CD => ExplanationOfBenefit.supportingInfo.code
+    if (claimGroup.getNonstandardFormatCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
           CcwCodebookVariable.NSTD_FRMT_CD,
           CcwCodebookVariable.NSTD_FRMT_CD,
           claimGroup.getNonstandardFormatCode());
+    }
 
-    if (claimGroup.getPricingExceptionCode().isPresent())
+    // PRCNG_EXCPTN_CD => ExplanationOfBenefit.supportingInfo.code
+    if (claimGroup.getPricingExceptionCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
           CcwCodebookVariable.PRCNG_EXCPTN_CD,
           CcwCodebookVariable.PRCNG_EXCPTN_CD,
           claimGroup.getPricingExceptionCode());
+    }
 
-    if (claimGroup.getCatastrophicCoverageCode().isPresent())
+    // CTSTRPHC_CVRG_CD => ExplanationOfBenefit.supportingInfo.code
+    if (claimGroup.getCatastrophicCoverageCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
           CcwCodebookVariable.CTSTRPHC_CVRG_CD,
           CcwCodebookVariable.CTSTRPHC_CVRG_CD,
           claimGroup.getCatastrophicCoverageCode());
+    }
 
-    if (claimGroup.getPrescriptionOriginationCode().isPresent())
+    // RX_ORGN_CD => ExplanationOfBenefit.supportingInfo.code
+    if (claimGroup.getPrescriptionOriginationCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
           CcwCodebookVariable.RX_ORGN_CD,
           CcwCodebookVariable.RX_ORGN_CD,
           claimGroup.getPrescriptionOriginationCode());
+    }
 
-    if (claimGroup.getBrandGenericCode().isPresent())
+    // BRND_GNRC_CD => ExplanationOfBenefit.supportingInfo.code
+    if (claimGroup.getBrandGenericCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
           CcwCodebookVariable.BRND_GNRC_CD,
           CcwCodebookVariable.BRND_GNRC_CD,
           claimGroup.getBrandGenericCode());
+    }
 
+    // PHRMCY_SRVC_TYPE_CD => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.addInformationWithCode(
         eob,
         CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD,
         CcwCodebookVariable.PHRMCY_SRVC_TYPE_CD,
         claimGroup.getPharmacyTypeCode());
 
+    // PTNT_RSDNC_CD => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.addInformationWithCode(
         eob,
         CcwCodebookVariable.PTNT_RSDNC_CD,
         CcwCodebookVariable.PTNT_RSDNC_CD,
         claimGroup.getPatientResidenceCode());
 
-    if (claimGroup.getSubmissionClarificationCode().isPresent())
+    // SUBMSN_CLR_CD => ExplanationOfBenefit.supportingInfo.code
+    if (claimGroup.getSubmissionClarificationCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
           eob,
           CcwCodebookVariable.SUBMSN_CLR_CD,
           CcwCodebookVariable.SUBMSN_CLR_CD,
           claimGroup.getSubmissionClarificationCode());
+    }
 
+    // Last Updated => ExplanationOfBenefit.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
