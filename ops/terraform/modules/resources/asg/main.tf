@@ -152,6 +152,9 @@ resource "aws_autoscaling_group" "main" {
   desired_capacity          = var.asg_config.desired
   max_size                  = var.asg_config.max
   min_size                  = var.asg_config.min
+  
+  # https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-max-instance-lifetime.html
+  max_instance_lifetime     = "${var.max_instance_lifetime > 0 ? var.max_instance_lifetime : 0}"
 
   # If an lb is defined, wait for the ELB 
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min

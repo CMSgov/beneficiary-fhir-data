@@ -225,10 +225,11 @@ module "lb_alarms" {
 module "fhir_asg" {
   source = "../resources/asg"
 
-  env_config      = local.env_config
-  role            = "fhir"
-  layer           = "app"
-  lb_config       = module.fhir_lb.lb_config
+  env_config            = local.env_config
+  role                  = "fhir"
+  layer                 = "app"
+  lb_config             = module.fhir_lb.lb_config
+  max_instance_lifetime = 604800 # 7 days
 
   # Initial size is one server per AZ
   asg_config        = {

@@ -13,6 +13,11 @@ variable "layer" {
   type        = string      
 }
 
+variable "max_instance_lifetime" {
+  description = "number of seconds an instance should live before being recycled"
+  type        = number
+}
+
 variable "asg_config" {
   type        = object({min=number, max=number, desired=number, sns_topic_arn=string, instance_warmup=number})
 }
