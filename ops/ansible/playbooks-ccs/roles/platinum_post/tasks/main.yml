@@ -11,4 +11,4 @@
 # update the aide database
 - name: Update aide database
   become: true
-  ansible.builtin.shell: /sbin/aide --update
+  shell: /sbin/aide --update
