@@ -267,7 +267,6 @@ public final class BeneficiaryTransformerTest {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
-    beneficiary.setHicnUnhashed(Optional.of(beneficiary.getHicn()));
     beneficiary.setHicn("someHICNhash");
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
