@@ -78,7 +78,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(new String("20"), beneRow.getMedicareEnrollmentStatusCode().get());
     Assert.assertEquals(new Character('0'), beneRow.getPartBTerminationCode().get());
     Assert.assertEquals(new Character('0'), beneRow.getPartBTerminationCode().get());
-    Assert.assertEquals("543217066U", beneRow.getHicn());
+    Assert.assertEquals("543217066U", beneRow.getHicnUnhashed().orElse(null));
     Assert.assertEquals("Doe", beneRow.getNameSurname());
     Assert.assertEquals("John", beneRow.getNameGiven());
     Assert.assertEquals(new Character('A'), beneRow.getNameMiddleInitial().get());
