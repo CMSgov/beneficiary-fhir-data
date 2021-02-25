@@ -8,8 +8,9 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -17,7 +18,6 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
-import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 
 /**
  * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -102,7 +102,10 @@ public class InpatientClaimTransformerV2 {
     // set the provider number which is common among several claim types
     // PRVDR_NUM => ExplanationOfBenefit.provider.identifier
     TransformerUtilsV2.addProviderSlice(
-        eob, C4BBIdentifierType.PAYERID, claimGroup.getProviderNumber());
+        eob,
+        C4BBIdentifierType.PAYERID,
+        claimGroup.getProviderNumber(),
+        claimGroup.getLastUpdated());
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
     if (claimGroup.getPatientStatusCd().isPresent()) {
@@ -231,6 +234,7 @@ public class InpatientClaimTransformerV2 {
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
+    // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.adjudication.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
@@ -243,7 +247,8 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getClaimPrimaryPayerCode(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getLastUpdated());
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
@@ -348,15 +353,15 @@ public class InpatientClaimTransformerV2 {
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
-          TransformerConstants.CODING_UPIN,
-          ClaimCareteamrole.OTHER,
+          C4BBPractitionerIdentifierType.UPIN,
+          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
-          TransformerConstants.CODING_NPI_US,
-          ClaimCareteamrole.OTHER,
+          C4BBPractitionerIdentifierType.NPI,
+          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
           line.getRevenueCenterRenderingPhysicianNPI());
     }
 

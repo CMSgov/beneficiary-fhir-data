@@ -18,8 +18,13 @@ import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
+import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2.CurrencyIdentifier;
 import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -38,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -274,6 +280,8 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Used for creating Identifier references for Organizations and Facilities
+   *
    * @param identifierSystem the {@link Identifier#getSystem()} to use in {@link
    *     Reference#getIdentifier()}
    * @param identifierValue the {@link Identifier#getValue()} to use in {@link
@@ -284,6 +292,34 @@ public final class TransformerUtilsV2 {
     return new Reference()
         .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
         .setDisplay(retrieveNpiCodeDisplay(identifierValue));
+  }
+
+  /**
+   * Used for creating Identifier references for Practitioners
+   *
+   * @param type the {@link C4BBPractitionerIdentifierType} to use in {@link
+   *     Reference#getIdentifier()}
+   * @param value the {@link Identifier#getValue()} to use in {@link Reference#getIdentifier()}
+   * @return a {@link Reference} with the specified {@link Identifier}
+   */
+  static Reference createPractitionerIdentifierReference(
+      C4BBPractitionerIdentifierType type, String value) {
+    Reference response =
+        new Reference()
+            .setIdentifier(
+                new Identifier()
+                    .setType(
+                        new CodeableConcept()
+                            .addCoding(
+                                new Coding(type.getSystem(), type.toCode(), type.getDisplay())))
+                    .setValue(value));
+
+    // If this is an NPI perform the extra lookup
+    if (C4BBPractitionerIdentifierType.NPI.equals(type)) {
+      response.setDisplay(retrieveNpiCodeDisplay(value));
+    }
+
+    return response;
   }
 
   /**
@@ -373,6 +409,21 @@ public final class TransformerUtilsV2 {
     return identifier;
   }
 
+  static Coding createC4BBSupportingInfoCoding(C4BBSupportingInfoType slice) {
+    return new Coding(slice.getSystem(), slice.toCode(), slice.getDisplay());
+  }
+
+  static Coding createC4BBClaimCoding() {
+    return new Coding(
+        C4BBClaimIdentifierType.UC.getSystem(),
+        C4BBClaimIdentifierType.UC.toCode(),
+        C4BBClaimIdentifierType.UC.getDisplay());
+  }
+
+  static CodeableConcept createC4BBClaimCodeableConcept() {
+    return new CodeableConcept().setCoding(Arrays.asList(createC4BBClaimCoding()));
+  }
+
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
@@ -385,18 +436,11 @@ public final class TransformerUtilsV2 {
       throw new IllegalArgumentException();
     }
 
-    CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType
-        .addCoding()
-        .setCode(C4BBClaimIdentifierType.UC.toCode())
-        .setSystem(C4BBClaimIdentifierType.UC.getSystem())
-        .setDisplay(C4BBClaimIdentifierType.UC.getDisplay());
-
     Identifier identifier =
         new Identifier()
             .setSystem(calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue)
-            .setType(claimCodeType);
+            .setType(createC4BBClaimCodeableConcept());
 
     return identifier;
   }
@@ -540,7 +584,9 @@ public final class TransformerUtilsV2 {
    */
   static CodeableConcept createCodeableConcept(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
-    if (!code.isPresent()) throw new IllegalArgumentException();
+    if (!code.isPresent()) {
+      throw new IllegalArgumentException();
+    }
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
 
@@ -717,7 +763,7 @@ public final class TransformerUtilsV2 {
 
     categoryConcept
         .addCoding()
-        .setSystem(TransformerConstants.CARIN_ADJUDICATION_CODE)
+        .setSystem(C4BBAdjudication.SUBMITTED.getSystem())
         .setCode(carinAdjuCode)
         .setDisplay(carinAdjuCodeDisplay);
 
@@ -750,9 +796,8 @@ public final class TransformerUtilsV2 {
 
   static <T> Optional<AdjudicationComponent> createAdjudicationWithReason(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<T> reasonCode) {
-    return reasonCode.isPresent()
-        ? Optional.of(createAdjudicationWithReason(rootResource, ccwVariable, reasonCode.get()))
-        : Optional.empty();
+    return reasonCode.map(
+        reason -> createAdjudicationWithReason(rootResource, ccwVariable, reason));
   }
 
   static void addAdjudication(ItemComponent item, Optional<AdjudicationComponent> adjudication) {
@@ -761,43 +806,97 @@ public final class TransformerUtilsV2 {
     }
   }
 
-  /**
-   * Creates an {@link AdjudicationComponent} to add to an {@ItemComponent}
-   *
-   * @param ccwVariable The CCW Variable that represents what the amount is
-   * @param amount A dollar amount
-   * @return The created {@link AdjudicationComponent}
-   */
-  static AdjudicationComponent createAdjudicationAmt(
-      CcwCodebookInterface ccwVariable, BigDecimal amount) {
-    return new AdjudicationComponent()
-        .setCategory(createAdjudicationCategory(ccwVariable))
-        .setAmount(createMoney(amount));
-  }
-
-  /**
-   * Optionally adds an {@link AdjudicationComponent} to a {@link ItemComponent}
-   *
-   * @param item The Item component to add the new {@link AdjudicationComponent} to
-   * @param ccwVariable The CCW Variable that represents what the amount is
-   * @param amount A dollar amount
-   * @return The created {@link AdjudicationComponent}, or {@link Optional#empty()}
-   */
-  static Optional<AdjudicationComponent> addItemAdjudicationAmt(
-      ItemComponent item, CcwCodebookInterface ccwVariable, Optional<BigDecimal> amount) {
-    if (amount.isPresent()) {
-      AdjudicationComponent adj = createAdjudicationAmt(ccwVariable, amount.get());
-      item.getAdjudication().add(adj);
-
-      return Optional.of(adj);
-    } else {
-      return Optional.empty();
+  static void addAdjudication(
+      ExplanationOfBenefit eob, Optional<AdjudicationComponent> adjudication) {
+    if (adjudication.isPresent()) {
+      eob.addAdjudication(adjudication.get());
     }
   }
 
-  static Optional<AdjudicationComponent> addItemAdjudicationAmt(
-      ItemComponent item, CcwCodebookInterface ccwVariable, BigDecimal amount) {
-    return addItemAdjudicationAmt(item, ccwVariable, Optional.of(amount));
+  static void addTotal(ExplanationOfBenefit eob, Optional<TotalComponent> total) {
+    if (total.isPresent()) {
+      eob.addTotal(total.get());
+    }
+  }
+
+  /**
+   * Creates a C4BB Adjudication `adjudicationamounttype` Code for use in multiple places
+   *
+   * @param ccwVariable The CCW Variable that represents what the amount is
+   * @param C4BBAdjudication The C4BBAdjudication code that represents this amount
+   * @param amount A dollar amount
+   * @return The created {@link AdjudicationComponent}
+   */
+  private static CodeableConcept createAdjudicationAmtSliceCategory(
+      CcwCodebookInterface ccwVariable, C4BBAdjudication code) {
+    return new CodeableConcept()
+        // Indicate the required coding for CC4BB adjudicationamounttype slice
+        .addCoding(new Coding(code.getSystem(), code.toCode(), code.getDisplay()))
+        // Indicate the correct CCW variable
+        .addCoding(
+            new Coding(
+                TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
+                calculateVariableReferenceUrl(ccwVariable),
+                ccwVariable.getVariable().getLabel()));
+  }
+
+  static Optional<AdjudicationComponent> createAdjudicationAmtSlice(
+      CcwCodebookInterface ccwVariable, C4BBAdjudication code, Optional<BigDecimal> amount) {
+    return amount.map(
+        amt ->
+            new AdjudicationComponent()
+                .setCategory(createAdjudicationAmtSliceCategory(ccwVariable, code))
+                .setAmount(createMoney(amt)));
+  }
+
+  static Optional<AdjudicationComponent> createAdjudicationAmtSlice(
+      CcwCodebookInterface ccwVariable, C4BBAdjudication code, BigDecimal amount) {
+    return createAdjudicationAmtSlice(ccwVariable, code, Optional.of(amount));
+  }
+
+  static AdjudicationComponent createAdjudicationDenialReasonSlice(CodeableConcept reason) {
+    return new AdjudicationComponent()
+        .setCategory(
+            new CodeableConcept()
+                .setCoding(
+                    Arrays.asList(
+                        new Coding(
+                            C4BBAdjudicationDiscriminator.DENIAL_REASON.getSystem(),
+                            C4BBAdjudicationDiscriminator.DENIAL_REASON.toCode(),
+                            C4BBAdjudicationDiscriminator.DENIAL_REASON.getDisplay()))))
+        .setReason(reason);
+  }
+
+  static Optional<AdjudicationComponent> createAdjudicationDenialReasonSlice(
+      ExplanationOfBenefit eob, CcwCodebookInterface ccwVariable, Optional<String> reasonCode) {
+    return reasonCode.map(
+        reason ->
+            createAdjudicationDenialReasonSlice(createCodeableConcept(eob, ccwVariable, reason)));
+  }
+
+  static Optional<AdjudicationComponent> createAdjudicationDenialReasonSlice(
+      ExplanationOfBenefit eob, CcwCodebookInterface ccwVariable, String reasonCode) {
+    return createAdjudicationDenialReasonSlice(eob, ccwVariable, Optional.of(reasonCode));
+  }
+
+  static Optional<TotalComponent> createTotalAdjudicationAmountSlice(
+      ExplanationOfBenefit eob,
+      CcwCodebookInterface ccwVariable,
+      C4BBAdjudication code,
+      Optional<BigDecimal> amount) {
+    return amount.map(
+        amt ->
+            new TotalComponent()
+                .setCategory(createAdjudicationAmtSliceCategory(ccwVariable, code))
+                .setAmount(createMoney(amount)));
+  }
+
+  static Optional<TotalComponent> createTotalAdjudicationAmountSlice(
+      ExplanationOfBenefit eob,
+      CcwCodebookInterface ccwVariable,
+      C4BBAdjudication code,
+      BigDecimal amount) {
+    return createTotalAdjudicationAmountSlice(eob, ccwVariable, code, Optional.of(amount));
   }
 
   /**
@@ -1580,7 +1679,8 @@ public final class TransformerUtilsV2 {
     // CLM_GRP_ID => ExplanationOfBenefit.identifier
     eob.addIdentifier()
         .setSystem(TransformerConstants.IDENTIFIER_SYSTEM_BBAPI_CLAIM_GROUP_ID)
-        .setValue(claimGroupId);
+        .setValue(claimGroupId)
+        .setType(createC4BBClaimCodeableConcept());
 
     // BENE_ID + Coverage Type => ExplanationOfBenefit.insurance.coverage (ref)
     eob.addInsurance().setCoverage(referenceCoverage(beneficiaryId, coverageType));
@@ -1664,16 +1764,16 @@ public final class TransformerUtilsV2 {
   static CareTeamComponent addCareTeamPractitioner(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
-      String practitionerIdSystem,
+      C4BBPractitionerIdentifierType type,
       String practitionerIdValue,
-      ClaimCareteamrole careTeamRole) {
+      C4BBClaimInstitutionalCareTeamRole careTeamRole) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry =
         eob.getCareTeam().stream()
             .filter(ctc -> ctc.getProvider().hasIdentifier())
             .filter(
                 ctc ->
-                    practitionerIdSystem.equals(ctc.getProvider().getIdentifier().getSystem())
+                    type.getSystem().equals(ctc.getProvider().getIdentifier().getSystem())
                         && practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
             .filter(ctc -> ctc.hasRole())
             .filter(
@@ -1691,11 +1791,10 @@ public final class TransformerUtilsV2 {
       careTeamEntry = eob.addCareTeam();
       // addItem adds and returns, so we want size() not size() + 1 here
       careTeamEntry.setSequence(eob.getCareTeam().size());
-      careTeamEntry.setProvider(
-          createIdentifierReference(practitionerIdSystem, practitionerIdValue));
+      careTeamEntry.setProvider(createPractitionerIdentifierReference(type, practitionerIdValue));
 
       CodeableConcept careTeamRoleConcept =
-          createCodeableConcept(ClaimCareteamrole.OTHER.getSystem(), careTeamRole.toCode());
+          createCodeableConcept(careTeamRole.getSystem(), careTeamRole.toCode());
       careTeamRoleConcept.getCodingFirstRep().setDisplay(careTeamRole.getDisplay());
       careTeamEntry.setRole(careTeamRoleConcept);
     }
@@ -1740,6 +1839,43 @@ public final class TransformerUtilsV2 {
     infoComponent.setCode(infoCode);
 
     return infoComponent;
+  }
+
+  static Optional<SupportingInformationComponent> addInformationSliceWithCode(
+      ExplanationOfBenefit eob,
+      C4BBSupportingInfoType slice,
+      CcwCodebookVariable categoryVariable,
+      CcwCodebookVariable codeSystemVariable,
+      Optional<?> codeValue) {
+    if (codeValue.isPresent()) {
+      SupportingInformationComponent infoComponent =
+          addInformationSlice(eob, slice, categoryVariable);
+
+      CodeableConcept infoCode =
+          new CodeableConcept().addCoding(createCoding(eob, codeSystemVariable, codeValue));
+      infoComponent.setCode(infoCode);
+
+      return Optional.of(infoComponent);
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  static SupportingInformationComponent addInformationSliceWithCode(
+      ExplanationOfBenefit eob,
+      C4BBSupportingInfoType slice,
+      CcwCodebookVariable categoryVariable,
+      CcwCodebookVariable codeSystemVariable,
+      Object codeValue) {
+    // Must get a valid value passed in
+    if (codeValue == null) {
+      throw new BadCodeMonkeyException();
+    }
+
+    return addInformationSliceWithCode(
+            eob, slice, categoryVariable, codeSystemVariable, Optional.of(codeValue))
+        // Since we are passing in a valid value, we will get a response
+        .get();
   }
 
   /**
@@ -1794,6 +1930,12 @@ public final class TransformerUtilsV2 {
         eob, categoryVariable, codeSystemVariable, Optional.of(codeValue));
   }
 
+  static SupportingInformationComponent addInformationSlice(
+      ExplanationOfBenefit eob, C4BBSupportingInfoType slice, Object value) {
+    return addInformation(eob)
+        .setCategory(new CodeableConcept().addCoding(createC4BBSupportingInfoCoding(slice)));
+  }
+
   /**
    * Returns a new {@link SupportingInformationComponent} that has been added to the specified
    * {@link ExplanationOfBenefit}.
@@ -1805,14 +1947,25 @@ public final class TransformerUtilsV2 {
    */
   static SupportingInformationComponent addInformation(
       ExplanationOfBenefit eob, CcwCodebookVariable categoryVariable) {
+    return addInformation(eob)
+        .setCategory(
+            createCodeableConceptForFieldId(
+                eob, TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY, categoryVariable));
+  }
+
+  /**
+   * Returns a new {@link SupportingInformationComponent} that has been added to the specified
+   * {@link ExplanationOfBenefit}.
+   *
+   * @param eob the {@link ExplanationOfBenefit} to modify
+   * @return the newly-added {@link SupportingInformationComponent} entry
+   */
+  static SupportingInformationComponent addInformation(ExplanationOfBenefit eob) {
     int maxSequence =
         eob.getSupportingInfo().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
 
     SupportingInformationComponent infoComponent = new SupportingInformationComponent();
     infoComponent.setSequence(maxSequence + 1);
-    infoComponent.setCategory(
-        createCodeableConceptForFieldId(
-            eob, TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY, categoryVariable));
     eob.getSupportingInfo().add(infoComponent);
 
     return infoComponent;
@@ -1868,6 +2021,10 @@ public final class TransformerUtilsV2 {
         break;
 
       case INPATIENT:
+        fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.INSTITUTIONAL;
+        break;
+
+      case OUTPATIENT:
         fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.INSTITUTIONAL;
         break;
 
@@ -2232,10 +2389,9 @@ public final class TransformerUtilsV2 {
    *     set.
    */
   static Optional<BenefitComponent> addBenefitBalanceFinancialMedicalAmt(
-      ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> amt) {
-    return amt.isPresent()
-        ? Optional.of(addBenefitBalanceFinancialMedicalAmt(eob, financialType, amt.get()))
-        : Optional.empty();
+      ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> amount) {
+    return amount.map(
+        amt -> addBenefitBalanceFinancialMedicalAmt(eob, financialType, amount.get()));
   }
 
   /**
@@ -2250,11 +2406,11 @@ public final class TransformerUtilsV2 {
    *     {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static BenefitComponent addBenefitBalanceFinancialMedicalInt(
-      ExplanationOfBenefit eob, CcwCodebookVariable financialType, BigDecimal value) {
+      ExplanationOfBenefit eob, CcwCodebookVariable financialType, BigDecimal amount) {
     // "1" is the code for MEDICAL in ExBenefitcategory
     return addBenefitBalanceFinancial(eob, ExBenefitcategory._1, financialType)
         // TODO: intValueExact() not working?
-        .setUsed(new UnsignedIntType(value.intValue()));
+        .setUsed(new UnsignedIntType(amount.intValue()));
   }
 
   /**
@@ -2271,9 +2427,7 @@ public final class TransformerUtilsV2 {
    */
   static Optional<BenefitComponent> addBenefitBalanceFinancialMedicalInt(
       ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> value) {
-    return value.isPresent()
-        ? Optional.of(addBenefitBalanceFinancialMedicalInt(eob, financialType, value.get()))
-        : Optional.empty();
+    return value.map(val -> addBenefitBalanceFinancialMedicalInt(eob, financialType, value.get()));
   }
 
   /**
@@ -2322,9 +2476,12 @@ public final class TransformerUtilsV2 {
    * @param id The NPI or UPIN coded as a string
    */
   static void addCareTeamMember(
-      ExplanationOfBenefit eob, String system, ClaimCareteamrole role, Optional<String> id) {
+      ExplanationOfBenefit eob,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimInstitutionalCareTeamRole role,
+      Optional<String> id) {
     if (id.isPresent()) {
-      addCareTeamPractitioner(eob, null, system, id.get(), role);
+      addCareTeamPractitioner(eob, null, type, id.get(), role);
     }
   }
 
@@ -2353,31 +2510,45 @@ public final class TransformerUtilsV2 {
 
     // AT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
-        eob, TransformerConstants.CODING_NPI_US, ClaimCareteamrole.PRIMARY, attendingPhysicianNpi);
+        eob,
+        C4BBPractitionerIdentifierType.NPI,
+        C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+        attendingPhysicianNpi);
 
     // AT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
-        eob, TransformerConstants.CODING_UPIN, ClaimCareteamrole.PRIMARY, attendingPhysicianUpin);
+        eob,
+        C4BBPractitionerIdentifierType.UPIN,
+        C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+        attendingPhysicianUpin);
 
     // OP_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
-        eob, TransformerConstants.CODING_NPI_US, ClaimCareteamrole.ASSIST, operatingPhysicianNpi);
+        eob,
+        C4BBPractitionerIdentifierType.NPI,
+        C4BBClaimInstitutionalCareTeamRole.OPERATING,
+        operatingPhysicianNpi);
 
     // OP_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
-        eob, TransformerConstants.CODING_UPIN, ClaimCareteamrole.ASSIST, operatingPhysicianUpin);
-
-    // OP_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
-    addCareTeamMember(
-        eob, TransformerConstants.CODING_UPIN, ClaimCareteamrole.ASSIST, operatingPhysicianUpin);
+        eob,
+        C4BBPractitionerIdentifierType.UPIN,
+        C4BBClaimInstitutionalCareTeamRole.OPERATING,
+        operatingPhysicianUpin);
 
     // OT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
-        eob, TransformerConstants.CODING_NPI_US, ClaimCareteamrole.OTHER, otherPhysicianNpi);
+        eob,
+        C4BBPractitionerIdentifierType.NPI,
+        C4BBClaimInstitutionalCareTeamRole.OTHER_OPERATING,
+        otherPhysicianNpi);
 
     // OT_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
-        eob, TransformerConstants.CODING_UPIN, ClaimCareteamrole.OTHER, otherPhysicianUpin);
+        eob,
+        C4BBPractitionerIdentifierType.UPIN,
+        C4BBClaimInstitutionalCareTeamRole.OTHER_OPERATING,
+        otherPhysicianUpin);
   }
 
   /**
@@ -2444,10 +2615,11 @@ public final class TransformerUtilsV2 {
       Optional<Character> claimPrimaryPayerCode,
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
-      Optional<String> fiscalIntermediaryNumber) {
+      Optional<String> fiscalIntermediaryNumber,
+      Optional<Date> lastUpdated) {
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
-    addProviderSlice(eob, C4BBIdentifierType.NPI, organizationNpi);
+    addProviderSlice(eob, C4BBIdentifierType.NPI, organizationNpi, lastUpdated);
 
     // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()
@@ -2455,8 +2627,12 @@ public final class TransformerUtilsV2 {
             createExtensionCoding(eob, CcwCodebookVariable.CLM_FAC_TYPE_CD, claimFacilityTypeCode));
 
     // CLM_FREQ_CD => ExplanationOfBenefit.supportingInfo
-    addInformationWithCode(
-        eob, CcwCodebookVariable.CLM_FREQ_CD, CcwCodebookVariable.CLM_FREQ_CD, claimFrequencyCode);
+    addInformationSliceWithCode(
+        eob,
+        C4BBSupportingInfoType.TYPE_OF_BILL,
+        CcwCodebookVariable.CLM_FREQ_CD,
+        CcwCodebookVariable.CLM_FREQ_CD,
+        claimFrequencyCode);
 
     // CLM_MDCR_NON_PMT_RSN_CD => ExplanationOfBenefit.extension
     if (claimNonPaymentReasonCode.isPresent()) {
@@ -2465,14 +2641,14 @@ public final class TransformerUtilsV2 {
               eob, CcwCodebookVariable.CLM_MDCR_NON_PMT_RSN_CD, claimNonPaymentReasonCode));
     }
 
-    // TODO: This should be getting mapped into `supportingInfo:discharge-status` slice
     // PTNT_DSCHRG_STUS_CD => ExplanationOfBenefit.supportingInfo
     if (!patientDischargeStatusCode.isEmpty()) {
-      TransformerUtilsV2.addInformationWithCode(
+      addInformationSliceWithCode(
           eob,
+          C4BBSupportingInfoType.DISCHARGE_STATUS,
           CcwCodebookVariable.PTNT_DSCHRG_STUS_CD,
           CcwCodebookVariable.PTNT_DSCHRG_STUS_CD,
-          patientDischargeStatusCode);
+          claimFrequencyCode);
     }
 
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
@@ -2482,22 +2658,27 @@ public final class TransformerUtilsV2 {
 
     // NCH_PRMRY_PYR_CD => ExplainationOfBenefit.supportingInfo
     if (claimPrimaryPayerCode.isPresent()) {
-      TransformerUtilsV2.addInformationWithCode(
+      addInformationWithCode(
           eob,
           CcwCodebookVariable.NCH_PRMRY_PYR_CD,
           CcwCodebookVariable.NCH_PRMRY_PYR_CD,
           claimPrimaryPayerCode.get());
     }
 
-    // CLM_TOT_CHRG_AMT => ExplanationOfBenefit.total.amount
-    TotalComponent totalComponent = new TotalComponent();
+    // CLM_TOT_CHRG_AMT => ExplainationOfBenefit.total
+    addTotal(
+        eob,
+        createTotalAdjudicationAmountSlice(
+            eob,
+            CcwCodebookVariable.CLM_TOT_CHRG_AMT,
+            C4BBAdjudication.SUBMITTED,
+            totalChargeAmount));
 
-    // TODO: Category must be set
-    // totalComponent.setCategory(createCodeableConcept(eob,
-    // CcwCodebookVariable.CLM_TOT_CHRG_AMT));
-    totalComponent.setAmount(createMoney(totalChargeAmount));
-
-    eob.addTotal(totalComponent);
+    // CLM_TOT_CHRG_AMT => ExplanationOfBenefit.adjudication.amount
+    addAdjudication(
+        eob,
+        createAdjudicationAmtSlice(
+            CcwCodebookVariable.CLM_TOT_CHRG_AMT, C4BBAdjudication.SUBMITTED, totalChargeAmount));
 
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(eob, CcwCodebookVariable.PRPAYAMT, primaryPayerPaidAmount);
@@ -2731,7 +2912,10 @@ public final class TransformerUtilsV2 {
    * @param value The value of the identifier. If empty, this call is a no-op
    */
   static void addProviderSlice(
-      ExplanationOfBenefit eob, C4BBIdentifierType type, Optional<String> value) {
+      ExplanationOfBenefit eob,
+      C4BBIdentifierType type,
+      Optional<String> value,
+      Optional<Date> lastUpdated) {
     if (value.isPresent()) {
       Resource providerResource = findOrCreateContainedOrg(eob, PROVIDER_ORG_ID);
 
@@ -2755,14 +2939,17 @@ public final class TransformerUtilsV2 {
 
       provider.addIdentifier(id);
 
+      setLastUpdated(provider, lastUpdated);
+
       // This gets updated for every call, but always set to the same value
       eob.getProvider().setReference(PROVIDER_ORG_REFERENCE);
     }
   }
 
   /** Convenience function when passing non-optional values */
-  static void addProviderSlice(ExplanationOfBenefit eob, C4BBIdentifierType type, String value) {
-    addProviderSlice(eob, type, Optional.of(value));
+  static void addProviderSlice(
+      ExplanationOfBenefit eob, C4BBIdentifierType type, String value, Optional<Date> lastupdated) {
+    addProviderSlice(eob, type, Optional.of(value), lastupdated);
   }
 
   /**
@@ -2913,14 +3100,26 @@ public final class TransformerUtilsV2 {
     item.setRevenue(createCodeableConcept(eob, CcwCodebookVariable.REV_CNTR, revenueCenterCode));
 
     // REV_CNTR_RATE_AMT => ExplanationOfBenefit.item.adjudication
-    addItemAdjudicationAmt(item, CcwCodebookVariable.REV_CNTR_RATE_AMT, rateAmount);
+    addAdjudication(
+        item,
+        createAdjudicationAmtSlice(
+            CcwCodebookVariable.REV_CNTR_RATE_AMT, C4BBAdjudication.SUBMITTED, rateAmount));
 
     // REV_CNTR_TOT_CHRG_AMT => ExplanationOfBenefit.item.adjudication
-    addItemAdjudicationAmt(item, CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT, totalChargeAmount);
+    addAdjudication(
+        item,
+        createAdjudicationAmtSlice(
+            CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT,
+            C4BBAdjudication.SUBMITTED,
+            totalChargeAmount));
 
     // REV_CNTR_NCVRD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
-    addItemAdjudicationAmt(
-        item, CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT, nonCoveredChargeAmount);
+    addAdjudication(
+        item,
+        createAdjudicationAmtSlice(
+            CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT,
+            C4BBAdjudication.NONCOVERED,
+            nonCoveredChargeAmount));
 
     // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.quantity
     item.setQuantity(new SimpleQuantity().setValue(unitCount));
@@ -2955,33 +3154,15 @@ public final class TransformerUtilsV2 {
       ItemComponent item, Optional<LocalDate> revenueCenterDate, BigDecimal paymentAmount) {
 
     // Revenue Center Date
+    // REV_CNTR_DT => ExplainationOfBenefit.item.serviced
     if (revenueCenterDate.isPresent()) {
       item.setServiced(new DateType().setValue(convertToDate(revenueCenterDate.get())));
     }
 
-    addItemAdjudicationAmt(item, CcwCodebookVariable.REV_CNTR_PMT_AMT_AMT, paymentAmount);
-  }
-
-  /**
-   * Transforms the common group level data elements between the {@link InpatientClaim} {@link
-   * HHAClaim} {@link HospiceClaim} and {@link SNFClaim} claim types to FHIR. The method parameter
-   * fields from {@link InpatientClaim} {@link HHAClaim} {@link HospiceClaim} and {@link SNFClaim}
-   * are listed below and their corresponding RIF CCW fields (denoted in all CAPS below from {@link
-   * InpatientClaimColumn} {@link HHAClaimColumn} {@link HospiceColumn} and {@link SNFClaimColumn}).
-   *
-   * @param eob the root {@link ExplanationOfBenefit} that the {@link ItemComponent} is part of
-   * @param item the {@link ItemComponent} to modify
-   * @param deductibleCoinsruanceCd REV_CNTR_DDCTBL_COINSRNC_CD
-   */
-  static void mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
-      ExplanationOfBenefit eob, ItemComponent item, Optional<Character> deductibleCoinsuranceCd) {
-
-    if (deductibleCoinsuranceCd.isPresent()) {
-      // FIXME should this be an adjudication?
-      item.getRevenue()
-          .addExtension(
-              createExtensionCoding(
-                  eob, CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD, deductibleCoinsuranceCd));
-    }
+    // REV_CNTR_PMT_AMT_AMT => ExplainationOfBenefit.item.adjudication
+    addAdjudication(
+        item,
+        createAdjudicationAmtSlice(
+            CcwCodebookVariable.REV_CNTR_PMT_AMT_AMT, C4BBAdjudication.SUBMITTED, paymentAmount));
   }
 }
