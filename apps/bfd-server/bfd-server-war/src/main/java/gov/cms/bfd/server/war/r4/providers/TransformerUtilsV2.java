@@ -45,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -410,6 +411,21 @@ public final class TransformerUtilsV2 {
     return identifier;
   }
 
+  static Coding createC4BBSupportingInfoCoding(C4BBSupportingInfoType slice) {
+    return new Coding(slice.getSystem(), slice.toCode(), slice.getDisplay());
+  }
+
+  static Coding createC4BBClaimCoding() {
+    return new Coding(
+        C4BBClaimIdentifierType.UC.getSystem(),
+        C4BBClaimIdentifierType.UC.toCode(),
+        C4BBClaimIdentifierType.UC.getDisplay());
+  }
+
+  static CodeableConcept createC4BBClaimCodeableConcept() {
+    return new CodeableConcept().setCoding(Arrays.asList(createC4BBClaimCoding()));
+  }
+
   /**
    * @param ccwVariable the {@link CcwCodebookVariable} being mapped
    * @param identifierValue the value to use for {@link Identifier#getValue()} for the resulting
@@ -419,18 +435,11 @@ public final class TransformerUtilsV2 {
   static Identifier createClaimIdentifier(CcwCodebookVariable ccwVariable, String identifierValue) {
     if (identifierValue == null) throw new IllegalArgumentException();
 
-    CodeableConcept claimCodeType = new CodeableConcept();
-    claimCodeType
-        .addCoding()
-        .setCode(C4BBClaimIdentifierType.UC.toCode())
-        .setSystem(C4BBClaimIdentifierType.UC.getSystem())
-        .setDisplay(C4BBClaimIdentifierType.UC.getDisplay());
-
     Identifier identifier =
         new Identifier()
             .setSystem(calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue)
-            .setType(claimCodeType);
+            .setType(createC4BBClaimCodeableConcept());
 
     return identifier;
   }
@@ -889,14 +898,26 @@ public final class TransformerUtilsV2 {
 
   static <T> Optional<AdjudicationComponent> createAdjudicationWithReason(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<T> reasonCode) {
-    return reasonCode.isPresent()
-        ? Optional.of(createAdjudicationWithReason(rootResource, ccwVariable, reasonCode.get()))
-        : Optional.empty();
+    return reasonCode.map(
+        reason -> createAdjudicationWithReason(rootResource, ccwVariable, reason));
   }
 
   static void addAdjudication(ItemComponent item, Optional<AdjudicationComponent> adjudication) {
     if (adjudication.isPresent()) {
       item.addAdjudication(adjudication.get());
+    }
+  }
+
+  static void addAdjudication(
+      ExplanationOfBenefit eob, Optional<AdjudicationComponent> adjudication) {
+    if (adjudication.isPresent()) {
+      eob.addAdjudication(adjudication.get());
+    }
+  }
+
+  static void addTotal(ExplanationOfBenefit eob, Optional<TotalComponent> total) {
+    if (total.isPresent()) {
+      eob.addTotal(total.get());
     }
   }
 
@@ -2674,7 +2695,10 @@ public final class TransformerUtilsV2 {
 
     // OP_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
-        eob, TransformerConstants.CODING_UPIN, ClaimCareteamrole.ASSIST, operatingPhysicianUpin);
+        eob,
+        C4BBPractitionerIdentifierType.UPIN,
+        C4BBClaimInstitutionalCareTeamRole.OPERATING,
+        operatingPhysicianUpin);
 
     // OT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(

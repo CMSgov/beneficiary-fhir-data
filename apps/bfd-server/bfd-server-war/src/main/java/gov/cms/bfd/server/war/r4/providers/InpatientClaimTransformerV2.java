@@ -233,6 +233,7 @@ public class InpatientClaimTransformerV2 {
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
+    // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.adjudication.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
@@ -400,15 +401,15 @@ public class InpatientClaimTransformerV2 {
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
-          TransformerConstants.CODING_UPIN,
-          ClaimCareteamrole.OTHER,
+          C4BBPractitionerIdentifierType.UPIN,
+          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
-          TransformerConstants.CODING_NPI_US,
-          ClaimCareteamrole.OTHER,
+          C4BBPractitionerIdentifierType.NPI,
+          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
           line.getRevenueCenterRenderingPhysicianNPI());
     }
 
