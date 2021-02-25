@@ -68,6 +68,7 @@ public class OutpatientClaimTransformerV2 {
     // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
     // eob.setOutcome(?)
 
+    // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
     // CLM_GRP_ID               => ExplanationOfBenefit.identifier

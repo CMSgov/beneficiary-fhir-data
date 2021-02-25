@@ -411,19 +411,28 @@ public final class TransformerUtilsV2 {
     return identifier;
   }
 
+  /**
+   * Converts a value from the {@link C4BBSupportingInfoType} enumeration into a {@link Coding}
+   *
+   * @param slice the {@link C4BBSupportingInfoType} being mapped
+   * @return the resulting {@link Coding}
+   */
   static Coding createC4BBSupportingInfoCoding(C4BBSupportingInfoType slice) {
     return new Coding(slice.getSystem(), slice.toCode(), slice.getDisplay());
   }
 
-  static Coding createC4BBClaimCoding() {
-    return new Coding(
-        C4BBClaimIdentifierType.UC.getSystem(),
-        C4BBClaimIdentifierType.UC.toCode(),
-        C4BBClaimIdentifierType.UC.getDisplay());
-  }
-
+  /**
+   * Helper function to create a {@link CodeableConcept} from a {@link C4BBClaimIdentifierType}.
+   * Since this type only has one value this uses a hardcoded value.
+   */
   static CodeableConcept createC4BBClaimCodeableConcept() {
-    return new CodeableConcept().setCoding(Arrays.asList(createC4BBClaimCoding()));
+    return new CodeableConcept()
+        .setCoding(
+            Arrays.asList(
+                new Coding(
+                    C4BBClaimIdentifierType.UC.getSystem(),
+                    C4BBClaimIdentifierType.UC.toCode(),
+                    C4BBClaimIdentifierType.UC.getDisplay())));
   }
 
   /**
@@ -801,7 +810,7 @@ public final class TransformerUtilsV2 {
 
     return categoryConcept;
   }
-  
+
   /**
    * @param ccwVariable the {@link CcwCodebookVariable} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
@@ -908,6 +917,13 @@ public final class TransformerUtilsV2 {
     }
   }
 
+  /**
+   * Optionally adds an {@link AdjudicationComponent} to an {@link
+   * ExplanationOfBenefit#getAdjudication()}
+   *
+   * @param eob {@link ExplanationOfBenefit} to add the {@link AdjudicationComponent} to
+   * @param adjudication Optional {@link AdjudicationComponent}
+   */
   static void addAdjudication(
       ExplanationOfBenefit eob, Optional<AdjudicationComponent> adjudication) {
     if (adjudication.isPresent()) {
@@ -915,6 +931,12 @@ public final class TransformerUtilsV2 {
     }
   }
 
+  /**
+   * Optionally adds an {@link TotalComponent} to an {@link ExplanationOfBenefit#getTotal()}
+   *
+   * @param eob {@link ExplanationOfBenefit} to add the {@link TotalComponent} to
+   * @param total Optional {@link TotalComponent}
+   */
   static void addTotal(ExplanationOfBenefit eob, Optional<TotalComponent> total) {
     if (total.isPresent()) {
       eob.addTotal(total.get());
