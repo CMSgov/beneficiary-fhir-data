@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.commons.carin;
 
 /**
- * CARIN Value set for Practitioner Identifiers <a
+ * CARIN ValueSet for Practitioner Identifiers <a
  * href="http://hl7.org/fhir/us/carin-bb/STU1/ValueSet-C4BBPractitionerIdentifierType.html">ValueSet:
  * C4BB Practitioner Identifier Type<a>
  */

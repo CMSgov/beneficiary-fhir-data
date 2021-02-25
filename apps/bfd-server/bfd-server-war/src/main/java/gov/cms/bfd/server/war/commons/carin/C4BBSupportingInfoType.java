@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.commons.carin;
 
 /**
- * CARIN Code System for Supportin INfo <a
+ * CARIN CodeSystem for Supportin INfo <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem:
  * C4BB Supporting Info Type Type</a>
  */

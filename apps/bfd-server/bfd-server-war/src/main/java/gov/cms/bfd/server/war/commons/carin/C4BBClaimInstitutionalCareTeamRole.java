@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.commons.carin;
 
 /**
- * CARIN Value set for Care Team Roles <a
+ * CARIN ValueSet for Care Team Roles <a
  * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBClaimInstitutionalCareTeamRole.html">ValueSet:
  * C4BB Claim Institutional Care Team Role<a>
  */

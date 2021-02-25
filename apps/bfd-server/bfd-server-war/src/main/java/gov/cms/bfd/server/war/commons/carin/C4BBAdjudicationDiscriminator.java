@@ -1,5 +1,10 @@
 package gov.cms.bfd.server.war.commons.carin;
 
+/**
+ * CARIN CodeSystem for Adjudication slices <a
+ * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBAdjudicationDiscriminator.html">CodeSystem:
+ * C4BB Adjudication Discriminator<a>
+ */
 public enum C4BBAdjudicationDiscriminator {
   ALLOWED_UNITS,
   IN_OUT_NETWORK,
