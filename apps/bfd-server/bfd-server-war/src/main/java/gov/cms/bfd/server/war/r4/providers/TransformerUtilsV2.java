@@ -17,6 +17,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
@@ -2966,9 +2967,7 @@ public final class TransformerUtilsV2 {
     // If it isn't there, add one
     if (!org.isPresent()) {
       org = Optional.of(new Organization().setId(id));
-      org.get()
-          .getMeta()
-          .addProfile("http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization");
+      org.get().getMeta().addProfile(ProfileConstants.C4BB_ORGANIZATION_URL);
       eob.getContained().add(org.get());
     }
 

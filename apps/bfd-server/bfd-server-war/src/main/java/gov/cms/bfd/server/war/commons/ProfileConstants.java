@@ -35,9 +35,17 @@ public class ProfileConstants {
 
   /**
    * C4BB Resource Profile: C4BB Coverage
-   * href="https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-C4BB-Coverage">
+   * href="http://hl7.org/fhir/us/carin-bb/STU1/StructureDefinition-C4BB-Coverage.html">
    * C4BBCoverage</a>
    */
   public static final String C4BB_COVERAGE_URL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage";
+
+  /**
+   * C4BB Resource Profile: C4BB Organization
+   * href="http://hl7.org/fhir/us/carin-bb/STU1/StructureDefinition-C4BB-Organization.html">
+   * C4BBOrganization</a>
+   */
+  public static final String C4BB_ORGANIZATION_URL =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization";
 }
