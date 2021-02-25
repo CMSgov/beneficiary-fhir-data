@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -56,9 +57,7 @@ public class InpatientClaimTransformerV2 {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta()
-        .addProfile(
-            "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional");
+    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 
     // "claim" => ExplanationOfBenefit.use
     eob.setUse(Use.CLAIM);

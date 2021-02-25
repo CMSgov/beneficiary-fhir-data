@@ -18,15 +18,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class OutpatientClaimTransformerV2Test {
-
-  @Test
-  public void optionaltest() {
-    Optional<String> s = Optional.of("test");
-
-    Optional<String> result = s.map(o -> o + "blah");
-
-    Assert.assertEquals("testblah", result.get());
-  }
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.OutpatientClaimTransformer#transform(Object)} works as

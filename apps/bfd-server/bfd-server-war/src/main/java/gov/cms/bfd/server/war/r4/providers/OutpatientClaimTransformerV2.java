@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -60,12 +61,13 @@ public class OutpatientClaimTransformerV2 {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta()
-        .addProfile(
-            "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional");
+    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_OUTPATIENT_PROFILE_URL);
 
     // "claim" => ExplanationOfBenefit.use
     eob.setUse(Use.CLAIM);
+
+    // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
+    // eob.setOutcome(?)
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id

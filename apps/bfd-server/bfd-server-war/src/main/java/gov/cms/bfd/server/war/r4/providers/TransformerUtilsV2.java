@@ -409,19 +409,28 @@ public final class TransformerUtilsV2 {
     return identifier;
   }
 
+  /**
+   * Converts a value from the {@link C4BBSupportingInfoType} enumeration into a {@link Coding}
+   *
+   * @param slice the {@link C4BBSupportingInfoType} being mapped
+   * @return the resulting {@link Coding}
+   */
   static Coding createC4BBSupportingInfoCoding(C4BBSupportingInfoType slice) {
     return new Coding(slice.getSystem(), slice.toCode(), slice.getDisplay());
   }
 
-  static Coding createC4BBClaimCoding() {
-    return new Coding(
-        C4BBClaimIdentifierType.UC.getSystem(),
-        C4BBClaimIdentifierType.UC.toCode(),
-        C4BBClaimIdentifierType.UC.getDisplay());
-  }
-
+  /**
+   * Helper function to create a {@link CodeableConcept} from a {@link C4BBClaimIdentifierType}.
+   * Since this type only has one value this uses a hardcoded value.
+   */
   static CodeableConcept createC4BBClaimCodeableConcept() {
-    return new CodeableConcept().setCoding(Arrays.asList(createC4BBClaimCoding()));
+    return new CodeableConcept()
+        .setCoding(
+            Arrays.asList(
+                new Coding(
+                    C4BBClaimIdentifierType.UC.getSystem(),
+                    C4BBClaimIdentifierType.UC.toCode(),
+                    C4BBClaimIdentifierType.UC.getDisplay())));
   }
 
   /**
@@ -554,6 +563,30 @@ public final class TransformerUtilsV2 {
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
 
     String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    Extension extension = new Extension(extensionUrl, coding);
+
+    return extension;
+  }
+
+  /**
+   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
+   *     will be contained in
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
+   * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
+   *     Coding} to represent the specified input values
+   */
+  static Extension createExtensionCoding(
+      IAnyResource rootResource,
+      CcwCodebookInterface ccwVariable,
+      String yearMonth,
+      Optional<?> code) {
+    if (!code.isPresent()) throw new IllegalArgumentException();
+
+    Coding coding = createCoding(rootResource, ccwVariable, yearMonth, code.get());
+
+    String extensionUrl =
+        String.format("%s/%s", calculateVariableReferenceUrl(ccwVariable), yearMonth);
     Extension extension = new Extension(extensionUrl, coding);
 
     return extension;
@@ -741,7 +774,7 @@ public final class TransformerUtilsV2 {
 
     return categoryConcept;
   }
-  
+
   /**
    * @param ccwVariable the {@link CcwCodebookVariable} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
@@ -771,41 +804,24 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link
-   *     AdjudicationComponent} will be contained in
-   * @param ccwVariable the {@link CcwCodebookInterface} being coded
-   * @param reasonCode the value to use for the {@link AdjudicationComponent#getReason()}'s {@link
-   *     Coding#getCode()} for the resulting {@link Coding}
-   * @return the output {@link AdjudicationComponent} for the specified input values
+   * Optionally adds an {@link AdjudicationComponent} to an {@link ItemComponent#getAdjudication()}
+   *
+   * @param item {@link ItemComponent} to add the {@link AdjudicationComponent} to
+   * @param adjudication Optional {@link AdjudicationComponent}
    */
-  static AdjudicationComponent createAdjudicationWithReason(
-      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object reasonCode) {
-    // Cheating here, since they use the same URL.
-    String categoryConceptCode = calculateVariableReferenceUrl(ccwVariable);
-
-    CodeableConcept category =
-        createCodeableConcept(
-            TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, categoryConceptCode);
-    category.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
-
-    AdjudicationComponent adjudication = new AdjudicationComponent(category);
-    adjudication.setReason(createCodeableConcept(rootResource, ccwVariable, reasonCode));
-
-    return adjudication;
-  }
-
-  static <T> Optional<AdjudicationComponent> createAdjudicationWithReason(
-      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<T> reasonCode) {
-    return reasonCode.map(
-        reason -> createAdjudicationWithReason(rootResource, ccwVariable, reason));
-  }
-
   static void addAdjudication(ItemComponent item, Optional<AdjudicationComponent> adjudication) {
     if (adjudication.isPresent()) {
       item.addAdjudication(adjudication.get());
     }
   }
 
+  /**
+   * Optionally adds an {@link AdjudicationComponent} to an {@link
+   * ExplanationOfBenefit#getAdjudication()}
+   *
+   * @param eob {@link ExplanationOfBenefit} to add the {@link AdjudicationComponent} to
+   * @param adjudication Optional {@link AdjudicationComponent}
+   */
   static void addAdjudication(
       ExplanationOfBenefit eob, Optional<AdjudicationComponent> adjudication) {
     if (adjudication.isPresent()) {
@@ -813,6 +829,12 @@ public final class TransformerUtilsV2 {
     }
   }
 
+  /**
+   * Optionally adds an {@link TotalComponent} to an {@link ExplanationOfBenefit#getTotal()}
+   *
+   * @param eob {@link ExplanationOfBenefit} to add the {@link TotalComponent} to
+   * @param total Optional {@link TotalComponent}
+   */
   static void addTotal(ExplanationOfBenefit eob, Optional<TotalComponent> total) {
     if (total.isPresent()) {
       eob.addTotal(total.get());
@@ -820,10 +842,11 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Creates a C4BB Adjudication `adjudicationamounttype` Code for use in multiple places
+   * Creates a C4BB Adjudication `adjudicationamounttype` {@link CodeableConcept} slice for use in
+   * multiple places
    *
    * @param ccwVariable The CCW Variable that represents what the amount is
-   * @param C4BBAdjudication The C4BBAdjudication code that represents this amount
+   * @param code The C4BBAdjudication code that represents this amount
    * @param amount A dollar amount
    * @return The created {@link AdjudicationComponent}
    */
@@ -840,6 +863,14 @@ public final class TransformerUtilsV2 {
                 ccwVariable.getVariable().getLabel()));
   }
 
+  /**
+   * Optionally Creates an `adjudicationamounttype` {@link AdjudicationComponent} slice
+   *
+   * @param ccwVariable The CCW Variable that represents what the amount is
+   * @param code The C4BBAdjudication code that represents this amount
+   * @param amount A dollar amount
+   * @return The created {@link AdjudicationComponent}
+   */
   static Optional<AdjudicationComponent> createAdjudicationAmtSlice(
       CcwCodebookInterface ccwVariable, C4BBAdjudication code, Optional<BigDecimal> amount) {
     return amount.map(
@@ -849,36 +880,69 @@ public final class TransformerUtilsV2 {
                 .setAmount(createMoney(amt)));
   }
 
+  /**
+   * Optionally Creates an `adjudicationamounttype` {@link AdjudicationComponent} slice
+   *
+   * @param ccwVariable The CCW Variable that represents what the amount is
+   * @param cod The C4BBAdjudication code that represents this amount
+   * @param amount A dollar amount
+   * @return The created {@link AdjudicationComponent}
+   */
   static Optional<AdjudicationComponent> createAdjudicationAmtSlice(
       CcwCodebookInterface ccwVariable, C4BBAdjudication code, BigDecimal amount) {
     return createAdjudicationAmtSlice(ccwVariable, code, Optional.of(amount));
   }
 
-  static AdjudicationComponent createAdjudicationDenialReasonSlice(CodeableConcept reason) {
-    return new AdjudicationComponent()
-        .setCategory(
-            new CodeableConcept()
-                .setCoding(
-                    Arrays.asList(
-                        new Coding(
-                            C4BBAdjudicationDiscriminator.DENIAL_REASON.getSystem(),
-                            C4BBAdjudicationDiscriminator.DENIAL_REASON.toCode(),
-                            C4BBAdjudicationDiscriminator.DENIAL_REASON.getDisplay()))))
-        .setReason(reason);
-  }
-
+  /**
+   * Optionally Creates an `denialreason` {@link AdjudicationComponent} slice
+   *
+   * @param eob The base {@link ExplanationOfBenefit} resource
+   * @param ccwVariable The CCW Variable that represents what the reason is
+   * @param reasonCode The coded denial reason
+   * @return The created {@link AdjudicationComponent}
+   */
   static Optional<AdjudicationComponent> createAdjudicationDenialReasonSlice(
       ExplanationOfBenefit eob, CcwCodebookInterface ccwVariable, Optional<String> reasonCode) {
     return reasonCode.map(
         reason ->
-            createAdjudicationDenialReasonSlice(createCodeableConcept(eob, ccwVariable, reason)));
+            new AdjudicationComponent()
+                // Set category for `denialreason` slice
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    C4BBAdjudicationDiscriminator.DENIAL_REASON.getSystem(),
+                                    C4BBAdjudicationDiscriminator.DENIAL_REASON.toCode(),
+                                    C4BBAdjudicationDiscriminator.DENIAL_REASON.getDisplay()))))
+                // Set BB coding for Reason
+                .setReason(createCodeableConcept(eob, ccwVariable, reason)));
   }
 
+  /**
+   * Optionally Creates an `denialreason` {@link AdjudicationComponent} slice
+   *
+   * @param eob The base {@link ExplanationOfBenefit} resource
+   * @param ccwVariable The CCW Variable that represents what the reason is
+   * @param reasonCode The coded denial reason
+   * @return The created {@link AdjudicationComponent}
+   */
   static Optional<AdjudicationComponent> createAdjudicationDenialReasonSlice(
       ExplanationOfBenefit eob, CcwCodebookInterface ccwVariable, String reasonCode) {
     return createAdjudicationDenialReasonSlice(eob, ccwVariable, Optional.of(reasonCode));
   }
 
+  /**
+   * Optionally Creates an `adjudicationamounttype` {@link TotalComponent} slice. This looks similar
+   * to the code to generate the {@link AdjudicationComponent} slice of the same name, but
+   * unfortunately can't be reused because they are different types.
+   *
+   * @param eob The base {@link ExplanationOfBenefit} resource
+   * @param ccwVariable The CCW Variable that represents what the reason is
+   * @param code The C4BBAdjudication code that represents this amount
+   * @param amount A dollar amount
+   * @return The created {@link TotalComponent}
+   */
   static Optional<TotalComponent> createTotalAdjudicationAmountSlice(
       ExplanationOfBenefit eob,
       CcwCodebookInterface ccwVariable,
@@ -891,6 +955,17 @@ public final class TransformerUtilsV2 {
                 .setAmount(createMoney(amount)));
   }
 
+  /**
+   * Optionally Creates an `adjudicationamounttype` {@link TotalComponent} slice. This looks similar
+   * to the code to generate the {@link AdjudicationComponent} slice of the same name, but
+   * unfortunately can't be reused because they are different types.
+   *
+   * @param eob The base {@link ExplanationOfBenefit} resource
+   * @param ccwVariable The CCW Variable that represents what the reason is
+   * @param code The C4BBAdjudication code that represents this amount
+   * @param amount A dollar amount
+   * @return The created {@link TotalComponent}
+   */
   static Optional<TotalComponent> createTotalAdjudicationAmountSlice(
       ExplanationOfBenefit eob,
       CcwCodebookInterface ccwVariable,
@@ -2341,7 +2416,9 @@ public final class TransformerUtilsV2 {
    *     appropriate {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static BenefitComponent addBenefitBalanceFinancial(
-      ExplanationOfBenefit eob, ExBenefitcategory benefitCategoryCode, CcwCodebookVariable financialType) {
+      ExplanationOfBenefit eob,
+      ExBenefitcategory benefitCategoryCode,
+      CcwCodebookVariable financialType) {
     BenefitBalanceComponent eobPrimaryBenefitBalance =
         findOrAddBenefitBalance(eob, benefitCategoryCode);
 

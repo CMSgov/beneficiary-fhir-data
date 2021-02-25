@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -55,7 +56,7 @@ final class PartDEventTransformerV2 {
   private static ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
-    eob.getMeta().addProfile(TransformerConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
+    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID
