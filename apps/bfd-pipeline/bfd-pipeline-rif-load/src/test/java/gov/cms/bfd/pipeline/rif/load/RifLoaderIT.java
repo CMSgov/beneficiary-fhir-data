@@ -269,6 +269,10 @@ public final class RifLoaderIT {
     DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // this should insert a new beneficiary history record
+    /*
+     * FIXME Why is this called "_UNCHANGED" if it will result in a new bene history record? Is the
+     * name off, or are we still creating some unnecessary history records?
+     */
     loadSample(dataSource, Arrays.asList(StaticRifResource.SAMPLE_U_BENES_UNCHANGED));
 
     long start = System.currentTimeMillis();

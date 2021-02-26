@@ -1,0 +1,14 @@
+## Final tasks to be run when building the platinum image.
+
+## AIDE fixup
+# remove the failing aide cron job
+- name: 'Ensure failing aide cron job is removed.'
+  become: true
+  cron:
+    name: "run AIDE check"
+    state: absent
+
+# update the aide database
+- name: Update aide database
+  become: true
+  shell: /sbin/aide --update
