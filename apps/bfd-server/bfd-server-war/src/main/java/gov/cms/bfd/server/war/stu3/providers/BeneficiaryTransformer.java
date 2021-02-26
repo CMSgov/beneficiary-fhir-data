@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
@@ -7,6 +8,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.ArrayList;
@@ -14,11 +16,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
 /**
@@ -51,9 +55,9 @@ import org.hl7.fhir.dstu3.model.Patient;
  * fields to the FHIR export - and your customers will receive for the first time - the following
  * fields:
  *
- * <p>CLM_UNCOMPD_CARE_PMT_AMT EFCTV_BGN_DT EFCTV_END_DT BENE_LINK_KEY CLM_CNTL_NUM
- * FI_DOC_CLM_CNTL_NUM FI_ORIG_CLM_CNTL_NUM TAX_NUM BENE_DEATH_DT NCH_WKLY_PROC_DT REV_CNTR_DT
- * IME_OP_CLM_VAL_AMT DSH_OP_CLM_VAL_AMT CLM_HOSPC_START_DT_ID NCH_BENE_DSCHRG_DT
+ * <p>CLM_UNCOMPD_CARE_PMT_AMT EFCTV_BGN_DT EFCTV_END_DT CLM_CNTL_NUM FI_DOC_CLM_CNTL_NUM
+ * FI_ORIG_CLM_CNTL_NUM BENE_DEATH_DT NCH_WKLY_PROC_DT REV_CNTR_DT IME_OP_CLM_VAL_AMT
+ * DSH_OP_CLM_VAL_AMT CLM_HOSPC_START_DT_ID NCH_BENE_DSCHRG_DT
  *
  * <p>Note that BB2.0 API will be filtering out all derived line address fields (1-6) and CITY_NAME.
  * Please announce this to your respective customer communities as you see fit. A list of which
@@ -64,19 +68,18 @@ final class BeneficiaryTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersValues the includeIdentifiers header values to use
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
   @Trace
   public static Patient transform(
-      MetricRegistry metricRegistry,
-      Beneficiary beneficiary,
-      List<String> includeIdentifiersValues) {
+      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders requestHeader) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform"))
             .time();
-    Patient patient = transform(beneficiary, includeIdentifiersValues);
+    Patient patient = transform(beneficiary, requestHeader);
     timer.stop();
 
     return patient;
@@ -84,10 +87,11 @@ final class BeneficiaryTransformer {
 
   /**
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersValues the includeIdentifiers header values to use
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(Beneficiary beneficiary, List<String> includeIdentifiersValues) {
+  private static Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
     Objects.requireNonNull(beneficiary);
 
     Patient patient = new Patient();
@@ -98,7 +102,7 @@ final class BeneficiaryTransformer {
             CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
 
     // Add hicn-hash identifier ONLY if raw hicn is requested.
-    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       patient
           .addIdentifier()
           .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
@@ -106,10 +110,28 @@ final class BeneficiaryTransformer {
     }
 
     if (beneficiary.getMbiHash().isPresent()) {
-      patient
-          .addIdentifier()
-          .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
-          .setValue(beneficiary.getMbiHash().get());
+      Period mbiPeriod = new Period();
+
+      if (beneficiary.getMbiEffectiveDate().isPresent()) {
+        TransformerUtils.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
+      }
+
+      if (beneficiary.getMbiObsoleteDate().isPresent()) {
+        TransformerUtils.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
+      }
+
+      if (mbiPeriod.hasStart() || mbiPeriod.hasEnd()) {
+        patient
+            .addIdentifier()
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+            .setValue(beneficiary.getMbiHash().get())
+            .setPeriod(mbiPeriod);
+      } else {
+        patient
+            .addIdentifier()
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+            .setValue(beneficiary.getMbiHash().get());
+      }
     }
 
     Extension currentIdentifier =
@@ -119,7 +141,7 @@ final class BeneficiaryTransformer {
     // Add lastUpdated
     TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
 
-    if (PatientResourceProvider.hasHICN(includeIdentifiersValues)) {
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
 
       if (hicnUnhashedCurrent.isPresent())
@@ -147,7 +169,7 @@ final class BeneficiaryTransformer {
       }
     }
 
-    if (PatientResourceProvider.hasMBI(includeIdentifiersValues)) {
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
 
       if (mbiUnhashedCurrent.isPresent())
@@ -176,14 +198,39 @@ final class BeneficiaryTransformer {
       }
     }
 
-    patient
-        .addAddress()
-        .setState(beneficiary.getStateCode())
-        .setDistrict(beneficiary.getCountyCode())
-        .setPostalCode(beneficiary.getPostalCode());
+    // support header includeAddressFields from downstream components e.g. BB2
+    // per requirement of BFD-379, BB2 always send header includeAddressFields = False
+    Boolean addrHdrVal =
+        requestHeader.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
+    if (addrHdrVal != null && addrHdrVal) {
+      patient
+          .addAddress()
+          .setState(beneficiary.getStateCode())
+          .setPostalCode(beneficiary.getPostalCode())
+          .setCity(beneficiary.getDerivedCityName().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress1().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress2().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress3().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress4().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress5().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress6().orElse(null));
+    } else {
+      patient
+          .addAddress()
+          .setState(beneficiary.getStateCode())
+          .setPostalCode(beneficiary.getPostalCode());
+    }
 
     if (beneficiary.getBirthDate() != null) {
       patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));
+    }
+
+    // Death Date
+    if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
+      patient.setDeceased(
+          new DateTimeType(
+              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              TemporalPrecisionEnum.DAY));
     }
 
     char sex = beneficiary.getSex();

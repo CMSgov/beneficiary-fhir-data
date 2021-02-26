@@ -159,7 +159,10 @@
     "value" : "99f6cc85e95c4b2cec5382600478482cceadb7534d4c3f0a4f2e55d33428c169"
   }, {
     "system" : "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-    "value" : "82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c"
+    "value" : "82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c",
+    "period" : {
+      "start" : "2020-07-30"
+    }
   }, {
     "system" : "https://bluebutton.cms.gov/resources/variables/bene_id",
     "value" : "567834"
@@ -171,8 +174,10 @@
   } ],
   "gender" : "male",
   "birthDate" : "1981-03-17",
+  "deceasedDateTime" : "1981-03-17",
   "address" : [ {
-    "district" : "123",
+    "line" : [ "204 SOUTH ST", "7560 123TH ST", "SURREY", "DAEJEON SI 34867", "COLOMBIA", "SURREY" ],
+    "city" : "PODUNK",
     "state" : "MO",
     "postalCode" : "12345"
   } ]

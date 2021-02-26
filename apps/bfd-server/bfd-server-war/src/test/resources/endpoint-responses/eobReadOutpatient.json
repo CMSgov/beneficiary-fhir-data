@@ -66,6 +66,18 @@
       "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
       "value" : "15444"
     }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "32490593716374487"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+      "value" : "373273882012"
+    }
   } ],
   "identifier" : [ {
     "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
@@ -144,6 +156,16 @@
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "2011-02-26"
+  }, {
+    "sequence" : 2,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
         "code" : "https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw",
         "display" : "Claim MCO Paid Switch"
       } ]
@@ -156,7 +178,7 @@
       } ]
     }
   }, {
-    "sequence" : 2,
+    "sequence" : 3,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -172,7 +194,7 @@
       } ]
     }
   }, {
-    "sequence" : 3,
+    "sequence" : 4,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -187,7 +209,7 @@
       } ]
     }
   }, {
-    "sequence" : 4,
+    "sequence" : 5,
     "category" : {
       "coding" : [ {
         "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
@@ -335,7 +357,7 @@
   } ],
   "procedure" : [ {
     "sequence" : 1,
-    "date" : "2016-01-16T00:00:00-08:00",
+    "date" : "2016-01-16T00:00:00-05:00",
     "procedureCodeableConcept" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/icd-10",

@@ -94,7 +94,8 @@ public class V2Server extends RestfulServer {
      * global history.
      */
     List<Object> plainProviders = new ArrayList<>();
-    registerProvider(plainProviders);
+    // TODO: Refactor to use registerProviders. The current method is deprecated.
+    setPlainProviders(plainProviders);
 
     /*
      * Register the HAPI server interceptors that have been configured in

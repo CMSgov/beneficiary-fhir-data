@@ -40,6 +40,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.BiFunction;
@@ -173,6 +174,11 @@ public final class RifFilesProcessor {
 
     RecordAction recordAction = RecordAction.match(csvRecord.get("DML_IND"));
     Beneficiary beneficiaryRow = BeneficiaryParser.parseRif(csvRecords);
+
+    // Swap the unhashed HICN into the correct field.
+    beneficiaryRow.setHicnUnhashed(Optional.ofNullable(beneficiaryRow.getHicn()));
+    beneficiaryRow.setHicn(null);
+
     return new RifRecordEvent<Beneficiary>(
         fileEvent, recordAction, beneficiaryRow.getBeneficiaryId(), beneficiaryRow);
   }

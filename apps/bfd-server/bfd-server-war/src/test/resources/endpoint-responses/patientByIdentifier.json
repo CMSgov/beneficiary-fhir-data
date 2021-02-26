@@ -114,7 +114,10 @@
       } ],
       "identifier" : [ {
         "system" : "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
-        "value" : "82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c"
+        "value" : "82273caf4d2c3b5a8340190ae3575950957ce469e593efd7736d60c3b39d253c",
+        "period" : {
+          "start" : "2020-07-30"
+        }
       }, {
         "system" : "https://bluebutton.cms.gov/resources/variables/bene_id",
         "value" : "567834"
@@ -126,8 +129,8 @@
       } ],
       "gender" : "male",
       "birthDate" : "1981-03-17",
+      "deceasedDateTime" : "1981-03-17",
       "address" : [ {
-        "district" : "123",
         "state" : "MO",
         "postalCode" : "12345"
       } ]
