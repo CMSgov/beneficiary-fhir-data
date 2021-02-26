@@ -181,7 +181,7 @@ That's it: nice & simple.
 Please note that running jobs in parallel does not necessarily mean running jobs on multiple hosts.
 Multiple jobs can easily run in parallel on a single host.
   particularly since most job threads will spend their time waiting around for I/O to complete.
-See the TODO section for details on _that_ business need.
+See the "Option: Do We Need To Run Jobs On More Than One Host?" section for details on _that_ business need.
 
 
 #### Option: Do We Need Better Obervability?
@@ -462,8 +462,6 @@ Note that while precedent set by other programs is some motivation, it does not 
 Please also take into consideration that we (and the government in general) sometimes intentionally diverge from common "best practices".
 
 -->
-
-TODO: Discuss BFD Insights' approach (AWS Glue, I think?).
 
 The following discussion is very relevant to this RFC:
   [Hacker News: How to Become a Data Engineer in 2021](https://news.ycombinator.com/item?id=25728198).
