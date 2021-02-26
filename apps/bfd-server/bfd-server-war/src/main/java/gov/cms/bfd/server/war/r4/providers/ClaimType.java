@@ -2,6 +2,8 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.InpatientClaim;
+import gov.cms.bfd.model.rif.InpatientClaim_;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import java.time.LocalDate;
@@ -28,7 +30,15 @@ public enum ClaimType {
       PartDEvent_.eventId,
       PartDEvent_.beneficiaryId,
       (entity) -> ((PartDEvent) entity).getPrescriptionFillDate(),
-      PartDEventTransformerV2::transform);
+      PartDEventTransformerV2::transform),
+
+  INPATIENT(
+      InpatientClaim.class,
+      InpatientClaim_.claimId,
+      InpatientClaim_.beneficiaryId,
+      (entity) -> ((InpatientClaim) entity).getDateThrough(),
+      InpatientClaimTransformerV2::transform,
+      InpatientClaim_.lines);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;
