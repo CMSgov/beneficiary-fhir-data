@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import java.time.Instant;
@@ -16,34 +17,34 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Integration tests for {@link DataSetMonitor}. */
-public final class DataSetMonitorIT {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorIT.class);
+/** Integration tests for {@link PipelineManager}. */
+public final class PipelineManagerIT {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManagerIT.class);
 
   /**
-   * Verifies that {@link DataSetMonitor} handles errors as expected when asked to run against an S3
-   * bucket that doesn't exist. This test case isn't so much needed to test that one specific
+   * Verifies that {@link PipelineManager} handles errors as expected when asked to run against an
+   * S3 bucket that doesn't exist. This test case isn't so much needed to test that one specific
    * failure case, but to instead verify the overall error handling.
    *
    * @throws InterruptedException (shouldn't happen)
    */
   @Test
   public void missingBucket() throws InterruptedException {
-    // Start the monitor against a bucket that doesn't exist.
+    // Start the pipeline against a bucket that doesn't exist.
     MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-    DataSetMonitor monitor =
-        new DataSetMonitor(new MetricRegistry(), new ExtractionOptions("foo"), 1, listener);
-    monitor.start();
+    PipelineManager pipeline =
+        new PipelineManager(new MetricRegistry(), new ExtractionOptions("foo"), 1, listener);
+    pipeline.start();
 
-    // Wait for the monitor to error out.
+    // Wait for the pipeline to error out.
     Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> !listener.errorEvents.isEmpty());
-    monitor.stop();
+    pipeline.stop();
     Assert.assertEquals(0, listener.getNoDataAvailableEvents());
     Assert.assertNotEquals(0, listener.getErrorEvents().size());
     Assert.assertEquals(0, listener.getDataEvents().size());
   }
 
-  /** Tests {@link DataSetMonitor} when run against an empty bucket. */
+  /** Tests {@link PipelineManager} when run against an empty bucket. */
   @Test
   public void emptyBucketTest() {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
@@ -57,14 +58,14 @@ public final class DataSetMonitorIT {
           s3Client.getS3AccountOwner().getDisplayName(),
           bucket.getName());
 
-      // Start the monitor and then stop it.
+      // Start the pipeline and then stop it.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      DataSetMonitor monitor = new DataSetMonitor(new MetricRegistry(), options, 1, listener);
-      monitor.start();
+      PipelineManager pipeline = new PipelineManager(new MetricRegistry(), options, 1, listener);
+      pipeline.start();
       Awaitility.await()
           .atMost(Duration.TEN_SECONDS)
           .until(() -> listener.getNoDataAvailableEvents() > 0);
-      monitor.stop();
+      pipeline.stop();
 
       // Verify that no data sets were generated.
       Assert.assertNotEquals(0, listener.getNoDataAvailableEvents());
@@ -76,7 +77,7 @@ public final class DataSetMonitorIT {
   }
 
   /**
-   * Tests {@link DataSetMonitor} when run against a bucket with two data sets in it.
+   * Tests {@link PipelineManager} when run against a bucket with two data sets in it.
    *
    * @throws InterruptedException (shouldn't happen)
    */
@@ -130,16 +131,16 @@ public final class DataSetMonitorIT {
               manifestC.getEntries().get(0),
               StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
-      // Start the monitor up.
+      // Start the pipeline up.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      DataSetMonitor monitor = new DataSetMonitor(new MetricRegistry(), options, 1, listener);
-      monitor.start();
+      PipelineManager pipeline = new PipelineManager(new MetricRegistry(), options, 1, listener);
+      pipeline.start();
 
-      // Wait for the monitor to generate events for the three data sets.
+      // Wait for the job to generate events for the three data sets.
       Awaitility.await()
           .atMost(Duration.ONE_MINUTE)
           .until(() -> listener.getDataEvents().size() >= 3);
-      monitor.stop();
+      pipeline.stop();
 
       // Verify what was handed off to the DataSetMonitorListener.
       Assert.assertEquals(3, listener.getDataEvents().size());
@@ -153,13 +154,13 @@ public final class DataSetMonitorIT {
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS,
+          CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS,
           1
               + manifestA.getEntries().size()
               + 1

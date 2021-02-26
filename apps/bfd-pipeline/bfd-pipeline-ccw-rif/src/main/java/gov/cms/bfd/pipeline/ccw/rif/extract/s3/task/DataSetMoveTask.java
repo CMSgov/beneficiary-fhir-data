@@ -7,9 +7,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.SSEAwsKeyManagementParams;
 import com.amazonaws.services.s3.transfer.Copy;
 import com.amazonaws.waiters.WaiterParameters;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorWorker;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -68,11 +68,10 @@ public final class DataSetMoveTask implements Callable<Void> {
      */
     for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
       String sourceKey =
-          String.format(
-              "%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
+          String.format("%s/%s", CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
       String targetKey =
           String.format(
-              "%s/%s", DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
+              "%s/%s", CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS, s3KeySuffixToMove);
 
       /*
        * Before copying, grab the metadata of the source object to ensure
@@ -113,8 +112,7 @@ public final class DataSetMoveTask implements Callable<Void> {
      */
     for (String s3KeySuffixToMove : s3KeySuffixesToMove) {
       String sourceKey =
-          String.format(
-              "%s/%s", DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
+          String.format("%s/%s", CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS, s3KeySuffixToMove);
       DeleteObjectRequest deleteObjectRequest =
           new DeleteObjectRequest(options.getS3BucketName(), sourceKey);
       s3TaskManager.getS3Client().deleteObject(deleteObjectRequest);

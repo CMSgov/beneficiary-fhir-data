@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
+package gov.cms.bfd.pipeline.ccw.rif;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
@@ -6,7 +6,11 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -15,13 +19,17 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Integration tests for {@link DataSetMonitorWorker}. */
-public final class DataSetMonitorWorkerIT {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorIT.class);
+/** Integration tests for {@link CcwRifPipelineJob}. */
+public final class CcwRifPipelineJobIT {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifPipelineJobIT.class);
 
-  /** Tests {@link DataSetMonitorWorker} when run against an empty bucket. */
+  /**
+   * Tests {@link CcwRifPipelineJob} when run against an empty bucket.
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
   @Test
-  public void emptyBucketTest() {
+  public void emptyBucketTest() throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
@@ -33,12 +41,12 @@ public final class DataSetMonitorWorkerIT {
           s3Client.getS3AccountOwner().getDisplayName(),
           bucket.getName());
 
-      // Run the worker.
+      // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
-      DataSetMonitorWorker monitorWorker =
-          new DataSetMonitorWorker(new MetricRegistry(), options, s3TaskManager, listener);
-      monitorWorker.run();
+      CcwRifPipelineJob ccwJob =
+          new CcwRifPipelineJob(new MetricRegistry(), options, s3TaskManager, listener);
+      ccwJob.call();
 
       // Verify that no data sets were generated.
       Assert.assertEquals(1, listener.getNoDataAvailableEvents());
@@ -49,9 +57,13 @@ public final class DataSetMonitorWorkerIT {
     }
   }
 
-  /** Tests {@link DataSetMonitorWorker} when run against a bucket with a single data set. */
+  /**
+   * Tests {@link CcwRifPipelineJob} when run against a bucket with a single data set.
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
   @Test
-  public void singleDataSetTest() {
+  public void singleDataSetTest() throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
@@ -85,12 +97,12 @@ public final class DataSetMonitorWorkerIT {
               manifest.getEntries().get(1),
               StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
-      // Run the worker.
+      // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
-      DataSetMonitorWorker monitorWorker =
-          new DataSetMonitorWorker(new MetricRegistry(), options, s3TaskManager, listener);
-      monitorWorker.run();
+      CcwRifPipelineJob ccwJob =
+          new CcwRifPipelineJob(new MetricRegistry(), options, s3TaskManager, listener);
+      ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
       Assert.assertEquals(0, listener.getNoDataAvailableEvents());
@@ -104,13 +116,13 @@ public final class DataSetMonitorWorkerIT {
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS,
+          CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
@@ -118,9 +130,13 @@ public final class DataSetMonitorWorkerIT {
     }
   }
 
-  /** Tests {@link DataSetMonitorWorker} when run against an empty bucket. */
+  /**
+   * Tests {@link CcwRifPipelineJob} when run against an empty bucket.
+   *
+   * @throws Exception (exceptions indicate test failure)
+   */
   @Test
-  public void multipleDataSetsTest() {
+  public void multipleDataSetsTest() throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
@@ -169,12 +185,12 @@ public final class DataSetMonitorWorkerIT {
               manifestC.getEntries().get(0),
               StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
-      // Run the worker.
+      // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
-      DataSetMonitorWorker monitorWorker =
-          new DataSetMonitorWorker(new MetricRegistry(), options, s3TaskManager, listener);
-      monitorWorker.run();
+      CcwRifPipelineJob ccwJob =
+          new CcwRifPipelineJob(new MetricRegistry(), options, s3TaskManager, listener);
+      ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
       Assert.assertEquals(0, listener.getNoDataAvailableEvents());
@@ -191,13 +207,13 @@ public final class DataSetMonitorWorkerIT {
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
           1 + manifestB.getEntries().size() + 1 + manifestC.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS,
+          CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS,
           1 + manifestA.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
@@ -206,11 +222,13 @@ public final class DataSetMonitorWorkerIT {
   }
 
   /**
-   * Tests {@link DataSetMonitorWorker} when run against a bucket with a single data set that should
-   * be skipped (per {@link ExtractionOptions#getDataSetFilter()}).
+   * Tests {@link CcwRifPipelineJob} when run against a bucket with a single data set that should be
+   * skipped (per {@link ExtractionOptions#getDataSetFilter()}).
+   *
+   * @throws Exception (exceptions indicate test failure)
    */
   @Test
-  public void skipDataSetTest() {
+  public void skipDataSetTest() throws Exception {
     AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
     Bucket bucket = null;
     try {
@@ -244,12 +262,12 @@ public final class DataSetMonitorWorkerIT {
               manifest.getEntries().get(1),
               StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
-      // Run the worker.
+      // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
-      DataSetMonitorWorker monitorWorker =
-          new DataSetMonitorWorker(new MetricRegistry(), options, s3TaskManager, listener);
-      monitorWorker.run();
+      CcwRifPipelineJob ccwJob =
+          new CcwRifPipelineJob(new MetricRegistry(), options, s3TaskManager, listener);
+      ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
       Assert.assertEquals(1, listener.getNoDataAvailableEvents());
@@ -260,13 +278,13 @@ public final class DataSetMonitorWorkerIT {
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          DataSetMonitorWorker.S3_PREFIX_COMPLETED_DATA_SETS,
+          CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
     } finally {

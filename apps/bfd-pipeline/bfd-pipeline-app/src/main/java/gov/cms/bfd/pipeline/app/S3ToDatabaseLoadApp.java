@@ -10,8 +10,8 @@ import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.PipelineManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public final class S3ToDatabaseLoadApp {
   private static final Logger LOGGER = LoggerFactory.getLogger(S3ToDatabaseLoadApp.class);
 
-  /** How often the {@link DataSetMonitor} will wait between scans for new data sets. */
+  /** How often the {@link PipelineManager} will wait between scans for new data sets. */
   private static final Duration S3_SCAN_INTERVAL = Duration.ofSeconds(1L);
 
   /**
@@ -42,7 +42,7 @@ public final class S3ToDatabaseLoadApp {
    * This {@link System#exit(int)} value should be used when the application exits due to an
    * unhandled exception.
    */
-  static final int EXIT_CODE_MONITOR_ERROR = DataSetMonitor.EXIT_CODE_MONITOR_ERROR;
+  static final int EXIT_CODE_MONITOR_ERROR = PipelineManager.EXIT_CODE_MONITOR_ERROR;
 
   /**
    * This method is the one that will get called when users launch the application from the command
@@ -155,23 +155,23 @@ public final class S3ToDatabaseLoadApp {
         };
 
     /*
-     * Create and start the DataSetMonitor that will find data sets as
+     * Create and start the PipelineManager that will find data sets as
      * they're pushed into S3. As each data set is found, it will be handed
      * off to the DataSetMonitorListener to be run through the ETL pipeline.
      */
-    DataSetMonitor s3Monitor =
-        new DataSetMonitor(
+    PipelineManager pipelineManager =
+        new PipelineManager(
             appMetrics,
             appConfig.getExtractionOptions(),
             (int) S3_SCAN_INTERVAL.toMillis(),
             dataSetMonitorListener);
-    registerShutdownHook(appMetrics, s3Monitor);
-    s3Monitor.start();
+    registerShutdownHook(appMetrics, pipelineManager);
+    pipelineManager.start();
     LOGGER.info("Monitoring S3 for new data sets to process...");
 
     /*
      * At this point, we're done here with the main thread. From now on, the
-     * DataSetMonitor's executor service should be the only non-daemon
+     * PipelineManager's executor service should be the only non-daemon
      * thread running (and whatever it kicks off). Once/if that thread
      * stops, the application will run all registered shutdown hooks and
      * exit.
@@ -204,10 +204,11 @@ public final class S3ToDatabaseLoadApp {
    * </ul>
    *
    * @param metrics the {@link MetricRegistry} to log out before the application exits
-   * @param s3Monitor the {@link DataSetMonitor} to be gracefully shut down before the application
-   *     exits
+   * @param pipelineManager the {@link PipelineManager} to be gracefully shut down before the
+   *     application exits
    */
-  private static void registerShutdownHook(MetricRegistry metrics, DataSetMonitor s3Monitor) {
+  private static void registerShutdownHook(
+      MetricRegistry metrics, PipelineManager pipelineManager) {
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
@@ -221,7 +222,7 @@ public final class S3ToDatabaseLoadApp {
                      * for any data sets that are being actively processed to finish
                      * processing.
                      */
-                    s3Monitor.stop();
+                    pipelineManager.stop();
 
                     // Ensure that the final metrics get logged.
                     Slf4jReporter.forRegistry(metrics).outputTo(LOGGER).build().report();
@@ -278,8 +279,8 @@ public final class S3ToDatabaseLoadApp {
     /*
      * This will trigger the shutdown monitors, block until they complete, and then terminate this
      * thread (and all others). Accordingly, we can be doubly sure that the data set processing will
-     * be halted: 1) this thread is the DataSetMonitorWorker's and that thread will block then die,
-     * and 2) the shutdown monitor will call DataSetMonitor.stop(). Pack it up: we're going home,
+     * be halted: 1) this thread is the CcwRifPipelineJob's and that thread will block then die,
+     * and 2) the shutdown monitor will call PipelineManager.stop(). Pack it up: we're going home,
      * folks.
      */
     System.exit(EXIT_CODE_MONITOR_ERROR);

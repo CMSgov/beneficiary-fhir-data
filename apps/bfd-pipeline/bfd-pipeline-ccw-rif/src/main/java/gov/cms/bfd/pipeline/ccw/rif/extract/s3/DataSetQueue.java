@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /** Represents and manages the queue of data sets in S3 to be processed. */
 public final class DataSetQueue {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorWorker.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetQueue.class);
 
   private final MetricRegistry appMetrics;
   private final ExtractionOptions options;
@@ -98,7 +99,7 @@ public final class DataSetQueue {
         .forEach(
             manifestId -> {
               String manifestS3Key =
-                  manifestId.computeS3Key(DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS);
+                  manifestId.computeS3Key(CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS);
               DataSetManifest manifest = null;
               try {
                 manifest = readManifest(s3TaskManager.getS3Client(), options, manifestS3Key);
@@ -173,7 +174,7 @@ public final class DataSetQueue {
 
       for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
         String key = objectSummary.getKey();
-        if (DataSetMonitorWorker.REGEX_PENDING_MANIFEST.matcher(key).matches()) {
+        if (CcwRifPipelineJob.REGEX_PENDING_MANIFEST.matcher(key).matches()) {
           /*
            * We've got an object that *looks like* it might be a
            * manifest file. But we need to parse the key to ensure
@@ -181,7 +182,7 @@ public final class DataSetQueue {
            */
           DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(key);
           if (manifestId != null) manifestIds.add(manifestId);
-        } else if (DataSetMonitorWorker.REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
+        } else if (CcwRifPipelineJob.REGEX_COMPLETED_MANIFEST.matcher(key).matches()) {
           completedManifestsCount++;
         }
       }

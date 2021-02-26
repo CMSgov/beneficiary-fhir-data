@@ -5,11 +5,11 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.transfer.Download;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorWorker;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask.ManifestEntryDownloadResult;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
@@ -65,7 +65,7 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
               options.getS3BucketName(),
               String.format(
                   "%s/%s/%s",
-                  DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+                  CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
                   manifestEntry.getParentManifest().getTimestampText(),
                   manifestEntry.getName()));
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");

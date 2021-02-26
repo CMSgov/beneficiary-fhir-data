@@ -6,11 +6,11 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorWorker;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.PipelineManager;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
@@ -259,7 +259,7 @@ public final class S3ToDatabaseLoadAppIT {
     return appRunConsumer
         .getStdoutContents()
         .toString()
-        .contains(DataSetMonitor.LOG_MESSAGE_STARTING_WORKER);
+        .contains(PipelineManager.LOG_MESSAGE_STARTING_WORKER);
   }
 
   /**
@@ -271,7 +271,7 @@ public final class S3ToDatabaseLoadAppIT {
     return appRunConsumer
         .getStdoutContents()
         .toString()
-        .contains(DataSetMonitorWorker.LOG_MESSAGE_DATA_SET_COMPLETE);
+        .contains(CcwRifPipelineJob.LOG_MESSAGE_DATA_SET_COMPLETE);
   }
 
   /**

@@ -1,14 +1,20 @@
-package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
+package gov.cms.bfd.pipeline.ccw.rif;
 
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.DataSetMoveTask;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -19,24 +25,46 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Acts as a worker {@link Runnable} for {@link DataSetMonitor}. It is expected that this will be
- * run on a repeating basis, via a {@link ScheduledExecutorService} .
+ * This {@link PipelineJob} checks for and, if found, processes data that has been pushed from CMS'
+ * Chronic Conditions Data (CCW) into an AWS S3 bucket. The data in S3 will be structured as
+ * follows:
  *
- * <p>When executed via {@link #run()}, the {@link DataSetMonitorWorker} will scan the specified
- * Amazon S3 bucket. It will look for <code>manifest.xml</code> objects/files and select the oldest
- * one available. If such a manifest is found, it will then wait for all of the objects in the data
- * set represented by it to become available. Once they're all available, it will kick off the
- * processing of the data set, and block until that processing has completed.
+ * <ul>
+ *   <li>Amazon S3 Bucket: <code>&lt;s3-bucket-name&gt;</code>
+ *       <ul>
+ *         <li><code>1997-07-16T19:20:30Z</code>
+ *             <ul>
+ *               <li><code>Incoming</code>
+ *                   <ul>
+ *                     <li><code>23_manifest.xml</code>
+ *                     <li><code>beneficiaries_42.rif</code>
+ *                     <li><code>bcarrier_58.rif</code>
+ *                     <li><code>pde_93.rif</code>
+ *                   </ul>
+ *               <li><code>Done</code>
+ *                   <ul>
+ *                     <li><code>64_manifest.xml</code>
+ *                     <li><code>beneficiaries_45.rif</code>
+ *                   </ul>
+ *             </ul>
+ *       </ul>
+ * </ul>
+ *
+ * <p>In that structure, there will be one top-level directory in the bucket for each data set that
+ * has yet to be completely processed by the ETL pipeline. Its name will be an <a
+ * href="https://www.w3.org/TR/NOTE-datetime">ISO 8601 date and time</a> expressed in UTC, to a
+ * precision of at least seconds. This will represent (roughly) the time that the data set was
+ * created. Within each of those directories will be manifest files and the RIF files that they
+ * reference.
  */
-public final class DataSetMonitorWorker implements Runnable {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitorWorker.class);
+public final class CcwRifPipelineJob implements PipelineJob {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifPipelineJob.class);
 
   private static final int GIGA = 1000 * 1000 * 1000;
 
@@ -47,19 +75,19 @@ public final class DataSetMonitorWorker implements Runnable {
   public static final String S3_PREFIX_COMPLETED_DATA_SETS = "Done";
 
   /**
-   * The {@link Logger} message that will be recorded if/when the {@link DataSetMonitorWorker} goes
-   * and looks, but doesn't find any data sets waiting to be processed.
+   * The {@link Logger} message that will be recorded if/when the {@link CcwRifPipelineJob} goes and
+   * looks, but doesn't find any data sets waiting to be processed.
    */
   public static final String LOG_MESSAGE_NO_DATA_SETS = "No data sets to process found.";
 
   /**
-   * The {@link Logger} message that will be recorded if/when the {@link DataSetMonitorWorker}
-   * starts processing a data set.
+   * The {@link Logger} message that will be recorded if/when the {@link CcwRifPipelineJob} starts
+   * processing a data set.
    */
   public static final String LOG_MESSAGE_DATA_SET_READY = "Data set ready. Processing it...";
 
   /**
-   * The {@link Logger} message that will be recorded if/when the {@link DataSetMonitorWorker}
+   * The {@link Logger} message that will be recorded if/when the {@link CcwRifPipelineJob}
    * completes the processing of a data set.
    */
   public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set processing complete.";
@@ -71,7 +99,7 @@ public final class DataSetMonitorWorker implements Runnable {
   public static final Pattern REGEX_PENDING_MANIFEST =
       Pattern.compile("^" + S3_PREFIX_PENDING_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
 
-  static final Pattern REGEX_COMPLETED_MANIFEST =
+  public static final Pattern REGEX_COMPLETED_MANIFEST =
       Pattern.compile("^" + S3_PREFIX_COMPLETED_DATA_SETS + "\\/(.*)\\/([0-9]+)_manifest\\.xml$");
 
   private final MetricRegistry appMetrics;
@@ -82,14 +110,14 @@ public final class DataSetMonitorWorker implements Runnable {
   private final DataSetQueue dataSetQueue;
 
   /**
-   * Constructs a new {@link DataSetMonitorWorker} instance.
+   * Constructs a new {@link CcwRifPipelineJob} instance.
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param options the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
    */
-  public DataSetMonitorWorker(
+  public CcwRifPipelineJob(
       MetricRegistry appMetrics,
       ExtractionOptions options,
       S3TaskManager s3TaskManager,
@@ -102,9 +130,9 @@ public final class DataSetMonitorWorker implements Runnable {
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
   }
 
-  /** @see java.lang.Runnable#run() */
+  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
   @Override
-  public void run() {
+  public PipelineJobOutcome call() throws Exception {
     LOGGER.debug("Scanning for data sets to process...");
 
     // Update the queue from S3.
@@ -114,7 +142,7 @@ public final class DataSetMonitorWorker implements Runnable {
     if (dataSetQueue.isEmpty()) {
       LOGGER.debug(LOG_MESSAGE_NO_DATA_SETS);
       listener.noDataAvailable();
-      return;
+      return PipelineJobOutcome.NOTHING_TO_DO;
     }
 
     // We've found the oldest manifest.
@@ -213,6 +241,8 @@ public final class DataSetMonitorWorker implements Runnable {
     rifFiles.stream().forEach(f -> f.cleanupTempFile());
     dataSetQueue.markProcessed(manifestToProcess);
     s3TaskManager.submit(new DataSetMoveTask(s3TaskManager, options, manifestToProcess));
+
+    return PipelineJobOutcome.WORK_DONE;
   }
 
   /**

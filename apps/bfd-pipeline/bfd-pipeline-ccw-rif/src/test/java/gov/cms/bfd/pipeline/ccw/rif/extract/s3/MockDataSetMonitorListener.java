@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** A mock {@link DataSetMonitorListener} that tracks the events it receives. */
-final class MockDataSetMonitorListener implements DataSetMonitorListener {
+public final class MockDataSetMonitorListener implements DataSetMonitorListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(MockDataSetMonitorListener.class);
 
   private int noDataAvailableEvents = 0;

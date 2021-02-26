@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestId;
 import java.io.InputStream;
@@ -107,12 +108,11 @@ public final class DataSetManifestTest {
   @Test
   public void manifestIdRoundtrip() {
     String s3Key =
-        DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS
-            + "/2017-07-11T00:00:00.000Z/1_manifest.xml";
+        CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS + "/2017-07-11T00:00:00.000Z/1_manifest.xml";
     DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(s3Key);
 
     Assert.assertEquals(
-        s3Key, manifestId.computeS3Key(DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS));
+        s3Key, manifestId.computeS3Key(CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS));
   }
 
   /**

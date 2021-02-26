@@ -8,11 +8,11 @@ import com.amazonaws.services.s3.transfer.Download;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorWorker;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -74,7 +74,7 @@ public final class ManifestEntryDownloadTaskIT {
               bucket.getName(),
               String.format(
                   "%s/%s/%s",
-                  DataSetMonitorWorker.S3_PREFIX_PENDING_DATA_SETS,
+                  CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
                   manifest.getEntries().get(0).getParentManifest().getTimestampText(),
                   manifest.getEntries().get(0).getName()));
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");

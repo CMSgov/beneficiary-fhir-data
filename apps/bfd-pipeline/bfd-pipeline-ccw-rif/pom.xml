@@ -20,6 +20,11 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rif</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<!-- Just useful. -->

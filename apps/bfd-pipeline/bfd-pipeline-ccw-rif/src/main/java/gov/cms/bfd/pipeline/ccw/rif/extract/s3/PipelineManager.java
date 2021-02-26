@@ -1,65 +1,32 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * This ETL pipeline is fed by data pushed from CMS' Chronic Conditions Data (CCW) into Amazon's S3
- * API. The data in S3 will be structured as follows:
- *
- * <ul>
- *   <li>Amazon S3 Bucket: <code>&lt;s3-bucket-name&gt;</code>
- *       <ul>
- *         <li><code>1997-07-16T19:20:30Z</code>
- *             <ul>
- *               <li><code>Incoming</code>
- *                   <ul>
- *                     <li><code>23_manifest.xml</code>
- *                     <li><code>beneficiaries_42.rif</code>
- *                     <li><code>bcarrier_58.rif</code>
- *                     <li><code>pde_93.rif</code>
- *                   </ul>
- *               <li><code>Done</code>
- *                   <ul>
- *                     <li><code>64_manifest.xml</code>
- *                     <li><code>beneficiaries_45.rif</code>
- *                   </ul>
- *             </ul>
- *       </ul>
- * </ul>
- *
- * <p>In that structure, there will be one top-level directory in the bucket for each data set that
- * has yet to be completely processed by the ETL pipeline. Its name will be an <a
- * href="https://www.w3.org/TR/NOTE-datetime">ISO 8601 date and time</a> expressed in UTC, to a
- * precision of at least seconds. This will represent (roughly) the time that the data set was
- * created. Within each of those directories will be manifest files and the RIF files that they
- * reference.
- *
- * <p>The ETL operates in a loop: periodically checking for the oldest manifest file that can be
- * found and then handing it off to the rest of the pipeline for processing.
- */
-public final class DataSetMonitor {
+/** Orchestrates and manages the execution of {@link PipelineJob}s. */
+public final class PipelineManager {
   /**
-   * The {@link Logger} message that will be recorded if/when the {@link DataSetMonitor} starts
+   * The {@link Logger} message that will be recorded if/when the {@link PipelineManager} starts
    * scanning for data sets.
    */
   public static final String LOG_MESSAGE_STARTING_WORKER =
       "Starting data set monitor: watching for data sets to process...";
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DataSetMonitor.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManager.class);
 
   /**
    * This {@link System#exit(int)} value should be used when the application exits due to an
-   * unhandled exception in {@link DataSetMonitor}.
+   * unhandled exception in {@link PipelineManager}.
    */
   public static final int EXIT_CODE_MONITOR_ERROR = 2;
 
@@ -71,10 +38,10 @@ public final class DataSetMonitor {
   private TaskExecutor dataSetWatcherExecutor;
   private S3TaskManager s3TaskManager;
   private ScheduledFuture<?> dataSetWatcherFuture;
-  private DataSetMonitorWorker dataSetWatcher;
+  private CcwRifPipelineJob dataSetWatcher;
 
   /**
-   * Constructs a new {@link DataSetMonitor} instance. Note that this must be used as a singleton
+   * Constructs a new {@link PipelineManager} instance. Note that this must be used as a singleton
    * service in the application: only one instance running at a time is supported.
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
@@ -83,7 +50,7 @@ public final class DataSetMonitor {
    *     operation and starting another
    * @param listener the {@link DataSetMonitorListener} that will be notified when events occur
    */
-  public DataSetMonitor(
+  public PipelineManager(
       MetricRegistry appMetrics,
       ExtractionOptions options,
       int scanRepeatDelay,
@@ -110,9 +77,8 @@ public final class DataSetMonitor {
 
     this.dataSetWatcherExecutor = new TaskExecutor("Data Set Watcher Executor", 1);
     this.s3TaskManager = new S3TaskManager(appMetrics, options);
-    this.dataSetWatcher = new DataSetMonitorWorker(appMetrics, options, s3TaskManager, listener);
-    Runnable errorNotifyingDataSetWatcher =
-        new ErrorNotifyingRunnableWrapper(dataSetWatcher, listener);
+    this.dataSetWatcher = new CcwRifPipelineJob(appMetrics, options, s3TaskManager, listener);
+    Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingJobWrapper(dataSetWatcher, listener);
 
     /*
      * This kicks off the data set watcher, which will be run periodically
@@ -152,7 +118,7 @@ public final class DataSetMonitor {
     }
 
     /*
-     * Signal the scheduler to stop after the current DataSetMonitorWorker
+     * Signal the scheduler to stop after the current CcwRifPipelineJob
      * execution (if any), then wait for that to happen.
      */
     dataSetWatcherExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
@@ -219,7 +185,7 @@ public final class DataSetMonitor {
   }
 
   /**
-   * @return <code>true</code> if this {@link DataSetMonitor} is running, <code>false</code> if it
+   * @return <code>true</code> if this {@link PipelineManager} is running, <code>false</code> if it
    *     is not
    */
   public boolean isStopped() {
@@ -227,26 +193,24 @@ public final class DataSetMonitor {
   }
 
   /**
-   * Wraps a {@link Runnable} (presumably our {@link DataSetMonitorWorker}) and catches any
-   * unhandled exceptions if it blows up.
+   * Wraps a {@link PipelineJob} and catches any unhandled exceptions if it blows up.
    *
    * <p>This is needed because otherwise, we won't find out about that error unless/until we try to
    * call <code>dataSetWatcherFuture.get()</code>. And starting up a separate thread to poll that
    * would be silly.
    */
-  private static final class ErrorNotifyingRunnableWrapper implements Runnable {
-    private final Runnable wrappedRunnable;
+  private static final class ErrorNotifyingJobWrapper implements Runnable {
+    private final PipelineJob wrappedJob;
     private final DataSetMonitorListener listener;
 
     /**
-     * Constructs a new {@link RunnableWrapper} instance.
+     * Constructs a new {@link ErrorNotifyingJobWrapper} instance.
      *
-     * @param wrappedRunnable the {@link Runnable} to wrap and execute
-     * @param listener the {@link Consumer} to send any errors that are caught to
+     * @param wrappedJob the {@link PipelineJob} to wrap and execute
+     * @param listener the {@link DataSetMonitorListener} to send any errors that are caught to
      */
-    public ErrorNotifyingRunnableWrapper(
-        Runnable wrappedRunnable, DataSetMonitorListener listener) {
-      this.wrappedRunnable = wrappedRunnable;
+    public ErrorNotifyingJobWrapper(PipelineJob wrappedJob, DataSetMonitorListener listener) {
+      this.wrappedJob = wrappedJob;
       this.listener = listener;
     }
 
@@ -254,7 +218,7 @@ public final class DataSetMonitor {
     @Override
     public void run() {
       try {
-        wrappedRunnable.run();
+        wrappedJob.call();
       } catch (Throwable t) {
         /*
          * First, notify our error receiver so that they can do whatever
