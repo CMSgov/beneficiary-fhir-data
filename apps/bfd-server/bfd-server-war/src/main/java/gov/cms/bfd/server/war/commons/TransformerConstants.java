@@ -357,6 +357,9 @@ public final class TransformerConstants {
    */
   public static final String HL7_RACE_UNKNOWN_DISPLAY = "Unknown";
 
+  /** System for encoding UNK/null values */
+  public static final String CODING_V3_NULL = "http://terminology.hg/CodeSystem/v3-NullFlavor";
+
   /**
    * US Core Code System URL for Race Category <a
    * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">CodeSystem: US Core
