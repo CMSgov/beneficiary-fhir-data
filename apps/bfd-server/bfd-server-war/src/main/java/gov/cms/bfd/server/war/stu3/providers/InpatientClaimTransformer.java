@@ -66,6 +66,8 @@ final class InpatientClaimTransformer {
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
 
+    TransformerUtils.mapEobWeeklyProcessDate(eob, claimGroup.getWeeklyProcessDate());
+
     // map eob type codes into FHIR
     TransformerUtils.mapEobType(
         eob,
@@ -95,6 +97,7 @@ final class InpatientClaimTransformer {
         claimGroup.getMedicareBenefitsExhaustedDate(),
         claimGroup.getDiagnosisRelatedGroupCd());
 
+    // Claim Operational Indirect Medical Education Amount
     if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob,
@@ -102,6 +105,7 @@ final class InpatientClaimTransformer {
           claimGroup.getIndirectMedicalEducationAmount());
     }
 
+    // Claim Operational disproportionate Amount
     if (claimGroup.getDisproportionateShareAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob, CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claimGroup.getDisproportionateShareAmount());
@@ -129,6 +133,21 @@ final class InpatientClaimTransformer {
           eob,
           CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
           claimGroup.getClaimTotalPPSCapitalAmount());
+    }
+
+    if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {
+      TransformerUtils.addAdjudicationTotal(
+          eob,
+          CcwCodebookVariable.IME_OP_CLM_VAL_AMT,
+          claimGroup.getIndirectMedicalEducationAmount().get());
+    }
+
+    // Claim Uncompensated Care Payment Amount
+    if (claimGroup.getClaimUncompensatedCareAmount().isPresent()) {
+      TransformerUtils.addAdjudicationTotal(
+          eob,
+          CcwCodebookVariable.CLM_UNCOMPD_CARE_PMT_AMT,
+          claimGroup.getClaimUncompensatedCareAmount().get());
     }
 
     /*
@@ -181,7 +200,9 @@ final class InpatientClaimTransformer {
         claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiOriginalClaimControlNumber());
 
     // Common group level fields between Inpatient, HHA, Hospice and SNF
     TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(

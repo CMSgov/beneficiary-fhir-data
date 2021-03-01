@@ -21,7 +21,7 @@ public enum IdentifierType {
       TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
       TransformerConstants.CODED_IDENTIFIER_TYPE_DL,
       TransformerConstants.CODED_IDENTIFIER_TYPE_DL_DISPLAY),
-  FTN(
+  TAX(
       TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
       TransformerConstants.CODED_IDENTIFIER_TYPE_TAX,
       TransformerConstants.CODED_IDENTIFIER_TYPE_TAX_DISPLAY);

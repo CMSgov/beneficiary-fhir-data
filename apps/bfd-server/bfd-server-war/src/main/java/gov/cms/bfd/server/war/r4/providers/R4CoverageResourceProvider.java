@@ -44,8 +44,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * This FHIR {@link IResourceProvider} adds support for STU3 {@link Coverage} resources, derived
- * from the CCW beneficiary enrollment data.
+ * This FHIR {@link IResourceProvider} adds support for R4 {@link Coverage} resources, derived from
+ * the CCW beneficiary enrollment data.
  */
 @Component
 public final class R4CoverageResourceProvider implements IResourceProvider {

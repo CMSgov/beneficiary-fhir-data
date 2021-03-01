@@ -21,6 +21,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ClaimType;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
@@ -275,6 +276,7 @@ public final class EndpointJsonResponseComparatorIT {
     Collections.sort(
         searchParams,
         new Comparator<JsonNode>() {
+          @Override
           public int compare(JsonNode node1, JsonNode node2) {
             String name1 = node1.get("name").toString();
             String name2 = node2.get("name").toString();
@@ -284,7 +286,7 @@ public final class EndpointJsonResponseComparatorIT {
 
     ((ArrayNode) searchParamsArray).removeAll();
     for (int i = 0; i < searchParams.size(); i++) {
-      ((ArrayNode) searchParamsArray).add((ObjectNode) searchParams.get(i));
+      ((ArrayNode) searchParamsArray).add(searchParams.get(i));
     }
 
     String jsonResponse = null;
@@ -346,6 +348,7 @@ public final class EndpointJsonResponseComparatorIT {
     Collections.sort(
         diagnosisTypes,
         new Comparator<JsonNode>() {
+          @Override
           public int compare(JsonNode node1, JsonNode node2) {
             String name1 = node1.get("coding").get(0).get("code").toString();
             String name2 = node2.get("coding").get(0).get("code").toString();
@@ -355,7 +358,7 @@ public final class EndpointJsonResponseComparatorIT {
 
     ((ArrayNode) diagnosisTypeArray).removeAll();
     for (int i = 0; i < diagnosisTypes.size(); i++) {
-      ((ArrayNode) diagnosisTypeArray).add((ObjectNode) diagnosisTypes.get(i));
+      ((ArrayNode) diagnosisTypeArray).add(diagnosisTypes.get(i));
     }
 
     String jsonResponse = null;
@@ -406,7 +409,12 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setHeaders(
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "hicn,mbi",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -458,7 +466,12 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setHeaders(
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "hicn,mbi",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -519,7 +532,12 @@ public final class EndpointJsonResponseComparatorIT {
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
-    extraParamsInterceptor.setIncludeIdentifiers("hicn,mbi");
+    extraParamsInterceptor.setHeaders(
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            "hicn,mbi",
+            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
@@ -953,6 +971,7 @@ public final class EndpointJsonResponseComparatorIT {
     NodeFilteringConsumer consumer =
         new NodeFilteringConsumer(
             new NodeFilter() {
+              @Override
               public boolean apply(JsonNode node) {
                 Pattern p = getIgnoredPathsRegex();
                 Matcher m = p.matcher(node.get("path").toString());

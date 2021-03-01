@@ -70,24 +70,22 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 
 Requirements: Docker
 
-Caution: Setting up your local environments requires git patches to run. Please make sure you `make unservable` and `make unloadadable` before you commit your changes to revert these patches.
-
 Let's begin!
 
 The instructions from here on should be run from the `contributing` directory located at /
 
 To simply run tests or execute other tasks in the BFD bring up the docker containers.
-Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory.
+Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory. A sample file in the `contributing` directory has been added to serve as a starting point.
 
-- `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
-- (optional) `SYNTHETIC_DATA` specifies a folder where you have the full set of synthetic rif files.
+```
+cp .env.sample .env
+```
+
+- (defaults to `..`) `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
+- (defaults to `9954`) `BFD_PORT` specifies the host port to use when running the API locally
 - (defaults to `/app`) `BFD_MOUNT_POINT` the path within the service container where the beneficiary-fhir-data directory will be mounted.
-
-Here's an example `.env` file that docker-compose could use:
-```
-BFD_DIR=../../beneficiary-fhir-data
-SYNTHETIC_DATA=../../synthetic-data
-```
+- (defaults to `./synthetic-data`) `SYNTHETIC_DATA` specifies a folder where you have the full set of synthetic rif files.
+- (defaults to `/synthetic-data`) `SYNTHETIC_DATA_MOUNT_POINT` specifies the folder in the bfd container where the data will be mounted
 
 ```
 make up
@@ -105,23 +103,7 @@ mvn verify
 
 #### Serving the BFD
 
-To run the BFD locally in a way that will allow you and other systems to interact with it some modifications need to be made so that it serves on a consistent port. Caution: Since this changes the code in the repository (server-start.sh) please keep in mind not to commit these changes.
-
-These changes are contained in the file `contributing/patches/allow_local_port_config.patch` and can be applied with
-
-```
-make servable
-```
-To undo the changes run `make unservable`.
-
-Once the changes are applied the server needs to be started in order for them to take effect.
-Run `make up` if no docker containers are running or
-
-```
-make restart
-```
-
-if they're already running.
+Run `make up` if no docker containers are running or `make restart` if they're already running.
 
 The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'.
 

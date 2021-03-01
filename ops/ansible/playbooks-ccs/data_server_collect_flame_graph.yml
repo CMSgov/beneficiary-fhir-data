@@ -1,0 +1,144 @@
+##
+# Collects a mixed-mode Java flame graph from the specified system, after
+# collecting `perf` data for the specified amount of time (in seconds).
+# Typically limited to just one system, via Ansible's `--limit`.
+#
+# Usage:
+#
+#     $ pipenv run ./ansible-playbook-wrapper data_server_collect_flame_graph.yml --inventory='somehost.ec2.internal' --extra-vars "perf_record_seconds=15 find_process_command='pgrep -f bfd-server-launcher.*jetty' java_user='bfd' jdk_path=/etc/alternatives/java_sdk_1.8.0_openjdk"
+##
+
+- name: Configure Data Server System
+  hosts: all
+  tasks:
+
+    - name: Set Helper Variables
+      set_fact:
+        tools_root_remote: '/usr/local'
+        tools_root_local: '/tmp'
+        find_process_command_default: 'pgrep java'
+        perf_record_seconds_default: 15
+        jdk_path_default: '/etc/alternatives/java_sdk_1.8.0_openjdk'
+
+    - name: Set More Helper Variables
+      set_fact:
+        perf_map_agent_path_remote: "{{ tools_root_remote }}/perf-map-agent"
+        perf_map_agent_path_local: "{{ tools_root_local }}/perf-map-agent"
+        flamegraph_path_local: "{{ tools_root_local }}/FlameGraph"
+        find_process_command: "{{ find_process_command | default(find_process_command_default) }}"
+        perf_record_seconds: "{{ perf_record_seconds | default(perf_record_seconds_default) }}"
+        jdk_path: "{{ jdk_path | default(jdk_path_default) }}"
+
+    - name: Download perf-map-agent Locally
+      git:
+        repo: 'https://github.com/jvm-profiling-tools/perf-map-agent.git'
+        dest: "{{ perf_map_agent_path_local }}"
+      delegate_to: localhost
+
+    - name: Copy perf-map-agent to Target
+      synchronize:
+        src: "{{ perf_map_agent_path_local }}"
+        dest: "{{ tools_root_remote }}"
+      become: true
+
+    - name: Install perf and Compiler Toolchain
+      package:
+        name:
+          - perf
+          - cmake
+          - gcc
+          - gcc-c++
+          - java-1.8.0-openjdk-devel
+        state: present
+      become: true
+
+    - name: Compile perf-map-agent on Remote System - CMake
+      command: cmake .
+      args:
+        chdir: "{{ perf_map_agent_path_remote }}"
+        creates: "{{ perf_map_agent_path_remote }}/Makefile"
+      environment:
+        JAVA_HOME: "{{ jdk_path }}"
+      become: true
+
+    - name: Compile perf-map-agent on Remote System - make
+      command: make
+      args:
+        chdir: "{{ perf_map_agent_path_remote }}"
+        creates: "{{ perf_map_agent_path_remote }}/out/libperfmap.so"
+      environment:
+        JAVA_HOME: "{{ jdk_path }}"
+      become: true
+
+    - name: Find Java Process
+      command: "{{ find_process_command }}"
+      register: pgrep_result
+
+    - name: Calculate Java Process PID
+      set_fact:
+        process_pid: "{{ pgrep_result.stdout_lines[0] }}"
+
+    - name: Display Java Process PID
+      debug:
+        msg: "Perf data to be collected from PID: '{{ process_pid }}'."
+
+    # This will record data from the process, and creates:
+    # * /tmp/perf-{{ process_pid }}.data
+    # * /tmp/perf-{{ process_pid }}.map
+    - name: Record perf Data from Java Process
+      shell: "{{ perf_map_agent_path_remote }}/bin/perf-java-record-stack {{ process_pid }}"
+      environment:
+        JAVA_HOME: "{{ jdk_path }}"
+        PERF_RECORD_SECONDS: "{{ perf_record_seconds }}"
+      become: true
+
+    # Note: This task will only work once per Java process. If you have to re-run this play against the same
+    # box (without a restart) it will fail. If you run into this, consider adding `failed_when: false` to
+    # this task. Haven't quite convinced myself it's a good default, yet.
+    - name: Attach Java Symbol Agent to Java Process
+      shell: "java -cp attach-main.jar:$JAVA_HOME/lib/tools.jar net.virtualvoid.perf.AttachOnce {{ process_pid }}"
+      args:
+        chdir: "{{ perf_map_agent_path_remote }}/out"
+      environment:
+        JAVA_HOME: "{{ jdk_path }}"
+      become: true
+      become_user: "{{ java_user }}"
+
+    - name: Fix Symbol Map Ownership
+      file:
+        path: "/tmp/perf-{{ process_pid }}.map"
+        owner: root
+        group: root
+        mode: 'u=rw,g=r,o=r'
+      become: true
+
+    - name: Generate Trace Output
+      shell: "perf script -i /tmp/perf-{{ process_pid }}.data > perf-{{ process_pid }}.stacks"
+      args:
+        chdir: '/tmp'
+      become: true
+
+    - name: Retrieve Trace File
+      fetch:
+        src: "/tmp/perf-{{ process_pid }}.stacks"
+        dest: "/tmp/"
+        flat: true
+
+    - name: Download FlameGraph Locally
+      git:
+        repo: 'https://github.com/brendangregg/FlameGraph.git'
+        dest: "{{ flamegraph_path_local }}"
+        depth: 1
+      delegate_to: localhost
+
+    - name: Run FlameGrapgh stackcollapse Script
+      shell: "{{ flamegraph_path_local }}/stackcollapse-perf.pl /tmp/perf-{{ process_pid }}.stacks > /tmp/perf-{{ process_pid }}.collapsed"
+      delegate_to: localhost
+
+    - name: Run FlameGrapgh SVG Script
+      shell: "{{ flamegraph_path_local }}/flamegraph.pl /tmp/perf-{{ process_pid }}.collapsed > /tmp/perf-{{ process_pid }}.svg"
+      delegate_to: localhost
+
+    - name: Display Output File Name
+      debug:
+        msg: "Flame Graph SVG file written to: '/tmp/perf-{{ process_pid }}.svg'."

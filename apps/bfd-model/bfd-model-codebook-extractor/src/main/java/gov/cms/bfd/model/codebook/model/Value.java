@@ -24,6 +24,15 @@ public final class Value {
   }
 
   /**
+   * Constructs a new {@link Value} instance for the CCWCodebookMissingVariable. Had to add new
+   * constructor for instantiation of the CCWCodebookInterface
+   */
+  public Value(String code, String description) {
+    this.code = code;
+    this.description = description;
+  }
+
+  /**
    * @return the coded value for this {@link Value}, representing one of the allowed values for its
    *     great-grandparent {@link Variable}
    */

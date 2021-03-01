@@ -69,7 +69,7 @@ public final class PartDEventTransformerTest {
   @Test
   public void transformSampleARecordWithFederalTaxNumber() throws FHIRException {
     String serviceProviderIdQualiferCode = "11";
-    String serviceProviderCode = IdentifierType.FTN.getSystem();
+    String serviceProviderCode = IdentifierType.TAX.getSystem();
     checkOrgAndFacility(serviceProviderIdQualiferCode, serviceProviderCode);
   }
 
@@ -283,7 +283,7 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), "Hand E San - ALCOHOL");
+          claim.getNationalDrugCode(), "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

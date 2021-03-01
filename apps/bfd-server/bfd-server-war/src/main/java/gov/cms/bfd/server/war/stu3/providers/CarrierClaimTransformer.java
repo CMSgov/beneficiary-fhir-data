@@ -62,6 +62,8 @@ final class CarrierClaimTransformer {
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
 
+    TransformerUtils.mapEobWeeklyProcessDate(eob, claimGroup.getWeeklyProcessDate());
+
     // map eob type codes into FHIR
     TransformerUtils.mapEobType(
         eob,
@@ -85,7 +87,9 @@ final class CarrierClaimTransformer {
         claimGroup.getProviderPaymentAmount(),
         claimGroup.getBeneficiaryPaymentAmount(),
         claimGroup.getSubmittedChargeAmount(),
-        claimGroup.getAllowedChargeAmount());
+        claimGroup.getAllowedChargeAmount(),
+        claimGroup.getClaimDispositionCode(),
+        claimGroup.getClaimCarrierControlNumber());
 
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(
