@@ -389,9 +389,11 @@ public class InpatientClaimTransformerV2 {
                   line.getDeductibleCoinsuranceCd()));
 
       // HCPCS_CD => item.productOrService
-      item.setProductOrService(
-          TransformerUtilsV2.createCodeableConcept(
-              eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
+      if (line.getHcpcsCode().isPresent()) {
+        item.setProductOrService(
+            TransformerUtilsV2.createCodeableConcept(
+                eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
+      }
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
