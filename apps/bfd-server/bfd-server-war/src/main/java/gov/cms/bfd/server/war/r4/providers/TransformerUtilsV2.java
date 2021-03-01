@@ -2753,12 +2753,6 @@ public final class TransformerUtilsV2 {
             C4BBAdjudication.SUBMITTED,
             totalChargeAmount));
 
-    // CLM_TOT_CHRG_AMT => ExplanationOfBenefit.adjudication.amount
-    addAdjudication(
-        eob,
-        createAdjudicationAmtSlice(
-            CcwCodebookVariable.CLM_TOT_CHRG_AMT, C4BBAdjudication.SUBMITTED, totalChargeAmount));
-
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     addBenefitBalanceFinancialMedicalAmt(eob, CcwCodebookVariable.PRPAYAMT, primaryPayerPaidAmount);
   }

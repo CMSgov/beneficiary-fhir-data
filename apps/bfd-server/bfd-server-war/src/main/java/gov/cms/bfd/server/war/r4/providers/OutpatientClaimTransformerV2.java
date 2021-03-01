@@ -184,9 +184,7 @@ public class OutpatientClaimTransformerV2 {
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
-    // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.adjudication.amount
-    // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
-    // (PRPAYAMT)
+    // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
