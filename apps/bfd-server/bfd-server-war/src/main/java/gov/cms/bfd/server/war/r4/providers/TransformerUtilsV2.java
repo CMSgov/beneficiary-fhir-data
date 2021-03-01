@@ -2759,6 +2759,62 @@ public final class TransformerUtilsV2 {
     return org.get();
   }
 
+  /**
+   * Looks up or adds a contained {@link Identifier} object to the current {@link Patient}. This is
+   * used to store Identifier slices related to the Patient.
+   *
+   * @param patient The {@link Patient} to Patient.identifier details to
+   * @param type The {@link C4BBIdentifierType} of the identifier slice
+   * @param value The value of the identifier. If empty, this call is a no-op
+   */
+  static void addIdentifierSlice(Patient patient, C4BBIdentifierType type, Optional<String> value) {
+    if (value.isPresent()) {
+      Identifier id =
+          new Identifier()
+              .setType(createCodeableConcept(type.getSystem(), type.toCode()))
+              .setValue(value.get());
+
+      patient.addIdentifier(id);
+    }
+  }
+
+  /**
+   * Looks up or adds a contained {@link Organization} object to the current {@link
+   * ExplanationOfBenefit}. This is used to store Identifier slices related to the Provider
+   * organization.
+   *
+   * @param patient The {@link Patient} to Patient.identifier details to
+   * @param codeable The {@link CodeableConcept} of the identifier slice
+   * @param value The value of the identifier. If empty, this call is a no-op
+   */
+  static void addIdentifierSlice(
+      Patient patient, CodeableConcept codeable, Optional<String> value) {
+    addIdentifierSlice(patient, codeable, value, Optional.empty());
+  }
+
+  /**
+   * Looks up or adds a contained {@link Identifier} object to the current {@link Patient}. This is
+   * used to store Identifier slices related to the Provider organization.
+   *
+   * @param patient The {@link Patient} to Patient.identifier details to
+   * @param codeable The {@link CodeableConcept} of the identifier slice
+   * @param value The value of the identifier. If empty, this call is a no-op
+   * @param systemUri optional system namespace for thee value
+   */
+  static void addIdentifierSlice(
+      Patient patient,
+      CodeableConcept codeable,
+      Optional<String> value,
+      Optional<String> systemUri) {
+    if (value.isPresent()) {
+      Identifier id = new Identifier().setType(codeable).setValue(value.get());
+      if (systemUri.isPresent()) {
+        id.setSystem(systemUri.get());
+      }
+      patient.addIdentifier(id);
+    }
+  }
+
   // Used to look up and identify an internal `contained` Organization resource
   private static final String PROVIDER_ORG_ID = "provider-org";
   private static final String PROVIDER_ORG_REFERENCE = "#" + PROVIDER_ORG_ID;
