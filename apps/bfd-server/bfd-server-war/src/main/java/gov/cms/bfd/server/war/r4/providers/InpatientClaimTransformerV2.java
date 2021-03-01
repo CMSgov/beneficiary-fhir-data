@@ -336,17 +336,21 @@ public class InpatientClaimTransformerV2 {
           line.getNationalDrugCodeQualifierCode());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue.extension
-      item.getRevenue()
-          .addExtension(
-              TransformerUtilsV2.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
-                  line.getDeductibleCoinsuranceCd()));
+      if (line.getDeductibleCoinsuranceCd().isPresent()) {
+        item.getRevenue()
+            .addExtension(
+                TransformerUtilsV2.createExtensionCoding(
+                    eob,
+                    CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
+                    line.getDeductibleCoinsuranceCd()));
+      }
 
       // HCPCS_CD => item.productOrService
-      item.setProductOrService(
-          TransformerUtilsV2.createCodeableConcept(
-              eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
+      if (line.getHcpcsCode().isPresent()) {
+        item.setProductOrService(
+            TransformerUtilsV2.createCodeableConcept(
+                eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
+      }
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
