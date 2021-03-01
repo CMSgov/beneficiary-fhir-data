@@ -23,6 +23,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimPharmacyTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -79,6 +80,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
@@ -86,7 +88,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PositiveIntType;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -290,9 +291,13 @@ public final class TransformerUtilsV2 {
    *     Reference#getIdentifier()}
    * @return a {@link Reference} with the specified {@link Identifier}
    */
-  static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
+  static Reference createIdentifierReference(
+      C4BBOrganizationIdentifierType type, String identifierValue) {
     return new Reference()
-        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+        .setIdentifier(
+            new Identifier()
+                .setType(createCodeableConcept(type.getSystem(), type.toCode()))
+                .setValue(identifierValue))
         .setDisplay(retrieveNpiCodeDisplay(identifierValue));
   }
 
@@ -1176,16 +1181,6 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * @param practitionerNpi the {@link Practitioner#getIdentifier()} value to match (where {@link
-   *     Identifier#getSystem()} is {@value #TransformerConstants.CODING_SYSTEM_NPI_US})
-   * @return a {@link Reference} to the {@link Practitioner} resource that matches the specified
-   *     parameters
-   */
-  static Reference referencePractitioner(String practitionerNpi) {
-    return createIdentifierReference(TransformerConstants.CODING_NPI_US, practitionerNpi);
-  }
-
-  /**
    * @param period the {@link Period} to adjust
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
@@ -1845,6 +1840,12 @@ public final class TransformerUtilsV2 {
     // Claim Type + Claim ID => ExplanationOfBenefit.id
     eob.setId(buildEobId(claimType, claimId));
 
+    // Current timestamp => Created
+    eob.setCreated(new Date());
+
+    // "claim" => ExplanationOfBenefit.use
+    eob.setUse(Use.CLAIM);
+
     if (claimType.equals(ClaimType.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
       eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId));
@@ -1938,12 +1939,14 @@ public final class TransformerUtilsV2 {
    *     CareTeamComponent#getRole()}
    * @return the {@link CareTeamComponent} that was created/linked
    */
-  static CareTeamComponent addCareTeamPractitioner(
+  private static CareTeamComponent addCareTeamPractitioner(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
       C4BBPractitionerIdentifierType type,
       String practitionerIdValue,
-      C4BBClaimInstitutionalCareTeamRole careTeamRole) {
+      String roleSystem,
+      String roleCode,
+      String roleDisplay) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry =
         eob.getCareTeam().stream()
@@ -1955,10 +1958,8 @@ public final class TransformerUtilsV2 {
             .filter(ctc -> ctc.hasRole())
             .filter(
                 ctc ->
-                    careTeamRole.toCode().equals(ctc.getRole().getCodingFirstRep().getCode())
-                        && careTeamRole
-                            .getSystem()
-                            .equals(ctc.getRole().getCodingFirstRep().getSystem()))
+                    roleCode.equals(ctc.getRole().getCodingFirstRep().getCode())
+                        && roleSystem.equals(ctc.getRole().getCodingFirstRep().getSystem()))
             .findAny()
             .orElse(null);
 
@@ -1970,9 +1971,8 @@ public final class TransformerUtilsV2 {
       careTeamEntry.setSequence(eob.getCareTeam().size());
       careTeamEntry.setProvider(createPractitionerIdentifierReference(type, practitionerIdValue));
 
-      CodeableConcept careTeamRoleConcept =
-          createCodeableConcept(careTeamRole.getSystem(), careTeamRole.toCode());
-      careTeamRoleConcept.getCodingFirstRep().setDisplay(careTeamRole.getDisplay());
+      CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
+      careTeamRoleConcept.getCodingFirstRep().setDisplay(roleDisplay);
       careTeamEntry.setRole(careTeamRoleConcept);
     }
 
@@ -2025,8 +2025,7 @@ public final class TransformerUtilsV2 {
       CcwCodebookVariable codeSystemVariable,
       Optional<?> codeValue) {
     if (codeValue.isPresent()) {
-      SupportingInformationComponent infoComponent =
-          addInformationSlice(eob, slice, categoryVariable);
+      SupportingInformationComponent infoComponent = addInformationSlice(eob, slice);
 
       CodeableConcept infoCode =
           new CodeableConcept().addCoding(createCoding(eob, codeSystemVariable, codeValue));
@@ -2108,7 +2107,7 @@ public final class TransformerUtilsV2 {
   }
 
   static SupportingInformationComponent addInformationSlice(
-      ExplanationOfBenefit eob, C4BBSupportingInfoType slice, Object value) {
+      ExplanationOfBenefit eob, C4BBSupportingInfoType slice) {
     return addInformation(eob)
         .setCategory(new CodeableConcept().addCoding(createC4BBSupportingInfoCoding(slice)));
   }
@@ -2648,6 +2647,32 @@ public final class TransformerUtilsV2 {
   /**
    * Optionally adds a member to @link ExplanationOfBenefit#getCareTeam()}
    *
+   * <p>Used for Institutional claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param item the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param system Coding System to use, either NPI or UPIN
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   */
+  static void addCareTeamMember(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimInstitutionalCareTeamRole role,
+      Optional<String> id) {
+    if (id.isPresent()) {
+      addCareTeamPractitioner(
+          eob, item, type, id.get(), role.getSystem(), role.toCode(), role.getDisplay());
+    }
+  }
+
+  /**
+   * Optionally adds a member to @link ExplanationOfBenefit#getCareTeam()}
+   *
+   * <p>Used for Institutional claims
+   *
    * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
    *     of
    * @param system Coding System to use, either NPI or UPIN
@@ -2659,8 +2684,30 @@ public final class TransformerUtilsV2 {
       C4BBPractitionerIdentifierType type,
       C4BBClaimInstitutionalCareTeamRole role,
       Optional<String> id) {
+    addCareTeamMember(eob, null, type, role, id);
+  }
+
+  /**
+   * Optionally adds a member to @link ExplanationOfBenefit#getCareTeam()}
+   *
+   * <p>Used for Pharmacy claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param item the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param system Coding System to use, either NPI or UPIN
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   */
+  static void addCareTeamMember(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimPharmacyTeamRole role,
+      Optional<String> id) {
     if (id.isPresent()) {
-      addCareTeamPractitioner(eob, null, type, id.get(), role);
+      addCareTeamPractitioner(
+          eob, item, type, id.get(), role.getSystem(), role.toCode(), role.getDisplay());
     }
   }
 
