@@ -143,7 +143,8 @@ public final class DataSetMonitorIT {
 
       // Verify what was handed off to the DataSetMonitorListener.
       Assert.assertEquals(3, listener.getDataEvents().size());
-      Assert.assertEquals(0, listener.getErrorEvents().size());
+      Assert.assertEquals(
+          "Errors encountered: " + listener.getErrorEvents(), 0, listener.getErrorEvents().size());
       Assert.assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
       Assert.assertEquals(manifestB.getTimestamp(), listener.getDataEvents().get(1).getTimestamp());
       Assert.assertEquals(manifestC.getTimestamp(), listener.getDataEvents().get(2).getTimestamp());
