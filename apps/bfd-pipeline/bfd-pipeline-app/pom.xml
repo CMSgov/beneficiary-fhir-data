@@ -19,12 +19,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-rif-load</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-rif-extract</artifactId>
+			<artifactId>bfd-pipeline-ccw-rif</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
