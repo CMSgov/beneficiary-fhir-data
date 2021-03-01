@@ -351,3 +351,11 @@ EnableSendfile on
 #
 # Load config files in the "/etc/httpd/conf.d" directory, if any.
 IncludeOptional conf.d/*.conf
+
+# Load rewrite module
+LoadModule  rewrite_module  "/usr/local/apache/modules/mod_rewrite.so"
+
+# Disable TRACEs
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+RewriteRule .* - [F]

@@ -122,17 +122,23 @@
   command: restorecon -irv /var/www
   become: yes
 
-- name: Enable Required Modules
-  copy:
-    src: "{{ item }}"
-    dest: "/etc/httpd/conf.modules.d/{{ item }}"
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-  become: true
-  with_items: []
-  notify:
-    - Restart Apache
+# - name: Enable Required Modules
+#   copy:
+#     src: "{{ item }}"
+#     dest: "/etc/httpd/conf.modules.d/{{ item }}"
+#     owner: root
+#     group: root
+#     mode: u=rw,g=r,o=r
+#   become: true
+#   with_items: []
+#   notify:
+#     - Restart Apache
+
+- name: Enable rewrite module
+  apache2_module:
+    name: rewrite
+    state: present
+    ignore_configcheck: True
 
 - name: Update Configuration Files
   template:

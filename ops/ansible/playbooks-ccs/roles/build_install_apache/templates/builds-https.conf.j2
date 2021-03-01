@@ -2,6 +2,11 @@
   ServerName {{ vault_builds_server_name }}
   ServerAlias www.{{ vault_builds_server_name }}
   
+  # Disable TRACEs
+  RewriteEngine On
+  RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+  RewriteRule .* - [F]
+
   DocumentRoot /var/www/builds/html
   <Directory /var/www/builds/html/>
     Require all denied
