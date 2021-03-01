@@ -12,6 +12,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
@@ -124,6 +125,14 @@ public class OutpatientClaimTransformerV2 {
         ClaimType.OUTPATIENT,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
+
+    // set the provider number which is common among several claim types
+    // PRVDR_NUM => ExplanationOfBenefit.provider.identifier
+    TransformerUtilsV2.addProviderSlice(
+        eob,
+        C4BBOrganizationIdentifierType.PRN,
+        claimGroup.getProviderNumber(),
+        claimGroup.getLastUpdated());
 
     // NCH_PROFNL_CMPNT_CHRG_AMT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(

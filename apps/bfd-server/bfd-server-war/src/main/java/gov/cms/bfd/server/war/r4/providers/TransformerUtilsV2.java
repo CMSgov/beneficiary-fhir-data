@@ -24,6 +24,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2.CurrencyIdentifier;
@@ -2697,7 +2698,7 @@ public final class TransformerUtilsV2 {
       Optional<Date> lastUpdated) {
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
-    addProviderSlice(eob, C4BBIdentifierType.NPI, organizationNpi, lastUpdated);
+    addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);
 
     // CLM_FAC_TYPE_CD => ExplanationOfBenefit.facility.extension
     eob.getFacility()
@@ -2989,7 +2990,7 @@ public final class TransformerUtilsV2 {
    */
   static void addProviderSlice(
       ExplanationOfBenefit eob,
-      C4BBIdentifierType type,
+      C4BBOrganizationIdentifierType type,
       Optional<String> value,
       Optional<Date> lastUpdated) {
     if (value.isPresent()) {
@@ -3009,7 +3010,7 @@ public final class TransformerUtilsV2 {
               .setValue(value.get());
 
       // Certain types have specific systems
-      if (type == C4BBIdentifierType.NPI) {
+      if (type == C4BBOrganizationIdentifierType.NPI) {
         id.setSystem(TransformerConstants.CODING_NPI_US);
       }
 
@@ -3024,7 +3025,10 @@ public final class TransformerUtilsV2 {
 
   /** Convenience function when passing non-optional values */
   static void addProviderSlice(
-      ExplanationOfBenefit eob, C4BBIdentifierType type, String value, Optional<Date> lastupdated) {
+      ExplanationOfBenefit eob,
+      C4BBOrganizationIdentifierType type,
+      String value,
+      Optional<Date> lastupdated) {
     addProviderSlice(eob, type, Optional.of(value), lastupdated);
   }
 

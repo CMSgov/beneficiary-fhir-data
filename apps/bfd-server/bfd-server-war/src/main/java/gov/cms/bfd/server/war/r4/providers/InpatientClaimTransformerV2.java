@@ -10,7 +10,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
-import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Optional;
@@ -102,7 +102,7 @@ public class InpatientClaimTransformerV2 {
     // PRVDR_NUM => ExplanationOfBenefit.provider.identifier
     TransformerUtilsV2.addProviderSlice(
         eob,
-        C4BBIdentifierType.PAYERID,
+        C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
         claimGroup.getLastUpdated());
 
