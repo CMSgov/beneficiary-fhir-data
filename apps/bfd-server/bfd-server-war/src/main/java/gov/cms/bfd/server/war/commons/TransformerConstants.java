@@ -366,21 +366,12 @@ public final class TransformerConstants {
       "http://hl7.org/fhir/us/core/ValueSet/omb-race-category";
 
   /**
-   * CARIN Value Set URL for Identifier Type <a href=
-   * "http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">ValueSet: C4BB
-   * Identifier Type</a>
-   */
-  public static final String CARIN_IDENTIFIER_TYPE =
-      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
-
-  /**
    * CARIN Code System URL for Supporting Info Type <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem:
    * C4BB Supporting Info Type</a>
    */
   public static final String CARIN_SUPPORTING_INFO_TYPE =
-      "http://hl7.org/fhir/ValueSet/claim-informationcategory";
-
+      "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
   /**
    * CARIN Value Set URL for Adjudication <a
    * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
@@ -390,34 +381,26 @@ public final class TransformerConstants {
       "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
 
   /**
-   * C4BB Resource Profile: C4BB ExplanationOfBenefit Inpatient Institutional<a
-   * href="https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-C4BB-ExplanationOfBenefit-Inpatient-Institutional.html">
-   * C4BBExplanationOfBenefitInpatientInstitutional</a>
+   * ValueSet: C4BB Adjudication <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
+   * Adjudication</a>
    */
-  public static final String C4BB_EOB_INPATIENT_PROFILE_URL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional";
+  public static final String C4BB_IDENTIFIER_TYPE =
+      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
 
   /**
-   * C4BB Resource Profile: C4BB ExplanationOfBenefit Outpatient Institutional<a
-   * href="https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-C4BB-ExplanationOfBenefit-Outpatient-Institutional.html">
-   * C4BBExplanationOfBenefitOutpatientInstitutional</a>
+   * CodeSystem: C4BB Supporting Info Type <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem:
+   * C4BB Supporting Info Type</a>
    */
-  public static final String C4BB_EOB_OUTPATIENT_PROFILE_URL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional";
+  public static final String C4BB_SUPPORTING_INFO_TYPE =
+      "http://hl7.org/fhir/ValueSet/claim-informationcategory";
 
   /**
-   * C4BB Resource Profile: C4BB ExplanationOfBenefit Pharmacy <a
-   * href="https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-C4BB-ExplanationOfBenefit-Pharmacy.html">
-   * C4BBExplanationOfBenefitPharmacy</a>
+   * ValueSet: C4BB Adjudication <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
+   * Adjudication</a>
    */
-  public static final String C4BB_EOB_PHARMACY_PROFILE_URL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy";
-
-  /**
-   * C4BB Resource Profile: C4BB ExplanationOfBenefit Professional NonClinician
-   * href="https://build.fhir.org/ig/HL7/carin-bb/StructureDefinition-C4BB-ExplanationOfBenefit-Professional-NonClinician.html">
-   * C4BBExplanationOfBenefitProfessionalNonClinician</a>
-   */
-  public static final String C4BB_EOB_NONCLINICIAN_PROFILE_URL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician";
+  public static final String C4BB_ADJUDICATION_CODE =
+      "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
 }

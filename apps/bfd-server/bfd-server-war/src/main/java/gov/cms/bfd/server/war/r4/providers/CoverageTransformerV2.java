@@ -7,6 +7,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
@@ -82,6 +83,8 @@ final class CoverageTransformerV2 {
     Objects.requireNonNull(beneficiary);
 
     Coverage coverage = new Coverage();
+
+    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
 
     // coverage.addClass_(coverageClass);
     coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary));
