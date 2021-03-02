@@ -39,7 +39,6 @@ public final class BeneficiaryTransformerV2Test {
             .findFirst()
             .get();
 
-    beneficiary.setHicnUnhashed(Optional.of(beneficiary.getHicn()));
     beneficiary.setHicn("someHICNhash");
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
@@ -64,7 +63,6 @@ public final class BeneficiaryTransformerV2Test {
             .map(r -> (MedicareBeneficiaryIdHistory) r)
             .filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId().orElse(null)))
             .collect(Collectors.toSet());
-
     beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
     assertThat(beneficiary, is(notNullValue()));
   }
@@ -92,8 +90,6 @@ public final class BeneficiaryTransformerV2Test {
 
     // assertMatches(beneficiary, patient, requestHeader);
     // Assert.assertEquals("Number of identifiers should be 2", 2, patient.getIdentifier().size());
-
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
 
     // Verify identifiers and values match.
     /*

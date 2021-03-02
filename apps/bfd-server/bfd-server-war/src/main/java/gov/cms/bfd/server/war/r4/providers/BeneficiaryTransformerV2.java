@@ -140,7 +140,6 @@ final class BeneficiaryTransformerV2 {
       if (beneficiary.getMbiEffectiveDate().isPresent()) {
         TransformerUtilsV2.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
       }
-
       if (beneficiary.getMbiObsoleteDate().isPresent()) {
         TransformerUtilsV2.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
       }
@@ -173,7 +172,7 @@ final class BeneficiaryTransformerV2 {
         addUnhashedIdentifier(
             patient,
             hicnUnhashedCurrent.get(),
-            TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
+            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
             currentIdentifier);
       }
 
@@ -192,7 +191,7 @@ final class BeneficiaryTransformerV2 {
         addUnhashedIdentifier(
             patient,
             hicn,
-            TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
+            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
             historicalIdentifier);
       }
     }
@@ -204,7 +203,7 @@ final class BeneficiaryTransformerV2 {
         addUnhashedIdentifier(
             patient,
             mbiUnhashedCurrent.get(),
-            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
             currentIdentifier);
       }
 
@@ -225,7 +224,7 @@ final class BeneficiaryTransformerV2 {
         addUnhashedIdentifier(
             patient,
             mbi,
-            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
             historicalIdentifier);
       }
     }
