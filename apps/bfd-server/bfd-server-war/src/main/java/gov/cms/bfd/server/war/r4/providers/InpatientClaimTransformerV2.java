@@ -351,53 +351,6 @@ public class InpatientClaimTransformerV2 {
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
-          C4BBPractitionerIdentifierType.UPIN,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
-          line.getRevenueCenterRenderingPhysicianUPIN());
-
-      // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
-      TransformerUtilsV2.addCareTeamMember(
-          eob,
-          C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
-          line.getRevenueCenterRenderingPhysicianNPI());
-    }
-
-    // BENE_LRD_USED_CNT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob, CcwCodebookVariable.BENE_LRD_USED_CNT, claimGroup.getLifetimeReservedDaysUsedCount());
-
-    // ClaimLine => ExplanationOfBenefit.item
-    for (InpatientClaimLine line : claimGroup.getLines()) {
-      ItemComponent item = TransformerUtilsV2.addItem(eob);
-
-      // Override the default sequence
-      // CLM_LINE_NUM => item.sequence
-      item.setSequence(line.getLineNumber().intValue());
-
-      // REV_CNTR => item.revenue
-      item.setRevenue(
-          TransformerUtilsV2.createCodeableConcept(
-              eob, CcwCodebookVariable.REV_CNTR, line.getRevenueCenter()));
-
-      // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue.extension
-      item.getRevenue()
-          .addExtension(
-              TransformerUtilsV2.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
-                  line.getDeductibleCoinsuranceCd()));
-
-      // HCPCS_CD => item.productOrService
-      if (line.getHcpcsCode().isPresent()) {
-        item.setProductOrService(
-            TransformerUtilsV2.createCodeableConcept(
-                eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
-      }
-
-      // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
-      TransformerUtilsV2.addCareTeamMember(
-          eob,
           item,
           C4BBPractitionerIdentifierType.UPIN,
           C4BBClaimInstitutionalCareTeamRole.ATTENDING,
