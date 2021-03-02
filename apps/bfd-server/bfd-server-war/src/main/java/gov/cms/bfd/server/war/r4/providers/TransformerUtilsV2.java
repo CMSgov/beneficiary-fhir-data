@@ -2576,13 +2576,6 @@ public final class TransformerUtilsV2 {
         C4BBClaimInstitutionalCareTeamRole.OPERATING,
         operatingPhysicianUpin);
 
-    // OP_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
-    addCareTeamMember(
-        eob,
-        C4BBPractitionerIdentifierType.UPIN,
-        C4BBClaimInstitutionalCareTeamRole.OPERATING,
-        operatingPhysicianUpin);
-
     // OT_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
     addCareTeamMember(
         eob,
