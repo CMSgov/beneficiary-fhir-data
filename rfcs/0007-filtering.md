@@ -78,6 +78,9 @@ that object unless there is a specific definition in the profile sub-selecting d
 
 | EOB Field |
 | --------- |
+| id |
+| identifier |
+| billablePeriod |
 | patient |
 | provider |
 | organization |
@@ -88,7 +91,9 @@ that object unless there is a specific definition in the profile sub-selecting d
 | procedure |
 | item |
 | careTeam |
-| identifier |
+| status |
+| precedence |
+| meta |
 
 #### AB2D_R4_VERSION1 Profile
 
@@ -102,7 +107,8 @@ they are ignored.  If a field represents an object, all fields of that object ar
 | productOrService |
 | serviced |
 | location |
-| quantity
+| quantity |
+| extension |
 
 | EOB Field |
 | --------- |
