@@ -5,14 +5,14 @@
 #
 
 locals {
-  env_config = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=aws_route53_zone.local_zone.id, azs=var.env_config.azs}
+  env_config = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = aws_route53_zone.local_zone.id, azs = var.env_config.azs }
 }
 
 # VPC
 #
 data "aws_vpc" "main" {
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["bfd-mgmt-vpc"]
   }
 }
@@ -43,8 +43,8 @@ data "aws_kms_key" "master_key" {
 
 data "aws_security_group" "vpn" {
   filter {
-    name        = "tag:Name"
-    values      = ["bfd-mgmt-vpn-private"]
+    name   = "tag:Name"
+    values = ["bfd-mgmt-vpn-private"]
   }
 }
 
@@ -53,8 +53,8 @@ data "aws_security_group" "vpn" {
 
 data "aws_security_group" "tools" {
   filter {
-    name        = "tag:Name"
-    values      = ["bfd-mgmt-enterprise-tools"]
+    name   = "tag:Name"
+    values = ["bfd-mgmt-enterprise-tools"]
   }
 }
 
@@ -63,8 +63,8 @@ data "aws_security_group" "tools" {
 
 data "aws_security_group" "management" {
   filter {
-    name        = "tag:Name"
-    values      = ["bfd-mgmt-remote-management"]
+    name   = "tag:Name"
+    values = ["bfd-mgmt-remote-management"]
   }
 }
 
@@ -78,7 +78,7 @@ data "aws_security_group" "management" {
 #
 
 resource "aws_route53_zone" "local_zone" {
-  name    = "bfd-${var.env_config.env}.local"
+  name = "bfd-${var.env_config.env}.local"
   vpc {
     vpc_id = data.aws_vpc.main.id
   }
@@ -115,32 +115,32 @@ EOF
 # S3 Admin bucket for adminstrative stuff
 #
 
-module "admin" { 
-  source              = "../resources/s3"
-  role                = "admin"
-  env_config          = local.env_config
-  kms_key_id          = data.aws_kms_key.master_key.arn
-  log_bucket          = module.logs.id
+module "admin" {
+  source     = "../resources/s3"
+  role       = "admin"
+  env_config = local.env_config
+  kms_key_id = data.aws_kms_key.master_key.arn
+  log_bucket = module.logs.id
 }
 
 # S3 bucket for logs 
 #
 
-module "logs" { 
-  source              = "../resources/s3"
-  role                = "logs"
-  env_config          = local.env_config
-  acl                 = "log-delivery-write"  # For AWS bucket logs
-  kms_key_id          = null                  # Use AWS encryption to support AWS Agents writing to this bucket
+module "logs" {
+  source     = "../resources/s3"
+  role       = "logs"
+  env_config = local.env_config
+  acl        = "log-delivery-write" # For AWS bucket logs
+  kms_key_id = null                 # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
 # EFS Resource, Mount and Security Group for Jenkins 
 
 module "efs" {
-  source          = "../resources/efs"
-  env_config      = local.env_config
-  role            = "jenkins"
-  layer           = "app"
+  source     = "../resources/efs"
+  env_config = local.env_config
+  role       = "jenkins"
+  layer      = "app"
 }
 
 resource "aws_ebs_volume" "jenkins_data" {
@@ -185,7 +185,7 @@ resource "aws_iam_instance_profile" "packer" {
 }
 
 resource "aws_iam_policy" "packer_s3" {
-  name = "bfd-${var.env_config.env}-packer-s3"
+  name        = "bfd-${var.env_config.env}-packer-s3"
   description = "packer S3 Policy"
 
   policy = <<EOF
@@ -228,7 +228,7 @@ resource "aws_iam_role_policy_attachment" "packer_EFS" {
 # to perform app integration testing against S3
 
 resource "aws_iam_user" "github_actions" {
-  name       = "bfd-${var.env_config.env}-github-actions"
+  name = "bfd-${var.env_config.env}-github-actions"
 }
 
 resource "aws_iam_user_policy_attachment" "github_actions_s3its" {
