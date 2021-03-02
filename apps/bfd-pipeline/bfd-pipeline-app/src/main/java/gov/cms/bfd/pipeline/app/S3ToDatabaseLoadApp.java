@@ -9,11 +9,11 @@ import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
-import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
-import gov.cms.bfd.pipeline.rif.extract.s3.DataSetMonitor;
-import gov.cms.bfd.pipeline.rif.extract.s3.DataSetMonitorListener;
-import gov.cms.bfd.pipeline.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.rif.load.RifRecordLoadResult;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
+import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -139,7 +139,7 @@ public final class S3ToDatabaseLoadApp {
 
           /**
            * @see
-           *     gov.cms.bfd.pipeline.rif.extract.s3.DataSetMonitorListener#errorOccurred(java.lang.Throwable)
+           *     gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener#errorOccurred(java.lang.Throwable)
            */
           @Override
           public void errorOccurred(Throwable error) {
