@@ -1,8 +1,8 @@
 locals {
-  azs         = ["us-east-1a"]
-  env_config  = {env=var.env_config.env, tags=var.env_config.tags, azs=local.azs}
-  tags        = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
-  is_prod     = substr(var.env_config.env, 0, 4) == "prod" 
+  azs        = ["us-east-1a"]
+  env_config = { env = var.env_config.env, tags = var.env_config.tags, azs = local.azs }
+  tags       = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
+  is_prod    = substr(var.env_config.env, 0, 4) == "prod"
 }
 
 # IAM: Setup Role, Profile and Policies for Jenkins
@@ -205,8 +205,8 @@ data "aws_subnet" "app_subnets" {
   vpc_id            = var.env_config.vpc_id
   availability_zone = var.env_config.azs[0]
   filter {
-    name    = "tag:Layer"
-    values  = [var.layer] 
+    name   = "tag:Layer"
+    values = [var.layer]
   }
 }
 
@@ -214,10 +214,10 @@ data "aws_subnet" "app_subnets" {
 #
 
 resource "aws_security_group" "base" {
-  name          = "bfd-${var.env_config.env}-${var.role}-base"
-  description   = "Allow CI access to app servers"
-  vpc_id        = var.env_config.vpc_id
-  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-base"}, local.tags)
+  name        = "bfd-${var.env_config.env}-${var.role}-base"
+  description = "Allow CI access to app servers"
+  vpc_id      = var.env_config.vpc_id
+  tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-base" }, local.tags)
 
   ingress {
     from_port   = 22
@@ -237,39 +237,39 @@ resource "aws_security_group" "base" {
 # Callers access to the app
 #
 resource "aws_security_group" "app" {
-  count         = var.lb_config == null ? 0 : 1
-  name          = "bfd-${var.env_config.env}-${var.role}-app"
-  description   = "Allow access to app servers"
-  vpc_id        = var.env_config.vpc_id
-  tags          = merge({Name="bfd-${var.env_config.env}-${var.role}-app"}, local.tags)
+  count       = var.lb_config == null ? 0 : 1
+  name        = "bfd-${var.env_config.env}-${var.role}-app"
+  description = "Allow access to app servers"
+  vpc_id      = var.env_config.vpc_id
+  tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-app" }, local.tags)
 
   ingress {
-    from_port       = var.lb_config.port
-    to_port         = var.lb_config.port
-    protocol        = "tcp"
+    from_port = var.lb_config.port
+    to_port   = var.lb_config.port
+    protocol  = "tcp"
     # TODO: Figure out what the real ingress rule should be
-    cidr_blocks     = ["10.0.0.0/8"]
-  } 
+    cidr_blocks = ["10.0.0.0/8"]
+  }
 }
 
 ##
 # Launch template
 ##
 resource "aws_launch_template" "main" {
-  name                          = "bfd-${var.env_config.env}-${var.role}"
-  description                   = "Template for the ${var.env_config.env} environment ${var.role} servers"
-  vpc_security_group_ids        = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], aws_security_group.app[*].id)
-  key_name                      = var.launch_config.key_name
-  image_id                      = var.launch_config.ami_id
-  instance_type                 = var.launch_config.instance_type
-  ebs_optimized                 = true
+  name                   = "bfd-${var.env_config.env}-${var.role}"
+  description            = "Template for the ${var.env_config.env} environment ${var.role} servers"
+  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], aws_security_group.app[*].id)
+  key_name               = var.launch_config.key_name
+  image_id               = var.launch_config.ami_id
+  instance_type          = var.launch_config.instance_type
+  ebs_optimized          = true
 
   iam_instance_profile {
-    name                        = "bfd-${var.env_config.env}-jenkins"
+    name = "bfd-${var.env_config.env}-jenkins"
   }
 
   placement {
-    tenancy                     = local.is_prod ? "dedicated" : "default"
+    tenancy = local.is_prod ? "dedicated" : "default"
   }
 
   monitoring {
@@ -285,10 +285,10 @@ resource "aws_autoscaling_group" "main" {
   # Generate a new group on every revision of the launch template. 
   # This does a simple version of a blue/green deployment
   #
-  name                      = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
-  desired_capacity          = var.asg_config.desired
-  max_size                  = var.asg_config.max
-  min_size                  = var.asg_config.min
+  name             = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
+  desired_capacity = var.asg_config.desired
+  max_size         = var.asg_config.max
+  min_size         = var.asg_config.min
 
   # If an lb is defined, wait for the ELB 
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
@@ -300,8 +300,8 @@ resource "aws_autoscaling_group" "main" {
   load_balancers            = var.lb_config == null ? [] : [var.lb_config.name]
 
   launch_template {
-    name                    = aws_launch_template.main.name
-    version                 = aws_launch_template.main.latest_version
+    name    = aws_launch_template.main.name
+    version = aws_launch_template.main.latest_version
   }
 
   enabled_metrics = [
@@ -325,9 +325,9 @@ resource "aws_autoscaling_group" "main" {
   }
 
   tag {
-    key                   = "Name"
-    value                 = "bfd-${var.env_config.env}-${var.role}"
-    propagate_at_launch   = true
+    key                 = "Name"
+    value               = "bfd-${var.env_config.env}-${var.role}"
+    propagate_at_launch = true
   }
 
   lifecycle {
