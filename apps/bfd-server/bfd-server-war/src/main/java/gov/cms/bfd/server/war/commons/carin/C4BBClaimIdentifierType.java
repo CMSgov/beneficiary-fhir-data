@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.war.commons.carin;
 
 /**
- * CARIN Code System for Patient Identifier Type <a
- * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem: C4BB
+ * CARIN ValueSet for Claim Identifiers<a
+ * href="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBClaimIdentifierType">ValueSet: C4BB Claim
  * Identifier Type</a>
  */
 public enum C4BBClaimIdentifierType {
