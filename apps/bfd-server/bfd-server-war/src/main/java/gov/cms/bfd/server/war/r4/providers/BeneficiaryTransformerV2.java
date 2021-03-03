@@ -8,9 +8,9 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
-import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,9 +100,7 @@ final class BeneficiaryTransformerV2 {
     Patient patient = new Patient();
 
     // Required values not directly mapped
-    patient
-        .getMeta()
-        .addProfile(ProfileConstants.C4BB_PATIENT_URL);
+    patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
 
     patient.setId(beneficiary.getBeneficiaryId());
 
@@ -419,7 +417,7 @@ final class BeneficiaryTransformerV2 {
   private static void addUnhashedIdentifier(
       Patient patient, String value, String system, Extension identifierCurrencyExtension) {
 
-      patient
+    patient
         .addIdentifier()
         .setValue(value)
         .setSystem(system)
