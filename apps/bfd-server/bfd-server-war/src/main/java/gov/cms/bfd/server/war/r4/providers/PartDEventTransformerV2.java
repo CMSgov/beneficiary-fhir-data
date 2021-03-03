@@ -8,7 +8,10 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -18,7 +21,6 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.r4.model.codesystems.V3ActCode;
 
 /** Transforms CCW {@link PartDEvent} instances into FHIR {@link ExplanationOfBenefit} resources. */
@@ -54,9 +56,7 @@ final class PartDEventTransformerV2 {
   private static ExplanationOfBenefit transformClaim(PartDEvent claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
-    eob.getMeta()
-        .addProfile(
-            "https://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy");
+    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_PHARMACY_PROFILE_URL);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID
@@ -276,9 +276,9 @@ final class PartDEventTransformerV2 {
       TransformerUtilsV2.addCareTeamPractitioner(
           eob,
           rxItem,
-          TransformerConstants.CODING_NPI_US,
+          C4BBPractitionerIdentifierType.NPI,
           claimGroup.getPrescriberId(),
-          ClaimCareteamrole.PRIMARY);
+          C4BBClaimInstitutionalCareTeamRole.PRIMARY);
     }
 
     // PROD_SRVC_ID => ExplanationOfBenefit.item.productOrService

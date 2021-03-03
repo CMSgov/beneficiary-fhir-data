@@ -4,6 +4,8 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaim_;
+import gov.cms.bfd.model.rif.OutpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaim_;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import java.time.LocalDate;
@@ -38,7 +40,15 @@ public enum ClaimType {
       InpatientClaim_.beneficiaryId,
       (entity) -> ((InpatientClaim) entity).getDateThrough(),
       InpatientClaimTransformerV2::transform,
-      InpatientClaim_.lines);
+      InpatientClaim_.lines),
+
+  OUTPATIENT(
+      OutpatientClaim.class,
+      OutpatientClaim_.claimId,
+      OutpatientClaim_.beneficiaryId,
+      (entity) -> ((OutpatientClaim) entity).getDateThrough(),
+      OutpatientClaimTransformerV2::transform,
+      OutpatientClaim_.lines);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;

@@ -5,8 +5,8 @@
 ##
 
 locals {
-  alarm_actions       = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
-  ok_actions          = var.ok_notification_arn == null ? [] : [var.ok_notification_arn]
+  alarm_actions = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]
+  ok_actions    = var.ok_notification_arn == null ? [] : [var.ok_notification_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {

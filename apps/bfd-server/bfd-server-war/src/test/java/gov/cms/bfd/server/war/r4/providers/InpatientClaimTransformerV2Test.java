@@ -20,7 +20,7 @@ import org.junit.Test;
 public class InpatientClaimTransformerV2Test {
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.InpatientClaimTransformer#transform(Object)} works as
+   * gov.cms.bfd.server.war.r4.providers.InpatientClaimTransformer#transform(Object)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
    * InpatientClaim}.
    *

@@ -1,11 +1,11 @@
 variable "env_config" {
   description = "All high-level info for the whole vpc"
-  type        = object({env=string, tags=map(string), vpc_id=string, zone_id=string})
+  type        = object({ env = string, tags = map(string), vpc_id = string, zone_id = string })
 }
 
 variable "db_config" {
   description = "Sizing information for the db to create"
-  type        = object({instance_class = string, allocated_storage=number, iops = number})
+  type        = object({ instance_class = string, allocated_storage = number, iops = number })
 }
 
 variable "availability_zone" {
@@ -19,25 +19,25 @@ variable "role" {
 }
 
 variable "vpc_security_group_ids" {
-  type        = list(string)
+  type = list(string)
 }
 
 variable "subnet_group" {
-  type        = string
+  type = string
 }
 
 variable "replicate_source_db" {
-  type        = string
+  type = string
 }
 
 variable "kms_key_id" {
-  type        = string
+  type = string
 }
 
 variable "apply_immediately" {
-  type        = bool
+  type = bool
 }
 
 variable "parameter_group_name" {
-  type        = string
+  type = string
 }
