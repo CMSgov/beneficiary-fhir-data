@@ -264,7 +264,7 @@ final class PartDEventTransformerV2 {
           "Prescriber ID Qualifier Code is invalid: " + claimGroup.getPrescriberIdQualifierCode());
     }
 
-    // PRSCRBR_ID   => ExplanationOfBenefit.careTeam.provider
+    // PRSCRBR_ID => ExplanationOfBenefit.careTeam.provider
     TransformerUtilsV2.addCareTeamMember(
         eob,
         rxItem,
@@ -272,6 +272,7 @@ final class PartDEventTransformerV2 {
         C4BBClaimPharmacyTeamRole.PRESCRIBING,
         Optional.ofNullable(claimGroup.getPrescriberId()));
 
+    // This can't use TransformerUtilsV2.addNationalDrugCode because it maps differently
     // PROD_SRVC_ID => ExplanationOfBenefit.item.productOrService
     rxItem.setProductOrService(
         TransformerUtilsV2.createCodeableConcept(

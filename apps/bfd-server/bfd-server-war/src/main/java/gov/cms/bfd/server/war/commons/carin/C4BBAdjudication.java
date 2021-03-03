@@ -16,7 +16,8 @@ public enum C4BBAdjudication {
   COINSURANCE,
   DISCOUNT,
   DRUG_COST,
-  BENEFIT;
+  BENEFIT,
+  ELIGIBLE;
 
   public String getSystem() {
     switch (this) {
@@ -24,6 +25,7 @@ public enum C4BBAdjudication {
       case SUBMITTED:
       case DEDUCTIBLE:
       case BENEFIT:
+      case ELIGIBLE:
         return "http://terminology.hl7.org/CodeSystem/adjudication";
         // The rest are Carin
       default:
@@ -55,6 +57,8 @@ public enum C4BBAdjudication {
         return "drugcost";
       case BENEFIT:
         return "benefit";
+      case ELIGIBLE:
+        return "eligible";
       default:
         return "?";
     }
@@ -84,6 +88,8 @@ public enum C4BBAdjudication {
         return "Drug Cost";
       case BENEFIT:
         return "Benefit Amount";
+      case ELIGIBLE:
+        return "Eligible Amount";
       default:
         return "?";
     }
@@ -111,6 +117,8 @@ public enum C4BBAdjudication {
         return "Price paid for the drug excluding mfr or other discounts. It typically is the sum of the following components: ingredient cost, dispensing fee, sales tax, and vaccine administration";
       case BENEFIT:
         return "Benefit Amount";
+      case ELIGIBLE:
+        return "Amount of the change which is considered for adjudication.";
       default:
         return "?";
     }

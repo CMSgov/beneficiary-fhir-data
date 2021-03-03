@@ -2,6 +2,8 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.CarrierClaim;
+import gov.cms.bfd.model.rif.CarrierClaim_;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaim_;
 import gov.cms.bfd.model.rif.OutpatientClaim;
@@ -27,6 +29,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * {@link R4ExplanationOfBenefitResourceProvider}.
  */
 public enum ClaimType {
+  CARRIER(
+      CarrierClaim.class,
+      CarrierClaim_.claimId,
+      CarrierClaim_.beneficiaryId,
+      (entity) -> ((CarrierClaim) entity).getDateThrough(),
+      CarrierClaimTransformerV2::transform,
+      CarrierClaim_.lines),
+
   PDE(
       PartDEvent.class,
       PartDEvent_.eventId,
