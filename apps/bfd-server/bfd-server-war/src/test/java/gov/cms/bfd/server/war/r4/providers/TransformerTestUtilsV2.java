@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -672,5 +673,21 @@ public final class TransformerTestUtilsV2 {
           TransformerConstants.FALLBACK_LAST_UPDATED,
           actualResource.getMeta().getLastUpdated());
     }
+  }
+
+  /**
+   * @param expectedStartDate the expected value for {@link Period#getStart()}
+   * @param expectedEndDate the expected value for {@link Period#getEnd()}
+   * @param actualPeriod the {@link Period} to verify
+   */
+  static void assertPeriodEquals(
+      Optional<LocalDate> expectedStartDate,
+      Optional<LocalDate> expectedEndDate,
+      Period actualPeriod) {
+    Assert.assertTrue(expectedStartDate.isPresent() || expectedEndDate.isPresent());
+    if (expectedStartDate.isPresent())
+      assertDateEquals(expectedStartDate.get(), actualPeriod.getStartElement());
+    if (expectedEndDate.isPresent())
+      assertDateEquals(expectedEndDate.get(), actualPeriod.getEndElement());
   }
 }
