@@ -18,6 +18,7 @@ import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
@@ -3293,6 +3294,28 @@ public final class TransformerUtilsV2 {
         id.setSystem(systemUri.get());
       }
       patient.addIdentifier(id);
+    }
+  }
+
+  /**
+   * Convenience method to convert race code {@link CcwCodebookVariable.RACE} to a {@link
+   * RaceCategory}. Input values can be: 0 Unknown 1 White 2 Black 3 Other 4 Asian 5 Hispanic 6
+   * North American Native
+   *
+   * @param value The race code to categorize;
+   */
+  static RaceCategory getRaceCategory(char value) {
+    switch (value) {
+      case '1':
+        return RaceCategory.WHITE;
+      case '2':
+        return RaceCategory.BLACK_OR_AFRICAN_AMERICAN;
+      case '4':
+        return RaceCategory.ASIAN;
+      case '6':
+        return RaceCategory.AMERICAN_INDIAN_OR_ALASKA_NATIVE;
+      default:
+        return RaceCategory.UNKNOWN;
     }
   }
 }

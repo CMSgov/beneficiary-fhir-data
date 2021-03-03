@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -262,6 +263,7 @@ final class BeneficiaryTransformerV2 {
           new DateTimeType(
               TransformerUtilsV2.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
               TemporalPrecisionEnum.DAY));
+      patient.setActive(false);
     } else {
       patient.setActive(true);
     }
@@ -276,24 +278,22 @@ final class BeneficiaryTransformerV2 {
           TransformerUtilsV2.createExtensionCoding(
               patient, CcwCodebookVariable.RACE, beneficiary.getRace().get()));
 
-      String ombCode = TransformerConstants.HL7_RACE_UNKNOWN_CODE;
-      String ombDisplay = TransformerConstants.HL7_RACE_UNKNOWN_DISPLAY;
+      RaceCategory raceCategory = TransformerUtilsV2.getRaceCategory(beneficiary.getRace().get());
+      Extension raceChildOMBExt1 =
+          new Extension()
+              .setValue(
+                  new Coding()
+                      .setCode(raceCategory.toCode())
+                      .setSystem(raceCategory.getSystem())
+                      .setDisplay(raceCategory.getDisplay()))
+              .setUrl("ombCategory");
 
-      Extension parentOMBRace = new Extension();
-      Extension raceChildOMBExt1 = new Extension();
+      Extension raceChildOMBExt2 =
+          new Extension()
+              .setValue(new StringType().setValue(raceCategory.getDisplay()))
+              .setUrl("text");
 
-      raceChildOMBExt1
-          .setValue(
-              new Coding()
-                  .setCode(ombCode)
-                  .setSystem(TransformerConstants.CODING_V3_NULL)
-                  .setDisplay(ombDisplay))
-          .setUrl("ombCategory");
-
-      Extension raceChildOMBExt2 = new Extension();
-      raceChildOMBExt2.setValue(new StringType().setValue(ombDisplay)).setUrl("text");
-
-      parentOMBRace.setUrl(TransformerConstants.CODING_RACE_US);
+      Extension parentOMBRace = new Extension().setUrl(TransformerConstants.CODING_RACE_US);
       parentOMBRace.addExtension(raceChildOMBExt1);
       parentOMBRace.addExtension(raceChildOMBExt2);
 
