@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.PipelineManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult;
 import java.lang.Thread.UncaughtExceptionHandler;

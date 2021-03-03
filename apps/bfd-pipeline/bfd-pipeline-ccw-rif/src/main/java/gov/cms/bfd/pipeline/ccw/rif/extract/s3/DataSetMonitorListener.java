@@ -5,7 +5,7 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
 
 /**
  * Implementations of this event/callback interface can receive the events fired by a {@link
- * PipelineManager} and its {@link CcwRifPipelineJob}s.
+ * CcwRifPipelineJob}.
  */
 public interface DataSetMonitorListener {
   /**
@@ -32,11 +32,10 @@ public interface DataSetMonitorListener {
 
   /**
    * This callback will be fired when an unrecoverable error has occurred. It is this method's
-   * responsibility to call {@link PipelineManager#stop()}, if the processing should be halted as a
-   * result of the error.
+   * responsibility to stop the job, if the processing should be halted as a result of the error.
    *
    * @param error the error that was encountered and couldn't be handled within the {@link
-   *     PipelineManager} or {@link CcwRifPipelineJob}
+   *     CcwRifPipelineJob}
    */
   void errorOccurred(Throwable error);
 }
