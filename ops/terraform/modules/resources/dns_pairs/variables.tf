@@ -1,34 +1,34 @@
 variable "env_config" {
   description = "All high-level info for the whole vpc"
-  type        = object({env=string, tags=map(string), vpc_id=string})
+  type        = object({ env = string, tags = map(string), vpc_id = string })
 }
 
 variable "zone_id" {
-  type        = string
+  type = string
 }
 
 variable "a_alias" {
-  type        = string
+  type = string
 }
 
 variable "a_zone_id" {
-  type        = string
+  type = string
 }
 
 variable "a_set" {
-  type        = string
+  type = string
 }
 
 variable "b_alias" {
-  type        = string
+  type = string
 }
 
 variable "b_zone_id" {
-  type        = string
+  type = string
 }
 
 variable "b_set" {
-  type        = string
+  type = string
 }
 
 variable "weights" {
