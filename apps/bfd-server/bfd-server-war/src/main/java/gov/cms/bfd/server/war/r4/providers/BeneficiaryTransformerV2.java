@@ -10,6 +10,7 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +102,7 @@ final class BeneficiaryTransformerV2 {
     // Required values not directly mapped
     patient
         .getMeta()
-        .addProfile("http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient");
+        .addProfile(ProfileConstants.C4BB_PATIENT_URL);
 
     patient.setId(beneficiary.getBeneficiaryId());
 
@@ -229,8 +230,6 @@ final class BeneficiaryTransformerV2 {
       }
     }
 
-    patient.setActive(!beneficiary.getBeneficiaryDateOfDeath().isPresent());
-
     // support header includeAddressFields from downstream components e.g. BB2
     // per requirement of BFD-379, BB2 always send header includeAddressFields = False
     Boolean addrHdrVal =
@@ -265,6 +264,8 @@ final class BeneficiaryTransformerV2 {
           new DateTimeType(
               TransformerUtilsV2.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
               TemporalPrecisionEnum.DAY));
+    } else {
+      patient.setActive(true);
     }
 
     char sex = beneficiary.getSex();
@@ -418,7 +419,7 @@ final class BeneficiaryTransformerV2 {
   private static void addUnhashedIdentifier(
       Patient patient, String value, String system, Extension identifierCurrencyExtension) {
 
-    patient
+      patient
         .addIdentifier()
         .setValue(value)
         .setSystem(system)
