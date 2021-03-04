@@ -13,13 +13,17 @@ public enum C4BBAdjudication {
   PAID_TO_PATIENT,
   PAID_BY_PATIENT,
   PRIOR_PAYER_PAID,
-  COINSURANCE;
+  COINSURANCE,
+  DISCOUNT,
+  DRUG_COST,
+  BENEFIT;
 
   public String getSystem() {
     switch (this) {
         // These are HL7
       case SUBMITTED:
       case DEDUCTIBLE:
+      case BENEFIT:
         return "http://terminology.hl7.org/CodeSystem/adjudication";
         // The rest are Carin
       default:
@@ -45,6 +49,12 @@ public enum C4BBAdjudication {
         return "paidbypatient";
       case PRIOR_PAYER_PAID:
         return "priorpayerpaid";
+      case DISCOUNT:
+        return "discount";
+      case DRUG_COST:
+        return "drugcost";
+      case BENEFIT:
+        return "benefit";
       default:
         return "?";
     }
@@ -68,6 +78,12 @@ public enum C4BBAdjudication {
         return "Paid by patient";
       case PRIOR_PAYER_PAID:
         return "Prior payer paid";
+      case DISCOUNT:
+        return "Discount";
+      case DRUG_COST:
+        return "Drug Cost";
+      case BENEFIT:
+        return "Benefit Amount";
       default:
         return "?";
     }
@@ -89,6 +105,12 @@ public enum C4BBAdjudication {
         return "The amount paid by the patient at the point of service.";
       case PRIOR_PAYER_PAID:
         return "The reduction in the payment amount to reflect the carrier as a secondary payor.";
+      case DISCOUNT:
+        return "The amount of the discount";
+      case DRUG_COST:
+        return "Price paid for the drug excluding mfr or other discounts. It typically is the sum of the following components: ingredient cost, dispensing fee, sales tax, and vaccine administration";
+      case BENEFIT:
+        return "Benefit Amount";
       default:
         return "?";
     }

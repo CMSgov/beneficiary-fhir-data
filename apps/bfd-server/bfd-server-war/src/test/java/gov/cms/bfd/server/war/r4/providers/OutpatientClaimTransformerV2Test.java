@@ -17,7 +17,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class OutpatientClaimTransformerV2Test {
+public final class OutpatientClaimTransformerV2Test {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.OutpatientClaimTransformer#transform(Object)} works as
