@@ -1,5 +1,12 @@
 locals {
   is_prod = substr(var.env_config.env, 0, 4) == "prod"
+
+  # see https://github.com/CMSgov/beneficiary-fhir-data/pull/476 for reference
+  node_identifier = {
+    "prod" = "bfd-prod-aurora-cluster",
+    "prod-sbx" = "bfd-prod-sbx-aurora",
+    "test" = "bfd-test-aurora"
+  }
 }
 
 data "aws_iam_role" "rds_monitoring" {
@@ -91,7 +98,7 @@ resource "aws_rds_cluster_instance" "aurora_nodes" {
   count          = var.aurora_config.cluster_nodes
   instance_class = var.aurora_config.instance_class
 
-  identifier         = "bfd-${var.env_config.env}-aurora-node-${count.index}"
+  identifier         = "${lookup(local.node_identifier, var.env_config.env)}-node-${count.index}"
   cluster_identifier = aws_rds_cluster.aurora_cluster.id
 
   availability_zone       = var.stateful_config.azs[count.index]
