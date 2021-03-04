@@ -1,5 +1,7 @@
 locals {
   is_prod = substr(var.env_config.env, 0, 4) == "prod"
+
+  # see https://jira.cms.gov/browse/BFD-665 for reference
   node_identifier = {
     "prod" = "bfd-prod-aurora-cluster",
     "prod-sbx" = "bfd-prod-sbx-aurora",
