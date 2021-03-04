@@ -739,6 +739,12 @@ public final class TransformerUtilsV2 {
     return categoryConcept;
   }
 
+  /**
+   * Helper function that finds or creates an {@link Address} object from `item.location`
+   *
+   * @param item The {@ItemComponent} to find the {@link Address} in
+   * @return The Address
+   */
   private static Address getAddress(ItemComponent item) {
     // Create one if we don't have it
     if (!item.hasLocation()) {
@@ -753,14 +759,32 @@ public final class TransformerUtilsV2 {
     return (Address) item.getLocation();
   }
 
+  /**
+   * Optionally adds State to a new or existing {@link Address} in an {@ItemComponent}
+   *
+   * @param item {@ItemComponent} to add the State code to
+   * @param state State code to add
+   */
   static void addLocationState(ItemComponent item, Optional<String> state) {
     state.ifPresent(s -> getAddress(item).setState(s));
   }
 
+  /**
+   * Adds State to a new or existing {@link Address} in an {@ItemComponent}
+   *
+   * @param item {@ItemComponent} to add the State code to
+   * @param state State code to add
+   */
   static void addLocationState(ItemComponent item, String state) {
     addLocationState(item, Optional.ofNullable(state));
   }
 
+  /**
+   * Optionally adds a ZIP code to a new or existing {@link Address} in an {@ItemComponent}
+   *
+   * @param item {@ItemComponent} to add the State code to
+   * @param zip The ZIP code to add
+   */
   static void addLocationZipCode(ItemComponent item, Optional<String> zip) {
     zip.ifPresent(z -> getAddress(item).setPostalCode(z));
   }
@@ -803,6 +827,14 @@ public final class TransformerUtilsV2 {
     }
   }
 
+  /**
+   * Optionally adds a National Drug Code (NDC) to the `item.productOrService` field.
+   *
+   * <p>This mapping is used for some EOB types but not all.
+   *
+   * @param item The {@link ItemComponent} to add the NDC to
+   * @param nationalDrugCode The NDC value to add
+   */
   static void addNationalDrugCode(ItemComponent item, Optional<String> nationalDrugCode) {
     nationalDrugCode.ifPresent(
         code ->
