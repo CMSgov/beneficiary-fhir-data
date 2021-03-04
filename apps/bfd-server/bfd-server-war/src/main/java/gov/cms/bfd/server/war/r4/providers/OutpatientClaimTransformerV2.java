@@ -21,7 +21,6 @@ import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 
 /**
  * Transforms CCW {@link OutpatientClaim} instances into FHIR {@link ExplanationOfBenefit}
@@ -64,9 +63,6 @@ public class OutpatientClaimTransformerV2 {
     // Required values not directly mapped
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_OUTPATIENT_PROFILE_URL);
 
-    // "claim" => ExplanationOfBenefit.use
-    eob.setUse(Use.CLAIM);
-
     // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
     // eob.setOutcome(?)
 
@@ -74,8 +70,6 @@ public class OutpatientClaimTransformerV2 {
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
     // CLM_GRP_ID               => ExplanationOfBenefit.identifier
-    // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage (reference)
-    // BENE_ID                  => ExplanationOfBenefit.patient (reference)
     // FINAL_ACTION             => ExplanationOfBenefit.status
     // CLM_FROM_DT              => ExplanationOfBenefit.billablePeriod.start
     // CLM_THRU_DT              => ExplanationOfBenefit.billablePeriod.end
@@ -405,6 +399,7 @@ public class OutpatientClaimTransformerV2 {
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
+          item,
           C4BBPractitionerIdentifierType.UPIN,
           C4BBClaimInstitutionalCareTeamRole.ATTENDING,
           line.getRevenueCenterRenderingPhysicianUPIN());
@@ -412,6 +407,7 @@ public class OutpatientClaimTransformerV2 {
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
+          item,
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimInstitutionalCareTeamRole.ATTENDING,
           line.getRevenueCenterRenderingPhysicianNPI());
