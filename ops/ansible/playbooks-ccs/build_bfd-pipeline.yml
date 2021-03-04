@@ -25,7 +25,11 @@
     - name: Apply base Cloudwatch Agent Role
       import_role:
         name: cloudwatch-agent-instrumented
-      
+    
+    - name: Apply latest host security patches
+      import_role:
+        name: base_patch
+
     - name: Apply Blue Button Data Pipeline Role
       import_role:
         name: bfd-pipeline
@@ -49,6 +53,6 @@
         name: ssh_users
       tags:
         - pre-ami
-        
+
   handlers:
     - import_tasks: handlers/main.yml

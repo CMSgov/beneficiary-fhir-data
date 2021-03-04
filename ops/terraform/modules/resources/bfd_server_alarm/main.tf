@@ -1,11 +1,11 @@
 # Flexible BFD server alarm to handle different configurations for different partners
 #
 resource "aws_cloudwatch_metric_alarm" "bfd-server-alarm" {
-  alarm_name          = "bfd-${var.env}-server-${var.alarm_config.alarm_name}"
-  alarm_description   = ""
+  alarm_name        = "bfd-${var.env}-server-${var.alarm_config.alarm_name}"
+  alarm_description = ""
 
-  metric_name         = "${var.alarm_config.metric_prefix}/${var.alarm_config.partner_name}"
-  namespace           = "bfd-${var.env}/bfd-server"
+  metric_name = "${var.alarm_config.metric_prefix}/${var.alarm_config.partner_name}"
+  namespace   = "bfd-${var.env}/bfd-server"
 
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = var.alarm_config.eval_periods
@@ -16,6 +16,6 @@ resource "aws_cloudwatch_metric_alarm" "bfd-server-alarm" {
   datapoints_to_alarm = var.alarm_config.datapoints
   treat_missing_data  = "notBreaching"
 
-  alarm_actions       = var.alarm_config.alarm_notify_arn == null ? [] : [var.alarm_config.alarm_notify_arn]
-  ok_actions          = var.alarm_config.ok_notify_arn == null ? [] : [var.alarm_config.ok_notify_arn]
+  alarm_actions = var.alarm_config.alarm_notify_arn == null ? [] : [var.alarm_config.alarm_notify_arn]
+  ok_actions    = var.alarm_config.ok_notify_arn == null ? [] : [var.alarm_config.ok_notify_arn]
 }

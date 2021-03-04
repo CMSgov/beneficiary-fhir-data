@@ -1,10 +1,10 @@
 variable "env_config" {
   description = "All high-level info for the whole vpc"
-  type        = object({env=string, tags=map(string)})
+  type        = object({ env = string, tags = map(string) })
 }
 
 variable "name" {
-  description = "The name part used to create the role and policy" 
+  description = "The name part used to create the role and policy"
   type        = string
   default     = "app"
 }
