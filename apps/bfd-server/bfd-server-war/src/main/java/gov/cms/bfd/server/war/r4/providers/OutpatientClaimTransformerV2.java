@@ -18,7 +18,6 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 
@@ -248,7 +247,7 @@ public class OutpatientClaimTransformerV2 {
       item.setSequence(line.getLineNumber().intValue());
 
       // PRVDR_STATE_CD => item.location
-      item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
+      TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
 
       // REV_CNTR => item.revenue
       item.setRevenue(
@@ -279,17 +278,15 @@ public class OutpatientClaimTransformerV2 {
           TransformerUtilsV2.createAdjudicationDenialReasonSlice(
               eob, CcwCodebookVariable.REV_CNTR_4TH_ANSI_CD, line.getRevCntr4thAnsiCd()));
 
-      // HCPCS_CD           => ExplanationOfBenefit.item.modifier
-      // HCPCS_1ST_MDFR_CD  => ExplanationOfBenefit.item.modifier
-      // HCPCS_2ND_MDFR_CD  => ExplanationOfBenefit.item.modifier
+      // HCPCS_CD               => ExplanationOfBenefit.item.productOrService
+      // HCPCS_1ST_MDFR_CD      => ExplanationOfBenefit.item.modifier
+      // HCPCS_2ND_MDFR_CD      => ExplanationOfBenefit.item.modifier
       TransformerUtilsV2.mapHcpcs(
           eob,
           item,
+          line.getHcpcsCode(),
           Optional.empty(),
-          Arrays.asList(
-              line.getHcpcsCode(),
-              line.getHcpcsInitialModifierCode(),
-              line.getHcpcsSecondModifierCode()));
+          Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
 
       // REV_CNTR                   => ExplanationOfBenefit.item.revenue
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
@@ -387,14 +384,8 @@ public class OutpatientClaimTransformerV2 {
       TransformerUtilsV2.mapEobCommonItemRevenueOutHHAHospice(
           item, line.getRevenueCenterDate(), line.getPaymentAmount());
 
-      // This must be added after `REV_CNTR_DT` and can only be set if `servicedDate` is set
-      // REV_CNTR_IDE_NDC_UPC_NUM => ExplanationOfBenefit.item.serviced.extension
-      if (line.getNationalDrugCode().isPresent() && item.getServiced() != null) {
-        item.getServiced()
-            .addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob, CcwCodebookVariable.REV_CNTR_IDE_NDC_UPC_NUM, line.getNationalDrugCode()));
-      }
+      // REV_CNTR_IDE_NDC_UPC_NUM => ExplanationOfBenefit.item.productOrService.extension
+      TransformerUtilsV2.addNationalDrugCode(item, line.getNationalDrugCode());
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

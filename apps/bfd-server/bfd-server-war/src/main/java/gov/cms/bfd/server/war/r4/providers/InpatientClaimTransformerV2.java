@@ -15,7 +15,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 
@@ -311,7 +310,7 @@ public class InpatientClaimTransformerV2 {
       item.setSequence(line.getLineNumber().intValue());
 
       // PRVDR_STATE_CD => item.location
-      item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
+      TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
 
       // REV_CNTR                   => ExplanationOfBenefit.item.revenue
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
