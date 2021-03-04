@@ -18,7 +18,6 @@ import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 
 /**
  * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -58,9 +57,6 @@ public class InpatientClaimTransformerV2 {
 
     // Required values not directly mapped
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
-
-    // "claim" => ExplanationOfBenefit.use
-    eob.setUse(Use.CLAIM);
 
     // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
     // eob.setOutcome(?)
@@ -355,6 +351,7 @@ public class InpatientClaimTransformerV2 {
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
+          item,
           C4BBPractitionerIdentifierType.UPIN,
           C4BBClaimInstitutionalCareTeamRole.ATTENDING,
           line.getRevenueCenterRenderingPhysicianUPIN());
@@ -362,6 +359,7 @@ public class InpatientClaimTransformerV2 {
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
+          item,
           C4BBPractitionerIdentifierType.NPI,
           C4BBClaimInstitutionalCareTeamRole.ATTENDING,
           line.getRevenueCenterRenderingPhysicianNPI());

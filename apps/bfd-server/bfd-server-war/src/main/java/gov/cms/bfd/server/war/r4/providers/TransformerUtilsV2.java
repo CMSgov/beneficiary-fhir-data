@@ -23,6 +23,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimPharmacyTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -58,8 +59,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -67,7 +66,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitBalanceComponent;
@@ -79,6 +77,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
@@ -86,7 +85,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PositiveIntType;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -145,84 +143,6 @@ public final class TransformerUtilsV2 {
 
   /** Tracks the NPI codes that have already had code lookup failures. */
   private static final Set<String> npiCodeLookupMissingFailures = new HashSet<>();
-
-  /**
-   * Adds an {@link Extension} to the specified {@link DomainResource}. {@link Extension#getValue()}
-   * will be set to a {@link CodeableConcept} containing a single {@link Coding}, with the specified
-   * system and code.
-   *
-   * <p>Data Architecture Note: The {@link CodeableConcept} might seem extraneous -- why not just
-   * add the {@link Coding} directly to the {@link Extension}? The main reason for doing it this way
-   * is consistency: this is what FHIR seems to do everywhere.
-   *
-   * @param fhirElement the FHIR element to add the {@link Extension} to
-   * @param extensionUrl the {@link Extension#getUrl()} to use
-   * @param codingSystem the {@link Coding#getSystem()} to use
-   * @param codingDisplay the {@link Coding#getDisplay()} to use
-   * @param codingCode the {@link Coding#getCode()} to use
-   */
-  static void addExtensionCoding(
-      IBaseHasExtensions fhirElement,
-      String extensionUrl,
-      String codingSystem,
-      String codingDisplay,
-      String codingCode) {
-    IBaseExtension<?, ?> extension = fhirElement.addExtension();
-    extension.setUrl(extensionUrl);
-    if (codingDisplay == null)
-      extension.setValue(new Coding().setSystem(codingSystem).setCode(codingCode));
-    else
-      extension.setValue(
-          new Coding().setSystem(codingSystem).setCode(codingCode).setDisplay(codingDisplay));
-  }
-
-  /**
-   * Adds an {@link Extension} to the specified {@link DomainResource}. {@link Extension#getValue()}
-   * will be set to a {@link Quantity} with the specified system and value.
-   *
-   * @param fhirElement the FHIR element to add the {@link Extension} to
-   * @param extensionUrl the {@link Extension#getUrl()} to use
-   * @param quantitySystem the {@link Quantity#getSystem()} to use
-   * @param quantityValue the {@link Quantity#getValue()} to use
-   */
-  static void addExtensionValueQuantity(
-      IBaseHasExtensions fhirElement,
-      String extensionUrl,
-      String quantitySystem,
-      BigDecimal quantityValue) {
-    IBaseExtension<?, ?> extension = fhirElement.addExtension();
-    extension.setUrl(extensionUrl);
-    extension.setValue(new Quantity().setSystem(extensionUrl).setValue(quantityValue));
-
-    // CodeableConcept codeableConcept = new CodeableConcept();
-    // extension.setValue(codeableConcept);
-    //
-    // Coding coding = codeableConcept.addCoding();
-    // coding.setSystem(codingSystem).setCode(codingCode);
-  }
-
-  /**
-   * Adds an {@link Extension} to the specified {@link DomainResource}. {@link Extension#getValue()}
-   * will be set to a {@link Identifier} with the specified url, system, and value.
-   *
-   * @param fhirElement the FHIR element to add the {@link Extension} to
-   * @param extensionUrl the {@link Extension#getUrl()} to use
-   * @param extensionSystem the {@link Identifier#getSystem()} to use
-   * @param extensionValue the {@link Identifier#getValue()} to use
-   */
-  static void addExtensionValueIdentifier(
-      IBaseHasExtensions fhirElement,
-      String extensionUrl,
-      String extensionSystem,
-      String extensionValue) {
-    IBaseExtension<?, ?> extension = fhirElement.addExtension();
-    extension.setUrl(extensionUrl);
-
-    Identifier valueIdentifier = new Identifier();
-    valueIdentifier.setSystem(extensionSystem).setValue(extensionValue);
-
-    extension.setValue(valueIdentifier);
-  }
 
   /**
    * @param beneficiary the {@link Beneficiary} to calculate the {@link Patient#getId()} value for
@@ -290,9 +210,13 @@ public final class TransformerUtilsV2 {
    *     Reference#getIdentifier()}
    * @return a {@link Reference} with the specified {@link Identifier}
    */
-  static Reference createIdentifierReference(String identifierSystem, String identifierValue) {
+  static Reference createIdentifierReference(
+      C4BBOrganizationIdentifierType type, String identifierValue) {
     return new Reference()
-        .setIdentifier(new Identifier().setSystem(identifierSystem).setValue(identifierValue))
+        .setIdentifier(
+            new Identifier()
+                .setType(createCodeableConcept(type.getSystem(), type.toCode()))
+                .setValue(identifierValue))
         .setDisplay(retrieveNpiCodeDisplay(identifierValue));
   }
 
@@ -603,6 +527,22 @@ public final class TransformerUtilsV2 {
    *     Coding} to represent the specified input values
    */
   static Extension createExtensionCoding(
+      IAnyResource rootResource, Optional<CcwCodebookInterface> ccwVariable, Optional<?> code) {
+    if (!ccwVariable.isPresent()) {
+      throw new IllegalArgumentException();
+    }
+    return createExtensionCoding(rootResource, ccwVariable.get(), code);
+  }
+
+  /**
+   * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Extension}
+   *     will be contained in
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
+   * @param code the value to use for {@link Coding#getCode()} for the resulting {@link Coding}
+   * @return the output {@link Extension}, with {@link Extension#getValue()} set to a new {@link
+   *     Coding} to represent the specified input values
+   */
+  static Extension createExtensionCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     // Jumping through hoops to cope with overloaded method:
     Optional<?> codeOptional = code instanceof Optional ? (Optional<?>) code : Optional.of(code);
@@ -751,42 +691,13 @@ public final class TransformerUtilsV2 {
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
-   *     specified {@link CcwCodebookVariable}
+   *     specified {@link CcwCodebookInterface}
    */
   static CodeableConcept createAdjudicationCategory(
       CcwCodebookInterface ccwVariable, String carinAdjuCode, String carinAdjuCodeDisplay) {
     /*
-     * Adjudication.category is mapped a bit differently than other
-     * Codings/CodeableConcepts: they all share the same Coding.system and use the
-     * CcwCodebookVariable reference URL as their Coding.code. This looks weird, but
-     * makes it easy for API developers to find more information about what the
-     * specific adjudication they're looking at means.
-     */
-
-    String conceptCode = calculateVariableReferenceUrl(ccwVariable);
-    CodeableConcept categoryConcept =
-        createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, conceptCode);
-    categoryConcept.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
-
-    categoryConcept
-        .addCoding()
-        .setSystem(TransformerConstants.CARIN_ADJUDICATION_CODE)
-        .setCode(carinAdjuCode)
-        .setDisplay(carinAdjuCodeDisplay);
-
-    return categoryConcept;
-  }
-
-  /**
-   * @param ccwVariable the {@link CcwCodebookVariable} being mapped
-   * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
-   *     specified {@link CcwCodebookVariable}
-   */
-  static CodeableConcept createAdjudicationCategory(
-      CcwCodebookVariable ccwVariable, String carinAdjuCode, String carinAdjuCodeDisplay) {
-    /*
      * Adjudication.category is mapped a bit differently than other Codings/CodeableConcepts: they
-     * all share the same Coding.system and use the CcwCodebookVariable reference URL as their
+     * all share the same Coding.system and use the CcwCodebookInterface reference URL as their
      * Coding.code. This looks weird, but makes it easy for API developers to find more information
      * about what the specific adjudication they're looking at means.
      */
@@ -842,6 +753,14 @@ public final class TransformerUtilsV2 {
       eob.addTotal(total.get());
     }
   }
+
+  /*
+  static <T> Optional<AdjudicationComponent> createAdjudicationWithReason(
+      IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<T> reasonCode) {
+    return reasonCode.map(
+        reason -> createAdjudicationWithReason(rootResource, ccwVariable, reason));
+  }
+  */
 
   /**
    * Creates a C4BB Adjudication `adjudicationamounttype` {@link CodeableConcept} slice for use in
@@ -1073,16 +992,6 @@ public final class TransformerUtilsV2 {
    */
   static Reference referencePatient(Beneficiary beneficiary) {
     return referencePatient(beneficiary.getBeneficiaryId());
-  }
-
-  /**
-   * @param practitionerNpi the {@link Practitioner#getIdentifier()} value to match (where {@link
-   *     Identifier#getSystem()} is {@value #TransformerConstants.CODING_SYSTEM_NPI_US})
-   * @return a {@link Reference} to the {@link Practitioner} resource that matches the specified
-   *     parameters
-   */
-  static Reference referencePractitioner(String practitionerNpi) {
-    return createIdentifierReference(TransformerConstants.CODING_NPI_US, practitionerNpi);
   }
 
   /**
@@ -1677,7 +1586,7 @@ public final class TransformerUtilsV2 {
   /**
    * @param rootResource the root FHIR {@link IAnyResource} that the resultant {@link Coding} will
    *     be contained in
-   * @param ccwVariable the {@link CcwCodebookVariable} being coded
+   * @param ccwVariable the {@link CcwCodebookInterface} being coded
    * @param yearMonth the value to use for {@link String} for yearMonth
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
@@ -1744,6 +1653,12 @@ public final class TransformerUtilsV2 {
 
     // Claim Type + Claim ID => ExplanationOfBenefit.id
     eob.setId(buildEobId(claimType, claimId));
+
+    // Current timestamp => Created
+    eob.setCreated(new Date());
+
+    // "claim" => ExplanationOfBenefit.use
+    eob.setUse(Use.CLAIM);
 
     if (claimType.equals(ClaimType.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
@@ -1838,12 +1753,14 @@ public final class TransformerUtilsV2 {
    *     CareTeamComponent#getRole()}
    * @return the {@link CareTeamComponent} that was created/linked
    */
-  static CareTeamComponent addCareTeamPractitioner(
+  private static CareTeamComponent addCareTeamPractitioner(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
       C4BBPractitionerIdentifierType type,
       String practitionerIdValue,
-      C4BBClaimInstitutionalCareTeamRole careTeamRole) {
+      String roleSystem,
+      String roleCode,
+      String roleDisplay) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry =
         eob.getCareTeam().stream()
@@ -1855,10 +1772,8 @@ public final class TransformerUtilsV2 {
             .filter(ctc -> ctc.hasRole())
             .filter(
                 ctc ->
-                    careTeamRole.toCode().equals(ctc.getRole().getCodingFirstRep().getCode())
-                        && careTeamRole
-                            .getSystem()
-                            .equals(ctc.getRole().getCodingFirstRep().getSystem()))
+                    roleCode.equals(ctc.getRole().getCodingFirstRep().getCode())
+                        && roleSystem.equals(ctc.getRole().getCodingFirstRep().getSystem()))
             .findAny()
             .orElse(null);
 
@@ -1870,9 +1785,8 @@ public final class TransformerUtilsV2 {
       careTeamEntry.setSequence(eob.getCareTeam().size());
       careTeamEntry.setProvider(createPractitionerIdentifierReference(type, practitionerIdValue));
 
-      CodeableConcept careTeamRoleConcept =
-          createCodeableConcept(careTeamRole.getSystem(), careTeamRole.toCode());
-      careTeamRoleConcept.getCodingFirstRep().setDisplay(careTeamRole.getDisplay());
+      CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
+      careTeamRoleConcept.getCodingFirstRep().setDisplay(roleDisplay);
       careTeamEntry.setRole(careTeamRoleConcept);
     }
 
@@ -1892,13 +1806,13 @@ public final class TransformerUtilsV2 {
   /**
    * Returns a new {@link SupportingInformationComponent} that has been added to the specified
    * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
-   * CcwCodebookVariable)}, this also sets the {@link SupportingInformationComponent#getCode()}
+   * CcwCodebookInterface)}, this also sets the {@link SupportingInformationComponent#getCode()}
    * based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
-   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   * @param codeSystemVariable the {@link CcwCodebookInterface} to map to the {@link
    *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
    * @param codeValue the value to map to the {@link Coding#getCode()} used in the {@link
    *     SupportingInformationComponent#getCode()}
@@ -1906,8 +1820,8 @@ public final class TransformerUtilsV2 {
    */
   static SupportingInformationComponent addInformationWithCode(
       ExplanationOfBenefit eob,
-      CcwCodebookVariable categoryVariable,
-      CcwCodebookVariable codeSystemVariable,
+      CcwCodebookInterface categoryVariable,
+      CcwCodebookInterface codeSystemVariable,
       Optional<?> codeValue) {
     SupportingInformationComponent infoComponent = addInformation(eob, categoryVariable);
 
@@ -1921,12 +1835,11 @@ public final class TransformerUtilsV2 {
   static Optional<SupportingInformationComponent> addInformationSliceWithCode(
       ExplanationOfBenefit eob,
       C4BBSupportingInfoType slice,
-      CcwCodebookVariable categoryVariable,
-      CcwCodebookVariable codeSystemVariable,
+      CcwCodebookInterface categoryVariable,
+      CcwCodebookInterface codeSystemVariable,
       Optional<?> codeValue) {
     if (codeValue.isPresent()) {
-      SupportingInformationComponent infoComponent =
-          addInformationSlice(eob, slice, categoryVariable);
+      SupportingInformationComponent infoComponent = addInformationSlice(eob, slice);
 
       CodeableConcept infoCode =
           new CodeableConcept().addCoding(createCoding(eob, codeSystemVariable, codeValue));
@@ -1941,8 +1854,8 @@ public final class TransformerUtilsV2 {
   static SupportingInformationComponent addInformationSliceWithCode(
       ExplanationOfBenefit eob,
       C4BBSupportingInfoType slice,
-      CcwCodebookVariable categoryVariable,
-      CcwCodebookVariable codeSystemVariable,
+      CcwCodebookInterface categoryVariable,
+      CcwCodebookInterface codeSystemVariable,
       Object codeValue) {
     // Must get a valid value passed in
     if (codeValue == null) {
@@ -1958,21 +1871,21 @@ public final class TransformerUtilsV2 {
   /**
    * Returns a new {@link SupportingInformationComponent} that has been added to the specified
    * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
-   * CcwCodebookVariable)}, this also sets the {@link SupportingInformationComponent#getCode()}
+   * CcwCodebookInterface)}, this also sets the {@link SupportingInformationComponent#getCode()}
    * based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
-   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   * @param codeSystemVariable the {@link CcwCodebookInterface} to map to the {@link
    *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
    * @param date the value to map to the {@link SupportingInformationComponent#getTiming()}
    * @return the newly-added {@link SupportingInformationComponent} entry
    */
   static SupportingInformationComponent addInformationWithDate(
       ExplanationOfBenefit eob,
-      CcwCodebookVariable categoryVariable,
-      CcwCodebookVariable codeSystemVariable,
+      CcwCodebookInterface categoryVariable,
+      CcwCodebookInterface codeSystemVariable,
       Optional<LocalDate> date) {
     SupportingInformationComponent infoComponent = addInformation(eob, categoryVariable);
 
@@ -1986,13 +1899,13 @@ public final class TransformerUtilsV2 {
   /**
    * Returns a new {@link SupportingInformationComponent} that has been added to the specified
    * {@link ExplanationOfBenefit}. Unlike {@link #addInformation(ExplanationOfBenefit,
-   * CcwCodebookVariable)}, this also sets the {@link SupportingInformationComponent#getCode()}
+   * CcwCodebookInterface)}, this also sets the {@link SupportingInformationComponent#getCode()}
    * based on the values provided.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
-   * @param codeSystemVariable the {@link CcwCodebookVariable} to map to the {@link
+   * @param codeSystemVariable the {@link CcwCodebookInterface} to map to the {@link
    *     Coding#getSystem()} used in the {@link SupportingInformationComponent#getCode()}
    * @param codeValue the value to map to the {@link Coding#getCode()} used in the {@link
    *     SupportingInformationComponent#getCode()}
@@ -2000,15 +1913,15 @@ public final class TransformerUtilsV2 {
    */
   static SupportingInformationComponent addInformationWithCode(
       ExplanationOfBenefit eob,
-      CcwCodebookVariable categoryVariable,
-      CcwCodebookVariable codeSystemVariable,
+      CcwCodebookInterface categoryVariable,
+      CcwCodebookInterface codeSystemVariable,
       Object codeValue) {
     return addInformationWithCode(
         eob, categoryVariable, codeSystemVariable, Optional.of(codeValue));
   }
 
   static SupportingInformationComponent addInformationSlice(
-      ExplanationOfBenefit eob, C4BBSupportingInfoType slice, Object value) {
+      ExplanationOfBenefit eob, C4BBSupportingInfoType slice) {
     return addInformation(eob)
         .setCategory(new CodeableConcept().addCoding(createC4BBSupportingInfoCoding(slice)));
   }
@@ -2018,12 +1931,12 @@ public final class TransformerUtilsV2 {
    * {@link ExplanationOfBenefit}.
    *
    * @param eob the {@link ExplanationOfBenefit} to modify
-   * @param categoryVariable {@link CcwCodebookVariable} to map to {@link
+   * @param categoryVariable {@link CcwCodebookInterface} to map to {@link
    *     SupportingInformationComponent#getCategory()}
    * @return the newly-added {@link SupportingInformationComponent} entry
    */
   static SupportingInformationComponent addInformation(
-      ExplanationOfBenefit eob, CcwCodebookVariable categoryVariable) {
+      ExplanationOfBenefit eob, CcwCodebookInterface categoryVariable) {
     return addInformation(eob)
         .setCategory(
             createCodeableConceptForFieldId(
@@ -2375,7 +2288,7 @@ public final class TransformerUtilsV2 {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
-   * @param categoryVariable the {@link CcwCodebookVariable} to map to the adjudication's <code>
+   * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
    *     category</code>
    * @param amountValue the {@link Money#getValue()} for the adjudication total
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
@@ -2383,7 +2296,7 @@ public final class TransformerUtilsV2 {
    */
   static void addAdjudicationTotal(
       ExplanationOfBenefit eob,
-      CcwCodebookVariable categoryVariable,
+      CcwCodebookInterface categoryVariable,
       Optional<? extends Number> amountValue) {
 
     if (amountValue.isPresent()) {
@@ -2397,14 +2310,14 @@ public final class TransformerUtilsV2 {
 
   /**
    * @param eob the {@link ExplanationOfBenefit} that the adjudication total should be part of
-   * @param categoryVariable the {@link CcwCodebookVariable} to map to the adjudication's <code>
+   * @param categoryVariable the {@link CcwCodebookInterface} to map to the adjudication's <code>
    *     category</code>
    * @param totalAmountValue the {@link Money#getValue()} for the adjudication total
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
    *     appropriate {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static void addAdjudicationTotal(
-      ExplanationOfBenefit eob, CcwCodebookVariable categoryVariable, Number totalAmountValue) {
+      ExplanationOfBenefit eob, CcwCodebookInterface categoryVariable, Number totalAmountValue) {
     addAdjudicationTotal(eob, categoryVariable, Optional.of(totalAmountValue));
   }
 
@@ -2412,7 +2325,7 @@ public final class TransformerUtilsV2 {
    * @param eob the {@link ExplanationOfBenefit} that the {@link ExBenefitcategory} should be part
    *     of
    * @param benefitCategoryCode the code representing an {@link ExBenefitcategory}
-   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   * @param financialType the {@link CcwCodebookInterface} to map to {@link
    *     BenefitComponent#getType()}
    * @return the new {@link BenefitBalanceComponent}, which will have already been added to the
    *     appropriate {@link ExplanationOfBenefit#getBenefitBalance()} entry
@@ -2420,7 +2333,7 @@ public final class TransformerUtilsV2 {
   static BenefitComponent addBenefitBalanceFinancial(
       ExplanationOfBenefit eob,
       ExBenefitcategory benefitCategoryCode,
-      CcwCodebookVariable financialType) {
+      CcwCodebookInterface financialType) {
     BenefitBalanceComponent eobPrimaryBenefitBalance =
         findOrAddBenefitBalance(eob, benefitCategoryCode);
 
@@ -2442,14 +2355,14 @@ public final class TransformerUtilsV2 {
    * BenefitComponent#getUsedMoney()}
    *
    * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
-   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   * @param financialType the {@link CcwCodebookInterface} to map to {@link
    *     BenefitComponent#getType()}
    * @param amt Money amount to map to {@link BenefitComponent#getUsedMoney()}
    * @return the new {@link BenefitComponent} which will have already been added to the appropriate
    *     {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static BenefitComponent addBenefitBalanceFinancialMedicalAmt(
-      ExplanationOfBenefit eob, CcwCodebookVariable financialType, BigDecimal amt) {
+      ExplanationOfBenefit eob, CcwCodebookInterface financialType, BigDecimal amt) {
     // "1" is the code for MEDICAL in ExBenefitcategory
     return addBenefitBalanceFinancial(eob, ExBenefitcategory._1, financialType)
         .setUsed(createMoney(amt));
@@ -2460,7 +2373,7 @@ public final class TransformerUtilsV2 {
    * BenefitComponent#getUsedMoney()}
    *
    * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
-   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   * @param financialType the {@link CcwCodebookInterface} to map to {@link
    *     BenefitComponent#getType()}
    * @param amt Money amount to map to {@link BenefitComponent#getUsedMoney()}
    * @return the new {@link BenefitComponent} which will have already been added to the appropriate
@@ -2468,7 +2381,7 @@ public final class TransformerUtilsV2 {
    *     set.
    */
   static Optional<BenefitComponent> addBenefitBalanceFinancialMedicalAmt(
-      ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> amount) {
+      ExplanationOfBenefit eob, CcwCodebookInterface financialType, Optional<BigDecimal> amount) {
     return amount.map(
         amt -> addBenefitBalanceFinancialMedicalAmt(eob, financialType, amount.get()));
   }
@@ -2478,14 +2391,14 @@ public final class TransformerUtilsV2 {
    * BenefitComponent#getUsedUnsignedIntType()}
    *
    * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
-   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   * @param financialType the {@link CcwCodebookInterface} to map to {@link
    *     BenefitComponent#getType()}
    * @param value Integral amount to map to {@link BenefitComponent#getUsedUnsignedIntType()}
    * @return the new {@link BenefitComponent} which will have already been added to the appropriate
    *     {@link ExplanationOfBenefit#getBenefitBalance()} entry
    */
   static BenefitComponent addBenefitBalanceFinancialMedicalInt(
-      ExplanationOfBenefit eob, CcwCodebookVariable financialType, BigDecimal amount) {
+      ExplanationOfBenefit eob, CcwCodebookInterface financialType, BigDecimal amount) {
     // "1" is the code for MEDICAL in ExBenefitcategory
     return addBenefitBalanceFinancial(eob, ExBenefitcategory._1, financialType)
         // TODO: intValueExact() not working?
@@ -2497,7 +2410,7 @@ public final class TransformerUtilsV2 {
    * BenefitComponent#getUsedUnsignedIntType()}
    *
    * @param eob the {@link ExplanationOfBenefit} that the {@link BenefitComponent} should be part of
-   * @param financialType the {@link CcwCodebookVariable} to map to {@link
+   * @param financialType the {@link CcwCodebookInterface} to map to {@link
    *     BenefitComponent#getType()}
    * @param value Integral amount to map to {@link BenefitComponent#getUsedUnsignedIntType()}
    * @return the new {@link BenefitComponent} which will have already been added to the appropriate
@@ -2505,7 +2418,7 @@ public final class TransformerUtilsV2 {
    *     set.
    */
   static Optional<BenefitComponent> addBenefitBalanceFinancialMedicalInt(
-      ExplanationOfBenefit eob, CcwCodebookVariable financialType, Optional<BigDecimal> value) {
+      ExplanationOfBenefit eob, CcwCodebookInterface financialType, Optional<BigDecimal> value) {
     return value.map(val -> addBenefitBalanceFinancialMedicalInt(eob, financialType, value.get()));
   }
 
@@ -2548,6 +2461,32 @@ public final class TransformerUtilsV2 {
   /**
    * Optionally adds a member to @link ExplanationOfBenefit#getCareTeam()}
    *
+   * <p>Used for Institutional claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param item the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param system Coding System to use, either NPI or UPIN
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   */
+  static void addCareTeamMember(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimInstitutionalCareTeamRole role,
+      Optional<String> id) {
+    if (id.isPresent()) {
+      addCareTeamPractitioner(
+          eob, item, type, id.get(), role.getSystem(), role.toCode(), role.getDisplay());
+    }
+  }
+
+  /**
+   * Optionally adds a member to @link ExplanationOfBenefit#getCareTeam()}
+   *
+   * <p>Used for Institutional claims
+   *
    * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
    *     of
    * @param system Coding System to use, either NPI or UPIN
@@ -2559,8 +2498,30 @@ public final class TransformerUtilsV2 {
       C4BBPractitionerIdentifierType type,
       C4BBClaimInstitutionalCareTeamRole role,
       Optional<String> id) {
+    addCareTeamMember(eob, null, type, role, id);
+  }
+
+  /**
+   * Optionally adds a member to @link ExplanationOfBenefit#getCareTeam()}
+   *
+   * <p>Used for Pharmacy claims
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param item the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param system Coding System to use, either NPI or UPIN
+   * @param role The care team member's role
+   * @param id The NPI or UPIN coded as a string
+   */
+  static void addCareTeamMember(
+      ExplanationOfBenefit eob,
+      ItemComponent item,
+      C4BBPractitionerIdentifierType type,
+      C4BBClaimPharmacyTeamRole role,
+      Optional<String> id) {
     if (id.isPresent()) {
-      addCareTeamPractitioner(eob, null, type, id.get(), role);
+      addCareTeamPractitioner(
+          eob, item, type, id.get(), role.getSystem(), role.toCode(), role.getDisplay());
     }
   }
 
