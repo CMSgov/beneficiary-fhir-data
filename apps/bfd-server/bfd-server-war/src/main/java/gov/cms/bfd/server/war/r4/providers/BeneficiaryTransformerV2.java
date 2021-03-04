@@ -6,7 +6,6 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RaceCategory;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
@@ -102,41 +102,23 @@ final class BeneficiaryTransformerV2 {
 
     // Required values not directly mapped
     patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
-
     patient.setId(beneficiary.getBeneficiaryId());
+    Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
 
     TransformerUtilsV2.addIdentifierSlice(
         patient,
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE, "MB"),
-        Optional.of(beneficiary.getBeneficiaryId()),
+        mbiUnhashedCurrent,
         Optional.of(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE));
 
-    // Add hicn-hash identifier ONLY if raw hicn is requested.
-    // TODO - check if this is MC or is HICN something else
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
+    // Add lastUpdated
+    TransformerUtilsV2.setLastUpdated(patient, beneficiary.getLastUpdated());
 
-      if (hicnUnhashedCurrent.isPresent()) {
-        /*
-        addUnhashedIdentifier(
-            patient,
-            hicnUnhashedCurrent.get(),
-            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-            TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT));
-        */
-        TransformerUtilsV2.addIdentifierSlice(
-            patient,
-            TransformerUtilsV2.createCodeableConcept(
-                TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE, "MC"),
-            hicnUnhashedCurrent,
-            Optional.of(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE));
-      }
-    }
+    // NOTE - No longer returning any HCIN value(s) in V2
 
-    if (beneficiary.getMbiHash().isPresent()) {
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       Period mbiPeriod = new Period();
-
       if (beneficiary.getMbiEffectiveDate().isPresent()) {
         TransformerUtilsV2.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
       }
@@ -144,69 +126,15 @@ final class BeneficiaryTransformerV2 {
         TransformerUtilsV2.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
       }
 
-      if (mbiPeriod.hasStart() || mbiPeriod.hasEnd()) {
-        patient
-            .addIdentifier()
-            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
-            .setValue(beneficiary.getMbiHash().get())
-            .setPeriod(mbiPeriod);
-      } else {
-        patient
-            .addIdentifier()
-            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
-            .setValue(beneficiary.getMbiHash().get());
-      }
-    }
+      addUnhashedIdentifier(
+          patient,
+          mbiUnhashedCurrent.get(),
+          TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+          TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT),
+          mbiPeriod);
 
-    Extension currentIdentifier =
-        TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
-    Extension historicalIdentifier =
-        TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
-    // Add lastUpdated
-    TransformerUtilsV2.setLastUpdated(patient, beneficiary.getLastUpdated());
-
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
-
-      if (hicnUnhashedCurrent.isPresent()) {
-        addUnhashedIdentifier(
-            patient,
-            hicnUnhashedCurrent.get(),
-            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-            currentIdentifier);
-      }
-
-      List<String> unhashedHicns = new ArrayList<String>();
-      for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
-        Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
-        if (hicnUnhashedHistoric.isPresent()) {
-          unhashedHicns.add(hicnUnhashedHistoric.get());
-        }
-        TransformerUtilsV2.updateMaxLastUpdated(patient, beneHistory.getLastUpdated());
-      }
-
-      List<String> unhashedHicnsNoDupes =
-          unhashedHicns.stream().distinct().collect(Collectors.toList());
-      for (String hicn : unhashedHicnsNoDupes) {
-        addUnhashedIdentifier(
-            patient,
-            hicn,
-            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-            historicalIdentifier);
-      }
-    }
-
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
-
-      if (mbiUnhashedCurrent.isPresent()) {
-        addUnhashedIdentifier(
-            patient,
-            mbiUnhashedCurrent.get(),
-            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-            currentIdentifier);
-      }
-
+      Extension historicalIdentifier =
+          TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
       List<String> unhashedMbis = new ArrayList<String>();
       for (MedicareBeneficiaryIdHistory mbiHistory :
           beneficiary.getMedicareBeneficiaryIdHistories()) {
@@ -225,7 +153,8 @@ final class BeneficiaryTransformerV2 {
             patient,
             mbi,
             TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-            historicalIdentifier);
+            historicalIdentifier,
+            null);
       }
     }
 
@@ -257,15 +186,14 @@ final class BeneficiaryTransformerV2 {
       patient.setBirthDate(TransformerUtilsV2.convertToDate(beneficiary.getBirthDate()));
     }
 
-    // Death Date
+    // "Patient.deceased[x]": ["boolean", "dateTime"],
     if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
       patient.setDeceased(
           new DateTimeType(
               TransformerUtilsV2.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
               TemporalPrecisionEnum.DAY));
-      patient.setActive(false);
     } else {
-      patient.setActive(true);
+      patient.setDeceased(new BooleanType(false));
     }
 
     char sex = beneficiary.getSex();
@@ -278,7 +206,9 @@ final class BeneficiaryTransformerV2 {
           TransformerUtilsV2.createExtensionCoding(
               patient, CcwCodebookVariable.RACE, beneficiary.getRace().get()));
 
-      RaceCategory raceCategory = TransformerUtilsV2.getRaceCategory(beneficiary.getRace().get());
+      // for race category, v2 will just treat all race codes as Unknown (UNK);
+      // thus we'll simply pass in the Unknown race code .
+      RaceCategory raceCategory = TransformerUtilsV2.getRaceCategory('0');
       Extension raceChildOMBExt1 =
           new Extension()
               .setValue(
@@ -413,27 +343,6 @@ final class BeneficiaryTransformerV2 {
    * @param value the value for {@link Identifier#getValue()}
    * @param system the value for {@link Identifier#getSystem()}
    * @param identifierCurrencyExtension the {@link Extension} to add to the {@link Identifier}
-   */
-  private static void addUnhashedIdentifier(
-      Patient patient, String value, String system, Extension identifierCurrencyExtension) {
-
-    patient
-        .addIdentifier()
-        .setValue(value)
-        .setSystem(system)
-        .getType()
-        .addCoding()
-        .setCode("MC")
-        .setSystem(system)
-        .setDisplay("Patient's Medicare Number")
-        .addExtension(identifierCurrencyExtension);
-  }
-
-  /**
-   * @param patient the FHIR {@link Patient} resource to add the {@link Identifier} to
-   * @param value the value for {@link Identifier#getValue()}
-   * @param system the value for {@link Identifier#getSystem()}
-   * @param identifierCurrencyExtension the {@link Extension} to add to the {@link Identifier}
    * @param mbiPeriod the value for {@link Period}
    */
   private static void addUnhashedIdentifier(
@@ -443,7 +352,7 @@ final class BeneficiaryTransformerV2 {
       Extension identifierCurrencyExtension,
       Period mbiPeriod) {
 
-    if (mbiPeriod != null) {
+    if (mbiPeriod != null && (mbiPeriod.hasStart() || mbiPeriod.hasEnd())) {
 
       patient
           .addIdentifier()
@@ -452,9 +361,8 @@ final class BeneficiaryTransformerV2 {
           .setPeriod(mbiPeriod)
           .getType()
           .addCoding()
-          .setCode("MC")
-          .setSystem(TransformerConstants.CARIN_IDENTIFIER_SYSTEM)
-          .setDisplay("Patient's Medicare Number")
+          .setCode("MB")
+          .setDisplay("Member Number")
           .addExtension(identifierCurrencyExtension);
     } else {
       patient
@@ -463,9 +371,8 @@ final class BeneficiaryTransformerV2 {
           .setSystem(system)
           .getType()
           .addCoding()
-          .setCode("MC")
-          .setSystem(TransformerConstants.CARIN_IDENTIFIER_SYSTEM)
-          .setDisplay("Patient's Medicare Number")
+          .setCode("MB")
+          .setDisplay("Member Number")
           .addExtension(identifierCurrencyExtension);
     }
   }
