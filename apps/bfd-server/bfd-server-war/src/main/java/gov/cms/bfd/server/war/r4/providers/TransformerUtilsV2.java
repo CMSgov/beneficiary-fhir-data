@@ -796,9 +796,7 @@ public final class TransformerUtilsV2 {
    * @param adjudication Optional {@link AdjudicationComponent}
    */
   static void addAdjudication(ItemComponent item, Optional<AdjudicationComponent> adjudication) {
-    if (adjudication.isPresent()) {
-      item.addAdjudication(adjudication.get());
-    }
+    adjudication.ifPresent(adj -> item.addAdjudication(adj));
   }
 
   /**
@@ -810,9 +808,7 @@ public final class TransformerUtilsV2 {
    */
   static void addAdjudication(
       ExplanationOfBenefit eob, Optional<AdjudicationComponent> adjudication) {
-    if (adjudication.isPresent()) {
-      eob.addAdjudication(adjudication.get());
-    }
+    adjudication.ifPresent(adj -> eob.addAdjudication(adj));
   }
 
   /**
@@ -822,9 +818,19 @@ public final class TransformerUtilsV2 {
    * @param total Optional {@link TotalComponent}
    */
   static void addTotal(ExplanationOfBenefit eob, Optional<TotalComponent> total) {
-    if (total.isPresent()) {
-      eob.addTotal(total.get());
-    }
+    total.ifPresent(t -> eob.addTotal(t));
+  }
+
+  /**
+   * Optionally adds an {@link SupportingInformationComponent} to an {@link
+   * ExplanationOfBenefit#getSupportingInformation()}
+   *
+   * @param eob {@link ExplanationOfBenefit} to add the {@link TotalComponent} to
+   * @param total Optional {@link TotalComponent}
+   */
+  static void addInformation(
+      ExplanationOfBenefit eob, Optional<SupportingInformationComponent> info) {
+    info.ifPresent(i -> eob.addSupportingInfo(i));
   }
 
   /**
@@ -958,6 +964,37 @@ public final class TransformerUtilsV2 {
             new TotalComponent()
                 .setCategory(createAdjudicationAmtSliceCategory(ccwVariable, code))
                 .setAmount(createMoney(amount)));
+  }
+
+  /**
+   * Optionally creates an `admissionperiod` {@link SupportingInformationComponent} slice.
+   *
+   * @param periodStart Period start
+   * @param periodEnd Period end
+   * @return The created {@link SupportingInformationComponent}
+   */
+  static Optional<SupportingInformationComponent> createInformationAdmPeriodSlice(
+      Optional<LocalDate> periodStart, Optional<LocalDate> periodEnd) {
+
+    // Create a range if we can
+    if (periodStart.isPresent() || periodEnd.isPresent()) {
+      validatePeriodDates(periodStart, periodEnd);
+
+      Period period = new Period();
+      periodStart.ifPresent(
+          start -> period.setStart(convertToDate(start), TemporalPrecisionEnum.DAY));
+      periodEnd.ifPresent(end -> period.setEnd(convertToDate(end), TemporalPrecisionEnum.DAY));
+
+      return Optional.of(
+          new SupportingInformationComponent()
+              .setCategory(
+                  new CodeableConcept()
+                      .addCoding(
+                          createC4BBSupportingInfoCoding(C4BBSupportingInfoType.ADMISSION_PERIOD)))
+              .setTiming(period));
+    } else {
+      return Optional.empty();
+    }
   }
 
   /**
@@ -1697,16 +1734,16 @@ public final class TransformerUtilsV2 {
   }
   /**
    * @param eob the {@link ExplanationOfBenefit} to extract the claim type from
-   * @return the {@link ClaimType}
+   * @return the {@link ClaimTypeV2}
    */
-  static ClaimType getClaimType(ExplanationOfBenefit eob) {
+  static ClaimTypeV2 getClaimType(ExplanationOfBenefit eob) {
     String type =
         eob.getType().getCoding().stream()
             .filter(c -> c.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE))
             .findFirst()
             .get()
             .getCode();
-    return ClaimType.valueOf(type);
+    return ClaimTypeV2.valueOf(type);
   }
 
   /**
@@ -1715,7 +1752,7 @@ public final class TransformerUtilsV2 {
    * @param eob the {@link ExplanationOfBenefit} to modify
    * @param claimId CLM_ID
    * @param beneficiaryId BENE_ID
-   * @param claimType {@link ClaimType} to process
+   * @param claimType {@link ClaimTypeV2} to process
    * @param claimGroupId CLM_GRP_ID
    * @param coverageType {@link MedicareSegment}
    * @param dateFrom CLM_FROM_DT
@@ -1727,7 +1764,7 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       String claimId,
       String beneficiaryId,
-      ClaimType claimType,
+      ClaimTypeV2 claimType,
       String claimGroupId,
       MedicareSegment coverageType,
       Optional<LocalDate> dateFrom,
@@ -1744,7 +1781,7 @@ public final class TransformerUtilsV2 {
     // "claim" => ExplanationOfBenefit.use
     eob.setUse(Use.CLAIM);
 
-    if (claimType.equals(ClaimType.PDE)) {
+    if (claimType.equals(ClaimTypeV2.PDE)) {
       // PDE_ID => ExplanationOfBenefit.identifier
       eob.addIdentifier(createClaimIdentifier(CcwCodebookVariable.PDE_ID, claimId));
     } else {
@@ -2046,13 +2083,13 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * @param claimType the {@link ClaimType} to compute an {@link ExplanationOfBenefit#getId()} for
+   * @param claimType the {@link ClaimTypeV2} to compute an {@link ExplanationOfBenefit#getId()} for
    * @param claimId the <code>claimId</code> field value (e.g. from {@link
    *     CarrierClaim#getClaimId()}) to compute an {@link ExplanationOfBenefit#getId()} for
    * @return the {@link ExplanationOfBenefit#getId()} value to use for the specified <code>claimId
    *     </code> value
    */
-  public static String buildEobId(ClaimType claimType, String claimId) {
+  public static String buildEobId(ClaimTypeV2 claimType, String claimId) {
     return String.format("%s-%s", claimType.name().toLowerCase(), claimId);
   }
 
@@ -2060,7 +2097,7 @@ public final class TransformerUtilsV2 {
    * maps a blue button claim type to a FHIR claim type
    *
    * @param eobType the {@link CodeableConcept} that will get remapped
-   * @param blueButtonClaimType the blue button {@link ClaimType} we are mapping from
+   * @param blueButtonClaimType the blue button {@link ClaimTypeV2} we are mapping from
    * @param ccwNearLineRecordIdCode if present, the blue button near line id code {@link
    *     Optional}&lt;{@link Character}&gt; gets remapped to a ccw record id code
    * @param ccwClaimTypeCode if present, the blue button claim type code {@link Optional}&lt;{@link
@@ -2068,7 +2105,7 @@ public final class TransformerUtilsV2 {
    */
   static void mapEobType(
       ExplanationOfBenefit eob,
-      ClaimType blueButtonClaimType,
+      ClaimTypeV2 blueButtonClaimType,
       Optional<Character> ccwNearLineRecordIdCode,
       Optional<String> ccwClaimTypeCode) {
 
@@ -2096,6 +2133,7 @@ public final class TransformerUtilsV2 {
 
       case INPATIENT:
       case OUTPATIENT:
+      case HOSPICE:
         fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.INSTITUTIONAL;
         break;
 
@@ -2509,6 +2547,24 @@ public final class TransformerUtilsV2 {
 
       eob.addExtension(adjudicationTotalEextension);
     }
+  }
+
+  static void addItemRevenue(
+      ItemComponent item,
+      ExplanationOfBenefit eob,
+      CcwCodebookInterface categoryVariable,
+      Optional<?> code) {
+    code.ifPresent(
+        c -> {
+          item.getRevenue()
+              // Add standard coding
+              .addCoding(
+                  new Coding()
+                      .setSystem(TransformerConstants.NUBC_REVENUE_CODE_SYSTEM)
+                      .setCode(String.valueOf(c)))
+              // Also add BB coding
+              .addCoding(createCoding(eob, categoryVariable, Optional.of(c)));
+        });
   }
 
   /**
@@ -3624,7 +3680,7 @@ public final class TransformerUtilsV2 {
       String revenueCenterCode,
       BigDecimal rateAmount,
       BigDecimal totalChargeAmount,
-      BigDecimal nonCoveredChargeAmount,
+      Optional<BigDecimal> nonCoveredChargeAmount,
       BigDecimal unitCount,
       Optional<BigDecimal> nationalDrugCodeQuantity,
       Optional<String> nationalDrugCodeQualifierCode) {
