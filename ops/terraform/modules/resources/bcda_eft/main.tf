@@ -1,17 +1,17 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ VARS & DATA SOURCES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 locals {
-  tags              = merge({Layer=var.layer, role=var.role}, var.env_config.tags)
-  posix_user_id     = "1500"
-  posix_group_id    = "1500"
-  bcda_root_dir     = "/dropbox"
+  tags           = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
+  posix_user_id  = "1500"
+  posix_group_id = "1500"
+  bcda_root_dir  = "/dropbox"
 }
 
 # returns selected vpc (bfd-prod-vpc, bfd-prod-sbx-vpc, etc)
 data "aws_vpc" "main" {
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-${var.env_config.env}-vpc"]
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-vpc"]
   }
 }
 
@@ -20,23 +20,23 @@ data "aws_caller_identity" "current" {}
 
 # returns all "data" subnet id's available to the seleted vpc
 data "aws_subnet_ids" "etl" {
-  vpc_id    = var.env_config.vpc_id
-  
+  vpc_id = var.env_config.vpc_id
+
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-${var.env_config.env}-az*-data"]
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-az*-data"]
   }
 }
 
 # returns all "data" subnets (used for grabbing cidr_blocks)
 data "aws_subnet" "etl" {
-  vpc_id    = var.env_config.vpc_id
-  for_each  = toset(data.aws_subnet_ids.etl.ids)
-  id        = each.value
+  vpc_id   = var.env_config.vpc_id
+  for_each = toset(data.aws_subnet_ids.etl.ids)
+  id       = each.value
 
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-${var.env_config.env}-az*-data"]
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-az*-data"]
   }
 }
 
@@ -60,7 +60,7 @@ resource "aws_kms_key" "bcda_eft_efs" {
   description = "bcda-eft-efs-${var.env_config.env}-cmk"
   key_usage   = "ENCRYPT_DECRYPT"
   is_enabled  = true
-  tags        = merge({Name="bcda-eft-${var.env_config.env}-efs"}, local.tags)
+  tags        = merge({ Name = "bcda-eft-${var.env_config.env}-efs" }, local.tags)
 
   policy = <<POLICY
 {
@@ -149,26 +149,26 @@ POLICY
 
 # BCDA EFT file system
 resource "aws_efs_file_system" "bcda_eft" {
-    creation_token  = "bcda-eft-${var.env_config.env}-efs"
-    encrypted       = "true"
-    kms_key_id      = aws_kms_key.bcda_eft_efs.arn
-    tags            = merge({Name="bcda-eft-${var.env_config.env}-efs"}, local.tags)
+  creation_token = "bcda-eft-${var.env_config.env}-efs"
+  encrypted      = "true"
+  kms_key_id     = aws_kms_key.bcda_eft_efs.arn
+  tags           = merge({ Name = "bcda-eft-${var.env_config.env}-efs" }, local.tags)
 
-    // BCDA will be responsible for cleaning up after ingestion, but just in case, we transition
-    // files not accessed after 7 days to slower storage to save $
-    // TODO: create alert if any files are in IA class
-    lifecycle_policy {
-      transition_to_ia = "AFTER_7_DAYS"
-    }
+  // BCDA will be responsible for cleaning up after ingestion, but just in case, we transition
+  // files not accessed after 7 days to slower storage to save $
+  // TODO: create alert if any files are in IA class
+  lifecycle_policy {
+    transition_to_ia = "AFTER_7_DAYS"
+  }
 }
 
 # Access point BCDA will mount
 # - will automagically root them into the /dropbox directory
 # - will perform all file operations as specific posix user & group (e.g., 1500:1500)
 resource "aws_efs_access_point" "bcda_eft" {
-  file_system_id  = aws_efs_file_system.bcda_eft.id
-  tags            = merge({Name="bcda-eft-${var.env_config.env}-efs-ap"}, local.tags)
-  
+  file_system_id = aws_efs_file_system.bcda_eft.id
+  tags           = merge({ Name = "bcda-eft-${var.env_config.env}-efs-ap" }, local.tags)
+
   posix_user {
     gid = local.posix_group_id
     uid = local.posix_user_id
@@ -176,7 +176,7 @@ resource "aws_efs_access_point" "bcda_eft" {
 
   root_directory {
     path = local.bcda_root_dir
-    
+
     creation_info {
       owner_gid   = local.posix_group_id
       owner_uid   = local.posix_user_id
@@ -189,9 +189,9 @@ resource "aws_efs_access_point" "bcda_eft" {
 # TODO: only deploys mount targets in *existing* subnets. We will need to extend our data
 # subnets into all AZ's to ensure we do not incur cross-AZ data charges
 resource "aws_efs_mount_target" "bcda_eft" {
-  file_system_id  = aws_efs_file_system.bcda_eft.id
-  for_each        = data.aws_subnet_ids.etl.ids
-  subnet_id       = each.value
+  file_system_id = aws_efs_file_system.bcda_eft.id
+  for_each       = data.aws_subnet_ids.etl.ids
+  subnet_id      = each.value
 }
 
 # EFS file system policy that
@@ -264,9 +264,9 @@ POLICY
 # below, allows BCDA to mount the EFS file system with read and write permissions.
 # TODO: verify principal
 resource "aws_iam_role" "bcda_rw" {
-    name               = "bcda-eft-efs-${var.env_config.env}-rw-access-role"
-    path               = "/"
-    assume_role_policy = <<POLICY
+  name               = "bcda-eft-efs-${var.env_config.env}-rw-access-role"
+  path               = "/"
+  assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -289,10 +289,10 @@ POLICY
 # - grants BCDA read+write privileges
 # - allows BCDA to describe our mount targets
 resource "aws_iam_policy" "bcda_ap_access" {
-    name        = "bcda-eft-efs-${var.env_config.env}-ap-access-policy"
-    path        = "/"
-    description = ""
-    policy      = <<POLICY
+  name        = "bcda-eft-efs-${var.env_config.env}-ap-access-policy"
+  path        = "/"
+  description = ""
+  policy      = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -315,9 +315,9 @@ POLICY
 
 # attaches the above policy to the role
 resource "aws_iam_policy_attachment" "bcda_ap_access" {
-    name       = "bcda-eft-efs-${var.env_config.env}-ap-access-policy-attachment"
-    policy_arn = aws_iam_policy.bcda_ap_access.arn
-    roles      = [aws_iam_role.bcda_rw.name]
+  name       = "bcda-eft-efs-${var.env_config.env}-ap-access-policy-attachment"
+  policy_arn = aws_iam_policy.bcda_ap_access.arn
+  roles      = [aws_iam_role.bcda_rw.name]
 }
 
 
@@ -326,18 +326,18 @@ resource "aws_iam_policy_attachment" "bcda_ap_access" {
 
 # security group that allows NFS traffic (TCP/2049) from BFD and BCDA subnets
 resource "aws_security_group" "bcda_efs_sg" {
-    name            = "bcda-eft-efs-${var.env_config.env}-sg"
-    description     = "allows nfs to bcda and bfd subnets"
-    vpc_id          = data.aws_vpc.main.id
-    tags            = local.tags
+  name        = "bcda-eft-efs-${var.env_config.env}-sg"
+  description = "allows nfs to bcda and bfd subnets"
+  vpc_id      = data.aws_vpc.main.id
+  tags        = local.tags
 
   // TODO: delete egress unless needed
-//    egress {
-//        from_port   = 0
-//        to_port     = 0
-//        protocol    = "-1"
-//        cidr_blocks = ["0.0.0.0/0"]
-//    }
+  //    egress {
+  //        from_port   = 0
+  //        to_port     = 0
+  //        protocol    = "-1"
+  //        cidr_blocks = ["0.0.0.0/0"]
+  //    }
 }
 
 # allow TCP/2049 from BFD ETL data subnets

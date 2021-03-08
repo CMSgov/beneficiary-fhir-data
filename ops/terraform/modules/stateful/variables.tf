@@ -1,11 +1,11 @@
 variable "aurora_config" {
   description = "Aurora sizing and version config"
-  type        = object({instance_class = string, cluster_nodes = number, engine_version = string, param_version = string})
+  type        = object({ instance_class = string, cluster_nodes = number, engine_version = string, param_version = string })
 }
 
 variable "aurora_node_params" {
   description = "Aurora node parameter group config"
-  type        = list(object({name = string, value = string, apply_on_reboot = bool}))
+  type        = list(object({ name = string, value = string, apply_on_reboot = bool }))
 }
 
 # variable "db_config" {
@@ -24,26 +24,26 @@ variable "aurora_node_params" {
 # }
 
 variable "env_config" {
-  description       = "All high-level info for the whole vpc"
-  type              = object({env=string, tags=map(string)})
+  description = "All high-level info for the whole vpc"
+  type        = object({ env = string, tags = map(string) })
 }
 
 variable "victor_ops_url" {
-  description       = "VictorOps CloudWatch integration URL"
-  type              = string
+  description = "VictorOps CloudWatch integration URL"
+  type        = string
 }
 
 variable "medicare_opt_out_config" {
-  description       = "Config for medicare opt out S3 bucket"
-  type              = object({read_roles = list(string), write_accts = list(string), admin_users = list(string)})
+  description = "Config for medicare opt out S3 bucket"
+  type        = object({ read_roles = list(string), write_accts = list(string), admin_users = list(string) })
 }
 
 variable "bcda_acct_num" {
-  description       = "BCDA AWS account number accessing EFT EFS file systems"
-  type              = string
+  description = "BCDA AWS account number accessing EFT EFS file systems"
+  type        = string
 }
 
 variable "bcda_subnets" {
-  description       = "BCDA subnets requiring access to EFT EFS file systems"
-  type              = map(list(string))
+  description = "BCDA subnets requiring access to EFT EFS file systems"
+  type        = map(list(string))
 }
