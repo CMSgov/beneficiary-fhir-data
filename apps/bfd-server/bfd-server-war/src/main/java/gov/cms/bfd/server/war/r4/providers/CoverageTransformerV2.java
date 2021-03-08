@@ -87,6 +87,7 @@ final class CoverageTransformerV2 {
 
     // coverage.addClass_(coverageClass);
     coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary));
+
     setCoverageStatus(coverage, beneficiary.getPartATerminationCode());
 
     beneficiary
@@ -668,10 +669,11 @@ final class CoverageTransformerV2 {
    * @param terminationCode The {@link Character} that denotes if Part is active
    */
   static void setCoverageStatus(Coverage coverage, Optional<Character> terminationCode) {
-    coverage.setStatus(
-        terminationCode.isPresent() && terminationCode.equals('0')
-            ? CoverageStatus.ACTIVE
-            : CoverageStatus.CANCELLED);
+    if (terminationCode.isPresent() && terminationCode.get().equals('0')) {
+      coverage.setStatus(CoverageStatus.ACTIVE);
+    } else {
+      coverage.setStatus(CoverageStatus.CANCELLED);
+    }
   }
 
   /**
