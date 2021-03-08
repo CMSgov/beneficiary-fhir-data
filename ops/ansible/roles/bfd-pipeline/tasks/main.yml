@@ -7,6 +7,9 @@
   with_items:
     # Needed to run the ETL service.
     - java-1.8.0-openjdk
+    # Needed for working with AWS EFS file systems (when using IAM roles/policies, KMS for crypto, etc)
+    # See https://docs.aws.amazon.com/efs/latest/ug/using-amazon-efs-utils.html
+    - amazon-efs-utils
   become: true
   tags: 
     - pre-ami
