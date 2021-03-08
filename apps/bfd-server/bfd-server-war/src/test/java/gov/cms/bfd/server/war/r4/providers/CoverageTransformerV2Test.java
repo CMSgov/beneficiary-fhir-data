@@ -60,7 +60,7 @@ public final class CoverageTransformerV2Test {
   public void transformSampleARecord() throws FHIRException {
     Coverage partACoverage =
         CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(partACoverage));
+    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(partACoverage));
     assertPartAMatches(beneficiary, partACoverage);
 
     Coverage partBCoverage =
