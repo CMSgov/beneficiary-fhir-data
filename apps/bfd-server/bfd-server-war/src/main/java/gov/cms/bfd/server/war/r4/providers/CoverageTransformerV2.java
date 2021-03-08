@@ -143,6 +143,7 @@ final class CoverageTransformerV2 {
     // Medicare Entitlement Buy In Indicator
     transformEntitlementBuyInIndicators(coverage, beneficiary);
 
+    // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
@@ -197,6 +198,8 @@ final class CoverageTransformerV2 {
 
     // Medicare Entitlement Buy In Indicator
     transformEntitlementBuyInIndicators(coverage, beneficiary);
+
+    // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
@@ -338,14 +341,15 @@ final class CoverageTransformerV2 {
     addCoverageCodeExtension(
         coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd());
 
-    TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
-
     // The reference year of the enrollment data
     addCoverageDecimalExtension(
         coverage, CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear());
 
     // Monthly Medicare-Medicaid dual eligibility codes
     transformEntitlementDualEligibility(coverage, beneficiary);
+
+    // update Coverage.meta.lastUpdated
+    TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
     return coverage;
@@ -586,6 +590,7 @@ final class CoverageTransformerV2 {
     // Monthly Medicare-Medicaid dual eligibility codes
     transformEntitlementDualEligibility(coverage, beneficiary);
 
+    // update Coverage.meta.lastUpdated
     TransformerUtilsV2.setLastUpdated(coverage, beneficiary.getLastUpdated());
 
     timer.stop();
