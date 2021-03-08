@@ -85,7 +85,6 @@ final class CoverageTransformerV2 {
 
     coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
 
-    // coverage.addClass_(coverageClass);
     coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary));
 
     setCoverageStatus(coverage, beneficiary.getPartATerminationCode());
