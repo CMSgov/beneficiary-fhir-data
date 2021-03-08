@@ -974,19 +974,24 @@ public final class TransformerUtilsV2 {
    * @return The created {@link SupportingInformationComponent}
    */
   static Optional<SupportingInformationComponent> createInformationAdmPeriodSlice(
-      Optional<LocalDate> periodStart, Optional<LocalDate> periodEnd) {
-
+      ExplanationOfBenefit eob, Optional<LocalDate> periodStart, Optional<LocalDate> periodEnd) {
     // Create a range if we can
     if (periodStart.isPresent() || periodEnd.isPresent()) {
       validatePeriodDates(periodStart, periodEnd);
 
+      // Create the period
       Period period = new Period();
       periodStart.ifPresent(
           start -> period.setStart(convertToDate(start), TemporalPrecisionEnum.DAY));
       periodEnd.ifPresent(end -> period.setEnd(convertToDate(end), TemporalPrecisionEnum.DAY));
 
+      int maxSequence =
+          eob.getSupportingInfo().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
+
+      // Create the SupportingInfo element
       return Optional.of(
           new SupportingInformationComponent()
+              .setSequence(maxSequence + 1)
               .setCategory(
                   new CodeableConcept()
                       .addCoding(

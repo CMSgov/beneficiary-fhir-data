@@ -118,7 +118,7 @@ public class HospiceClaimTransformerV2 {
     TransformerUtilsV2.addInformation(
         eob,
         TransformerUtilsV2.createInformationAdmPeriodSlice(
-            claimGroup.getClaimHospiceStartDate(), claimGroup.getBeneficiaryDischargeDate()));
+            eob, claimGroup.getClaimHospiceStartDate(), claimGroup.getBeneficiaryDischargeDate()));
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
