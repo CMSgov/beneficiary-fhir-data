@@ -999,10 +999,26 @@ public final class TransformerUtilsV2 {
    * @param period the {@link Period} to adjust
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
+  static void setPeriodEnd(Period period, Optional<LocalDate> date) {
+    date.ifPresent(value -> setPeriodEnd(period, value));
+  }
+
+  /**
+   * @param period the {@link Period} to adjust
+   * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
+   */
   static void setPeriodEnd(Period period, LocalDate date) {
     period.setEnd(
         Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
         TemporalPrecisionEnum.DAY);
+  }
+
+  /**
+   * @param period the {@link Period} to adjust
+   * @param date the {@link LocalDate} to set the {@link Period#getStart()} value with/to
+   */
+  static void setPeriodStart(Period period, Optional<LocalDate> date) {
+    date.ifPresent(value -> setPeriodStart(period, value));
   }
 
   /**
