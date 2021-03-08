@@ -2,8 +2,12 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
+import gov.cms.bfd.model.rif.CarrierClaim;
+import gov.cms.bfd.model.rif.CarrierClaim_;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaim_;
+import gov.cms.bfd.model.rif.OutpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaim_;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import java.time.LocalDate;
@@ -25,6 +29,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * {@link R4ExplanationOfBenefitResourceProvider}.
  */
 public enum ClaimType {
+  CARRIER(
+      CarrierClaim.class,
+      CarrierClaim_.claimId,
+      CarrierClaim_.beneficiaryId,
+      (entity) -> ((CarrierClaim) entity).getDateThrough(),
+      CarrierClaimTransformerV2::transform,
+      CarrierClaim_.lines),
+
   PDE(
       PartDEvent.class,
       PartDEvent_.eventId,
@@ -38,7 +50,15 @@ public enum ClaimType {
       InpatientClaim_.beneficiaryId,
       (entity) -> ((InpatientClaim) entity).getDateThrough(),
       InpatientClaimTransformerV2::transform,
-      InpatientClaim_.lines);
+      InpatientClaim_.lines),
+
+  OUTPATIENT(
+      OutpatientClaim.class,
+      OutpatientClaim_.claimId,
+      OutpatientClaim_.beneficiaryId,
+      (entity) -> ((OutpatientClaim) entity).getDateThrough(),
+      OutpatientClaimTransformerV2::transform,
+      OutpatientClaim_.lines);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;

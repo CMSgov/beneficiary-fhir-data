@@ -2,9 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.samples.StaticRifResource;
+import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -14,15 +12,13 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.junit.Assert;
 import org.junit.Test;
 
-public final class InpatientClaimTransformerV2Test {
+public final class PartDEventTransformerV2Test {
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.InpatientClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
-   * InpatientClaim}.
+   * gov.cms.bfd.server.war.r4.providers.PartDEventTransformer#transform(Object)} works as expected
+   * when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link InpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -31,16 +27,16 @@ public final class InpatientClaimTransformerV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    InpatientClaim claim =
+    PartDEvent claim =
         parsedRecords.stream()
-            .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
+            .filter(r -> r instanceof PartDEvent)
+            .map(r -> (PartDEvent) r)
             .findFirst()
             .get();
 
     claim.setLastUpdated(new Date());
 
-    ExplanationOfBenefit eob = InpatientClaimTransformerV2.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob = PartDEventTransformerV2.transform(new MetricRegistry(), claim);
 
     assertMatches(claim, eob);
   }
@@ -57,23 +53,24 @@ public final class InpatientClaimTransformerV2Test {
    *     InpatientClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(InpatientClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtilsV2.assertEobCommonClaimHeaderData(
         eob,
-        claim.getClaimId(),
+        claim.getEventId(),
         claim.getBeneficiaryId(),
-        ClaimType.INPATIENT,
+        ClaimType.PDE,
         claim.getClaimGroupId().toPlainString(),
-        MedicareSegment.PART_A,
-        Optional.of(claim.getDateFrom()),
-        Optional.of(claim.getDateThrough()),
-        Optional.of(claim.getPaymentAmount()),
+        MedicareSegment.PART_D,
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
         claim.getFinalAction());
 
     // Test the common field provider NPI number is set as expected in the EOB
     // TransformerTestUtilsV2.assertProviderNPI(eob, claim.getOrganizationNpi());
 
+    /*
     if (claim.getPatientStatusCd().isPresent()) {
       TransformerTestUtilsV2.assertInfoWithCodeEquals(
           CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
@@ -81,11 +78,9 @@ public final class InpatientClaimTransformerV2Test {
           claim.getPatientStatusCd(),
           eob);
     }
+    */
 
     // TODO: finish tests based off V1
-
-    // Test that the expected number of diagnoses are mapped
-    Assert.assertEquals(9, eob.getDiagnosis().size());
 
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }

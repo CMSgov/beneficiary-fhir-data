@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import com.google.common.collect.ImmutableMap;
+import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import java.time.LocalDate;
 import java.util.EnumSet;
@@ -19,6 +21,10 @@ public final class ClaimTypeTest {
     LocalDate start = LocalDate.now();
     LocalDate end = start.plusDays(10);
 
+    CarrierClaim carrierClaim = new CarrierClaim();
+    carrierClaim.setDateFrom(start);
+    carrierClaim.setDateThrough(end);
+
     PartDEvent partDEvent = new PartDEvent();
     partDEvent.setPrescriptionFillDate(end);
 
@@ -26,9 +32,15 @@ public final class ClaimTypeTest {
     inpatientClaim.setDateFrom(start);
     inpatientClaim.setDateThrough(end);
 
+    OutpatientClaim outpatientClaim = new OutpatientClaim();
+    outpatientClaim.setDateFrom(start);
+    outpatientClaim.setDateThrough(end);
+
     ImmutableMap.Builder<ClaimType, Object> builder = ImmutableMap.builder();
+    builder.put(ClaimType.CARRIER, carrierClaim);
     builder.put(ClaimType.PDE, partDEvent);
     builder.put(ClaimType.INPATIENT, inpatientClaim);
+    builder.put(ClaimType.OUTPATIENT, outpatientClaim);
 
     Map<ClaimType, Object> claimTypeToClaim = builder.build();
 
