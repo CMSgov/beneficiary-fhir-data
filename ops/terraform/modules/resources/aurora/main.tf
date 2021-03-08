@@ -3,9 +3,9 @@ locals {
 
   # see https://github.com/CMSgov/beneficiary-fhir-data/pull/476 for reference
   node_identifier = {
-    "prod" = "bfd-prod-aurora-cluster",
+    "prod"     = "bfd-prod-aurora-cluster",
     "prod-sbx" = "bfd-prod-sbx-aurora",
-    "test" = "bfd-test-aurora"
+    "test"     = "bfd-test-aurora"
   }
 }
 
