@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.TaskExecutor;
@@ -37,10 +37,10 @@ public final class PipelineManager {
   private final int scanRepeatDelay;
   private final DataSetMonitorListener listener;
 
-  private TaskExecutor dataSetWatcherExecutor;
+  private TaskExecutor jobExecutor;
   private S3TaskManager s3TaskManager;
-  private ScheduledFuture<?> dataSetWatcherFuture;
-  private CcwRifPipelineJob dataSetWatcher;
+  private ScheduledFuture<?> ccwRifLoadJobFuture;
+  private CcwRifLoadJob ccwRifLoadJob;
 
   /**
    * Constructs a new {@link PipelineManager} instance. Note that this must be used as a singleton
@@ -62,9 +62,9 @@ public final class PipelineManager {
     this.scanRepeatDelay = scanRepeatDelay;
     this.listener = listener;
 
-    this.dataSetWatcherExecutor = null;
-    this.dataSetWatcherFuture = null;
-    this.dataSetWatcher = null;
+    this.jobExecutor = null;
+    this.ccwRifLoadJobFuture = null;
+    this.ccwRifLoadJob = null;
   }
 
   /**
@@ -74,13 +74,14 @@ public final class PipelineManager {
    */
   public void start() {
     // Instances of this class are single-use-only.
-    if (this.dataSetWatcherExecutor != null || this.dataSetWatcherFuture != null)
+    if (this.jobExecutor != null || this.ccwRifLoadJobFuture != null)
       throw new IllegalStateException();
 
-    this.dataSetWatcherExecutor = new TaskExecutor("Data Set Watcher Executor", 1);
+    this.jobExecutor = new TaskExecutor("Pipeline Job Executor", 1);
     this.s3TaskManager = new S3TaskManager(appMetrics, options);
-    this.dataSetWatcher = new CcwRifPipelineJob(appMetrics, options, s3TaskManager, listener);
-    Runnable errorNotifyingDataSetWatcher = new ErrorNotifyingJobWrapper(dataSetWatcher, listener);
+    this.ccwRifLoadJob = new CcwRifLoadJob(appMetrics, options, s3TaskManager, listener);
+    Runnable ccwRifLoadJobErrorNotifyingWrapper =
+        new ErrorNotifyingJobWrapper(ccwRifLoadJob, listener);
 
     /*
      * This kicks off the data set watcher, which will be run periodically
@@ -93,9 +94,9 @@ public final class PipelineManager {
      * immediately.)
      */
     LOGGER.info(LOG_MESSAGE_STARTING_WORKER);
-    this.dataSetWatcherFuture =
-        dataSetWatcherExecutor.scheduleWithFixedDelay(
-            errorNotifyingDataSetWatcher, 0, scanRepeatDelay, TimeUnit.MILLISECONDS);
+    this.ccwRifLoadJobFuture =
+        jobExecutor.scheduleWithFixedDelay(
+            ccwRifLoadJobErrorNotifyingWrapper, 0, scanRepeatDelay, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -110,22 +111,22 @@ public final class PipelineManager {
     LOGGER.debug("Stopping...");
 
     // If we haven't started yet, this is easy.
-    if (dataSetWatcherFuture == null) {
+    if (ccwRifLoadJobFuture == null) {
       return;
     }
 
     // If something has already shut us down, we're done.
-    if (dataSetWatcherExecutor.isShutdown()) {
+    if (jobExecutor.isShutdown()) {
       return;
     }
 
     /*
-     * Signal the scheduler to stop after the current CcwRifPipelineJob
+     * Signal the scheduler to stop after the current CcwRifLoadJob
      * execution (if any), then wait for that to happen.
      */
-    dataSetWatcherExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-    dataSetWatcherExecutor.shutdown();
-    dataSetWatcherFuture.cancel(false);
+    jobExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+    jobExecutor.shutdown();
+    ccwRifLoadJobFuture.cancel(false);
     waitForStop();
 
     // Clean house.
@@ -140,7 +141,7 @@ public final class PipelineManager {
    */
   private void waitForStop() {
     // If we haven't started yet, this is easy.
-    if (dataSetWatcherFuture == null) return;
+    if (ccwRifLoadJobFuture == null) return;
 
     try {
       /*
@@ -156,7 +157,7 @@ public final class PipelineManager {
        * ExecutionException that wraps the failure.
        */
       LOGGER.info("Waiting for any in-progress data set processing to gracefully complete...");
-      dataSetWatcherFuture.get();
+      ccwRifLoadJobFuture.get();
     } catch (CancellationException e) {
       /*
        * This is expected to occur when the app is being gracefully shut
@@ -176,7 +177,7 @@ public final class PipelineManager {
       throw new BadCodeMonkeyException(e);
     } catch (ExecutionException e) {
       /*
-       * This will only occur if the Runnable (dataSetWatcherFuture)
+       * This will only occur if the Runnable (ccwRifLoadJobFuture)
        * failed with an unhandled exception. This is unexpected, and
        * accordingly, we don't know what to do. Safest bet is to blow up.
        */
@@ -191,14 +192,14 @@ public final class PipelineManager {
    *     is not
    */
   public boolean isStopped() {
-    return dataSetWatcherExecutor != null && dataSetWatcherExecutor.isShutdown();
+    return jobExecutor != null && jobExecutor.isShutdown();
   }
 
   /**
    * Wraps a {@link PipelineJob} and catches any unhandled exceptions if it blows up.
    *
    * <p>This is needed because otherwise, we won't find out about that error unless/until we try to
-   * call <code>dataSetWatcherFuture.get()</code>. And starting up a separate thread to poll that
+   * call <code>ccwRifLoadJobFuture.get()</code>. And starting up a separate thread to poll that
    * would be silly.
    */
   private static final class ErrorNotifyingJobWrapper implements Runnable {

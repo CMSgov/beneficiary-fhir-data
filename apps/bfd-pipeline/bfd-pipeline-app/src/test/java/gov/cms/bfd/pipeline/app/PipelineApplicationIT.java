@@ -6,7 +6,7 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
@@ -34,20 +34,20 @@ import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 
 /**
- * Integration tests for {@link gov.cms.bfd.pipeline.app.S3ToDatabaseLoadApp}.
+ * Integration tests for {@link PipelineApplication}.
  *
  * <p>These tests require the application capsule JAR to be built and available. Accordingly, they
  * may not run correctly in Eclipse: if the capsule isn't built yet, they'll just fail, but if an
  * older capsule exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
-public final class S3ToDatabaseLoadAppIT {
+public final class PipelineApplicationIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
 
   /**
-   * Verifies that {@link gov.cms.bfd.pipeline.app.S3ToDatabaseLoadApp} exits as expected when
-   * launched with no configuration environment variables.
+   * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
+   * environment variables.
    *
    * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
@@ -70,14 +70,14 @@ public final class S3ToDatabaseLoadAppIT {
     appRunConsumerThread.join();
 
     // Verify that the application exited as expected.
-    Assert.assertEquals(S3ToDatabaseLoadApp.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
+    Assert.assertEquals(PipelineApplication.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.pipeline.app.S3ToDatabaseLoadApp} exits as expected when asked
-   * to run against an S3 bucket that doesn't exist. This test case isn't so much needed to test
-   * that one specific failure case, but to instead verify that the application dies as expected
-   * when something goes sideways.
+   * Verifies that {@link PipelineApplication} exits as expected when asked to run against an S3
+   * bucket that doesn't exist. This test case isn't so much needed to test that one specific
+   * failure case, but to instead verify that the application dies as expected when something goes
+   * sideways.
    *
    * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
@@ -103,7 +103,7 @@ public final class S3ToDatabaseLoadAppIT {
       // Verify that the application exited as expected.
       Assert.assertEquals(
           String.format("Wrong exit code. Output [\n%s]\n", appRunConsumer.getStdoutContents()),
-          S3ToDatabaseLoadApp.EXIT_CODE_MONITOR_ERROR,
+          PipelineApplication.EXIT_CODE_MONITOR_ERROR,
           appProcess.exitValue());
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
@@ -111,9 +111,8 @@ public final class S3ToDatabaseLoadAppIT {
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.pipeline.app.S3ToDatabaseLoadApp} works as expected when no
-   * data is made available for it to process. Basically, it should just sit there and wait for
-   * data, doing nothing.
+   * Verifies that {@link PipelineApplication} works as expected when no data is made available for
+   * it to process. Basically, it should just sit there and wait for data, doing nothing.
    *
    * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
@@ -158,10 +157,10 @@ public final class S3ToDatabaseLoadAppIT {
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.pipeline.app.S3ToDatabaseLoadApp} works as expected against a
-   * small amount of data. We trust that other tests elsewhere are covering the ETL results'
-   * correctness; here we're just verifying the overall flow. Does it find the data set, process it,
-   * and then not find a data set anymore?
+   * Verifies that {@link PipelineApplication} works as expected against a small amount of data. We
+   * trust that other tests elsewhere are covering the ETL results' correctness; here we're just
+   * verifying the overall flow. Does it find the data set, process it, and then not find a data set
+   * anymore?
    *
    * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
@@ -270,7 +269,7 @@ public final class S3ToDatabaseLoadAppIT {
     return appRunConsumer
         .getStdoutContents()
         .toString()
-        .contains(CcwRifPipelineJob.LOG_MESSAGE_DATA_SET_COMPLETE);
+        .contains(CcwRifLoadJob.LOG_MESSAGE_DATA_SET_COMPLETE);
   }
 
   /**

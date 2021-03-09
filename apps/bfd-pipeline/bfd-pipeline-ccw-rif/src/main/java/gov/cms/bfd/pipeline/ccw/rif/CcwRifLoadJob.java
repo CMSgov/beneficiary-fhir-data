@@ -63,8 +63,8 @@ import org.slf4j.LoggerFactory;
  * created. Within each of those directories will be manifest files and the RIF files that they
  * reference.
  */
-public final class CcwRifPipelineJob implements PipelineJob {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifPipelineJob.class);
+public final class CcwRifLoadJob implements PipelineJob {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
 
   private static final int GIGA = 1000 * 1000 * 1000;
 
@@ -75,20 +75,20 @@ public final class CcwRifPipelineJob implements PipelineJob {
   public static final String S3_PREFIX_COMPLETED_DATA_SETS = "Done";
 
   /**
-   * The {@link Logger} message that will be recorded if/when the {@link CcwRifPipelineJob} goes and
+   * The {@link Logger} message that will be recorded if/when the {@link CcwRifLoadJob} goes and
    * looks, but doesn't find any data sets waiting to be processed.
    */
   public static final String LOG_MESSAGE_NO_DATA_SETS = "No data sets to process found.";
 
   /**
-   * The {@link Logger} message that will be recorded if/when the {@link CcwRifPipelineJob} starts
+   * The {@link Logger} message that will be recorded if/when the {@link CcwRifLoadJob} starts
    * processing a data set.
    */
   public static final String LOG_MESSAGE_DATA_SET_READY = "Data set ready. Processing it...";
 
   /**
-   * The {@link Logger} message that will be recorded if/when the {@link CcwRifPipelineJob}
-   * completes the processing of a data set.
+   * The {@link Logger} message that will be recorded if/when the {@link CcwRifLoadJob} completes
+   * the processing of a data set.
    */
   public static final String LOG_MESSAGE_DATA_SET_COMPLETE = "Data set processing complete.";
 
@@ -110,14 +110,14 @@ public final class CcwRifPipelineJob implements PipelineJob {
   private final DataSetQueue dataSetQueue;
 
   /**
-   * Constructs a new {@link CcwRifPipelineJob} instance.
+   * Constructs a new {@link CcwRifLoadJob} instance.
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param options the {@link ExtractionOptions} to use
    * @param s3TaskManager the {@link S3TaskManager} to use
    * @param listener the {@link DataSetMonitorListener} to send events to
    */
-  public CcwRifPipelineJob(
+  public CcwRifLoadJob(
       MetricRegistry appMetrics,
       ExtractionOptions options,
       S3TaskManager s3TaskManager,

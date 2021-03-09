@@ -8,7 +8,7 @@ import com.amazonaws.services.s3.transfer.Download;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.AwsFailureException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
@@ -74,7 +74,7 @@ public final class ManifestEntryDownloadTaskIT {
               bucket.getName(),
               String.format(
                   "%s/%s/%s",
-                  CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
+                  CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
                   manifest.getEntries().get(0).getParentManifest().getTimestampText(),
                   manifest.getEntries().get(0).getName()));
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");

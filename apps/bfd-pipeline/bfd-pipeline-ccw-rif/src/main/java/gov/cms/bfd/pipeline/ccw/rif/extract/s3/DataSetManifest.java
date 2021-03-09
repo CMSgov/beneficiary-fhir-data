@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -270,7 +270,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
      *     processing
      */
     public static DataSetManifestId parseManifestIdFromS3Key(String s3ManifestKey) {
-      Matcher manifestKeyMatcher = CcwRifPipelineJob.REGEX_PENDING_MANIFEST.matcher(s3ManifestKey);
+      Matcher manifestKeyMatcher = CcwRifLoadJob.REGEX_PENDING_MANIFEST.matcher(s3ManifestKey);
       boolean keyMatchesRegex = manifestKeyMatcher.matches();
 
       if (!keyMatchesRegex) return null;

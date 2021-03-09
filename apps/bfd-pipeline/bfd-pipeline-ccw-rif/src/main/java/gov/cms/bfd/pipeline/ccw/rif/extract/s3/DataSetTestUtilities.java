@@ -10,7 +10,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.waiters.WaiterParameters;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask;
@@ -99,7 +99,7 @@ public class DataSetTestUtilities {
   public static PutObjectRequest createPutRequest(Bucket bucket, DataSetManifest manifest) {
     String keyPrefix =
         String.format(
-            "%s/%s", CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
+            "%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
     return createPutRequest(bucket, keyPrefix, manifest);
   }
 
@@ -150,7 +150,7 @@ public class DataSetTestUtilities {
       URL objectContentsUrl) {
     String keyPrefix =
         String.format(
-            "%s/%s", CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
+            "%s/%s", CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS, manifest.getTimestampText());
     return createPutRequest(bucket, keyPrefix, manifest, manifestEntry, objectContentsUrl);
   }
 

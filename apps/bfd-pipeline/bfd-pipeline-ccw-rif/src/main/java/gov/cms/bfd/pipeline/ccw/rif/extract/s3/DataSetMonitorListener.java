@@ -1,16 +1,16 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import gov.cms.bfd.model.rif.RifFilesEvent;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 
 /**
  * Implementations of this event/callback interface can receive the events fired by a {@link
- * CcwRifPipelineJob}.
+ * CcwRifLoadJob}.
  */
 public interface DataSetMonitorListener {
   /**
-   * This callback will be fired when the {@link CcwRifPipelineJob} has checked the S3 bucket for a
-   * new data set, and not found one.
+   * This callback will be fired when the {@link CcwRifLoadJob} has checked the S3 bucket for a new
+   * data set, and not found one.
    */
   default void noDataAvailable() {
     // Default is a no-op, as this is really only used in tests.
@@ -35,7 +35,7 @@ public interface DataSetMonitorListener {
    * responsibility to stop the job, if the processing should be halted as a result of the error.
    *
    * @param error the error that was encountered and couldn't be handled within the {@link
-   *     CcwRifPipelineJob}
+   *     CcwRifLoadJob}
    */
   void errorOccurred(Throwable error);
 }

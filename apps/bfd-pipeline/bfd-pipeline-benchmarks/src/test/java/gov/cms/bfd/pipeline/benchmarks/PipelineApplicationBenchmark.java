@@ -16,8 +16,8 @@ import com.codahale.metrics.SlidingWindowReservoir;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.app.S3ToDatabaseLoadApp;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
+import gov.cms.bfd.pipeline.app.PipelineApplication;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
@@ -65,11 +65,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Benchmarks for {@link S3ToDatabaseLoadApp} by running it against {@link StaticRifResourceGroup}
+ * Benchmarks for {@link PipelineApplication} by running it against {@link StaticRifResourceGroup}
  * data sets.
  */
-public final class S3ToDatabaseLoadAppBenchmark {
-  private static final Logger LOGGER = LoggerFactory.getLogger(S3ToDatabaseLoadAppBenchmark.class);
+public final class PipelineApplicationBenchmark {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplicationBenchmark.class);
 
   /**
    * The name of the {@link System#getProperty(String)} value that must be specified, which will
@@ -382,7 +382,7 @@ public final class S3ToDatabaseLoadAppBenchmark {
         String objectKey =
             String.format(
                 "%s/%s/%s",
-                CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
+                CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
                 manifest.getTimestampText(),
                 manifest.getEntries().get(i).getName());
 
@@ -471,9 +471,9 @@ public final class S3ToDatabaseLoadAppBenchmark {
    */
   private static final class BenchmarkTask implements Callable<BenchmarkResult> {
     private static final Pattern PATTERN_DATA_SET_START =
-        Pattern.compile("^(\\S* \\S*) .* " + CcwRifPipelineJob.LOG_MESSAGE_DATA_SET_READY + "$");
+        Pattern.compile("^(\\S* \\S*) .* " + CcwRifLoadJob.LOG_MESSAGE_DATA_SET_READY + "$");
     private static final Pattern PATTERN_DATA_SET_COMPLETE =
-        Pattern.compile("^(\\S* \\S*) .* " + CcwRifPipelineJob.LOG_MESSAGE_DATA_SET_COMPLETE + "$");
+        Pattern.compile("^(\\S* \\S*) .* " + CcwRifLoadJob.LOG_MESSAGE_DATA_SET_COMPLETE + "$");
     private static final DateTimeFormatter ETL_LOG_DATE_TIME_FORMATTER =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss,SSS");
 

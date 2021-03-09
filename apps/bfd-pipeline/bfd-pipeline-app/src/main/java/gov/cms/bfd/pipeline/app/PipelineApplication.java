@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
  * the specified S3 bucket, parse it, and push it to the specified database server. See {@link
  * #main(String[])}.
  */
-public final class S3ToDatabaseLoadApp {
-  private static final Logger LOGGER = LoggerFactory.getLogger(S3ToDatabaseLoadApp.class);
+public final class PipelineApplication {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplication.class);
 
   /** How often the {@link PipelineManager} will wait between scans for new data sets. */
   private static final Duration S3_SCAN_INTERVAL = Duration.ofSeconds(1L);
@@ -90,7 +90,7 @@ public final class S3ToDatabaseLoadApp {
                 appMetrics
                     .timer(
                         MetricRegistry.name(
-                            S3ToDatabaseLoadApp.class.getSimpleName(), "dataSet", "processed"))
+                            PipelineApplication.class.getSimpleName(), "dataSet", "processed"))
                     .time();
 
             Consumer<Throwable> errorHandler =
@@ -278,7 +278,7 @@ public final class S3ToDatabaseLoadApp {
     /*
      * This will trigger the shutdown monitors, block until they complete, and then terminate this
      * thread (and all others). Accordingly, we can be doubly sure that the data set processing will
-     * be halted: 1) this thread is the CcwRifPipelineJob's and that thread will block then die,
+     * be halted: 1) this thread is the CcwRifLoadJob's and that thread will block then die,
      * and 2) the shutdown monitor will call PipelineManager.stop(). Pack it up: we're going home,
      * folks.
      */

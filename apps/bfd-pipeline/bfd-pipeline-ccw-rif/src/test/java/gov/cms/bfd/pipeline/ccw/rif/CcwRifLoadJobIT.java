@@ -19,12 +19,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Integration tests for {@link CcwRifPipelineJob}. */
-public final class CcwRifPipelineJobIT {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifPipelineJobIT.class);
+/** Integration tests for {@link CcwRifLoadJob}. */
+public final class CcwRifLoadJobIT {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJobIT.class);
 
   /**
-   * Tests {@link CcwRifPipelineJob} when run against an empty bucket.
+   * Tests {@link CcwRifLoadJob} when run against an empty bucket.
    *
    * @throws Exception (exceptions indicate test failure)
    */
@@ -44,8 +44,8 @@ public final class CcwRifPipelineJobIT {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
-      CcwRifPipelineJob ccwJob =
-          new CcwRifPipelineJob(new MetricRegistry(), options, s3TaskManager, listener);
+      CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
       ccwJob.call();
 
       // Verify that no data sets were generated.
@@ -58,7 +58,7 @@ public final class CcwRifPipelineJobIT {
   }
 
   /**
-   * Tests {@link CcwRifPipelineJob} when run against a bucket with a single data set.
+   * Tests {@link CcwRifLoadJob} when run against a bucket with a single data set.
    *
    * @throws Exception (exceptions indicate test failure)
    */
@@ -100,8 +100,8 @@ public final class CcwRifPipelineJobIT {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
-      CcwRifPipelineJob ccwJob =
-          new CcwRifPipelineJob(new MetricRegistry(), options, s3TaskManager, listener);
+      CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -116,13 +116,13 @@ public final class CcwRifPipelineJobIT {
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
@@ -131,7 +131,7 @@ public final class CcwRifPipelineJobIT {
   }
 
   /**
-   * Tests {@link CcwRifPipelineJob} when run against an empty bucket.
+   * Tests {@link CcwRifLoadJob} when run against an empty bucket.
    *
    * @throws Exception (exceptions indicate test failure)
    */
@@ -188,8 +188,8 @@ public final class CcwRifPipelineJobIT {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
-      CcwRifPipelineJob ccwJob =
-          new CcwRifPipelineJob(new MetricRegistry(), options, s3TaskManager, listener);
+      CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -207,13 +207,13 @@ public final class CcwRifPipelineJobIT {
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           1 + manifestB.getEntries().size() + 1 + manifestC.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
           1 + manifestA.getEntries().size(),
           java.time.Duration.ofSeconds(10));
     } finally {
@@ -222,7 +222,7 @@ public final class CcwRifPipelineJobIT {
   }
 
   /**
-   * Tests {@link CcwRifPipelineJob} when run against a bucket with a single data set that should be
+   * Tests {@link CcwRifLoadJob} when run against a bucket with a single data set that should be
    * skipped (per {@link ExtractionOptions#getDataSetFilter()}).
    *
    * @throws Exception (exceptions indicate test failure)
@@ -265,8 +265,8 @@ public final class CcwRifPipelineJobIT {
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
       S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
-      CcwRifPipelineJob ccwJob =
-          new CcwRifPipelineJob(new MetricRegistry(), options, s3TaskManager, listener);
+      CcwRifLoadJob ccwJob =
+          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -278,13 +278,13 @@ public final class CcwRifPipelineJobIT {
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           1 + manifest.getEntries().size(),
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
     } finally {

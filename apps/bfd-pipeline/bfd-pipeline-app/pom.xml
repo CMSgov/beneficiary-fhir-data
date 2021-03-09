@@ -87,7 +87,7 @@
 					<groupId>com.github.chrischristo</groupId>
 					<artifactId>capsule-maven-plugin</artifactId>
 					<configuration>
-						<appClass>gov.cms.bfd.pipeline.app.S3ToDatabaseLoadApp</appClass>
+						<appClass>gov.cms.bfd.pipeline.app.PipelineApplication</appClass>
 
 						<!-- Building the "really executable" .x files is tempting, but ultimately 
 							not very useful, as there's no way to pass JVM args into such launchers, 

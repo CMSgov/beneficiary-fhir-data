@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * This is a small utility app designed to clean up after abnormally terminated runs of {@link
- * S3ToDatabaseLoadAppBenchmark}. It reads the metadata in <code>target/benchmark-iterations</code>
+ * PipelineApplicationBenchmark}. It reads the metadata in <code>target/benchmark-iterations</code>
  * and runs the teardown scripts for each iteration.
  */
 public final class BenchmarkCleanup {

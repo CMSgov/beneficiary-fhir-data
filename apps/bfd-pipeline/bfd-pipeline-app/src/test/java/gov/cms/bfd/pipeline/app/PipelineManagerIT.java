@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifPipelineJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -157,13 +157,13 @@ public final class PipelineManagerIT {
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          CcwRifPipelineJob.S3_PREFIX_PENDING_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
           0,
           java.time.Duration.ofSeconds(10));
       DataSetTestUtilities.waitForBucketObjectCount(
           s3Client,
           bucket,
-          CcwRifPipelineJob.S3_PREFIX_COMPLETED_DATA_SETS,
+          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
           1
               + manifestA.getEntries().size()
               + 1
