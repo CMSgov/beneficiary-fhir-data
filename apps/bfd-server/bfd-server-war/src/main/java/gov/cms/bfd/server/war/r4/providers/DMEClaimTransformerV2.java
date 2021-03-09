@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.r4.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -10,6 +10,7 @@ import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -30,11 +31,11 @@ final class DMEClaimTransformerV2 {
   static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
     Timer.Context timer =
         metricRegistry
-            .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
+            .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof DMEClaim)) {
-        throw new BadCodeMonkeyException();
+      throw new BadCodeMonkeyException();
     }
     ExplanationOfBenefit eob = transformClaim((DMEClaim) claim);
 
@@ -55,7 +56,7 @@ final class DMEClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimType.DME,
+        ClaimTypeV2.DME,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
@@ -68,7 +69,7 @@ final class DMEClaimTransformerV2 {
     // map eob type codes into FHIR
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimType.DME,
+        ClaimTypeV2.DME,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -193,7 +194,8 @@ final class DMEClaimTransformerV2 {
           .setCategory(
               TransformerUtilsV2.createAdjudicationCategory(
                   CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT))
-          .setAmount(TransformerUtilsV2.createMoney(claimLine.getPrimaryPayerAllowedChargeAmount()));
+          .setAmount(
+              TransformerUtilsV2.createMoney(claimLine.getPrimaryPayerAllowedChargeAmount()));
 
       item.addAdjudication()
           .setCategory(
@@ -275,5 +277,54 @@ final class DMEClaimTransformerV2 {
     }
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
+  }
+
+  /**
+   * Sets the Coverage.relationship Looks up or adds a contained {@link Identifier} object to the
+   * current {@link Patient}. This is used to store Identifier slices related to the Provider
+   * organization.
+   *
+   * @param eob The {@link ExplanationOfBenefit} to ExplanationOfBenefit details
+   * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the
+   *     ExplanationOfBenefit
+   * @param optVal The {@link String} value associated with the ExplanationOfBenefit
+   */
+  static void addExtension(
+      ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<String> optVal) {
+    optVal.ifPresent(
+        value ->
+            eob.addExtension(TransformerUtilsV2.createExtensionCoding(eob, ccwVariable, value)));
+  }
+
+  /**
+   * Sets the ExplanationOfBenefit.relationship Looks up or adds a contained {@link Identifier}
+   * object to the current {@link Patient}. This is used to store Identifier slices related to the
+   * Provider organization.
+   *
+   * @param eob The {@link ExplanationOfBenefit} to ExplanationOfBenefit details
+   * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the
+   *     ExplanationOfBenefit
+   * @param optVal The {@link Character} value associated with the ExplanationOfBenefit
+   */
+  static void addCodeExtension(
+      ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<Character> optVal) {
+    optVal.ifPresent(
+        value ->
+            eob.addExtension(TransformerUtilsV2.createExtensionCoding(eob, ccwVariable, value)));
+  }
+
+  /**
+   * Sets the Coverage.relationship Looks up or adds a contained {@link Identifier} object to the
+   * current {@link Patient}. This is used to store Identifier slices related to the Provider
+   * organization.
+   *
+   * @param eob The {@link ExplanationOfBenefit} to ExplanationOfBenefit details
+   * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the
+   *     ExplanationOfBenefit
+   * @param optVal The {@link BigDecimal} value associated with the ExplanationOfBenefit
+   */
+  static void addDecimalExtension(
+      ExplanationOfBenefit eob, CcwCodebookVariable ccwVariable, Optional<BigDecimal> optVal) {
+    eob.addExtension(TransformerUtilsV2.createExtensionDate(ccwVariable, optVal));
   }
 }
