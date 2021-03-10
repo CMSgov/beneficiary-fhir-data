@@ -74,7 +74,7 @@ public class InpatientClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimType.INPATIENT,
+        ClaimTypeV2.INPATIENT,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
@@ -89,7 +89,7 @@ public class InpatientClaimTransformerV2 {
     // NCH_NEAR_LINE_REC_IDENT_CD   => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimType.INPATIENT,
+        ClaimTypeV2.INPATIENT,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -325,20 +325,17 @@ public class InpatientClaimTransformerV2 {
           line.getRevenueCenter(),
           line.getRateAmount(),
           line.getTotalChargeAmount(),
-          line.getNonCoveredChargeAmount(),
+          Optional.of(line.getNonCoveredChargeAmount()),
           line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 
-      // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue.extension
-      if (line.getDeductibleCoinsuranceCd().isPresent()) {
-        item.getRevenue()
-            .addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
-                    line.getDeductibleCoinsuranceCd()));
-      }
+      // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
+      TransformerUtilsV2.addItemRevenue(
+          item,
+          eob,
+          CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
+          line.getDeductibleCoinsuranceCd());
 
       // HCPCS_CD => item.productOrService
       if (line.getHcpcsCode().isPresent()) {
@@ -352,7 +349,7 @@ public class InpatientClaimTransformerV2 {
           eob,
           item,
           C4BBPractitionerIdentifierType.UPIN,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
@@ -360,7 +357,7 @@ public class InpatientClaimTransformerV2 {
           eob,
           item,
           C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI());
     }
 
