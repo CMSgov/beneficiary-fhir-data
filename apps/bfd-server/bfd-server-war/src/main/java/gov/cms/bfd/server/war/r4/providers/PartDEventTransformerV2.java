@@ -72,7 +72,7 @@ final class PartDEventTransformerV2 {
         eob,
         claimGroup.getEventId(),
         claimGroup.getBeneficiaryId(),
-        ClaimType.PDE,
+        ClaimTypeV2.PDE,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_D,
         Optional.empty(),
@@ -89,7 +89,7 @@ final class PartDEventTransformerV2 {
     // map eob type codes into FHIR
     // EOB Type               => ExplanationOfBenefit.type.coding
     // Claim Type  (pharmacy) => ExplanationOfBenefit.type.coding
-    TransformerUtilsV2.mapEobType(eob, ClaimType.PDE, Optional.empty(), Optional.empty());
+    TransformerUtilsV2.mapEobType(eob, ClaimTypeV2.PDE, Optional.empty(), Optional.empty());
 
     // Coverage object is not optional, and we want to add extensions to it. This is safe.
 
