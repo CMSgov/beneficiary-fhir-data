@@ -17,9 +17,8 @@ import org.junit.Test;
 public final class PartDEventTransformerV2Test {
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.InpatientClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
-   * InpatientClaim}.
+   * gov.cms.bfd.server.war.r4.providers.PartDEventTransformer#transform(Object)} works as expected
+   * when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link InpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -60,7 +59,7 @@ public final class PartDEventTransformerV2Test {
         eob,
         claim.getEventId(),
         claim.getBeneficiaryId(),
-        ClaimType.PDE,
+        ClaimTypeV2.PDE,
         claim.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_D,
         Optional.empty(),
