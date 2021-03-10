@@ -14,15 +14,14 @@ sudo pvresize /dev/nvme0n1p2
 sudo lvextend -l +100%FREE /dev/VolGroup00/rootVol
 sudo xfs_growfs /
 
-git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBranchName} --single-branch
 
+# Checkout the latest ops files from master
+git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch "$gitBranchName" --single-branch
+
+# Load the secret key from the keyfile identified in vault.keyfile.id (keyfiles are stored in s3)
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
-
-# At this time gitCommitId is a unique merge commit in Jenkins that cannot be properly
-# checked out via GitHub, uncommenting this will break instance launch!
-# git checkout ${gitCommitId}
-
-aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
+keyfile=$(cat vault.keyfile.id) # the keyfile that was used to encrypt this branches files
+tfkey="$(aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/${keyfile} -)"
 
 # The extra_vars.json file from the previous build step contains a few incorrect values
 # and needs to get trimmed down to the following
@@ -33,6 +32,5 @@ cat <<EOF >> extra_vars.json
 }
 EOF
 
-ansible-playbook --extra-vars '@extra_vars.json' --vault-password-file=vault.password --tags "post-ami" launch_bfd-pipeline.yml
-
-rm vault.password
+# Provision
+ansible-playbook --extra-vars '@extra_vars.json' --vault-password-file=<(echo "$tfkey") --tags "post-ami" launch_bfd-pipeline.yml
