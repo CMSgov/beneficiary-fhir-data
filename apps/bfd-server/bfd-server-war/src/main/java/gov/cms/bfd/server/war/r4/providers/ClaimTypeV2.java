@@ -12,6 +12,8 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim_;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
+import gov.cms.bfd.model.rif.SNFClaim;
+import gov.cms.bfd.model.rif.SNFClaim_;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,7 +70,15 @@ public enum ClaimTypeV2 {
       HospiceClaim_.beneficiaryId,
       (entity) -> ((HospiceClaim) entity).getDateThrough(),
       HospiceClaimTransformerV2::transform,
-      HospiceClaim_.lines);
+      HospiceClaim_.lines),
+
+  SNF(
+      SNFClaim.class,
+      SNFClaim_.claimId,
+      SNFClaim_.beneficiaryId,
+      (entity) -> ((SNFClaim) entity).getDateThrough(),
+      SNFClaimTransformerV2::transform,
+      SNFClaim_.lines);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;
