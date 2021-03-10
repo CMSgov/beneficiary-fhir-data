@@ -7,12 +7,20 @@ import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.r4.model.BaseDateTimeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -21,6 +29,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.Assert;
@@ -165,6 +174,64 @@ public final class TransformerTestUtilsV2 {
 
   /**
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
+   * @param expectedCode the expected {@link Coding#getCode()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionCodingEquals(
+      CcwCodebookInterface ccwVariable, Object expectedCode, IBaseHasExtensions actualElement) {
+    // Jumping through hoops to cope with overloaded method:
+    Optional<?> expectedCodeCast =
+        expectedCode instanceof Optional ? (Optional<?>) expectedCode : Optional.of(expectedCode);
+    assertExtensionCodingEquals(ccwVariable, expectedCodeCast, actualElement);
+  }
+
+  /**
+   * FIXME change name of this and related methods to assertHasExtensionCoding(...)
+   *
+   * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
+   *     Coding} are for
+   * @param expectedCode the expected {@link Coding#getCode()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionCodingEquals(
+      CcwCodebookInterface ccwVariable,
+      Optional<?> expectedCode,
+      IBaseHasExtensions actualElement) {
+    String expectedExtensionUrl = TransformerUtilsV2.calculateVariableReferenceUrl(ccwVariable);
+    String expectedCodingSystem = expectedExtensionUrl;
+    Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
+        actualElement.getExtension().stream()
+            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
+
+    Assert.assertEquals(expectedCode.isPresent(), extensionForUrl.isPresent());
+    if (expectedCode.isPresent())
+      assertCodingEquals(
+          expectedCodingSystem, expectedCode.get(), (Coding) extensionForUrl.get().getValue());
+  }
+
+  /**
+   * @param fhirElement the FHIR element to check the extension of
+   * @param expectedExtensionUrl the expected {@link Extension#getUrl()} of the {@link Extension} to
+   *     look for
+   * @param expectedCodingSystem the expected {@link Coding#getSystem()}
+   * @param expectedCode the expected {@link Coding#getCode()}
+   */
+  static void assertExtensionCodingEquals(
+      IBaseHasExtensions fhirElement,
+      String expectedExtensionUrl,
+      String expectedCodingSystem,
+      String expectedCode) {
+    IBaseExtension<?, ?> extensionForUrl =
+        fhirElement.getExtension().stream()
+            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
+            .findFirst()
+            .get();
+    assertHasCoding(expectedCodingSystem, expectedCode, (Coding) extensionForUrl.getValue());
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedValue the expected {@link Identifier#getValue()} value
    * @param actualIdentifiers the actual {@link Identifier}s to verify a match can be found within
    */
@@ -181,6 +248,67 @@ public final class TransformerTestUtilsV2 {
             .filter(i -> expectedValue.equals(i.getValue()))
             .findAny();
     Assert.assertTrue(matchingIdentifier.isPresent());
+  }
+
+  /**
+   * @param expectedSystem the expected {@link Coding#getSystem()} value
+   * @param expectedCode the expected {@link Coding#getCode()} value
+   * @param actualCode the actual {@link Coding} to verify
+   */
+  static void assertHasCoding(String expectedSystem, String expectedCode, Coding actualCode) {
+    assertHasCoding(expectedSystem, null, null, expectedCode, Arrays.asList(actualCode));
+  }
+
+  /**
+   * @param expectedSystem the expected {@link Coding#getSystem()} value
+   * @param expectedCode the expected {@link Coding#getCode()} value
+   * @param actualCode the actual {@link List}&lt;{@link Coding}&gt; to verify
+   */
+  static void assertHasCoding(String expectedSystem, String expectedCode, List<Coding> actualCode) {
+    assertHasCoding(expectedSystem, null, null, expectedCode, actualCode);
+  }
+
+  /**
+   * @param expectedSystem the expected {@link Coding#getSystem()} value
+   * @param expectedVersion the expected {@link Coding#getVersion()} value
+   * @param expectedVersion the expected {@link Coding#getDisplay()} value
+   * @param expectedCode the expected {@link Coding#getCode()} value
+   * @param actualCode the actual {@link List}&lt;{@link Coding}&gt; to verify
+   */
+  static void assertHasCoding(
+      String expectedSystem,
+      String expectedVersion,
+      String expectedDisplay,
+      String expectedCode,
+      List<Coding> actualCode) {
+    Assert.assertTrue(
+        "No matching Coding found: " + actualCode.toString(),
+        actualCode.stream()
+            .anyMatch(
+                c -> {
+                  if (!expectedSystem.equals(c.getSystem())
+                      || (expectedVersion != null && !expectedVersion.equals(c.getVersion()))
+                      || (expectedDisplay != null && !expectedDisplay.equals(c.getDisplay()))
+                      || !expectedCode.equals(c.getCode())) {
+                    return false;
+                  }
+                  return true;
+                }));
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
+   * @param expectedValue the expected {@link Identifier#getValue()} value
+   * @param actual the actual {@link Identifier} to verify
+   */
+  static void assertIdentifierEquals(
+      CcwCodebookInterface ccwVariable, String expectedValue, Identifier actual) {
+    if (expectedValue == null) throw new IllegalArgumentException();
+
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(
+        TransformerUtilsV2.calculateVariableReferenceUrl(ccwVariable), actual.getSystem());
+    Assert.assertEquals(expectedValue, actual.getValue());
   }
 
   /**
@@ -267,6 +395,26 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
+   *     Coding} are for
+   * @param expectedDateYear the expected {@link Coding#getCode()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionDateYearEquals(
+      CcwCodebookInterface ccwVariable,
+      Optional<?> expectedDateYear,
+      IBaseHasExtensions actualElement) {
+    String expectedExtensionUrl = TransformerUtilsV2.calculateVariableReferenceUrl(ccwVariable);
+    String expectedCodingSystem = expectedExtensionUrl;
+    Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
+        actualElement.getExtension().stream()
+            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
+
+    Assert.assertEquals(expectedDateYear.isPresent(), extensionForUrl.isPresent());
+  }
+
+  /**
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedCode the expected {@link Coding#getCode()}
    * @param actualConcept the FHIR {@link CodeableConcept} to verify
@@ -332,6 +480,17 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * @param expectedValue the expected {@link Quantity#getValue()}
+   * @param actual the actual {@link Quantity} to verify
+   */
+  static void assertQuantityEquals(Number expectedValue, Quantity actual) {
+    Assert.assertNotNull(actual);
+
+    if (expectedValue instanceof BigDecimal) Assert.assertEquals(expectedValue, actual.getValue());
+    else throw new BadCodeMonkeyException();
+  }
+
+  /**
    * @param categoryVariable the {@link CcwCodebookVariable} for the {@link Extension#getUrl()} to
    *     find and verify
    * @param expectedAmountValue the expected {@link Extension#getValue()} {@link Money#getValue()}
@@ -393,5 +552,118 @@ public final class TransformerTestUtilsV2 {
     Assert.assertTrue(actual.precision() >= expected.precision());
     Assert.assertTrue(actual.scale() >= expected.scale());
     Assert.assertEquals(0, expected.compareTo(actual));
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
+   * @param expectedValue the expected {@link Identifier#getValue()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionIdentifierEquals(
+      CcwCodebookInterface ccwVariable, String expectedValue, IBaseHasExtensions actualElement) {
+    assertExtensionIdentifierEquals(ccwVariable, Optional.of(expectedValue), actualElement);
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
+   *     Coding} are for
+   * @param expectedValue the expected {@link Quantity#getValue()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionIdentifierEquals(
+      CcwCodebookInterface ccwVariable,
+      Optional<String> expectedValue,
+      IBaseHasExtensions actualElement) {
+    String expectedExtensionUrl = TransformerUtilsV2.calculateVariableReferenceUrl(ccwVariable);
+    Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
+        actualElement.getExtension().stream()
+            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
+
+    Assert.assertEquals(expectedValue.isPresent(), extensionForUrl.isPresent());
+    if (expectedValue.isPresent())
+      assertIdentifierEquals(
+          ccwVariable, expectedValue.get(), (Identifier) extensionForUrl.get().getValue());
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
+   * @param expectedValue the expected {@link Quantity#getValue()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  // FIXME rename this and friends to include "Value"
+  static void assertExtensionQuantityEquals(
+      CcwCodebookInterface ccwVariable, Number expectedValue, IBaseHasExtensions actualElement) {
+    assertExtensionQuantityEquals(ccwVariable, Optional.of(expectedValue), actualElement);
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
+   *     Coding} are for
+   * @param expectedValue the expected {@link Quantity#getValue()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionQuantityEquals(
+      CcwCodebookInterface ccwVariable,
+      Optional<? extends Number> expectedValue,
+      IBaseHasExtensions actualElement) {
+    String expectedExtensionUrl = TransformerUtilsV2.calculateVariableReferenceUrl(ccwVariable);
+    Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
+        actualElement.getExtension().stream()
+            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
+
+    Assert.assertEquals(expectedValue.isPresent(), extensionForUrl.isPresent());
+    if (expectedValue.isPresent())
+      assertQuantityEquals(expectedValue.get(), (Quantity) extensionForUrl.get().getValue());
+  }
+
+  /**
+   * Uses the setters of the specified record to set all {@link Optional} fields to {@link
+   * Optional#empty()}.
+   *
+   * @param record the record to modify
+   */
+  static void setAllOptionalsToEmpty(Object record) {
+    try {
+      for (Method method : record.getClass().getMethods()) {
+        if (!method.getName().startsWith("set")) continue;
+        if (method.getParameterTypes().length != 1) continue;
+        if (!method.getParameterTypes()[0].equals(Optional.class)) continue;
+
+        method.invoke(record, Optional.empty());
+      }
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /**
+   * Test that the resource being tested has a matching lastUpdated
+   *
+   * @param expectedDateTime from the entity
+   * @param actualResource that is being created by the transform
+   */
+  static void assertLastUpdatedEquals(
+      Optional<Date> expectedDateTime, IAnyResource actualResource) {
+    if (expectedDateTime.isPresent()) {
+      /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
+       * use one instance of an IT DB with the same resources for most tests.
+       * The actual resources a test finds may have a lastUpdated value slightly after the time the test wrote it
+       * because another test over wrote the same resource.
+       * To handle this case, dates that are within a second of each other match.
+       */
+      final Instant expectedLastUpdated = expectedDateTime.get().toInstant();
+      final Instant actualLastUpdated = actualResource.getMeta().getLastUpdated().toInstant();
+      final Duration diff = Duration.between(expectedLastUpdated, actualLastUpdated);
+      Assert.assertTrue(
+          "Expect the actual lastUpdated to be equal or after the loaded resources",
+          diff.compareTo(Duration.ofSeconds(1)) <= 0);
+    } else {
+      Assert.assertEquals(
+          "Expect lastUpdated to be the fallback value",
+          TransformerConstants.FALLBACK_LAST_UPDATED,
+          actualResource.getMeta().getLastUpdated());
+    }
   }
 }
