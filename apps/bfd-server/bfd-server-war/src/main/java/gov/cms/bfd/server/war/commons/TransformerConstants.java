@@ -357,13 +357,16 @@ public final class TransformerConstants {
    */
   public static final String HL7_RACE_UNKNOWN_DISPLAY = "Unknown";
 
+  /** System for encoding UNK/null values */
+  public static final String CODING_V3_NULL = "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
+
   /**
    * US Core Code System URL for Race Category <a
-   * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">CodeSystem: US Core
-   * Race</a>
+   * href="http://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-race.html">CodeSystem:
+   * US Core Race</a>
    */
   public static final String CODING_RACE_US =
-      "http://hl7.org/fhir/us/core/ValueSet/omb-race-category";
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race";
 
   /**
    * CARIN Code System URL for Supporting Info Type <a

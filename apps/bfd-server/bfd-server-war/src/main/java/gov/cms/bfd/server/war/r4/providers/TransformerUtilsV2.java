@@ -18,6 +18,7 @@ import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
@@ -1443,7 +1444,8 @@ public final class TransformerUtilsV2 {
     if (!drugCodeLookupMissingFailures.contains(claimDrugCode)) {
       drugCodeLookupMissingFailures.add(claimDrugCode);
       LOGGER.info(
-          "No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
+          "No national drug code value (PRODUCTNDC column) match found for drug code {} in"
+              + " resource {}.",
           claimDrugCode,
           "fda_products_utf8.tsv");
     }
@@ -3759,5 +3761,83 @@ public final class TransformerUtilsV2 {
         item,
         createAdjudicationAmtSlice(
             CcwCodebookVariable.REV_CNTR_PMT_AMT_AMT, C4BBAdjudication.SUBMITTED, paymentAmount));
+  }
+
+  /**
+   * Looks up or adds a contained {@link Identifier} object to the current {@link Patient}. This is
+   * used to store Identifier slices related to the Patient.
+   *
+   * @param patient The {@link Patient} to Patient.identifier details to
+   * @param type The {@link C4BBIdentifierType} of the identifier slice
+   * @param value The value of the identifier. If empty, this call is a no-op
+   */
+  static void addIdentifierSlice(Patient patient, C4BBIdentifierType type, Optional<String> value) {
+    if (value.isPresent()) {
+      Identifier id =
+          new Identifier()
+              .setType(createCodeableConcept(type.getSystem(), type.toCode()))
+              .setValue(value.get());
+
+      patient.addIdentifier(id);
+    }
+  }
+
+  /**
+   * Looks up or adds a contained {@link Organization} object to the current {@link
+   * ExplanationOfBenefit}. This is used to store Identifier slices related to the Provider
+   * organization.
+   *
+   * @param patient The {@link Patient} to Patient.identifier details to
+   * @param codeable The {@link CodeableConcept} of the identifier slice
+   * @param value The value of the identifier. If empty, this call is a no-op
+   */
+  static void addIdentifierSlice(
+      Patient patient, CodeableConcept codeable, Optional<String> value) {
+    addIdentifierSlice(patient, codeable, value, Optional.empty());
+  }
+
+  /**
+   * Looks up or adds a contained {@link Identifier} object to the current {@link Patient}. This is
+   * used to store Identifier slices related to the Provider organization.
+   *
+   * @param patient The {@link Patient} to Patient.identifier details to
+   * @param codeable The {@link CodeableConcept} of the identifier slice
+   * @param value The value of the identifier. If empty, this call is a no-op
+   * @param systemUri optional system namespace for thee value
+   */
+  static void addIdentifierSlice(
+      Patient patient,
+      CodeableConcept codeable,
+      Optional<String> value,
+      Optional<String> systemUri) {
+    if (value.isPresent()) {
+      Identifier id = new Identifier().setType(codeable).setValue(value.get());
+      if (systemUri.isPresent()) {
+        id.setSystem(systemUri.get());
+      }
+      patient.addIdentifier(id);
+    }
+  }
+
+  /**
+   * Convenience method to convert race code {@link CcwCodebookVariable.RACE} to a {@link
+   * RaceCategory}. Input values can be: 0 Unknown 1 White 2 Black 3 Other 4 Asian 5 Hispanic 6
+   * North American Native
+   *
+   * @param value The race code to categorize;
+   */
+  static RaceCategory getRaceCategory(char value) {
+    switch (value) {
+      case '1':
+        return RaceCategory.WHITE;
+      case '2':
+        return RaceCategory.BLACK_OR_AFRICAN_AMERICAN;
+      case '4':
+        return RaceCategory.ASIAN;
+      case '6':
+        return RaceCategory.AMERICAN_INDIAN_OR_ALASKA_NATIVE;
+      default:
+        return RaceCategory.UNKNOWN;
+    }
   }
 }

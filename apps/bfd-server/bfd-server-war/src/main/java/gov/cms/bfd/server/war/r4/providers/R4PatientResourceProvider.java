@@ -121,11 +121,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   @Read(version = false)
   @Trace
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
-    if (patientId == null) throw new IllegalArgumentException();
-    if (patientId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
-
+    if (patientId == null || patientId.getVersionIdPartAsLong() != null) {
+      throw new IllegalArgumentException();
+    }
     String beneIdText = patientId.getIdPart();
-    if (beneIdText == null || beneIdText.trim().isEmpty()) throw new IllegalArgumentException();
+    if (beneIdText == null || beneIdText.trim().isEmpty()) {
+      throw new IllegalArgumentException();
+    }
 
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
@@ -139,8 +141,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
 
-    if (requestHeader.isHICNinIncludeIdentifiers())
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+    }
+
     // commented out as in V2 code, keep it that way for now
     // if (requestHeader.isMBIinIncludeIdentifiers())
     root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
@@ -180,9 +184,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient =
-        BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
-    return patient;
+    return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
 
   /**
