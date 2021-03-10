@@ -15,10 +15,8 @@ import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 
 /**
  * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -59,9 +57,6 @@ public class InpatientClaimTransformerV2 {
     // Required values not directly mapped
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 
-    // "claim" => ExplanationOfBenefit.use
-    eob.setUse(Use.CLAIM);
-
     // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
     // eob.setOutcome(?)
 
@@ -79,7 +74,7 @@ public class InpatientClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimType.INPATIENT,
+        ClaimTypeV2.INPATIENT,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
@@ -94,7 +89,7 @@ public class InpatientClaimTransformerV2 {
     // NCH_NEAR_LINE_REC_IDENT_CD   => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimType.INPATIENT,
+        ClaimTypeV2.INPATIENT,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -315,7 +310,7 @@ public class InpatientClaimTransformerV2 {
       item.setSequence(line.getLineNumber().intValue());
 
       // PRVDR_STATE_CD => item.location
-      item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
+      TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
 
       // REV_CNTR                   => ExplanationOfBenefit.item.revenue
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
@@ -330,20 +325,17 @@ public class InpatientClaimTransformerV2 {
           line.getRevenueCenter(),
           line.getRateAmount(),
           line.getTotalChargeAmount(),
-          line.getNonCoveredChargeAmount(),
+          Optional.of(line.getNonCoveredChargeAmount()),
           line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 
-      // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue.extension
-      if (line.getDeductibleCoinsuranceCd().isPresent()) {
-        item.getRevenue()
-            .addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
-                    line.getDeductibleCoinsuranceCd()));
-      }
+      // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
+      TransformerUtilsV2.addItemRevenue(
+          item,
+          eob,
+          CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
+          line.getDeductibleCoinsuranceCd());
 
       // HCPCS_CD => item.productOrService
       if (line.getHcpcsCode().isPresent()) {
@@ -355,15 +347,17 @@ public class InpatientClaimTransformerV2 {
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
+          item,
           C4BBPractitionerIdentifierType.UPIN,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
+          item,
           C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI());
     }
 

@@ -18,10 +18,8 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.IntStream;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 
 /**
  * Transforms CCW {@link OutpatientClaim} instances into FHIR {@link ExplanationOfBenefit}
@@ -64,9 +62,6 @@ public class OutpatientClaimTransformerV2 {
     // Required values not directly mapped
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_OUTPATIENT_PROFILE_URL);
 
-    // "claim" => ExplanationOfBenefit.use
-    eob.setUse(Use.CLAIM);
-
     // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
     // eob.setOutcome(?)
 
@@ -74,8 +69,6 @@ public class OutpatientClaimTransformerV2 {
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
     // CLM_GRP_ID               => ExplanationOfBenefit.identifier
-    // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage (reference)
-    // BENE_ID                  => ExplanationOfBenefit.patient (reference)
     // FINAL_ACTION             => ExplanationOfBenefit.status
     // CLM_FROM_DT              => ExplanationOfBenefit.billablePeriod.start
     // CLM_THRU_DT              => ExplanationOfBenefit.billablePeriod.end
@@ -84,7 +77,7 @@ public class OutpatientClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimType.OUTPATIENT,
+        ClaimTypeV2.OUTPATIENT,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
@@ -122,7 +115,7 @@ public class OutpatientClaimTransformerV2 {
     // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimType.OUTPATIENT,
+        ClaimTypeV2.OUTPATIENT,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -254,7 +247,7 @@ public class OutpatientClaimTransformerV2 {
       item.setSequence(line.getLineNumber().intValue());
 
       // PRVDR_STATE_CD => item.location
-      item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
+      TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
 
       // REV_CNTR => item.revenue
       item.setRevenue(
@@ -285,17 +278,15 @@ public class OutpatientClaimTransformerV2 {
           TransformerUtilsV2.createAdjudicationDenialReasonSlice(
               eob, CcwCodebookVariable.REV_CNTR_4TH_ANSI_CD, line.getRevCntr4thAnsiCd()));
 
-      // HCPCS_CD           => ExplanationOfBenefit.item.modifier
-      // HCPCS_1ST_MDFR_CD  => ExplanationOfBenefit.item.modifier
-      // HCPCS_2ND_MDFR_CD  => ExplanationOfBenefit.item.modifier
+      // HCPCS_CD               => ExplanationOfBenefit.item.productOrService
+      // HCPCS_1ST_MDFR_CD      => ExplanationOfBenefit.item.modifier
+      // HCPCS_2ND_MDFR_CD      => ExplanationOfBenefit.item.modifier
       TransformerUtilsV2.mapHcpcs(
           eob,
           item,
+          line.getHcpcsCode(),
           Optional.empty(),
-          Arrays.asList(
-              line.getHcpcsCode(),
-              line.getHcpcsInitialModifierCode(),
-              line.getHcpcsSecondModifierCode()));
+          Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
 
       // REV_CNTR                   => ExplanationOfBenefit.item.revenue
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
@@ -310,7 +301,7 @@ public class OutpatientClaimTransformerV2 {
           line.getRevenueCenterCode(),
           line.getRateAmount(),
           line.getTotalChargeAmount(),
-          line.getNonCoveredChargeAmount(),
+          Optional.of(line.getNonCoveredChargeAmount()),
           line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
@@ -393,27 +384,23 @@ public class OutpatientClaimTransformerV2 {
       TransformerUtilsV2.mapEobCommonItemRevenueOutHHAHospice(
           item, line.getRevenueCenterDate(), line.getPaymentAmount());
 
-      // This must be added after `REV_CNTR_DT` and can only be set if `servicedDate` is set
-      // REV_CNTR_IDE_NDC_UPC_NUM => ExplanationOfBenefit.item.serviced.extension
-      if (line.getNationalDrugCode().isPresent() && item.getServiced() != null) {
-        item.getServiced()
-            .addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob, CcwCodebookVariable.REV_CNTR_IDE_NDC_UPC_NUM, line.getNationalDrugCode()));
-      }
+      // REV_CNTR_IDE_NDC_UPC_NUM => ExplanationOfBenefit.item.productOrService.extension
+      TransformerUtilsV2.addNationalDrugCode(item, line.getNationalDrugCode());
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
+          item,
           C4BBPractitionerIdentifierType.UPIN,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
+          item,
           C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI());
     }
 

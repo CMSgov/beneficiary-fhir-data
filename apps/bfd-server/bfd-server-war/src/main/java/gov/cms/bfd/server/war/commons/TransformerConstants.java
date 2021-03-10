@@ -372,21 +372,6 @@ public final class TransformerConstants {
    */
   public static final String CARIN_SUPPORTING_INFO_TYPE =
       "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
-  /**
-   * CARIN Value Set URL for Adjudication <a
-   * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
-   * Adjudication</a>
-   */
-  public static final String CARIN_ADJUDICATION_CODE =
-      "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
-
-  /**
-   * ValueSet: C4BB Adjudication <a
-   * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
-   * Adjudication</a>
-   */
-  public static final String C4BB_IDENTIFIER_TYPE =
-      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
 
   /**
    * CodeSystem: C4BB Supporting Info Type <a
@@ -397,10 +382,12 @@ public final class TransformerConstants {
       "http://hl7.org/fhir/ValueSet/claim-informationcategory";
 
   /**
-   * ValueSet: C4BB Adjudication <a
-   * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
-   * Adjudication</a>
+   * Code system used for {@link ItemComponent#getRevenue()}
+   *
+   * <p>ValueSet: NUBC Revenue Codes <a
+   * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-AHANUBCRevenueCodes.html">ValueSet: NUBC
+   * Revenue Codes</a>
    */
-  public static final String C4BB_ADJUDICATION_CODE =
-      "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
+  public static final String NUBC_REVENUE_CODE_SYSTEM =
+      "https://www.nubc.org/CodeSystem/RevenueCodes";
 }
