@@ -5,7 +5,7 @@
 # IAM Roles and Policy for the DLM policy
 #
 resource "aws_iam_role" "dlm_lifecycle_role" {
-  name = "dlm-lifecycle-role"
+  name               = "dlm-lifecycle-role"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",

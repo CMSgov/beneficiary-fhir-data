@@ -4,7 +4,7 @@ variable "env" {
 
 variable "metric_config" {
   type = object({
-    partner_name = string,
+    partner_name  = string,
     partner_regex = string
   })
 }

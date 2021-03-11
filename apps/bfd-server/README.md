@@ -22,6 +22,7 @@ This application has the following configuration parameters:
 * `bfdServer.db.url`: The JDBC URL of the database to use. Supports HSQL and PostgreSQL. Samples:
     * `jdbc:hsqldb:mem:test`
     * `jdbc:postgresql://example.com:5432/fhir`
+* `bfdServer.v2.enabled`: Enabled V2 of the BFD API. Supports "true" or "false".
 * `bfdServer.db.username`: The JDBC username to use with the database.
 * `bfdServer.db.password`: The JDBC password to use with the database.
 
@@ -34,7 +35,11 @@ This project can be built and run, as follows:
     $ mvn clean install
     $ mvn --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
 
-This will start the server using a local, in-memory database that will be deleted once the server is stopped. The server can take a few minutes to finish starting up, and Maven will exit with a "`BUILD SUCCESSFUL`" message once it's ready. The server will be running at <https://localhost:9094/baseDstu2>. Please note that it is set by default to require SSL mutual authentication, so accessing it via a browser isn't simple. See [Development Environment Setup](./dev/devenv-readme.md) for details on how to work with this, if needed.
+This will start the server using a local, in-memory database that will be deleted once the server is stopped. The server can take a few minutes to finish starting up, and Maven will exit with a "`BUILD SUCCESSFUL`" message once it's ready. 
+
+There are currently two versions of the API available. V1 is based on FHIR dstu3 while V2 is based on FHIR R4 with considerations made to adhere to the CARIN Blue Button Implementation Guide. 
+
+The server will be running at <https://localhost:9094/v1/fhir> or at <https://localhost:9094/v2/fhir>. Please note that it is set by default to require SSL mutual authentication, so accessing it via a browser isn't simple. See [Development Environment Setup](./dev/devenv-readme.md) for details on how to work with this, if needed.
 
 Once the server is no longer needed, you can stop it by running the following command:
 

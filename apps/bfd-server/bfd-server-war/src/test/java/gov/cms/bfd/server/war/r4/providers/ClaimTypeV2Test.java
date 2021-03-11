@@ -1,6 +1,10 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import com.google.common.collect.ImmutableMap;
+import gov.cms.bfd.model.rif.CarrierClaim;
+import gov.cms.bfd.model.rif.HospiceClaim;
+import gov.cms.bfd.model.rif.InpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import java.time.LocalDate;
 import java.util.EnumSet;
@@ -8,7 +12,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-public final class ClaimTypeTest {
+public final class ClaimTypeV2Test {
   /**
    * Verifies that our service end date function is working as expected. Since we are type casting
    * our claim object, we need to verify that every ClaimType is tested.
@@ -18,16 +22,36 @@ public final class ClaimTypeTest {
     LocalDate start = LocalDate.now();
     LocalDate end = start.plusDays(10);
 
+    CarrierClaim carrierClaim = new CarrierClaim();
+    carrierClaim.setDateFrom(start);
+    carrierClaim.setDateThrough(end);
+
+    HospiceClaim hospiceClaim = new HospiceClaim();
+    hospiceClaim.setDateFrom(start);
+    hospiceClaim.setDateThrough(end);
+
     PartDEvent partDEvent = new PartDEvent();
     partDEvent.setPrescriptionFillDate(end);
 
-    ImmutableMap.Builder<ClaimType, Object> builder = ImmutableMap.builder();
-    builder.put(ClaimType.PDE, partDEvent);
+    InpatientClaim inpatientClaim = new InpatientClaim();
+    inpatientClaim.setDateFrom(start);
+    inpatientClaim.setDateThrough(end);
 
-    Map<ClaimType, Object> claimTypeToClaim = builder.build();
+    OutpatientClaim outpatientClaim = new OutpatientClaim();
+    outpatientClaim.setDateFrom(start);
+    outpatientClaim.setDateThrough(end);
+
+    ImmutableMap.Builder<ClaimTypeV2, Object> builder = ImmutableMap.builder();
+    builder.put(ClaimTypeV2.CARRIER, carrierClaim);
+    builder.put(ClaimTypeV2.PDE, partDEvent);
+    builder.put(ClaimTypeV2.INPATIENT, inpatientClaim);
+    builder.put(ClaimTypeV2.OUTPATIENT, outpatientClaim);
+    builder.put(ClaimTypeV2.HOSPICE, hospiceClaim);
+
+    Map<ClaimTypeV2, Object> claimTypeToClaim = builder.build();
 
     // Verify that we're testing all of the ClaimTypes that are defined
-    EnumSet.allOf(ClaimType.class).stream()
+    EnumSet.allOf(ClaimTypeV2.class).stream()
         .forEach(
             claimType ->
                 Assert.assertTrue(
