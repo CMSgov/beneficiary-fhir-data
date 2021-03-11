@@ -57,32 +57,82 @@ public final class CoverageTransformerV2Test {
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void transformSampleARecord() throws FHIRException {
-    Coverage partACoverage =
+  public void testCoveragePartA() throws FHIRException {
+    Coverage coverage =
         CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
     // System.out.println(fhirContext.newJsonParser().encodeResourceToString(partACoverage));
-    assertPartAMatches(beneficiary, partACoverage);
-
-    Coverage partBCoverage =
-        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_B, beneficiary);
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(partBCoverage));
-    assertPartBMatches(beneficiary, partBCoverage);
-
-    Coverage partCCoverage =
-        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_C, beneficiary);
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(partCCoverage));
-    assertPartCMatches(beneficiary, partCCoverage);
-
-    Coverage partDCoverage =
-        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_D, beneficiary);
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(partDCoverage));
-    assertPartDMatches(beneficiary, partDCoverage);
+    assertPartAMatches(beneficiary, coverage);
 
     // Test with null lastUpdated
     beneficiary.setLastUpdated(null);
     Coverage partACoverageNullLastUpdated =
         CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, partACoverageNullLastUpdated);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CoverageTransformerV2#transform(MedicareSegment,
+   * Beneficiary)} works as expected when run against the {@link StaticRifResource#SAMPLE_B_CARRIER}
+   * {@link Beneficiary}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void testCoveragePartB() throws FHIRException {
+    Coverage coverage =
+        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_B, beneficiary);
+    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(partBCoverage));
+    assertPartBMatches(beneficiary, coverage);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CoverageTransformerV2#transform(MedicareSegment,
+   * Beneficiary)} works as expected when run against the {@link StaticRifResource#SAMPLE_C_CARRIER}
+   * {@link Beneficiary}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void testCoveragePartC() throws FHIRException {
+    Coverage coverage =
+        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_C, beneficiary);
+    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(partCCoverage));
+    assertPartCMatches(beneficiary, coverage);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CoverageTransformerV2#transform(MedicareSegment,
+   * Beneficiary)} works as expected when run against the {@link StaticRifResource#SAMPLE_D_CARRIER}
+   * {@link Beneficiary}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void testCoveragePartD() throws FHIRException {
+    Coverage coverage =
+        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_D, beneficiary);
+    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(partCCoverage));
+    assertPartDMatches(beneficiary, coverage);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CoverageTransformerV2#transform(MedicareSegment,
+   * Beneficiary)} works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER}
+   * {@link Beneficiary}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void testCoveragePartA_NoDate() throws FHIRException {
+    // Test with null lastUpdated
+    beneficiary.setLastUpdated(null);
+    Coverage coverage =
+        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
+    assertPartAMatches(beneficiary, coverage);
   }
 
   /**
