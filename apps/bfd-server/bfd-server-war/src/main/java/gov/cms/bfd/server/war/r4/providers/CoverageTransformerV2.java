@@ -114,13 +114,10 @@ final class CoverageTransformerV2 {
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
     createCoverageClass(
-        coverage, CoverageClass.SUBGROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
+        coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
 
     createCoverageClass(
-        coverage,
-        CoverageClass.SUBPLAN,
-        TransformerConstants.COVERAGE_PLAN_PART_A,
-        Optional.empty());
+        coverage, CoverageClass.PLAN, TransformerConstants.COVERAGE_PLAN_PART_A, Optional.empty());
 
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
@@ -175,13 +172,10 @@ final class CoverageTransformerV2 {
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
     createCoverageClass(
-        coverage, CoverageClass.SUBGROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
+        coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
 
     createCoverageClass(
-        coverage,
-        CoverageClass.SUBPLAN,
-        TransformerConstants.COVERAGE_PLAN_PART_B,
-        Optional.empty());
+        coverage, CoverageClass.PLAN, TransformerConstants.COVERAGE_PLAN_PART_B, Optional.empty());
 
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
@@ -229,13 +223,10 @@ final class CoverageTransformerV2 {
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
     createCoverageClass(
-        coverage, CoverageClass.SUBGROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
+        coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
 
     createCoverageClass(
-        coverage,
-        CoverageClass.SUBPLAN,
-        TransformerConstants.COVERAGE_PLAN_PART_C,
-        Optional.empty());
+        coverage, CoverageClass.PLAN, TransformerConstants.COVERAGE_PLAN_PART_C, Optional.empty());
 
     coverage.setBeneficiary(TransformerUtilsV2.referencePatient(beneficiary));
 
@@ -378,13 +369,10 @@ final class CoverageTransformerV2 {
     setCoverageRelationship(coverage, SubscriberPolicyRelationship.SELF);
 
     createCoverageClass(
-        coverage, CoverageClass.SUBGROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
+        coverage, CoverageClass.GROUP, TransformerConstants.COVERAGE_PLAN, Optional.empty());
 
     createCoverageClass(
-        coverage,
-        CoverageClass.SUBPLAN,
-        TransformerConstants.COVERAGE_PLAN_PART_D,
-        Optional.empty());
+        coverage, CoverageClass.PLAN, TransformerConstants.COVERAGE_PLAN_PART_D, Optional.empty());
 
     coverage.setStatus(CoverageStatus.ACTIVE);
 
