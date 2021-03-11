@@ -328,14 +328,24 @@ public class LoadedFilterManager {
       List<LoadedFileFilter> existingFilters,
       List<LoadedTuple> loadedTuples,
       Function<Long, List<LoadedBatch>> fetchById) {
+  REFRESHLOGGER.debug(
+          "LoadedFilterManger.updateFilters(): 1. Entering update filters");
     List<LoadedFileFilter> result = new ArrayList<>(existingFilters);
+    REFRESHLOGGER.debug(
+          "LoadedFilterManger.updateFilters(): 2. Building filters");
     List<LoadedFileFilter> newFilters = buildFilters(loadedTuples, fetchById);
+    REFRESHLOGGER.debug(
+          "LoadedFilterManger.updateFilters(): 3. Foreach loop");
     newFilters.forEach(
         filter -> {
           result.removeIf(f -> f.getLoadedFileId() == filter.getLoadedFileId());
           result.add(filter);
         });
+        REFRESHLOGGER.debug(
+          "LoadedFilterManger.updateFilters(): 4. Sorting");
     result.sort((a, b) -> b.getFirstUpdated().compareTo(a.getFirstUpdated())); // Descending
+    REFRESHLOGGER.debug(
+      "LoadedFilterManger.updateFilters(): 5. Exiting");
     return result;
   }
 
@@ -442,9 +452,17 @@ public class LoadedFilterManager {
    * @return tuples that meet the after criteria or an empty list
    */
   private List<LoadedTuple> fetchLoadedTuples(Date after) {
+    REFRESHLOGGER.debug(
+            "LoadedFilterManger.fetchLoadedTuples(): 1. entering fetchLoadedTuples with date " + after.toString());
     final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    REFRESHLOGGER.debug(
+            "LoadedFilterManger.fetchLoadedTuples(): 2. creating query");
     CriteriaQuery<LoadedTuple> query = cb.createQuery(LoadedTuple.class);
+    REFRESHLOGGER.debug(
+      "LoadedFilterManger.fetchLoadedTuples(): 3. query from");
     final Root<LoadedFile> f = query.from(LoadedFile.class);
+    REFRESHLOGGER.debug(
+      "LoadedFilterManger.fetchLoadedTuples(): 4. joining batches");
     Join<LoadedFile, LoadedBatch> b = f.join("batches");
     query =
         query.select(
@@ -453,11 +471,19 @@ public class LoadedFilterManager {
                 f.get("loadedFileId"),
                 f.get("created"),
                 cb.max(b.get("created"))));
+                REFRESHLOGGER.debug(
+                  "LoadedFilterManger.fetchLoadedTuples(): 5. before the if statement");
     if (after != null) {
+      REFRESHLOGGER.debug(
+        "LoadedFilterManger.fetchLoadedTuples(): 6. Entering if statement");
       query = query.where(cb.greaterThan(b.get("created"), after));
     }
+    REFRESHLOGGER.debug(
+        "LoadedFilterManger.fetchLoadedTuples(): 7. Creating query");
     query =
         query.groupBy(f.get("loadedFileId"), f.get("created")).orderBy(cb.desc(f.get("created")));
+    REFRESHLOGGER.debug(
+          "LoadedFilterManger.fetchLoadedTuples(): 8. Returning");
     return entityManager.createQuery(query).getResultList();
   }
 
