@@ -77,7 +77,7 @@ public class CarrierClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimType.CARRIER,
+        ClaimTypeV2.CARRIER,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
@@ -93,13 +93,13 @@ public class CarrierClaimTransformerV2 {
         Optional.of(claimGroup.getWeeklyProcessDate()));
 
     // map eob type codes into FHIR
-    // NCH_CLM_TYPE_CD => ExplanationOfBenefit.type.coding
-    // EOB Type => ExplanationOfBenefit.type.coding
-    // Claim Type (institutional) => ExplanationOfBenefit.type.coding
+    // NCH_CLM_TYPE_CD            => ExplanationOfBenefit.type.coding
+    // EOB Type                   => ExplanationOfBenefit.type.coding
+    // Claim Type (Professional)  => ExplanationOfBenefit.type.coding
     // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimType.CARRIER,
+        ClaimTypeV2.CARRIER,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 

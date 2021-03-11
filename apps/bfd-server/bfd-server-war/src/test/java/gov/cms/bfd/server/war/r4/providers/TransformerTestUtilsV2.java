@@ -56,7 +56,7 @@ public final class TransformerTestUtilsV2 {
       ExplanationOfBenefit eob,
       String claimId,
       String beneficiaryId,
-      ClaimType claimType,
+      ClaimTypeV2 claimType,
       String claimGroupId,
       MedicareSegment coverageType,
       Optional<LocalDate> dateFrom,
@@ -69,7 +69,7 @@ public final class TransformerTestUtilsV2 {
     Assert.assertEquals(
         TransformerUtilsV2.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
-    if (claimType.equals(ClaimType.PDE)) {
+    if (claimType.equals(ClaimTypeV2.PDE)) {
       assertHasIdentifier(CcwCodebookVariable.PDE_ID, claimId, eob.getIdentifier());
     } else {
       assertHasIdentifier(CcwCodebookVariable.CLM_ID, claimId, eob.getIdentifier());
@@ -98,13 +98,6 @@ public final class TransformerTestUtilsV2 {
       default:
         throw new BadCodeMonkeyException();
     }
-
-    /*
-    if (dateFrom.isPresent()) {
-      assertDateEquals(dateFrom.get(), eob.getBillablePeriod().getStartElement());
-      assertDateEquals(dateThrough.get(), eob.getBillablePeriod().getEndElement());
-    }
-    */
 
     if (paymentAmount.isPresent()) {
       Assert.assertEquals(paymentAmount.get(), eob.getPayment().getAmount().getValue());

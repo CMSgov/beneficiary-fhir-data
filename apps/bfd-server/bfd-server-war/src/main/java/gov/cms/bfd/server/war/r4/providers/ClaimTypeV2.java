@@ -4,6 +4,8 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaim_;
+import gov.cms.bfd.model.rif.HospiceClaim;
+import gov.cms.bfd.model.rif.HospiceClaim_;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaim_;
 import gov.cms.bfd.model.rif.OutpatientClaim;
@@ -28,7 +30,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
  * {@link R4ExplanationOfBenefitResourceProvider}.
  */
-public enum ClaimType {
+public enum ClaimTypeV2 {
   CARRIER(
       CarrierClaim.class,
       CarrierClaim_.claimId,
@@ -58,7 +60,15 @@ public enum ClaimType {
       OutpatientClaim_.beneficiaryId,
       (entity) -> ((OutpatientClaim) entity).getDateThrough(),
       OutpatientClaimTransformerV2::transform,
-      OutpatientClaim_.lines);
+      OutpatientClaim_.lines),
+
+  HOSPICE(
+      HospiceClaim.class,
+      HospiceClaim_.claimId,
+      HospiceClaim_.beneficiaryId,
+      (entity) -> ((HospiceClaim) entity).getDateThrough(),
+      HospiceClaimTransformerV2::transform,
+      HospiceClaim_.lines);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;
@@ -77,7 +87,7 @@ public enum ClaimType {
    * @param transformer the value to use for {@link #getTransformer()}
    * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
-  private ClaimType(
+  private ClaimTypeV2(
       Class<?> entityClass,
       SingularAttribute<?, ?> entityIdAttribute,
       SingularAttribute<?, String> entityBeneficiaryIdAttribute,
@@ -96,8 +106,8 @@ public enum ClaimType {
   }
 
   /**
-   * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link ClaimType}
-   *     in the database
+   * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
+   *     ClaimTypeV2} in the database
    */
   public Class<?> getEntityClass() {
     return entityClass;
@@ -141,12 +151,12 @@ public enum ClaimType {
   }
 
   /**
-   * @param claimTypeText the lower-cased {@link ClaimType#name()} value to parse back into a {@link
-   *     ClaimType}
-   * @return the {@link ClaimType} represented by the specified {@link String}
+   * @param claimTypeText the lower-cased {@link ClaimTypeV2#name()} value to parse back into a
+   *     {@link ClaimTypeV2}
+   * @return the {@link ClaimTypeV2} represented by the specified {@link String}
    */
-  public static Optional<ClaimType> parse(String claimTypeText) {
-    for (ClaimType claimType : ClaimType.values())
+  public static Optional<ClaimTypeV2> parse(String claimTypeText) {
+    for (ClaimTypeV2 claimType : ClaimTypeV2.values())
       if (claimType.name().toLowerCase().equals(claimTypeText)) return Optional.of(claimType);
     return Optional.empty();
   }

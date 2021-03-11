@@ -60,7 +60,7 @@ public class CarrierClaimTransformerV2Test {
         eob,
         claim.getClaimId(),
         claim.getBeneficiaryId(),
-        ClaimType.CARRIER,
+        ClaimTypeV2.CARRIER,
         claim.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_B,
         Optional.of(claim.getDateFrom()),
