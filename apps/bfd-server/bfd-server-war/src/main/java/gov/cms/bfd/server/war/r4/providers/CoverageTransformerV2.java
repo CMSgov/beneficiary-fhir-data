@@ -161,6 +161,7 @@ final class CoverageTransformerV2 {
     Timer.Context timer = getTimerContext(metricRegistry, "part_b");
     Coverage coverage = new Coverage();
 
+    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
     coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_B, beneficiary));
     setCoverageStatus(coverage, beneficiary.getPartBTerminationCode());
 
@@ -217,6 +218,7 @@ final class CoverageTransformerV2 {
     Timer.Context timer = getTimerContext(metricRegistry, "part_c");
     Coverage coverage = new Coverage();
 
+    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
     coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_C, beneficiary));
     coverage.setStatus(CoverageStatus.ACTIVE);
 
@@ -366,6 +368,7 @@ final class CoverageTransformerV2 {
     Timer.Context timer = getTimerContext(metricRegistry, "part_d");
     Coverage coverage = new Coverage();
 
+    coverage.getMeta().addProfile(ProfileConstants.C4BB_COVERAGE_URL);
     coverage.setId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, beneficiary));
 
     beneficiary.getMedicareBeneficiaryId().ifPresent(value -> coverage.setSubscriberId(value));
