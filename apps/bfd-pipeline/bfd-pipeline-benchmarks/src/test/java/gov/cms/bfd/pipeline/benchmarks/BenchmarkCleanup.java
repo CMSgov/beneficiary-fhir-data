@@ -3,8 +3,8 @@ package gov.cms.bfd.pipeline.benchmarks;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Bucket;
-import gov.cms.bfd.pipeline.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * This is a small utility app designed to clean up after abnormally terminated runs of {@link
- * S3ToDatabaseLoadAppBenchmark}. It reads the metadata in <code>target/benchmark-iterations</code>
+ * PipelineApplicationBenchmark}. It reads the metadata in <code>target/benchmark-iterations</code>
  * and runs the teardown scripts for each iteration.
  */
 public final class BenchmarkCleanup {
