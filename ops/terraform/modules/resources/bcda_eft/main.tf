@@ -79,10 +79,7 @@ resource "aws_kms_key" "bcda_eft_efs" {
     "Effect" : "Allow",
     "Principal" : {
       "AWS" : [
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/AJHL",
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/D6LU",
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/BFD_System_Maintainer",
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/VZG9"
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/AJHL"
       ]
     },
     "Action" : [
@@ -106,7 +103,7 @@ resource "aws_kms_key" "bcda_eft_efs" {
     "Sid" : "Allow use of the key",
     "Effect" : "Allow",
     "Principal" : {
-      "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/bcda-${var.env_config.env}-eft-efs-rw-access-role"
+      "AWS" : "${aws_iam_role.bcda_rw.arn}"
     },
     "Action" : [ "kms:Encrypt",
         "kms:Decrypt",
@@ -119,7 +116,7 @@ resource "aws_kms_key" "bcda_eft_efs" {
     "Sid" : "Allow attachment of persistent resources",
     "Effect" : "Allow",
     "Principal" : {
-      "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/bcda-${var.env_config.env}-eft-efs-rw-access-role"
+      "AWS" : "${aws_iam_role.bcda_rw.arn}"
     },
     "Action" : [
         "kms:CreateGrant",
@@ -331,13 +328,13 @@ resource "aws_security_group" "bcda_efs_sg" {
   vpc_id      = data.aws_vpc.main.id
   tags        = local.tags
 
-  // TODO: delete egress unless needed
-  //    egress {
-  //        from_port   = 0
-  //        to_port     = 0
-  //        protocol    = "-1"
-  //        cidr_blocks = ["0.0.0.0/0"]
-  //    }
+  # TODO: tighten this up
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 # allow TCP/2049 from BFD ETL data subnets
