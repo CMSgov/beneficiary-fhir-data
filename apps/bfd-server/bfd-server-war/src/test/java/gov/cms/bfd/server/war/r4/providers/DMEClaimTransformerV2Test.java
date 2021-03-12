@@ -1,5 +1,6 @@
-package gov.cms.bfd.server.war.stu3.providers;
+package gov.cms.bfd.server.war.r4.providers;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -46,6 +47,21 @@ public final class DMEClaimTransformerV2Test {
   @After
   public void tearDown() {
     claim = null;
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.DMEClaimTransformerV2#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  // @Ignore
+  @Test
+  public void outputSampleARecord() throws FHIRException {
+    ExplanationOfBenefit eob = DMEClaimTransformerV2.transform(new MetricRegistry(), claim);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
+    assertMatches(1, 1);
   }
 
   /**
