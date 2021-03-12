@@ -4,8 +4,11 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaim_;
+<<<<<<< HEAD:apps/bfd-server/bfd-server-war/src/main/java/gov/cms/bfd/server/war/r4/providers/ClaimTypeV2.java
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaim_;
+=======
+>>>>>>> master:apps/bfd-server/bfd-server-war/src/main/java/gov/cms/bfd/server/war/r4/providers/ClaimType.java
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaim_;
 import gov.cms.bfd.model.rif.InpatientClaim;

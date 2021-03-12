@@ -79,8 +79,34 @@ public final class ServerTestUtils {
    * @return a new FHIR {@link IGenericClient} for use
    */
   public static IGenericClient createFhirClient(Optional<ClientSslIdentity> clientSslIdentity) {
+    return createFhirClient("v1", clientSslIdentity);
+  }
+
+  /**
+   * @return a new FHIR {@link IGenericClient} for use, configured to use the {@link
+   *     ClientSslIdentity#TRUSTED} login for FIHR v2 server
+   */
+  public static IGenericClient createFhirClientV2() {
+    return createFhirClientV2(Optional.of(ClientSslIdentity.TRUSTED));
+  }
+
+  /**
+   * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FV2 HIR server
+   * @return a new FHIR {@link IGenericClient} for use
+   */
+  public static IGenericClient createFhirClientV2(Optional<ClientSslIdentity> clientSslIdentity) {
+    return createFhirClient("v2", clientSslIdentity);
+  }
+
+  /**
+   * @param versionId the {@link v1 or v2 identifier to use as a part of the URL for the FHIR server
+   * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FHIR server
+   * @return a new FHIR {@link IGenericClient} for use
+   */
+  private static IGenericClient createFhirClient(
+      String versionId, Optional<ClientSslIdentity> clientSslIdentity) {
     // Figure out where the test server is running.
-    String fhirBaseUrl = String.format("%s/v1/fhir", getServerBaseUrl());
+    String fhirBaseUrl = String.format("%s/%s/fhir", getServerBaseUrl(), versionId);
 
     /*
      * We need to override the FHIR client's SSLContext. Unfortunately, that
