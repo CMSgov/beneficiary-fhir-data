@@ -70,6 +70,6 @@ public class CarrierClaimTransformerV2Test {
 
     // TODO: finish tests based off V1
 
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
+    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

@@ -163,7 +163,7 @@ public final class BeneficiaryTransformerV2Test {
     Patient patient =
         BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, requestHeader);
 
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
+    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
     assertThat(patient.getIdentifier(), not(IsEmptyCollection.empty()));
   }
 

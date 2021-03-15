@@ -52,11 +52,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
@@ -1750,15 +1752,12 @@ public final class TransformerUtilsV2 {
             .get()
             .getCode();
     return ClaimTypeV2.valueOf(type);
-<<<<<<< HEAD
   }
 
   // Weekly Process Date
   static void mapEobWeeklyProcessDate(ExplanationOfBenefit eob, LocalDate weeklyProcessLocalDate) {
     TransformerUtilsV2.addInformation(eob, CcwCodebookVariable.NCH_WKLY_PROC_DT)
-        .setTiming(new DateType(TransformerUtils.convertToDate(weeklyProcessLocalDate)));
-=======
->>>>>>> master
+        .setTiming(new DateType(convertToDate(weeklyProcessLocalDate)));
   }
 
   /**
@@ -2146,6 +2145,7 @@ public final class TransformerUtilsV2 {
         fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.PHARMACY;
         break;
 
+      case DME:
       case INPATIENT:
       case OUTPATIENT:
       case HOSPICE:
@@ -3910,5 +3910,23 @@ public final class TransformerUtilsV2 {
       default:
         return RaceCategory.UNKNOWN;
     }
+  }
+
+  public static Consumer<Optional<Diagnosis>> addPrincipalDiagnosis(List<Diagnosis> diagnoses) {
+    return diagnosisToAdd -> {
+      if (diagnosisToAdd.isPresent()) {
+        Optional<Diagnosis> matchingDiagnosis =
+            diagnoses.stream()
+                .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
+                .findFirst();
+        if (matchingDiagnosis.isPresent()) {
+          // append labels
+          matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
+          diagnoses.add(matchingDiagnosis.get());
+        } else {
+          diagnoses.add(diagnosisToAdd.get());
+        }
+      }
+    };
   }
 }
