@@ -1,6 +1,6 @@
 ---
-id: bene_id
-name: BENE_ID
+id: ccw_bene_id
+commonName: BENE_ID
 description: |
   This is a **Markdown** description.
 

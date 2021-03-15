@@ -10,11 +10,15 @@ The idea is to move BFD to more of a declarative data management model,
 * More collaboration with non-developer teammates on the data documentation and transformations.
 
 At the moment, practically none of that is implemented.
-As of 2020-02-19, it's basically just in the "sketch it on the back of a napkin" design phase.
+As of 2020-03-15, it's barely past the "sketch it on the back of a napkin" design phase.
 The following are likely next steps:
 
-* Add a mapping for RIF --> BFD database.
-* Convert the mappings from YAML to (mostly declarative) Java.
+* Finish the stubbed-out mapping for RIF --> BFD database.
+* Resolve compile errors by stubbing out more classes.
+* Add a unit test for the mapping declaration.
+* Implement enough things that the unit test compiles.
+* Add mappings for BFD DB to BFD FHIR v1.
+* Try to abstract the mappings so they don't require separate implementations for each format pair.
 * Add a few more fields to flush out more potential problems, such as:
    * FHIR nested fields that aren't arrays. (We must be using some of those, right?)
    * Cross-hierarchy references, like with `EOB.diagnosis`.
