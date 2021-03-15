@@ -6,7 +6,7 @@
     state: latest
   with_items:
     # Needed to supply `keytool` and also to run the ETL service.
-    - java-1.8.0-openjdk-devel
+    - java-1.11.0-openjdk-devel
     # Needed to use the `s3_object` module.
     - python-boto
     # Needed to use the `postgresql_db` module.
