@@ -102,6 +102,7 @@ final class BeneficiaryTransformerV2 {
 
     // Required values not directly mapped
     patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
+
     patient.setId(beneficiary.getBeneficiaryId());
     Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
 
