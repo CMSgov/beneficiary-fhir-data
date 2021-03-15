@@ -6,6 +6,7 @@ import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
+import gov.cms.bfd.model.rif.SNFClaim;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Map;
@@ -41,12 +42,17 @@ public final class ClaimTypeV2Test {
     outpatientClaim.setDateFrom(start);
     outpatientClaim.setDateThrough(end);
 
+    SNFClaim snfClaim = new SNFClaim();
+    snfClaim.setDateFrom(start);
+    snfClaim.setDateThrough(end);
+
     ImmutableMap.Builder<ClaimTypeV2, Object> builder = ImmutableMap.builder();
     builder.put(ClaimTypeV2.CARRIER, carrierClaim);
     builder.put(ClaimTypeV2.PDE, partDEvent);
     builder.put(ClaimTypeV2.INPATIENT, inpatientClaim);
     builder.put(ClaimTypeV2.OUTPATIENT, outpatientClaim);
     builder.put(ClaimTypeV2.HOSPICE, hospiceClaim);
+    builder.put(ClaimTypeV2.SNF, snfClaim);
 
     Map<ClaimTypeV2, Object> claimTypeToClaim = builder.build();
 

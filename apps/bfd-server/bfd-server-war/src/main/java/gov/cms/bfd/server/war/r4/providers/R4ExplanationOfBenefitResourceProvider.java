@@ -257,13 +257,72 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    if (claimTypes.contains(ClaimTypeV2.PDE))
+    if (claimTypes.contains(ClaimTypeV2.CARRIER)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.CARRIER,
+              findClaimTypeByPatient(
+                  ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate)));
+    }
+
+    /*
+    TODO: When DME and HHA are implemented
+    if (claimTypes.contains(ClaimTypeV2.DME)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.DME,
+              findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.HHA)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.HHA,
+              findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate)));
+    }
+    */
+
+    if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.HOSPICE,
+              findClaimTypeByPatient(
+                  ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.INPATIENT,
+              findClaimTypeByPatient(
+                  ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.OUTPATIENT,
+              findClaimTypeByPatient(
+                  ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.PDE)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.PDE,
               findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate)));
+    }
 
-    if (Boolean.parseBoolean(excludeSamhsa)) filterSamhsa(eobs);
+    if (claimTypes.contains(ClaimTypeV2.SNF)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.SNF,
+              findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate)));
+    }
+
+    if (Boolean.parseBoolean(excludeSamhsa)) {
+      filterSamhsa(eobs);
+    }
 
     eobs.sort(R4ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
@@ -470,13 +529,16 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
             codingToken.getValue() != null
                 ? ClaimTypeV2.parse(codingToken.getValue().toLowerCase())
                 : Optional.empty();
+
         if (codingToken.getSystem() != null
             && codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
             && !claimType.isPresent()) {
           claimTypesInner.addAll(Arrays.asList(ClaimTypeV2.values()));
         } else if (codingToken.getSystem() == null
             || codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)) {
-          if (claimType.isPresent()) claimTypesInner.add(claimType.get());
+          if (claimType.isPresent()) {
+            claimTypesInner.add(claimType.get());
+          }
         }
       }
 
