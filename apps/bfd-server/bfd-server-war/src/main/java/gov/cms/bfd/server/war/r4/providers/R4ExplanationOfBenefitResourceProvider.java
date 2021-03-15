@@ -274,6 +274,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate)));
     }
     */
+
     if (claimTypes.contains(ClaimTypeV2.HHA)) {
       eobs.addAll(
           transformToEobs(
