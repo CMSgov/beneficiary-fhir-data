@@ -102,13 +102,22 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getLastUpdated());
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
-    if (claimGroup.getPatientStatusCd().isPresent()) {
-      TransformerUtilsV2.addInformationWithCode(
-          eob,
-          CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-          CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-          claimGroup.getPatientStatusCd());
-    }
+    claimGroup
+        .getPatientStatusCd()
+        .ifPresent(
+            c ->
+                TransformerUtilsV2.addInformationWithCode(
+                    eob,
+                    CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+                    CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+                    c));
+
+    // CLM_ADMSN_DT       => ExplanationOfBenefit.supportingInfo:admissionperiod
+    // NCH_BENE_DSCHRG_DT => ExplanationOfBenefit.supportingInfo:admissionperiod
+    TransformerUtilsV2.addInformation(
+        eob,
+        TransformerUtilsV2.createInformationAdmPeriodSlice(
+            eob, claimGroup.getClaimAdmissionDate(), claimGroup.getBeneficiaryDischargeDate()));
 
     // add EOB information to fields that are common between the Inpatient and SNF claim types
     // CLM_IP_ADMSN_TYPE_CD             => ExplanationOfBenefit.supportingInfo.code
@@ -338,11 +347,12 @@ public class InpatientClaimTransformerV2 {
           line.getDeductibleCoinsuranceCd());
 
       // HCPCS_CD => item.productOrService
-      if (line.getHcpcsCode().isPresent()) {
-        item.setProductOrService(
-            TransformerUtilsV2.createCodeableConcept(
-                eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
-      }
+      line.getHcpcsCode()
+          .ifPresent(
+              c ->
+                  item.setProductOrService(
+                      TransformerUtilsV2.createCodeableConcept(
+                          eob, CcwCodebookVariable.HCPCS_CD, c)));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

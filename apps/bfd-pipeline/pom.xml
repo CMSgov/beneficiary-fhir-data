@@ -16,8 +16,8 @@
 	</description>
 
 	<modules>
-		<module>bfd-pipeline-rif-extract</module>
-		<module>bfd-pipeline-rif-load</module>
+		<module>bfd-pipeline-ccw-rif</module>
+		<module>bfd-pipeline-shared-utils</module>
 		<module>bfd-pipeline-app</module>
 		<module>bfd-pipeline-benchmarks</module>
 	</modules>

@@ -1127,10 +1127,26 @@ public final class TransformerUtilsV2 {
    * @param period the {@link Period} to adjust
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
+  static void setPeriodEnd(Period period, Optional<LocalDate> date) {
+    date.ifPresent(value -> setPeriodEnd(period, value));
+  }
+
+  /**
+   * @param period the {@link Period} to adjust
+   * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
+   */
   static void setPeriodEnd(Period period, LocalDate date) {
     period.setEnd(
         Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
         TemporalPrecisionEnum.DAY);
+  }
+
+  /**
+   * @param period the {@link Period} to adjust
+   * @param date the {@link LocalDate} to set the {@link Period#getStart()} value with/to
+   */
+  static void setPeriodStart(Period period, Optional<LocalDate> date) {
+    date.ifPresent(value -> setPeriodStart(period, value));
   }
 
   /**
@@ -1446,7 +1462,8 @@ public final class TransformerUtilsV2 {
     if (!drugCodeLookupMissingFailures.contains(claimDrugCode)) {
       drugCodeLookupMissingFailures.add(claimDrugCode);
       LOGGER.info(
-          "No national drug code value (PRODUCTNDC column) match found for drug code {} in resource {}.",
+          "No national drug code value (PRODUCTNDC column) match found for drug code {} in"
+              + " resource {}.",
           claimDrugCode,
           "fda_products_utf8.tsv");
     }
@@ -2149,6 +2166,7 @@ public final class TransformerUtilsV2 {
       case INPATIENT:
       case OUTPATIENT:
       case HOSPICE:
+      case SNF:
         fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.INSTITUTIONAL;
         break;
 
