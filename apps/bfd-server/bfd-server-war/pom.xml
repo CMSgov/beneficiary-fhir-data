@@ -226,7 +226,8 @@
 		<dependency>
 			<!-- Used to load sample data in tests. -->
 			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-rif-load</artifactId>
+			<artifactId>bfd-pipeline-ccw-rif</artifactId>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
