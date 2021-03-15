@@ -287,11 +287,8 @@ public class InpatientClaimTransformerV2 {
         .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p.get()));
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
-    TransformerUtilsV2.addInformationWithDate(
-        eob,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        Optional.of(claimGroup.getWeeklyProcessDate()));
+    TransformerUtilsV2.createInformationRecievedDateSlice(
+        eob, CcwCodebookVariable.NCH_WKLY_PROC_DT, Optional.of(claimGroup.getWeeklyProcessDate()));
 
     // NCH_PTNT_STATUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.addInformationWithCode(

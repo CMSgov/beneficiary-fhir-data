@@ -4,13 +4,12 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.HospiceClaim;
-import gov.cms.bfd.model.rif.HospiceClaimLine;
+import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
-import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
-import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -18,44 +17,41 @@ import java.util.Arrays;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.Quantity;
 
-/**
- * Transforms CCW {@link HospiceClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
- */
-public class HospiceClaimTransformerV2 {
+public class HHAClaimTransformerV2 {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link HospiceClaim} to transform
+   * @param claim the CCW {@link HHAClaim} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HospiceClaim}
+   *     HHAClaim}
    */
   @Trace
   static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
     Timer.Context timer =
         metricRegistry
-            .timer(
-                MetricRegistry.name(HospiceClaimTransformerV2.class.getSimpleName(), "transform"))
+            .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(claim instanceof HospiceClaim)) {
+    if (!(claim instanceof HHAClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((HospiceClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((HHAClaim) claim);
 
     timer.stop();
     return eob;
   }
 
   /**
-   * @param claimGroup the CCW {@link HospiceClaim} to transform
+   * @param claimGroup the CCW {@link HHAClaim} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     HospiceClaim}
+   *     HHAClaim}
    */
-  private static ExplanationOfBenefit transformClaim(HospiceClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(HHAClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
+    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_NONCLINICIAN_PROFILE_URL);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
@@ -71,9 +67,9 @@ public class HospiceClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimTypeV2.HOSPICE,
+        ClaimTypeV2.HHA,
         claimGroup.getClaimGroupId().toPlainString(),
-        MedicareSegment.PART_A,
+        MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
         Optional.of(claimGroup.getPaymentAmount()),
@@ -86,11 +82,11 @@ public class HospiceClaimTransformerV2 {
     // map eob type codes into FHIR
     // NCH_CLM_TYPE_CD            => ExplanationOfBenefit.type.coding
     // EOB Type                   => ExplanationOfBenefit.type.coding
-    // Claim Type (Professional)  => ExplanationOfBenefit.type.coding
+    // Claim Type                 => ExplanationOfBenefit.type.coding
     // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimTypeV2.HOSPICE,
+        ClaimTypeV2.HHA,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -101,26 +97,7 @@ public class HospiceClaimTransformerV2 {
         claimGroup.getProviderNumber(),
         claimGroup.getLastUpdated());
 
-    // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
-    if (claimGroup.getPatientStatusCd().isPresent()) {
-      TransformerUtilsV2.addInformationWithCode(
-          eob,
-          CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-          CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-          claimGroup.getPatientStatusCd());
-    }
-
-    // CLM_ADMSN_DT       => ExplanationOfBenefit.supportingInfo:admissionperiod
-    // NCH_BENE_DSCHRG_DT => ExplanationOfBenefit.supportingInfo:admissionperiod
-    TransformerUtilsV2.addInformation(
-        eob,
-        TransformerUtilsV2.createInformationAdmPeriodSlice(
-            eob, claimGroup.getClaimHospiceStartDate(), claimGroup.getBeneficiaryDischargeDate()));
-
-    // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob, CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, claimGroup.getUtilizationDayCount());
-
+    // Common group level fields between Inpatient, Outpatient Hospice, HHA and SNF
     // ORG_NPI_NUM              => ExplanationOfBenefit.provider
     // CLM_FAC_TYPE_CD          => ExplanationOfBenefit.facility.extension
     // CLM_FREQ_CD              => ExplanationOfBenefit.supportingInfo
@@ -129,7 +106,7 @@ public class HospiceClaimTransformerV2 {
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
-    // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
+    // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
         eob,
         claimGroup.getOrganizationNpi(),
@@ -144,18 +121,22 @@ public class HospiceClaimTransformerV2 {
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getLastUpdated());
 
+    // CLM_PPS_IND_CODE => ExplanationOfBenefit.supportingInfo
+    TransformerUtilsV2.addInformationWithCode(
+        eob,
+        CcwCodebookVariable.CLM_PPS_IND_CD,
+        CcwCodebookVariable.CLM_PPS_IND_CD,
+        claimGroup.getProspectivePaymentCode());
+
     // Handle Diagnosis
-    // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept
-    // ADMTG_DGNS_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // PRNCPAL_DGNS_CD          => diagnosis.diagnosisCodeableConcept
+    // PRNCPAL_DGNS_VRSN_CD     => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_CD(1-25)        => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_VRSN_CD(1-25)   => diagnosis.diagnosisCodeableConcept
-    // CLM_POA_IND_SW(1-25)     => diagnosis.type
     // FST_DGNS_E_CD            => diagnosis.diagnosisCodeableConcept
     // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
     for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
       TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
     }
@@ -172,8 +153,40 @@ public class HospiceClaimTransformerV2 {
         Optional.empty(),
         Optional.empty());
 
-    for (HospiceClaimLine line : claimGroup.getLines()) {
-      ItemComponent item = TransformerUtilsV2.addItem(eob);
+    // CLM_HHA_LUPA_IND_CD => ExplanationOfBenefit.supportinginfo.code
+    claimGroup
+        .getClaimLUPACode()
+        .ifPresent(
+            c ->
+                TransformerUtilsV2.addInformationWithCode(
+                    eob,
+                    CcwCodebookVariable.CLM_HHA_LUPA_IND_CD,
+                    CcwCodebookVariable.CLM_HHA_LUPA_IND_CD,
+                    c));
+
+    // CLM_HHA_RFRL_CD => ExplanationOfBenefit.supportinginfo.code
+    claimGroup
+        .getClaimReferralCode()
+        .ifPresent(
+            c ->
+                TransformerUtilsV2.addInformationWithCode(
+                    eob,
+                    CcwCodebookVariable.CLM_HHA_RFRL_CD,
+                    CcwCodebookVariable.CLM_HHA_RFRL_CD,
+                    c));
+
+    // CLM_HHA_TOT_VISIT_CNT => ExplanationOfBenefit.supportinginfo.value[x]
+    TransformerUtilsV2.addInformation(eob, CcwCodebookVariable.CLM_HHA_TOT_VISIT_CNT)
+        .setValue(new Quantity(claimGroup.getTotalVisitCount().intValue()));
+
+    // CLM_ADMSN_DT => ExplanationOfBenefit.supportingInfo:admissionperiod
+    TransformerUtilsV2.addInformation(
+        eob,
+        TransformerUtilsV2.createInformationAdmPeriodSlice(
+            eob, claimGroup.getCareStartDate(), Optional.empty()));
+
+    for (HHAClaimLine line : claimGroup.getLines()) {
+      ItemComponent item = eob.addItem();
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
@@ -181,6 +194,22 @@ public class HospiceClaimTransformerV2 {
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
+
+      // HCPCS_CD           => ExplanationOfBenefit.item.productOrService
+      // HCPCS_1ST_MDFR_CD  => ExplanationOfBenefit.item.modifier
+      // HCPCS_2ND_MDFR_CD  => ExplanationOfBenefit.item.modifier
+      TransformerUtilsV2.mapHcpcs(
+          eob,
+          item,
+          line.getHcpcsCode(),
+          Optional.empty(),
+          Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
+
+      // REV_CNTR_1ST_ANSI_CD => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.addAdjudication(
+          item,
+          TransformerUtilsV2.createAdjudicationDenialReasonSlice(
+              eob, CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD, line.getRevCntr1stAnsiCd()));
 
       // REV_CNTR                   => ExplanationOfBenefit.item.revenue
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
@@ -195,10 +224,16 @@ public class HospiceClaimTransformerV2 {
           line.getRevenueCenterCode(),
           line.getRateAmount(),
           line.getTotalChargeAmount(),
-          line.getNonCoveredChargeAmount(),
+          Optional.of(line.getNonCoveredChargeAmount()),
           line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
+
+      // Common item level fields between Outpatient, HHA and Hospice
+      // REV_CNTR_DT              => ExplanationOfBenefit.item.servicedDate
+      // REV_CNTR_PMT_AMT_AMT     => ExplanationOfBenefit.item.adjudication
+      TransformerUtilsV2.mapEobCommonItemRevenueOutHHAHospice(
+          item, line.getRevenueCenterDate(), line.getPaymentAmount());
 
       // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
       TransformerUtilsV2.addItemRevenue(
@@ -212,7 +247,7 @@ public class HospiceClaimTransformerV2 {
           eob,
           item,
           C4BBPractitionerIdentifierType.UPIN,
-          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
+          C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
@@ -220,40 +255,8 @@ public class HospiceClaimTransformerV2 {
           eob,
           item,
           C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
+          C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI());
-
-      // HCPCS_CD           => ExplanationOfBenefit.item.productOrService
-      // HCPCS_1ST_MDFR_CD  => ExplanationOfBenefit.item.modifier
-      // HCPCS_2ND_MDFR_CD  => ExplanationOfBenefit.item.modifier
-      TransformerUtilsV2.mapHcpcs(
-          eob,
-          item,
-          line.getHcpcsCode(),
-          Optional.empty(),
-          Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
-
-      // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
-      TransformerUtilsV2.addAdjudication(
-          item,
-          TransformerUtilsV2.createAdjudicationAmtSlice(
-              CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT,
-              C4BBAdjudication.PAID_TO_PROVIDER,
-              line.getProviderPaymentAmount()));
-
-      // REV_CNTR_BENE_PMT_AMT => ExplanationOfBenefit.item.adjudication
-      TransformerUtilsV2.addAdjudication(
-          item,
-          TransformerUtilsV2.createAdjudicationAmtSlice(
-              CcwCodebookVariable.REV_CNTR_BENE_PMT_AMT,
-              C4BBAdjudication.PAID_TO_PATIENT,
-              line.getBenficiaryPaymentAmount()));
-
-      // Common item level fields between Outpatient, HHA and Hospice
-      // REV_CNTR_DT              => ExplanationOfBenefit.item.servicedDate
-      // REV_CNTR_PMT_AMT_AMT     => ExplanationOfBenefit.item.adjudication
-      TransformerUtilsV2.mapEobCommonItemRevenueOutHHAHospice(
-          item, line.getRevenueCenterDate(), line.getPaymentAmount());
     }
 
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
