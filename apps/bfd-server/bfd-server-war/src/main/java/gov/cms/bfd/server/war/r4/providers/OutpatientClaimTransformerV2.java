@@ -77,7 +77,7 @@ public class OutpatientClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimType.OUTPATIENT,
+        ClaimTypeV2.OUTPATIENT,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_B,
         Optional.of(claimGroup.getDateFrom()),
@@ -115,7 +115,7 @@ public class OutpatientClaimTransformerV2 {
     // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimType.OUTPATIENT,
+        ClaimTypeV2.OUTPATIENT,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
@@ -301,7 +301,7 @@ public class OutpatientClaimTransformerV2 {
           line.getRevenueCenterCode(),
           line.getRateAmount(),
           line.getTotalChargeAmount(),
-          line.getNonCoveredChargeAmount(),
+          Optional.of(line.getNonCoveredChargeAmount()),
           line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
@@ -392,7 +392,7 @@ public class OutpatientClaimTransformerV2 {
           eob,
           item,
           C4BBPractitionerIdentifierType.UPIN,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
@@ -400,7 +400,7 @@ public class OutpatientClaimTransformerV2 {
           eob,
           item,
           C4BBPractitionerIdentifierType.NPI,
-          C4BBClaimInstitutionalCareTeamRole.ATTENDING,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI());
     }
 

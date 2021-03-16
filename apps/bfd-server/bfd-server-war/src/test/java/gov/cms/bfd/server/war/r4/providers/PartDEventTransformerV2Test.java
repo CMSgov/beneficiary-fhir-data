@@ -59,7 +59,7 @@ public final class PartDEventTransformerV2Test {
         eob,
         claim.getEventId(),
         claim.getBeneficiaryId(),
-        ClaimType.PDE,
+        ClaimTypeV2.PDE,
         claim.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_D,
         Optional.empty(),
