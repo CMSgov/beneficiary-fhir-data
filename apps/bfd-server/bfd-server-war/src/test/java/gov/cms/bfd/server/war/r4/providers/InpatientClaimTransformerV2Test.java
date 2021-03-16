@@ -63,7 +63,7 @@ public final class InpatientClaimTransformerV2Test {
         eob,
         claim.getClaimId(),
         claim.getBeneficiaryId(),
-        ClaimType.INPATIENT,
+        ClaimTypeV2.INPATIENT,
         claim.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
