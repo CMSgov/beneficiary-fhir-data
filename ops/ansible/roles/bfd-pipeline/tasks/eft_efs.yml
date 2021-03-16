@@ -1,0 +1,37 @@
+---
+
+# We assign each partner accessing our EFT EFS hosted file system
+# a posix user & group. When they mount via their assigned EFS
+# access point, they will be automatically rooted to a folder and
+# all file operations will be performed with this user and group
+
+- name: Ensure EFT EFS POSIX Groups exists
+  group:
+    name: "{{ item.name }}_eft_efs"
+    gid: "{{ item.group_id }}"
+    system: yes
+    state: present
+  loop:
+    - { name: 'bcda', group_id: 1500 }
+  tags:
+    - pre-ami
+  become: true
+
+- name: Ensure EFT EFS POSIX Users exists
+  become: true
+  user:
+    name: "{{ item.name }}_eft_efs"
+    uid: "{{ item.user_id }}"
+    group: "{{ item.group }}"
+    groups: '' # ensures they will only be assigned to the primary group
+    append: yes
+    comment: "{{ item.name }} user to identify partner EFT/EFS files."
+    create_home: no
+    expires: -1 # never expire
+    shell: /bin/false
+    system: yes
+    state: present
+  loop:
+    - { name: 'bcda', user_id: 1500, group: 'bcda_eft_efs' }
+  tags:
+    - pre-ami
