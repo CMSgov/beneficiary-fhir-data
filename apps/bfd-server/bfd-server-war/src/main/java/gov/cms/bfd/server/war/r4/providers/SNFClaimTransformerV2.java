@@ -1,11 +1,12 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.model.rif.InpatientClaim;
-import gov.cms.bfd.model.rif.InpatientClaimLine;
+import gov.cms.bfd.model.rif.SNFClaim;
+import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -13,58 +14,53 @@ import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.Period;
 
-/**
- * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
- */
-public class InpatientClaimTransformerV2 {
+/** Transforms CCW {@link SNFClaim} instances into FHIR {@link ExplanationOfBenefit} resources. */
+public class SNFClaimTransformerV2 {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claim the CCW {@link InpatientClaim} to transform
+   * @param claim the CCW {@link SNFClaim} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     InpatientClaim}
+   *     SNFClaim}
    */
   @Trace
   static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
     Timer.Context timer =
         metricRegistry
-            .timer(
-                MetricRegistry.name(InpatientClaimTransformerV2.class.getSimpleName(), "transform"))
+            .timer(MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform"))
             .time();
 
-    if (!(claim instanceof InpatientClaim)) {
+    if (!(claim instanceof SNFClaim)) {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((InpatientClaim) claim);
-
     timer.stop();
-    return eob;
+    return transformClaim((SNFClaim) claim);
   }
 
   /**
-   * @param claimGroup the CCW {@link InpatientClaim} to transform
+   * @param claimGroup the CCW {@link SNFClaim} to transform
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     InpatientClaim}
+   *     SNFClaim}
    */
-  private static ExplanationOfBenefit transformClaim(InpatientClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(SNFClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 
-    // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
-    // eob.setOutcome(?)
-
     // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
     // CLM_GRP_ID               => ExplanationOfBenefit.identifier
-    // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage (reference)
+    // BENE_ID + Coverage Type  => ExplanationOfBenefit.insurance.coverage
     // BENE_ID                  => ExplanationOfBenefit.patient (reference)
     // FINAL_ACTION             => ExplanationOfBenefit.status
     // CLM_FROM_DT              => ExplanationOfBenefit.billablePeriod.start
@@ -74,7 +70,7 @@ public class InpatientClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimTypeV2.INPATIENT,
+        ClaimTypeV2.SNF,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
@@ -82,24 +78,48 @@ public class InpatientClaimTransformerV2 {
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
 
+    // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
+    TransformerUtilsV2.addInformationWithDate(
+        eob,
+        CcwCodebookVariable.NCH_WKLY_PROC_DT,
+        CcwCodebookVariable.NCH_WKLY_PROC_DT,
+        Optional.of(claimGroup.getWeeklyProcessDate()));
+
     // map eob type codes into FHIR
-    // NCH_CLM_TYPE_CD              => ExplanationOfBenefit.type.coding
-    // EOB Type                     => ExplanationOfBenefit.type.coding
-    // Claim Type  (institutional)  => ExplanationOfBenefit.type.coding
-    // NCH_NEAR_LINE_REC_IDENT_CD   => ExplanationOfBenefit.extension
+    // NCH_CLM_TYPE_CD            => ExplanationOfBenefit.type.coding
+    // EOB Type                   => ExplanationOfBenefit.type.coding
+    // Claim Type (Professional)  => ExplanationOfBenefit.type.coding
+    // NCH_NEAR_LINE_REC_IDENT_CD => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimTypeV2.INPATIENT,
+        ClaimTypeV2.HOSPICE,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
-    // set the provider number which is common among several claim types
     // PRVDR_NUM => ExplanationOfBenefit.provider.identifier
     TransformerUtilsV2.addProviderSlice(
         eob,
         C4BBOrganizationIdentifierType.PRN,
         claimGroup.getProviderNumber(),
         claimGroup.getLastUpdated());
+
+    // add EOB information to fields that are common between the Inpatient and SNF claim types
+    // CLM_IP_ADMSN_TYPE_CD             => ExplanationOfBenefit.supportingInfo.code
+    // CLM_SRC_IP_ADMSN_CD              => ExplanationOfBenefit.supportingInfo.code
+    // NCH_VRFD_NCVRD_STAY_FROM_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
+    // NCH_VRFD_NCVRD_STAY_THRU_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
+    // NCH_ACTV_OR_CVRD_LVL_CARE_THRU   => ExplanationOfBenefit.supportingInfo.timingDate
+    // NCH_BENE_MDCR_BNFTS_EXHTD_DT_I   => ExplanationOfBenefit.supportingInfo.timingDate
+    // CLM_DRG_CD                       => ExplanationOfBenefit.diagnosis
+    TransformerUtilsV2.addCommonEobInformationInpatientSNF(
+        eob,
+        claimGroup.getAdmissionTypeCd(),
+        claimGroup.getSourceAdmissionCd(),
+        claimGroup.getNoncoveredStayFromDate(),
+        claimGroup.getNoncoveredStayThroughDate(),
+        claimGroup.getCoveredCareThroughDate(),
+        claimGroup.getMedicareBenefitsExhaustedDate(),
+        claimGroup.getDiagnosisRelatedGroupCd());
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
     claimGroup
@@ -119,49 +139,47 @@ public class InpatientClaimTransformerV2 {
         TransformerUtilsV2.createInformationAdmPeriodSlice(
             eob, claimGroup.getClaimAdmissionDate(), claimGroup.getBeneficiaryDischargeDate()));
 
-    // add EOB information to fields that are common between the Inpatient and SNF claim types
-    // CLM_IP_ADMSN_TYPE_CD             => ExplanationOfBenefit.supportingInfo.code
-    // CLM_SRC_IP_ADMSN_CD              => ExplanationOfBenefit.supportingInfo.code
-    // NCH_VRFD_NCVRD_STAY_FROM_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
-    // NCH_VRFD_NCVRD_STAY_THRU_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
-    // NCH_ACTV_OR_CVRD_LVL_CARE_THRU   => ExplanationOfBenefit.supportingInfo.timingDate
-    // NCH_BENE_MDCR_BNFTS_EXHTD_DT_I   => ExplanationOfBenefit.supportingInfo.timingDate
-    // CLM_DRG_CD                       => ExplanationOfBenefit.diagnosis
-    TransformerUtilsV2.addCommonEobInformationInpatientSNF(
-        eob,
-        claimGroup.getAdmissionTypeCd(),
-        claimGroup.getSourceAdmissionCd(),
-        claimGroup.getNoncoveredStayFromDate(),
-        claimGroup.getNoncoveredStayThroughDate(),
-        claimGroup.getCoveredCareThoughDate(),
-        claimGroup.getMedicareBenefitsExhaustedDate(),
-        claimGroup.getDiagnosisRelatedGroupCd());
+    // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
+    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
+        eob, CcwCodebookVariable.CLM_UTLZTN_DAY_CNT, claimGroup.getUtilizationDayCount());
 
-    // IME_OP_CLM_VAL_AMT => ExplanationOfBenefit.extension
-    TransformerUtilsV2.addAdjudicationTotal(
-        eob,
-        CcwCodebookVariable.IME_OP_CLM_VAL_AMT,
-        claimGroup.getIndirectMedicalEducationAmount());
+    // This is messy but appears to be specific to SNF.  Maybe revisit and clean in the future
+    // NCH_QLFYD_STAY_FROM_DT => ExplanationOfBenefit.supportingInfo
+    // NCH_QLFYD_STAY_THRU_DT => ExplanationOfBenefit.supportingInfo
+    if (claimGroup.getQualifiedStayFromDate().isPresent()
+        || claimGroup.getQualifiedStayThroughDate().isPresent()) {
+      TransformerUtilsV2.validatePeriodDates(
+          claimGroup.getQualifiedStayFromDate(), claimGroup.getQualifiedStayThroughDate());
 
-    // DSH_OP_CLM_VAL_AMT => ExplanationOfBenefit.extension
-    TransformerUtilsV2.addAdjudicationTotal(
-        eob, CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claimGroup.getDisproportionateShareAmount());
+      Period period = new Period();
 
-    // CLM_PASS_THRU_PER_DIEM_AMT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
-        eob,
-        CcwCodebookVariable.CLM_PASS_THRU_PER_DIEM_AMT,
-        Optional.ofNullable(claimGroup.getPassThruPerDiemAmount()));
+      // NCH_QLFYD_STAY_FROM_DT
+      claimGroup
+          .getQualifiedStayFromDate()
+          .ifPresent(
+              c -> period.setStart(TransformerUtilsV2.convertToDate(c), TemporalPrecisionEnum.DAY));
 
-    // NCH_PROFNL_CMPNT_CHRG_AMT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
-        eob,
-        CcwCodebookVariable.NCH_PROFNL_CMPNT_CHRG_AMT,
-        Optional.ofNullable(claimGroup.getProfessionalComponentCharge()));
+      // NCH_QLFYD_STAY_THRU_DT
+      claimGroup
+          .getQualifiedStayThroughDate()
+          .ifPresent(
+              c -> period.setEnd(TransformerUtilsV2.convertToDate(c), TemporalPrecisionEnum.DAY));
 
-    // CLM_TOT_PPS_CPTL_AMT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
-        eob, CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT, claimGroup.getClaimTotalPPSCapitalAmount());
+      // Add to EOB
+      TransformerUtilsV2.addInformation(eob, CcwCodebookVariable.NCH_QLFYD_STAY_FROM_DT)
+          .setTiming(period);
+    }
+
+    // CLM_PPS_IND_CODE => ExplanationOfBenefit.supportingInfo
+    claimGroup
+        .getProspectivePaymentCode()
+        .ifPresent(
+            c ->
+                TransformerUtilsV2.addInformationWithCode(
+                    eob,
+                    CcwCodebookVariable.CLM_PPS_IND_CD,
+                    CcwCodebookVariable.CLM_PPS_IND_CD,
+                    c));
 
     /*
      * add field values to the benefit balances that are common between the
@@ -195,12 +213,6 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getClaimPPSCapitalIMEAmount(),
         claimGroup.getClaimPPSCapitalOutlierAmount(),
         claimGroup.getClaimPPSOldCapitalHoldHarmlessAmount());
-
-    // NCH_DRG_OUTLIER_APRVD_PMT_AMT => ExplanationOfBenefit.extension
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalAmt(
-        eob,
-        CcwCodebookVariable.NCH_DRG_OUTLIER_APRVD_PMT_AMT,
-        claimGroup.getDrgOutlierApprovedPaymentAmount());
 
     // Map care team
     // AT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Primary)
@@ -252,24 +264,16 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getFiscalIntermediaryNumber(),
         claimGroup.getLastUpdated());
 
-    // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob,
-        CcwCodebookVariable.CLM_UTLZTN_DAY_CNT,
-        Optional.of(claimGroup.getUtilizationDayCount()));
-
     // Handle Diagnosis
     // ADMTG_DGNS_CD            => diagnosis.diagnosisCodeableConcept
     // ADMTG_DGNS_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // PRNCPAL_DGNS_CD          => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_CD(1-25)        => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_VRSN_CD(1-25)   => diagnosis.diagnosisCodeableConcept
-    // CLM_POA_IND_SW(1-25)     => diagnosis.type
     // FST_DGNS_E_CD            => diagnosis.diagnosisCodeableConcept
     // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
     for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
       TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
     }
@@ -286,33 +290,8 @@ public class InpatientClaimTransformerV2 {
         .filter(p -> p.isPresent())
         .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p.get()));
 
-    // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
-    TransformerUtilsV2.addInformationWithDate(
-        eob,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        Optional.of(claimGroup.getWeeklyProcessDate()));
-
-    // NCH_PTNT_STATUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
-    TransformerUtilsV2.addInformationWithCode(
-        eob,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        claimGroup.getPatientStatusCd());
-
-    // CLM_PPS_CPTL_DRG_WT_NUM => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob,
-        CcwCodebookVariable.CLM_PPS_CPTL_DRG_WT_NUM,
-        claimGroup.getClaimPPSCapitalDrgWeightNumber());
-
-    // BENE_LRD_USED_CNT => ExplanationOfBenefit.benefitBalance.financial
-    TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
-        eob, CcwCodebookVariable.BENE_LRD_USED_CNT, claimGroup.getLifetimeReservedDaysUsedCount());
-
-    // ClaimLine => ExplanationOfBenefit.item
-    for (InpatientClaimLine line : claimGroup.getLines()) {
-      ItemComponent item = TransformerUtilsV2.addItem(eob);
+    for (SNFClaimLine line : claimGroup.getLines()) {
+      ItemComponent item = eob.addItem();
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
@@ -320,6 +299,10 @@ public class InpatientClaimTransformerV2 {
 
       // PRVDR_STATE_CD => item.location
       TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
+
+      // HCPCS_CD => ExplanationOfBenefit.item.productOrService
+      TransformerUtilsV2.mapHcpcs(
+          eob, item, line.getHcpcsCode(), Optional.empty(), Collections.emptyList());
 
       // REV_CNTR                   => ExplanationOfBenefit.item.revenue
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
@@ -335,7 +318,7 @@ public class InpatientClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
-          line.getUnitCount(),
+          BigDecimal.valueOf(line.getUnitCount()),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 
@@ -345,14 +328,6 @@ public class InpatientClaimTransformerV2 {
           eob,
           CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
           line.getDeductibleCoinsuranceCd());
-
-      // HCPCS_CD => item.productOrService
-      line.getHcpcsCode()
-          .ifPresent(
-              c ->
-                  item.setProductOrService(
-                      TransformerUtilsV2.createCodeableConcept(
-                          eob, CcwCodebookVariable.HCPCS_CD, c)));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
