@@ -52,13 +52,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
@@ -1771,12 +1769,6 @@ public final class TransformerUtilsV2 {
     return ClaimTypeV2.valueOf(type);
   }
 
-  // Weekly Process Date
-  static void mapEobWeeklyProcessDate(ExplanationOfBenefit eob, LocalDate weeklyProcessLocalDate) {
-    TransformerUtilsV2.addInformation(eob, CcwCodebookVariable.NCH_WKLY_PROC_DT)
-        .setTiming(new DateType(convertToDate(weeklyProcessLocalDate)));
-  }
-
   /**
    * Transforms the common group level header fields between all claim types
    *
@@ -2162,11 +2154,11 @@ public final class TransformerUtilsV2 {
         fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.PHARMACY;
         break;
 
-      case DME:
       case INPATIENT:
       case OUTPATIENT:
       case HOSPICE:
       case SNF:
+      case DME:
         fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.INSTITUTIONAL;
         break;
 
@@ -3270,70 +3262,6 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Extract the Diagnosis values for codes 1-12
-   *
-   * @param diagnosisPrincipalCode
-   * @param diagnosisPrincipalCodeVersion
-   * @param diagnosis1Code through diagnosis12Code
-   * @param diagnosis1CodeVersion through diagnosis12CodeVersion
-   * @return the {@link Diagnosis}es that can be extracted from the specified
-   */
-  public static List<Diagnosis> extractDiagnoses1Thru12(
-      Optional<String> diagnosisPrincipalCode,
-      Optional<Character> diagnosisPrincipalCodeVersion,
-      Optional<String> diagnosis1Code,
-      Optional<Character> diagnosis1CodeVersion,
-      Optional<String> diagnosis2Code,
-      Optional<Character> diagnosis2CodeVersion,
-      Optional<String> diagnosis3Code,
-      Optional<Character> diagnosis3CodeVersion,
-      Optional<String> diagnosis4Code,
-      Optional<Character> diagnosis4CodeVersion,
-      Optional<String> diagnosis5Code,
-      Optional<Character> diagnosis5CodeVersion,
-      Optional<String> diagnosis6Code,
-      Optional<Character> diagnosis6CodeVersion,
-      Optional<String> diagnosis7Code,
-      Optional<Character> diagnosis7CodeVersion,
-      Optional<String> diagnosis8Code,
-      Optional<Character> diagnosis8CodeVersion,
-      Optional<String> diagnosis9Code,
-      Optional<Character> diagnosis9CodeVersion,
-      Optional<String> diagnosis10Code,
-      Optional<Character> diagnosis10CodeVersion,
-      Optional<String> diagnosis11Code,
-      Optional<Character> diagnosis11CodeVersion,
-      Optional<String> diagnosis12Code,
-      Optional<Character> diagnosis12CodeVersion) {
-    List<Diagnosis> diagnoses = new LinkedList<>();
-
-    /*
-     * Seems silly, but allows the block below to be simple one-liners, rather than requiring
-     * if-blocks.
-     */
-    Consumer<Optional<Diagnosis>> diagnosisAdder = addPrincipalDiagnosis(diagnoses);
-
-    diagnosisAdder.accept(
-        Diagnosis.from(
-            diagnosisPrincipalCode, diagnosisPrincipalCodeVersion, DiagnosisLabel.PRINCIPAL));
-    diagnosisAdder.accept(
-        Diagnosis.from(diagnosis1Code, diagnosis1CodeVersion, DiagnosisLabel.PRINCIPAL));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis2Code, diagnosis2CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis3Code, diagnosis3CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis4Code, diagnosis4CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis5Code, diagnosis5CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis6Code, diagnosis6CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis7Code, diagnosis7CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis8Code, diagnosis8CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis9Code, diagnosis9CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis10Code, diagnosis10CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis11Code, diagnosis11CodeVersion));
-    diagnosisAdder.accept(Diagnosis.from(diagnosis12Code, diagnosis12CodeVersion));
-
-    return diagnoses;
-  }
-
-  /**
    * Helper function to look up method names and optionally attempt to execute
    *
    * @return an Optional result, cast to the generic type. If the method did not exist, or
@@ -3928,23 +3856,5 @@ public final class TransformerUtilsV2 {
       default:
         return RaceCategory.UNKNOWN;
     }
-  }
-
-  public static Consumer<Optional<Diagnosis>> addPrincipalDiagnosis(List<Diagnosis> diagnoses) {
-    return diagnosisToAdd -> {
-      if (diagnosisToAdd.isPresent()) {
-        Optional<Diagnosis> matchingDiagnosis =
-            diagnoses.stream()
-                .filter(d -> d.getCode().equals(diagnosisToAdd.get().getCode()))
-                .findFirst();
-        if (matchingDiagnosis.isPresent()) {
-          // append labels
-          matchingDiagnosis.get().setLabels(DiagnosisLabel.PRINCIPAL);
-          diagnoses.add(matchingDiagnosis.get());
-        } else {
-          diagnoses.add(diagnosisToAdd.get());
-        }
-      }
-    };
   }
 }

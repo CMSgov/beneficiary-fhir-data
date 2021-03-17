@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
@@ -53,6 +54,9 @@ final class DMEClaimTransformerV2 {
   private static ExplanationOfBenefit transformClaim(DMEClaim claimGroup) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
+    // Required values not directly mapped
+    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
+
     // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
@@ -69,18 +73,11 @@ final class DMEClaimTransformerV2 {
         claimGroup.getBeneficiaryId(),
         ClaimTypeV2.DME,
         claimGroup.getClaimGroupId().toPlainString(),
-        MedicareSegment.PART_B,
+        MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
         Optional.of(claimGroup.getDateThrough()),
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
-
-    // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
-    TransformerUtilsV2.addInformationWithDate(
-        eob,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        Optional.of(claimGroup.getWeeklyProcessDate()));
 
     // map eob type codes into FHIR
     // NCH_CLM_TYPE_CD            => ExplanationOfBenefit.type.coding
@@ -94,11 +91,20 @@ final class DMEClaimTransformerV2 {
         Optional.of(claimGroup.getClaimTypeCode()));
 
     // CARR_CLM_PRMRY_PYR_PD_AMT => ExplanationOfBenefit.total.amount
-    // TODO is this column nullable? If so, why isn't it Optional?
-    if (claimGroup.getPrimaryPayerPaidAmount() != null) {
-      TransformerUtilsV2.addAdjudicationTotal(
-          eob, CcwCodebookVariable.PRPAYAMT, claimGroup.getPrimaryPayerPaidAmount());
-    }
+    TransformerUtilsV2.addTotal(
+        eob,
+        TransformerUtilsV2.createTotalAdjudicationAmountSlice(
+            eob,
+            CcwCodebookVariable.CLM_TOT_CHRG_AMT,
+            C4BBAdjudication.PRIOR_PAYER_PAID,
+            claimGroup.getPrimaryPayerPaidAmount()));
+
+    // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
+    TransformerUtilsV2.addInformationWithDate(
+        eob,
+        CcwCodebookVariable.NCH_WKLY_PROC_DT,
+        CcwCodebookVariable.NCH_WKLY_PROC_DT,
+        Optional.of(claimGroup.getWeeklyProcessDate()));
 
     // Common group level fields between Carrier and DME
     // BENE_ID =>
@@ -134,60 +140,18 @@ final class DMEClaimTransformerV2 {
         claimGroup.getClaimDispositionCode(),
         claimGroup.getClaimCarrierControlNumber());
 
-    // ICD_DGNS_CD1         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD1    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD2         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD2    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD3         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD3    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD4         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD4    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD5         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD5    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD6         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD6    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD7         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD7    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD8         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD8    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD9         => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD9    => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD10        => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD10   => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD11        => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD11   => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    // ICD_DGNS_CD12        => ExplanationOfBenefit.diagnosis
-    // ICD_DGNS_VRSN_CD12   => ExplanationOfBenefit.diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis :
-        TransformerUtilsV2.extractDiagnoses1Thru12(
-            claimGroup.getDiagnosisPrincipalCode(),
-            claimGroup.getDiagnosisPrincipalCodeVersion(),
-            claimGroup.getDiagnosis1Code(),
-            claimGroup.getDiagnosis1CodeVersion(),
-            claimGroup.getDiagnosis2Code(),
-            claimGroup.getDiagnosis2CodeVersion(),
-            claimGroup.getDiagnosis3Code(),
-            claimGroup.getDiagnosis3CodeVersion(),
-            claimGroup.getDiagnosis4Code(),
-            claimGroup.getDiagnosis4CodeVersion(),
-            claimGroup.getDiagnosis5Code(),
-            claimGroup.getDiagnosis5CodeVersion(),
-            claimGroup.getDiagnosis6Code(),
-            claimGroup.getDiagnosis6CodeVersion(),
-            claimGroup.getDiagnosis7Code(),
-            claimGroup.getDiagnosis7CodeVersion(),
-            claimGroup.getDiagnosis8Code(),
-            claimGroup.getDiagnosis8CodeVersion(),
-            claimGroup.getDiagnosis9Code(),
-            claimGroup.getDiagnosis9CodeVersion(),
-            claimGroup.getDiagnosis10Code(),
-            claimGroup.getDiagnosis10CodeVersion(),
-            claimGroup.getDiagnosis11Code(),
-            claimGroup.getDiagnosis11CodeVersion(),
-            claimGroup.getDiagnosis12Code(),
-            claimGroup.getDiagnosis12CodeVersion())) {
+    // PRNCPAL_DGNS_CD          => diagnosis.diagnosisCodeableConcept
+    // PRNCPAL_DGNS_VRSN_CD     => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_CD(1-12)        => diagnosis.diagnosisCodeableConcept
+    // ICD_DGNS_VRSN_CD(1-12)   => diagnosis.diagnosisCodeableConcept
+    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
       TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
     }
+
+    // CARR_CLM_ENTRY_CD => ExplanationOfBenefit.extension
+    eob.addExtension(
+        TransformerUtilsV2.createExtensionCoding(
+            eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
     handleClaimLines(claimGroup, eob);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
@@ -195,42 +159,73 @@ final class DMEClaimTransformerV2 {
   }
 
   private static void handleClaimLines(DMEClaim claimGroup, ExplanationOfBenefit eob) {
-    for (DMEClaimLine claimLine : claimGroup.getLines()) {
+    for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
-      System.out.println("\n\nitem: " + item);
 
       // Override the default sequence
       // CLM_LINE_NUM => item.sequence
-      item.setSequence(claimLine.getLineNumber().intValue());
-      System.out.println("lineNumber: " + claimLine.getLineNumber().intValue());
+      item.setSequence(line.getLineNumber().intValue());
 
       // add an extension for the provider billing number as there is not a good place
       // to map this in the existing FHIR specification
       // PRVDR_NUM => ExplanationOfBenefit.provider.value
-      if (claimLine.getProviderBillingNumber().isPresent()) {
-        item.addExtension(
-            TransformerUtilsV2.createExtensionIdentifier(
-                CcwCodebookVariable.SUPLRNUM, claimLine.getProviderBillingNumber()));
-      }
+      line.getProviderBillingNumber()
+          .ifPresent(
+              c ->
+                  item.addExtension(
+                      TransformerUtilsV2.createExtensionIdentifier(
+                          CcwCodebookVariable.SUPLRNUM, line.getProviderBillingNumber())));
 
-      if (claimLine.getProviderNPI().isPresent()) {
-        handleProviderInfo(claimGroup, eob, claimLine, item);
-        System.out.println("handleProviderInfo");
+      // PRVDR_NPI => ExplanationOfBenefit.careTeam.provider
+      Optional<CareTeamComponent> performing =
+          TransformerUtilsV2.addCareTeamMember(
+              eob,
+              item,
+              C4BBPractitionerIdentifierType.NPI,
+              C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
+              line.getProviderNPI());
+
+      // Update the responsible flag
+      performing.ifPresent(
+          p -> {
+            p.setResponsible(true);
+
+            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+            p.setQualification(
+                TransformerUtilsV2.createCodeableConcept(
+                    eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+
+            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+            p.addExtension(
+                TransformerUtilsV2.createExtensionCoding(
+                    eob,
+                    CcwCodebookVariable.PRTCPTNG_IND_CD,
+                    line.getProviderParticipatingIndCode()));
+          });
+
+      // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
+      if (item.getLocation() != null) {
+        item.getLocation()
+            .addExtension(
+                TransformerUtilsV2.createExtensionCoding(
+                    eob, CcwCodebookVariable.PRVDR_STATE_CD, line.getProviderStateCode()));
       }
 
       // HCPCS_CD            => ExplanationOfBenefit.item.productOrService
       // HCPCS_1ST_MDFR_CD   => ExplanationOfBenefit.item.modifier
       // HCPCS_2ND_MDFR_CD   => ExplanationOfBenefit.item.modifier
+      // HCPCS_3RD_MDFR_CD   => ExplanationOfBenefit.item.modifier
+      // HCPCS_4Th_MDFR_CD   => ExplanationOfBenefit.item.modifier
       TransformerUtilsV2.mapHcpcs(
           eob,
           item,
-          claimLine.getHcpcsCode(),
+          line.getHcpcsCode(),
           claimGroup.getHcpcsYearCode(),
           Arrays.asList(
-              claimLine.getHcpcsInitialModifierCode(),
-              claimLine.getHcpcsSecondModifierCode(),
-              claimLine.getHcpcsThirdModifierCode(),
-              claimLine.getHcpcsFourthModifierCode()));
+              line.getHcpcsInitialModifierCode(),
+              line.getHcpcsSecondModifierCode(),
+              line.getHcpcsThirdModifierCode(),
+              line.getHcpcsFourthModifierCode()));
 
       // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(
@@ -238,15 +233,7 @@ final class DMEClaimTransformerV2 {
           TransformerUtilsV2.createAdjudicationAmtSlice(
               CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT,
               C4BBAdjudication.PAID_TO_PROVIDER,
-              claimLine.getProviderPaymentAmount()));
-
-      // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
-      TransformerUtilsV2.addAdjudication(
-          item,
-          TransformerUtilsV2.createAdjudicationAmtSlice(
-              CcwCodebookVariable.REV_CNTR_PRVDR_PMT_AMT,
-              C4BBAdjudication.PAID_TO_PROVIDER,
-              claimLine.getProviderPaymentAmount()));
+              line.getProviderPaymentAmount()));
 
       // TODO - check w/jack if this is right ELIGIBLE
       // LINE_PRMRY_ALOWD_CHRG_AMT => ExplanationOfBenefit.item.adjudication.value
@@ -255,7 +242,7 @@ final class DMEClaimTransformerV2 {
           TransformerUtilsV2.createAdjudicationAmtSlice(
               CcwCodebookVariable.LINE_PRMRY_ALOWD_CHRG_AMT,
               C4BBAdjudication.ELIGIBLE,
-              claimLine.getPrimaryPayerAllowedChargeAmount()));
+              line.getPrimaryPayerAllowedChargeAmount()));
 
       // LINE_DME_PRCHS_PRICE_AMT => ExplanationOfBenefit.item.adjudication.value
       TransformerUtilsV2.addAdjudication(
@@ -263,38 +250,57 @@ final class DMEClaimTransformerV2 {
           TransformerUtilsV2.createAdjudicationAmtSlice(
               CcwCodebookVariable.LINE_DME_PRCHS_PRICE_AMT,
               C4BBAdjudication.SUBMITTED,
-              claimLine.getPurchasePriceAmount()));
+              line.getPurchasePriceAmount()));
 
       // DMERC_LINE_SCRN_SVGS_AMT => ExplanationOfBenefit.item.extension
-      claimLine
-          .getScreenSavingsAmount()
+      line.getScreenSavingsAmount()
           .ifPresent(
               c ->
                   item.addExtension(
                       // TODO should this be an adjudication?
                       TransformerUtilsV2.createExtensionQuantity(
                           CcwCodebookVariable.DMERC_LINE_SCRN_SVGS_AMT,
-                          claimLine.getScreenSavingsAmount())));
+                          line.getScreenSavingsAmount())));
 
       // DMERC_LINE_MTUS_CNT => ExplanationOfBenefit.item.extension
       Extension mtusQuantityExtension =
           TransformerUtilsV2.createExtensionQuantity(
-              CcwCodebookVariable.DMERC_LINE_MTUS_CNT, claimLine.getMtusCount());
+              CcwCodebookVariable.DMERC_LINE_MTUS_CNT, line.getMtusCount());
 
       item.addExtension(mtusQuantityExtension);
 
       // DMERC_LINE_MTUS_CD => ExplanationOfBenefit.item.extension
-      if (claimLine.getMtusCode().isPresent()) {
+      if (line.getMtusCode().isPresent()) {
         Quantity mtusQuantity = (Quantity) mtusQuantityExtension.getValue();
         TransformerUtilsV2.setQuantityUnitInfo(
-            CcwCodebookVariable.DMERC_LINE_MTUS_CD, claimLine.getMtusCode(), eob, mtusQuantity);
+            CcwCodebookVariable.DMERC_LINE_MTUS_CD, line.getMtusCode(), eob, mtusQuantity);
       }
 
+      // DMERC_LINE_PRCNG_STATE_CD => ExplanationOfBenefit.item.extension
+      line.getPricingStateCode()
+          .ifPresent(
+              c ->
+                  item.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          eob,
+                          CcwCodebookVariable.DMERC_LINE_PRCNG_STATE_CD,
+                          line.getPricingStateCode())));
+
+      // DMERC_LINE_SUPPLR_TYPE_CD => ExplanationOfBenefit.item.extension
+      line.getSupplierTypeCode()
+          .ifPresent(
+              c ->
+                  item.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          eob,
+                          CcwCodebookVariable.DMERC_LINE_SUPPLR_TYPE_CD,
+                          line.getSupplierTypeCode())));
+
       // Common item level fields between Carrier and DME
+      // LINE_NUM                 => ExplanationOfBenefit.item.sequence
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
       // LINE_CMS_TYPE_SRVC_CD    => ExplanationOfBenefit.item.category
       // LINE_PLACE_OF_SRVC_CD    => ExplanationOfBenefit.item.location
-      // BETOS_CD                 => ExplanationOfBenefit.item.extension
       // LINE_1ST_EXPNS_DT        => ExplanationOfBenefit.item.servicedPeriod
       // LINE_LAST_EXPNS_DT       => ExplanationOfBenefit.item.servicedPeriod
       // LINE_NCH_PMT_AMT         => ExplanationOfBenefit.item.adjudication
@@ -304,6 +310,7 @@ final class DMEClaimTransformerV2 {
       // LINE_BENE_PTB_DDCTBL_AMT => ExplanationOfBenefit.item.adjudication
       // LINE_BENE_PRMRY_PYR_CD   => ExplanationOfBenefit.item.extension
       // LINE_BENE_PRMRY_PYR_PD_AMT => ExplanationOfBenefit.item.adjudication
+      // BETOS_CD                 => ExplanationOfBenefit.item.extension
       // LINE_COINSRNC_AMT        => ExplanationOfBenefit.item.adjudication
       // LINE_SBMTD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // LINE_ALOWD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
@@ -314,155 +321,76 @@ final class DMEClaimTransformerV2 {
       // LINE_HCT_HGB_TYPE_CD     => Observation.code
       // LINE_HCT_HGB_RSLT_NUM    => Observation.value
       // LINE_NDC_CD              => ExplanationOfBenefit.item.productOrService
+      // LINE_BENE_PMT_AMT        => ExplanationOfBenefit.item.adjudication.value
+      // LINE_PRCSG_IND_CD        => ExplanationOfBenefit.item.extension
+      // LINE_DME_PRCHS_PRICE_AMT => ExplanationOfBenefit.item.adjudication.value
+
       TransformerUtilsV2.mapEobCommonItemCarrierDME(
           item,
           eob,
           claimGroup.getClaimId(),
           item.getSequence(),
-          claimLine.getServiceCount(),
-          claimLine.getPlaceOfServiceCode(),
-          claimLine.getFirstExpenseDate(),
-          claimLine.getLastExpenseDate(),
-          claimLine.getBeneficiaryPaymentAmount(),
-          claimLine.getProviderPaymentAmount(),
-          claimLine.getBeneficiaryPartBDeductAmount(),
-          claimLine.getPrimaryPayerCode(),
-          claimLine.getPrimaryPayerPaidAmount(),
-          claimLine.getBetosCode(),
-          claimLine.getPaymentAmount(),
-          claimLine.getPaymentCode(),
-          claimLine.getCoinsuranceAmount(),
-          claimLine.getSubmittedChargeAmount(),
-          claimLine.getAllowedChargeAmount(),
-          claimLine.getProcessingIndicatorCode(),
-          claimLine.getServiceDeductibleCode(),
-          claimLine.getDiagnosisCode(),
-          claimLine.getDiagnosisCodeVersion(),
-          claimLine.getHctHgbTestTypeCode(),
-          claimLine.getHctHgbTestResult(),
-          claimLine.getCmsServiceTypeCode(),
-          claimLine.getNationalDrugCode());
+          line.getServiceCount(),
+          line.getPlaceOfServiceCode(),
+          line.getFirstExpenseDate(),
+          line.getLastExpenseDate(),
+          line.getBeneficiaryPaymentAmount(),
+          line.getProviderPaymentAmount(),
+          line.getBeneficiaryPartBDeductAmount(),
+          line.getPrimaryPayerCode(),
+          line.getPrimaryPayerPaidAmount(),
+          line.getBetosCode(),
+          line.getPaymentAmount(),
+          line.getPaymentCode(),
+          line.getCoinsuranceAmount(),
+          line.getSubmittedChargeAmount(),
+          line.getAllowedChargeAmount(),
+          line.getProcessingIndicatorCode(),
+          line.getServiceDeductibleCode(),
+          line.getDiagnosisCode(),
+          line.getDiagnosisCodeVersion(),
+          line.getHctHgbTestTypeCode(),
+          line.getHctHgbTestResult(),
+          line.getCmsServiceTypeCode(),
+          line.getNationalDrugCode());
 
-      // DMERC_LINE_PRCNG_STATE_CD => ExplanationOfBenefit.item.extension
-      if (claimLine.getPricingStateCode().isPresent()) {
+      // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
+      if (line.getProviderStateCode() != null) {
         item.getLocation()
             .addExtension(
                 TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.DMERC_LINE_PRCNG_STATE_CD,
-                    claimLine.getPricingStateCode()));
+                    eob, CcwCodebookVariable.PRVDR_STATE_CD, line.getProviderStateCode()));
       }
 
-      // DMERC_LINE_SUPPLR_TYPE_CD => ExplanationOfBenefit.item.extension
-      if (claimLine.getSupplierTypeCode().isPresent()) {
-        // TODO should this be elsewhere; does it item.location make sense?
-        item.getLocation()
-            .addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.DMERC_LINE_SUPPLR_TYPE_CD,
-                    claimLine.getSupplierTypeCode()));
-      }
+      // LINE_BENE_PRMRY_PYR_CD
+      // claimLine.getPrimaryPayerCode()) => ExplanationOfBenefit.item.extension
+      line.getPrimaryPayerCode()
+          .ifPresent(
+              c ->
+                  item.addExtension(
+                      TransformerUtilsV2.createExtensionCoding(
+                          eob,
+                          CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD,
+                          line.getPrimaryPayerCode())));
+
+      // LINE_BENE_PMT_AMT
+      // claimLine.getBeneficiaryPaymentAmount() => ExplanationOfBenefit.item.adjudication.value
+      TransformerUtilsV2.addAdjudication(
+          item,
+          TransformerUtilsV2.createAdjudicationAmtSlice(
+              CcwCodebookVariable.LINE_BENE_PMT_AMT,
+              C4BBAdjudication.PAID_TO_PROVIDER,
+              line.getPurchasePriceAmount()));
+
+      // LINE_DME_PRCHS_PRICE_AMT
+      // claimLine.getPurchasePriceAmount() => ExplanationOfBenefit.item.adjudication.value
+      TransformerUtilsV2.addAdjudication(
+          item,
+          TransformerUtilsV2.createAdjudicationAmtSlice(
+              CcwCodebookVariable.LINE_DME_PRCHS_PRICE_AMT,
+              C4BBAdjudication.SUBMITTED,
+              line.getPurchasePriceAmount()));
     }
-  }
-
-  private static void handleProviderInfo(
-      DMEClaim claimGroup, ExplanationOfBenefit eob, DMEClaimLine line, ItemComponent item) {
-
-    // PRVDR_NPI => ExplanationOfBenefit.careTeam.provider
-    Optional<CareTeamComponent> performing =
-        TransformerUtilsV2.addCareTeamMember(
-            eob,
-            item,
-            C4BBPractitionerIdentifierType.NPI,
-            C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-            line.getProviderNPI());
-
-    // Update the responsible flag
-    performing.ifPresent(
-        p -> {
-          p.setResponsible(true);
-
-          // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-          p.setQualification(
-              TransformerUtilsV2.createCodeableConcept(
-                  eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
-
-          // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-          p.addExtension(
-              TransformerUtilsV2.createExtensionCoding(
-                  eob,
-                  CcwCodebookVariable.PRTCPTNG_IND_CD,
-                  line.getProviderParticipatingIndCode()));
-        });
-
-    // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
-    System.out.println("getProviderStateCode " + line.getProviderStateCode());
-    if (line.getProviderStateCode() != null && !line.getProviderStateCode().isEmpty()) {
-      item.getLocation()
-          .addExtension(
-              TransformerUtilsV2.createExtensionCoding(
-                  eob, CcwCodebookVariable.PRVDR_STATE_CD, line.getProviderStateCode()));
-      System.out.println("handleProviderInfo 3");
-    }
-
-    System.out.println("\n\nPart 7\n\n");
-
-    // REV_CNTR                   => ExplanationOfBenefit.item.revenue
-    // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
-    // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-    // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-    // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.quantity
-    // REV_CNTR_NDC_QTY           => TODO: ??
-    // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
-    /*
-    TransformerUtilsV2.mapEobCommonItemRevenue(
-        item,
-        eob,
-        line.getRevenueCenterCode(),
-        line.getRateAmount(),
-        line.getTotalChargeAmount(),
-        line.getNonCoveredChargeAmount(),
-        line.getUnitCount(),
-        line.getNationalDrugCodeQuantity(),
-        line.getNationalDrugCodeQualifierCode());
-        */
-
-    // claimGroup.getPrimaryPayerPaidAmount().ifPresent(value -> coverage.setSubscriberId(value));
-
-    // REV_CNTR                   => ExplanationOfBenefit.item.revenue
-    // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
-    // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-    // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-    // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.quantity
-    // REV_CNTR_NDC_QTY           => TODO: ??
-    // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
-    /*
-    TransformerUtilsV2.mapEobCommonItemRevenue(
-        item,
-        eob,
-        line.getRevenueCenterCode(),
-        line.getRateAmount(),
-        line.getTotalChargeAmount(),
-        line.getNonCoveredChargeAmount(),
-        line.getUnitCount(),
-        line.getNationalDrugCodeQuantity(),
-        line.getNationalDrugCodeQualifierCode());
-        */
-
-    // add an extension for the provider billing number as there is not a good place
-    // to map this in the existing FHIR specification
-    // PRVDR_NUM => ExplanationOfBenefit.provider.value
-    // TODO - fix this
-    /*
-    claimGroup
-        .getProviderBillingNumber()
-        .ifPresent(
-            value ->
-                item.addExtension(
-                    TransformerUtilsV2.createExtensionIdentifier(
-                        CcwCodebookVariable.SUPLRNUM, line.getProviderBillingNumber())));
-                        */
   }
 
   /**
