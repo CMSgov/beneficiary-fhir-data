@@ -74,7 +74,7 @@
 		<project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
 
 		<!-- The version of Java that we'll use for everything. -->
-		<javaSourceVersion>15</javaSourceVersion>
+		<javaSourceVersion>11</javaSourceVersion>
 
 		<!-- Configure Sonar such that projects evaluated by it against it will 
 			use JaCoCo to compute the code coverage of any unit and integration tests. -->
@@ -300,7 +300,7 @@
 						<toolchains>
 							<jdk>
 								<!-- Use a Java 8 JDK, by default. -->
-								<version>1.15</version>
+								<version>1.11</version>
 							</jdk>
 						</toolchains>
 					</configuration>
