@@ -5,19 +5,13 @@
 
 
 # remove if installed so we can configure a fips compatible version
+# note: no need to remove old stunnel as installing amazon-efs-utils will
+# simply reinstall it :/
 - name: Remove default amazon-efs-utils
   become: yes
   yum:
     - amazon-efs-utils
   state: absent
-
-# rhel has an old stunnel that is not compatible with efs
-- name: Remove outdated stunnel
-  become: yes
-  yum:
-    - stunnel
-  state: absent
-  when: ansible_os_family == "RedHat"
 
 # TODO: determine if rpm-build is compatible with amazon linux
 - name: Install EFS util requirements
@@ -39,9 +33,25 @@
     lock_timeout: 180
   when: ansible_os_family == "RedHat"
 
+- name: Ensure amazon-efs-utils is FIPS-compliant
+  become: yes
+  shell: |
+    git clone https://github.com/aws/efs-utils
+    cd efs-utils
+    sed -i -E "s/'fips': 'no'/'fips': 'yes'/" ./src/mount_efs/__init__.py
+    make rpm
+    yum -y install --nogpgcheck build/amazon-efs-utils*rpm
+    cd /tmp
+    rm -rf /tmp/efs-utils
+  args:
+    chdir: /tmp
+    warn: false
+
+# replace old stunnel with a recent version
 - name: Build fips enabled stunnel
   become: yes
   shell: |
+    mkdir stunnel && cd stunnel
     wget https://www.stunnel.org/downloads/stunnel-5.58.tar.gz
     tar -xvzf stunnel-{{ stunnel_version }}.tar.gz
     cd stunnel-{{ stunnel_version }}/
@@ -65,18 +75,8 @@
     ln -sf /usr/local/etc/stunnel/stunnel.conf /etc/stunnel/stunnel.conf
     # make sure stunnel is in fips mode
     sed -i '/^;fips.*/s/^;//' /usr/local/etc/stunnel/stunnel.conf
+    cd /tmp
+    rm -rf /tmp/stunnel
   args:
     chdir: /tmp
   when: ansible_os_family == "RedHat"
-
-- name: Ensure amazon-efs-utils is FIPS-compliant
-  become: yes
-  shell: |
-    git clone https://github.com/aws/efs-utils
-    cd efs-utils
-    sed -i -E "s/'fips': 'no'/'fips': 'yes'/" ./src/mount_efs/__init__.py
-    make rpm
-    yum -y install --nogpgcheck build/amazon-efs-utils*rpm
-  args:
-    chdir: /tmp
-    warn: false
