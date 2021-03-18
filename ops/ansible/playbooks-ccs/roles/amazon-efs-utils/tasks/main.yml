@@ -12,7 +12,7 @@
   yum:
     name:
       - amazon-efs-utils
-  state: absent
+    state: absent
 
 # TODO: determine if rpm-build is compatible with amazon linux
 - name: Install EFS util requirements
