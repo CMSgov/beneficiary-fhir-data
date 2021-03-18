@@ -10,7 +10,8 @@
 - name: Remove default amazon-efs-utils
   become: yes
   yum:
-    - amazon-efs-utils
+    name:
+      - amazon-efs-utils
   state: absent
 
 # TODO: determine if rpm-build is compatible with amazon linux
