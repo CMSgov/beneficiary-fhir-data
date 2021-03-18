@@ -6,7 +6,7 @@
   hosts: all
   become: true
   remote_user: ec2-user
-  gather_facts: no
+  gather_facts: yes
   vars:
     ansible_ssh_pipelining: no
     env: "test"
