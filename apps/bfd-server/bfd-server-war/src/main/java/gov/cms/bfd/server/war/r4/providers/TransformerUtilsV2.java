@@ -12,13 +12,12 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
-import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RaceCategory;
+import gov.cms.bfd.server.war.commons.ReflectionUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudicationDiscriminator;
@@ -31,7 +30,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2.CurrencyIdentifier;
-import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,7 +37,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -47,7 +44,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,7 +54,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -74,7 +69,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitBalanceComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ProcedureComponent;
@@ -133,9 +127,6 @@ public final class TransformerUtilsV2 {
 
   /** Tracks the national drug codes that have already had code lookup failures. */
   private static final Set<String> drugCodeLookupMissingFailures = new HashSet<>();
-
-  /** Stores the diagnosis ICD codes and their display values */
-  private static Map<String, String> icdMap = null;
 
   /** Stores the procedure codes and their display values */
   private static Map<String, String> procedureMap = null;
@@ -1231,74 +1222,6 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Retrieves the Diagnosis display value from a Diagnosis code look up file
-   *
-   * @param icdCode - Diagnosis code
-   */
-  public static String retrieveIcdCodeDisplay(String icdCode) {
-
-    if (icdCode.isEmpty()) {
-      return null;
-    }
-
-    /*
-     * There's a race condition here: we may initialize this static field more than once if multiple
-     * requests come in at the same time. However, the assignment is atomic, so the race and
-     * reinitialization is harmless other than maybe wasting a bit of time.
-     */
-    // read the entire ICD file the first time and put in a Map
-    if (icdMap == null) {
-      icdMap = readIcdCodeFile();
-    }
-
-    if (icdMap.containsKey(icdCode.toUpperCase())) {
-      String icdCodeDisplay = icdMap.get(icdCode);
-      return icdCodeDisplay;
-    }
-
-    // log which NDC codes we couldn't find a match for in our downloaded NDC file
-    if (!drugCodeLookupMissingFailures.contains(icdCode)) {
-      drugCodeLookupMissingFailures.add(icdCode);
-      LOGGER.info(
-          "No ICD code display value match found for ICD code {} in resource {}.",
-          icdCode,
-          "DGNS_CD.txt");
-    }
-
-    return null;
-  }
-
-  /**
-   * Reads ALL the ICD codes and display values from the DGNS_CD.txt file. Refer to the README file
-   * in the src/main/resources directory
-   */
-  private static Map<String, String> readIcdCodeFile() {
-    Map<String, String> icdDiagnosisMap = new HashMap<String, String>();
-
-    try (final InputStream icdCodeDisplayStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream("DGNS_CD.txt");
-        final BufferedReader icdCodesIn =
-            new BufferedReader(new InputStreamReader(icdCodeDisplayStream))) {
-      /*
-       * We want to extract the ICD Diagnosis codes and display values and put in a map for easy
-       * retrieval to get the display value icdColumns[1] is DGNS_DESC(i.e. 7840 code is HEADACHE
-       * description)
-       */
-      String line = "";
-      icdCodesIn.readLine();
-      while ((line = icdCodesIn.readLine()) != null) {
-        String icdColumns[] = line.split("\t");
-        icdDiagnosisMap.put(icdColumns[0], icdColumns[1]);
-      }
-      icdCodesIn.close();
-    } catch (IOException e) {
-      throw new UncheckedIOException("Unable to read ICD code data.", e);
-    }
-
-    return icdDiagnosisMap;
-  }
-
-  /**
    * Retrieves the NPI display value from an NPI code look up file
    *
    * @param npiCode - NPI code
@@ -2197,8 +2120,8 @@ public final class TransformerUtilsV2 {
         break;
 
       default:
-        // unknown claim type
-        throw new BadCodeMonkeyException();
+        // All options on ClaimTypeV2 are covered above, but this is there to appease linter
+        throw new BadCodeMonkeyException("No match found for ClaimTypeV2");
     }
 
     // Claim Type => ExplanationOfBenefit.type.coding
@@ -3095,8 +3018,6 @@ public final class TransformerUtilsV2 {
    * @param allowedChargeAmount LINE_ALOWD_CHRG_AMT,
    * @param processingIndicatorCode LINE_PRCSG_IND_CD,
    * @param serviceDeductibleCode LINE_SERVICE_DEDUCTIBLE,
-   * @param diagnosisCode LINE_ICD_DGNS_CD,
-   * @param diagnosisCodeVersion LINE_ICD_DGNS_VRSN_CD,
    * @param hctHgbTestTypeCode LINE_HCT_HGB_TYPE_CD
    * @param hctHgbTestResult LINE_HCT_HGB_RSLT_NUM,
    * @param cmsServiceTypeCode LINE_CMS_TYPE_SRVC_CD,
@@ -3127,8 +3048,6 @@ public final class TransformerUtilsV2 {
       BigDecimal allowedChargeAmount,
       Optional<String> processingIndicatorCode,
       Optional<Character> serviceDeductibleCode,
-      Optional<String> diagnosisCode,
-      Optional<Character> diagnosisCodeVersion,
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
@@ -3253,10 +3172,6 @@ public final class TransformerUtilsV2 {
             item.addExtension(
                 createExtensionCoding(eob, CcwCodebookVariable.LINE_SERVICE_DEDUCTIBLE, code)));
 
-    // LINE_ICD_DGNS_CD => ExplanationOfBenefit.item.diagnosisSequence
-    // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
-    addDiagnosisLink(eob, item, Diagnosis.from(diagnosisCode, diagnosisCodeVersion));
-
     // LINE_HCT_HGB_TYPE_CD => Observation.code
     // LINE_HCT_HGB_RSLT_NUM => Observation.value
     if (hctHgbTestTypeCode.isPresent()) {
@@ -3285,118 +3200,6 @@ public final class TransformerUtilsV2 {
   }
 
   /**
-   * Helper function to look up method names and optionally attempt to execute
-   *
-   * @return an Optional result, cast to the generic type. If the method did not exist, or
-   *     invocation failed, this returns {@link Optional#empty()}
-   */
-  @SuppressWarnings("unchecked")
-  private static <T> Optional<T> tryMethod(Object obj, String methodName) {
-    try {
-      Method func = obj.getClass().getDeclaredMethod(methodName);
-
-      return (Optional<T>) func.invoke(obj);
-    }
-    // Any reflection errors would be caused by the method not being available
-    catch (Exception e) {
-      return Optional.empty();
-    }
-  }
-
-  /**
-   * Generically attempts to retrieve a diagnosis from the current claim.
-   *
-   * @param substitution The methods to retrive diagnosis information all follow a similar pattern.
-   *     This value is used to substitute into that pattern when looking up the specific method to
-   *     retrive information with.
-   * @param claim Passed as an Object because there is no top level `Claim` class that claims derive
-   *     from
-   * @param ccw CCW Codebook value that represents which "PresentOnAdmissionCode" is being used.
-   *     Example: {@link CcwCodebookVariable#CLM_POA_IND_SW5}
-   * @param labels One or more labels to use when mapping the diagnosis.
-   * @return a {@link Diagnosis} or {@link Optional#empty()}
-   */
-  public static Optional<Diagnosis> extractDiagnosis(
-      String substitution,
-      Object claim,
-      Optional<CcwCodebookInterface> ccw,
-      DiagnosisLabel... labels) {
-
-    Optional<String> code = tryMethod(claim, String.format("getDiagnosis%sCode", substitution));
-    Optional<Character> codeVersion =
-        tryMethod(claim, String.format("getDiagnosis%sCodeVersion", substitution));
-    Optional<Character> presentOnAdm =
-        tryMethod(claim, String.format("getDiagnosis%sPresentOnAdmissionCode", substitution));
-
-    return Diagnosis.from(code, codeVersion, presentOnAdm, ccw, labels);
-  }
-
-  /**
-   * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
-   * @param diagnosis the {@link Diagnosis} to add, if it's not already present
-   * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
-   */
-  static int addDiagnosisCode(ExplanationOfBenefit eob, Diagnosis diagnosis) {
-    // Filter out if the diagnosis is alrerady contained in the document
-    Optional<DiagnosisComponent> existingDiagnosis =
-        eob.getDiagnosis().stream()
-            .filter(d -> d.getDiagnosis() instanceof CodeableConcept)
-            .filter(d -> containedIn(diagnosis, (CodeableConcept) d.getDiagnosis()))
-            .findAny();
-
-    if (existingDiagnosis.isPresent()) {
-      return existingDiagnosis.get().getSequenceElement().getValue();
-    }
-
-    DiagnosisComponent diagnosisComponent =
-        new DiagnosisComponent().setSequence(eob.getDiagnosis().size() + 1);
-    diagnosisComponent.setDiagnosis(toCodeableConcept(diagnosis));
-
-    for (DiagnosisLabel diagnosisLabel : diagnosis.getLabels()) {
-      CodeableConcept diagnosisTypeConcept =
-          createCodeableConcept(diagnosisLabel.getSystem(), diagnosisLabel.toCode());
-      diagnosisTypeConcept.getCodingFirstRep().setDisplay(diagnosisLabel.getDisplay());
-      diagnosisComponent.addType(diagnosisTypeConcept);
-    }
-
-    if (diagnosis.getPresentOnAdmission().isPresent()
-        && diagnosis.getPresentOnAdmissionCode().isPresent()) {
-      diagnosisComponent.addExtension(
-          createExtensionCoding(
-              eob, diagnosis.getPresentOnAdmissionCode().get(), diagnosis.getPresentOnAdmission()));
-    }
-
-    eob.getDiagnosis().add(diagnosisComponent);
-
-    return diagnosisComponent.getSequenceElement().getValue();
-  }
-
-  /**
-   * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
-   * @param diagnosis the {@link Diagnosis} to add, if it's not already present
-   * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry
-   */
-  static int addDiagnosisCode(ExplanationOfBenefit eob, Optional<Diagnosis> diagnosis) {
-    if (diagnosis.isPresent()) {
-      return addDiagnosisCode(eob, diagnosis.get());
-    } else {
-      return -1;
-    }
-  }
-
-  /**
-   * @param eob the {@link ExplanationOfBenefit} that the specified {@link ItemComponent} is a child
-   *     of
-   * @param item the {@link ItemComponent} to add an {@link ItemComponent#getDiagnosisLinkId()}
-   *     entry to
-   * @param diagnosis the {@link Diagnosis} to add a link for
-   */
-  static void addDiagnosisLink(
-      ExplanationOfBenefit eob, ItemComponent item, Optional<Diagnosis> diagnosis) {
-    diagnosis.ifPresent(diag -> item.addDiagnosisSequence(addDiagnosisCode(eob, diag)));
-  }
-
-  /**
    * Generically attempts to retrieve a procedure from the current claim.
    *
    * @param procedure Procedure accessors all follow the same pattern except for an integer
@@ -3406,33 +3209,14 @@ public final class TransformerUtilsV2 {
    * @return a {@link CCWProcedure} or {@link Optional#empty()}
    */
   public static Optional<CCWProcedure> extractCCWProcedure(int procedure, Object claim) {
-    Optional<String> code = tryMethod(claim, String.format("getProcedure%dCode", procedure));
+    Optional<String> code =
+        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dCode", procedure));
     Optional<Character> codeVersion =
-        tryMethod(claim, String.format("getProcedure%dCodeVersion", procedure));
-    Optional<LocalDate> date = tryMethod(claim, String.format("getProcedure%dDate", procedure));
+        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dCodeVersion", procedure));
+    Optional<LocalDate> date =
+        ReflectionUtils.tryMethod(claim, String.format("getProcedure%dDate", procedure));
 
     return CCWProcedure.from(code, codeVersion, date);
-  }
-
-  static boolean containedIn(Diagnosis diag, CodeableConcept codeableConcept) {
-    return codeableConcept.getCoding().stream()
-            .filter(c -> diag.getCode().equals(c.getCode()))
-            .filter(c -> diag.getFhirSystem().equals(c.getSystem()))
-            .count()
-        != 0;
-  }
-
-  static CodeableConcept toCodeableConcept(Diagnosis diag) {
-    CodeableConcept codeableConcept = new CodeableConcept();
-
-    codeableConcept
-        .addCoding()
-        .setSystem(diag.getFhirSystem())
-        .setCode(diag.getCode())
-        // TODO: This code should be pulled out to a common library
-        .setDisplay(TransformerUtils.retrieveIcdCodeDisplay(diag.getCode()));
-
-    return codeableConcept;
   }
 
   /**
@@ -3602,68 +3386,6 @@ public final class TransformerUtilsV2 {
               createExtensionCoding(
                   eob, CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD, deductibleCoinsuranceCd));
     }
-  }
-
-  /*
-   * @param claim the Claim to extract the {@link Diagnosis}es from
-   * @return the {@link Diagnosis} that can be extracted from the specified {@link InpatientClaim}
-   */
-  static List<Diagnosis> extractDiagnoses(Object claim) {
-    List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
-
-    // Handle the "special" diagnosis fields
-    diagnosis.add(extractDiagnosis("Admitting", claim, Optional.empty(), DiagnosisLabel.ADMITTING));
-    diagnosis.add(
-        extractDiagnosis(
-            "1",
-            claim,
-            Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
-            DiagnosisLabel.PRINCIPAL));
-    diagnosis.add(extractDiagnosis("Principal", claim, Optional.empty(), DiagnosisLabel.PRINCIPAL));
-
-    // Generically handle the rest (2-25)
-    final int FIRST_DIAG = 2;
-    final int LAST_DIAG = 25;
-
-    IntStream.range(FIRST_DIAG, LAST_DIAG + 1)
-        .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  String.valueOf(i),
-                  claim,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)));
-            })
-        .forEach(diagnosis::add);
-
-    // Handle external diagnosis
-    diagnosis.add(
-        extractDiagnosis(
-            "External1",
-            claim,
-            Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
-            DiagnosisLabel.FIRSTEXTERNAL));
-    diagnosis.add(
-        extractDiagnosis("ExternalFirst", claim, Optional.empty(), DiagnosisLabel.FIRSTEXTERNAL));
-
-    // Generically handle the rest (2-12)
-    final int FIRST_EX_DIAG = 2;
-    final int LAST_EX_DIAG = 12;
-
-    IntStream.range(FIRST_EX_DIAG, LAST_EX_DIAG + 1)
-        .mapToObj(
-            i -> {
-              return extractDiagnosis(
-                  "External" + String.valueOf(i),
-                  claim,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)));
-            })
-        .forEach(diagnosis::add);
-
-    // Some may be empty.  Convert from List<Optional<Diagnosis>> to List<Diagnosis>
-    return diagnosis.stream()
-        .filter(d -> d.isPresent())
-        .map(d -> d.get())
-        .collect(Collectors.toList());
   }
 
   /**
