@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.r4.providers;
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
@@ -27,6 +28,10 @@ public final class ClaimTypeV2Test {
     CarrierClaim carrierClaim = new CarrierClaim();
     carrierClaim.setDateFrom(start);
     carrierClaim.setDateThrough(end);
+
+    DMEClaim dmeClaim = new DMEClaim();
+    dmeClaim.setDateFrom(start);
+    dmeClaim.setDateThrough(end);
 
     HospiceClaim hospiceClaim = new HospiceClaim();
     hospiceClaim.setDateFrom(start);
@@ -53,6 +58,7 @@ public final class ClaimTypeV2Test {
 
     ImmutableMap.Builder<ClaimTypeV2, Object> builder = ImmutableMap.builder();
     builder.put(ClaimTypeV2.CARRIER, carrierClaim);
+    builder.put(ClaimTypeV2.DME, dmeClaim);
     builder.put(ClaimTypeV2.PDE, partDEvent);
     builder.put(ClaimTypeV2.INPATIENT, inpatientClaim);
     builder.put(ClaimTypeV2.OUTPATIENT, outpatientClaim);
