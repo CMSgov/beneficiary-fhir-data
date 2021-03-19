@@ -34,6 +34,37 @@
 		<appender-ref ref="HTTP_ACCESS" />
 	</logger>
 
+
+	<appender name="LOADED_FILTER_MANAGER" class="ch.qos.logback.core.FileAppender">
+		<file>${bfdServer.logs.dir:-./target/server-work/}loadedFilterManagerLog.json</file>
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<!-- We output the log as newline-delimited JSON objects (NDJSON).
+				This allows us to easily parse and search it. More importantly, it
+				pairs very nicely with Logback's MDC: values added to the MDC will be available
+				as separate keys in the JSON log events, which makes it super easy to extract
+				them from the logs. -->
+			<layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+				<jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
+					<!-- If you need things pretty-printed, pipe the log into jq or something like that. -->
+					<prettyPrint>false</prettyPrint>
+				</jsonFormatter>
+
+				<!-- Add line breaks between each entry, to make tailing the log simpler. -->
+				<appendLineSeparator>true</appendLineSeparator>
+
+				<!-- Format timestamps per ISO8601. -->
+				<timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SSSZ</timestampFormat>
+				<timestampFormatTimezoneId>UTC</timestampFormatTimezoneId>
+			</layout>
+		</encoder>
+	</appender>
+
+	<!-- Route all events from the JSON access log to the correct output. The additivity
+		setting here ensures that the events don't also land in the other file. -->
+	<logger name="LOADED_FILTER_MANAGER" level="DEBUG" additivity="false">
+		<appender-ref ref="LOADED_FILTER_MANAGER" />
+	</logger>
+
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<!-- We output the application log as newline-delimited JSON objects (NDJSON).

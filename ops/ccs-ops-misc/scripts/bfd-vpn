@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+# bfd-vpn - BFD VPN helper script
+CMS_EUA="${CMS_EUA:-}"
+CMS_VPN_HOST="${CMS_VPN_HOST:-}"
+DEFAULT_TIMEOUT="${CMS_VPN_TIMEOUT:-60}" # in minutes
+CMS_VPN_CONFIG_DIR="${CMS_VPN_CONFIG_DIR:-$HOME/.config/cms_vpn}"
+CMS_VPN_CONFIG="$CMS_VPN_CONFIG_DIR/.env"
+CMS_VPN_PID="$CMS_VPN_CONFIG_DIR/.cms_vpn_pid"
+RUN_IN_FOREGROUND="${RUN_IN_FOREGROUND:-false}"
+PROGNAME=${0##*/}
+TIMEOUT=
+
+# writes our config to disk (overwrites if present)
+# $1 == path to config file
+write_config(){
+  cat << _EOF_ > "$1"
+export CMS_VPN_HOST="$CMS_VPN_HOST"
+export CMS_EUA="$CMS_EUA"
+export CMS_VPN_TIMEOUT="$DEFAULT_TIMEOUT" # in minutes
+_EOF_
+}
+
+setup(){
+  local config_file
+  local overwrite
+  overwrite=false
+
+  # create a place (if it does not exist already) to store our pids and semi-sensitive env files
+  mkdir -p "$CMS_VPN_CONFIG_DIR"
+
+  # if an env file does not exist, create it
+  if [[ -f "$CMS_VPN_CONFIG" ]]; then
+    read -r -p "$CMS_VPN_CONFIG already exists. Overwrite? [y/n] " response
+    case "$response" in
+      # yes or y
+      [yY][eE][sS]|[yY])
+        overwrite=true ;;
+      *) exit 0 ;;
+    esac
+  fi
+
+  # prompt for settings
+  read -r -p "Enter your EUA ID: " CMS_EUA
+  read -r -p "Enter the CMS VPN host address: " CMS_VPN_HOST
+  read -r -p "Default tunnel timeout (in minutes): " DEFAULT_TIMEOUT
+  write_config "$CMS_VPN_CONFIG"
+}
+
+tunnel_start(){
+  local tunnel_cmd
+  local eua_pass
+  local mfa_pass
+  source "$CMS_VPN_CONFIG"
+  
+  # check if tunnel is running
+  if [[ -f "$CMS_VPN_PID" ]]; then
+    printf "Tunnel already up: pid "
+    echo "$(ps -p $(cat "$CMS_VPN_PID"))"
+    exit
+  fi
+  
+  if [[ -n "$CMS_VPN_HOST" ]] && [[ -n "$CMS_EUA" ]] && [[ -n "$CMS_VPN_PID" ]]; then
+    # prompt for password
+    read -s -p "EUA pass: " eua_pass
+    echo
+    read -s -p "MFA pass: " mfa_pass
+    echo
+    
+    tunnel_cmd="openconnect $CMS_VPN_HOST --user=$CMS_EUA --pid-file=$CMS_VPN_PID --quiet --background --passwd-on-stdin"
+    if [[ "$RUN_IN_FOREGROUND" == false ]]; then
+      $({ printf "$eua_pass\n"; sleep 1; printf "$mfa_pass\n"; } | nohup $tunnel_cmd > "$CMS_VPN_CONFIG_DIR/vpn.log" 2>&1) & >/dev/null 2>&1
+      echo "Starting tunnel.."
+      sleep 5
+      tunnel_status
+    else
+      $tunnel_cmd
+    fi
+  else
+    echo "We're missing one or more settings. Please run \`$PROGNAME setup\` or manually check $CMS_VPN_CONFIG_DIR/.env and try again."
+  fi
+}
+
+tunnel_stop(){
+  if [[ -f "$CMS_VPN_PID" ]]; then
+    printf "Stopping tunnel.. "
+    kill "$(cat "$CMS_VPN_PID")" >/dev/null 2>&1
+    rm -f "$CMS_VPN_PID" >/dev/null 2>&1
+    echo "OK"
+  else
+    echo "Tunnel not up."
+  fi
+}
+
+tunnel_status(){
+  # exit now if tunnel is already running
+  if [[ -f "$CMS_VPN_PID" ]]; then
+    if ps -p $(cat "$CMS_VPN_PID") >/dev/null 2>&1; then
+      echo "Tunnel is up."
+      exit
+    fi
+  fi
+  echo "Tunnel not up."
+}
+
+# handle signals
+signal_exit() {
+  case $1 in
+    INT)
+      tunnel_stop;;
+    TERM)
+      echo -e "\nTunnel terminated" >&2
+      tunnel_stop ;;
+  esac
+}
+
+usage() {
+  echo -e "Usage: $PROGNAME [-h|--help] [-f|--foreground] [-t|--timeout] [start|stop|status]"
+}
+
+help_message() {
+  cat <<- _EOF_
+  $PROGNAME
+  CMS VPN helper script. Uses openconnect to start|stop a vpn tunnel to CMS. The tunnels will be started
+  detached from the terminal (so you can close your terminal without terminating the tunnel).
+  
+  The tunnel will terminate after \$CMS_VPN_TIMEOUT minutes ($CMS_VPN_TIMEOUT by default).
+  
+  Use \`--foreground\` if you prefer to keep it attached to the running terminal. Use ctl+c to stop.
+
+  $(usage)
+
+  # SETUP
+  1. Install openconnect. (e.g., \`brew install openconnect\`)
+  2. Copy this script to \`/usr/local/bin\` (or somewhere in your PATH)
+  3. Run \`chmod +x /usr/local/bin/bfd-vpn\`
+  4. Run \`bfd-vpn setup\`
+
+  You will then be prompted for your EUA ID and the VPN host (ask the team for these). This only needs
+  to be done once.
+
+  Then:
+  bfd-vpn start
+  bfd-vpn stop
+  bfd-vpn status
+
+  Options:
+  -h, --help  Display this help message and exit.
+
+  NOTE: This script needs to be run as root.
+
+_EOF_
+  return
+}
+
+# Trap signals
+trap "signal_exit TERM" TERM HUP
+trap "signal_exit INT"  INT
+
+# Check for root UID
+if [[ $(id -u) != 0 ]]; then
+  echo "This script needs to be run as root. Try \`sudo !!\`"
+  exit 1
+fi
+
+# Parse command-line
+while [[ -n $1 ]]; do
+  case $1 in
+    -h | --help)
+      help_message; exit ;;
+    -f | --foreground)
+      RUN_IN_FOREGROUND=true ;;
+    -t | --timeout)
+      shift; TIMEOUT=(60 * "$1") ;;
+    -* | --*)
+      usage
+      tunnel_exit "Unknown option $1" ;;
+    *)
+      case "$1" in
+        start) tunnel_start ;;
+        stop) tunnel_stop ;;
+        status) tunnel_status ;;
+        setup) setup;;
+        *)
+          echo "Unknown option."
+        ;;
+      esac
+  esac
+  shift
+done
