@@ -1004,6 +1004,35 @@ public final class TransformerUtilsV2 {
   }
 
   /**
+   * Optionally creates an `clmrecvdate` {@link SupportingInformationComponent} slice.
+   *
+   * @param date Claim received date
+   * @return The created {@link SupportingInformationComponent}
+   */
+  static Optional<SupportingInformationComponent> createInformationRecievedDateSlice(
+      ExplanationOfBenefit eob, CcwCodebookInterface ccwVariable, Optional<LocalDate> date) {
+    return date.map(
+        d -> {
+          int maxSequence =
+              eob.getSupportingInfo().stream().mapToInt(i -> i.getSequence()).max().orElse(0);
+
+          // Create the SupportingInfo element
+          return new SupportingInformationComponent()
+              .setSequence(maxSequence + 1)
+              .setCategory(
+                  new CodeableConcept()
+                      .addCoding(
+                          createC4BBSupportingInfoCoding(C4BBSupportingInfoType.RECEIVED_DATE))
+                      .addCoding(
+                          new Coding(
+                              TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
+                              calculateVariableReferenceUrl(ccwVariable),
+                              ccwVariable.getVariable().getLabel())))
+              .setTiming(new DateType(convertToDate(d)));
+        });
+  }
+
+  /**
    * Optionally Creates an `adjudicationamounttype` {@link TotalComponent} slice. This looks similar
    * to the code to generate the {@link AdjudicationComponent} slice of the same name, but
    * unfortunately can't be reused because they are different types.
@@ -2163,6 +2192,7 @@ public final class TransformerUtilsV2 {
         break;
 
       case CARRIER:
+      case HHA:
         fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.PROFESSIONAL;
         break;
 
@@ -2254,24 +2284,17 @@ public final class TransformerUtilsV2 {
     // NCH_VRFD_NCVRD_STAY_THRU_DT =>
     // ExplanationOfBenefit.supportingInfo.timingPeriod
     if (noncoveredStayFromDate.isPresent() || noncoveredStayThroughDate.isPresent()) {
-      TransformerUtilsV2.validatePeriodDates(noncoveredStayFromDate, noncoveredStayThroughDate);
+      validatePeriodDates(noncoveredStayFromDate, noncoveredStayThroughDate);
 
       SupportingInformationComponent nchVrfdNcvrdStayInfo =
-          TransformerUtilsV2.addInformation(eob, CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT);
+          addInformation(eob, CcwCodebookVariable.NCH_VRFD_NCVRD_STAY_FROM_DT);
 
       Period nchVrfdNcvrdStayPeriod = new Period();
 
-      if (noncoveredStayFromDate.isPresent()) {
-        nchVrfdNcvrdStayPeriod.setStart(
-            TransformerUtilsV2.convertToDate((noncoveredStayFromDate.get())),
-            TemporalPrecisionEnum.DAY);
-      }
-
-      if (noncoveredStayThroughDate.isPresent()) {
-        nchVrfdNcvrdStayPeriod.setEnd(
-            TransformerUtilsV2.convertToDate((noncoveredStayThroughDate.get())),
-            TemporalPrecisionEnum.DAY);
-      }
+      noncoveredStayFromDate.ifPresent(
+          d -> nchVrfdNcvrdStayPeriod.setStart(convertToDate(d), TemporalPrecisionEnum.DAY));
+      noncoveredStayThroughDate.ifPresent(
+          d -> nchVrfdNcvrdStayPeriod.setEnd(convertToDate(d), TemporalPrecisionEnum.DAY));
 
       nchVrfdNcvrdStayInfo.setTiming(nchVrfdNcvrdStayPeriod);
     }

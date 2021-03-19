@@ -273,6 +273,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.DME,
               findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate)));
     }
+    */
 
     if (claimTypes.contains(ClaimTypeV2.HHA)) {
       eobs.addAll(
@@ -280,7 +281,6 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               ClaimTypeV2.HHA,
               findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate)));
     }
-    */
 
     if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
       eobs.addAll(

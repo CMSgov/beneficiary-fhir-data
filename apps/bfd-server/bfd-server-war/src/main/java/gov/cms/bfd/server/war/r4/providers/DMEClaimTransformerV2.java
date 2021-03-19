@@ -100,11 +100,12 @@ final class DMEClaimTransformerV2 {
             claimGroup.getPrimaryPayerPaidAmount()));
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
-    TransformerUtilsV2.addInformationWithDate(
+    TransformerUtilsV2.addInformation(
         eob,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        Optional.of(claimGroup.getWeeklyProcessDate()));
+        TransformerUtilsV2.createInformationRecievedDateSlice(
+            eob,
+            CcwCodebookVariable.NCH_WKLY_PROC_DT,
+            Optional.of(claimGroup.getWeeklyProcessDate())));
 
     // Common group level fields between Carrier and DME
     // BENE_ID =>

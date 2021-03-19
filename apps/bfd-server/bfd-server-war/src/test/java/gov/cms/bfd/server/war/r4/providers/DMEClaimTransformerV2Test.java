@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static org.hamcrest.CoreMatchers.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -10,6 +8,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -18,8 +17,27 @@ import org.junit.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.v4.providers.DMEClaimTransformerV2}. */
 public final class DMEClaimTransformerV2Test {
+  /**
+   * Generates the Claim object to be used in multiple tests
+   *
+   * @return
+   * @throws FHIRException
+   */
+  public DMEClaim generateClaim() throws FHIRException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-  private static final FhirContext fhirContext = FhirContext.forR4();
+    DMEClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+
+    claim.setLastUpdated(new Date());
+
+    return claim;
+  }
 
   /**
    * Verifies that {@link
@@ -30,20 +48,24 @@ public final class DMEClaimTransformerV2Test {
    */
   @Test
   public void transformSampleARecord() throws FHIRException {
-    List<Object> parsedRecords =
-        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    DMEClaim claim = generateClaim();
 
-    // Pull out the base Beneficiary record and fix its HICN and MBI-HASH fields.
-    DMEClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof DMEClaim)
-            .map(r -> (DMEClaim) r)
-            .findFirst()
-            .get();
+    assertMatches(claim, DMEClaimTransformerV2.transform(new MetricRegistry(), claim));
+  }
 
-    ExplanationOfBenefit eob = DMEClaimTransformerV2.transform(new MetricRegistry(), claim);
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
-    assertMatches(claim, eob);
+  private static final FhirContext fhirContext = FhirContext.forR4();
+
+  /**
+   * Serializes the EOB and prints to the command line
+   *
+   * @throws FHIRException
+   */
+  // @Ignore
+  @Test
+  public void serializeSampleARecord() throws FHIRException {
+    ExplanationOfBenefit eob =
+        DMEClaimTransformerV2.transform(new MetricRegistry(), generateClaim());
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
   /**
