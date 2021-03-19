@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public final class OutpatientClaimTransformerV2Test {
@@ -62,7 +63,7 @@ public final class OutpatientClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  // @Ignore
+  @Ignore
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
