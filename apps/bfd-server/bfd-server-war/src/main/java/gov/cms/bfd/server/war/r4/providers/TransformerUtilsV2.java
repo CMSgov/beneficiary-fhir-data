@@ -2158,6 +2158,7 @@ public final class TransformerUtilsV2 {
       case OUTPATIENT:
       case HOSPICE:
       case SNF:
+      case DME:
         fhirClaimType = org.hl7.fhir.r4.model.codesystems.ClaimType.INSTITUTIONAL;
         break;
 

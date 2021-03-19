@@ -74,6 +74,6 @@ public final class OutpatientClaimTransformerV2Test {
     // TODO: Double check the assumed value
     Assert.assertEquals(5, eob.getDiagnosis().size());
 
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
+    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }
