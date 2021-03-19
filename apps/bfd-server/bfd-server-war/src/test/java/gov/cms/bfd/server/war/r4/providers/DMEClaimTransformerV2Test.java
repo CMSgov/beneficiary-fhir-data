@@ -7,14 +7,12 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-
-import java.util.Date;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.v4.providers.DMEClaimTransformerV2}. */
@@ -29,7 +27,7 @@ public final class DMEClaimTransformerV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-        DMEClaim claim =
+    DMEClaim claim =
         parsedRecords.stream()
             .filter(r -> r instanceof DMEClaim)
             .map(r -> (DMEClaim) r)
@@ -62,11 +60,11 @@ public final class DMEClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  //@Ignore
+  // @Ignore
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-      DMEClaimTransformerV2.transform(new MetricRegistry(), generateClaim());
+        DMEClaimTransformerV2.transform(new MetricRegistry(), generateClaim());
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 

@@ -2,8 +2,8 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rif.CarrierClaim;
-import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.OutpatientClaim;
