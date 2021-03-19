@@ -86,8 +86,12 @@ public class OutpatientClaimTransformerV2 {
         claimGroup.getFinalAction());
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
-    TransformerUtilsV2.createInformationRecievedDateSlice(
-        eob, CcwCodebookVariable.NCH_WKLY_PROC_DT, Optional.of(claimGroup.getWeeklyProcessDate()));
+    TransformerUtilsV2.addInformation(
+        eob,
+        TransformerUtilsV2.createInformationRecievedDateSlice(
+            eob,
+            CcwCodebookVariable.NCH_WKLY_PROC_DT,
+            Optional.of(claimGroup.getWeeklyProcessDate())));
 
     // Map care team
     // AT_PHYSN_NPI     => ExplanationOfBenefit.careTeam.provider (Primary)

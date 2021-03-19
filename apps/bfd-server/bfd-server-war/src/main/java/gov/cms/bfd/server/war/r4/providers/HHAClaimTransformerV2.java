@@ -76,8 +76,12 @@ public class HHAClaimTransformerV2 {
         claimGroup.getFinalAction());
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
-    TransformerUtilsV2.createInformationRecievedDateSlice(
-        eob, CcwCodebookVariable.NCH_WKLY_PROC_DT, Optional.of(claimGroup.getWeeklyProcessDate()));
+    TransformerUtilsV2.addInformation(
+        eob,
+        TransformerUtilsV2.createInformationRecievedDateSlice(
+            eob,
+            CcwCodebookVariable.NCH_WKLY_PROC_DT,
+            Optional.of(claimGroup.getWeeklyProcessDate())));
 
     // map eob type codes into FHIR
     // NCH_CLM_TYPE_CD            => ExplanationOfBenefit.type.coding

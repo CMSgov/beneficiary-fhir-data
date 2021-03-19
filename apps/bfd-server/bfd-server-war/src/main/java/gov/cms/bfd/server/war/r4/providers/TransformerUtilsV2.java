@@ -1022,7 +1022,7 @@ public final class TransformerUtilsV2 {
               .setCategory(
                   new CodeableConcept()
                       .addCoding(
-                          createC4BBSupportingInfoCoding(C4BBSupportingInfoType.ADMISSION_PERIOD))
+                          createC4BBSupportingInfoCoding(C4BBSupportingInfoType.RECEIVED_DATE))
                       .addCoding(
                           new Coding(
                               TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,

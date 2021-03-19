@@ -14,8 +14,7 @@ public enum C4BBSupportingInfoType {
   RX_ORIGIN_CODE,
   BRAND_GENERIC_CODE,
   ADMISSION_PERIOD,
-  RECEIVED_DATE,
-  ;
+  RECEIVED_DATE;
 
   public String getSystem() {
     return "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType";
