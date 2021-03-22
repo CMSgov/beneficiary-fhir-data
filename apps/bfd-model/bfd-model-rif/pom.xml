@@ -48,6 +48,31 @@
 		</dependency>
 
 		<dependency>
+			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
+				model classes in the gov.cms.bfd.model.rif package. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-codegen</artifactId>
+			<version>${project.version}</version>
+
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
+				for JPA entities. This happens happens automagically via javac's annotation
+				processor. -->
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jpamodelgen</artifactId>
+			<version>${hibernate.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.logging</groupId>
+					<artifactId>jboss-logging</artifactId>
+				</exclusion>
+			</exclusions>
+
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<!-- Used for annotations in the generated code. -->
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
@@ -157,89 +182,5 @@
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<!-- Need to disable default annotation processing since apt-maven-plugin takes over. -->
-					<compilerArgument>-proc:none</compilerArgument>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!-- Run Java Annotation Processors, which will produce new .java source files in
-				     target/generated-sources/java. We use this plugin, rather than letting javac
-					 handle it, as this plays nicer with VS Code. Can't get VS Code to run this
-					 itself, but at least this way it can "see" the output produced by an external
-					 Maven build. -->
-				<groupId>com.mysema.maven</groupId>
-				<artifactId>apt-maven-plugin</artifactId>
-				<version>1.1.3</version>
-				<configuration>
-					<outputDirectory>${generatedSources}</outputDirectory>
-					<processors>
-						<processor>gov.cms.bfd.model.codegen.RifLayoutsProcessor</processor>
-						<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
-					</processors>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
-							model classes in the gov.cms.bfd.model.rif package. -->
-						<groupId>gov.cms.bfd</groupId>
-						<artifactId>bfd-model-codegen</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-					<dependency>
-						<!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
-							for JPA entities. This happens happens automagically via javac's annotation
-							processor. -->
-						<groupId>org.hibernate</groupId>
-						<artifactId>hibernate-jpamodelgen</artifactId>
-						<version>${hibernate.version}</version>
-						<exclusions>
-							<exclusion>
-								<groupId>org.jboss.logging</groupId>
-								<artifactId>jboss-logging</artifactId>
-							</exclusion>
-						</exclusions>
-					</dependency>
-				</dependencies>
-				<executions>
-					<execution>
-						<?m2e execute onConfiguration,onIncremental?>
-						<id>run-annotation-processors</id>
-						<goals>
-							<goal>process</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<sources>
-						<source>${generatedSources}</source>
-					</sources>
-				</configuration>
-				<executions>
-					<execution>
-						<!-- Need to ensure the generated source folder is added to the project classpath, in jdt.ls -->
-						<?m2e execute onConfiguration,onIncremental?>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>
