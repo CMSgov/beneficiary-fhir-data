@@ -15,7 +15,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class SNFClaimTransformerV2Test {
-
   /**
    * Generates the Claim object to be used in multiple tests
    *
@@ -32,6 +31,7 @@ public class SNFClaimTransformerV2Test {
         .findFirst()
         .get();
   }
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.SNFClaimTransformer#transform(Object)} works as expected
@@ -83,9 +83,5 @@ public class SNFClaimTransformerV2Test {
         Optional.of(claim.getDateThrough()),
         Optional.of(claim.getPaymentAmount()),
         claim.getFinalAction());
-
-    // TODO: finish tests based off V1
-
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

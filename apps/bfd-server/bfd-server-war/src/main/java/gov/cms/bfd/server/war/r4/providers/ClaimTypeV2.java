@@ -4,6 +4,10 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaim_;
+import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.model.rif.DMEClaim_;
+import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.HHAClaim_;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.HospiceClaim_;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -40,6 +44,14 @@ public enum ClaimTypeV2 {
       (entity) -> ((CarrierClaim) entity).getDateThrough(),
       CarrierClaimTransformerV2::transform,
       CarrierClaim_.lines),
+
+  DME(
+      DMEClaim.class,
+      DMEClaim_.claimId,
+      DMEClaim_.beneficiaryId,
+      (entity) -> ((DMEClaim) entity).getDateThrough(),
+      DMEClaimTransformerV2::transform,
+      DMEClaim_.lines),
 
   PDE(
       PartDEvent.class,
@@ -78,7 +90,15 @@ public enum ClaimTypeV2 {
       SNFClaim_.beneficiaryId,
       (entity) -> ((SNFClaim) entity).getDateThrough(),
       SNFClaimTransformerV2::transform,
-      SNFClaim_.lines);
+      SNFClaim_.lines),
+
+  HHA(
+      HHAClaim.class,
+      HHAClaim_.claimId,
+      HHAClaim_.beneficiaryId,
+      (entity) -> ((HHAClaim) entity).getDateThrough(),
+      HHAClaimTransformerV2::transform,
+      HHAClaim_.lines);
 
   private final Class<?> entityClass;
   private final SingularAttribute<?, ?> entityIdAttribute;

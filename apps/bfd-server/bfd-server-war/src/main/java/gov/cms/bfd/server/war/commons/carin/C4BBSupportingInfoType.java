@@ -13,7 +13,8 @@ public enum C4BBSupportingInfoType {
   REFILL_NUM,
   RX_ORIGIN_CODE,
   BRAND_GENERIC_CODE,
-  ADMISSION_PERIOD;
+  ADMISSION_PERIOD,
+  RECEIVED_DATE;
 
   public String getSystem() {
     return "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType";
@@ -37,6 +38,8 @@ public enum C4BBSupportingInfoType {
         return "brandgenericcode";
       case ADMISSION_PERIOD:
         return "admissionperiod";
+      case RECEIVED_DATE:
+        return "clmrecvddate";
       default:
         return "?";
     }
@@ -60,6 +63,8 @@ public enum C4BBSupportingInfoType {
         return "Brand Generic Code";
       case ADMISSION_PERIOD:
         return "Admission Period";
+      case RECEIVED_DATE:
+        return "Claim Received Date";
       default:
         return "?";
     }
@@ -83,6 +88,8 @@ public enum C4BBSupportingInfoType {
         return "NCPDP code indicating whether the plan adjudicated the claim as a brand or generic drug.";
       case ADMISSION_PERIOD:
         return "Dates corresponding with the admission and discharge of the beneficiary to a facility";
+      case RECEIVED_DATE:
+        return "Date the claim was received by the payer.";
       default:
         return "?";
     }

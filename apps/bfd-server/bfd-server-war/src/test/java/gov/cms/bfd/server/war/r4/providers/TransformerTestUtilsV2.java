@@ -6,6 +6,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -25,6 +27,8 @@ import org.hl7.fhir.r4.model.BaseDateTimeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
@@ -323,6 +327,78 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * @param expectedProviderNpi the {@link Identifier#getValue()} of the provider to find a matching
+   *     {@link CareTeamComponent} for
+   * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
+   * @return the {@link CareTeamComponent} whose {@link CareTeamComponent#getProvider()} is an
+   *     {@link Identifier} with the specified provider NPI, or else <code>null</code> if no such
+   *     {@link CareTeamComponent} was found
+   */
+  static CareTeamComponent findCareTeamEntryForProviderIdentifier(
+      String expectedProviderNpi, List<CareTeamComponent> careTeam) {
+    return findCareTeamEntryForProviderIdentifier(
+        TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
+  }
+
+  /**
+   * @param expectedIdentifierSystem the {@link Identifier#getSystem()} of the provider to find a
+   *     matching {@link CareTeamComponent} for
+   * @param expectedIdentifierValue the {@link Identifier#getValue()} of the provider to find a
+   *     matching {@link CareTeamComponent} for
+   * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
+   * @return the {@link CareTeamComponent} whose {@link CareTeamComponent#getProvider()} is an
+   *     {@link Identifier} with the specified provider NPI, or else <code>null</code> if no such
+   *     {@link CareTeamComponent} was found
+   */
+  private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
+      String expectedIdentifierSystem,
+      String expectedIdentifierValue,
+      C4BBClaimProfessionalAndNonClinicianCareTeamRole expectedRole,
+      List<CareTeamComponent> careTeam) {
+    Optional<CareTeamComponent> careTeamEntry =
+        careTeam.stream()
+            .filter(
+                ctc ->
+                    doesReferenceMatchIdentifier(
+                        expectedIdentifierSystem, expectedIdentifierValue, ctc.getProvider()))
+            .filter(ctc -> doesCareTeamComponentMatchRole(expectedRole, ctc))
+            .findFirst();
+    return careTeamEntry.orElse(null);
+  }
+
+  /**
+   * @param expectedIdentifierSystem the expected {@link Identifier#getSystem()} to match
+   * @param expectedIdentifierValue the expected {@link Identifier#getValue()} to match
+   * @param actualReference the {@link Reference} to check
+   * @return <code>true</code> if the specified {@link Reference} matches the expected {@link
+   *     Identifier}
+   */
+  private static boolean doesReferenceMatchIdentifier(
+      String expectedIdentifierSystem, String expectedIdentifierValue, Reference actualReference) {
+    if (!actualReference.hasIdentifier()) return false;
+    return expectedIdentifierSystem.equals(actualReference.getIdentifier().getSystem())
+        && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+  }
+
+  /**
+   * Does the role of the care team component match what is expected
+   *
+   * @param expectedRole expected role; maybe empty
+   * @param actualComponent the Care Team Component to test
+   * @return iff it matches or expected role is empty
+   */
+  private static boolean doesCareTeamComponentMatchRole(
+      C4BBClaimProfessionalAndNonClinicianCareTeamRole expectedRole,
+      CareTeamComponent actualComponent) {
+    if (expectedRole == null) return true;
+    if (!actualComponent.hasRole()) return false;
+    final Coding actualRole = actualComponent.getRole().getCodingFirstRep();
+    return actualRole.getCode().equals(expectedRole.toCode());
+    // TODO - fix this
+    // && actualRole.getSystem().equals(ClaimCareteamrole.NULL.getSystem());
+  }
+
+  /**
    * @param categoryVariable the {@link CcwCodebookVariable} matching the {@link
    *     SupportingInformationComponent#getCategory()} to find
    * @param codeSystemVariable the {@link CcwCodebookVariable} that should have been mapped to
@@ -338,6 +414,191 @@ public final class TransformerTestUtilsV2 {
       ExplanationOfBenefit eob) {
     SupportingInformationComponent info = assertHasInfo(categoryVariable, eob);
     assertHasCoding(codeSystemVariable, codeValue, info.getCode());
+  }
+
+  /**
+   * Tests that the hcpcs code and hcpcs modifier codes are set as expected in the item component.
+   * The hcpcsCode field is common among these claim types: Carrier, Inpatient, Outpatient, DME,
+   * Hospice, HHA and SNF. The modifier fields are common among these claim types: Carrier,
+   * Outpatient, DME, Hospice and HHA.
+   *
+   * @param item the {@link ItemComponent} this method will test against
+   * @param hcpcCode the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing the hcpcs
+   *     code for the claim
+   * @param hcpcsInitialModifierCode the {@link Optional}&lt;{@link String}&gt; HCPCS_1ST_MDFR_CD:
+   *     representing the expected hcpcs initial modifier code for the claim
+   * @param hcpcsSecondModifierCode the {@link Optional}&lt;{@link String}&gt; HCPCS_2ND_MDFR_CD:
+   *     representing the expected hcpcs second modifier code for the claim
+   * @param hcpcsYearCode the {@link Optional}&lt;{@link Character}&gt; CARR_CLM_HCPCS_YR_CD:
+   *     representing the hcpcs year code for the claim
+   * @param index the {@link int} modifier index in the item containing the expected code
+   */
+  static void assertHcpcsCodes(
+      ItemComponent item,
+      Optional<String> hcpcsCode,
+      Optional<String> hcpcsInitialModifierCode,
+      Optional<String> hcpcsSecondModifierCode,
+      Optional<Character> hcpcsYearCode,
+      int index) {
+    // TODO - fix this
+    /*
+    if (hcpcsYearCode.isPresent()) { // some claim types have a year code...
+      assertHasCoding(
+          TransformerConstants.CODING_SYSTEM_HCPCS,
+          "" + hcpcsYearCode.get(),
+          null,
+          hcpcsInitialModifierCode.get(),
+          item.getModifier().get(index).getCoding());
+      assertHasCoding(
+          TransformerConstants.CODING_SYSTEM_HCPCS,
+          "" + hcpcsYearCode.get(),
+          null,
+          hcpcsCode.get(),
+          item.getService().getCoding());
+    } else { // while others do not...
+      if (hcpcsInitialModifierCode.isPresent()) {
+        assertHasCoding(
+            TransformerConstants.CODING_SYSTEM_HCPCS,
+            hcpcsInitialModifierCode.get(),
+            item.getModifier().get(index).getCoding());
+      }
+      if (hcpcsCode.isPresent()) {
+        assertHasCoding(
+            TransformerConstants.CODING_SYSTEM_HCPCS,
+            hcpcsCode.get(),
+            item.getService().getCoding());
+      }
+    }
+    */
+
+    Assert.assertFalse(hcpcsSecondModifierCode.isPresent());
+  }
+
+  /**
+   * Test the transformation of the item level data elements between the {@link CarrierClaimLine}
+   * and {@link DMEClaimLine} claim types to FHIR. The method parameter fields from {@link
+   * CarrierClaimLine} and {@link DMEClaimLine} are listed below and their corresponding RIF CCW
+   * fields (denoted in all CAPS below from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
+   *
+   * @param item the {@ ItemComponent} to test
+   * @param eob the {@ ExplanationOfBenefit} to test
+   * @param serviceCount LINE_SRVC_CNT,
+   * @param placeOfServiceCode LINE_PLACE_OF_SRVC_CD,
+   * @param firstExpenseDate LINE_1ST_EXPNS_DT,
+   * @param lastExpenseDate LINE_LAST_EXPNS_DT,
+   * @param beneficiaryPaymentAmount LINE_BENE_PMT_AMT,
+   * @param providerPaymentAmount LINE_PRVDR_PMT_AMT,
+   * @param beneficiaryPartBDeductAmount LINE_BENE_PTB_DDCTBL_AMT,
+   * @param primaryPayerCode LINE_BENE_PRMRY_PYR_CD,
+   * @param primaryPayerPaidAmount LINE_BENE_PRMRY_PYR_PD_AMT,
+   * @param betosCode BETOS_CD,
+   * @param paymentAmount LINE_NCH_PMT_AMT,
+   * @param paymentCode LINE_PMT_80_100_CD,
+   * @param coinsuranceAmount LINE_COINSRNC_AMT,
+   * @param submittedChargeAmount LINE_SBMTD_CHRG_AMT,
+   * @param allowedChargeAmount LINE_ALOWD_CHRG_AMT,
+   * @param processingIndicatorCode LINE_PRCSG_IND_CD,
+   * @param serviceDeductibleCode LINE_SERVICE_DEDUCTIBLE,
+   * @param diagnosisCode LINE_ICD_DGNS_CD,
+   * @param diagnosisCodeVersion LINE_ICD_DGNS_VRSN_CD,
+   * @param hctHgbTestTypeCode LINE_HCT_HGB_TYPE_CD
+   * @param hctHgbTestResult LINE_HCT_HGB_RSLT_NUM,
+   * @param cmsServiceTypeCode LINE_CMS_TYPE_SRVC_CD,
+   * @param nationalDrugCode LINE_NDC_CD
+   * @throws FHIRException
+   */
+  static void assertEobCommonItemCarrierDMEEquals(
+      ItemComponent item,
+      ExplanationOfBenefit eob,
+      BigDecimal serviceCount,
+      String placeOfServiceCode,
+      Optional<LocalDate> firstExpenseDate,
+      Optional<LocalDate> lastExpenseDate,
+      BigDecimal beneficiaryPaymentAmount,
+      BigDecimal providerPaymentAmount,
+      BigDecimal beneficiaryPartBDeductAmount,
+      Optional<Character> primaryPayerCode,
+      BigDecimal primaryPayerPaidAmount,
+      Optional<String> betosCode,
+      BigDecimal paymentAmount,
+      Optional<Character> paymentCode,
+      BigDecimal coinsuranceAmount,
+      BigDecimal submittedChargeAmount,
+      BigDecimal allowedChargeAmount,
+      Optional<String> processingIndicatorCode,
+      Optional<Character> serviceDeductibleCode,
+      Optional<String> diagnosisCode,
+      Optional<Character> diagnosisCodeVersion,
+      Optional<String> hctHgbTestTypeCode,
+      BigDecimal hctHgbTestResult,
+      char cmsServiceTypeCode,
+      Optional<String> nationalDrugCode)
+      throws FHIRException {
+
+    Assert.assertEquals(serviceCount, item.getQuantity().getValue());
+
+    assertHasCoding(
+        CcwCodebookVariable.LINE_CMS_TYPE_SRVC_CD, cmsServiceTypeCode, item.getCategory());
+    assertHasCoding(
+        CcwCodebookVariable.LINE_PLACE_OF_SRVC_CD,
+        placeOfServiceCode,
+        item.getLocationCodeableConcept());
+    assertExtensionCodingEquals(CcwCodebookVariable.BETOS_CD, betosCode, item);
+    assertDateEquals(firstExpenseDate.get(), item.getServicedPeriod().getStartElement());
+    assertDateEquals(lastExpenseDate.get(), item.getServicedPeriod().getEndElement());
+
+    // TODO - fix this
+    /*
+    AdjudicationComponent adjudicationForPayment =
+        assertAdjudicationAmountEquals(
+            CcwCodebookVariable.LINE_NCH_PMT_AMT, paymentAmount, item.getAdjudication());
+    assertExtensionCodingEquals(
+        CcwCodebookVariable.LINE_PMT_80_100_CD, paymentCode, adjudicationForPayment);
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_BENE_PMT_AMT, beneficiaryPaymentAmount, item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_PRVDR_PMT_AMT, providerPaymentAmount, item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_BENE_PTB_DDCTBL_AMT,
+        beneficiaryPartBDeductAmount,
+        item.getAdjudication());
+    assertExtensionCodingEquals(CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD, primaryPayerCode, item);
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_BENE_PRMRY_PYR_PD_AMT,
+        primaryPayerPaidAmount,
+        item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_COINSRNC_AMT, coinsuranceAmount, item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_SBMTD_CHRG_AMT, submittedChargeAmount, item.getAdjudication());
+    assertAdjudicationAmountEquals(
+        CcwCodebookVariable.LINE_ALOWD_CHRG_AMT, allowedChargeAmount, item.getAdjudication());
+    assertAdjudicationReasonEquals(
+        CcwCodebookVariable.LINE_PRCSG_IND_CD, processingIndicatorCode, item.getAdjudication());
+    assertExtensionCodingEquals(
+        CcwCodebookVariable.LINE_SERVICE_DEDUCTIBLE, serviceDeductibleCode, item);
+
+    assertDiagnosisLinkPresent(Diagnosis.from(diagnosisCode, diagnosisCodeVersion), eob, item);
+
+    List<Extension> hctHgbObservationExtension =
+        item.getExtensionsByUrl(
+            TransformerUtils.calculateVariableReferenceUrl(
+                CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM));
+    Assert.assertEquals(1, hctHgbObservationExtension.size());
+    Assert.assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
+    Reference hctHgbReference = (Reference) hctHgbObservationExtension.get(0).getValue();
+    Assert.assertTrue(hctHgbReference.getResource() instanceof Observation);
+    Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
+    assertHasCoding(
+        CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode, hctHgbObservation.getCode());
+    Assert.assertEquals(hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
+
+    assertExtensionCodingEquals(
+        item,
+        TransformerConstants.CODING_NDC,
+        TransformerConstants.CODING_NDC,
+        nationalDrugCode.get());
+        */
   }
 
   /**
@@ -669,6 +930,73 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Test the transformation of the common group level data elements between the {@link
+   * CarrierClaim} and {@link DMEClaim} claim types to FHIR. The method parameter fields from {@link
+   * CarrierClaim} and {@link DMEClaim} are listed below and their corresponding RIF CCW fields
+   * (denoted in all CAPS below from {@link CarrierClaimColumn} and {@link DMEClaimColumn}).
+   *
+   * @param eob the {@link ExplanationOfBenefit} to test
+   * @param benficiaryId BENE_ID, *
+   * @param carrierNumber CARR_NUM,
+   * @param clinicalTrialNumber CLM_CLNCL_TRIL_NUM,
+   * @param beneficiaryPartBDeductAmount CARR_CLM_CASH_DDCTBL_APLD_AMT,
+   * @param paymentDenialCode CARR_CLM_PMT_DNL_CD,
+   * @param referringPhysicianNpi RFR_PHYSN_NPI,
+   * @param providerAssignmentIndicator CARR_CLM_PRVDR_ASGNMT_IND_SW,
+   * @param providerPaymentAmount NCH_CLM_PRVDR_PMT_AMT,
+   * @param beneficiaryPaymentAmount NCH_CLM_BENE_PMT_AMT,
+   * @param submittedChargeAmount NCH_CARR_CLM_SBMTD_CHRG_AMT,
+   * @param allowedChargeAmount NCH_CARR_CLM_ALOWD_AMT,
+   */
+  static void assertEobCommonGroupCarrierDMEEquals(
+      ExplanationOfBenefit eob,
+      String beneficiaryId,
+      String carrierNumber,
+      Optional<String> clinicalTrialNumber,
+      BigDecimal beneficiaryPartBDeductAmount,
+      String paymentDenialCode,
+      Optional<String> referringPhysicianNpi,
+      Optional<Character> providerAssignmentIndicator,
+      BigDecimal providerPaymentAmount,
+      BigDecimal beneficiaryPaymentAmount,
+      BigDecimal submittedChargeAmount,
+      BigDecimal allowedChargeAmount) {
+
+    assertExtensionCodingEquals(CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode, eob);
+
+    /*
+        ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
+        Assert.assertEquals(
+            TransformerUtilsV2.referencePatient(beneficiaryId).getReference(),
+            referral.getSubject().getReference());
+        assertReferenceIdentifierEquals(
+            TransformerConstants.CODING_NPI_US,
+            referringPhysicianNpi.get(),
+            referral.getRequester().getAgent());
+        Assert.assertEquals(1, referral.getRecipient().size());
+        assertReferenceIdentifierEquals(
+            TransformerConstants.CODING_NPI_US,
+            referringPhysicianNpi.get(),
+            referral.getRecipientFirstRep());
+    */
+    assertExtensionCodingEquals(CcwCodebookVariable.ASGMNTCD, providerAssignmentIndicator, eob);
+
+    assertExtensionIdentifierEquals(CcwCodebookVariable.CARR_NUM, carrierNumber, eob);
+    assertExtensionIdentifierEquals(
+        CcwCodebookVariable.CLM_CLNCL_TRIL_NUM, clinicalTrialNumber, eob);
+    assertAdjudicationTotalAmountEquals(
+        CcwCodebookVariable.CARR_CLM_CASH_DDCTBL_APLD_AMT, beneficiaryPartBDeductAmount, eob);
+    assertAdjudicationTotalAmountEquals(
+        CcwCodebookVariable.NCH_CLM_PRVDR_PMT_AMT, providerPaymentAmount, eob);
+    assertAdjudicationTotalAmountEquals(
+        CcwCodebookVariable.NCH_CLM_BENE_PMT_AMT, beneficiaryPaymentAmount, eob);
+    assertAdjudicationTotalAmountEquals(
+        CcwCodebookVariable.NCH_CARR_CLM_SBMTD_CHRG_AMT, submittedChargeAmount, eob);
+    assertAdjudicationTotalAmountEquals(
+        CcwCodebookVariable.NCH_CARR_CLM_ALOWD_AMT, allowedChargeAmount, eob);
+  }
+
+  /*
    * @param expectedStartDate the expected value for {@link Period#getStart()}
    * @param expectedEndDate the expected value for {@link Period#getEnd()}
    * @param actualPeriod the {@link Period} to verify
