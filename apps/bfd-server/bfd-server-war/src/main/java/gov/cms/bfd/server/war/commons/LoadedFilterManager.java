@@ -30,8 +30,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoadedFilterManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManager.class);
-  private static final Logger REFRESHLOGGER =
-      LoggerFactory.getLogger(LoadedFilterManager.class + "LoadedFilterManager");
+  private static final Logger REFRESHLOGGER = LoggerFactory.getLogger("LOADED_FILTER_MANAGER");
 
   // A date before the lastUpdate feature was rolled out
   private static final Date BEFORE_LAST_UPDATED_FEATURE =
