@@ -17,7 +17,7 @@ public enum C4BBClaimInpatientInstitutionalDiagnosisType {
       case ADMITTING:
         return "http://terminology.hl7.org/CodeSystem/ex-diagnosistype";
       default:
-        return "https://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBClaimDiagnosisType.html";
+        return "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType";
     }
   }
 
