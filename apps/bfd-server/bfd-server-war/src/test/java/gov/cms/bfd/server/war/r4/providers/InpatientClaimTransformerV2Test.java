@@ -15,19 +15,17 @@ import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public final class InpatientClaimTransformerV2Test {
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.InpatientClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
-   * InpatientClaim}.
+   * Generates the Claim object to be used in multiple tests
    *
-   * @throws FHIRException (indicates test failure)
+   * @return
+   * @throws FHIRException
    */
-  @Test
-  public void transformSampleARecord() throws FHIRException {
+  public InpatientClaim generateClaim() throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -40,12 +38,38 @@ public final class InpatientClaimTransformerV2Test {
 
     claim.setLastUpdated(new Date());
 
-    ExplanationOfBenefit eob = InpatientClaimTransformerV2.transform(new MetricRegistry(), claim);
+    return claim;
+  }
 
-    assertMatches(claim, eob);
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.InpatientClaimTransformer#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
+   * InpatientClaim}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void transformSampleARecord() throws FHIRException {
+    InpatientClaim claim = generateClaim();
+
+    assertMatches(claim, InpatientClaimTransformerV2.transform(new MetricRegistry(), claim));
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
+
+  /**
+   * Serializes the EOB and prints to the command line
+   *
+   * @throws FHIRException
+   */
+  @Ignore
+  @Test
+  public void serializeSampleARecord() throws FHIRException {
+    ExplanationOfBenefit eob =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), generateClaim());
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
+  }
 
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
@@ -63,7 +87,7 @@ public final class InpatientClaimTransformerV2Test {
         eob,
         claim.getClaimId(),
         claim.getBeneficiaryId(),
-        ClaimType.INPATIENT,
+        ClaimTypeV2.INPATIENT,
         claim.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_A,
         Optional.of(claim.getDateFrom()),
@@ -82,11 +106,7 @@ public final class InpatientClaimTransformerV2Test {
           eob);
     }
 
-    // TODO: finish tests based off V1
-
     // Test that the expected number of diagnoses are mapped
     Assert.assertEquals(9, eob.getDiagnosis().size());
-
-    System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }

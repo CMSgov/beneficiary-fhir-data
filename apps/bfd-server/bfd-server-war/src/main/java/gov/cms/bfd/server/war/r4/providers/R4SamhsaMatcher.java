@@ -125,19 +125,20 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   /** @see java.util.function.Predicate#test(java.lang.Object) */
   @Override
   public boolean test(ExplanationOfBenefit eob) {
-    ClaimType claimType = TransformerUtilsV2.getClaimType(eob);
-    if (claimType == ClaimType.PDE) {
+    ClaimTypeV2 claimType = TransformerUtilsV2.getClaimType(eob);
+    if (claimType == ClaimTypeV2.PDE) {
       return testPartDEvent(eob);
     } else throw new BadCodeMonkeyException("Unsupported claim type: " + claimType);
   }
 
   /**
-   * @param eob the {@link ClaimType#PDE} {@link ExplanationOfBenefit} to check
-   * @return <code>true</code> if the specified {@link ClaimType#PDE} {@link ExplanationOfBenefit}
+   * @param eob the {@link ClaimTypeV2#PDE} {@link ExplanationOfBenefit} to check
+   * @return <code>true</code> if the specified {@link ClaimTypeV2#PDE} {@link ExplanationOfBenefit}
    *     contains any known-SAMHSA-related codes, <code>false</code> if it does not
    */
   private boolean testPartDEvent(ExplanationOfBenefit eob) {
-    if (TransformerUtilsV2.getClaimType(eob) != ClaimType.PDE) throw new IllegalArgumentException();
+    if (TransformerUtilsV2.getClaimType(eob) != ClaimTypeV2.PDE)
+      throw new IllegalArgumentException();
 
     // There are no SAMHSA fields in PDE claims
     return false;
