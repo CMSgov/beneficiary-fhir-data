@@ -2246,12 +2246,10 @@ public final class TransformerUtilsV2 {
 
     // diagnosisRelatedGroupCd
     // CLM_DRG_CD => ExplanationOfBenefit.supportingInfo
-    diagnosisRelatedGroupCd.ifPresent(cd -> addInformationWithCode(
-        eob,
-        CcwCodebookVariable.CLM_DRG_CD,
-        CcwCodebookVariable.CLM_DRG_CD,
-        cd
-      ));
+    diagnosisRelatedGroupCd.ifPresent(
+        cd ->
+            addInformationWithCode(
+                eob, CcwCodebookVariable.CLM_DRG_CD, CcwCodebookVariable.CLM_DRG_CD, cd));
   }
 
   /**
