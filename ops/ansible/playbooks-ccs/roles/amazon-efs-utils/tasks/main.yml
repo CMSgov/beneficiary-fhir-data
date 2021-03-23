@@ -1,0 +1,83 @@
+---
+# This role will install and configure fips compatible amazon-efs-utils
+# on rhel compatible distributions.
+# TODO: determine ansible_os_family for amazon linux if/when we migrate
+
+
+# remove if installed so we can configure a fips compatible version
+# note: no need to remove old stunnel as installing amazon-efs-utils will
+# simply reinstall it :/
+- name: Remove default amazon-efs-utils
+  become: yes
+  yum:
+    name:
+      - amazon-efs-utils
+    state: absent
+
+# TODO: determine if rpm-build is compatible with amazon linux
+- name: Install EFS util requirements
+  become: yes
+  yum:
+    name:
+      - git
+      - rpm-build
+
+- name: Install stunnel requirements
+  become: yes
+  yum:
+    name:
+      - wget
+      - gcc
+      - openssl-devel
+      - tcp_wrappers-devel
+    state: present
+    lock_timeout: 180
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure amazon-efs-utils is FIPS-compliant
+  become: yes
+  shell: |
+    git clone https://github.com/aws/efs-utils
+    cd efs-utils
+    sed -i -E "s/'fips': 'no'/'fips': 'yes'/" ./src/mount_efs/__init__.py
+    make rpm
+    yum -y install --nogpgcheck build/amazon-efs-utils*rpm
+    cd /tmp
+    rm -rf /tmp/efs-utils
+  args:
+    chdir: /tmp
+    warn: false
+
+# replace old stunnel with a recent version
+- name: Build fips enabled stunnel
+  become: yes
+  shell: |
+    mkdir stunnel && cd stunnel
+    wget https://www.stunnel.org/downloads/stunnel-{{ stunnel_version }}.tar.gz
+    tar -xvzf stunnel-{{ stunnel_version }}.tar.gz
+    cd stunnel-{{ stunnel_version }}/
+    # remove previous stunnel bin if it's still there
+    if [[ -f /bin/stunnel ]]; then
+        sudo mv /bin/stunnel /bin/stunnel.bak
+    fi
+    # remove previous stunnel config if it's still there
+    if [[ -f /etc/stunnel/stunnel.conf ]]; then
+        sudo mv /etc/stunnel/stunnel.conf //etc/stunnel/stunnel.conf.bak
+    fi
+    # build and install stunnel 5 with fips (installs to /usr/local/* by default)
+    ./configure --enable-fips
+    make
+    make install
+    # link to /bin in case /usr/local/bin is not in the path
+    ln -sf /usr/local/bin/stunnel /bin/stunnel
+    # copy our configs
+    mkdir -p /etc/stunnel
+    cp /usr/local/etc/stunnel/stunnel.conf-sample /usr/local/etc/stunnel/stunnel.conf
+    ln -sf /usr/local/etc/stunnel/stunnel.conf /etc/stunnel/stunnel.conf
+    # make sure stunnel is in fips mode
+    sed -i '/^;fips.*/s/^;//' /usr/local/etc/stunnel/stunnel.conf
+    cd /tmp
+    rm -rf /tmp/stunnel
+  args:
+    chdir: /tmp
+  when: ansible_os_family == "RedHat"
