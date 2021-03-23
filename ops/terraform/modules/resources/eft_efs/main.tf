@@ -2,9 +2,6 @@
 #
 locals {
   tags           = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
-  posix_user_id  = "1500"
-  posix_group_id = "1500"
-  bcda_root_dir  = "/dropbox"
 }
 
 # returns selected vpc (bfd-prod-vpc, bfd-prod-sbx-vpc, etc)
@@ -40,12 +37,6 @@ data "aws_subnet" "etl" {
   }
 }
 
-# targets the bcda eft efs cmk (encryption key)
-# using this in case we move the KMS resources defined in this file somewhere else in the future
-# data "aws_kms_key" "bcda_eft_efs" {
-#   key_id = "alias/bcda-eft-efs-${var.env_config.env}-cmk"
-# }
-
 # etl instance role
 data "aws_iam_role" "etl_instance" {
   name = "bfd-${var.env_config.env}-bfd_pipeline-role"
@@ -56,16 +47,16 @@ data "aws_iam_role" "etl_instance" {
 #
 
 # provision the cmk TODO: update policy to use roles instead of users
-resource "aws_kms_key" "bcda_eft_efs" {
-  description = "bcda-eft-efs-${var.env_config.env}-cmk"
+resource "aws_kms_key" "eft_efs" {
+  description = "${var.partner}-eft-efs-${var.env_config.env}-cmk"
   key_usage   = "ENCRYPT_DECRYPT"
   is_enabled  = true
-  tags        = merge({ Name = "bcda-eft-${var.env_config.env}-efs" }, local.tags)
+  tags        = merge({ Name = "${var.partner}-eft-efs-${var.env_config.env}" }, local.tags)
 
   policy = <<POLICY
 {
   "Version" : "2012-10-17",
-  "Id" : "bcda-eft-efs-${var.env_config.env}-cmk-policy",
+  "Id" : "${var.partner}-eft-efs-${var.env_config.env}-cmk-policy",
   "Statement" : [ {
     "Sid" : "Allow root full admin",
     "Effect" : "Allow",
@@ -103,7 +94,7 @@ resource "aws_kms_key" "bcda_eft_efs" {
     "Sid" : "Allow use of the key",
     "Effect" : "Allow",
     "Principal" : {
-      "AWS" : "${aws_iam_role.bcda_rw.arn}"
+      "AWS" : "${aws_iam_role.eft_efs_rw.arn}"
     },
     "Action" : [ "kms:Encrypt",
         "kms:Decrypt",
@@ -116,7 +107,7 @@ resource "aws_kms_key" "bcda_eft_efs" {
     "Sid" : "Allow attachment of persistent resources",
     "Effect" : "Allow",
     "Principal" : {
-      "AWS" : "${aws_iam_role.bcda_rw.arn}"
+      "AWS" : "${aws_iam_role.eft_efs_rw.arn}"
     },
     "Action" : [
         "kms:CreateGrant",
@@ -135,23 +126,23 @@ POLICY
 }
 
 # # key alias
-# resource "aws_kms_alias" "bcda_eft_efs" {
-#     name          = "alias/bcda-eft-efs-${var.env_config.env}-cmk"
-#     target_key_id = aws_kms_key.bcda_eft_efs.id
+# resource "aws_kms_alias" "${var.partner}_eft_efs" {
+#     name          = "alias/${var.partner}-eft-efs-${var.env_config.env}-cmk"
+#     target_key_id = aws_kms_key.${var.partner}_eft_efs.id
 # }
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FILE SYSTEMS AND ACCESS POINTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-# BCDA EFT file system
-resource "aws_efs_file_system" "bcda_eft" {
-  creation_token = "bcda-eft-${var.env_config.env}-efs"
+# ${var.partner} EFT file system
+resource "aws_efs_file_system" "eft" {
+  creation_token = "${var.partner}-eft-efs-${var.env_config.env}"
   encrypted      = "true"
-  kms_key_id     = aws_kms_key.bcda_eft_efs.arn
-  tags           = merge({ Name = "bcda-eft-${var.env_config.env}-efs" }, local.tags)
+  kms_key_id     = aws_kms_key.eft_efs.arn
+  tags           = merge({ Name = "${var.partner}-eft-efs-${var.env_config.env}" }, local.tags)
 
-  // BCDA will be responsible for cleaning up after ingestion, but just in case, we transition
+  // ${var.partner} will be responsible for cleaning up after ingestion, but just in case, we transition
   // files not accessed after 7 days to slower storage to save $
   // TODO: create alert if any files are in IA class
   lifecycle_policy {
@@ -159,24 +150,24 @@ resource "aws_efs_file_system" "bcda_eft" {
   }
 }
 
-# Access point BCDA will mount
+# Access point ${var.partner} will mount
 # - will automagically root them into the /dropbox directory
 # - will perform all file operations as specific posix user & group (e.g., 1500:1500)
-resource "aws_efs_access_point" "bcda_eft" {
-  file_system_id = aws_efs_file_system.bcda_eft.id
-  tags           = merge({ Name = "bcda-eft-${var.env_config.env}-efs-ap" }, local.tags)
+resource "aws_efs_access_point" "eft" {
+  file_system_id = aws_efs_file_system.eft.id
+  tags           = merge({ Name = "${var.partner}-eft-efs-${var.env_config.env}-ap" }, local.tags)
 
   posix_user {
-    gid = local.posix_group_id
-    uid = local.posix_user_id
+    gid = var.posix_gid
+    uid = var.posix_uid
   }
 
   root_directory {
-    path = local.bcda_root_dir
+    path = var.partner_root_dir
 
     creation_info {
-      owner_gid   = local.posix_group_id
-      owner_uid   = local.posix_user_id
+      owner_gid   = var.posix_gid
+      owner_uid   = var.posix_gid
       permissions = "0755"
     }
   }
@@ -185,23 +176,23 @@ resource "aws_efs_access_point" "bcda_eft" {
 # Deploys mount targets in all ETL data subnets
 # TODO: only deploys mount targets in *existing* subnets. We will need to extend our data
 # subnets into all AZ's to ensure we do not incur cross-AZ data charges
-resource "aws_efs_mount_target" "bcda_eft" {
-  file_system_id = aws_efs_file_system.bcda_eft.id
+resource "aws_efs_mount_target" "eft" {
+  file_system_id = aws_efs_file_system.eft.id
   for_each       = data.aws_subnet_ids.etl.ids
   subnet_id      = each.value
 }
 
 # EFS file system policy that
 # - allows BFD ETL servers full root access
-# - allows BCDA read+write access
+# - allows ${var.partner} read+write access
 # - denies all non-tls enabled connections
-resource "aws_efs_file_system_policy" "bcda_eft" {
-  file_system_id = aws_efs_file_system.bcda_eft.id
+resource "aws_efs_file_system_policy" "eft" {
+  file_system_id = aws_efs_file_system.eft.id
 
   policy = <<POLICY
 {
     "Version": "2012-10-17",
-    "Id": "bcda-eft-${var.env_config.env}-efs-policy",
+    "Id": "${var.partner}-eft-efs-${var.env_config.env}-policy",
     "Statement": [
         {
             "Sid": "allow-etl-full",
@@ -214,7 +205,7 @@ resource "aws_efs_file_system_policy" "bcda_eft" {
                 "elasticfilesystem:ClientRootAccess",
                 "elasticfilesystem:ClientWrite"
             ],
-            "Resource": "${aws_efs_file_system.bcda_eft.arn}",
+            "Resource": "${aws_efs_file_system.eft.arn}",
             "Condition": {
                 "ArnEquals": {
                     "aws:PrincipalArn": "${data.aws_iam_role.etl_instance.arn}"
@@ -222,7 +213,7 @@ resource "aws_efs_file_system_policy" "bcda_eft" {
             }
         },
         {
-            "Sid": "allow-bcda-rw",
+            "Sid": "allow-${var.partner}-rw",
             "Effect": "Allow",
             "Principal": {
                 "AWS": "*"
@@ -231,10 +222,10 @@ resource "aws_efs_file_system_policy" "bcda_eft" {
                 "elasticfilesystem:ClientMount",
                 "elasticfilesystem:ClientWrite"
             ],
-            "Resource": "${aws_efs_file_system.bcda_eft.arn}",
+            "Resource": "${aws_efs_file_system.eft.arn}",
             "Condition": {
                 "ArnEquals": {
-                    "aws:PrincipalArn": "arn:aws:iam::${var.bcda_acct_num}:*"
+                    "aws:PrincipalArn": "arn:aws:iam::${var.partner_acct_num}:*"
                 }
             }
         },
@@ -245,7 +236,7 @@ resource "aws_efs_file_system_policy" "bcda_eft" {
                 "AWS": "*"
             },
             "Action": "*",
-            "Resource": "${aws_efs_file_system.bcda_eft.arn}",
+            "Resource": "${aws_efs_file_system.eft.arn}",
             "Condition": {
                 "Bool": {
                     "aws:SecureTransport": "false"
@@ -257,11 +248,11 @@ resource "aws_efs_file_system_policy" "bcda_eft" {
 POLICY
 }
 
-# Creates an IAM role that BCDA account is allowed to assume. This role, along with the policy
-# below, allows BCDA to mount the EFS file system with read and write permissions.
+# Creates an IAM role that ${var.partner} account is allowed to assume. This role, along with the policy
+# below, allows ${var.partner} to mount the EFS file system with read and write permissions.
 # TODO: verify principal
-resource "aws_iam_role" "bcda_rw" {
-  name               = "bcda-eft-efs-${var.env_config.env}-rw-access-role"
+resource "aws_iam_role" "eft_efs_rw" {
+  name               = "${var.partner}-eft-efs-${var.env_config.env}-rw-access-role"
   path               = "/"
   assume_role_policy = <<POLICY
 {
@@ -270,7 +261,7 @@ resource "aws_iam_role" "bcda_rw" {
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::${var.bcda_acct_num}:root"
+        "AWS": "arn:aws:iam::${var.partner_acct_num}:root"
       },
       "Action": "sts:AssumeRole",
       "Condition": {
@@ -282,11 +273,11 @@ POLICY
 }
 
 # policy attached to above role that
-# - allows BCDA to mount the file system
-# - grants BCDA read+write privileges
-# - allows BCDA to describe our mount targets
-resource "aws_iam_policy" "bcda_ap_access" {
-  name        = "bcda-eft-efs-${var.env_config.env}-ap-access-policy"
+# - allows ${var.partner} to mount the file system
+# - grants ${var.partner} read+write privileges
+# - allows ${var.partner} to describe our mount targets
+resource "aws_iam_policy" "eft_efs_ap_access" {
+  name        = "${var.partner}-eft-efs-${var.env_config.env}-ap-access-policy"
   path        = "/"
   description = ""
   policy      = <<POLICY
@@ -302,7 +293,7 @@ resource "aws_iam_policy" "bcda_ap_access" {
         "elasticfilesystem:ClientMount"
       ],
       "Resource": [
-        "${aws_efs_access_point.bcda_eft.arn}"
+        "${aws_efs_access_point.eft.arn}"
       ]
     }
   ]
@@ -311,24 +302,23 @@ POLICY
 }
 
 # attaches the above policy to the role
-resource "aws_iam_policy_attachment" "bcda_ap_access" {
-  name       = "bcda-eft-efs-${var.env_config.env}-ap-access-policy-attachment"
-  policy_arn = aws_iam_policy.bcda_ap_access.arn
-  roles      = [aws_iam_role.bcda_rw.name]
+resource "aws_iam_policy_attachment" "eft_efs_ap_access" {
+  name       = "${var.partner}-eft-efs-${var.env_config.env}-ap-access-policy-attachment"
+  policy_arn = aws_iam_policy.eft_efs_ap_access.arn
+  roles      = [aws_iam_role.eft_efs_rw.name]
 }
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NETWORK ACL's ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-# security group that allows NFS traffic (TCP/2049) from BFD and BCDA subnets
-resource "aws_security_group" "bcda_efs_sg" {
-  name        = "bcda-eft-efs-${var.env_config.env}-sg"
-  description = "allows nfs to bcda and bfd subnets"
+# security group that allows NFS traffic (TCP/2049) from BFD and ${var.partner} subnets
+resource "aws_security_group" "eft_efs_sg" {
+  name        = "${var.partner}-eft-efs-${var.env_config.env}-sg"
+  description = "allows nfs to ${var.partner} and bfd subnets"
   vpc_id      = data.aws_vpc.main.id
   tags        = local.tags
 
-  # TODO: tighten this up
   egress {
     from_port   = 0
     to_port     = 0
@@ -338,25 +328,25 @@ resource "aws_security_group" "bcda_efs_sg" {
 }
 
 # allow TCP/2049 from BFD ETL data subnets
-resource "aws_security_group_rule" "bfd" {
+resource "aws_security_group_rule" "bfd_nfs" {
   description       = "Allow NFS"
   type              = "ingress"
   to_port           = "2049"
   from_port         = "2049"
   protocol          = "tcp"
-  security_group_id = aws_security_group.bcda_efs_sg.id
+  security_group_id = aws_security_group.eft_efs_sg.id
   cidr_blocks       = values(data.aws_subnet.etl).*.cidr_block
 }
 
-# allow TCP/2049 from specified BCDA subnets
-resource "aws_security_group_rule" "bcda" {
+# allow TCP/2049 from specified ${var.partner} subnets
+resource "aws_security_group_rule" "partner_nfs" {
   description       = "Allow NFS"
   type              = "ingress"
   to_port           = "2049"
   from_port         = "2049"
   protocol          = "tcp"
-  security_group_id = aws_security_group.bcda_efs_sg.id
-  cidr_blocks       = var.bcda_subnets[var.env_config.env]
+  security_group_id = aws_security_group.eft_efs_sg.id
+  cidr_blocks       = var.partner_subnets[var.env_config.env]
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MONITORING/ALERTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -364,16 +354,16 @@ resource "aws_security_group_rule" "bcda" {
 
 # sns topic for cloudwatch
 resource "aws_sns_topic" "cloudwatch_alarms_topic" {
-  name = "bcda-${var.env_config.env}-eft-efs-cloudwatch-alarms"
+  name = "${var.partner}-eft-efs-${var.env_config.env}-cloudwatch-alarms"
 }
 
 # hook up efs alerts
 module "cloudwatch_alarms_efs" {
   source = "../efs_alarms"
 
-  app                         = "bcda"
+  app                         = var.partner
   env                         = var.env_config.env
   cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms_topic.arn
 
-  filesystem_id = aws_efs_file_system.bcda_eft.id
+  filesystem_id = aws_efs_file_system.eft.id
 }

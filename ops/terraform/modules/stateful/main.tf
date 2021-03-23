@@ -596,11 +596,15 @@ resource "aws_cloudwatch_log_group" "bfd_server_gc" {
 
 # BCDA EFT EFS
 #
-module "bcda_eft" {
-  source        = "../resources/bcda_eft"
-  env_config    = local.env_config
-  bcda_acct_num = var.bcda_acct_num
-  bcda_subnets  = var.bcda_subnets
+module "bcda" {
+  source = "../resources/eft_efs"
+  partner = "bcda"
+  partner_acct_num = var.bcda_acct_num
+  partner_subnets = var.bcda_subnets
+  posix_gid = 1500
+  posix_uid = 1500
+
+  env_config = local.env_config
   role          = "etl"
   layer         = "data"
 }
