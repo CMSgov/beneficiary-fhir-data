@@ -230,7 +230,7 @@ resource "aws_iam_policy" "aws_cli" {
 }
 EOF
 }
-resource "aws_iam_role_policy_attachement" "aws_cli" {
+resource "aws_iam_role_policy_attachment" "aws_cli" {
   role       = module.iam_profile_bfd_pipeline.role
   policy_arn = aws_iam_policy.aws_cli.arn
 }
