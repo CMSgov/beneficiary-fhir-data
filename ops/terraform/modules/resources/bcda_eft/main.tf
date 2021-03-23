@@ -358,3 +358,22 @@ resource "aws_security_group_rule" "bcda" {
   security_group_id = aws_security_group.bcda_efs_sg.id
   cidr_blocks       = var.bcda_subnets[var.env_config.env]
 }
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MONITORING/ALERTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+# sns topic for cloudwatch
+resource "aws_sns_topic" "cloudwatch_alarms_topic" {
+  name = "bcda-${var.env_config.env}-eft-efs-cloudwatch-alarms"
+}
+
+# hook up efs alerts
+module "cloudwatch_alarms_efs" {
+  source = "../efs_alarms"
+
+  app                         = "bcda"
+  env                         = var.env_config.env
+  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms_topic.arn
+
+  filesystem_id = aws_efs_file_system.bcda_eft.id
+}
