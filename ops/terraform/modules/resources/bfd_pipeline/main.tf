@@ -202,6 +202,39 @@ resource "aws_iam_role_policy_attachment" "bfd_pipeline_iam_ansible_vault_pw_ro_
   policy_arn = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
 }
 
+# Attach the amazon manged AmazonElasticFileSystemReadOnlyAccess policy to the instance role
+# This is needed to query EFT EFS file systems
+resource "aws_iam_role_policy_attachment" "aws_efs_read_only_access" {
+  role       = module.iam_profile_bfd_pipeline.role
+  policy_arn = "arn:aws:iam::aws:policy/AmazonElasticFileSystemReadOnlyAccess"
+}
+
+# Policy to allow pipeline instance role to make AWS api calls via the cli
+# - DescribeAvailabilityZones is needed to query/mount EFT EFS file systems
+resource "aws_iam_policy" "aws_cli" {
+  name        = "bfd-pipeline-${var.env_config.env}-cli"
+  description = "AWS cli privileges for the BFD Pipeline instance role."
+
+  policy = <<EOF
+{
+   "Version": "2012-10-17",
+   "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeAvailabilityZones"
+      ],
+      "Resource": "*"
+    }
+   ]
+}
+EOF
+}
+resource "aws_iam_role_policy_attachement" "aws_cli" {
+  role       = module.iam_profile_bfd_pipeline.role
+  policy_arn = aws_iam_policy.aws_cli.arn
+}
+
 # EC2 Instance to run the BFD Pipeline app.
 #
 module "ec2_instance" {
