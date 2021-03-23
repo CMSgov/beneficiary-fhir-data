@@ -37,7 +37,7 @@ resource "aws_cloudwatch_metric_alarm" "percent_io_limit_too_high" {
   statistic           = "Maximum"
 
   dimensions = {
-    FileSystemId = var.efs_name
+    FileSystemId = var.filesystem_id
   }
 
   alarm_description = "I/O limit has been reached, consider using Max I/O performance mode in: ${var.app}-${var.env}"
