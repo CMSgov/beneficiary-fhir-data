@@ -931,6 +931,79 @@
           "display" : "Not Medicare enrolled for the month"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct01/2018-1",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct01",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct02/2018-2",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct02",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct03/2018-3",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct03",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct04/2018-4",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct04",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct05/2018-5",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct05",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct06/2018-6",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct06",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct07/2018-7",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct07",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct08/2018-8",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct08",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct09/2018-9",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct09",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct10/2018-10",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct10",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct11/2018-11",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct11",
+          "code" : "S4607"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct12/2018-12",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ptdcntrct12",
+          "code" : "0",
+          "display" : "Not Medicare enrolled for the month"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/ptdpbpid01",
         "valueCoding" : {
           "system" : "https://bluebutton.cms.gov/resources/variables/ptdpbpid01",

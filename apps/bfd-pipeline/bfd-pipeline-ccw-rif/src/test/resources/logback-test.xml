@@ -1,0 +1,35 @@
+<configuration scan="true" scanPeriod="5 seconds">
+	<!-- Required to ensure that JUL respects log level changes. -->
+	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
+
+	<!-- This appender will be sent all of the app's logging statements. -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- At 'debug', the AWS SDK will log HTTP/S request/response summaries. -->
+	<!-- <logger name="com.amazonaws.request" level="debug" /> -->
+
+	<!--  At 'debug', the AWS SDK (and possibly other libs) will log full HTTP/S requests and responses. -->
+	<!-- <logger name="org.apache.http.wire" level="debug" /> -->
+
+	<!-- At 'debug', Hibernate will log SQL statements. -->
+	<logger name="org.hibernate.SQL" level="info" />
+
+	<!-- At 'debug', will display timing information about the idle task batches -->
+	<logger name="gov.cms.bfd.pipeline.ccw.rif.load" level="info" />
+
+	<!-- At 'trace', Hibernate will log SQL parameter values. -->
+	<logger name="org.hibernate.type" level="info" />
+	
+	<!-- At 'debug', Liquibase will log its DDL statements. -->
+	<logger name="liquibase" level="info" />
+
+	<!-- Configure the root logger to filter to 'info' and more severe, and 
+		send all events to 'STDOUT'. -->
+	<root level="info">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>

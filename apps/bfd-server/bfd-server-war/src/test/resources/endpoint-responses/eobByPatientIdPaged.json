@@ -376,7 +376,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-08:00",
+        "date" : "2016-01-16T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -722,12 +722,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
           "code" : "1",
           "display" : "Physician/supplier"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/carr_num",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/carr_num",
-          "value" : "74655592568216"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",
@@ -2205,7 +2199,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-08:00",
+        "date" : "2016-01-16T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2214,7 +2208,7 @@
         }
       }, {
         "sequence" : 2,
-        "date" : "2016-01-16T00:00:00-08:00",
+        "date" : "2016-01-16T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2223,7 +2217,7 @@
         }
       }, {
         "sequence" : 3,
-        "date" : "2016-01-15T00:00:00-08:00",
+        "date" : "2016-01-15T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2232,7 +2226,7 @@
         }
       }, {
         "sequence" : 4,
-        "date" : "2016-01-17T00:00:00-08:00",
+        "date" : "2016-01-17T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2241,7 +2235,7 @@
         }
       }, {
         "sequence" : 5,
-        "date" : "2016-01-24T00:00:00-08:00",
+        "date" : "2016-01-24T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2250,7 +2244,7 @@
         }
       }, {
         "sequence" : 6,
-        "date" : "2016-01-24T00:00:00-08:00",
+        "date" : "2016-01-24T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2893,7 +2887,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-08:00",
+        "date" : "2016-01-16T00:00:00-05:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
@@ -3556,12 +3550,6 @@
           "system" : "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
           "code" : "1",
           "display" : "Physician/supplier"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/resources/variables/carr_num",
-        "valueIdentifier" : {
-          "system" : "https://bluebutton.cms.gov/resources/variables/carr_num",
-          "value" : "74655592568216"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/resources/variables/asgmntcd",

@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -22,17 +23,23 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,7 +67,7 @@ import org.springframework.stereotype.Component;
  * the CCW beneficiaries.
  */
 @Component
-public final class PatientResourceProvider implements IResourceProvider {
+public final class PatientResourceProvider implements IResourceProvider, CommonHeaders {
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
    */
@@ -121,21 +128,22 @@ public final class PatientResourceProvider implements IResourceProvider {
     String beneIdText = patientId.getIdPart();
     if (beneIdText == null || beneIdText.trim().isEmpty()) throw new IllegalArgumentException();
 
-    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
-    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
 
-    if (hasHICN(includeIdentifiersValues))
+    if (requestHeader.isHICNinIncludeIdentifiers())
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
 
-    if (hasMBI(includeIdentifiersValues))
+    if (requestHeader.isMBIinIncludeIdentifiers())
       root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
@@ -155,24 +163,55 @@ public final class PatientResourceProvider implements IResourceProvider {
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
 
       TransformerUtils.recordQueryInMdc(
-          String.format("bene_by_id.include_%s", String.join("_", includeIdentifiersValues)),
+          String.format(
+              "bene_by_id.include_%s",
+              String.join(
+                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
     }
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!hasHICN(includeIdentifiersValues)) {
+    if (!requestHeader.isHICNinIncludeIdentifiers()) {
       beneficiary.setHicnUnhashed(Optional.empty());
     }
 
     // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!hasMBI(includeIdentifiersValues)) {
+    if (!requestHeader.isMBIinIncludeIdentifiers()) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient =
-        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
+    Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;
+  }
+
+  @Search
+  public Bundle searchByCoverageContract(
+      // This is very explicit as a place holder until this kind
+      // of relational search is more common.
+      @OptionalParam(name = "_has:Coverage.extension")
+          @Description(shortDefinition = "Part D coverage type")
+          TokenParam coverageId,
+      @OptionalParam(name = "_has:Coverage.rfrncyr")
+          @Description(shortDefinition = "Part D reference year")
+          TokenParam referenceYear,
+      @OptionalParam(name = "cursor")
+          @Description(shortDefinition = "The cursor used for result pagination")
+          String cursor,
+      RequestDetails requestDetails) {
+    /*
+     * HAPI's @Search request routing appears to be borked, so we're doing it manually here,
+     * instead. Figure out which of the two coverage search methods to invoke, and then just do so.
+     */
+    if (coverageId != null && referenceYear == null) {
+      return searchByCoverageContractByFieldName(coverageId, cursor, requestDetails);
+    } else if (coverageId != null && referenceYear != null) {
+      return searchByCoverageContractAndYearMonth(
+          coverageId, referenceYear, cursor, requestDetails);
+    } else {
+      // whatever the spec says we're supposed to do: a 404 and/or OperationOutcome
+      throw new IllegalStateException();
+    }
   }
 
   /**
@@ -236,10 +275,12 @@ public final class PatientResourceProvider implements IResourceProvider {
      * Publish the operation name. Note: This is a bit later than we'd normally do this, as we need
      * to override the operation name that was published by the possible call to read(...), above.
      */
+
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "id");
-    operation.setOption(
-        "IncludeIdentifiers", returnIncludeIdentifiersValues(requestDetails).toString());
+    // track all api hdrs
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
@@ -250,8 +291,7 @@ public final class PatientResourceProvider implements IResourceProvider {
     return bundle;
   }
 
-  @Search
-  public Bundle searchByCoverageContract(
+  public Bundle searchByCoverageContractByFieldName(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
@@ -262,17 +302,16 @@ public final class PatientResourceProvider implements IResourceProvider {
           String cursor,
       RequestDetails requestDetails) {
     checkCoverageId(coverageId);
-    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
     checkPageSize(paging);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "coverageContract");
-    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
-    List<Beneficiary> matchingBeneficiaries =
-        fetchBeneficiaries(coverageId, includeIdentifiersValues, paging);
+    List<Beneficiary> matchingBeneficiaries = fetchBeneficiaries(coverageId, requestHeader, paging);
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -284,17 +323,67 @@ public final class PatientResourceProvider implements IResourceProvider {
             .map(
                 beneficiary -> {
                   // Null out the unhashed HICNs if we're not supposed to be returning them
-                  if (!hasHICN(includeIdentifiersValues)) {
+                  if (!requestHeader.isHICNinIncludeIdentifiers()) {
                     beneficiary.setHicnUnhashed(Optional.empty());
                   }
                   // Null out the unhashed MBIs if we're not supposed to be returning
-                  if (!hasMBI(includeIdentifiersValues)) {
+                  if (!requestHeader.isMBIinIncludeIdentifiers()) {
                     beneficiary.setMedicareBeneficiaryId(Optional.empty());
                   }
 
                   Patient patient =
-                      BeneficiaryTransformer.transform(
-                          metricRegistry, beneficiary, includeIdentifiersValues);
+                      BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
+                  return patient;
+                })
+            .collect(Collectors.toList());
+
+    Bundle bundle =
+        TransformerUtils.createBundle(patients, paging, loadedFilterManager.getTransactionTime());
+    TransformerUtils.workAroundHAPIIssue1585(requestDetails);
+    return bundle;
+  }
+
+  public Bundle searchByCoverageContractAndYearMonth(
+      // This is very explicit as a place holder until this kind
+      // of relational search is more common.
+      TokenParam coverageId,
+      TokenParam referenceYear,
+      String cursor,
+      RequestDetails requestDetails) {
+    checkCoverageId(coverageId);
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
+
+    PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    checkPageSize(paging);
+
+    Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
+    operation.setOption("by", "coverageContract");
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
+    operation.publishOperationName();
+
+    List<Beneficiary> matchingBeneficiaries =
+        fetchBeneficiariesByContractAndYearMonth(coverageId, referenceYear, requestHeader, paging);
+    boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
+    if (hasAnotherPage) {
+      matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
+      paging = new PatientLinkBuilder(paging, hasAnotherPage);
+    }
+
+    List<IBaseResource> patients =
+        matchingBeneficiaries.stream()
+            .map(
+                beneficiary -> {
+                  // Null out the unhashed HICNs if we're not supposed to be returning them
+                  if (!requestHeader.isHICNinIncludeIdentifiers()) {
+                    beneficiary.setHicnUnhashed(Optional.empty());
+                  }
+                  // Null out the unhashed MBIs if we're not supposed to be returning
+                  if (!requestHeader.isMBIinIncludeIdentifiers()) {
+                    beneficiary.setMedicareBeneficiaryId(Optional.empty());
+                  }
+
+                  Patient patient =
+                      BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
                   return patient;
                 })
             .collect(Collectors.toList());
@@ -314,18 +403,56 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   private String partDFieldFor(CcwCodebookVariable month) {
-    if (month == CcwCodebookVariable.PTDCNTRCT01) return "partDContractNumberJanId";
-    if (month == CcwCodebookVariable.PTDCNTRCT02) return "partDContractNumberFebId";
-    if (month == CcwCodebookVariable.PTDCNTRCT03) return "partDContractNumberMarId";
-    if (month == CcwCodebookVariable.PTDCNTRCT04) return "partDContractNumberAprId";
-    if (month == CcwCodebookVariable.PTDCNTRCT05) return "partDContractNumberMayId";
-    if (month == CcwCodebookVariable.PTDCNTRCT06) return "partDContractNumberJunId";
-    if (month == CcwCodebookVariable.PTDCNTRCT07) return "partDContractNumberJulId";
-    if (month == CcwCodebookVariable.PTDCNTRCT08) return "partDContractNumberAugId";
-    if (month == CcwCodebookVariable.PTDCNTRCT09) return "partDContractNumberSeptId";
-    if (month == CcwCodebookVariable.PTDCNTRCT10) return "partDContractNumberOctId";
-    if (month == CcwCodebookVariable.PTDCNTRCT11) return "partDContractNumberNovId";
-    if (month == CcwCodebookVariable.PTDCNTRCT12) return "partDContractNumberDecId";
+
+    Map<CcwCodebookVariable, String> mapOfMonth =
+        new HashMap<CcwCodebookVariable, String>() {
+          {
+            put(CcwCodebookVariable.PTDCNTRCT01, "partDContractNumberJanId");
+            put(CcwCodebookVariable.PTDCNTRCT02, "partDContractNumberFebId");
+            put(CcwCodebookVariable.PTDCNTRCT03, "partDContractNumberMarId");
+            put(CcwCodebookVariable.PTDCNTRCT04, "partDContractNumberAprId");
+            put(CcwCodebookVariable.PTDCNTRCT05, "partDContractNumberMayId");
+            put(CcwCodebookVariable.PTDCNTRCT06, "partDContractNumberJunId");
+            put(CcwCodebookVariable.PTDCNTRCT07, "partDContractNumberJulId");
+            put(CcwCodebookVariable.PTDCNTRCT08, "partDContractNumberAugId");
+            put(CcwCodebookVariable.PTDCNTRCT09, "partDContractNumberSeptId");
+            put(CcwCodebookVariable.PTDCNTRCT10, "partDContractNumberOctId");
+            put(CcwCodebookVariable.PTDCNTRCT11, "partDContractNumberNovId");
+            put(CcwCodebookVariable.PTDCNTRCT12, "partDContractNumberDecId");
+          }
+        };
+
+    if (mapOfMonth.containsKey(month)) {
+      return mapOfMonth.get(month);
+    }
+
+    throw new InvalidRequestException(
+        "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
+  }
+
+  private String partDFieldByMonth(CcwCodebookVariable month) {
+
+    Map<CcwCodebookVariable, String> mapOfMonth =
+        new HashMap<CcwCodebookVariable, String>() {
+          {
+            put(CcwCodebookVariable.PTDCNTRCT01, "01");
+            put(CcwCodebookVariable.PTDCNTRCT02, "02");
+            put(CcwCodebookVariable.PTDCNTRCT03, "03");
+            put(CcwCodebookVariable.PTDCNTRCT04, "04");
+            put(CcwCodebookVariable.PTDCNTRCT05, "05");
+            put(CcwCodebookVariable.PTDCNTRCT06, "06");
+            put(CcwCodebookVariable.PTDCNTRCT07, "07");
+            put(CcwCodebookVariable.PTDCNTRCT08, "08");
+            put(CcwCodebookVariable.PTDCNTRCT09, "09");
+            put(CcwCodebookVariable.PTDCNTRCT10, "10");
+            put(CcwCodebookVariable.PTDCNTRCT11, "11");
+            put(CcwCodebookVariable.PTDCNTRCT12, "12");
+          }
+        };
+
+    if (mapOfMonth.containsKey(month)) {
+      return mapOfMonth.get(month);
+    }
     throw new InvalidRequestException(
         "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
   }
@@ -335,12 +462,13 @@ public final class PatientResourceProvider implements IResourceProvider {
    * entity mappings are fetched as well
    *
    * @param coverageId coverage type
-   * @param includedIdentifiers list from the includeIdentifier header
+   * @param requestHeader, see {@link RequestHeaders} the holder that contains all supported
+   *     resource request headers
    * @param paging specified
    * @return the beneficiaries
    */
   private List<Beneficiary> fetchBeneficiaries(
-      TokenParam coverageId, List<String> includedIdentifiers, PatientLinkBuilder paging) {
+      TokenParam coverageId, RequestHeaders requestHeader, PatientLinkBuilder paging) {
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
@@ -352,7 +480,8 @@ public final class PatientResourceProvider implements IResourceProvider {
     // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
     // with paging and then fetch full benes with joins.
     boolean useTwoSteps =
-        (hasHICN(includedIdentifiers) || hasMBI(includedIdentifiers)) && paging.isPagingRequested();
+        (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers())
+            && paging.isPagingRequested();
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
@@ -361,10 +490,64 @@ public final class PatientResourceProvider implements IResourceProvider {
               .getResultList();
 
       // Fetch the benes using the ids
-      return queryBeneficiariesByIds(ids, includedIdentifiers).getResultList();
+      return queryBeneficiariesByIds(ids, requestHeader).getResultList();
     } else {
       // Fetch benes and their histories in one query
-      return queryBeneficiariesBy(contractMonthField, contractCode, paging, includedIdentifiers)
+      return queryBeneficiariesBy(contractMonthField, contractCode, paging, requestHeader)
+          .setMaxResults(paging.getPageSize() + 1)
+          .getResultList();
+    }
+  }
+
+  /**
+   * Fetch beneficiaries for the PartD coverage parameter. If includeIdentiers are present then the
+   * entity mappings are fetched as well
+   *
+   * @param coverageId coverage type
+   * @param includedIdentifiers list from the includeIdentifier header
+   * @param paging specified
+   * @return the beneficiaries
+   */
+  private List<Beneficiary> fetchBeneficiariesByContractAndYearMonth(
+      TokenParam coverageId,
+      TokenParam referenceYear,
+      RequestHeaders requestHeader,
+      PatientLinkBuilder paging) {
+    String contractMonth =
+        coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
+
+    CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
+    String contractMonthField = partDFieldByMonth(partDContractMonth);
+    String contractYearField = referenceYear.getValueNotNull();
+
+    String contractCode = coverageId.getValueNotNull();
+
+    LocalDate yearMonth = getFormattedYearMonth(contractYearField, contractMonthField);
+
+    // Fetching with joins is not compatible with setMaxResults as explained in this post:
+    // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
+    // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
+    // with paging and then fetch full benes with joins.
+    boolean useTwoSteps =
+        (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers())
+            && paging.isPagingRequested();
+    if (useTwoSteps) {
+      // Fetch ids
+      List<String> ids =
+          queryBeneficiaryIdsByPartDContractCodeAndYearMonth(contractCode, yearMonth, paging)
+              .setMaxResults(paging.getPageSize() + 1)
+              .getResultList();
+
+      if (ids.isEmpty()) {
+        return new ArrayList<Beneficiary>();
+      } else {
+        // Fetch the benes using the ids
+        return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids, requestHeader).getResultList();
+      }
+    } else {
+      // Fetch benes and their histories in one query
+      return queryBeneficiariesByPartDContractCodeAndYearMonth(
+              contractCode, yearMonth, paging, requestHeader)
           .setMaxResults(paging.getPageSize() + 1)
           .getResultList();
     }
@@ -380,10 +563,12 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
-      String field, String value, PatientLinkBuilder paging, List<String> identifiers) {
+      String field, String value, PatientLinkBuilder paging, RequestHeaders requestHeader) {
     String joinsClause = "";
-    if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
+    if (requestHeader.isMBIinIncludeIdentifiers())
+      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (requestHeader.isHICNinIncludeIdentifiers())
+      joinsClause += "left join fetch b.beneficiaryHistories ";
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
@@ -446,6 +631,91 @@ public final class PatientResourceProvider implements IResourceProvider {
   }
 
   /**
+   * Build a criteria for a general Beneficiary query
+   *
+   * @param field to match on
+   * @param value to match on
+   * @param paging to use for the result set
+   * @param identifiers to add for many-to-one relations
+   * @return the criteria
+   */
+  private TypedQuery<Beneficiary> queryBeneficiariesByPartDContractCodeAndYearMonth(
+      String contractCode,
+      LocalDate yearMonth,
+      PatientLinkBuilder paging,
+      RequestHeaders requestHeader) {
+    String joinsClause = "inner join b.beneficiaryMonthlys bm ";
+    if (requestHeader.isMBIinIncludeIdentifiers())
+      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (requestHeader.isHICNinIncludeIdentifiers())
+      joinsClause += "left join fetch b.beneficiaryHistories ";
+
+    if (paging.isPagingRequested() && !paging.isFirstPage()) {
+      String query =
+          "select distinct b from Beneficiary b "
+              + joinsClause
+              + "where bm.partDContractNumberId = :contractCode and "
+              + "bm.yearMonth = :yearMonth "
+              + "and b.beneficiaryId > :cursor "
+              + "order by b.beneficiaryId asc";
+
+      return entityManager
+          .createQuery(query, Beneficiary.class)
+          .setParameter("contractCode", contractCode)
+          .setParameter("yearMonth", yearMonth)
+          .setParameter("cursor", paging.getCursor());
+    } else {
+      String query =
+          "select distinct b from Beneficiary b "
+              + joinsClause
+              + "where bm.partDContractNumberId = :contractCode and "
+              + "bm.yearMonth = :yearMonth "
+              + "order by b.beneficiaryId asc";
+
+      return entityManager
+          .createQuery(query, Beneficiary.class)
+          .setParameter("contractCode", contractCode)
+          .setParameter("yearMonth", yearMonth);
+    }
+  }
+
+  /**
+   * Build a criteria for a general beneficiaryId query
+   *
+   * @param field to match on
+   * @param value to match on
+   * @param paging to use for the result set
+   * @return the criteria
+   */
+  private TypedQuery<String> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
+      String contractCode, LocalDate yearMonth, PatientLinkBuilder paging) {
+    if (paging.isPagingRequested() && !paging.isFirstPage()) {
+      String query =
+          "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
+              + "where bm.partDContractNumberId = :contractCode and "
+              + "bm.yearMonth = :yearMonth and b.beneficiaryId > :cursor "
+              + "order by b.beneficiaryId asc";
+
+      return entityManager
+          .createQuery(query, String.class)
+          .setParameter("contractCode", contractCode)
+          .setParameter("yearMonth", yearMonth)
+          .setParameter("cursor", paging.getCursor());
+    } else {
+      String query =
+          "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
+              + "where bm.partDContractNumberId = :contractCode and "
+              + "bm.yearMonth = :yearMonth "
+              + "order by b.beneficiaryId asc";
+
+      return entityManager
+          .createQuery(query, String.class)
+          .setParameter("contractCode", contractCode)
+          .setParameter("yearMonth", yearMonth);
+    }
+  }
+
+  /**
    * Build a criteria for a beneficiary query using the passed in list of ids
    *
    * @param ids to use
@@ -453,10 +723,34 @@ public final class PatientResourceProvider implements IResourceProvider {
    * @return the criteria
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIds(
-      List<String> ids, List<String> identifiers) {
+      List<String> ids, RequestHeaders requestHeader) {
     String joinsClause = "";
-    if (hasMBI(identifiers)) joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (hasHICN(identifiers)) joinsClause += "left join fetch b.beneficiaryHistories ";
+    if (requestHeader.isMBIinIncludeIdentifiers())
+      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (requestHeader.isHICNinIncludeIdentifiers())
+      joinsClause += "left join fetch b.beneficiaryHistories ";
+
+    String query =
+        "select distinct b from Beneficiary b "
+            + joinsClause
+            + "where b.beneficiaryId in :ids "
+            + "order by b.beneficiaryId asc";
+    return entityManager.createQuery(query, Beneficiary.class).setParameter("ids", ids);
+  }
+  /**
+   * Build a criteria for a beneficiary query using the passed in list of ids
+   *
+   * @param ids to use
+   * @param identifiers to add for many-to-one relations
+   * @return the criteria
+   */
+  private TypedQuery<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(
+      List<String> ids, RequestHeaders requestHeader) {
+    String joinsClause = "inner join b.beneficiaryMonthlys bm ";
+    if (requestHeader.isMBIinIncludeIdentifiers())
+      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    if (requestHeader.isHICNinIncludeIdentifiers())
+      joinsClause += "left join fetch b.beneficiaryHistories ";
 
     String query =
         "select distinct b from Beneficiary b "
@@ -512,11 +806,11 @@ public final class PatientResourceProvider implements IResourceProvider {
     if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
 
-    List<String> includeIdentifiersValues = returnIncludeIdentifiersValues(requestDetails);
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "identifier");
-    operation.setOption("IncludeIdentifiers", includeIdentifiersValues.toString());
+    requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
     operation.publishOperationName();
@@ -527,10 +821,10 @@ public final class PatientResourceProvider implements IResourceProvider {
       switch (identifier.getSystem()) {
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
         case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
-          patient = queryDatabaseByHicnHash(identifier.getValue(), includeIdentifiersValues);
+          patient = queryDatabaseByHicnHash(identifier.getValue(), requestHeader);
           break;
         case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
-          patient = queryDatabaseByMbiHash(identifier.getValue(), includeIdentifiersValues);
+          patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
           break;
         default:
           throw new InvalidRequestException(
@@ -553,47 +847,39 @@ public final class PatientResourceProvider implements IResourceProvider {
 
   /**
    * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *     value to use
-   * @param includeAddressFieldsValue the {@link #returnIncludeAddressFieldsValue(RequestDetails)}
-   *     value to use to decide if address fields need to be included
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getHicn()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByHicnHash(String hicnHash, List<String> includeIdentifiersValues) {
+  private Patient queryDatabaseByHicnHash(String hicnHash, RequestHeaders requestHeader) {
     return queryDatabaseByHash(
-        hicnHash, "hicn", includeIdentifiersValues, Beneficiary_.hicn, BeneficiaryHistory_.hicn);
+        hicnHash, "hicn", Beneficiary_.hicn, BeneficiaryHistory_.hicn, requestHeader);
   }
 
   /**
    * @param mbiHash the {@link Beneficiary#getMbiHash()} ()} hash value to match
-   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *     value to use
-   * @param includeAddressFields the {@link #returnIncludeAddressFieldsValue(RequestDetails)} value
-   *     to decide if address fields need to be included
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
    *     {@link Beneficiary#getMbiHash()} ()} hash value
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
   @Trace
-  private Patient queryDatabaseByMbiHash(String mbiHash, List<String> includeIdentifiersValues) {
+  private Patient queryDatabaseByMbiHash(String mbiHash, RequestHeaders requestHeader) {
     return queryDatabaseByHash(
-        mbiHash,
-        "mbi",
-        includeIdentifiersValues,
-        Beneficiary_.mbiHash,
-        BeneficiaryHistory_.mbiHash);
+        mbiHash, "mbi", Beneficiary_.mbiHash, BeneficiaryHistory_.mbiHash, requestHeader);
   }
 
   /**
    * @param hash the {@link Beneficiary} hash value to match
    * @param hashType a string to represent the hash type (used for logging purposes)
-   * @param includeIdentifiersValues the {@link #returnIncludeIdentifiersValues(RequestDetails)}
-   *     value to use
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
    * @param beneficiaryHashField the JPA location of the beneficiary hash field
    * @param beneficiaryHistoryHashField the JPA location of the beneficiary history hash field
    * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
@@ -605,9 +891,9 @@ public final class PatientResourceProvider implements IResourceProvider {
   private Patient queryDatabaseByHash(
       String hash,
       String hashType,
-      List<String> includeIdentifiersValues,
       SingularAttribute<Beneficiary, String> beneficiaryHashField,
-      SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField) {
+      SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField,
+      RequestHeaders requestHeader) {
     if (hash == null || hash.trim().isEmpty()) throw new IllegalArgumentException();
 
     /*
@@ -676,10 +962,10 @@ public final class PatientResourceProvider implements IResourceProvider {
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
 
-    if (hasHICN(includeIdentifiersValues))
+    if (requestHeader.isHICNinIncludeIdentifiers())
       beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
 
-    if (hasMBI(includeIdentifiersValues))
+    if (requestHeader.isMBIinIncludeIdentifiers())
       beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     beneMatches.select(beneMatchesRoot);
@@ -710,7 +996,8 @@ public final class PatientResourceProvider implements IResourceProvider {
       TransformerUtils.recordQueryInMdc(
           String.format(
               "bene_by_" + hashType + ".bene_by_" + hashType + "_or_id.include_%s",
-              String.join("_", includeIdentifiersValues)),
+              String.join(
+                  "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           benesByHashOrIdQueryNanoSeconds,
           matchingBenes.size());
     }
@@ -734,17 +1021,16 @@ public final class PatientResourceProvider implements IResourceProvider {
     }
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!hasHICN(includeIdentifiersValues)) {
+    if (!requestHeader.isHICNinIncludeIdentifiers()) {
       beneficiary.setHicnUnhashed(Optional.empty());
     }
 
     // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!hasMBI(includeIdentifiersValues)) {
+    if (!requestHeader.isMBIinIncludeIdentifiers()) {
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
-    Patient patient =
-        BeneficiaryTransformer.transform(metricRegistry, beneficiary, includeIdentifiersValues);
+    Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;
   }
 
@@ -802,7 +1088,7 @@ public final class PatientResourceProvider implements IResourceProvider {
   public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
     String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
-    if (headerValues == null || headerValues == "") return Arrays.asList("");
+    if (Strings.isNullOrEmpty(headerValues)) return Arrays.asList("");
     else
       // Return values split on a comma with any whitespace, valid, distict, and sort
       return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream()
@@ -837,6 +1123,11 @@ public final class PatientResourceProvider implements IResourceProvider {
     return includeIdentifiersValues.contains("mbi") || includeIdentifiersValues.contains("true");
   }
 
+  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;
+  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
+  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
+  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
+
   /**
    * Check that coverageId value is valid
    *
@@ -860,5 +1151,17 @@ public final class PatientResourceProvider implements IResourceProvider {
   public static void checkPageSize(LinkBuilder paging) {
     if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
     if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
+  }
+
+  private static LocalDate getFormattedYearMonth(String contractYear, String contractMonth) {
+    if (Strings.isNullOrEmpty(contractYear))
+      throw new InvalidRequestException("A null or empty year is not supported");
+    if (Strings.isNullOrEmpty(contractMonth))
+      throw new InvalidRequestException("A null or empty month is not supported");
+    if (contractYear.length() != 4)
+      throw new InvalidRequestException("A invalid year is not supported");
+
+    String localDateString = String.format("%s-%s-%s", contractYear, contractMonth, "01");
+    return LocalDate.parse(localDateString);
   }
 }
