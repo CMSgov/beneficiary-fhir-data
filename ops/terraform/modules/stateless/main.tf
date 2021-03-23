@@ -241,8 +241,10 @@ module "fhir_asg" {
 
   launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
-    instance_type = "m5.xlarge" # Use reserve instances
-    volume_size   = 60          # GB
+    # upsize prod-sbx from 4 to 16 cores for performance testing
+    # update launch_bfd-server.yml -> data_server_db_connections_max accordingly
+    instance_type = var.env_config.env == "prod-sbx" ? "m5.4xlarge" : "m5.xlarge"
+    volume_size   = 60                                                             # GB
     ami_id        = var.fhir_ami
     key_name      = var.ssh_key_name
 
