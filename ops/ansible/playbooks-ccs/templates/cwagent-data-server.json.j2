@@ -51,6 +51,12 @@
             "log_group_name": "/bfd/{{ env }}/bfd-server/bfd-server-startup.log",
             "log_stream_name": "{instance_id}",
             "timestamp_format": "%Y-%m-%d %H:%M:%S"
+          },
+          {
+            "file_path": "{{ bfd_server_dir }}/loadedFilterManagerLog.json",
+            "log_group_name": "/bfd/{{ env }}/bfd-server/loadedFilterManagerLog.log",
+            "log_stream_name": "{instance_id}",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S"
           }
         ]
       }

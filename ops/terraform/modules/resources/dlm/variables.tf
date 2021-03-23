@@ -6,5 +6,5 @@ variable "retain" {
 variable "time" {
   description = "Snapshot start time"
   type        = string
-  default     = "23:45" 
+  default     = "23:45"
 }

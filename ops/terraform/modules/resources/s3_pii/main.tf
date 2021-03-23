@@ -2,8 +2,8 @@
 #
 
 locals {
-  tags    = merge({Layer="data", role=var.pii_bucket_config.name}, var.env_config.tags)
-  is_prod = substr(var.env_config.env, 0, 4) == "prod" 
+  tags    = merge({ Layer = "data", role = var.pii_bucket_config.name }, var.env_config.tags)
+  is_prod = substr(var.env_config.env, 0, 4) == "prod"
 }
 
 data "aws_caller_identity" "current" {}
