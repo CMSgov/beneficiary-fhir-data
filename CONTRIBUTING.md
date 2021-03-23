@@ -83,7 +83,7 @@ A: Anyone can coordinate with you and the core team to take over the work.
 
 Going to work on this project? Great! There are currently two documented methods for getting a local environment up and running to get you setup for development. 
 
-[Getting started on BFD via Docker](README.md) 
+[Getting started on BFD](README.md) 
 
 #### Opening A PR
 
