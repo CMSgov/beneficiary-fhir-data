@@ -43,7 +43,7 @@ Some of this project's integration tests require AWS credentials. These credenti
 
 ## Running the Benchmarks
 
-This project's `bluebutton-data-pipeline-benchmarks` module contains the `S3ToFhirLoadAppBenchmark` class, which runs a series of (time-consuming) benchmarks of this application's performance. See the [Design Decisions](./design-decisions-readme.md) document for a discussion on how these benchmarks were designed.
+This project's `bluebutton-data-pipeline-benchmarks` module contains the `PipelineApplicationBenchmark` class, which runs a series of (time-consuming) benchmarks of this application's performance. See the [Design Decisions](./design-decisions-readme.md) document for a discussion on how these benchmarks were designed.
 
 To run the benchmarks, a number of additional parameters have to be included in the typical Maven build command, as follows:
 

@@ -66,28 +66,73 @@ mkdir -p ~/workspaces/bfd/
 git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/beneficiary-fhir-data.git
 ```
 
-### Setting up the FHIR server and DB with Docker
+### Native Setup
+1. Install JDK 8. You'll need Java 8 to run BFD. You can install OpenJDK 8 however you prefer. Problems currently arise after the 8.0.252 release. 
+2. Install Maven 3. Project tasks are handled by Apache Maven. Install it however you prefer.
+3. Configure your toolchain. You'll want to configure your `~/.m2/toolchains.xml` file to look like the following:
+```xml
+<?xml version="1.0" encoding="UTF8"?>
+<toolchains>
+  <!-- JDK toolchains -->
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>1.8</version>
+      <vendor>sun</vendor>
+    </provides>
+    <configuration>
+      <jdkHome>/path/to/your/jdk</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
+```
+4. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
+5. Set up a Postgres 9 database. The major version matters here—some newer versions will not work. The easiest way to set up a local database is with the following command. Data will be persisted between starts and stops in the `pgdata` volume.
+```sh
+docker run \
+  -d \
+  --name 'bfd-db' \
+  -e 'POSTGRES_USER=bfd' \
+  -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
+  -p '5432:5432' \
+  -v 'pgdata:/var/lib/postgresql/data' \
+  postgres:9.6
+```
+6. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run `mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify`. This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with `docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT "beneficiaryId" FROM "Beneficiaries" LIMIT 1;'`
+7. Run `export BFD_PORT=6500` and add it to your profile, too. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later.
+8. Now it's time to start the server up. Change to `apps/bfd-server` and run `mvn -X -Dits.db.url="jdbc:postgresql://localhost:5432/bfd?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start`. After it starts up, you can tail the logs with `tail -f bfd-server-war/target/server-work/server-console.log`.
+9. We're finally going to make a request. BFD requires that clients authenticate themselves with a certificate. Those certs live in the `apps/bfd-server/dev/ssl-stores` directory. We can curl the server using a cert with this command `curl --cert $BFD_PATH/apps/bfd-server/dev/ssl-stores/client-unsecured.pem -s https://localhost:$BFD_PORT/v2/fhir/ExplanationOfBenefit/?patient=-20140000001827&_format=json`, where `$BFD_PATH` is that path to the `beneficiary-fhir-data` repo on your system. It may be helpful to have that set in your profile, too. To configure Postman, go to `Settings -> Certificates -> Add certificate` and load in `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` under the PFX File option. The passphrase is `changeit`. Under `Settings -> General` you'll also want to turn off "SSL Certificate Verification."
+10. Total success (probably)!. You have a working call. But you'll probably want more data. Move on to the next section to see how to load 30,000 synthetic beneficiaries. 
+
+### Load Full Synthetic Dataset
+1. Change to the top-level `contributing` directory and run `make synthetic-data/*.rif`. This will fetch RIF files (the raw incoming data) from a public S3 bucket.
+2. Run `export LOCAL_SYNTHETIC_DATA=$BFD_PATH/contributing/synthetic-data`. You may want this one in your profile, too.
+3. Apply the patched files with `git apply contributing/patches/load_local_synthetic_data.patch` from the root of the project. This will change three files: `StaticRifResource.java`, `StaticRifResourceGroup.java` and `RifLoaderIT.java`. The changes effectively create an integration test that point to the local RIF files that you just pulled down.
+4. Change to the `apps` directory and run `mvn clean install -DskipITs` again to recompile with the newly changed files.
+5. Make sure you have an active MFA session with AWS. The integration tests will need to be allowed to create an S3 bucket.
+6. Change to `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run `mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadLocalSyntheticData clean verify`. This could take around an hour to complete.
+7. Verify everything loaded with `docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT COUNT("beneficiaryId") FROM "Beneficiaries";'`. You should see a count of 30,000.
+
+### Docker Setup
 
 Requirements: Docker
-
-Caution: Setting up your local environments requires git patches to run. Please make sure you `make unservable` and `make unloadadable` before you commit your changes to revert these patches.
 
 Let's begin!
 
 The instructions from here on should be run from the `contributing` directory located at /
 
 To simply run tests or execute other tasks in the BFD bring up the docker containers.
-Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory.
+Note: As a prerequisite, the bfd Docker environments need a few variables to be set in a file named .env placed within the /contributing directory. A sample file in the `contributing` directory has been added to serve as a starting point.
 
-- `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
-- (optional) `SYNTHETIC_DATA` specifies a folder where you have the full set of synthetic rif files.
+```
+cp .env.sample .env
+```
+
+- (defaults to `..`) `BFD_DIR` specifies the directory on your host machine where you have cloned https://github.com/CMSgov/beneficiary-fhir-data
+- (defaults to `9954`) `BFD_PORT` specifies the host port to use when running the API locally
 - (defaults to `/app`) `BFD_MOUNT_POINT` the path within the service container where the beneficiary-fhir-data directory will be mounted.
-
-Here's an example `.env` file that docker-compose could use:
-```
-BFD_DIR=../../beneficiary-fhir-data
-SYNTHETIC_DATA=../../synthetic-data
-```
+- (defaults to `./synthetic-data`) `SYNTHETIC_DATA` specifies a folder where you have the full set of synthetic rif files.
+- (defaults to `/synthetic-data`) `SYNTHETIC_DATA_MOUNT_POINT` specifies the folder in the bfd container where the data will be mounted
 
 ```
 make up
@@ -105,23 +150,7 @@ mvn verify
 
 #### Serving the BFD
 
-To run the BFD locally in a way that will allow you and other systems to interact with it some modifications need to be made so that it serves on a consistent port. Caution: Since this changes the code in the repository (server-start.sh) please keep in mind not to commit these changes.
-
-These changes are contained in the file `contributing/patches/allow_local_port_config.patch` and can be applied with
-
-```
-make servable
-```
-To undo the changes run `make unservable`.
-
-Once the changes are applied the server needs to be started in order for them to take effect.
-Run `make up` if no docker containers are running or
-
-```
-make restart
-```
-
-if they're already running.
+Run `make up` if no docker containers are running or `make restart` if they're already running.
 
 The FHIR server should now be reachable from the browser at https://localhost:1337. In order for the FHIR server to trust your browser and return data, the client certificate at `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` needs to be imported into the browser. The cert password is 'changeit'.
 

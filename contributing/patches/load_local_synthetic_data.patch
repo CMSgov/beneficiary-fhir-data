@@ -1,19 +1,19 @@
-From 58e3f4eaa6f9f9290720a9fbaaaa5969cddc9a8a Mon Sep 17 00:00:00 2001
-From: jzulim <john.zulim@adhocteam.us>
-Date: Thu, 7 May 2020 10:47:42 -0700
-Subject: [PATCH] load local synthetic
+From 30a4253cbf60a7800613ef5c782b7eb113a98762 Mon Sep 17 00:00:00 2001
+From: Ryan Travitz <rtravitz@gmail.com>
+Date: Mon, 22 Mar 2021 14:44:37 -0700
+Subject: [PATCH] Update files that load local synthetic data to new directory
 
 ---
  .../model/rif/samples/StaticRifResource.java  | 180 ++++++++++++++++++
  .../rif/samples/StaticRifResourceGroup.java   |  33 ++++
- .../bfd/pipeline/rif/load/RifLoaderIT.java    |  15 ++
- 3 files changed, 228 insertions(+)
+ .../pipeline/ccw/rif/load/RifLoaderIT.java    |  11 ++
+ 3 files changed, 224 insertions(+)
 
 diff --git a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
-index 59c78855..8a097b96 100644
+index 9c0f140a..d45acb36 100644
 --- a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
 +++ b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
-@@ -302,6 +302,161 @@ public enum StaticRifResource {
+@@ -323,6 +323,161 @@ public enum StaticRifResource {
        RifFileType.OUTPATIENT,
        27955),
  
@@ -175,7 +175,7 @@ index 59c78855..8a097b96 100644
    SAMPLE_MCT_BENES(
        resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
  
-@@ -390,6 +545,31 @@ public enum StaticRifResource {
+@@ -411,6 +566,31 @@ public enum StaticRifResource {
      };
    }
  
@@ -208,12 +208,12 @@ index 59c78855..8a097b96 100644
     * @param dataSetLocation the {@link TestDataSetLocation} of the file to get a local copy of
     * @param fileName the name of the specific file in the specified {@link TestDataSetLocation} to
 diff --git a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
-index a1401b55..a44fca81 100644
+index fbc6727a..40f50380 100644
 --- a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
 +++ b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
-@@ -47,6 +47,39 @@ public enum StaticRifResourceGroup {
-   SAMPLE_U_BENES_UNCHANGED(
-       StaticRifResource.SAMPLE_U_BENES_UNCHANGED, StaticRifResource.SAMPLE_U_CARRIER),
+@@ -86,6 +86,39 @@ public enum StaticRifResourceGroup {
+       StaticRifResource.SYNTHETIC_OUTPATIENT_2015_2014,
+       StaticRifResource.SYNTHETIC_OUTPATIENT_2016_2014),
  
 +  LOCAL_SYNTHETIC(
 +      StaticRifResource.LOCAL_SYNTHETIC_BENEFICIARY_1999,
@@ -248,21 +248,18 @@ index a1401b55..a44fca81 100644
 +      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_2015_2014,
 +      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_2016_2014),
 +
-   SYNTHETIC_DATA(
-       StaticRifResource.SYNTHETIC_BENEFICIARY_1999,
-       StaticRifResource.SYNTHETIC_BENEFICIARY_2000,
-diff --git a/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java b/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
-index a163268d..5378d8ce 100644
---- a/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
-+++ b/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderIT.java
-@@ -316,6 +316,20 @@ public final class RifLoaderIT {
-       if (entityManager != null) entityManager.close();
-     }
+   SAMPLE_MCT(StaticRifResource.SAMPLE_MCT_BENES, StaticRifResource.SAMPLE_MCT_PDE),
+ 
+   SAMPLE_MCT_UPDATE_1(StaticRifResource.SAMPLE_MCT_UPDATE_1_BENES),
+diff --git a/apps/bfd-pipeline/bfd-pipeline-ccw-rif/src/test/java/gov/cms/bfd/pipeline/ccw/rif/load/RifLoaderIT.java b/apps/bfd-pipeline/bfd-pipeline-ccw-rif/src/test/java/gov/cms/bfd/pipeline/ccw/rif/load/RifLoaderIT.java
+index 8d049012..e792afc7 100644
+--- a/apps/bfd-pipeline/bfd-pipeline-ccw-rif/src/test/java/gov/cms/bfd/pipeline/ccw/rif/load/RifLoaderIT.java
++++ b/apps/bfd-pipeline/bfd-pipeline-ccw-rif/src/test/java/gov/cms/bfd/pipeline/ccw/rif/load/RifLoaderIT.java
+@@ -1130,4 +1130,15 @@ public final class RifLoaderIT {
+               return true;
+             });
    }
-+  /**
-+   * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
-+   * StaticRifResourceGroup#LOCAL_SYNTHETIC} data.
-+   */
++
 +  @Test
 +  public void loadLocalSyntheticData() {
 +    /*Assume.assumeTrue(
@@ -273,9 +270,7 @@ index a163268d..5378d8ce 100644
 +    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
 +    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.LOCAL_SYNTHETIC.getResources()));
 +  }
-   /**
-    * Runs {@link gov.cms.bfd.pipeline.rif.load.RifLoader} against the {@link
-    * StaticRifResourceGroup#SAMPLE_B} data.
+ }
 -- 
-2.19.0
+2.30.0
 

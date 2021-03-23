@@ -176,6 +176,10 @@ public final class TransformerConstants {
    */
   public static final String CODED_IDENTIFIER_TYPE_NPI_DISPLAY = "National Provider Identifier";
 
+  /** System for encoding UPIN values */
+  public static final String CODING_UPIN =
+      "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBPractitionerIdentifierType";
+
   /**
    * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
    * identifier is a UPIN.
@@ -353,21 +357,16 @@ public final class TransformerConstants {
    */
   public static final String HL7_RACE_UNKNOWN_DISPLAY = "Unknown";
 
-  /**
-   * US Core Code System URL for Race Category <a
-   * href="https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">CodeSystem: US Core
-   * Race</a>
-   */
-  public static final String CODING_RACE_US =
-      "http://hl7.org/fhir/us/core/ValueSet/omb-race-category";
+  /** System for encoding UNK/null values */
+  public static final String CODING_V3_NULL = "http://terminology.hl7.org/CodeSystem/v3-NullFlavor";
 
   /**
-   * CARIN Value Set URL for Identifier Type <a href=
-   * "http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">ValueSet: C4BB
-   * Identifier Type</a>
+   * US Core Code System URL for Race Category <a
+   * href="http://hl7.org/fhir/us/core/STU3.1.1/StructureDefinition-us-core-race.html">CodeSystem:
+   * US Core Race</a>
    */
-  public static final String CARIN_IDENTIFIER_TYPE =
-      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
+  public static final String CODING_RACE_US =
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race";
 
   /**
    * CARIN Code System URL for Supporting Info Type <a
@@ -375,13 +374,23 @@ public final class TransformerConstants {
    * C4BB Supporting Info Type</a>
    */
   public static final String CARIN_SUPPORTING_INFO_TYPE =
+      "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
+
+  /**
+   * CodeSystem: C4BB Supporting Info Type <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBSupportingInfoType.html">CodeSystem:
+   * C4BB Supporting Info Type</a>
+   */
+  public static final String C4BB_SUPPORTING_INFO_TYPE =
       "http://hl7.org/fhir/ValueSet/claim-informationcategory";
 
   /**
-   * CARIN Value Set URL for Adjudication <a
-   * href="http://build.fhir.org/ig/HL7/carin-bb/ValueSet-C4BBAdjudication.html">ValueSet: C4BB
-   * Adjudication</a>
+   * Code system used for {@link ItemComponent#getRevenue()}
+   *
+   * <p>ValueSet: NUBC Revenue Codes <a
+   * href="https://build.fhir.org/ig/HL7/carin-bb/ValueSet-AHANUBCRevenueCodes.html">ValueSet: NUBC
+   * Revenue Codes</a>
    */
-  public static final String CARIN_ADJUDICATION_CODE =
-      "http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication";
+  public static final String NUBC_REVENUE_CODE_SYSTEM =
+      "https://www.nubc.org/CodeSystem/RevenueCodes";
 }
