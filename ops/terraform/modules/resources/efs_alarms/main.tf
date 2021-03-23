@@ -17,7 +17,7 @@ resource "aws_cloudwatch_metric_alarm" "burst_credit_balance_too_low" {
     FileSystemId = var.filesystem_id
   }
 
-  alarm_description = "Average burst credit balance over last 10 minutes too low, expect a significant performance drop soon in APP-ENV: ${var.app}-${var.env}"
+  alarm_description = "Average burst credit balance over last 10 minutes too low, expect a significant performance drop soon in: ${var.app}-${var.env}"
 
   threshold          = var.burst_credit_balance_threshold
   unit               = "Count"
@@ -40,7 +40,7 @@ resource "aws_cloudwatch_metric_alarm" "percent_io_limit_too_high" {
     FileSystemId = var.efs_name
   }
 
-  alarm_description = "I/O limit has been reached, consider using Max I/O performance mode in APP-ENV: ${var.app}-${var.env}"
+  alarm_description = "I/O limit has been reached, consider using Max I/O performance mode in: ${var.app}-${var.env}"
 
   threshold          = var.percent_io_limit_threshold
   unit               = "Count"
@@ -63,7 +63,7 @@ resource "aws_cloudwatch_metric_alarm" "client_connections" {
     FileSystemId = var.filesystem_id
   }
 
-  alarm_description = "Number of Client Connections has surpassed the threshold in APP-ENV: ${var.app}-${var.env}"
+  alarm_description = "Number of Client Connections has surpassed the threshold in: ${var.app}-${var.env}"
 
   threshold          = var.client_connections
   unit               = "Count"
