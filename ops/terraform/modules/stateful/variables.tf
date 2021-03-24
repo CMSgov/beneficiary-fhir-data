@@ -38,12 +38,12 @@ variable "medicare_opt_out_config" {
   type        = object({ read_roles = list(string), write_accts = list(string), admin_users = list(string) })
 }
 
-variable "bcda_acct_num" {
-  description = "BCDA AWS account number accessing EFT EFS file systems"
-  type        = string
+variable "partner_acct_nums" {
+  description = "Map of partner account numbers accessing EFT EFS file systems"
+  type        = map
 }
 
-variable "bcda_subnets" {
-  description = "BCDA subnets requiring access to EFT EFS file systems"
-  type        = map(list(string))
+variable "partner_subnets" {
+  description = "Map of partner subnets requiring access to EFT EFS file systems"
+  type        = map(map(list(string)))
 }

@@ -599,8 +599,8 @@ resource "aws_cloudwatch_log_group" "bfd_server_gc" {
 module "bcda" {
   source = "../resources/eft_efs"
   partner = "bcda"
-  partner_acct_num = var.bcda_acct_num
-  partner_subnets = var.bcda_subnets
+  partner_acct_num = var.partner_acct_nums["bcda"]
+  partner_subnets = var.partner_subnets["bcda"]
   posix_gid = 1500
   posix_uid = 1500
 
