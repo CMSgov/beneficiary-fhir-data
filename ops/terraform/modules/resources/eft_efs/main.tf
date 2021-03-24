@@ -359,7 +359,7 @@ resource "aws_sns_topic" "cloudwatch_alarms_topic" {
 
 # hook up efs alerts
 module "cloudwatch_alarms_efs" {
-  source = "../efs_alarms"
+  source = "../eft_efs_alarms"
 
   app                         = var.partner
   env                         = var.env_config.env
