@@ -65,5 +65,5 @@ module "stateful" {
   }
 
   partner_acct_nums = var.partner_acct_nums
-  partner_subnets = var.partner_subnets
+  partner_subnets   = var.partner_subnets
 }

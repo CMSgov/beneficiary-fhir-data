@@ -244,7 +244,7 @@ module "fhir_asg" {
     # upsize prod-sbx from 4 to 16 cores for performance testing
     # update launch_bfd-server.yml -> data_server_db_connections_max accordingly
     instance_type = var.env_config.env == "prod-sbx" ? "m5.4xlarge" : "m5.xlarge"
-    volume_size   = 60                                                             # GB
+    volume_size   = 60 # GB
     ami_id        = var.fhir_ami
     key_name      = var.ssh_key_name
 

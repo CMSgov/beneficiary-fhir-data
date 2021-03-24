@@ -1,7 +1,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ VARS & DATA SOURCES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 locals {
-  tags           = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
+  tags = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
 }
 
 # returns selected vpc (bfd-prod-vpc, bfd-prod-sbx-vpc, etc)

@@ -1,11 +1,11 @@
 variable "partner" {
   description = "Parnert name. E.g., 'bcda', 'dpc', etc."
-  type = string
+  type        = string
 }
 
 variable "partner_acct_num" {
   description = "Partners AWS Account Number"
-  type = string
+  type        = string
 }
 
 variable "partner_subnets" {
@@ -24,7 +24,7 @@ variable "posix_gid" {
 # NOTE: the path must be prefixed with / but no trailing /
 variable "partner_root_dir" {
   description = "Name of the folder within the EFS fs that we want to root our partners into."
-  default = "/dropbox"
+  default     = "/dropbox"
 }
 
 variable "env_config" {

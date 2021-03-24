@@ -5,7 +5,7 @@ variable "victor_ops_url" {
 
 variable "partner_acct_nums" {
   description = "Map of partner account numbers accessing EFT EFS file systems."
-  type = map
+  type        = map
 }
 
 variable "partner_subnets" {
