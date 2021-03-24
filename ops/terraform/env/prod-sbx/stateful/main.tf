@@ -55,7 +55,6 @@ module "stateful" {
     admin_users = ["arn:aws:iam::577373831711:user/DS7H", "arn:aws:iam::577373831711:user/VZG9"]
   }
 
-  # BCDA EFT EFS vars
-  bcda_acct_num = var.bcda_acct_num
-  bcda_subnets  = var.bcda_subnets
+  partner_acct_nums = var.partner_acct_nums
+  partner_subnets = var.partner_subnets
 }
