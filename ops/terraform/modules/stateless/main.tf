@@ -4,33 +4,33 @@
 #
 
 locals {
-  azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  env_config        = {env=var.env_config.env, tags=var.env_config.tags, vpc_id=data.aws_vpc.main.id, zone_id=data.aws_route53_zone.local_zone.id, azs=local.azs}
-  is_prod           = substr(var.env_config.env, 0, 4) == "prod"
-  port              = 7443
-  cw_period         = 60    # Seconds
-  cw_eval_periods   = 3
+  azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  env_config      = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = data.aws_route53_zone.local_zone.id, azs = local.azs }
+  is_prod         = substr(var.env_config.env, 0, 4) == "prod"
+  port            = 7443
+  cw_period       = 60 # Seconds
+  cw_eval_periods = 3
 
   # Add new peerings here
   vpc_peerings_by_env = {
-    test            = [
+    test = [
       "bfd-test-vpc-to-bluebutton-dev", "bfd-test-vpc-to-bluebutton-test"
     ],
-    prod            = [
-      "bfd-prod-vpc-to-mct-prod-vpc", "bfd-prod-vpc-to-mct-prod-dr-vpc", 
-      "bfd-prod-vpc-to-dpc-prod-vpc", 
-      "bfd-prod-vpc-to-bluebutton-prod", 
+    prod = [
+      "bfd-prod-vpc-to-mct-prod-vpc", "bfd-prod-vpc-to-mct-prod-dr-vpc",
+      "bfd-prod-vpc-to-dpc-prod-vpc",
+      "bfd-prod-vpc-to-bluebutton-prod",
       "bfd-prod-vpc-to-bcda-prod-vpc",
       "bfd-prod-to-ab2d-prod"
     ],
-    prod-sbx        = [
+    prod-sbx = [
       "bfd-prod-sbx-to-bcda-dev", "bfd-prod-sbx-to-bcda-test", "bfd-prod-sbx-to-bcda-sbx", "bfd-prod-sbx-to-bcda-opensbx",
       "bfd-prod-sbx-vpc-to-bluebutton-dev", "bfd-prod-sbx-vpc-to-bluebutton-impl", "bfd-prod-sbx-vpc-to-bluebutton-test",
-      "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc", 
+      "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc",
       "bfd-prod-sbx-vpc-to-mct-imp-vpc", "bfd-prod-sbx-vpc-to-mct-test-vpc"
     ]
   }
-  vpc_peerings      = local.vpc_peerings_by_env[var.env_config.env]
+  vpc_peerings = local.vpc_peerings_by_env[var.env_config.env]
 }
 
 # Find resources defined outside this script 
@@ -40,30 +40,30 @@ locals {
 #
 data "aws_vpc" "main" {
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-${var.env_config.env}-vpc"]
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-vpc"]
   }
 }
 
 data "aws_vpc" "mgmt" {
   filter {
-    name    = "tag:Name"
-    values  = ["bfd-mgmt-vpc"]
+    name   = "tag:Name"
+    values = ["bfd-mgmt-vpc"]
   }
 }
 
 # VPC peerings
 #
 data "aws_vpc_peering_connection" "peers" {
-  count     = length(local.vpc_peerings)
-  tags      = {Name=local.vpc_peerings[count.index]}
+  count = length(local.vpc_peerings)
+  tags  = { Name = local.vpc_peerings[count.index] }
 }
 
 # DNS
 #
 data "aws_route53_zone" "local_zone" {
-  name          = "bfd-${var.env_config.env}.local"
-  private_zone  = true
+  name         = "bfd-${var.env_config.env}.local"
+  private_zone = true
 }
 
 # S3 Buckets
@@ -81,11 +81,11 @@ data "aws_s3_bucket" "logs" {
 # CloudWatch
 #
 data "aws_sns_topic" "cloudwatch_alarms" {
-  name  = "bfd-${var.env_config.env}-cloudwatch-alarms"
+  name = "bfd-${var.env_config.env}-cloudwatch-alarms"
 }
 
 data "aws_sns_topic" "cloudwatch_ok" {
-  name  = "bfd-${var.env_config.env}-cloudwatch-ok"
+  name = "bfd-${var.env_config.env}-cloudwatch-ok"
 }
 
 # # RDS Replicas
@@ -126,8 +126,8 @@ data "aws_security_group" "aurora_cluster" {
 #
 data "aws_security_group" "vpn" {
   filter {
-    name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-vpn-private"]
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-vpn-private"]
   }
 }
 
@@ -135,8 +135,8 @@ data "aws_security_group" "vpn" {
 #
 data "aws_security_group" "tools" {
   filter {
-    name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-enterprise-tools"]
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-enterprise-tools"]
   }
 }
 
@@ -144,15 +144,15 @@ data "aws_security_group" "tools" {
 #
 data "aws_security_group" "remote" {
   filter {
-    name        = "tag:Name"
-    values      = ["bfd-${var.env_config.env}-remote-management"]
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-remote-management"]
   }
 }
 
 # Find ansible vault pw read only policy by hardcoded ARN, no other options for this data source
 #
 data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
-  arn           = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
+  arn = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
 }
 
 ##
@@ -165,13 +165,13 @@ data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
 module "fhir_iam" {
   source = "../resources/iam"
 
-  env_config      = local.env_config
-  name            = "fhir"
+  env_config = local.env_config
+  name       = "fhir"
 }
 
 resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
-  role            = module.fhir_iam.role
-  policy_arn      = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
+  role       = module.fhir_iam.role
+  policy_arn = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
 }
 
 # NLB for the FHIR server (SSL terminated by the FHIR server)
@@ -179,43 +179,43 @@ resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
 module "fhir_lb" {
   source = "../resources/lb"
 
-  env_config      = local.env_config
-  role            = "fhir"
-  layer           = "dmz"
-  log_bucket      = data.aws_s3_bucket.logs.id
-  is_public       = var.is_public
+  env_config = local.env_config
+  role       = "fhir"
+  layer      = "dmz"
+  log_bucket = data.aws_s3_bucket.logs.id
+  is_public  = var.is_public
 
   ingress = var.is_public ? {
-    description   = "Public Internet access"
-    port          = 443
-    cidr_blocks   = ["0.0.0.0/0"]
-  } : {
-    description   = "From VPC peerings, the MGMT VPC, and self"
-    port          = 443
-    cidr_blocks   = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    description = "Public Internet access"
+    port        = 443
+    cidr_blocks = ["0.0.0.0/0"]
+    } : {
+    description = "From VPC peerings, the MGMT VPC, and self"
+    port        = 443
+    cidr_blocks = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
   }
 
   egress = {
-    description   = "To VPC instances"
-    port          = local.port
-    cidr_blocks   = [data.aws_vpc.main.cidr_block]
-  }    
+    description = "To VPC instances"
+    port        = local.port
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
+  }
 }
 
 module "lb_alarms" {
-  source = "../resources/lb_alarms"  
+  source = "../resources/lb_alarms"
 
-  load_balancer_name            = module.fhir_lb.name
-  alarm_notification_arn        = data.aws_sns_topic.cloudwatch_alarms.arn
-  ok_notification_arn           = data.aws_sns_topic.cloudwatch_ok.arn
-  env                           = var.env_config.env
-  app                           = "bfd"
+  load_balancer_name     = module.fhir_lb.name
+  alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
+  ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
+  env                    = var.env_config.env
+  app                    = "bfd"
 
   # NLBs only have this metric to alarm on
-  healthy_hosts   = {
-    eval_periods  = local.cw_eval_periods
-    period        = local.cw_period
-    threshold     = 1     # Count
+  healthy_hosts = {
+    eval_periods = local.cw_eval_periods
+    period       = local.cw_period
+    threshold    = 1 # Count
   }
 }
 
@@ -225,44 +225,46 @@ module "lb_alarms" {
 module "fhir_asg" {
   source = "../resources/asg"
 
-  env_config      = local.env_config
-  role            = "fhir"
-  layer           = "app"
-  lb_config       = module.fhir_lb.lb_config
+  env_config = local.env_config
+  role       = "fhir"
+  layer      = "app"
+  lb_config  = module.fhir_lb.lb_config
 
   # Initial size is one server per AZ
-  asg_config        = {
-    min             = local.is_prod ? 2*length(local.azs): length(local.azs)
-    max             = 8*length(local.azs)
-    desired         = local.is_prod ? 2*length(local.azs): length(local.azs)
+  asg_config = {
+    min             = local.is_prod ? 2 * length(local.azs) : length(local.azs)
+    max             = 8 * length(local.azs)
+    desired         = local.is_prod ? 2 * length(local.azs) : length(local.azs)
     sns_topic_arn   = ""
     instance_warmup = 430
   }
 
-  launch_config   = {
+  launch_config = {
     # instance_type must support NVMe EBS volumes: https://github.com/CMSgov/beneficiary-fhir-data/pull/110
-    instance_type   = "m5.xlarge"             # Use reserve instances
-    volume_size     = 60 # GB
-    ami_id          = var.fhir_ami 
-    key_name        = var.ssh_key_name 
+    # upsize prod-sbx from 4 to 16 cores for performance testing
+    # update launch_bfd-server.yml -> data_server_db_connections_max accordingly
+    instance_type = var.env_config.env == "prod-sbx" ? "m5.4xlarge" : "m5.xlarge"
+    volume_size   = 60                                                             # GB
+    ami_id        = var.fhir_ami
+    key_name      = var.ssh_key_name
 
-    profile         = module.fhir_iam.profile
-    user_data_tpl   = "fhir_server.tpl"       # See templates directory for choices
-    account_id      = data.aws_caller_identity.current.account_id
-    git_branch      = var.git_branch_name
-    git_commit      = var.git_commit_id
+    profile       = module.fhir_iam.profile
+    user_data_tpl = "fhir_server.tpl" # See templates directory for choices
+    account_id    = data.aws_caller_identity.current.account_id
+    git_branch    = var.git_branch_name
+    git_commit    = var.git_commit_id
   }
 
-  db_config       = {
-    db_sg         = data.aws_security_group.aurora_cluster.id
-    role          = "aurora cluster"
+  db_config = {
+    db_sg = data.aws_security_group.aurora_cluster.id
+    role  = "aurora cluster"
   }
 
-  mgmt_config     = {
-    vpn_sg        = data.aws_security_group.vpn.id
-    tool_sg       = data.aws_security_group.tools.id
-    remote_sg     = data.aws_security_group.remote.id
-    ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
+  mgmt_config = {
+    vpn_sg    = data.aws_security_group.vpn.id
+    tool_sg   = data.aws_security_group.tools.id
+    remote_sg = data.aws_security_group.remote.id
+    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
   }
 }
 
@@ -271,7 +273,7 @@ module "fhir_asg" {
 module "bfd_server_metrics_all" {
   source = "../resources/bfd_server_metrics"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   metric_config = {
     partner_name  = "all"
@@ -282,7 +284,7 @@ module "bfd_server_metrics_all" {
 module "bfd_server_metrics_bb" {
   source = "../resources/bfd_server_metrics"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   metric_config = {
     partner_name  = "bb"
@@ -293,7 +295,7 @@ module "bfd_server_metrics_bb" {
 module "bfd_server_metrics_bcda" {
   source = "../resources/bfd_server_metrics"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   metric_config = {
     partner_name  = "bcda"
@@ -304,7 +306,7 @@ module "bfd_server_metrics_bcda" {
 module "bfd_server_metrics_mct" {
   source = "../resources/bfd_server_metrics"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   metric_config = {
     partner_name  = "mct"
@@ -315,7 +317,7 @@ module "bfd_server_metrics_mct" {
 module "bfd_server_metrics_dpc" {
   source = "../resources/bfd_server_metrics"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   metric_config = {
     partner_name  = "dpc"
@@ -326,7 +328,7 @@ module "bfd_server_metrics_dpc" {
 module "bfd_server_metrics_ab2d" {
   source = "../resources/bfd_server_metrics"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   metric_config = {
     partner_name  = "ab2d"
@@ -343,7 +345,7 @@ module "bfd_server_metrics_ab2d" {
 module "bfd_server_alarm_all_500s" {
   source = "../resources/bfd_server_alarm"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   alarm_config = {
     alarm_name       = "all-500s"
@@ -363,7 +365,7 @@ module "bfd_server_alarm_all_500s" {
 module "bfd_server_alarm_all_eob_6s-p95" {
   source = "../resources/bfd_server_alarm"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   alarm_config = {
     alarm_name       = "all-eob-6s-p95"
@@ -383,7 +385,7 @@ module "bfd_server_alarm_all_eob_6s-p95" {
 module "bfd_server_alarm_mct_eob_3s_p95" {
   source = "../resources/bfd_server_alarm"
 
-  env    = var.env_config.env
+  env = var.env_config.env
 
   alarm_config = {
     alarm_name       = "mct-eob-3s-p95"
@@ -405,26 +407,26 @@ module "bfd_server_alarm_mct_eob_3s_p95" {
 module "bfd_pipeline" {
   source = "../resources/bfd_pipeline"
 
-  env_config      = local.env_config
-  az              = "us-east-1b" # Same as the master db
+  env_config = local.env_config
+  az         = "us-east-1b" # Same as the master db
 
-  launch_config   = {
-    ami_id        = var.etl_ami
-    account_id    = data.aws_caller_identity.current.account_id
-    ssh_key_name  = var.ssh_key_name
-    git_branch    = var.git_branch_name
-    git_commit    = var.git_commit_id
+  launch_config = {
+    ami_id       = var.etl_ami
+    account_id   = data.aws_caller_identity.current.account_id
+    ssh_key_name = var.ssh_key_name
+    git_branch   = var.git_branch_name
+    git_commit   = var.git_commit_id
   }
 
-  db_config       = {
-    db_sg         = data.aws_security_group.aurora_cluster.id
+  db_config = {
+    db_sg = data.aws_security_group.aurora_cluster.id
   }
 
-  mgmt_config     = {
-    vpn_sg        = data.aws_security_group.vpn.id
-    tool_sg       = data.aws_security_group.tools.id
-    remote_sg     = data.aws_security_group.remote.id
-    ci_cidrs      = [data.aws_vpc.mgmt.cidr_block]
+  mgmt_config = {
+    vpn_sg    = data.aws_security_group.vpn.id
+    tool_sg   = data.aws_security_group.tools.id
+    remote_sg = data.aws_security_group.remote.id
+    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
   }
 
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn

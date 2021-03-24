@@ -4,11 +4,11 @@ locals {
   }
 
   endpoints = {
-    "all": "*",
-    "metadata": "*/metadata*",
-    "coverageAll": "*/Coverage*",
-    "patientAll": "*/Patient*",
-    "eobAll": "*/ExplanationOfBenefit*",
+    "all" : "*",
+    "metadata" : "*/metadata*",
+    "coverageAll" : "*/Coverage*",
+    "patientAll" : "*/Patient*",
+    "eobAll" : "*/ExplanationOfBenefit*",
   }
 }
 

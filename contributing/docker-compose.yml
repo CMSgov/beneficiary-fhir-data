@@ -20,13 +20,12 @@ services:
     volumes:
       - ./docker:/code
       - ${BFD_DIR}:${BFD_MOUNT_POINT:-/app}
-      - ${SYNTHETIC_DATA}:/synthetic-data
+      - ${SYNTHETIC_DATA}:${SYNTHETIC_DATA_MOUNT_POINT}
     environment:
       JAVA_HOME: "/usr/lib/jvm/java-1.8.0-openjdk"
-      BFD_PORT: 9954
-      LOCAL_SYNTHETIC_DATA: "/synthetic-data"
-      BFD_MOUNT_POINT: ${BFD_MOUNT_POINT:-/app}
+      BFD_PORT: "${BFD_PORT}"
+      BFD_MOUNT_POINT: "${BFD_MOUNT_POINT}"
     ports:
-      - "1337:9954"
+      - "1337:${BFD_PORT}"
     depends_on:
       - local_bfddb

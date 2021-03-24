@@ -1,5 +1,11 @@
 ---
 
+- name: Configure AWS EFS Utils
+  import_role:
+    name: ../../playbooks-ccs/roles/amazon-efs-utils
+  tags:
+    - pre-ami
+
 - name: Install Pre-requisites
   yum:
     name: "{{ item }}"
