@@ -147,8 +147,8 @@ final class DMEClaimTransformerV2 {
     // PRNCPAL_DGNS_VRSN_CD     => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_CD(1-12)        => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_VRSN_CD(1-12)   => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.DME);
     }
 
     // CARR_CLM_ENTRY_CD => ExplanationOfBenefit.extension
@@ -326,15 +326,12 @@ final class DMEClaimTransformerV2 {
       // LINE_ALOWD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // LINE_BENE_PRMRY_PYR_CD   => ExplanationOfBenefit.item.extension
       // LINE_SERVICE_DEDUCTIBLE  => ExplanationOfBenefit.item.extension
-      // LINE_ICD_DGNS_CD         => ExplanationOfBenefit.item.diagnosisSequence
-      // LINE_ICD_DGNS_VRSN_CD    => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_HCT_HGB_TYPE_CD     => Observation.code
       // LINE_HCT_HGB_RSLT_NUM    => Observation.value
       // LINE_NDC_CD              => ExplanationOfBenefit.item.productOrService
       // LINE_BENE_PMT_AMT        => ExplanationOfBenefit.item.adjudication.value
       // LINE_PRCSG_IND_CD        => ExplanationOfBenefit.item.extension
       // LINE_DME_PRCHS_PRICE_AMT => ExplanationOfBenefit.item.adjudication.value
-
       TransformerUtilsV2.mapEobCommonItemCarrierDME(
           item,
           eob,
@@ -357,12 +354,18 @@ final class DMEClaimTransformerV2 {
           line.getAllowedChargeAmount(),
           line.getProcessingIndicatorCode(),
           line.getServiceDeductibleCode(),
-          line.getDiagnosisCode(),
-          line.getDiagnosisCodeVersion(),
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode());
+
+      // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
+      // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
+      DiagnosisUtilV2.addDiagnosisLink(
+          eob,
+          item,
+          Diagnosis.from(line.getDiagnosisCode(), line.getDiagnosisCodeVersion()),
+          ClaimTypeV2.CARRIER);
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
       if (line.getProviderStateCode() != null) {

@@ -112,7 +112,7 @@ public class SNFClaimTransformerV2 {
     // NCH_VRFD_NCVRD_STAY_THRU_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
     // NCH_ACTV_OR_CVRD_LVL_CARE_THRU   => ExplanationOfBenefit.supportingInfo.timingDate
     // NCH_BENE_MDCR_BNFTS_EXHTD_DT_I   => ExplanationOfBenefit.supportingInfo.timingDate
-    // CLM_DRG_CD                       => ExplanationOfBenefit.diagnosis
+    // CLM_DRG_CD                       => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),
@@ -276,8 +276,8 @@ public class SNFClaimTransformerV2 {
     // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.SNF);
     }
 
     // Handle Procedures

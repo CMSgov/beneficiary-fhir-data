@@ -110,6 +110,6 @@ public final class InpatientClaimTransformerV2Test {
     }
 
     // Test that the expected number of diagnoses are mapped
-    Assert.assertEquals(9, eob.getDiagnosis().size());
+    Assert.assertEquals(8, eob.getDiagnosis().size());
   }
 }

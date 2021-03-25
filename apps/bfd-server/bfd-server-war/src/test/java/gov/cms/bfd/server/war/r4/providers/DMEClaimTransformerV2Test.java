@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.v4.providers.DMEClaimTransformerV2}. */
@@ -61,7 +62,7 @@ public final class DMEClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  // @Ignore
+  @Ignore
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =

@@ -161,8 +161,8 @@ public class HospiceClaimTransformerV2 {
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
-    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.HOSPICE);
     }
 
     // Map care team
