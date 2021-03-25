@@ -145,6 +145,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     String eobIdClaimIdText = eobIdMatcher.group(2);
 
     Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption("by", "id");
     operation.publishOperationName();
 
@@ -250,6 +251,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
                 .sorted(Comparator.comparing(ClaimType::name))
                 .collect(Collectors.toList())
                 .toString());
+    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
     operation.setOption(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));

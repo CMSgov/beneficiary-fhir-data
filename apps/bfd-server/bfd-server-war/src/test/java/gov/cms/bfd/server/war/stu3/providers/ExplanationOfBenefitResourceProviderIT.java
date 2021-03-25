@@ -1521,15 +1521,15 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
     // Verify that tax numbers are present for carrier claims.
     carrierEob = filterToClaimType(searchResults, ClaimType.CARRIER).get(0);
-    // Assert.assertNotNull(
-    // TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
-    //   carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
+    Assert.assertNotNull(
+        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
+            carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
 
     // Verify that tax numbers are present for DME claims.
     dmeEob = filterToClaimType(searchResults, ClaimType.DME).get(0);
-    // Assert.assertNotNull(
-    //   TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
-    //      dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));
+    Assert.assertNotNull(
+        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
+            dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));
   }
 
   /**
