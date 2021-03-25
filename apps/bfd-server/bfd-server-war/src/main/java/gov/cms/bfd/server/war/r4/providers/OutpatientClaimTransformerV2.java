@@ -33,7 +33,8 @@ public class OutpatientClaimTransformerV2 {
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(

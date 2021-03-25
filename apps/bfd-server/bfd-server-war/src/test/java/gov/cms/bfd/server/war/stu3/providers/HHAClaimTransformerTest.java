@@ -39,7 +39,8 @@ public final class HHAClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = HHAClaimTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        HHAClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     assertMatches(claim, eob);
   }
 

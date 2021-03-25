@@ -53,7 +53,9 @@ public final class OutpatientClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException {
     OutpatientClaim claim = generateClaim();
 
-    assertMatches(claim, OutpatientClaimTransformerV2.transform(new MetricRegistry(), claim));
+    assertMatches(
+        claim,
+        OutpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)));
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -67,7 +69,7 @@ public final class OutpatientClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        HHAClaimTransformerV2.transform(new MetricRegistry(), generateClaim());
+        HHAClaimTransformerV2.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 

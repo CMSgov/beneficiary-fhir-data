@@ -31,7 +31,8 @@ public class CarrierClaimTransformerV2 {
    *     CarrierClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -42,7 +43,7 @@ public class CarrierClaimTransformerV2 {
       throw new BadCodeMonkeyException();
     }
 
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
 
     timer.stop();
     return eob;
@@ -53,7 +54,8 @@ public class CarrierClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private static ExplanationOfBenefit transformClaim(CarrierClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -241,6 +243,12 @@ public class CarrierClaimTransformerV2 {
           line.getHcpcsCode(),
           claimGroup.getHcpcsYearCode(),
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
+
+      if (includeTaxNumbers.orElse(false)) {
+        item.addExtension(
+            TransformerUtilsV2.createExtensionCoding(
+                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
+      }
 
       // CARR_LINE_ANSTHSA_UNIT_CNT => ExplanationOfBenefit.item.extension
       if (line.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {

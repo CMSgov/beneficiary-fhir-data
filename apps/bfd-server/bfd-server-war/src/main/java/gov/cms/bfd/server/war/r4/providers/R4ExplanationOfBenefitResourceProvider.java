@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -70,6 +71,14 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
   private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+  /**
+   * The header key used to determine whether or not tax numbers should be included in responses.
+   *
+   * <p>Should be set to <code>"true"</code> if {@link CarrierClaimColumn#TAX_NUM} or {@link
+   * DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>"false"</code> if
+   * not. Defaults to <code>"false"</code>.
+   */
+  public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -121,7 +130,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
-  public ExplanationOfBenefit read(@IdParam IdType eobId) {
+  public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
     if (eobId == null) throw new IllegalArgumentException();
     if (eobId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
 
@@ -136,7 +145,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     Optional<ClaimTypeV2> eobIdType = ClaimTypeV2.parse(eobIdTypeText);
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
     String eobIdClaimIdText = eobIdMatcher.group(2);
-
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     Operation operation = new Operation(Operation.Endpoint.V2_EOB);
     operation.setOption("by", "id");
     operation.publishOperationName();
@@ -166,7 +175,11 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
 
-    ExplanationOfBenefit eob = eobIdType.get().getTransformer().apply(metricRegistry, claimEntity);
+    ExplanationOfBenefit eob =
+        eobIdType
+            .get()
+            .getTransformer()
+            .transform(metricRegistry, claimEntity, Optional.of(includeTaxNumbers));
     return eob;
   }
 
@@ -227,6 +240,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     Set<ClaimTypeV2> claimTypes = parseTypeParam(type);
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     Operation operation = new Operation(Operation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");
     operation.setOption(
@@ -261,8 +275,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.CARRIER,
-              findClaimTypeByPatient(
-                  ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate)));
+              findClaimTypeByPatient(ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
     }
 
     /*
@@ -271,7 +285,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.DME,
-              findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate)));
+              findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate) Optional.of(includeTaxNumbers)));
     }
     */
 
@@ -279,15 +293,16 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.HHA,
-              findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate)));
+              findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
     }
 
     if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.HOSPICE,
-              findClaimTypeByPatient(
-                  ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate)));
+              findClaimTypeByPatient(ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
     }
 
     if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
@@ -295,7 +310,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           transformToEobs(
               ClaimTypeV2.INPATIENT,
               findClaimTypeByPatient(
-                  ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate)));
+                  ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
     }
 
     if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
@@ -303,21 +319,24 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           transformToEobs(
               ClaimTypeV2.OUTPATIENT,
               findClaimTypeByPatient(
-                  ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate)));
+                  ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
     }
 
     if (claimTypes.contains(ClaimTypeV2.PDE)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.PDE,
-              findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate)));
+              findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
     }
 
     if (claimTypes.contains(ClaimTypeV2.SNF)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.SNF,
-              findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate)));
+              findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
     }
 
     if (Boolean.parseBoolean(excludeSamhsa)) {
@@ -440,9 +459,10 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    *     claim/event
    */
   @Trace
-  private List<ExplanationOfBenefit> transformToEobs(ClaimTypeV2 claimType, List<?> claims) {
+  private List<ExplanationOfBenefit> transformToEobs(
+      ClaimTypeV2 claimType, List<?> claims, Optional<Boolean> includeTaxNumbers) {
     return claims.stream()
-        .map(c -> claimType.getTransformer().apply(metricRegistry, c))
+        .map(c -> claimType.getTransformer().transform(metricRegistry, c, includeTaxNumbers))
         .collect(Collectors.toList());
   }
 
@@ -549,5 +569,34 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     }
 
     return claimTypes;
+  }
+
+  /**
+   * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
+   *     to parse out the HTTP header that controls this setting
+   * @return <code>true</code> if {@link CarrierClaimColumn#TAX_NUM} and {@link
+   *     DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>false</code> if
+   *     not (defaults to <code>false</code>)
+   */
+  public static boolean returnIncludeTaxNumbers(RequestDetails requestDetails) {
+    /*
+     * Note: headers can be multi-valued and so calling the enticing-looking `getHeader(...)` method
+     * is often a bad idea, as it will often do the wrong thing.
+     */
+    List<String> headerValues = requestDetails.getHeaders(HEADER_NAME_INCLUDE_TAX_NUMBERS);
+
+    if (headerValues == null || headerValues.isEmpty()) {
+      return false;
+    } else if (headerValues.size() == 1) {
+      String headerValue = headerValues.get(0);
+      if ("true".equalsIgnoreCase(headerValue)) {
+        return true;
+      } else if ("false".equalsIgnoreCase(headerValue)) {
+        return false;
+      }
+    }
+
+    throw new InvalidRequestException(
+        "Unsupported " + HEADER_NAME_INCLUDE_TAX_NUMBERS + " header value: " + headerValues);
   }
 }

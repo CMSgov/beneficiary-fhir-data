@@ -7,6 +7,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -23,29 +24,36 @@ final class DMEClaimTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link DMEClaim} to transform
+   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof DMEClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumbers);
 
     timer.stop();
     return eob;
   }
 
   /**
-   * @param claimGroup the CCW {@link DMEClaim} to transform
+   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private static ExplanationOfBenefit transformClaim(DMEClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -186,6 +194,22 @@ final class DMEClaimTransformer {
               claimLine.getHcpcsSecondModifierCode(),
               claimLine.getHcpcsThirdModifierCode(),
               claimLine.getHcpcsFourthModifierCode()));
+
+      /*
+       * FIXME This value seems to be just a "synonym" for the performing physician NPI and should
+       * probably be mapped as an extra identifier with it (if/when that lands in a contained
+       * Practitioner resource).
+       */
+      if (includeTaxNumbers.orElse(false)) {
+        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
+            TransformerUtils.addCareTeamPractitioner(
+                eob,
+                item,
+                IdentifierType.TAX.getSystem(),
+                claimLine.getProviderTaxNumber(),
+                ClaimCareteamrole.OTHER);
+        providerTaxNumber.setResponsible(true);
+      }
 
       item.addAdjudication()
           .setCategory(

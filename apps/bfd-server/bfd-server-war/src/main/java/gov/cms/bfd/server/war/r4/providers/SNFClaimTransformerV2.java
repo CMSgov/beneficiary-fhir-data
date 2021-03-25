@@ -31,7 +31,8 @@ public class SNFClaimTransformerV2 {
    *     SNFClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(SNFClaimTransformerV2.class.getSimpleName(), "transform"))
