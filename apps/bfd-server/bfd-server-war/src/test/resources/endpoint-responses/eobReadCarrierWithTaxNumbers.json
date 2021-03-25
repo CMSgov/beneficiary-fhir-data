@@ -207,6 +207,22 @@
         "display" : "Optometrist"
       } ]
     }
+  }, {
+    "sequence" : 3,
+    "provider" : {
+      "identifier" : {
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "value" : "204299999"
+      }
+    },
+    "responsible" : true,
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "other",
+        "display" : "Other"
+      } ]
+    }
   } ],
   "diagnosis" : [ {
     "sequence" : 1,
@@ -308,7 +324,7 @@
       }
     } ],
     "sequence" : 6,
-    "careTeamLinkId" : [ 2 ],
+    "careTeamLinkId" : [ 2, 3 ],
     "diagnosisLinkId" : [ 5 ],
     "category" : {
       "coding" : [ {

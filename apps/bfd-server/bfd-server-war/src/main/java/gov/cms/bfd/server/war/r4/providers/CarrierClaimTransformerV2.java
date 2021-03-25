@@ -244,6 +244,7 @@ public class CarrierClaimTransformerV2 {
           claimGroup.getHcpcsYearCode(),
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
 
+      // tax num should be as a extension
       if (includeTaxNumbers.orElse(false)) {
         item.addExtension(
             TransformerUtilsV2.createExtensionCoding(

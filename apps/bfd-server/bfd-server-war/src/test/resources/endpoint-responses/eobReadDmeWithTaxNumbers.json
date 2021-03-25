@@ -192,6 +192,22 @@
         "display" : "Pharmacy (DMERC)"
       } ]
     }
+  }, {
+    "sequence" : 3,
+    "provider" : {
+      "identifier" : {
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "value" : "9994931888"
+      }
+    },
+    "responsible" : true,
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "other",
+        "display" : "Other"
+      } ]
+    }
   } ],
   "diagnosis" : [ {
     "sequence" : 1,
@@ -284,7 +300,7 @@
       }
     } ],
     "sequence" : 1,
-    "careTeamLinkId" : [ 2 ],
+    "careTeamLinkId" : [ 2, 3 ],
     "diagnosisLinkId" : [ 3 ],
     "category" : {
       "coding" : [ {

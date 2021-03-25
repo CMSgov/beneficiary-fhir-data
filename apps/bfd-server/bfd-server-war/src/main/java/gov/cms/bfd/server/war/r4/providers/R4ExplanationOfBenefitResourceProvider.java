@@ -147,6 +147,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     String eobIdClaimIdText = eobIdMatcher.group(2);
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     Operation operation = new Operation(Operation.Endpoint.V2_EOB);
+    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption("by", "id");
     operation.publishOperationName();
 
@@ -243,6 +244,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     Operation operation = new Operation(Operation.Endpoint.V1_EOB);
     operation.setOption("by", "patient");
+    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption(
         "types",
         (claimTypes.size() == ClaimTypeV2.values().length)

@@ -80,6 +80,9 @@ public class RequestHeaders {
           if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
             this.headerNVs.put(h, returnIncludeIdentifiersValues(v));
           }
+          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS)) {
+            this.headerNVs.put(h, returnIncludeTaxValue(v));
+          }
         });
   }
 
