@@ -69,7 +69,8 @@ public final class OutpatientClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        OutpatientClaimTransformerV2.transform.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
+        OutpatientClaimTransformerV2.transform.transform(
+            new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
