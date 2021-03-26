@@ -198,6 +198,11 @@ public final class Diagnosis extends IcdCode {
         "The single medical diagnosis that is most relevant to the patient's chief complaint"
             + " or need for treatment."),
 
+    /** NOTE: display text matches C4BBClaimDiagnosisType#OTHER */
+    OTHER(
+        "other",
+        "Required when other conditions coexist or develop subsequently during the treatment"),
+
     /** Note: display text matches ExDiagnosistype#ADMITTING. */
     ADMITTING(
         "admitting",
