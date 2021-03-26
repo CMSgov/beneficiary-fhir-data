@@ -138,9 +138,9 @@ public final class SyntheaDataToFhirIT {
      * there 100% of the time.
      */
     Assert.assertTrue(
-        "No diagnoses found.", eobs.stream().anyMatch(eob -> !eob.getDiagnosis().isEmpty()));
-    Assert.assertTrue(
-        "No procedures found.", eobs.stream().anyMatch(eob -> !eob.getProcedure().isEmpty()));
+        "No diagnoses or procedures found.",
+        eobs.stream()
+            .anyMatch(eob -> !(eob.getDiagnosis().isEmpty() && eob.getProcedure().isEmpty())));
     Assert.assertTrue(
         "No line item services found.",
         eobs.stream()

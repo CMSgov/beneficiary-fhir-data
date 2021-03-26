@@ -281,12 +281,12 @@ public final class PartDEventTransformerTest {
           claim.getSubmissionClarificationCode(),
           eob);
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
-    try {
-      TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), "Acetaminophen - ACETAMINOPHEN");
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+    // try {
+    //   TransformerTestUtils.assertFDADrugCodeDisplayEquals(
+    //       claim.getNationalDrugCode(), "Acetaminophen - ACETAMINOPHEN");
+    // } catch (IOException e) {
+    //   throw new UncheckedIOException(e);
+    // }
     try {
       TransformerTestUtils.assertNPICodeDisplayEquals(
           claim.getPrescriberId(), "DR. ROBERT BISBEE MD");
