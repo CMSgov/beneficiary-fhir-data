@@ -178,8 +178,7 @@ public class RequestHeaders {
    */
   public boolean isTaxNumIncludeIdentifiers() {
     List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS);
-    if (v.contains("true")) return true;
-    else return false;
+    return v.contains("true");
   }
 
   /**
