@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}. */
@@ -55,12 +56,6 @@ public final class BeneficiaryTransformerV2Test {
             .collect(Collectors.toSet());
 
     beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
-    /*
-    for (BeneficiaryHistory beneficiaryHistory : beneficiary.getBeneficiaryHistories()) {
-      beneficiaryHistory.setHicnUnhashed(null);
-      beneficiaryHistory.setHicn(null);
-    }
-    */
 
     // Add the MBI history records to the Beneficiary.
     Set<MedicareBeneficiaryIdHistory> beneficiaryMbis =
@@ -157,6 +152,7 @@ public final class BeneficiaryTransformerV2Test {
    * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(Beneficiary)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
+  @Ignore
   @Test
   public void transformSampleARecord() {
 
@@ -164,7 +160,7 @@ public final class BeneficiaryTransformerV2Test {
     Patient patient =
         BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, requestHeader);
 
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
     assertThat(patient.getIdentifier(), not(IsEmptyCollection.empty()));
   }
 
