@@ -44,10 +44,9 @@ public final class BeneficiaryTransformerV2Test {
             .findFirst()
             .get();
 
-    beneficiary.setHicn("someHICNhash");
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
-    // Add the HICN history records to the Beneficiary, and fix their HICN fields.
+    // Add the history records to the Beneficiary, but nill out the HICN fields.
     Set<BeneficiaryHistory> beneficiaryHistories =
         parsedRecords.stream()
             .filter(r -> r instanceof BeneficiaryHistory)
@@ -56,10 +55,12 @@ public final class BeneficiaryTransformerV2Test {
             .collect(Collectors.toSet());
 
     beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
+    /*
     for (BeneficiaryHistory beneficiaryHistory : beneficiary.getBeneficiaryHistories()) {
-      beneficiaryHistory.setHicnUnhashed(Optional.of(beneficiaryHistory.getHicn()));
-      beneficiaryHistory.setHicn("someHICNhash");
+      beneficiaryHistory.setHicnUnhashed(null);
+      beneficiaryHistory.setHicn(null);
     }
+    */
 
     // Add the MBI history records to the Beneficiary.
     Set<MedicareBeneficiaryIdHistory> beneficiaryMbis =
@@ -182,29 +183,33 @@ public final class BeneficiaryTransformerV2Test {
 
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
-    if (beneficiary.getSex() == Sex.MALE.getCode())
+    if (beneficiary.getSex() == Sex.MALE.getCode()) {
       Assert.assertEquals(
           AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());
-    else if (beneficiary.getSex() == Sex.FEMALE.getCode())
+    } else if (beneficiary.getSex() == Sex.FEMALE.getCode()) {
       Assert.assertEquals(
           AdministrativeGender.FEMALE.toString(), patient.getGender().toString().trim());
+    }
 
     TransformerTestUtilsV2.assertExtensionCodingEquals(
         CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
     Assert.assertEquals(
         beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
-    if (beneficiary.getNameMiddleInitial().isPresent())
+    if (beneficiary.getNameMiddleInitial().isPresent()) {
       Assert.assertEquals(
           beneficiary.getNameMiddleInitial().get().toString(),
           patient.getName().get(0).getGiven().get(1).toString());
+    }
     Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());
 
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
+    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent()) {
       TransformerTestUtilsV2.assertExtensionCodingEquals(
           CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), patient);
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
+    }
+    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       TransformerTestUtilsV2.assertExtensionDateYearEquals(
           CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), patient);
+    }
 
     TransformerTestUtilsV2.assertLastUpdatedEquals(beneficiary.getLastUpdated(), patient);
 

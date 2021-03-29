@@ -69,12 +69,10 @@ import org.springframework.stereotype.Component;
 public final class R4PatientResourceProvider implements IResourceProvider, CommonHeaders {
   /**
    * The {@link Identifier#getSystem()} values that are supported by {@link #searchByIdentifier}.
+   * NOTE: For v2, HICN no longer supported.
    */
   private static final List<String> SUPPORTED_HASH_IDENTIFIER_SYSTEMS =
-      Arrays.asList(
-          TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
-          TransformerConstants.CODING_BBAPI_BENE_HICN_HASH,
-          TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
+      Arrays.asList(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH);
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -141,11 +139,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
 
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-    }
-
-    // commented out as in V2 code, keep it that way for now
+    // commented out as in V2 code;  keep it that way for now
     // if (requestHeader.isMBIinIncludeIdentifiers())
     root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
@@ -172,16 +166,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                   "_", (List<String>) requestHeader.getValue(HEADER_NAME_INCLUDE_IDENTIFIERS))),
           beneByIdQueryNanoSeconds,
           beneficiary == null ? 0 : 1);
-    }
-
-    // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!requestHeader.isHICNinIncludeIdentifiers()) {
-      beneficiary.setHicnUnhashed(Optional.empty());
-    }
-
-    // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!requestHeader.isMBIinIncludeIdentifiers()) {
-      beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
     // Add bene_id to MDC logs
@@ -321,14 +305,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         matchingBeneficiaries.stream()
             .map(
                 beneficiary -> {
-                  // Null out the unhashed HICNs if we're not supposed to be returning them
-                  if (!requestHeader.isHICNinIncludeIdentifiers()) {
-                    beneficiary.setHicnUnhashed(Optional.empty());
-                  }
-                  // Null out the unhashed MBIs if we're not supposed to be returning
-                  if (!requestHeader.isMBIinIncludeIdentifiers()) {
-                    beneficiary.setMedicareBeneficiaryId(Optional.empty());
-                  }
+                  // Null out the unhashed HICNs
+                  beneficiary.setHicnUnhashed(Optional.empty());
 
                   Patient patient =
                       BeneficiaryTransformerV2.transform(
@@ -399,9 +377,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
     // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
     // with paging and then fetch full benes with joins.
-    boolean useTwoSteps =
-        (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers())
-            && paging.isPagingRequested();
+    boolean useTwoSteps = (requestHeader.isMBIinIncludeIdentifiers() && paging.isPagingRequested());
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
@@ -446,10 +422,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // BFD379: original V2, no MBI logic here
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
-    }
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.beneficiaryHistories ";
       passDistinctThrough = true;
     }
 
@@ -533,10 +505,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
       passDistinctThrough = true;
     }
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.beneficiaryHistories ";
-      passDistinctThrough = true;
-    }
 
     String query =
         "select distinct b from Beneficiary b "
@@ -552,11 +520,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   /**
    * Adds support for the FHIR "search" operation for {@link Patient}s, allowing users to search by
    * {@link Patient#getIdentifier()}. Specifically, the following criteria are supported:
-   *
-   * <ul>
-   *   <li>Matching a {@link Beneficiary#getHicn()} hash value: when {@link TokenParam#getSystem()}
-   *       matches one of the {@link #SUPPORTED_HASH_IDENTIFIER_SYSTEMS} entries.
-   * </ul>
    *
    * <p>Searches that don't match one of the above forms are not supported.
    *
@@ -588,9 +551,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           @Description(shortDefinition = "Include resources last updated in the given range")
           DateRangeParam lastUpdated,
       RequestDetails requestDetails) {
-    if (identifier.getQueryParameterQualifier() != null)
+    if (identifier.getQueryParameterQualifier() != null) {
       throw new InvalidRequestException(
           "Unsupported query parameter qualifier: " + identifier.getQueryParameterQualifier());
+    }
 
     if (!SUPPORTED_HASH_IDENTIFIER_SYSTEMS.contains(identifier.getSystem()))
       throw new InvalidRequestException("Unsupported identifier system: " + identifier.getSystem());
@@ -605,21 +569,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     operation.publishOperationName();
 
     List<IBaseResource> patients;
-    try {
-      Patient patient;
-      switch (identifier.getSystem()) {
-        case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
-        case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
-          patient = queryDatabaseByHicnHash(identifier.getValue(), requestHeader);
-          break;
-        case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
-          patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
-          break;
-        default:
-          throw new InvalidRequestException(
-              "Unsupported identifier system: " + identifier.getSystem());
-      }
 
+    try {
+      if (identifier.getSystem() != TransformerConstants.CODING_BBAPI_BENE_MBI_HASH) {
+        throw new InvalidRequestException(
+            "Unsupported identifier system: " + identifier.getSystem());
+      }
+      Patient patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
       patients =
           QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
               ? Collections.singletonList(patient)
@@ -629,24 +585,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
-    Bundle bundle =
-        TransformerUtilsV2.createBundle(paging, patients, loadedFilterManager.getTransactionTime());
-    return bundle;
-  }
-
-  /**
-   * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
-   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
-   *     encapsulated
-   * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
-   *     {@link Beneficiary#getHicn()} hash value
-   * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
-   *     Beneficiary} can be found
-   */
-  @Trace
-  private Patient queryDatabaseByHicnHash(String hicnHash, RequestHeaders requestHeader) {
-    return queryDatabaseByHash(
-        hicnHash, "hicn", Beneficiary_.hicn, BeneficiaryHistory_.hicn, requestHeader);
+    return TransformerUtilsV2.createBundle(
+        paging, patients, loadedFilterManager.getTransactionTime());
   }
 
   /**
@@ -683,11 +623,13 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       SingularAttribute<Beneficiary, String> beneficiaryHashField,
       SingularAttribute<BeneficiaryHistory, String> beneficiaryHistoryHashField,
       RequestHeaders requestHeader) {
-    if (hash == null || hash.trim().isEmpty()) throw new IllegalArgumentException();
+    if (hash == null || hash.trim().isEmpty()) {
+      throw new IllegalArgumentException();
+    }
 
     /*
-     * Beneficiaries' HICN/MBIs can change over time and those past HICN/MBIs may land in
-     * BeneficiaryHistory records. Accordingly, we need to search for matching HICN/MBIs in both the
+     * Beneficiaries' MBIs can change over time and those past MBIs may land in
+     * BeneficiaryHistory records. Accordingly, we need to search for matching MBIs in both the
      * Beneficiary and the BeneficiaryHistory records.
      *
      * There's no sane way to do this in a single query with JPA 2.1, it appears: JPA doesn't
@@ -704,8 +646,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      *
      * ... with the returned columns and JOINs being dynamic, depending on IncludeIdentifiers.
      *
-     * In lieu of that, we run two queries: one to find HICN/MBI matches in BeneficiariesHistory,
-     * and a second to find BENE_ID or HICN/MBI matches in Beneficiaries (with all of their data, so
+     * In lieu of that, we run two queries: one to find MBI matches in BeneficiariesHistory,
+     * and a second to find BENE_ID or MBI matches in Beneficiaries (with all of their data, so
      * we're ready to return the result). This is bad and dumb but I can't find a better working
      * alternative.
      *
@@ -713,7 +655,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
      * joins or fetch groups to work with them.)
      *
      * If we want to fix this, we need to move identifiers out entirely to separate tables:
-     * BeneficiaryHicns and BeneficiaryMbis. We could then safely query these tables and join them
+     * i.e., BeneficiaryMbis. We could then safely query these tables and join them
      * back to Beneficiaries (and hopefully the optimizer will play nice, too).
      */
 
@@ -723,11 +665,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<String> beneHistoryMatches = builder.createQuery(String.class);
     Root<BeneficiaryHistory> beneHistoryMatchesRoot =
         beneHistoryMatches.from(BeneficiaryHistory.class);
-    beneHistoryMatches.select(beneHistoryMatchesRoot.get(BeneficiaryHistory_.beneficiaryId));
-    beneHistoryMatches.where(
-        builder.equal(beneHistoryMatchesRoot.get(beneficiaryHistoryHashField), hash));
+    beneHistoryMatches
+        .select(beneHistoryMatchesRoot.get(BeneficiaryHistory_.beneficiaryId))
+        .where(builder.equal(beneHistoryMatchesRoot.get(beneficiaryHistoryHashField), hash));
     List<String> matchingIdsFromBeneHistory = null;
-    Long hicnsFromHistoryQueryNanoSeconds = null;
+    Long fromHistoryQueryNanoSeconds = null;
     Timer.Context beneHistoryMatchesTimer =
         metricRegistry
             .timer(
@@ -740,10 +682,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     try {
       matchingIdsFromBeneHistory = entityManager.createQuery(beneHistoryMatches).getResultList();
     } finally {
-      hicnsFromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
+      fromHistoryQueryNanoSeconds = beneHistoryMatchesTimer.stop();
       TransformerUtilsV2.recordQueryInMdc(
           "bene_by_" + hashType + "." + hashType + "s_from_beneficiarieshistory",
-          hicnsFromHistoryQueryNanoSeconds,
+          fromHistoryQueryNanoSeconds,
           matchingIdsFromBeneHistory == null ? 0 : matchingIdsFromBeneHistory.size());
     }
 
@@ -751,11 +693,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> beneMatches = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> beneMatchesRoot = beneMatches.from(Beneficiary.class);
 
-    if (requestHeader.isHICNinIncludeIdentifiers())
-      beneMatchesRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     // BFD379: in original V2, if check is commented out
-    if (requestHeader.isMBIinIncludeIdentifiers())
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       beneMatchesRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    }
 
     beneMatches.select(beneMatchesRoot);
     Predicate beneHashMatches = builder.equal(beneMatchesRoot.get(beneficiaryHashField), hash);
@@ -768,7 +709,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
     List<Beneficiary> matchingBenes = Collections.emptyList();
     Long benesByHashOrIdQueryNanoSeconds = null;
-    Timer.Context timerHicnQuery =
+    Timer.Context timerQuery =
         metricRegistry
             .timer(
                 MetricRegistry.name(
@@ -780,7 +721,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     try {
       matchingBenes = entityManager.createQuery(beneMatches).getResultList();
     } finally {
-      benesByHashOrIdQueryNanoSeconds = timerHicnQuery.stop();
+      benesByHashOrIdQueryNanoSeconds = timerQuery.stop();
 
       TransformerUtilsV2.recordQueryInMdc(
           String.format(
@@ -809,15 +750,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       beneficiary = matchingBenes.get(0);
     }
 
-    // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!requestHeader.isHICNinIncludeIdentifiers()) {
-      beneficiary.setHicnUnhashed(Optional.empty());
-    }
-
-    // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!requestHeader.isMBIinIncludeIdentifiers()) {
-      beneficiary.setMedicareBeneficiaryId(Optional.empty());
-    }
+    // Null out the unhashed HICNs; in v2 we are ignoring HICNs
+    beneficiary.setHicnUnhashed(Optional.empty());
 
     Patient patient =
         BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
@@ -825,8 +759,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Following method will bring back the Beneficiary that has the most recent rfrnc_yr since the
-   * hicn points to more than one bene id in the Beneficiaries table
+   * Following method will bring back the Beneficiary that has the most recent rfrnc_yr since there
+   * may be more than bene id in the Beneficiaries table
    *
    * @param duplicateBenes of matching Beneficiary records the {@link
    *     Beneficiary#getBeneficiaryId()} value to match
@@ -865,7 +799,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * #returnIncludeIdentifiersValues(RequestDetails)} for details.
    */
   public static final List<String> VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS =
-      Arrays.asList("true", "false", "hicn", "mbi");
+      Arrays.asList("true", "false", "mbi");
 
   /**
    * Return a valid List of values for the IncludeIdenfifiers header
@@ -878,8 +812,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   public static List<String> returnIncludeIdentifiersValues(RequestDetails requestDetails) {
     String headerValues = requestDetails.getHeader(HEADER_NAME_INCLUDE_IDENTIFIERS);
 
-    if (Strings.isNullOrEmpty(headerValues)) return Arrays.asList("");
-    else
+    if (Strings.isNullOrEmpty(headerValues)) {
+      return Arrays.asList("");
+    } else
       // Return values split on a comma with any whitespace, valid, distict, and sort
       return Arrays.asList(headerValues.toLowerCase().split("\\s*,\\s*")).stream()
           .peek(
@@ -891,16 +826,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           .distinct()
           .sorted()
           .collect(Collectors.toList());
-  }
-
-  /**
-   * Check if HICN is in {@link #HEADER_NAME_INCLUDE_IDENTIFIERS} header values.
-   *
-   * @param includeIdentifiersValues a list of header values.
-   * @return Returns true if includes unhashed hicn
-   */
-  public static boolean hasHICN(List<String> includeIdentifiersValues) {
-    return includeIdentifiersValues.contains("hicn") || includeIdentifiersValues.contains("true");
   }
 
   /**
@@ -924,9 +849,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         || includeIdentifiersValues.contains("true");
   }
 
-  public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_HICN = true;
   public static final boolean CNST_INCL_IDENTIFIERS_EXPECT_MBI = true;
-  public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_HICN = false;
   public static final boolean CNST_INCL_IDENTIFIERS_NOT_EXPECT_MBI = false;
 
   /**
@@ -984,10 +907,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     boolean passDistinctThrough = false;
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
-    }
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.beneficiaryHistories ";
       passDistinctThrough = true;
     }
 
@@ -1073,10 +992,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
       passDistinctThrough = true;
     }
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.beneficiaryHistories ";
-      passDistinctThrough = true;
-    }
 
     String query =
         "select distinct b from Beneficiary b "
@@ -1146,14 +1061,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         matchingBeneficiaries.stream()
             .map(
                 beneficiary -> {
-                  // Null out the unhashed HICNs if we're not supposed to be returning them
-                  if (!requestHeader.isHICNinIncludeIdentifiers()) {
-                    beneficiary.setHicnUnhashed(Optional.empty());
-                  }
-                  // Null out the unhashed MBIs if we're not supposed to be returning
-                  if (!requestHeader.isMBIinIncludeIdentifiers()) {
-                    beneficiary.setMedicareBeneficiaryId(Optional.empty());
-                  }
+                  // Null out the unhashed HICNs
+                  beneficiary.setHicnUnhashed(Optional.empty());
 
                   Patient patient =
                       BeneficiaryTransformerV2.transform(
@@ -1197,9 +1106,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
     // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
     // with paging and then fetch full benes with joins.
-    boolean useTwoSteps =
-        (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers())
-            && paging.isPagingRequested();
+    boolean useTwoSteps = (requestHeader.isMBIinIncludeIdentifiers() && paging.isPagingRequested());
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
