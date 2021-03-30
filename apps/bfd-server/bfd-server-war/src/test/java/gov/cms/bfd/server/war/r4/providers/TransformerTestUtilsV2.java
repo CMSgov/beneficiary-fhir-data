@@ -1011,4 +1011,89 @@ public final class TransformerTestUtilsV2 {
     if (expectedEndDate.isPresent())
       assertDateEquals(expectedEndDate.get(), actualPeriod.getEndElement());
   }
+
+  static Identifier findIdentifierBySystem(String system, List<Identifier> identifiers) {
+    Optional<Identifier> id =
+        identifiers.stream().filter(i -> system.equals(i.getSystem())).findFirst();
+
+    Assert.assertTrue(id.isPresent());
+
+    return id.get();
+  }
+
+  static Identifier createIdentifier(
+      String system, String value, String codeSystem, String code, String codeDisplay) {
+    return new Identifier()
+        .setType(
+            new CodeableConcept()
+                .setCoding(Arrays.asList(new Coding(codeSystem, code, codeDisplay))))
+        .setSystem(system)
+        .setValue(value);
+  }
+
+  static Extension findExtensionByUrl(String url, List<Extension> extensions) {
+    Optional<Extension> ex = extensions.stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    Assert.assertTrue(ex.isPresent());
+
+    return ex.get();
+  }
+
+  static Coding findCodingBySystem(String system, List<Coding> codings) {
+    Optional<Coding> coding =
+        codings.stream().filter(c -> system.equals(c.getSystem())).findFirst();
+
+    Assert.assertTrue(coding.isPresent());
+
+    return coding.get();
+  }
+
+  static CareTeamComponent findCareTeamBySequence(int seq, List<CareTeamComponent> team) {
+    Optional<CareTeamComponent> ctc = team.stream().filter(c -> c.getSequence() == seq).findFirst();
+
+    Assert.assertTrue(ctc.isPresent());
+
+    return ctc.get();
+  }
+
+  static CareTeamComponent createNpiCareTeamMember(
+      int sequence, String npi, String system, String code, String display) {
+    return new CareTeamComponent()
+        .setSequence(sequence)
+        .setProvider(
+            new Reference()
+                .setIdentifier(
+                    createIdentifier(
+                        null,
+                        npi,
+                        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+                        "npi",
+                        "National Provider Identifier")))
+        .setRole(new CodeableConcept().setCoding(Arrays.asList(new Coding(system, code, display))));
+  }
+
+  static SupportingInformationComponent findSupportingInfoByCode(
+      String system, List<SupportingInformationComponent> components) {
+    Optional<SupportingInformationComponent> si =
+        components.stream()
+            .filter(
+                cmp ->
+                    cmp.getCode().getCoding().stream()
+                            .filter(c -> system.equals(c.getSystem()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(si.isPresent());
+
+    return si.get();
+  }
+
+  static SupportingInformationComponent createSupportingInfo(
+      int sequence, List<Coding> category, Coding code) {
+    return new SupportingInformationComponent()
+        .setSequence(sequence)
+        .setCategory(new CodeableConcept().setCoding(category))
+        .setCode(new CodeableConcept().setCoding(Arrays.asList(code)));
+  }
 }

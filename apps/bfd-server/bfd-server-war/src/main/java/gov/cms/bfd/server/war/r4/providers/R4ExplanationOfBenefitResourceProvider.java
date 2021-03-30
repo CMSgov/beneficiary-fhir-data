@@ -227,7 +227,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     Set<ClaimTypeV2> claimTypes = parseTypeParam(type);
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
-    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    Operation operation = new Operation(Operation.Endpoint.V2_EOB);
     operation.setOption("by", "patient");
     operation.setOption(
         "types",
@@ -265,15 +265,12 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
                   ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate)));
     }
 
-    /*
-    TODO: When DME and HHA are implemented
     if (claimTypes.contains(ClaimTypeV2.DME)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.DME,
               findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate)));
     }
-    */
 
     if (claimTypes.contains(ClaimTypeV2.HHA)) {
       eobs.addAll(
