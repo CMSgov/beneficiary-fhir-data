@@ -392,10 +392,20 @@ public enum StaticRifResource {
   SYNTHEA_INPATIENT(
       syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/inpatient.csv")),
       RifFileType.INPATIENT,
+      Optional.empty()),
+
+  /**
+   * The NPIs produced by {@link #generateSyntheaData()}, the amount of which will vary across
+   * Synthea runs.
+   */
+  SYNTHEA_NPIS(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/npi.tsv")),
+      null,
       Optional.empty());
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StaticRifResource.class);
-  private static Path SYNTHEA_OUTPUT_DIR;
+  private static Path SYNTHEA_OUTPUT_DIR =
+      Paths.get("/Users/mhadley/Development/synthea/output/bfd");
 
   private final Supplier<URL> resourceUrlSupplier;
   private final RifFileType rifFileType;
