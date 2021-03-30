@@ -147,7 +147,7 @@ public final class SyntheaDataToFhirIT {
             .flatMap(eob -> eob.getItem().stream())
             .anyMatch(item -> item.getService() != null));
     Assert.assertTrue(
-        "No diagnosis display values found.",
+        "No organization display values found.",
         eobs.stream().anyMatch(eob -> eob.getOrganization().getDisplay() != null));
     Assert.assertTrue(
         "No provider display values found.",
