@@ -54,6 +54,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -302,6 +303,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     if (Boolean.parseBoolean(excludeSamhsa)) filterSamhsa(eobs);
 
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
+
+    // Add bene_id to MDC logs
+    MDC.put("bene_id", beneficiaryId);
 
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }

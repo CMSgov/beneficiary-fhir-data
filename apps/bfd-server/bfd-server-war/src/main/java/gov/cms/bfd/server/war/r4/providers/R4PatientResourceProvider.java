@@ -184,6 +184,9 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       beneficiary.setMedicareBeneficiaryId(Optional.empty());
     }
 
+    // Add bene_id to MDC logs
+    MDC.put("bene_id", beneIdText);
+
     return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
 
