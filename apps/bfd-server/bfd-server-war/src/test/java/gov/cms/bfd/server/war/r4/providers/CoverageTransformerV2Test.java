@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -20,6 +19,7 @@ import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformerV2}. */
@@ -40,12 +40,48 @@ public final class CoverageTransformerV2Test {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
-    beneficiary.setLastUpdated(new Date());
+    // beneficiary.setLastUpdated(new Date());
   }
 
   @After
   public void tearDown() {
     beneficiary = null;
+  }
+
+  /** Standalone wrapper to output PART_A */
+  @Ignore
+  @Test
+  public void transformCoveragePartA() throws FHIRException {
+    Coverage coverage =
+        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
+  }
+
+  /** Standalone wrapper to output PART_B */
+  @Ignore
+  @Test
+  public void transformCoveragePartB() throws FHIRException {
+    Coverage coverage =
+        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_B, beneficiary);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
+  }
+
+  /** Standalone wrapper to output PART_C */
+  @Ignore
+  @Test
+  public void transformCoveragePartC() throws FHIRException {
+    Coverage coverage =
+        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_C, beneficiary);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
+  }
+
+  /** Standalone wrapper to output PART_D */
+  @Ignore
+  @Test
+  public void transformCoveragePartD() throws FHIRException {
+    Coverage coverage =
+        CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_D, beneficiary);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
   }
 
   /**
@@ -60,7 +96,6 @@ public final class CoverageTransformerV2Test {
   public void testCoveragePartA() throws FHIRException {
     Coverage coverage =
         CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
     assertPartAMatches(beneficiary, coverage);
 
     // Test with null lastUpdated
@@ -82,7 +117,6 @@ public final class CoverageTransformerV2Test {
   public void testCoveragePartB() throws FHIRException {
     Coverage coverage =
         CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_B, beneficiary);
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
     assertPartBMatches(beneficiary, coverage);
   }
 
@@ -98,7 +132,6 @@ public final class CoverageTransformerV2Test {
   public void testCoveragePartC() throws FHIRException {
     Coverage coverage =
         CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_C, beneficiary);
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
     assertPartCMatches(beneficiary, coverage);
   }
 
@@ -114,7 +147,6 @@ public final class CoverageTransformerV2Test {
   public void testCoveragePartD() throws FHIRException {
     Coverage coverage =
         CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_D, beneficiary);
-    // System.out.println(fhirContext.newJsonParser().encodeResourceToString(coverage));
     assertPartDMatches(beneficiary, coverage);
   }
 
