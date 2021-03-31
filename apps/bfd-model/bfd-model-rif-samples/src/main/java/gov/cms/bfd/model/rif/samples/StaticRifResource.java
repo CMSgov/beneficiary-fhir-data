@@ -405,7 +405,9 @@ public enum StaticRifResource {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StaticRifResource.class);
   private static Path SYNTHEA_OUTPUT_DIR =
-      Paths.get("/Users/mhadley/Development/synthea/output/bfd");
+      System.getenv("SYNTHEA_OUTPUT_DIR") != null
+          ? Paths.get(System.getenv("SYNTHEA_OUTPUT_DIR"))
+          : null;
 
   private final Supplier<URL> resourceUrlSupplier;
   private final RifFileType rifFileType;
