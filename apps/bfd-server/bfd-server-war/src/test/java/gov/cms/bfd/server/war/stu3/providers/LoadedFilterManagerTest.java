@@ -5,6 +5,9 @@ import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.server.war.commons.LoadedFileFilter;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -194,6 +197,25 @@ public final class LoadedFilterManagerTest {
         LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
     Assert.assertEquals(3, cFilters.size());
     Assert.assertEquals(1, cFilters.get(0).getBatchesCount());
+  }
+
+  @Test
+  public void testDateComparisonAssumptions() throws ParseException {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss.SSS");
+    // Root cause of BFD-713.
+    // Adding this here in case a new version of Java changes behavior.  The Date objects used in
+    // LoadedFilterManager are actually java.sql.Timestamps, which split milliseconds from the
+    // seconds
+    Date lastBatchCreated = new Timestamp(formatter.parse("2021-03-27 21:14:52.316").getTime());
+    Date currentLastBatchCreated =
+        new Timestamp(formatter.parse("2021-03-27 21:14:52.557").getTime());
+
+    // You would expect this to be true, but Timestamp splits the ms from the seconds, and this is
+    // only comparing the seconds which are equal
+    Assert.assertFalse(lastBatchCreated.before(currentLastBatchCreated));
+
+    // If we convert to instants, it will work in either case:
+    Assert.assertTrue(lastBatchCreated.toInstant().isBefore(currentLastBatchCreated.toInstant()));
   }
 
   @Test
