@@ -422,7 +422,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // BFD379: original V2, no MBI logic here
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
     }
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
@@ -503,7 +502,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // BFD379: no MBI logic in original V2 code here
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
     }
 
     String query =
@@ -907,7 +905,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     boolean passDistinctThrough = false;
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
     }
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
@@ -990,7 +987,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     boolean passDistinctThrough = false;
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
     }
 
     String query =
