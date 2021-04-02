@@ -125,13 +125,6 @@ resource "aws_kms_key" "eft_efs" {
 POLICY
 }
 
-# # key alias
-# resource "aws_kms_alias" "${var.partner}_eft_efs" {
-#     name          = "alias/${var.partner}-eft-efs-${var.env_config.env}-cmk"
-#     target_key_id = aws_kms_key.${var.partner}_eft_efs.id
-# }
-
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FILE SYSTEMS AND ACCESS POINTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
@@ -171,15 +164,6 @@ resource "aws_efs_access_point" "eft" {
       permissions = "0755"
     }
   }
-}
-
-# Deploys mount targets in all ETL data subnets
-# TODO: only deploys mount targets in *existing* subnets. We will need to extend our data
-# subnets into all AZ's to ensure we do not incur cross-AZ data charges
-resource "aws_efs_mount_target" "eft" {
-  file_system_id = aws_efs_file_system.eft.id
-  for_each       = data.aws_subnet_ids.etl.ids
-  subnet_id      = each.value
 }
 
 # EFS file system policy that
@@ -319,12 +303,6 @@ resource "aws_security_group" "eft_efs_sg" {
   vpc_id      = data.aws_vpc.main.id
   tags        = local.tags
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
 
 # allow TCP/2049 from BFD ETL data subnets
@@ -347,6 +325,23 @@ resource "aws_security_group_rule" "partner_nfs" {
   protocol          = "tcp"
   security_group_id = aws_security_group.eft_efs_sg.id
   cidr_blocks       = var.partner_subnets[var.env_config.env]
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MOUNT TARGETS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+# Deploy mount targets into etl data subnets
+# TODO: only deploys mount targets in *existing* subnets. We will need to extend our data
+# TODO: subnets into all AZ's to ensure we do not incur cross-AZ data charges
+resource "aws_efs_mount_target" "eft" {
+  file_system_id = aws_efs_file_system.eft.id
+
+  # for each data subnet
+  for_each       = data.aws_subnet_ids.etl.ids
+  subnet_id      = each.value
+
+  # attach our nfs rules to the moutn targets
+  security_groups = [aws_security_group.eft_efs_sg.id]
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MONITORING/ALERTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
