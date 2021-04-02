@@ -214,12 +214,7 @@ public class RequestHeaders {
    * @return True or False.
    */
   public static Boolean returnIncludeTaxValue(String headerValue) {
-    return (headerValue == null
-            || headerValue == ""
-            || headerValue.equalsIgnoreCase("FALSE")
-            || !headerValue.equalsIgnoreCase("TRUE"))
-        ? Boolean.FALSE
-        : Boolean.TRUE;
+    return (headerValue != null && headerValue.equalsIgnoreCase("TRUE"));
   }
 
   /**
