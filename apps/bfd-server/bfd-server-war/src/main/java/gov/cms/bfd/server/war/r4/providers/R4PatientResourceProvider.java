@@ -431,11 +431,27 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   private TypedQuery<Beneficiary> queryBeneficiariesBy(
       String field, String value, PatientLinkBuilder paging, RequestHeaders requestHeader) {
     String joinsClause = "";
+    boolean passDistinctThrough = false;
+
+    /*
+      Because the DISTINCT JPQL keyword has two meanings based on the underlying query type, it’s important
+      to pass it through to the SQL statement only for scalar queries where the result set requires duplicates
+      to be removed by the database engine.
+
+      For parent-child entity queries where the child collection is using JOIN FETCH, the DISTINCT keyword should
+      only be applied after the ResultSet is got from JDBC, therefore avoiding passing DISTINCT to the SQL statement
+      that gets executed.
+    */
+
     // BFD379: original V2, no MBI logic here
-    if (requestHeader.isMBIinIncludeIdentifiers())
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (requestHeader.isHICNinIncludeIdentifiers())
+      passDistinctThrough = true;
+    }
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.beneficiaryHistories ";
+      passDistinctThrough = true;
+    }
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
@@ -449,7 +465,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       return entityManager
           .createQuery(query, Beneficiary.class)
           .setParameter("value", value)
-          .setParameter("cursor", paging.getCursor());
+          .setParameter("cursor", paging.getCursor())
+          .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
     } else {
       String query =
           "select distinct b from Beneficiary b "
@@ -459,7 +476,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
               + " = :value "
               + "order by b.beneficiaryId asc";
 
-      return entityManager.createQuery(query, Beneficiary.class).setParameter("value", value);
+      return entityManager
+          .createQuery(query, Beneficiary.class)
+          .setParameter("value", value)
+          .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
     }
   }
 
@@ -507,18 +527,26 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   private TypedQuery<Beneficiary> queryBeneficiariesByIds(
       List<String> ids, RequestHeaders requestHeader) {
     String joinsClause = "";
+    boolean passDistinctThrough = false;
     // BFD379: no MBI logic in original V2 code here
-    if (requestHeader.isMBIinIncludeIdentifiers())
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (requestHeader.isHICNinIncludeIdentifiers())
+      passDistinctThrough = true;
+    }
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.beneficiaryHistories ";
+      passDistinctThrough = true;
+    }
 
     String query =
         "select distinct b from Beneficiary b "
             + joinsClause
             + "where b.beneficiaryId in :ids "
             + "order by b.beneficiaryId asc";
-    return entityManager.createQuery(query, Beneficiary.class).setParameter("ids", ids);
+    return entityManager
+        .createQuery(query, Beneficiary.class)
+        .setParameter("ids", ids)
+        .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
   }
 
   /**
@@ -953,10 +981,15 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       PatientLinkBuilder paging,
       RequestHeaders requestHeader) {
     String joinsClause = "inner join b.beneficiaryMonthlys bm ";
-    if (requestHeader.isMBIinIncludeIdentifiers())
+    boolean passDistinctThrough = false;
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (requestHeader.isHICNinIncludeIdentifiers())
+      passDistinctThrough = true;
+    }
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.beneficiaryHistories ";
+      passDistinctThrough = true;
+    }
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
       String query =
@@ -971,7 +1004,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           .createQuery(query, Beneficiary.class)
           .setParameter("contractCode", contractCode)
           .setParameter("yearMonth", yearMonth)
-          .setParameter("cursor", paging.getCursor());
+          .setParameter("cursor", paging.getCursor())
+          .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
     } else {
       String query =
           "select distinct b from Beneficiary b "
@@ -983,7 +1017,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       return entityManager
           .createQuery(query, Beneficiary.class)
           .setParameter("contractCode", contractCode)
-          .setParameter("yearMonth", yearMonth);
+          .setParameter("yearMonth", yearMonth)
+          .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
     }
   }
 
@@ -1033,17 +1068,25 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   private TypedQuery<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(
       List<String> ids, RequestHeaders requestHeader) {
     String joinsClause = "inner join b.beneficiaryMonthlys bm ";
-    if (requestHeader.isMBIinIncludeIdentifiers())
+    boolean passDistinctThrough = false;
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    if (requestHeader.isHICNinIncludeIdentifiers())
+      passDistinctThrough = true;
+    }
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.beneficiaryHistories ";
+      passDistinctThrough = true;
+    }
 
     String query =
         "select distinct b from Beneficiary b "
             + joinsClause
             + "where b.beneficiaryId in :ids "
             + "order by b.beneficiaryId asc";
-    return entityManager.createQuery(query, Beneficiary.class).setParameter("ids", ids);
+    return entityManager
+        .createQuery(query, Beneficiary.class)
+        .setParameter("ids", ids)
+        .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
   }
 
   private String partDFieldByMonth(CcwCodebookVariable month) {
