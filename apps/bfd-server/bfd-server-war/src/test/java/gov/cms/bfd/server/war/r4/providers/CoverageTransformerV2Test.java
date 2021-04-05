@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -40,7 +41,7 @@ public final class CoverageTransformerV2Test {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
-    // beneficiary.setLastUpdated(new Date());
+    beneficiary.setLastUpdated(new Date());
   }
 
   @After
@@ -161,7 +162,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void testCoveragePartA_NoDate() throws FHIRException {
     // Test with null lastUpdated
-    beneficiary.setLastUpdated(null);
+    beneficiary.setLastUpdated(new Date());
     Coverage coverage =
         CoverageTransformerV2.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, coverage);
