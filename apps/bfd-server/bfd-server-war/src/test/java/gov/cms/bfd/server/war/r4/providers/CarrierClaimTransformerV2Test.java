@@ -50,7 +50,9 @@ public class CarrierClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException {
     CarrierClaim claim = generateClaim();
 
-    assertMatches(claim, CarrierClaimTransformerV2.transform(new MetricRegistry(), claim));
+    assertMatches(
+        claim,
+        CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)));
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -64,7 +66,8 @@ public class CarrierClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        CarrierClaimTransformerV2.transform(new MetricRegistry(), generateClaim());
+        CarrierClaimTransformerV2.transform(
+            new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
