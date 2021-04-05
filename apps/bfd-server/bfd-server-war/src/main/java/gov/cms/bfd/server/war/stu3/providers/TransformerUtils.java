@@ -3113,16 +3113,17 @@ public final class TransformerUtils {
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform
+   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
+   *     includeTaxNumbers whether or not to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
-      MetricRegistry metricRegistry, Object rifRecord) {
-    if (rifRecord == null) throw new IllegalArgumentException();
-
+      MetricRegistry metricRegistry, Object rifRecord, Optional<Boolean> includeTaxNumbers) {
     for (ClaimType claimType : ClaimType.values()) {
       if (claimType.getEntityClass().isInstance(rifRecord)) {
-        return claimType.getTransformer().apply(metricRegistry, rifRecord);
+        return claimType.getTransformer().transform(metricRegistry, rifRecord, includeTaxNumbers);
       }
     }
 

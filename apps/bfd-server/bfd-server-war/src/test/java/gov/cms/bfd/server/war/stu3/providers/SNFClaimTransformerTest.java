@@ -43,7 +43,8 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = SNFClaimTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        SNFClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     assertMatches(claim, eob);
   }
 

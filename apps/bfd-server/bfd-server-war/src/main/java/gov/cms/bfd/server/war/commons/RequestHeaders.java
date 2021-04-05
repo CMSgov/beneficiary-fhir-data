@@ -29,6 +29,9 @@ public class RequestHeaders {
           if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
             this.headerNVs.put(h, returnIncludeIdentifiersValues(v));
           }
+          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS)) {
+            this.headerNVs.put(h, returnIncludeTaxValue(v));
+          }
         });
   }
 
@@ -76,6 +79,9 @@ public class RequestHeaders {
           }
           if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
             this.headerNVs.put(h, returnIncludeIdentifiersValues(v));
+          }
+          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS)) {
+            this.headerNVs.put(h, returnIncludeTaxValue(v));
           }
         });
   }
@@ -166,6 +172,17 @@ public class RequestHeaders {
 
   /**
    * check if request contains header includeIdentifiers {@link
+   * #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'hicn' or 'true'
+   *
+   * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
+   */
+  public boolean isTaxNumIncludeIdentifiers() {
+    List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS);
+    return v.contains("true");
+  }
+
+  /**
+   * check if request contains header includeIdentifiers {@link
    * #CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'mbi' or 'true'
    *
    * @return true if the header presents and has value 'hicn' or 'true', false otherwise.
@@ -188,6 +205,16 @@ public class RequestHeaders {
             || !headerValue.equalsIgnoreCase("TRUE"))
         ? Boolean.FALSE
         : Boolean.TRUE;
+  }
+
+  /**
+   * Return a TRUE / FALSE from VALID_HEADER_VALUES_INCLUDE_IDENTIFIERS header
+   *
+   * @param headerValue a String containing Boolean value in string form
+   * @return True or False.
+   */
+  public static Boolean returnIncludeTaxValue(String headerValue) {
+    return (headerValue != null && headerValue.equalsIgnoreCase("TRUE"));
   }
 
   /**

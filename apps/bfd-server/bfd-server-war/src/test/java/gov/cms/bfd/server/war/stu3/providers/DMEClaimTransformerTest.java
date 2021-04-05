@@ -41,8 +41,9 @@ public final class DMEClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = DMEClaimTransformer.transform(new MetricRegistry(), claim);
-    assertMatches(claim, eob);
+    ExplanationOfBenefit eob =
+        DMEClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+    assertMatches(claim, eob, Optional.of(true));
   }
 
   /**
@@ -51,10 +52,15 @@ public final class DMEClaimTransformerTest {
    *
    * @param claim the {@link DMEClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
-   *     DMEClaim}
+   *     DMEClaim}@param includedTaxNumbers whether or not to include tax numbers are expected to be
+   *     included in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(DMEClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(
+      DMEClaim claim, ExplanationOfBenefit eob, Optional<Boolean> includedTaxNumbers)
+      throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -98,7 +104,7 @@ public final class DMEClaimTransformerTest {
     TransformerTestUtils.assertCareTeamEquals(
         claimLine1.getProviderNPI().get(), ClaimCareteamrole.PRIMARY, eob);
     CareTeamComponent performingCareTeamEntry =
-        TransformerTestUtils.findCareTeamEntryForProviderIdentifier(
+        TransformerTestUtils.findCareTeamEntryForProviderNpi(
             claimLine1.getProviderNPI().get(), eob.getCareTeam());
     TransformerTestUtils.assertHasCoding(
         CcwCodebookVariable.PRVDR_SPCLTY,
@@ -113,6 +119,15 @@ public final class DMEClaimTransformerTest {
         CcwCodebookVariable.PRVDR_STATE_CD,
         claimLine1.getProviderStateCode(),
         eobItem0.getLocation());
+
+    CareTeamComponent taxNumberCareTeamEntry =
+        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
+            claimLine1.getProviderTaxNumber(), eob.getCareTeam());
+    if (includedTaxNumbers.orElse(false)) {
+      Assert.assertNotNull(taxNumberCareTeamEntry);
+    } else {
+      Assert.assertNull(taxNumberCareTeamEntry);
+    }
 
     TransformerTestUtils.assertHcpcsCodes(
         eobItem0,

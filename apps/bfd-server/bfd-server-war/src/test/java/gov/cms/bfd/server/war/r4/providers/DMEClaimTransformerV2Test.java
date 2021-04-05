@@ -51,7 +51,8 @@ public final class DMEClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException {
     DMEClaim claim = generateClaim();
 
-    assertMatches(claim, DMEClaimTransformerV2.transform(new MetricRegistry(), claim));
+    assertMatches(
+        claim, DMEClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)));
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -65,7 +66,7 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        DMEClaimTransformerV2.transform(new MetricRegistry(), generateClaim());
+        DMEClaimTransformerV2.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
