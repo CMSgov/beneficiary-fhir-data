@@ -34,7 +34,7 @@
         data_server_db_url: "{{ vault_data_db_secondary_url[ansible_facts['facter_ec2_metadata']['placement']['availability-zone']] }}"
         data_server_db_username: "{{ vault_data_server_db_username }}"
         data_server_db_password: "{{ vault_data_server_db_password }}"
-        data_server_db_connections_max: {{ data_server_num_cores * 10 }} # Oracle recommends 1-10 connections per CPU core
+        data_server_db_connections_max: "{{ data_server_num_cores * 10 }}" # Oracle recommends 1-10 connections per CPU core
         data_server_new_relic_license_key: "{{ vault_data_server_new_relic_license_key }}"
         data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
         data_server_new_relic_environment: "{{ env_name_std }}"
