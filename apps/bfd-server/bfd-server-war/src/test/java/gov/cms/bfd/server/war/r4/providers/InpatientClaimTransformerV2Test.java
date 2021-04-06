@@ -820,17 +820,29 @@ public final class InpatientClaimTransformerV2Test {
             new Coding("http://hl7.org/fhir/sid/icd-10", "0TCDDEE", null),
             "2016-01-16T00:00:00-06:00");
 
+    System.out.println(proc1.getClass().getName());
+    System.out.println(cmp1.getClass().getName());
+
     System.out.println(proc1.getSequence());
     System.out.println(cmp1.getSequence());
 
     System.out.println(proc1.getDate());
     System.out.println(cmp1.getDate());
 
+    System.out.println(proc1.getDate().getClass().getName());
+    System.out.println(cmp1.getDate().getClass().getName());
+
+    System.out.println(proc1.getProcedureCodeableConcept().getCoding().size());
+    System.out.println(cmp1.getProcedureCodeableConcept().getCoding().size());
+
     System.out.println(proc1.getProcedureCodeableConcept().getCodingFirstRep().getSystem());
     System.out.println(cmp1.getProcedureCodeableConcept().getCodingFirstRep().getSystem());
 
     System.out.println(proc1.getProcedureCodeableConcept().getCodingFirstRep().getCode());
     System.out.println(cmp1.getProcedureCodeableConcept().getCodingFirstRep().getCode());
+
+    System.out.println(proc1.getProcedureCodeableConcept().getCodingFirstRep().getDisplay());
+    System.out.println(cmp1.getProcedureCodeableConcept().getCodingFirstRep().getDisplay());
 
     Assert.assertTrue("Comparing Procedure code 0TCDDEE", cmp1.equalsDeep(proc1));
 
