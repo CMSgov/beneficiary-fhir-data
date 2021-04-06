@@ -11,12 +11,11 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -1274,15 +1273,14 @@ public final class TransformerTestUtilsV2 {
    * @return
    */
   static ProcedureComponent createProcedure(int seq, Coding code, String date) {
-    try {
-      return new ProcedureComponent()
-          .setSequence(seq)
-          .setProcedure(new CodeableConcept().setCoding(Arrays.asList(code)))
-          .setDate((new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")).parse(date));
-    } catch (ParseException e) {
-      Assert.fail("Parse exception when creating procedure");
-      return null;
-    }
+    // The CCW Procedure extraction uses a LocalDate and converts it to Date
+    LocalDate ldate =
+        LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+
+    return new ProcedureComponent()
+        .setSequence(seq)
+        .setProcedure(new CodeableConcept().setCoding(Arrays.asList(code)))
+        .setDate(TransformerUtilsV2.convertToDate(ldate));
   }
 
   /**
