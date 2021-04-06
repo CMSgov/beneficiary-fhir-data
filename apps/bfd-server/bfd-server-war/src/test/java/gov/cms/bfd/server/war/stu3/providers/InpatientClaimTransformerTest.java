@@ -44,7 +44,8 @@ public final class InpatientClaimTransformerTest {
             .get();
     claim.setLastUpdated(new Date());
 
-    ExplanationOfBenefit eob = InpatientClaimTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        InpatientClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     assertMatches(claim, eob);
   }
 

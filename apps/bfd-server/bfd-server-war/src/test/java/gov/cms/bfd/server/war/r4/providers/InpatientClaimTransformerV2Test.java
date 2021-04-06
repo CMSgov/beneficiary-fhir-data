@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -70,7 +71,7 @@ public final class InpatientClaimTransformerV2Test {
   @Before
   public void before() {
     claim = generateClaim();
-    eob = InpatientClaimTransformerV2.transform(new MetricRegistry(), claim);
+    eob = InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -1651,7 +1652,8 @@ public final class InpatientClaimTransformerV2Test {
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), generateClaim());
+        InpatientClaimTransformerV2.transform(
+            new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 }
