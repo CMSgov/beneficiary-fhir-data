@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.dc.geo;
+package gov.cms.bfd.pipeline.rda.grpc;
 
 /**
  * Wrapper for exceptions thrown during batch process. Intended to capture the number of objects

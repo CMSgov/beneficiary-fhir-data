@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.dc.geo;
+package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
