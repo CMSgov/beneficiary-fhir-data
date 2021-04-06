@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class DcGeoRDALoadJob<T> implements PipelineJob {
+public final class DcGeoRDALoadJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRDALoadJob.class);
   public static final String SCAN_INTERVAL_PROPERTY = "DCGeoRDALoadIntervalSeconds";
   public static final String RUN_TIME_PROPERTY = "DCGeoRDALoadRunSeconds";
@@ -31,8 +31,8 @@ public final class DcGeoRDALoadJob<T> implements PipelineJob {
       DcGeoRDALoadJob.class.getSimpleName() + ".processed";
 
   private final Config config;
-  private final Callable<RDASource<T>> sourceFactory;
-  private final Callable<RDASink<T>> sinkFactory;
+  private final Callable<RDASource<PreAdjudicatedClaim>> sourceFactory;
+  private final Callable<RDASink<PreAdjudicatedClaim>> sinkFactory;
   private final Meter callsMeter;
   private final Meter failuresMeter;
   private final Meter successesMeter;
@@ -40,8 +40,8 @@ public final class DcGeoRDALoadJob<T> implements PipelineJob {
 
   public DcGeoRDALoadJob(
       Config config,
-      Callable<RDASource<T>> sourceFactory,
-      Callable<RDASink<T>> sinkFactory,
+      Callable<RDASource<PreAdjudicatedClaim>> sourceFactory,
+      Callable<RDASink<PreAdjudicatedClaim>> sinkFactory,
       MetricRegistry appMetrics) {
     this.config = config;
     this.sourceFactory = sourceFactory;
@@ -50,6 +50,20 @@ public final class DcGeoRDALoadJob<T> implements PipelineJob {
     failuresMeter = appMetrics.meter(FAILURES_METER_NAME);
     successesMeter = appMetrics.meter(SUCCESSES_METER_NAME);
     processedMeter = appMetrics.meter(PROCESSED_METER_NAME);
+  }
+
+  /**
+   * Factory method to construct a new job instance using standard parameters.
+   *
+   * @param appMetrics MetricRegistry used to track operational metrics
+   * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
+   */
+  public static DcGeoRDALoadJob newDcGeoRDALoadJob(MetricRegistry appMetrics) {
+    return new DcGeoRDALoadJob(
+        new Config(System.getProperties()),
+        () -> new SkeletonRDASource(appMetrics),
+        () -> new SkeletonRDASink(appMetrics),
+        appMetrics);
   }
 
   public Duration getScanInterval() {
@@ -63,8 +77,8 @@ public final class DcGeoRDALoadJob<T> implements PipelineJob {
     Exception error = null;
     try {
       callsMeter.mark();
-      try (RDASource<T> source = sourceFactory.call();
-          RDASink<T> sink = sinkFactory.call()) {
+      try (RDASource<PreAdjudicatedClaim> source = sourceFactory.call();
+          RDASink<PreAdjudicatedClaim> sink = sinkFactory.call()) {
         processedCount =
             source.retrieveAndProcessObjects(
                 config.getMaxObjectsPerCall(), config.getBatchSize(), config.getMaxRunTime(), sink);

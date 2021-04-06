@@ -5,7 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SkeletonRDASink implements RDASink<Object> {
+public class SkeletonRDASink implements RDASink<PreAdjudicatedClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRDASource.class);
   private final Meter callsMeter;
 
@@ -14,7 +14,7 @@ public class SkeletonRDASink implements RDASink<Object> {
   }
 
   @Override
-  public int writeObject(Object object) throws ProcessingException {
+  public int writeObject(PreAdjudicatedClaim object) throws ProcessingException {
     callsMeter.mark();
     LOGGER.warn("simulating object storage");
     return 1;

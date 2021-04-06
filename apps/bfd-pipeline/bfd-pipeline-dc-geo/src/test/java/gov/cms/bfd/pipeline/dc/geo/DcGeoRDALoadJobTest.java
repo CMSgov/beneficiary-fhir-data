@@ -21,11 +21,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DcGeoRDALoadJobTest {
-  private Callable<RDASource<Integer>> sourceFactory;
-  private Callable<RDASink<Integer>> sinkFactory;
-  private RDASource<Integer> source;
-  private RDASink<Integer> sink;
-  private DcGeoRDALoadJob<Integer> job;
+  private Callable<RDASource<PreAdjudicatedClaim>> sourceFactory;
+  private Callable<RDASink<PreAdjudicatedClaim>> sinkFactory;
+  private RDASource<PreAdjudicatedClaim> source;
+  private RDASink<PreAdjudicatedClaim> sink;
+  private DcGeoRDALoadJob job;
   private MetricRegistry appMetrics;
 
   @SuppressWarnings("unchecked")
@@ -38,7 +38,7 @@ public class DcGeoRDALoadJobTest {
     DcGeoRDALoadJob.Config config =
         new DcGeoRDALoadJob.Config(Duration.ofSeconds(10), Duration.ofSeconds(25), 5, 3);
     appMetrics = new MetricRegistry();
-    job = new DcGeoRDALoadJob<>(config, sourceFactory, sinkFactory, appMetrics);
+    job = new DcGeoRDALoadJob(config, sourceFactory, sinkFactory, appMetrics);
   }
 
   @Test

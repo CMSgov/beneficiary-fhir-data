@@ -6,7 +6,7 @@ import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SkeletonRDASource implements RDASource<Object> {
+public class SkeletonRDASource implements RDASource<PreAdjudicatedClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRDASource.class);
 
   private final Meter callsMeter;
@@ -17,7 +17,7 @@ public class SkeletonRDASource implements RDASource<Object> {
 
   @Override
   public int retrieveAndProcessObjects(
-      int maxToProcess, int maxPerBatch, Duration maxRunTime, RDASink<Object> sink)
+      int maxToProcess, int maxPerBatch, Duration maxRunTime, RDASink<PreAdjudicatedClaim> sink)
       throws ProcessingException {
     LOGGER.warn("simulating object processing");
     callsMeter.mark();
