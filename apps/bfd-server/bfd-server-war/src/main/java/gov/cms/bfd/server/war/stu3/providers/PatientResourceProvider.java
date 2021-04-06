@@ -582,11 +582,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
     }
     if (requestHeader.isHICNinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.beneficiaryHistories ";
-      passDistinctThrough = true;
     }
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
@@ -671,11 +669,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     boolean passDistinctThrough = false;
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
     }
     if (requestHeader.isHICNinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.beneficiaryHistories ";
-      passDistinctThrough = true;
     }
 
     if (paging.isPagingRequested() && !paging.isFirstPage()) {
@@ -758,11 +754,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     boolean passDistinctThrough = false;
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
     }
     if (requestHeader.isHICNinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.beneficiaryHistories ";
-      passDistinctThrough = true;
     }
 
     String query =
@@ -788,11 +782,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     boolean passDistinctThrough = false;
     if (requestHeader.isMBIinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-      passDistinctThrough = true;
     }
     if (requestHeader.isHICNinIncludeIdentifiers()) {
       joinsClause += "left join fetch b.beneficiaryHistories ";
-      passDistinctThrough = true;
     }
 
     String query =
