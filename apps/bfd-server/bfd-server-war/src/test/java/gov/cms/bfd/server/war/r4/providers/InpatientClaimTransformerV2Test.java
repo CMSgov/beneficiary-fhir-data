@@ -820,7 +820,19 @@ public final class InpatientClaimTransformerV2Test {
             new Coding("http://hl7.org/fhir/sid/icd-10", "0TCDDEE", null),
             "2016-01-16T00:00:00-06:00");
 
-    Assert.assertTrue(cmp1.equalsDeep(proc1));
+    System.out.println(proc1.getSequence());
+    System.out.println(cmp1.getSequence());
+
+    System.out.println(proc1.getDate());
+    System.out.println(cmp1.getDate());
+
+    System.out.println(proc1.getProcedureCodeableConcept().getCodingFirstRep().getSystem());
+    System.out.println(cmp1.getProcedureCodeableConcept().getCodingFirstRep().getSystem());
+
+    System.out.println(proc1.getProcedureCodeableConcept().getCodingFirstRep().getCode());
+    System.out.println(cmp1.getProcedureCodeableConcept().getCodingFirstRep().getCode());
+
+    Assert.assertTrue("Comparing Procedure code 0TCDDEE", cmp1.equalsDeep(proc1));
 
     ProcedureComponent proc2 =
         TransformerTestUtilsV2.findProcedureByCode("302DDAA", eob.getProcedure());
@@ -831,7 +843,7 @@ public final class InpatientClaimTransformerV2Test {
             new Coding("http://hl7.org/fhir/sid/icd-10", "302DDAA", null),
             "2016-01-16T00:00:00-06:00");
 
-    Assert.assertTrue(cmp2.equalsDeep(proc2));
+    Assert.assertTrue("Comparing Procedure code 302DDAA", cmp2.equalsDeep(proc2));
 
     ProcedureComponent proc3 =
         TransformerTestUtilsV2.findProcedureByCode("302ZZXX", eob.getProcedure());
@@ -842,7 +854,7 @@ public final class InpatientClaimTransformerV2Test {
             new Coding("http://hl7.org/fhir/sid/icd-10", "302ZZXX", null),
             "2016-01-15T00:00:00-06:00");
 
-    Assert.assertTrue(cmp3.equalsDeep(proc3));
+    Assert.assertTrue("Comparing Procedure code 302ZZXX", cmp3.equalsDeep(proc3));
 
     ProcedureComponent proc4 =
         TransformerTestUtilsV2.findProcedureByCode("5566AAA", eob.getProcedure());
@@ -853,7 +865,7 @@ public final class InpatientClaimTransformerV2Test {
             new Coding("http://hl7.org/fhir/sid/icd-10", "5566AAA", null),
             "2016-01-17T00:00:00-06:00");
 
-    Assert.assertTrue(cmp4.equalsDeep(proc4));
+    Assert.assertTrue("Comparing Procedure code 5566AAA", cmp4.equalsDeep(proc4));
 
     ProcedureComponent proc5 =
         TransformerTestUtilsV2.findProcedureByCode("6677BBB", eob.getProcedure());
@@ -864,7 +876,7 @@ public final class InpatientClaimTransformerV2Test {
             new Coding("http://hl7.org/fhir/sid/icd-10", "6677BBB", null),
             "2016-01-24T00:00:00-06:00");
 
-    Assert.assertTrue(cmp5.equalsDeep(proc5));
+    Assert.assertTrue("Comparing Procedure code 6677BBB", cmp5.equalsDeep(proc5));
 
     ProcedureComponent proc6 =
         TransformerTestUtilsV2.findProcedureByCode("8109", eob.getProcedure());
@@ -875,7 +887,7 @@ public final class InpatientClaimTransformerV2Test {
             new Coding("http://hl7.org/fhir/sid/icd-10", "8109", "REFUSION OF SPINE"),
             "2016-01-24T00:00:00-06:00");
 
-    Assert.assertTrue(cmp6.equalsDeep(proc6));
+    Assert.assertTrue("Comparing Procedure code 8109", cmp6.equalsDeep(proc6));
   }
 
   /** Insurance */
