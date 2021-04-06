@@ -1,38 +1,36 @@
 package gov.cms.bfd.server.war;
 
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import com.codahale.metrics.JmxReporter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.health.HealthCheckRegistry;
-import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
-import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
-import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
-import net.ttddyy.dsproxy.support.ProxyDataSource;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.health.HealthCheckRegistry;
+import com.codahale.metrics.jmx.JmxReporter;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.codahale.metrics.newrelic.NewRelicReporter;
+import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.OkHttpPoster;
+import com.newrelic.telemetry.SenderConfiguration;
+import com.newrelic.telemetry.metrics.MetricBatchSender;
+import com.zaxxer.hikari.HikariDataSource;
+
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -45,6 +43,20 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
+import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
+import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
+import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
+import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import net.ttddyy.dsproxy.support.ProxyDataSource;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 /** The main Spring {@link Configuration} for the Blue Button API Backend application. */
 @Configuration
@@ -362,6 +374,34 @@ public class SpringConfiguration {
 
     final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).build();
     reporter.start();
+
+    String hostname;
+    try {
+      hostname = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      hostname = "unknown";
+    }
+
+    String apiKey = System.getenv("BFD_NEW_RELIC_KEY");
+    SenderConfiguration configuration = SenderConfiguration
+      .builder(
+          "https://gov-metric-api.newrelic.com",
+          "/metric/v1")
+      .httpPoster(new OkHttpPoster())
+      .apiKey(apiKey)
+      .build();
+
+    MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
+
+    Attributes commonAttributes =
+        new Attributes().put("host", hostname).put("appName", "bfd-local");
+
+    NewRelicReporter newRelicReporter =
+        NewRelicReporter.build(metricRegistry, metricBatchSender)
+            .commonAttributes(commonAttributes)
+            .build();
+
+    newRelicReporter.start(15, TimeUnit.SECONDS);
 
     return metricRegistry;
   }

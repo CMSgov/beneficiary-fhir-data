@@ -157,11 +157,29 @@
 			<version>${metrics.version}</version>
 		</dependency>
 
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-jmx</artifactId>
+      <version>${metrics.version}</version>
+    </dependency>
+
 		<dependency>
 			<!-- Allows us to provide New Relic with additional information on requests. -->
 			<groupId>com.newrelic.agent.java</groupId>
 			<artifactId>newrelic-api</artifactId>
 			<version>5.9.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>dropwizard-metrics-newrelic</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>telemetry-http-okhttp</artifactId>
+			<version>0.6.1</version>
 		</dependency>
 		
 		<dependency>
