@@ -10,7 +10,7 @@ public class SkeletonRDASink implements RDASink<PreAdjudicatedClaim> {
   private final Meter callsMeter;
 
   public SkeletonRDASink(MetricRegistry appMetrics) {
-    callsMeter = appMetrics.meter(getClass().getSimpleName() + ".calls");
+    callsMeter = appMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "calls"));
   }
 
   @Override

@@ -22,13 +22,14 @@ public final class DcGeoRDALoadJob implements PipelineJob {
   public static final String MAX_RECORDS_DEFAULT = String.valueOf(Integer.MAX_VALUE);
   public static final String BATCH_SIZE_PROPERTY = "DCGeoBatchSize";
   public static final String BATCH_SIZE_DEFAULT = "1";
-  public static final String CALLS_METER_NAME = DcGeoRDALoadJob.class.getSimpleName() + ".calls";
+  public static final String CALLS_METER_NAME =
+      MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "calls");
   public static final String FAILURES_METER_NAME =
-      DcGeoRDALoadJob.class.getSimpleName() + ".failures";
+      MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "failures");
   public static final String SUCCESSES_METER_NAME =
-      DcGeoRDALoadJob.class.getSimpleName() + ".successes";
+      MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "successes");
   public static final String PROCESSED_METER_NAME =
-      DcGeoRDALoadJob.class.getSimpleName() + ".processed";
+      MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "processed");
 
   private final Config config;
   private final Callable<RDASource<PreAdjudicatedClaim>> sourceFactory;

@@ -12,7 +12,7 @@ public class SkeletonRDASource implements RDASource<PreAdjudicatedClaim> {
   private final Meter callsMeter;
 
   public SkeletonRDASource(MetricRegistry appMetrics) {
-    callsMeter = appMetrics.meter(getClass().getSimpleName() + ".calls");
+    callsMeter = appMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "calls"));
   }
 
   @Override
