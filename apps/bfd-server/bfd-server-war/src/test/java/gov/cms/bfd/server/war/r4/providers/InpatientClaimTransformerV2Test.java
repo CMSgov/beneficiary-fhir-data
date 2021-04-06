@@ -828,12 +828,15 @@ public final class InpatientClaimTransformerV2Test {
 
     System.out.println(proc1.getDate());
     System.out.println(cmp1.getDate());
+    System.out.println(cmp1.getDate().equals(proc1.getDate()));
 
     System.out.println(proc1.getDate().getClass().getName());
     System.out.println(cmp1.getDate().getClass().getName());
 
     System.out.println(proc1.getProcedureCodeableConcept().getCoding().size());
     System.out.println(cmp1.getProcedureCodeableConcept().getCoding().size());
+    System.out.println(
+        cmp1.getProcedureCodeableConcept().equalsDeep(proc1.getProcedureCodeableConcept()));
 
     System.out.println(proc1.getProcedureCodeableConcept().getCodingFirstRep().getSystem());
     System.out.println(cmp1.getProcedureCodeableConcept().getCodingFirstRep().getSystem());
