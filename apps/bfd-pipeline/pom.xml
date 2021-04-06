@@ -17,7 +17,7 @@
 
 	<modules>
 		<module>bfd-pipeline-ccw-rif</module>
-		<module>bfd-pipeline-dc-geo</module>
+		<module>bfd-pipeline-rda-grpc</module>
 		<module>bfd-pipeline-shared-utils</module>
 		<module>bfd-pipeline-app</module>
 		<module>bfd-pipeline-benchmarks</module>

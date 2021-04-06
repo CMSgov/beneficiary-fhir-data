@@ -8,7 +8,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>bfd-pipeline-dc-geo</artifactId>
+    <artifactId>bfd-pipeline-rda-grpc</artifactId>
     <packaging>jar</packaging>
 
     <description>
