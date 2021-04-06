@@ -40,7 +40,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public final class InpatientClaimTransformerV2Test {
@@ -1648,7 +1647,7 @@ public final class InpatientClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  @Ignore
+  // @Ignore
   @Test
   public void serializeSampleARecord() throws FHIRException {
     ExplanationOfBenefit eob =
