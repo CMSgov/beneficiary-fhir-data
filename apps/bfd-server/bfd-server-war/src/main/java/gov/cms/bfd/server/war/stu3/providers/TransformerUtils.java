@@ -3172,7 +3172,10 @@ public final class TransformerUtils {
             .orElse(transactionTime);
     bundle
         .getMeta()
-        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
+        .setLastUpdated(
+            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
+                ? transactionTime
+                : maxBundleDate);
     bundle.setTotal(resources.size());
     return bundle;
   }
@@ -3209,7 +3212,10 @@ public final class TransformerUtils {
             .orElse(transactionTime);
     bundle
         .getMeta()
-        .setLastUpdated(transactionTime.after(maxBundleDate) ? transactionTime : maxBundleDate);
+        .setLastUpdated(
+            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
+                ? transactionTime
+                : maxBundleDate);
     return bundle;
   }
 
