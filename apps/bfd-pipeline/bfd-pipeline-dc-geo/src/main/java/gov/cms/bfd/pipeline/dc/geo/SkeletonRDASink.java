@@ -9,7 +9,7 @@ public class SkeletonRDASink implements RDASink<Object> {
   private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRDASource.class);
   private final Meter callsMeter;
 
-  SkeletonRDASink(MetricRegistry appMetrics) {
+  public SkeletonRDASink(MetricRegistry appMetrics) {
     callsMeter = appMetrics.meter(getClass().getSimpleName() + ".calls");
   }
 

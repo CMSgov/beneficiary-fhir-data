@@ -11,7 +11,7 @@ public class SkeletonRDASource implements RDASource<Object> {
 
   private final Meter callsMeter;
 
-  SkeletonRDASource(MetricRegistry appMetrics) {
+  public SkeletonRDASource(MetricRegistry appMetrics) {
     callsMeter = appMetrics.meter(getClass().getSimpleName() + ".calls");
   }
 
