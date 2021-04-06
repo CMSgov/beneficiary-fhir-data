@@ -1,7 +1,15 @@
 package gov.cms.bfd.pipeline.dc.geo;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.io.IOException;
 import java.time.Duration;
@@ -18,6 +26,7 @@ public class DcGeoRDALoadJobTest {
   private RDASource<Integer> source;
   private RDASink<Integer> sink;
   private DcGeoRDALoadJob<Integer> job;
+  private MetricRegistry appMetrics;
 
   @SuppressWarnings("unchecked")
   @Before
@@ -28,7 +37,8 @@ public class DcGeoRDALoadJobTest {
     sink = mock(RDASink.class);
     DcGeoRDALoadJob.Config config =
         new DcGeoRDALoadJob.Config(Duration.ofSeconds(10), Duration.ofSeconds(25), 5, 3);
-    job = new DcGeoRDALoadJob<>(config, sourceFactory, sinkFactory);
+    appMetrics = new MetricRegistry();
+    job = new DcGeoRDALoadJob<>(config, sourceFactory, sinkFactory, appMetrics);
   }
 
   @Test
@@ -42,6 +52,8 @@ public class DcGeoRDALoadJobTest {
       MatcherAssert.assertThat(ex, Matchers.instanceOf(IOException.class));
     }
     verifyNoInteractions(sinkFactory);
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -56,6 +68,8 @@ public class DcGeoRDALoadJobTest {
       MatcherAssert.assertThat(ex, Matchers.instanceOf(IOException.class));
     }
     verify(source).close();
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -74,6 +88,8 @@ public class DcGeoRDALoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -89,6 +105,8 @@ public class DcGeoRDALoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.SUCCESSES_METER_NAME).getCount());
   }
 
   @Test
@@ -104,5 +122,7 @@ public class DcGeoRDALoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.SUCCESSES_METER_NAME).getCount());
   }
 }

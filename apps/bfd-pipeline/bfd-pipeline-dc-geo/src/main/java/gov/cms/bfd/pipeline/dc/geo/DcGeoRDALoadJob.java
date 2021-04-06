@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.dc.geo;
 
 import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.time.Duration;
@@ -20,16 +22,34 @@ public final class DcGeoRDALoadJob<T> implements PipelineJob {
   public static final String MAX_RECORDS_DEFAULT = String.valueOf(Integer.MAX_VALUE);
   public static final String BATCH_SIZE_PROPERTY = "DCGeoBatchSize";
   public static final String BATCH_SIZE_DEFAULT = "1";
+  public static final String CALLS_METER_NAME = DcGeoRDALoadJob.class.getSimpleName() + ".calls";
+  public static final String FAILURES_METER_NAME =
+      DcGeoRDALoadJob.class.getSimpleName() + ".failures";
+  public static final String SUCCESSES_METER_NAME =
+      DcGeoRDALoadJob.class.getSimpleName() + ".successes";
+  public static final String PROCESSED_METER_NAME =
+      DcGeoRDALoadJob.class.getSimpleName() + ".processed";
 
   private final Config config;
   private final Callable<RDASource<T>> sourceFactory;
   private final Callable<RDASink<T>> sinkFactory;
+  private final Meter callsMeter;
+  private final Meter failuresMeter;
+  private final Meter successesMeter;
+  private final Meter processedMeter;
 
   public DcGeoRDALoadJob(
-      Config config, Callable<RDASource<T>> sourceFactory, Callable<RDASink<T>> sinkFactory) {
+      Config config,
+      Callable<RDASource<T>> sourceFactory,
+      Callable<RDASink<T>> sinkFactory,
+      MetricRegistry appMetrics) {
     this.config = config;
     this.sourceFactory = sourceFactory;
     this.sinkFactory = sinkFactory;
+    callsMeter = appMetrics.meter(CALLS_METER_NAME);
+    failuresMeter = appMetrics.meter(FAILURES_METER_NAME);
+    successesMeter = appMetrics.meter(SUCCESSES_METER_NAME);
+    processedMeter = appMetrics.meter(PROCESSED_METER_NAME);
   }
 
   public Duration getScanInterval() {
@@ -42,6 +62,7 @@ public final class DcGeoRDALoadJob<T> implements PipelineJob {
     int processedCount = 0;
     Exception error = null;
     try {
+      callsMeter.mark();
       try (RDASource<T> source = sourceFactory.call();
           RDASink<T> sink = sinkFactory.call()) {
         processedCount =
@@ -54,12 +75,15 @@ public final class DcGeoRDALoadJob<T> implements PipelineJob {
     } catch (Exception ex) {
       error = ex;
     }
+    processedMeter.mark(processedCount);
     final long stopMillis = System.currentTimeMillis();
     LOGGER.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
     if (error != null) {
+      failuresMeter.mark();
       LOGGER.error("processing aborted by an exception: message={}", error.getMessage(), error);
       throw error;
     }
+    successesMeter.mark();
     return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
   }
 
