@@ -1,17 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import com.google.common.base.Stopwatch;
-import com.nava.health.v1.HealthCheckRequest;
-import com.nava.health.v1.HealthCheckResponse;
-import com.nava.health.v1.HealthGrpc;
 import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RDASink;
 import gov.cms.bfd.pipeline.rda.grpc.RDASource;
-import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -20,14 +16,20 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HealthCheckSource implements RDASource<PreAdjudicatedClaim> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(HealthCheckSource.class);
+/**
+ * General RDASource implementation that delegates actual service call and result mapping to another
+ * class.
+ *
+ * @param <T> type of objects returned by the gRPC service
+ */
+public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRDASource.class);
 
-  private final Config config;
+  private final GrpcStreamCaller<T> caller;
   private ManagedChannel channel;
 
-  public HealthCheckSource(Config config) {
-    this.config = config;
+  public GrpcRDASource(Config config, GrpcStreamCaller<T> caller) {
+    this.caller = caller;
     channel =
         ManagedChannelBuilder.forAddress(config.host, config.port)
             .usePlaintext()
@@ -39,29 +41,26 @@ public class HealthCheckSource implements RDASource<PreAdjudicatedClaim> {
   public int retrieveAndProcessObjects(
       int maxToProcess, int maxPerBatch, Duration maxRunTime, RDASink<PreAdjudicatedClaim> sink)
       throws ProcessingException {
-    final HealthGrpc.HealthBlockingStub stub = HealthGrpc.newBlockingStub(channel);
-    final HealthCheckRequest request = HealthCheckRequest.newBuilder().setService("").build();
-    final List<PreAdjudicatedClaim> batch = new ArrayList<>();
-    final Stopwatch timer = Stopwatch.createStarted();
     int processed = 0;
     try {
+      final List<PreAdjudicatedClaim> batch = new ArrayList<>();
+      final Instant stopTime = Instant.now().plus(maxRunTime);
+      caller.createStub(channel);
       while (true) {
         if (processed >= maxToProcess) {
           LOGGER.info(
               "exiting loop after processing max number of records: processed={}", processed);
           break;
         }
-        if (runtimeRemains(timer, maxRunTime)) {
-          LOGGER.info(
-              "exiting loop after reaching max runtime: runtime={}ms", timer.elapsed().toMillis());
+        if (runtimeExceeded(stopTime)) {
+          LOGGER.info("exiting loop after reaching max runtime");
           break;
         }
-        final Iterator<HealthCheckResponse> responses =
-            stub.withDeadline(Deadline.after(maxRunTime.toMillis(), TimeUnit.MILLISECONDS))
-                .watch(request);
-        while (responses.hasNext()) {
-          responses.next(); // we don't use the actual object
-          batch.add(new PreAdjudicatedClaim());
+        final Iterator<T> resultIterator = caller.callService(maxRunTime);
+        while (resultIterator.hasNext()) {
+          final T result = resultIterator.next();
+          final PreAdjudicatedClaim claim = caller.convertResultToClaim(result);
+          batch.add(claim);
           if (batch.size() >= maxPerBatch) {
             processed += submitBatchToSink(sink, batch);
           }
@@ -95,18 +94,14 @@ public class HealthCheckSource implements RDASource<PreAdjudicatedClaim> {
     return processed;
   }
 
-  private boolean runtimeRemains(Stopwatch timer, Duration maxRunTime) {
-    return timer.elapsed().compareTo(maxRunTime) < 0;
+  private boolean runtimeExceeded(Instant stopTime) {
+    return Instant.now().compareTo(stopTime) < 0;
   }
 
   public static class Config {
     private final String host;
     private final int port;
     private final Duration maxIdle;
-
-    public Config() {
-      this("localhost", 5001, Duration.ofSeconds(30));
-    }
 
     public Config(String host, int port, Duration maxIdle) {
       this.host = host;
