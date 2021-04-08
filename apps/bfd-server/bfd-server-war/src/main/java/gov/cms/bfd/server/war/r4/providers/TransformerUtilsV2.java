@@ -638,7 +638,7 @@ public final class TransformerUtilsV2 {
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
-  private static Coding createCoding(
+  public static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     /*
      * The code parameter is an Object to avoid needing multiple copies of this and related methods.
@@ -666,7 +666,7 @@ public final class TransformerUtilsV2 {
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
-  private static Coding createCoding(
+  public static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
     return createCoding(rootResource, ccwVariable, code.get());
   }
