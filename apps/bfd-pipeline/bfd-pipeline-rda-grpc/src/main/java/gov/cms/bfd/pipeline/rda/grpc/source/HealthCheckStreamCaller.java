@@ -4,7 +4,6 @@ import com.nava.health.v1.HealthCheckRequest;
 import com.nava.health.v1.HealthCheckResponse;
 import com.nava.health.v1.HealthGrpc;
 import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
-import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import java.time.Duration;
 import java.util.Iterator;
@@ -23,8 +22,7 @@ public class HealthCheckStreamCaller implements GrpcStreamCaller<HealthCheckResp
   @Override
   public Iterator<HealthCheckResponse> callService(Duration maxRunTime) throws Exception {
     final HealthCheckRequest request = HealthCheckRequest.newBuilder().setService(service).build();
-    return stub.withDeadline(Deadline.after(maxRunTime.toMillis(), TimeUnit.MILLISECONDS))
-        .watch(request);
+    return stub.withDeadlineAfter(maxRunTime.toMillis(), TimeUnit.MILLISECONDS).watch(request);
   }
 
   @Override
