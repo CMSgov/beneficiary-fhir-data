@@ -134,22 +134,45 @@ public class GrpcRDASourceTest {
   @Test
   public void testStopAfterThreeItemsDueToMaxRuntime() throws Exception {
     doReturn(
-            Instant.ofEpochMilli(1000), // computing stopTime
-            Instant.ofEpochMilli(1000), // outer loop
-            Instant.ofEpochMilli(1000), // first item
-            Instant.ofEpochMilli(1000), // second item
-            Instant.ofEpochMilli(1000), // third item
-            Instant.ofEpochMilli(2000), // fourth item
-            Instant.ofEpochMilli(3000), // fifth item
-            Instant.ofEpochMilli(4000)) // outer look and any others
+            Instant.ofEpochMilli(1000), // service call
+            Instant.ofEpochMilli(2000), // first item
+            Instant.ofEpochMilli(3000), // second item
+            Instant.ofEpochMilli(4000), // third item
+            Instant.ofEpochMilli(5000), // fourth item
+            Instant.ofEpochMilli(6000), // fifth item
+            Instant.ofEpochMilli(7000)) // any others
         .when(clock)
         .instant();
-    doReturn(Arrays.asList(1, 2, 3, 4, 5).iterator()).when(caller).callService(any());
+    doReturn(Arrays.asList(1, 2, 3, 4, 5).iterator())
+        .when(caller)
+        .callService(Duration.ofSeconds(4));
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
 
-    final int result = source.retrieveAndProcessObjects(5, 2, Duration.ofMillis(10), sink);
+    final int result = source.retrieveAndProcessObjects(5, 2, Duration.ofSeconds(4), sink);
     assertEquals(3, result);
+  }
+
+  @Test
+  public void testStopAfterFourItemsAndTwoCallsDueToMaxRuntime() throws Exception {
+    doReturn(
+            Instant.ofEpochMilli(1000), // first service call
+            Instant.ofEpochMilli(2000), // first item
+            Instant.ofEpochMilli(3000), // second item
+            Instant.ofEpochMilli(4000), // second service call
+            Instant.ofEpochMilli(5000), // third item
+            Instant.ofEpochMilli(6000), // fourth item
+            Instant.ofEpochMilli(7000), // fifth item
+            Instant.ofEpochMilli(8000)) // any others
+        .when(clock)
+        .instant();
+    doReturn(Arrays.asList(1, 2).iterator()).when(caller).callService(Duration.ofSeconds(6));
+    doReturn(Arrays.asList(3, 4, 5).iterator()).when(caller).callService(Duration.ofSeconds(3));
+    doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
+    doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_3, CLAIM_4));
+
+    final int result = source.retrieveAndProcessObjects(5, 2, Duration.ofSeconds(6), sink);
+    assertEquals(4, result);
   }
 
   @Test

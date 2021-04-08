@@ -55,16 +55,19 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
     try {
       final GrpcStreamCaller<T> caller = callerFactory.createCaller(channel);
       final List<PreAdjudicatedClaim> batch = new ArrayList<>();
-      final Instant stopTime = clock.instant().plus(maxRunTime);
-      while (shouldContinue(processed, maxToProcess, stopTime)) {
-        final Iterator<T> resultIterator = caller.callService(maxRunTime);
-        while (resultIterator.hasNext() && shouldContinue(processed, maxToProcess, stopTime)) {
+      Instant now = clock.instant();
+      final Instant stopTime = now.plus(maxRunTime);
+      while (shouldContinue(processed, maxToProcess, now, stopTime)) {
+        final Iterator<T> resultIterator = caller.callService(Duration.between(now, stopTime));
+        now = clock.instant();
+        while (resultIterator.hasNext() && shouldContinue(processed, maxToProcess, now, stopTime)) {
           final T result = resultIterator.next();
           final PreAdjudicatedClaim claim = caller.convertResultToClaim(result);
           batch.add(claim);
           if (batch.size() >= maxPerBatch) {
             processed += submitBatchToSink(sink, batch);
           }
+          now = clock.instant();
         }
         if (batch.size() > 0) {
           processed += submitBatchToSink(sink, batch);
@@ -86,12 +89,12 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
     }
   }
 
-  private boolean shouldContinue(int processed, int maxToProcess, Instant stopTime) {
+  private boolean shouldContinue(int processed, int maxToProcess, Instant now, Instant stopTime) {
     if (processed >= maxToProcess) {
       LOGGER.info("exiting loop after processing max number of records: processed={}", processed);
       return false;
     }
-    if (runtimeExceeded(stopTime)) {
+    if (now.compareTo(stopTime) >= 0) {
       LOGGER.info("exiting loop after reaching max runtime");
       return false;
     }
@@ -105,11 +108,6 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
     LOGGER.info("submitted batch to sink: size={} processed={}", batch.size(), processed);
     batch.clear();
     return processed;
-  }
-
-  private boolean runtimeExceeded(Instant stopTime) {
-    final Instant now = clock.instant();
-    return now.compareTo(stopTime) > 0;
   }
 
   public static class Config {
