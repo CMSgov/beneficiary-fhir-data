@@ -13,15 +13,10 @@ import java.util.concurrent.TimeUnit;
 /** GrpcStreamCaller implementation that calls the RDA HealthCheck service. */
 public class HealthCheckStreamCaller implements GrpcStreamCaller<HealthCheckResponse> {
   private final String service;
+  private final HealthGrpc.HealthBlockingStub stub;
 
-  private HealthGrpc.HealthBlockingStub stub;
-
-  public HealthCheckStreamCaller(String service) {
+  public HealthCheckStreamCaller(String service, ManagedChannel channel) {
     this.service = service;
-  }
-
-  @Override
-  public void createStub(ManagedChannel channel) throws Exception {
     stub = HealthGrpc.newBlockingStub(channel);
   }
 
@@ -35,5 +30,9 @@ public class HealthCheckStreamCaller implements GrpcStreamCaller<HealthCheckResp
   @Override
   public PreAdjudicatedClaim convertResultToClaim(HealthCheckResponse ignored) throws Exception {
     return new PreAdjudicatedClaim();
+  }
+
+  public static GrpcStreamCaller.Factory<HealthCheckResponse> createFactory(String service) {
+    return channel -> new HealthCheckStreamCaller(service, channel);
   }
 }

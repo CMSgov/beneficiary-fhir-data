@@ -42,13 +42,13 @@ public class GrpcRDASourceTest {
     clock = mock(Clock.class);
     caller = mock(GrpcStreamCaller.class);
     channel = mock(ManagedChannel.class);
-    source = new GrpcRDASource<>(channel, caller, clock);
     sink = mock(RDASink.class);
     doReturn(CLAIM_1).when(caller).convertResultToClaim(1);
     doReturn(CLAIM_2).when(caller).convertResultToClaim(2);
     doReturn(CLAIM_3).when(caller).convertResultToClaim(3);
     doReturn(CLAIM_4).when(caller).convertResultToClaim(4);
     doReturn(CLAIM_5).when(caller).convertResultToClaim(5);
+    source = new GrpcRDASource<>(channel, this::callerFactory, clock);
   }
 
   @Test
@@ -60,7 +60,6 @@ public class GrpcRDASourceTest {
 
     final int result = source.retrieveAndProcessObjects(3, 2, Duration.ofSeconds(10), sink);
     assertEquals(3, result);
-    verify(caller).createStub(channel);
   }
 
   @Test
@@ -81,7 +80,26 @@ public class GrpcRDASourceTest {
       assertEquals(3, ex.getProcessedCount());
       assertSame(error, ex.getCause());
     }
-    verify(caller).createStub(channel);
+  }
+
+  @Test
+  public void testHandlesExceptionFromCallerFactory() {
+    final Exception error = new IOException("oops");
+    source =
+        new GrpcRDASource<>(
+            channel,
+            c -> {
+              throw error;
+            },
+            clock);
+
+    try {
+      source.retrieveAndProcessObjects(5, 2, Duration.ofSeconds(10), sink);
+      fail("source should have thrown exception");
+    } catch (ProcessingException ex) {
+      assertEquals(0, ex.getProcessedCount());
+      assertSame(error, ex.getCause());
+    }
   }
 
   @Test
@@ -100,7 +118,6 @@ public class GrpcRDASourceTest {
       assertEquals(2, ex.getProcessedCount());
       assertSame(error, ex.getCause());
     }
-    verify(caller).createStub(channel);
   }
 
   @Test
@@ -112,7 +129,6 @@ public class GrpcRDASourceTest {
 
     final int result = source.retrieveAndProcessObjects(4, 2, Duration.ofSeconds(10), sink);
     assertEquals(4, result);
-    verify(caller).createStub(channel);
   }
 
   @Test
@@ -130,11 +146,10 @@ public class GrpcRDASourceTest {
         .instant();
     doReturn(Arrays.asList(1, 2, 3, 4, 5).iterator()).when(caller).callService(any());
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
-    doReturn(1).when(sink).writeBatch(Arrays.asList(CLAIM_3));
+    doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
 
     final int result = source.retrieveAndProcessObjects(5, 2, Duration.ofMillis(10), sink);
     assertEquals(3, result);
-    verify(caller).createStub(channel);
   }
 
   @Test
@@ -144,5 +159,10 @@ public class GrpcRDASourceTest {
     source.close(); // second call does nothing
     verify(channel, times(1)).shutdownNow();
     verify(channel, times(1)).awaitTermination(5, TimeUnit.SECONDS);
+  }
+
+  private GrpcStreamCaller<Integer> callerFactory(ManagedChannel channel) {
+    assertSame(this.channel, channel);
+    return caller;
   }
 }

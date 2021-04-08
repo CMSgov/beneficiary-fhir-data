@@ -26,12 +26,12 @@ import org.slf4j.LoggerFactory;
 public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRDASource.class);
 
-  private final GrpcStreamCaller<T> caller;
+  private final GrpcStreamCaller.Factory<T> callerFactory;
   private final Clock clock;
   private ManagedChannel channel;
 
-  public GrpcRDASource(Config config, GrpcStreamCaller<T> caller) {
-    this.caller = caller;
+  public GrpcRDASource(Config config, GrpcStreamCaller.Factory<T> callerFactory) {
+    this.callerFactory = callerFactory;
     clock = Clock.systemDefaultZone();
     channel =
         ManagedChannelBuilder.forAddress(config.host, config.port)
@@ -41,8 +41,8 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
   }
 
   @VisibleForTesting
-  GrpcRDASource(ManagedChannel channel, GrpcStreamCaller<T> caller, Clock clock) {
-    this.caller = caller;
+  GrpcRDASource(ManagedChannel channel, GrpcStreamCaller.Factory<T> callerFactory, Clock clock) {
+    this.callerFactory = callerFactory;
     this.channel = channel;
     this.clock = clock;
   }
@@ -53,9 +53,9 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
       throws ProcessingException {
     int processed = 0;
     try {
+      final GrpcStreamCaller<T> caller = callerFactory.createCaller(channel);
       final List<PreAdjudicatedClaim> batch = new ArrayList<>();
       final Instant stopTime = clock.instant().plus(maxRunTime);
-      caller.createStub(channel);
       while (shouldContinue(processed, maxToProcess, stopTime)) {
         final Iterator<T> resultIterator = caller.callService(maxRunTime);
         while (resultIterator.hasNext() && shouldContinue(processed, maxToProcess, stopTime)) {
