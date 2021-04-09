@@ -371,31 +371,36 @@ public class SpringConfiguration {
     final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).build();
     reporter.start();
 
-    String hostname;
-    try {
-      hostname = InetAddress.getLocalHost().getHostName();
-    } catch (UnknownHostException e) {
-      hostname = "unknown";
+    String newRelicMetricKey = System.getenv("NEW_RELIC_METRIC_KEY");
+
+    if (newRelicMetricKey != null) {
+      String newRelicAppName = System.getenv("NEW_RELIC_APP_NAME");
+
+      String hostname;
+      try {
+        hostname = InetAddress.getLocalHost().getHostName();
+      } catch (UnknownHostException e) {
+        hostname = "unknown";
+      }
+
+      SenderConfiguration configuration =
+          SenderConfiguration.builder("https://gov-metric-api.newrelic.com", "/metric/v1")
+              .httpPoster(new OkHttpPoster())
+              .apiKey(newRelicMetricKey)
+              .build();
+
+      MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
+
+      Attributes commonAttributes =
+          new Attributes().put("host", hostname).put("appName", newRelicAppName);
+
+      NewRelicReporter newRelicReporter =
+          NewRelicReporter.build(metricRegistry, metricBatchSender)
+              .commonAttributes(commonAttributes)
+              .build();
+
+      newRelicReporter.start(15, TimeUnit.SECONDS);
     }
-
-    String apiKey = System.getenv("BFD_NEW_RELIC_KEY");
-    SenderConfiguration configuration =
-        SenderConfiguration.builder("https://gov-metric-api.newrelic.com", "/metric/v1")
-            .httpPoster(new OkHttpPoster())
-            .apiKey(apiKey)
-            .build();
-
-    MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
-
-    Attributes commonAttributes =
-        new Attributes().put("host", hostname).put("appName", "bfd-local");
-
-    NewRelicReporter newRelicReporter =
-        NewRelicReporter.build(metricRegistry, metricBatchSender)
-            .commonAttributes(commonAttributes)
-            .build();
-
-    newRelicReporter.start(15, TimeUnit.SECONDS);
 
     return metricRegistry;
   }
