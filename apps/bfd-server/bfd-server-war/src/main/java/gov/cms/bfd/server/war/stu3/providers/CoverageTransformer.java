@@ -964,8 +964,9 @@ final class CoverageTransformer {
 
               if (mapOfMonth.containsKey(month)) {
                 if (!beneMonthly.getPartDContractNumberId().isPresent()
-                    || beneMonthly.getPartDContractNumberId().get().isEmpty())
+                    || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
                   beneMonthly.setPartDContractNumberId(Optional.of("0"));
+                }
 
                 coverage.addExtension(
                     TransformerUtils.createExtensionCoding(

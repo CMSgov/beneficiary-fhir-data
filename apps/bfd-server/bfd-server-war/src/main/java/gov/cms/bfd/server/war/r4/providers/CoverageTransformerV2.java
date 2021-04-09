@@ -438,6 +438,11 @@ final class CoverageTransformerV2 {
                   };
 
               if (mapOfMonth.containsKey(month)) {
+                if (!beneMonthly.getPartDContractNumberId().isPresent()
+                    || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
+                  beneMonthly.setPartDContractNumberId(Optional.of("0"));
+                }
+
                 coverage.addExtension(
                     TransformerUtilsV2.createExtensionCoding(
                         coverage,
