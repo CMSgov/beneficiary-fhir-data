@@ -27,7 +27,8 @@ public class HHAClaimTransformerV2 {
    *     HHAClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HHAClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -141,8 +142,8 @@ public class HHAClaimTransformerV2 {
     // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.HHA);
     }
 
     // Map care team

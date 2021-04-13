@@ -29,7 +29,8 @@ public class InpatientClaimTransformerV2 {
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -126,7 +127,7 @@ public class InpatientClaimTransformerV2 {
     // NCH_VRFD_NCVRD_STAY_THRU_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
     // NCH_ACTV_OR_CVRD_LVL_CARE_THRU   => ExplanationOfBenefit.supportingInfo.timingDate
     // NCH_BENE_MDCR_BNFTS_EXHTD_DT_I   => ExplanationOfBenefit.supportingInfo.timingDate
-    // CLM_DRG_CD                       => ExplanationOfBenefit.diagnosis
+    // CLM_DRG_CD                       => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),
@@ -270,8 +271,8 @@ public class InpatientClaimTransformerV2 {
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
-    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.INPATIENT);
     }
 
     // Handle Procedures
@@ -293,13 +294,6 @@ public class InpatientClaimTransformerV2 {
             eob,
             CcwCodebookVariable.NCH_WKLY_PROC_DT,
             Optional.of(claimGroup.getWeeklyProcessDate())));
-
-    // NCH_PTNT_STATUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
-    TransformerUtilsV2.addInformationWithCode(
-        eob,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        claimGroup.getPatientStatusCd());
 
     // CLM_PPS_CPTL_DRG_WT_NUM => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
