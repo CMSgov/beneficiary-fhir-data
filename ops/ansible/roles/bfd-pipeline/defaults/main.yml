@@ -5,3 +5,18 @@ data_pipeline_loader_threads: 200
 data_pipeline_jvm_args: -Xmx64g
 data_pipeline_tmp_dir: /tmp
 data_pipeline_idempotency_required: true
+
+# EFT EFS base directory - partners eft efs file systems will be mounted in this directory
+# ** without trailing slash **
+eft_efs_base_dir: /mnt/eft
+
+# Partner EFT EFS mount points. Each partner should be matched to the posix user and group
+# id's defined in their respective eft efs declaration in `ops/terraform/modules/stateful/main.tf`.
+# EFS file systems will be mounted to {{ eft_efs_base_dir }}/{{ eft_efs_mounts.name }}. E.g.
+# /mnt/eft/bcda
+# /mnt/eft/dpc
+eft_efs_mounts:
+  - { name: 'bcda',
+      posix_uid: '1500',
+      posix_gid: '1500',
+    }
