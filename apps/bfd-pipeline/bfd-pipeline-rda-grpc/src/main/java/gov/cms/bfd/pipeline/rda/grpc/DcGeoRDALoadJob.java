@@ -7,21 +7,26 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.time.Duration;
-import java.util.Properties;
 import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Skeleton PipelineJob instance that delegates the actual ETL work to two other objects. The
+ * RDASource object handles communication with the source of incoming data. The RDASink object
+ * handles communication with the ultimate storage system. The purpose of this class is to handle
+ * general PipelineJob semantics that are common to any source or sink.
+ */
 public final class DcGeoRDALoadJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRDALoadJob.class);
   public static final String SCAN_INTERVAL_PROPERTY = "DCGeoRDALoadIntervalSeconds";
   public static final String RUN_TIME_PROPERTY = "DCGeoRDALoadRunSeconds";
   public static final String MAX_RECORDS_PROPERTY = "DCGeoRDALoadMaxRecords";
-  public static final String SCAN_INTERVAL_DEFAULT = "300";
-  public static final String RUN_TIME_DEFAULT = "300";
-  public static final String MAX_RECORDS_DEFAULT = String.valueOf(Integer.MAX_VALUE);
+  public static final int SCAN_INTERVAL_DEFAULT = 300;
+  public static final int RUN_TIME_DEFAULT = 300;
+  public static final int MAX_RECORDS_DEFAULT = Integer.MAX_VALUE;
   public static final String BATCH_SIZE_PROPERTY = "DCGeoBatchSize";
-  public static final String BATCH_SIZE_DEFAULT = "1";
+  public static final int BATCH_SIZE_DEFAULT = 1;
   public static final String CALLS_METER_NAME =
       MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "calls");
   public static final String FAILURES_METER_NAME =
@@ -61,7 +66,7 @@ public final class DcGeoRDALoadJob implements PipelineJob {
    */
   public static DcGeoRDALoadJob newDcGeoRDALoadJob(MetricRegistry appMetrics) {
     return new DcGeoRDALoadJob(
-        new Config(System.getProperties()),
+        new Config(),
         () -> new SkeletonRDASource(appMetrics),
         () -> new SkeletonRDASink(appMetrics),
         appMetrics);
@@ -102,6 +107,7 @@ public final class DcGeoRDALoadJob implements PipelineJob {
     return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
   }
 
+  /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
   public static final class Config {
     private final Duration scanInterval;
     private final Duration maxRunTime;
@@ -116,15 +122,12 @@ public final class DcGeoRDALoadJob implements PipelineJob {
       this.batchSize = batchSize;
     }
 
-    public Config(Properties properties) {
+    public Config() {
       this(
-          Duration.ofSeconds(
-              Long.parseLong(
-                  properties.getProperty(SCAN_INTERVAL_PROPERTY, SCAN_INTERVAL_DEFAULT))),
-          Duration.ofSeconds(
-              Long.parseLong(properties.getProperty(RUN_TIME_PROPERTY, RUN_TIME_DEFAULT))),
-          Integer.parseInt(properties.getProperty(MAX_RECORDS_PROPERTY, MAX_RECORDS_DEFAULT)),
-          Integer.parseInt(properties.getProperty(BATCH_SIZE_PROPERTY, BATCH_SIZE_DEFAULT)));
+          Duration.ofSeconds(ConfigUtils.getInt(SCAN_INTERVAL_PROPERTY, SCAN_INTERVAL_DEFAULT)),
+          Duration.ofSeconds(ConfigUtils.getInt(RUN_TIME_PROPERTY, RUN_TIME_DEFAULT)),
+          ConfigUtils.getInt(MAX_RECORDS_PROPERTY, MAX_RECORDS_DEFAULT),
+          ConfigUtils.getInt(BATCH_SIZE_PROPERTY, BATCH_SIZE_DEFAULT));
     }
 
     public Duration getScanInterval() {

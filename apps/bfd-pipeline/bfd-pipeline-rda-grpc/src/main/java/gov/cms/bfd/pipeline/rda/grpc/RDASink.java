@@ -11,7 +11,7 @@ import java.util.Collections;
  */
 public interface RDASink<T> extends AutoCloseable {
   /**
-   * Write the object to the data store and return the number of object successfully written.
+   * Write the object to the data store and return the number of objects successfully written.
    *
    * @param object single object to be written to the data store
    * @return number of objects successfully processed

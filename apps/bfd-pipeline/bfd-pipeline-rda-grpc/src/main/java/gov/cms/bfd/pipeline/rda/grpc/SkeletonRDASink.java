@@ -5,6 +5,10 @@ import com.codahale.metrics.MetricRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Skeleton RDASink implementation that just updates a Meter to count the number of times it has
+ * been called. This implementation satisfies the requirements of DCGEO-18.
+ */
 public class SkeletonRDASink implements RDASink<PreAdjudicatedClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRDASource.class);
   private final Meter callsMeter;
