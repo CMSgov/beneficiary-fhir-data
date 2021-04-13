@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 /**
- * Wrapper for exceptions thrown during batch process. Intended to capture the number of objects
+ * Wrapper for exceptions thrown during batch processing. Intended to capture the number of objects
  * that were successfully processed before the exception was thrown.
  */
 public class ProcessingException extends Exception {
@@ -22,6 +22,11 @@ public class ProcessingException extends Exception {
     return processedCount;
   }
 
+  /**
+   * The actual underlying exception that terminated batch processing.
+   *
+   * @return the actual exception that terminated batch processing
+   */
   @Override
   public Exception getCause() {
     return (Exception) super.getCause();
