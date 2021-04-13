@@ -94,15 +94,16 @@ final class CoverageTransformerV2 {
         .ifPresent(value -> TransformerUtilsV2.setPeriodStart(coverage.getPeriod(), value));
 
     // deh start
-    // coverage.addContract().setId("ptc-contract1");
+    coverage.addContract().setId("contract1");
 
-    LocalDate localDate = LocalDate.now();
     Contract newContract = new Contract();
-    newContract.addIdentifier(
-        new Identifier().setSystem("part C System").setValue("contract 5555"));
-    newContract.setApplies(
-        (new Period()
-            .setStart((TransformerUtilsV2.convertToDate(localDate)), TemporalPrecisionEnum.DAY)));
+    newContract
+        .addIdentifier(new Identifier().setSystem("part C System").setValue("contract 5555"))
+        .setApplies(
+            (new Period()
+                .setStart(
+                    (TransformerUtilsV2.convertToDate(LocalDate.now())),
+                    TemporalPrecisionEnum.DAY)));
     coverage.addContained(newContract);
 
     coverage.addContract(TransformerUtilsV2.referenceCoverage("contract1", MedicareSegment.PART_A));

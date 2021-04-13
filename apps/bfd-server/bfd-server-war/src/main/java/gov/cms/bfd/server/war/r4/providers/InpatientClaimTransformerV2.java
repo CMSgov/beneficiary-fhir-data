@@ -29,7 +29,8 @@ public class InpatientClaimTransformerV2 {
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -293,13 +294,6 @@ public class InpatientClaimTransformerV2 {
             eob,
             CcwCodebookVariable.NCH_WKLY_PROC_DT,
             Optional.of(claimGroup.getWeeklyProcessDate())));
-
-    // NCH_PTNT_STATUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
-    TransformerUtilsV2.addInformationWithCode(
-        eob,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        claimGroup.getPatientStatusCd());
 
     // CLM_PPS_CPTL_DRG_WT_NUM => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(

@@ -31,7 +31,8 @@ final class DMEClaimTransformerV2 {
    *     DMEClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -40,7 +41,7 @@ final class DMEClaimTransformerV2 {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumbers);
 
     timer.stop();
     return eob;
@@ -51,7 +52,8 @@ final class DMEClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private static ExplanationOfBenefit transformClaim(DMEClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -154,12 +156,13 @@ final class DMEClaimTransformerV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
-    handleClaimLines(claimGroup, eob);
+    handleClaimLines(claimGroup, eob, includeTaxNumbers);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 
-  private static void handleClaimLines(DMEClaim claimGroup, ExplanationOfBenefit eob) {
+  private static void handleClaimLines(
+      DMEClaim claimGroup, ExplanationOfBenefit eob, Optional<Boolean> includeTaxNumbers) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
@@ -227,6 +230,12 @@ final class DMEClaimTransformerV2 {
               line.getHcpcsSecondModifierCode(),
               line.getHcpcsThirdModifierCode(),
               line.getHcpcsFourthModifierCode()));
+
+      if (includeTaxNumbers.orElse(false)) {
+        item.addExtension(
+            TransformerUtilsV2.createExtensionCoding(
+                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
+      }
 
       // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(
