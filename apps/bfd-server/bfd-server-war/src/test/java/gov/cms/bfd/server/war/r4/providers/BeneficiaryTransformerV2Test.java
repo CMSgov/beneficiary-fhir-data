@@ -346,7 +346,7 @@ public final class BeneficiaryTransformerV2Test {
    * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(Beneficiary)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
-  // @Ignore
+  @Ignore
   @Test
   public void transformSampleARecord() {
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
