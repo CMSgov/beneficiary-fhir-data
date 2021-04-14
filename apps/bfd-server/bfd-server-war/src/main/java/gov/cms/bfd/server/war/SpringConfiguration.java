@@ -3,7 +3,6 @@ package gov.cms.bfd.server.war;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheckRegistry;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
@@ -368,13 +367,20 @@ public class SpringConfiguration {
     metricRegistry.registerAll(new MemoryUsageGaugeSet());
     metricRegistry.registerAll(new GarbageCollectorMetricSet());
 
-    final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).build();
-    reporter.start();
-
     String newRelicMetricKey = System.getenv("NEW_RELIC_METRIC_KEY");
 
     if (newRelicMetricKey != null) {
       String newRelicAppName = System.getenv("NEW_RELIC_APP_NAME");
+      String newRelicMetricHost = System.getenv("NEW_RELIC_METRIC_HOST");
+      String newRelicMetricPath = System.getenv("NEW_RELIC_METRIC_PATH");
+      String rawNewRelicPeriod = System.getenv("NEW_RELIC_METRIC_PERIOD");
+
+      int newRelicPeriod;
+      try {
+        newRelicPeriod = Integer.parseInt(rawNewRelicPeriod);
+      } catch (NumberFormatException ex) {
+        newRelicPeriod = 15;
+      }
 
       String hostname;
       try {
@@ -384,7 +390,7 @@ public class SpringConfiguration {
       }
 
       SenderConfiguration configuration =
-          SenderConfiguration.builder("https://gov-metric-api.newrelic.com", "/metric/v1")
+          SenderConfiguration.builder(newRelicMetricHost, newRelicMetricPath)
               .httpPoster(new OkHttpPoster())
               .apiKey(newRelicMetricKey)
               .build();
@@ -399,7 +405,7 @@ public class SpringConfiguration {
               .commonAttributes(commonAttributes)
               .build();
 
-      newRelicReporter.start(15, TimeUnit.SECONDS);
+      newRelicReporter.start(newRelicPeriod, TimeUnit.SECONDS);
     }
 
     return metricRegistry;
