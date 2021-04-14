@@ -82,8 +82,6 @@ public class OutpatientClaimAdaptor extends ClaimAdaptor {
     return Optional.of(claim.getClaimTypeCode());
   }
 
-  // NationalDrugCode not here
-
   @Override
   public List<ClaimLineAdaptorInterface> getLines() {
     return claim.getLines().stream()
