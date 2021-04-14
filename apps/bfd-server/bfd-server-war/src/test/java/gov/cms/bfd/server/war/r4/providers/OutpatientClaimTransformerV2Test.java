@@ -598,8 +598,8 @@ public final class OutpatientClaimTransformerV2Test {
   @Test
   public void shouldHaveLineItemAdjudicationRevCntr1stAnsiCd() {
     AdjudicationComponent adjudication =
-        TransformerTestUtilsV2.findAdjudicationByCategory(
-            "denialreason", eob.getItemFirstRep().getAdjudication());
+        TransformerTestUtilsV2.findAdjudicationByReason(
+            "CO120", eob.getItemFirstRep().getAdjudication());
 
     AdjudicationComponent compare =
         new AdjudicationComponent()
@@ -618,6 +618,34 @@ public final class OutpatientClaimTransformerV2Test {
                             new Coding(
                                 "https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd",
                                 "CO120",
+                                null))));
+
+    Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveLineItemAdjudicationRevCntr2ndAnsiCd() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByReason(
+            "CR121", eob.getItemFirstRep().getAdjudication());
+
+    AdjudicationComponent compare =
+        new AdjudicationComponent()
+            .setCategory(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+                                "denialreason",
+                                "Denial Reason"))))
+            .setReason(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/variables/rev_cntr_2nd_ansi_cd",
+                                "CR121",
                                 null))));
 
     Assert.assertTrue(compare.equalsDeep(adjudication));
