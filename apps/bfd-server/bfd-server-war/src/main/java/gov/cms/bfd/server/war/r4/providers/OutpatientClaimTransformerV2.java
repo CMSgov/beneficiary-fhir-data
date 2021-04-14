@@ -33,7 +33,8 @@ public class OutpatientClaimTransformerV2 {
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -202,31 +203,34 @@ public class OutpatientClaimTransformerV2 {
     // FST_DGNS_E_VRSN_CD       => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.OUTPATIENT);
     }
 
     // Handle Inpatient Diagnosis.  Only three, so just brute force it
     // RSN_VISIT_CD1        => diagnosis.diagnosisCodeableConcept
     // RSN_VISIT_VRSN_CD1   => diagnosis.diagnosisCodeableConcept
-    TransformerUtilsV2.addDiagnosisCode(
+    DiagnosisUtilV2.addDiagnosisCode(
         eob,
-        TransformerUtilsV2.extractDiagnosis(
-            "Admission1", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT));
+        DiagnosisUtilV2.extractDiagnosis(
+            "Admission1", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
+        ClaimTypeV2.OUTPATIENT);
 
     // RSN_VISIT_CD2        => diagnosis.diagnosisCodeableConcept
     // RSN_VISIT_VRSN_CD2   => diagnosis.diagnosisCodeableConcept
-    TransformerUtilsV2.addDiagnosisCode(
+    DiagnosisUtilV2.addDiagnosisCode(
         eob,
-        TransformerUtilsV2.extractDiagnosis(
-            "Admission2", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT));
+        DiagnosisUtilV2.extractDiagnosis(
+            "Admission2", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
+        ClaimTypeV2.OUTPATIENT);
 
     // RSN_VISIT_CD3        => diagnosis.diagnosisCodeableConcept
     // RSN_VISIT_VRSN_CD3   => diagnosis.diagnosisCodeableConcept
-    TransformerUtilsV2.addDiagnosisCode(
+    DiagnosisUtilV2.addDiagnosisCode(
         eob,
-        TransformerUtilsV2.extractDiagnosis(
-            "Admission3", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT));
+        DiagnosisUtilV2.extractDiagnosis(
+            "Admission3", claimGroup, Optional.empty(), DiagnosisLabel.REASONFORVISIT),
+        ClaimTypeV2.OUTPATIENT);
 
     // Handle Procedures
     // ICD_PRCDR_CD(1-25)        => ExplanationOfBenefit.procedure.procedureCodableConcept

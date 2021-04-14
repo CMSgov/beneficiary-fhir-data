@@ -31,7 +31,8 @@ final class DMEClaimTransformerV2 {
    *     DMEClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(DMEClaimTransformerV2.class.getSimpleName(), "transform"))
@@ -40,7 +41,7 @@ final class DMEClaimTransformerV2 {
     if (!(claim instanceof DMEClaim)) {
       throw new BadCodeMonkeyException();
     }
-    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((DMEClaim) claim, includeTaxNumbers);
 
     timer.stop();
     return eob;
@@ -51,7 +52,8 @@ final class DMEClaimTransformerV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private static ExplanationOfBenefit transformClaim(DMEClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      DMEClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -145,8 +147,8 @@ final class DMEClaimTransformerV2 {
     // PRNCPAL_DGNS_VRSN_CD     => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_CD(1-12)        => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_VRSN_CD(1-12)   => diagnosis.diagnosisCodeableConcept
-    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.DME);
     }
 
     // CARR_CLM_ENTRY_CD => ExplanationOfBenefit.extension
@@ -154,12 +156,13 @@ final class DMEClaimTransformerV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
-    handleClaimLines(claimGroup, eob);
+    handleClaimLines(claimGroup, eob, includeTaxNumbers);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 
-  private static void handleClaimLines(DMEClaim claimGroup, ExplanationOfBenefit eob) {
+  private static void handleClaimLines(
+      DMEClaim claimGroup, ExplanationOfBenefit eob, Optional<Boolean> includeTaxNumbers) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
@@ -227,6 +230,12 @@ final class DMEClaimTransformerV2 {
               line.getHcpcsSecondModifierCode(),
               line.getHcpcsThirdModifierCode(),
               line.getHcpcsFourthModifierCode()));
+
+      if (includeTaxNumbers.orElse(false)) {
+        item.addExtension(
+            TransformerUtilsV2.createExtensionCoding(
+                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
+      }
 
       // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(
@@ -317,15 +326,12 @@ final class DMEClaimTransformerV2 {
       // LINE_ALOWD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // LINE_BENE_PRMRY_PYR_CD   => ExplanationOfBenefit.item.extension
       // LINE_SERVICE_DEDUCTIBLE  => ExplanationOfBenefit.item.extension
-      // LINE_ICD_DGNS_CD         => ExplanationOfBenefit.item.diagnosisSequence
-      // LINE_ICD_DGNS_VRSN_CD    => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_HCT_HGB_TYPE_CD     => Observation.code
       // LINE_HCT_HGB_RSLT_NUM    => Observation.value
       // LINE_NDC_CD              => ExplanationOfBenefit.item.productOrService
       // LINE_BENE_PMT_AMT        => ExplanationOfBenefit.item.adjudication.value
       // LINE_PRCSG_IND_CD        => ExplanationOfBenefit.item.extension
       // LINE_DME_PRCHS_PRICE_AMT => ExplanationOfBenefit.item.adjudication.value
-
       TransformerUtilsV2.mapEobCommonItemCarrierDME(
           item,
           eob,
@@ -348,12 +354,18 @@ final class DMEClaimTransformerV2 {
           line.getAllowedChargeAmount(),
           line.getProcessingIndicatorCode(),
           line.getServiceDeductibleCode(),
-          line.getDiagnosisCode(),
-          line.getDiagnosisCodeVersion(),
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
           line.getNationalDrugCode());
+
+      // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
+      // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
+      DiagnosisUtilV2.addDiagnosisLink(
+          eob,
+          item,
+          Diagnosis.from(line.getDiagnosisCode(), line.getDiagnosisCodeVersion()),
+          ClaimTypeV2.CARRIER);
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
       if (line.getProviderStateCode() != null) {
