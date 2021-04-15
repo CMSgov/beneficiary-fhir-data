@@ -15,6 +15,10 @@ env_name_std: 'prod-sbx'
 # Whether to enable BFD API V2
 data_server_v2_enabled: true
 
+# New Relic Metric API
+data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
+data_server_new_relic_metric_path: '/metric/v1'
+
 # This system is an m5.xlarge (4 vCPUs, 16 GB RAM).
 data_pipeline_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
 data_pipeline_ec2_instance_type_vcpu: 4
