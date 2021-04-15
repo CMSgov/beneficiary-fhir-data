@@ -72,6 +72,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ProcedureComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.RemittanceOutcome;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
@@ -1781,6 +1782,9 @@ public final class TransformerUtilsV2 {
 
     // BENE_ID => ExplanationOfBenefit.patient (reference)
     eob.setPatient(referencePatient(beneficiaryId));
+
+    // "outcome" => ExplanationOfBenefit.outcome
+    eob.setOutcome(RemittanceOutcome.COMPLETE);
 
     // FINAL_ACTION => ExplanationOfBenefit.status
     switch (finalAction) {
