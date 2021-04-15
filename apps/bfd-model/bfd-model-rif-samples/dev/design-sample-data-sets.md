@@ -449,3 +449,28 @@ It was created via the following process:
 2. Randomly select 11 beneficiaries from the synthetic data set. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://jira.cms.gov/browse/BFD-326).  Adjust identifiers `BENE_ID` so that they don't conflict/collide with any other data sets.
 3. For each of those beneficiaries, randomly select Part D events from the synthetic data sample-mct-update-5-pde.txt set to associate with them. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://jira.cms.gov/browse/BFD-326).
 4. Adjust all other identifiers (`BENE_ID`, `PDE_ID`, and `CLM_GRP_ID`) so that they don't conflict/collide with any other data sets.
+
+
+### `SAMPLE_A` Uploaded to Different Environments
+As an end user of the BFD, I would like to have access to the most complete representation of a beneficiary and their possible claims as provided by the CCW, so that I am able to more accurately test and develop against that data.
+1. Started with the data in our Sample_A files located in our /bfd-model/bfd-model-rif-samples/src/main/resources/rif-static-samples folder
+2. Added a new file called beneficiary_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ and changed the BenefitEnrollmentReferenceYear to a real year
+3. Added a new file called carrier_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+4. Added a new file called dme_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+5. Added a new file called hha_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+6. Added a new file called hospice_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+7. Added a new file called inpatient_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+8. Added a new file called outpatient_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+9. Added a new file called pde_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+10. Added a new file called snf_sample_a.txt to the S3 bucket bfd-public-test-data
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+11.  Compared the data in these files to real values in prod and made sure it made sense.  Again DID NOT use real prod data.
+12.  Uploaded all of these files in Test, Prod-sandbox, and Prod.
