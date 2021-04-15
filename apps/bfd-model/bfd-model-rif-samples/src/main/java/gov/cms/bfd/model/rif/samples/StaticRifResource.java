@@ -395,12 +395,21 @@ public enum StaticRifResource {
       Optional.empty()),
 
   /**
-   * The {@link InpatientClaim} records produced by {@link #generateSyntheaData()}, the amount of
+   * The {@link OutpatientClaim} records produced by {@link #generateSyntheaData()}, the amount of
    * which will vary across Synthea versions.
    */
   SYNTHEA_OUTPATIENT(
       syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/outpatient.csv")),
       RifFileType.OUTPATIENT,
+      Optional.empty()),
+
+  /**
+   * The {@link PrescriptionClaim} records produced by {@link #generateSyntheaData()}, the amount of
+   * which will vary across Synthea versions.
+   */
+  SYNTHEA_PDE(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/prescription.csv")),
+      RifFileType.PDE,
       Optional.empty()),
 
   /**
