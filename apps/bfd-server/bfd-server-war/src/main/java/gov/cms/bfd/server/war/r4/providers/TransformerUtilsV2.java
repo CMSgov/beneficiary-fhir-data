@@ -3349,6 +3349,9 @@ public final class TransformerUtilsV2 {
 
       provider.addIdentifier(id);
 
+      // Set active to value of true
+      provider.setActive(true);
+
       setLastUpdated(provider, lastUpdated);
 
       // This gets updated for every call, but always set to the same value
