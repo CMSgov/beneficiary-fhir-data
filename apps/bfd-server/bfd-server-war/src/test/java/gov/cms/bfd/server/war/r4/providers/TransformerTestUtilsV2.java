@@ -1308,6 +1308,30 @@ public final class TransformerTestUtilsV2 {
   }
 
   /**
+   * Finds an {@link AdjudicationComponent} using a code in the reason
+   *
+   * @param code
+   * @param components
+   * @return
+   */
+  static AdjudicationComponent findAdjudicationByReason(
+      String code, List<AdjudicationComponent> components) {
+    Optional<AdjudicationComponent> adjudication =
+        components.stream()
+            .filter(
+                cmp ->
+                    cmp.getReason().getCoding().stream()
+                            .filter(c -> code.equals(c.getCode()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(adjudication.isPresent());
+
+    return adjudication.get();
+  }
+
+  /**
    * Finds a {@link BenefitComponent} in a list based on a Code in the component's Type
    *
    * @param code
