@@ -72,6 +72,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ProcedureComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.RemittanceOutcome;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
@@ -1782,6 +1783,16 @@ public final class TransformerUtilsV2 {
     // BENE_ID => ExplanationOfBenefit.patient (reference)
     eob.setPatient(referencePatient(beneficiaryId));
 
+    // "insurer" => ExplanationOfBenefit.insurer 
+    eob.setInsurer(
+      new Reference()
+        .setIdentifier(
+          new Identifier()
+          .setValue("CMS")));
+    
+    // "outcome" => ExplanationOfBenefit.outcome 
+    eob.setOutcome(RemittanceOutcome.COMPLETE);
+
     // FINAL_ACTION => ExplanationOfBenefit.status
     switch (finalAction) {
       case 'F':
@@ -3440,7 +3451,6 @@ public final class TransformerUtilsV2 {
    * @param rateAmount REV_CNTR_RATE_AMT,
    * @param totalChargeAmount REV_CNTR_TOT_CHRG_AMT,
    * @param nonCoveredChargeAmount REV_CNTR_NCVRD_CHRG_AMT,
-   * @param unitCount REV_CNTR_UNIT_CNT,
    * @param nationalDrugCodeQuantity REV_CNTR_NDC_QTY,
    * @param nationalDrugCodeQualifierCode REV_CNTR_NDC_QTY_QLFR_CD,
    * @return the {@link ItemComponent}
@@ -3452,7 +3462,6 @@ public final class TransformerUtilsV2 {
       BigDecimal rateAmount,
       BigDecimal totalChargeAmount,
       Optional<BigDecimal> nonCoveredChargeAmount,
-      BigDecimal unitCount,
       Optional<BigDecimal> nationalDrugCodeQuantity,
       Optional<String> nationalDrugCodeQualifierCode) {
 
@@ -3481,8 +3490,11 @@ public final class TransformerUtilsV2 {
             C4BBAdjudication.NONCOVERED,
             nonCoveredChargeAmount));
 
-    // REV_CNTR_UNIT_CNT => ExplanationOfBenefit.item.quantity
-    item.setQuantity(new SimpleQuantity().setValue(unitCount));
+    // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
+    Extension drugQuantityExtension =
+    createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
+    Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
+    item.setQuantity(drugQuantity);
 
     // REV_CNTR_NDC_QTY_QLFR_CD => ExplanationOfBenefit.item.modifier
     if (nationalDrugCodeQualifierCode.isPresent()) {
