@@ -457,20 +457,20 @@ As an end user of the BFD, I would like to have access to the most complete repr
 2. Added a new file called beneficiary_sample_a.txt to the S3 bucket bfd-public-test-data
 data-synthetic/Sample-A-Synthetic-Data/ and changed the BenefitEnrollmentReferenceYear to a real year
 3. Added a new file called carrier_sample_a.txt to the S3 bucket bfd-public-test-data
-data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the NPI for orgs and physicians to real data found from a search with https://npiregistry.cms.hhs.gov/registry/ and ICD-9 and ICD-10 codes from searches with https://icd.codes/icd10cm
 4. Added a new file called dme_sample_a.txt to the S3 bucket bfd-public-test-data
-data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the NPI for orgs and physicians to real data found from a search with https://npiregistry.cms.hhs.gov/registry/ and ICD-9 and ICD-10 codes from searches with https://icd.codes/icd10cm
 5. Added a new file called hha_sample_a.txt to the S3 bucket bfd-public-test-data
-data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the NPI for orgs and physicians to real data found from a search with https://npiregistry.cms.hhs.gov/registry/ and ICD-9 and ICD-10 codes from searches with https://icd.codes/icd10cm
 6. Added a new file called hospice_sample_a.txt to the S3 bucket bfd-public-test-data
-data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the NPI for orgs and physicians to real data found from a search with https://npiregistry.cms.hhs.gov/registry/ and ICD-9 and ICD-10 codes from searches with https://icd.codes/icd10cm
 7. Added a new file called inpatient_sample_a.txt to the S3 bucket bfd-public-test-data
-data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the NPI for orgs and physicians to real data found from a search with https://npiregistry.cms.hhs.gov/registry/ and ICD-9 and ICD-10 codes from searches with https://icd.codes/icd10cm
 8. Added a new file called outpatient_sample_a.txt to the S3 bucket bfd-public-test-data
-data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the NPI for orgs and physicians to real data found from a search with https://npiregistry.cms.hhs.gov/registry/ and ICD-9 and ICD-10 codes from searches with https://icd.codes/icd10cm
 9. Added a new file called pde_sample_a.txt to the S3 bucket bfd-public-test-data
 data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
 10. Added a new file called snf_sample_a.txt to the S3 bucket bfd-public-test-data
-data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1
+data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the NPI for orgs and physicians to real data found from a search with https://npiregistry.cms.hhs.gov/registry/ and ICD-9 and ICD-10 codes from searches with https://icd.codes/icd10cm
 11.  Compared the data in these files to real values in prod and made sure it made sense.  Again DID NOT use real prod data.
 12.  Uploaded all of these files in Test, Prod-sandbox, and Prod.
