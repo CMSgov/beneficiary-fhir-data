@@ -72,7 +72,10 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * NOTE: For v2, HICN no longer supported.
    */
   private static final List<String> SUPPORTED_HASH_IDENTIFIER_SYSTEMS =
-      Arrays.asList(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH);
+      Arrays.asList(
+          TransformerConstants.CODING_BBAPI_BENE_MBI_HASH,
+          TransformerConstants.CODING_BBAPI_BENE_HICN_HASH,
+          TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD);
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -569,16 +572,24 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     List<IBaseResource> patients;
 
     try {
-      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)) {
-        Patient patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
-        patients =
-            QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
-                ? Collections.singletonList(patient)
-                : Collections.emptyList();
-      } else {
-        throw new InvalidRequestException(
-            "Unsupported identifier system: " + identifier.getSystem());
+      Patient patient;
+      switch (identifier.getSystem()) {
+        case TransformerConstants.CODING_BBAPI_BENE_MBI_HASH:
+          patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
+          break;
+        case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH:
+        case TransformerConstants.CODING_BBAPI_BENE_HICN_HASH_OLD:
+          patient = queryDatabaseByHicnHash(identifier.getValue(), requestHeader);
+          break;
+        default:
+          throw new InvalidRequestException(
+              "Unsupported identifier system: " + identifier.getSystem());
       }
+
+      patients =
+          QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
+              ? Collections.singletonList(patient)
+              : Collections.emptyList();
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
@@ -586,6 +597,21 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/Patient?");
     return TransformerUtilsV2.createBundle(
         paging, patients, loadedFilterManager.getTransactionTime());
+  }
+
+  /**
+   * @param hicnHash the {@link Beneficiary#getHicn()} hash value to match
+   * @param requestHeader the {@link #RequestHeaders} where resource request headers are
+   *     encapsulated
+   * @return a FHIR {@link Patient} for the CCW {@link Beneficiary} that matches the specified
+   *     {@link Beneficiary#getHicn()} hash value
+   * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
+   *     Beneficiary} can be found
+   */
+  @Trace
+  private Patient queryDatabaseByHicnHash(String hicnHash, RequestHeaders requestHeader) {
+    return queryDatabaseByHash(
+        hicnHash, "hicn", Beneficiary_.hicn, BeneficiaryHistory_.hicn, requestHeader);
   }
 
   /**
