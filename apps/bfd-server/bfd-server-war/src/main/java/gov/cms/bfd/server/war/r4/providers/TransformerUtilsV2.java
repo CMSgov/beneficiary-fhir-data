@@ -1783,14 +1783,10 @@ public final class TransformerUtilsV2 {
     // BENE_ID => ExplanationOfBenefit.patient (reference)
     eob.setPatient(referencePatient(beneficiaryId));
 
-    // "insurer" => ExplanationOfBenefit.insurer 
-    eob.setInsurer(
-      new Reference()
-        .setIdentifier(
-          new Identifier()
-          .setValue("CMS")));
-    
-    // "outcome" => ExplanationOfBenefit.outcome 
+    // "insurer" => ExplanationOfBenefit.insurer
+    eob.setInsurer(new Reference().setIdentifier(new Identifier().setValue("CMS")));
+
+    // "outcome" => ExplanationOfBenefit.outcome
     eob.setOutcome(RemittanceOutcome.COMPLETE);
 
     // FINAL_ACTION => ExplanationOfBenefit.status
@@ -3502,7 +3498,7 @@ public final class TransformerUtilsV2 {
 
     // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
     Extension drugQuantityExtension =
-    createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
+        createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
     Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
     item.setQuantity(drugQuantity);
 
