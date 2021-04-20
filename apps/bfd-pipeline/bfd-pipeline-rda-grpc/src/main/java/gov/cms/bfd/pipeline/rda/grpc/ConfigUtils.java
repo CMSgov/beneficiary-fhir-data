@@ -1,11 +1,16 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This helper class abstracts the source of configuration values and handles insertion of default
  * values when none are provided by the environment. Currently implemented to pull values from
  * environment variables.
  */
 class ConfigUtils {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigUtils.class);
+
   /**
    * Retrieve configuration value with the given name. Returns the specified default value when
    * there is no configuration value matching the key.
@@ -28,7 +33,16 @@ class ConfigUtils {
    * @return either the configuration value or the default
    */
   public static int getInt(String key, int defaultValue) {
-    String strValue = System.getenv(key);
-    return strValue != null ? Integer.parseInt(strValue) : defaultValue;
+    try {
+      String strValue = System.getenv(key);
+      return strValue != null ? Integer.parseInt(strValue) : defaultValue;
+    } catch (NumberFormatException ex) {
+      LOGGER.error(
+          "Invalid environment variable value, expected a valid integer: envvar={} error='{}'",
+          key,
+          ex.getMessage(),
+          ex);
+      throw ex;
+    }
   }
 }
