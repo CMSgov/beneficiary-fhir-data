@@ -413,6 +413,15 @@ public enum StaticRifResource {
       Optional.empty()),
 
   /**
+   * The {@link Carrier} records produced by {@link #generateSyntheaData()}, the amount of which
+   * will vary across Synthea versions.
+   */
+  SYNTHEA_CARRIER(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/carrier.csv")),
+      RifFileType.CARRIER,
+      Optional.empty()),
+
+  /**
    * The NPIs produced by {@link #generateSyntheaData()}, the amount of which will vary across
    * Synthea runs.
    */
