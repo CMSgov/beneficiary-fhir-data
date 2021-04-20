@@ -569,15 +569,16 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     List<IBaseResource> patients;
 
     try {
-      if (identifier.getSystem() != TransformerConstants.CODING_BBAPI_BENE_MBI_HASH) {
+      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)) {
+        Patient patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
+        patients =
+            QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
+                ? Collections.singletonList(patient)
+                : Collections.emptyList();
+      } else {
         throw new InvalidRequestException(
             "Unsupported identifier system: " + identifier.getSystem());
       }
-      Patient patient = queryDatabaseByMbiHash(identifier.getValue(), requestHeader);
-      patients =
-          QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
-              ? Collections.singletonList(patient)
-              : Collections.emptyList();
     } catch (NoResultException e) {
       patients = new LinkedList<>();
     }
