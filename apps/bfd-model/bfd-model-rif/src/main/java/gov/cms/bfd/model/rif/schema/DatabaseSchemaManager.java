@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>This uses <a href="http://www.liquibase.org/">Liquibase</a> to manage the schema. The main
  * Liquibase changelog is in <code>src/main/resources/db-schema.xml</code>.
+ *
+ * <p>TODO This is no longer only used by the CCW job, and so should be moved to a different module
+ * & package
  */
 public final class DatabaseSchemaManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);

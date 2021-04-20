@@ -1,181 +1,368 @@
 package gov.cms.bfd.pipeline.app;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.Bucket;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
-import java.time.Instant;
+import gov.cms.bfd.pipeline.app.scheduler.SchedulerJob;
+import gov.cms.bfd.pipeline.app.volunteer.VolunteerJob;
+import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
+import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
+import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/** Integration tests for {@link PipelineManager}. */
+/** Integration tests for {@link PipelineManager}, {@link PipelineJobRecordStore}, and friends. */
 public final class PipelineManagerIT {
-  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManagerIT.class);
-
   /**
-   * Verifies that {@link PipelineManager} handles errors as expected when asked to run against an
-   * S3 bucket that doesn't exist. This test case isn't so much needed to test that one specific
-   * failure case, but to instead verify the overall error handling.
-   *
-   * @throws InterruptedException (shouldn't happen)
+   * Verifies that {@link PipelineManager} automatically runs {@link MockJob} and {@link
+   * SchedulerJob}, as expected.
    */
   @Test
-  public void missingBucket() throws InterruptedException {
-    // Start the pipeline against a bucket that doesn't exist.
-    MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-    PipelineManager pipeline =
-        new PipelineManager(new MetricRegistry(), new ExtractionOptions("foo"), 1, listener);
-    pipeline.start();
+  public void runBuiltinJobs() {
+    // Create the pipeline.
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    new PipelineManager(new MetricRegistry(), jobRecordStore);
 
-    // Wait for the pipeline to error out.
-    Awaitility.await().atMost(Duration.TEN_SECONDS).until(() -> !listener.errorEvents.isEmpty());
-    pipeline.stop();
-    Assert.assertEquals(0, listener.getNoDataAvailableEvents());
-    Assert.assertNotEquals(0, listener.getErrorEvents().size());
-    Assert.assertEquals(0, listener.getDataEvents().size());
+    // Verify that there are job records for the built-ins.
+    Assert.assertEquals(2, jobRecordStore.getJobRecords().size());
+    Assert.assertTrue(
+        jobRecordStore.getJobRecords().stream()
+            .anyMatch(j -> VolunteerJob.JOB_TYPE.equals(j.getJobType())));
+    Assert.assertTrue(
+        jobRecordStore.getJobRecords().stream()
+            .anyMatch(j -> SchedulerJob.JOB_TYPE.equals(j.getJobType())));
   }
 
-  /** Tests {@link PipelineManager} when run against an empty bucket. */
+  /** Verifies that {@link PipelineManager} runs a successful mock one-shot job, as expected. */
   @Test
-  public void emptyBucketTest() {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-    Bucket bucket = null;
-    try {
-      // Create the (empty) bucket to run against.
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName());
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
+  public void runSuccessfulMockOneshotJob() {
+    // Create the pipeline and have it run a mock job.
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MockJob mockJob = new MockJob(Optional.empty(), () -> PipelineJobOutcome.WORK_DONE);
+    pipelineManager.registerJob(mockJob);
+    jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
 
-      // Start the pipeline and then stop it.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      PipelineManager pipeline = new PipelineManager(new MetricRegistry(), options, 1, listener);
-      pipeline.start();
-      Awaitility.await()
-          .atMost(Duration.TEN_SECONDS)
-          .until(() -> listener.getNoDataAvailableEvents() > 0);
-      pipeline.stop();
+    // Wait until a completed iteration of the mock job can be found.
+    Awaitility.await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until(
+            () ->
+                jobRecordStore.getJobRecords().stream()
+                    .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
+                    .findAny()
+                    .isPresent());
 
-      // Verify that no data sets were generated.
-      Assert.assertNotEquals(0, listener.getNoDataAvailableEvents());
-      Assert.assertEquals(0, listener.getDataEvents().size());
-      Assert.assertEquals(0, listener.errorEvents.size());
-    } finally {
-      if (bucket != null) s3Client.deleteBucket(bucket.getName());
+    // Verify that one of the completed mock job iterations looks correct.
+    Optional<PipelineJobRecord<?>> mockJobRecord =
+        jobRecordStore.getJobRecords().stream()
+            .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
+            .findAny();
+    Assert.assertEquals(
+        Optional.of(PipelineJobOutcome.WORK_DONE), mockJobRecord.get().getOutcome());
+  }
+
+  /** Verifies that {@link PipelineManager} runs a failing mock one-shot job, as expected. */
+  @Test
+  public void runFailingMockOneshotJob() {
+    // Create the pipeline and have it run a mock job.
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MockJob mockJob =
+        new MockJob(
+            Optional.empty(),
+            () -> {
+              throw new RuntimeException("boom");
+            });
+    pipelineManager.registerJob(mockJob);
+    jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+
+    // Wait until a completed iteration of the mock job can be found.
+    Awaitility.await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until(
+            () ->
+                jobRecordStore.getJobRecords().stream()
+                    .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
+                    .findAny()
+                    .isPresent());
+
+    // Verify that one of the completed mock job iterations looks correct.
+    Optional<PipelineJobRecord<?>> mockJobRecord =
+        jobRecordStore.getJobRecords().stream()
+            .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
+            .findAny();
+    Assert.assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
+    Assert.assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
+  }
+
+  /** Verifies that {@link PipelineManager} runs a successful mock scheduled job, as expected. */
+  @Test
+  public void runSuccessfulScheduledJob() {
+    // Create the pipeline and have it run a mock job.
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MockJob mockJob =
+        new MockJob(
+            Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
+            () -> PipelineJobOutcome.WORK_DONE);
+    pipelineManager.registerJob(mockJob);
+    jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+
+    // Wait until a completed iteration of the mock job can be found.
+    Awaitility.await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until(
+            () ->
+                jobRecordStore.getJobRecords().stream()
+                    .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
+                    .findAny()
+                    .isPresent());
+
+    // Verify that one of the completed mock job iterations looks correct.
+    Optional<PipelineJobRecord<?>> mockJobRecord =
+        jobRecordStore.getJobRecords().stream()
+            .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
+            .findAny();
+    Assert.assertEquals(
+        Optional.of(PipelineJobOutcome.WORK_DONE), mockJobRecord.get().getOutcome());
+  }
+
+  /** Verifies that {@link PipelineManager} runs a failing mock scheduled job, as expected. */
+  @Test
+  public void runFailingScheduledJob() {
+    // Create the pipeline and have it run a mock job.
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MockJob mockJob =
+        new MockJob(
+            Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
+            () -> {
+              throw new RuntimeException("boom");
+            });
+    pipelineManager.registerJob(mockJob);
+    jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+
+    // Wait until a completed job can be found.
+    Awaitility.await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until(
+            () ->
+                jobRecordStore.getJobRecords().stream()
+                    .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
+                    .findAny()
+                    .isPresent());
+
+    // Verify that one of the completed mock job iterations looks correct.
+    Optional<PipelineJobRecord<?>> mockJobRecord =
+        jobRecordStore.getJobRecords().stream()
+            .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
+            .findAny();
+    Assert.assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
+    Assert.assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
+
+    // Make sure that the job stopped trying to execute after it failed.
+    Assert.assertEquals(
+        1,
+        jobRecordStore.getJobRecords().stream()
+            .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
+            .count());
+  }
+
+  /** Verifies that {@link PipelineManager#stop()} works, as expected. */
+  @Test
+  public void runInterruptibleJobsThenStop() {
+    // Create the pipeline and have it run a mock job.
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MockJob mockJob =
+        new MockJob(
+            Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
+            () -> {
+              // Add an artificial delay that we'll be able to measure.
+              Thread.sleep(500);
+              return PipelineJobOutcome.WORK_DONE;
+            });
+    pipelineManager.registerJob(mockJob);
+    jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+
+    // Wait until the mock job has started.
+    Awaitility.await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until(
+            () ->
+                jobRecordStore.getJobRecords().stream()
+                    .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isStarted())
+                    .findAny()
+                    .isPresent());
+
+    // Stop the pipeline and then make sure that the job was actually interrupted.
+    pipelineManager.stop();
+    PipelineJobRecord<NullPipelineJobArguments> mockJobRecord =
+        jobRecordStore.findMostRecent(MockJob.JOB_TYPE).get();
+    Assert.assertTrue(mockJobRecord.getCancelTime().isPresent());
+    Assert.assertTrue(mockJobRecord.getDuration().get().toMillis() < 500);
+  }
+
+  /** Verifies that {@link PipelineManager#stop()} works, as expected. */
+  @Test
+  public void runUninterruptibleJobsThenStop() {
+    // Create the pipeline and have it run a mock job.
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MockJob mockJob =
+        new MockJob(
+            Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
+            false,
+            () -> {
+              return PipelineJobOutcome.WORK_DONE;
+            });
+    pipelineManager.registerJob(mockJob);
+    jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+
+    // Wait until the mock job has started.
+    Awaitility.await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until(
+            () ->
+                jobRecordStore.getJobRecords().stream()
+                    .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isStarted())
+                    .findAny()
+                    .isPresent());
+
+    // Stop the pipeline. If this doesn't hang, we're good.
+    pipelineManager.stop();
+  }
+
+  /** Verifies that {@link PipelineManager#stop()} works, as expected. */
+  @Test
+  public void runThenStopAndCancelPendingJobs() {
+    // Create the pipeline and a slow mock job that we can use.
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MockJob mockJob =
+        new MockJob(
+            Optional.empty(),
+            () -> {
+              // Add an artificial delay that we'll be able to measure.
+              Thread.sleep(500);
+              return PipelineJobOutcome.WORK_DONE;
+            });
+    pipelineManager.registerJob(mockJob);
+
+    /*
+     * Once the VolunteerJob is running, submit enough slow mock jobs to fill up the
+     * PipelineManager's executor threads/slots.
+     */
+    Awaitility.await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until(
+            () ->
+                jobRecordStore.getJobRecords().stream()
+                    .filter(j -> VolunteerJob.JOB_TYPE.equals(j.getJobType()) && j.isStarted())
+                    .findAny()
+                    .isPresent());
+    int openExecutorSlots = pipelineManager.getOpenExecutorSlots();
+    for (int i = 0; i < openExecutorSlots; i++) {
+      jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
     }
+
+    // Add one extra job that should sit as pending for a bit.
+    jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+
+    // Wait until one of the mock jobs has started.
+    Awaitility.await()
+        .atMost(1, TimeUnit.SECONDS)
+        .until(
+            () ->
+                jobRecordStore.getJobRecords().stream()
+                    .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isStarted())
+                    .findAny()
+                    .isPresent());
+
+    // Stop the pipeline and verify that at least one job was cancelled before it started.
+    pipelineManager.stop();
+    Assert.assertTrue(
+        jobRecordStore.getJobRecords().stream()
+            .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isStarted())
+            .findAny()
+            .isPresent());
   }
 
-  /**
-   * Tests {@link PipelineManager} when run against a bucket with two data sets in it.
-   *
-   * @throws InterruptedException (shouldn't happen)
-   */
-  @Test
-  public void multipleDataSetsTest() throws InterruptedException {
-    AmazonS3 s3Client = S3Utilities.createS3Client(new ExtractionOptions("foo"));
-    Bucket bucket = null;
-    try {
-      /*
-       * Create the (empty) bucket to run against, and populate it with
-       * two data sets.
-       */
-      bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName());
-      LOGGER.info(
-          "Bucket created: '{}:{}'",
-          s3Client.getS3AccountOwner().getDisplayName(),
-          bucket.getName());
-      DataSetManifest manifestA =
-          new DataSetManifest(
-              Instant.now().minus(1L, ChronoUnit.HOURS),
-              0,
-              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestA));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifestA,
-              manifestA.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_BENES.getResourceUrl()));
-      DataSetManifest manifestB =
-          new DataSetManifest(
-              manifestA.getTimestampText(),
-              1,
-              new DataSetManifestEntry("pde.rif", RifFileType.PDE));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestB));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifestB,
-              manifestB.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_PDE.getResourceUrl()));
-      DataSetManifest manifestC =
-          new DataSetManifest(
-              Instant.now(), 0, new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
-      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifestC));
-      s3Client.putObject(
-          DataSetTestUtilities.createPutRequest(
-              bucket,
-              manifestC,
-              manifestC.getEntries().get(0),
-              StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+  /** Reduce tick time on built-in jobs, to speed test execution. */
+  @BeforeClass
+  public static void configureTimers() {
+    VolunteerJob.VOLUNTEER_TICK_MILLIS = 10;
+    SchedulerJob.SCHEDULER_TICK_MILLIS = 10;
+  }
 
-      // Start the pipeline up.
-      MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      PipelineManager pipeline = new PipelineManager(new MetricRegistry(), options, 1, listener);
-      pipeline.start();
+  /** This mock {@link PipelineJob} returns a specified result. */
+  private static final class MockJob implements PipelineJob<NullPipelineJobArguments> {
+    public static final PipelineJobType<NullPipelineJobArguments> JOB_TYPE =
+        new PipelineJobType<NullPipelineJobArguments>(MockJob.class);
 
-      // Wait for the job to generate events for the three data sets.
-      Awaitility.await()
-          .atMost(Duration.ONE_MINUTE)
-          .until(() -> listener.getDataEvents().size() >= 3);
-      pipeline.stop();
+    private final Optional<PipelineJobSchedule> schedule;
+    private final boolean interruptible;
+    private final Callable<Object> jobResultProducer;
 
-      // Verify what was handed off to the DataSetMonitorListener.
-      Assert.assertEquals(3, listener.getDataEvents().size());
-      Assert.assertEquals(
-          "Errors encountered: " + listener.getErrorEvents(), 0, listener.getErrorEvents().size());
-      Assert.assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
-      Assert.assertEquals(manifestB.getTimestamp(), listener.getDataEvents().get(1).getTimestamp());
-      Assert.assertEquals(manifestC.getTimestamp(), listener.getDataEvents().get(2).getTimestamp());
+    /**
+     * Constructs a new {@link MockJob} instance.
+     *
+     * @param schedule the value to use for {@link #getSchedule()}
+     * @param interruptible the value to use for {@link #isInterruptible()}
+     * @param jobResultProducer the {@link Callable} that will create the values to use for {@link
+     *     #call()}
+     */
+    public MockJob(
+        Optional<PipelineJobSchedule> schedule,
+        boolean interruptible,
+        Callable<Object> jobResultProducer) {
+      this.schedule = schedule;
+      this.interruptible = interruptible;
+      this.jobResultProducer = jobResultProducer;
+    }
 
-      // Verify that the data sets were both renamed.
-      DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
-          bucket,
-          CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS,
-          0,
-          java.time.Duration.ofSeconds(10));
-      DataSetTestUtilities.waitForBucketObjectCount(
-          s3Client,
-          bucket,
-          CcwRifLoadJob.S3_PREFIX_COMPLETED_DATA_SETS,
-          1
-              + manifestA.getEntries().size()
-              + 1
-              + manifestB.getEntries().size()
-              + 1
-              + manifestC.getEntries().size(),
-          java.time.Duration.ofSeconds(10));
-    } catch (Exception e) {
-      LOGGER.warn("Test case failed.", e);
-      throw new RuntimeException(e);
-    } finally {
-      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+    /**
+     * Constructs a new {@link MockJob} instance.
+     *
+     * @param schedule the value to use for {@link #getSchedule()}
+     * @param jobResultProducer the {@link Callable} that will create the values to use for {@link
+     *     #call()}
+     */
+    public MockJob(Optional<PipelineJobSchedule> schedule, Callable<Object> jobResultProducer) {
+      this(schedule, true, jobResultProducer);
+    }
+
+    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+    @Override
+    public Optional<PipelineJobSchedule> getSchedule() {
+      return schedule;
+    }
+
+    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+    @Override
+    public boolean isInterruptible() {
+      return interruptible;
+    }
+
+    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
+    @Override
+    public PipelineJobOutcome call() throws Exception {
+      Object result = jobResultProducer.call();
+      if (result instanceof PipelineJobOutcome) {
+        return (PipelineJobOutcome) result;
+      } else {
+        throw new BadCodeMonkeyException();
+      }
     }
   }
 }

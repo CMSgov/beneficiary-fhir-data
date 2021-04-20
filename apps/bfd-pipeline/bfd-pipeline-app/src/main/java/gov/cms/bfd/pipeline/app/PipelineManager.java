@@ -1,17 +1,41 @@
 package gov.cms.bfd.pipeline.app;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
-import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.TaskExecutor;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import gov.cms.bfd.pipeline.app.scheduler.SchedulerJob;
+import gov.cms.bfd.pipeline.app.volunteer.VolunteerJob;
+import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobRecordId;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
+import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobFailure;
+import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
+import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +48,15 @@ public final class PipelineManager {
   public static final String LOG_MESSAGE_STARTING_WORKER =
       "Starting data set monitor: watching for data sets to process...";
 
+  /**
+   * The number of jobs that can be run at one time. Because the {@link VolunteerJob} and {@link
+   * SchedulerJob} will always be running, this number must be >=3, in order for any actual jobs to
+   * get run.
+   *
+   * @see #jobExecutor
+   */
+  public static final int JOB_EXECUTOR_THREADS = 3;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManager.class);
 
   /**
@@ -32,209 +65,403 @@ public final class PipelineManager {
    */
   public static final int EXIT_CODE_MONITOR_ERROR = 2;
 
+  /** The {@link MetricRegistry} used to track the application's performance and events. */
   private final MetricRegistry appMetrics;
-  private final ExtractionOptions options;
-  private final int scanRepeatDelay;
-  private final DataSetMonitorListener listener;
 
-  private TaskExecutor jobExecutor;
-  private S3TaskManager s3TaskManager;
-  private ScheduledFuture<?> ccwRifLoadJobFuture;
-  private CcwRifLoadJob ccwRifLoadJob;
+  /**
+   * Used to run the jobs. Provided by Guava and documented here:
+   * https://github.com/google/guava/wiki/ListenableFutureExplained. If you're touching this class,
+   * you <strong>need</strong> to read that page and the associated JavaDoc. Concurrent APIs like
+   * this are chock-full-o' footguns and while Guava's APIs here are well-designed, they're still no
+   * exception to that rule.
+   */
+  private final ListeningScheduledExecutorService jobExecutor;
+
+  /**
+   * Tracks the number of currently running tasks in {@link #jobExecutor}. Note: this isn't really
+   * thread-safe; it's subject to race conditions, unless used very carefully. Accordingly, usage of
+   * this field <strong>SHALL</strong> conform to the following rules:
+   *
+   * <ul>
+   *   <li>The values SHALL only be incremented on the {@link SchedulerJob}'s thread.
+   *   <li>The values SHALL only be read on the {@link SchedulerJob}'s thread (aside from reads for
+   *       metrics, which SHALL NOT be used for any application logic).
+   *   <li>The values SHALL only be decremented by {@link PipelineJobWrapper}.
+   * </ul>
+   *
+   * <p>Following these rules will result in this value being eventually consistent but nevertheless
+   * ALWAYS >= the number of jobs that are actually running, from the view of the {@link
+   * SchedulerJob}'s thread. This aligns with what the {@link SchedulerJob} needs the value for, as
+   * we're using it to avoid over-subscribing on work. Under-subscribing is fine, in the context.
+   *
+   * @return the counter for how many tasks are currently running on the {@link PipelineJob}s {@link
+   *     Executor}
+   */
+  private final AtomicInteger jobsRunningCounter;
+
+  /**
+   * This {@link Set} stores handles to all active job {@link Future}s. We need to keep track of
+   * these so that we can ensure that jobs can be cancelled when {@link #stop()} is called. It needs
+   * to be thread-safe because, to prevent runaway memory growth, we remove jobs from the set as
+   * they finish.
+   */
+  private final ConcurrentMap<PipelineJobRecordId, PipelineJobHandle<?>> jobActiveHandles;
+
+  /**
+   * Used to run the job monitoring tasks, e.g. {@link ListenableFuture} callbacks. Those tasks are
+   * run in a separate thread pool to ensure that job execution doesn't starve them out.
+   */
+  private final ExecutorService jobMonitorsExecutor;
+
+  /**
+   * The {@link PipelineJobRecordStore} service that tracks job submissions, executions, and
+   * outcomes.
+   */
+  private final PipelineJobRecordStore jobRecordStore;
+
+  /**
+   * Stores the {@link PipelineJob}s that have been registered via {@link
+   * #registerJob(PipelineJob)}.
+   */
+  private final Map<PipelineJobType<?>, PipelineJob<?>> jobRegistry;
 
   /**
    * Constructs a new {@link PipelineManager} instance. Note that this must be used as a singleton
    * service in the application: only one instance running at a time is supported.
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
-   * @param options the {@link ExtractionOptions} to use
-   * @param scanRepeatDelay the number of milliseconds to wait after completing one poll/process
-   *     operation and starting another
-   * @param listener the {@link DataSetMonitorListener} that will be notified when events occur
+   * @param jobRecordStore the {@link PipelineJobRecordStore} for the overall application
    */
-  public PipelineManager(
-      MetricRegistry appMetrics,
-      ExtractionOptions options,
-      int scanRepeatDelay,
-      DataSetMonitorListener listener) {
+  public PipelineManager(MetricRegistry appMetrics, PipelineJobRecordStore jobRecordStore) {
     this.appMetrics = appMetrics;
-    this.options = options;
-    this.scanRepeatDelay = scanRepeatDelay;
-    this.listener = listener;
-
-    this.jobExecutor = null;
-    this.ccwRifLoadJobFuture = null;
-    this.ccwRifLoadJob = null;
-  }
-
-  /**
-   * Starts this monitor: it will begin regularly polling for and processing new data sets on a
-   * background thread. This particular method will return immediately, but that background
-   * processing will continue to run asynchronously until {@link #stop()} is called.
-   */
-  public void start() {
-    // Instances of this class are single-use-only.
-    if (this.jobExecutor != null || this.ccwRifLoadJobFuture != null)
-      throw new IllegalStateException();
-
-    this.jobExecutor = new TaskExecutor("Pipeline Job Executor", 1);
-    this.s3TaskManager = new S3TaskManager(appMetrics, options);
-    this.ccwRifLoadJob = new CcwRifLoadJob(appMetrics, options, s3TaskManager, listener);
-    Runnable ccwRifLoadJobErrorNotifyingWrapper =
-        new ErrorNotifyingJobWrapper(ccwRifLoadJob, listener);
+    this.jobRecordStore = jobRecordStore;
+    this.jobExecutor = createJobExecutor();
+    this.jobActiveHandles = new ConcurrentHashMap<>();
+    this.jobsRunningCounter = new AtomicInteger(0);
+    this.jobMonitorsExecutor = Executors.newCachedThreadPool();
+    this.jobRegistry = new HashMap<>();
 
     /*
-     * This kicks off the data set watcher, which will be run periodically
-     * (as configured), until either A) this instance's stop() method is
-     * called to request a graceful shutdown, or B) one of the watcher
-     * execution runs fails. In turn, it basically acts as the application's
-     * main loop, and will drive all of the application's data processing,
-     * etc. on the ScheduledExecutorService's separate thread. (To be clear:
-     * this method does not block, and should return normally almost
-     * immediately.)
+     * Bootstrap the SchedulerJob and VolunteerJob, which are responsible for ensuring that all of
+     * the other jobs get executed, as and when needed. Note that it will permanently tie up two of
+     * the job executors, as they're designed to run forever.
      */
-    LOGGER.info(LOG_MESSAGE_STARTING_WORKER);
-    this.ccwRifLoadJobFuture =
-        jobExecutor.scheduleWithFixedDelay(
-            ccwRifLoadJobErrorNotifyingWrapper, 0, scanRepeatDelay, TimeUnit.MILLISECONDS);
+    VolunteerJob volunteerJob = new VolunteerJob(this, jobRecordStore);
+    registerJob(volunteerJob);
+    PipelineJobRecord<NullPipelineJobArguments> volunteerJobRecord =
+        jobRecordStore.submitPendingJob(VolunteerJob.JOB_TYPE, null);
+    enqueueJob(volunteerJobRecord);
+    SchedulerJob schedulerJob = new SchedulerJob(this, jobRecordStore);
+    registerJob(schedulerJob);
+    jobRecordStore.submitPendingJob(SchedulerJob.JOB_TYPE, null);
+  }
+
+  /** @return the {@link ListeningScheduledExecutorService} to use for {@link #jobExecutor} */
+  private static ListeningScheduledExecutorService createJobExecutor() {
+    ScheduledThreadPoolExecutor jobExecutorInner =
+        new ScheduledThreadPoolExecutor(JOB_EXECUTOR_THREADS);
+    jobExecutorInner.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+    return MoreExecutors.listeningDecorator(jobExecutorInner);
   }
 
   /**
-   * Stops this monitor: it will wait for the current polling/processing operation (if any) to
-   * complete normally, then stop any future polling/processing runs from starting. This method will
-   * block until any current operations have completed and future ones have been cancelled.
+   * Registers the specified {@link PipelineJob}, scheduling it (if it has a {@link
+   * PipelineJob#getSchedule()}) and also making it available for triggering elsewhere, via {@link
+   * PipelineManager#enqueueJob(PipelineJobType)}.
    *
-   * <p><strong>Note:</strong> This might block for a while! Some data sets have terabytes of data,
-   * and there is no way to safely stop processing in the middle of a data set.
+   * @param job the {@link PipelineJob} to register
+   */
+  public void registerJob(PipelineJob<?> job) {
+    jobRegistry.put(job.getType(), job);
+  }
+
+  /**
+   * <strong>Warning:</strong> See the note on {@link #jobsRunningCounter} for the thread-safety
+   * rules for usage of this field. It is <strong>not</strong> safe to use outside of those
+   * conditions.
+   *
+   * @return the number of available executor slots (technically, an eventually consistent
+   *     approximation of that value, which is guaranteed to be less-than-or-equal-to the true
+   *     value, provided that the thread-safety rules described in {@link #jobsRunningCounter} are
+   *     adhered to)
+   */
+  public int getOpenExecutorSlots() {
+    return JOB_EXECUTOR_THREADS - jobsRunningCounter.get();
+  }
+
+  /**
+   * @return the {@link Set} of jobs registered via {@link #registerJob(PipelineJob)} that have
+   *     {@link PipelineJob#getSchedule()} values
+   */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public Set<PipelineJob<NullPipelineJobArguments>> getScheduledJobs() {
+    Set scheduledJobs =
+        jobRegistry.values().stream()
+            .filter(j -> j.getSchedule().isPresent())
+            .collect(Collectors.toSet());
+    return scheduledJobs;
+  }
+
+  /**
+   * Enqueues an execution of the specified {@link PipelineJob}, with the specified parameters.
+   *
+   * @param jobRecord the {@link PipelineJobRecord} of the job to run
+   * @return <code>true</code> if the specified job was enqueued, or <code>false</code> if it could
+   *     not be (e.g. because {@link #stop()} has been called)
+   */
+  public <A extends PipelineJobArguments> boolean enqueueJob(PipelineJobRecord<A> jobRecord) {
+    // First, find the specified job.
+    @SuppressWarnings("unchecked")
+    PipelineJob<A> job = (PipelineJob<A>) jobRegistry.get(jobRecord.getJobType());
+    if (job == null)
+      throw new IllegalArgumentException(
+          String.format("Unknown or unregistered job type '%s'.", jobRecord.getJobType()));
+
+    /*
+     * Design Note: Java's Executor framework is great at running things and returning results, but
+     * provides no built-in facilities at all for monitoring and tracking the things that have been
+     * run. We need that monitoring here, so we use PipelineJobWrapper to catch these events:
+     * enqueue, start, complete-successfully, complete-with-exception. (See Futures.addCallback(...)
+     * a little bit further below for a discussion of some additional monitoring we need and add
+     * in.)
+     */
+    PipelineJobWrapper<A> jobWrapper = new PipelineJobWrapper<>(job, jobRecord);
+
+    // Ensure code below doesn't accidentally use the unwrapped job.
+    job = jobWrapper;
+
+    // Submit the job to be run!
+    ListenableFuture<PipelineJobOutcome> jobFuture;
+    try {
+      jobFuture = jobExecutor.submit(jobWrapper);
+    } catch (RejectedExecutionException e) {
+      // Indicates that the executor has been shutdown.
+      return false;
+    }
+    jobActiveHandles.put(jobRecord.getId(), new PipelineJobHandle<>(jobWrapper, jobFuture));
+    jobsRunningCounter.incrementAndGet();
+
+    /*
+     * Design Note: We can't catch job-cancellation-before-start events in PipelineJobWrapper,
+     * because its call(...) method won't ever be called in those cases. Guava's ListenableFuture
+     * framework doesn't monitor task submission or start, so we can't use it to catch those events.
+     * Accordingly, we use a combo: both PipelineJobWrapper and Guava's ListenableFuture, to catch
+     * all of the events that we're interested in.
+     */
+    Futures.addCallback(
+        jobFuture, new PipelineJobCallback<A>(jobWrapper.getJobRecord()), this.jobMonitorsExecutor);
+
+    return true;
+  }
+
+  /**
+   * This will eventually end all jobs and shut down this {@link PipelineManager}. Note: not all
+   * jobs support being stopped while in progress, so this method may block for quite a while.
    */
   public void stop() {
-    LOGGER.debug("Stopping...");
-
-    // If we haven't started yet, this is easy.
-    if (ccwRifLoadJobFuture == null) {
-      return;
-    }
-
     // If something has already shut us down, we're done.
     if (jobExecutor.isShutdown()) {
       return;
     }
 
+    LOGGER.info("Stopping PipelineManager...");
+
     /*
-     * Signal the scheduler to stop after the current CcwRifLoadJob
-     * execution (if any), then wait for that to happen.
+     * Tell the job executor to shut down, which will prevent it from accepting new jobs and from
+     * running any jobs that haven't already started. If all jobs are interruptible, we'll shut it
+     * down _harder_, such that in-progress job threads get interrupted (ala Thread.interrupt()).
      */
-    jobExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-    jobExecutor.shutdown();
-    ccwRifLoadJobFuture.cancel(false);
-    waitForStop();
-
-    // Clean house.
-    s3TaskManager.shutdownSafely();
-
-    LOGGER.debug("Stopped.");
-  }
-
-  /**
-   * Waits for the data set watcher to complete, presumably after something has asked it to stop.
-   * (If that hasn't happened, and doesn't, this method will block forever.)
-   */
-  private void waitForStop() {
-    // If we haven't started yet, this is easy.
-    if (ccwRifLoadJobFuture == null) return;
-
-    try {
-      /*
-       * Our Future here is tied to a Runnable, so there's nothing for
-       * this `.get()` call to actually return. Instead, per the JavaDoc
-       * for ScheduledExecutorService.scheduleWithFixedDelay(...), this
-       * method will block unless/until something cancels the Future. At
-       * that time, it will wait for any current execution/iteration of
-       * the Runnable to complete normally. Then, it will throw a
-       * CancellationException to signal that things have gracefully
-       * stopped. A bit counter-intuitive, but it works. Alternatively, if
-       * one of the Runnable's iterations has failed, this will return an
-       * ExecutionException that wraps the failure.
-       */
-      LOGGER.info("Waiting for any in-progress data set processing to gracefully complete...");
-      ccwRifLoadJobFuture.get();
-    } catch (CancellationException e) {
-      /*
-       * This is expected to occur when the app is being gracefully shut
-       * down (see the stop() method). It should only happen **after** the
-       * last execution of our Runnable. Accordingly, we'll just log the
-       * event and allow this method to stop blocking and return.
-       */
-      LOGGER.info("Data set processing has been gracefully stopped.");
-      return;
-    } catch (InterruptedException e) {
-      /*
-       * Many Java applications use InterruptedExceptions to signal that a
-       * thread should stop what it's doing ASAP. This app doesn't, so
-       * this is unexpected, and accordingly, we don't know what to do.
-       * Safest bet is to blow up.
-       */
-      throw new BadCodeMonkeyException(e);
-    } catch (ExecutionException e) {
-      /*
-       * This will only occur if the Runnable (ccwRifLoadJobFuture)
-       * failed with an unhandled exception. This is unexpected, and
-       * accordingly, we don't know what to do. Safest bet is to blow up.
-       */
-      throw new BadCodeMonkeyException(e);
+    boolean unsafeToInterrupt = jobRegistry.values().stream().anyMatch(j -> !j.isInterruptible());
+    if (unsafeToInterrupt) {
+      jobExecutor.shutdown();
+      LOGGER.info("Shut down job executor, without cancelling existing jobs.");
+    } else {
+      jobExecutor.shutdownNow();
+      LOGGER.info("Shut down job executor, cancelling existing jobs.");
     }
 
-    LOGGER.info("Data set processing was stopped.");
+    // Try to stop all jobs that are either not running yet or are interruptible.
+    jobActiveHandles
+        .values()
+        .parallelStream()
+        .forEach(
+            j -> {
+              j.cancelIfPendingOrInterruptible();
+            });
+
+    /*
+     * Wait for everything to halt.
+     */
+    boolean allStopped = jobExecutor.isTerminated();
+    Optional<Instant> lastWaitMessage = Optional.empty();
+    while (!allStopped) {
+      if (!lastWaitMessage.isPresent()
+          || Duration.between(Instant.now(), lastWaitMessage.get()).toMinutes() >= 10) {
+        LOGGER.info(
+            "Waiting for jobs to stop, which may take A WHILE. "
+                + "(Message will repeat every ten minutes, until complete.)");
+        lastWaitMessage = Optional.of(Instant.now());
+      }
+      try {
+        allStopped = jobExecutor.awaitTermination(10, TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+        /*
+         * Need to ignore interrupts here so that we can shut down safely.
+         */
+        LOGGER.warn(
+            String.format("%s ignoring interrupt during shutdown.", this.getClass().getName()));
+      }
+    }
+    LOGGER.info("Stopped PipelineManager.");
   }
 
   /**
-   * @return <code>true</code> if this {@link PipelineManager} is running, <code>false</code> if it
-   *     is not
-   */
-  public boolean isStopped() {
-    return jobExecutor != null && jobExecutor.isShutdown();
-  }
-
-  /**
-   * Wraps a {@link PipelineJob} and catches any unhandled exceptions if it blows up.
+   * A handle for a {@link PipelineJob} execution, which is used to allow the application to cancel
+   * job executions.
    *
-   * <p>This is needed because otherwise, we won't find out about that error unless/until we try to
-   * call <code>ccwRifLoadJobFuture.get()</code>. And starting up a separate thread to poll that
-   * would be silly.
+   * @param <A> the {@link PipelineJobArguments} type associated with this {@link PipelineJob}
+   *     implementation (see {@link NullPipelineJobArguments} for those {@link PipelineJob}
+   *     implementations which do not need arguments)
    */
-  private static final class ErrorNotifyingJobWrapper implements Runnable {
-    private final PipelineJob wrappedJob;
-    private final DataSetMonitorListener listener;
+  private static final class PipelineJobHandle<A extends PipelineJobArguments> {
+    private final PipelineJob<A> job;
+    private final Future<PipelineJobOutcome> future;
 
     /**
-     * Constructs a new {@link ErrorNotifyingJobWrapper} instance.
+     * Constructs a new {@link PipelineJobHandle} instance.
      *
-     * @param wrappedJob the {@link PipelineJob} to wrap and execute
-     * @param listener the {@link DataSetMonitorListener} to send any errors that are caught to
+     * @param job the {@link PipelineJob} that the paired {@link Future} is for
+     * @param future the {@link Future} representing an execution of the paired {@link PipelineJob}
      */
-    public ErrorNotifyingJobWrapper(PipelineJob wrappedJob, DataSetMonitorListener listener) {
-      this.wrappedJob = wrappedJob;
-      this.listener = listener;
+    public PipelineJobHandle(PipelineJob<A> job, Future<PipelineJobOutcome> future) {
+      this.job = job;
+      this.future = future;
     }
 
-    /** @see java.lang.Runnable#run() */
-    @Override
-    public void run() {
-      try {
-        wrappedJob.call();
-      } catch (Throwable t) {
-        /*
-         * First, notify our error receiver so that they can do whatever
-         * it is they need to do.
-         */
-        listener.errorOccurred(t);
+    /**
+     * Attempts to cancel the job execution by calling {@link Future#cancel(boolean)}, respecting
+     * the value of {@link PipelineJob#isInterruptible()}.
+     */
+    public void cancelIfPendingOrInterruptible() {
+      LOGGER.trace("cancelIfPendingOrInterruptible() called: job.getType()='{}'", job.getType());
+      future.cancel(job.isInterruptible());
+    }
+  }
 
+  /**
+   * This {@link PipelineJob} implementation wraps a delegate {@link PipelineJob}, providing data to
+   * {@link PipelineJobRecordStore} about that job's execution and status.
+   *
+   * @param <A> the {@link PipelineJobArguments} type associated with this {@link PipelineJob}
+   *     implementation (see {@link NullPipelineJobArguments} for those {@link PipelineJob}
+   *     implementations which do not need arguments)
+   */
+  private final class PipelineJobWrapper<A extends PipelineJobArguments> implements PipelineJob<A> {
+    private final PipelineJob<A> wrappedJob;
+    private final PipelineJobRecord<A> jobRecord;
+
+    /**
+     * Constructs a new {@link PipelineJobWrapper} for the specified {@link PipelineJob}.
+     *
+     * @param wrappedJob the {@link PipelineJob} to wrap and monitor
+     * @param jobRecord the {@link PipelineJobRecord} for the job to wrap and monitor
+     */
+    public PipelineJobWrapper(PipelineJob<A> wrappedJob, PipelineJobRecord<A> jobRecord) {
+      this.wrappedJob = wrappedJob;
+      this.jobRecord = jobRecord;
+      jobRecordStore.recordJobEnqueue(jobRecord.getId());
+    }
+
+    /** @return the {@link PipelineJobRecord} for this {@link PipelineJobWrapper} */
+    public PipelineJobRecord<A> getJobRecord() {
+      return jobRecord;
+    }
+
+    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getType() */
+    @Override
+    public PipelineJobType<A> getType() {
+      return wrappedJob.getType();
+    }
+
+    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+    @Override
+    public Optional<PipelineJobSchedule> getSchedule() {
+      return wrappedJob.getSchedule();
+    }
+
+    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+    @Override
+    public boolean isInterruptible() {
+      return wrappedJob.isInterruptible();
+    }
+
+    /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
+    @Override
+    public PipelineJobOutcome call() throws Exception {
+      jobRecordStore.recordJobStart(jobRecord.getId());
+
+      try {
+        PipelineJobOutcome jobOutcome = wrappedJob.call();
+        jobRecordStore.recordJobCompletion(jobRecord.getId(), jobOutcome);
+        return jobOutcome;
+      } catch (InterruptedException e) {
         /*
-         * As it's expected that the error receiver might synchronously
-         * call System.exit(...), there's no guarantee that anything
-         * else we try to do here will succeed. So... we don't do
-         * anything.
+         * This indicates that someone has successfully interrupted the job, which should only have
+         * happened when we're trying to shut down. Whether or not PipelineJob.isInterruptible() for
+         * this job, it's now been stopped, so we should record the cancellation.
          */
+        jobRecordStore.recordJobCancellation(jobRecord.getId());
+
+        // Restore the interrupt so things can get back to shutting down.
+        Thread.currentThread().interrupt();
+        throw new InterruptedException("Re-firing job interrupt.");
+      } catch (Exception e) {
+        jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
+
+        // Wrap and re-thrown the failure.
+        throw new Exception("Re-throwing job failure.", e);
+      } finally {
+        jobActiveHandles.remove(jobRecord.getId());
+        jobsRunningCounter.decrementAndGet();
+      }
+    }
+  }
+
+  /**
+   * A {@link FutureCallback} for Guava {@link ListenableFuture}s for {@link PipelineJobWrapper}
+   * tasks, providing data to {@link PipelineJobRecordStore} about a job's execution and status.
+   */
+  private final class PipelineJobCallback<A extends PipelineJobArguments>
+      implements FutureCallback<PipelineJobOutcome> {
+    private final PipelineJobRecord<A> jobRecord;
+
+    /**
+     * Constructs a new {@link PipelineJobWrapper} for the specified {@link PipelineJob}.
+     *
+     * @param jobRecord the {@link PipelineJobRecordId} that this {@link PipelineJobCallback} is for
+     * @param jobRecordStore the {@link PipelineJobRecordStore} to send job monitoring data to
+     */
+    public PipelineJobCallback(PipelineJobRecord<A> jobRecord) {
+      this.jobRecord = jobRecord;
+    }
+
+    /** @see com.google.common.util.concurrent.FutureCallback#onSuccess(java.lang.Object) */
+    @Override
+    public void onSuccess(PipelineJobOutcome result) {
+      // Nothing to do here.
+    }
+
+    /** @see com.google.common.util.concurrent.FutureCallback#onFailure(java.lang.Throwable) */
+    @Override
+    public void onFailure(Throwable jobThrowable) {
+      if (jobThrowable instanceof CancellationException) {
+        /*
+         * This is the whole reason we have this extra listener in the first place: it's the only
+         * way we have to catch cancel-before-start events (the PipelineJobWrapper can't do it,
+         * since it won't get called in the first place).
+         */
+        jobActiveHandles.remove(jobRecord.getId());
+        jobRecordStore.recordJobCancellation(jobRecord.getId());
       }
     }
   }

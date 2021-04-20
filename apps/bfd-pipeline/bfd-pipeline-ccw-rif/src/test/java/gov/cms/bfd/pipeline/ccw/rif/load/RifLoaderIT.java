@@ -17,7 +17,6 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
@@ -529,146 +528,6 @@ public final class RifLoaderIT {
         dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3.getResources()));
   }
 
-  /** Tests the RifLoaderIdleTasks class with a Sample. Note: only works with Postgres. */
-  @Ignore
-  @Test
-  public void runIdleTasks() {
-    final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    RifLoader loader = createLoader(dataSource, true);
-
-    // The sample are loaded with mbiHash set, clear them for this test
-    clearMbiHash(loader);
-    final String selectBeneficiary = "select b from Beneficiary b where b.mbiHash is null";
-    EntityManager em = RifLoader.createEntityManagerFactory(dataSource).createEntityManager();
-    Assert.assertFalse(
-        "Should not be empty now",
-        em.createQuery(selectBeneficiary, Beneficiary.class).getResultList().isEmpty());
-    final String selectHistory = "select b from BeneficiaryHistory b where b.mbiHash is null";
-    Assert.assertFalse(
-        "Should not be empty now",
-        em.createQuery(selectHistory, BeneficiaryHistory.class).getResultList().isEmpty());
-
-    // Run the initial task
-    Assert.assertEquals(
-        "Should be running the initial task",
-        RifLoaderIdleTasks.Task.INITIAL,
-        loader.getIdleTasks().getCurrentTask());
-    loader.doIdleTask();
-
-    // Run the post startup task
-    Assert.assertEquals(
-        "Should be running the post-startup task",
-        RifLoaderIdleTasks.Task.POST_STARTUP,
-        loader.getIdleTasks().getCurrentTask());
-    loader.doIdleTask();
-
-    // Run the post startup beneficiary task
-    Assert.assertEquals(
-        "Should be running the post-startup task",
-        RifLoaderIdleTasks.Task.POST_STARTUP_FIXUP_BENEFICIARIES,
-        loader.getIdleTasks().getCurrentTask());
-    loader.doIdleTask();
-
-    // Run the post startup beneficiary history task
-    Assert.assertEquals(
-        "Should be running the post-startup task",
-        RifLoaderIdleTasks.Task.POST_STARTUP_FIXUP_BENEFICIARY_HISTORY,
-        loader.getIdleTasks().getCurrentTask());
-    loader.doIdleTask();
-
-    // Should mbiHash should be set now
-    Assert.assertEquals(
-        "Should be running the normal task",
-        RifLoaderIdleTasks.Task.NORMAL,
-        loader.getIdleTasks().getCurrentTask());
-    Assert.assertTrue(
-        "Expect all mbiHash have been filled",
-        em.createQuery(selectBeneficiary, Beneficiary.class).getResultList().isEmpty());
-    Assert.assertTrue(
-        "Should all mbiHash should have been filled",
-        em.createQuery(selectHistory, BeneficiaryHistory.class).getResultList().isEmpty());
-
-    loader.close();
-  }
-
-  /** Tests the RifLoaderIdleTasks with no fixups needed. */
-  @Test
-  public void runIdleTasksWithNoFixups() {
-    final DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    final RifLoader loader = createLoader(dataSource, false);
-
-    // Should need no work
-    final String selectBeneficiary = "select b from Beneficiary b where b.mbiHash is null";
-    EntityManager em = RifLoader.createEntityManagerFactory(dataSource).createEntityManager();
-    Assert.assertTrue(
-        "Beneficiaries should be fixed up",
-        em.createQuery(selectBeneficiary, Beneficiary.class).getResultList().isEmpty());
-    final String selectHistory = "select b from BeneficiaryHistory b where b.mbiHash is null";
-    Assert.assertTrue(
-        "Histories should be fixed up",
-        em.createQuery(selectHistory, BeneficiaryHistory.class).getResultList().isEmpty());
-
-    // Run the initial task
-    Assert.assertEquals(
-        "Should be running the initial task",
-        RifLoaderIdleTasks.Task.INITIAL,
-        loader.getIdleTasks().getCurrentTask());
-    loader.doIdleTask();
-
-    // Run the post startup task
-    Assert.assertEquals(
-        "Should be running the post-startup task",
-        RifLoaderIdleTasks.Task.POST_STARTUP,
-        loader.getIdleTasks().getCurrentTask());
-    loader.doIdleTask();
-
-    // Should be normal now
-    Assert.assertEquals(
-        "Should be running the normal task",
-        RifLoaderIdleTasks.Task.NORMAL,
-        loader.getIdleTasks().getCurrentTask());
-
-    loader.close();
-  }
-
-  /**
-   * Tests the RifLoaderIdleTasks class with existing data in the database. Useful for profiling
-   * against the beneficiary data set.
-   */
-  @Ignore
-  @Test
-  public void runExistingIdleTasks() {
-    final DataSource dataSource = DatabaseTestHelper.getTestDatabase();
-    final RifLoader loader = createLoader(dataSource, true);
-
-    // The sample are loaded with mbiHash set, clear them for this test
-    clearMbiHash(loader);
-
-    // Run the initial task
-    Assert.assertEquals(
-        "Should be running the initial task",
-        RifLoaderIdleTasks.Task.INITIAL,
-        loader.getIdleTasks().getCurrentTask());
-    loader.doIdleTask();
-
-    // Run the post startup task
-    Instant startTime = Instant.now();
-    while (loader.getIdleTasks().getCurrentTask() != RifLoaderIdleTasks.Task.NORMAL) {
-      loader.doIdleTask();
-    }
-    Duration time = Duration.between(startTime, Instant.now());
-    LOGGER.info("Post migration took: {} seconds", time.getSeconds());
-
-    // Should mbiHash should be set now
-    Assert.assertEquals(
-        "Should be running the normal task",
-        RifLoaderIdleTasks.Task.NORMAL,
-        loader.getIdleTasks().getCurrentTask());
-    loader.close();
-  }
-
   /**
    * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
@@ -824,27 +683,6 @@ public final class RifLoaderIT {
     } finally {
       if (entityManager != null) entityManager.close();
     }
-  }
-
-  /**
-   * Create a RIF loader
-   *
-   * @param dataSource to use
-   * @param fixupsEnabled option
-   */
-  private static RifLoader createLoader(DataSource dataSource, boolean fixupsEnabled) {
-    MetricRegistry appMetrics = new MetricRegistry();
-    LoadAppOptions defaultOptions = RifLoaderTestUtils.getLoadOptions(dataSource);
-    return new RifLoader(
-        appMetrics,
-        new LoadAppOptions(
-            defaultOptions.getHicnHashIterations(),
-            defaultOptions.getHicnHashPepper(),
-            defaultOptions.getDatabaseDataSource(),
-            defaultOptions.getLoaderThreads(),
-            defaultOptions.isIdempotencyRequired(),
-            fixupsEnabled,
-            defaultOptions.getFixupThreads()));
   }
 
   public static void assertBeneficiaryMonthly(Beneficiary beneficiaryFromDb) {
@@ -1114,20 +952,5 @@ public final class RifLoaderIT {
         enrollment.getPartDRetireeDrugSubsidyInd().orElse(null));
     Assert.assertEquals(
         partDSegmentNumberId.orElse(null), enrollment.getPartDSegmentNumberId().orElse(null));
-  }
-  /**
-   * Clear the MBI hash fields in the db
-   *
-   * @param loader the loader and the db connection within
-   */
-  private static void clearMbiHash(final RifLoader loader) {
-    loader
-        .getIdleTasks()
-        .doBatches(
-            (session) -> {
-              session.createQuery("update Beneficiary set mbiHash = null").executeUpdate();
-              session.createQuery("update BeneficiaryHistory set mbiHash = null").executeUpdate();
-              return true;
-            });
   }
 }

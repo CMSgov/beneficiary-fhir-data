@@ -3,10 +3,11 @@ package gov.cms.bfd.pipeline.app;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import java.io.Serializable;
 import java.util.Optional;
 import org.apache.commons.codec.DecoderException;
@@ -95,38 +96,36 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_KEY_FIXUP_THREADS = "FIXUP_THREADS";
 
-  private final ExtractionOptions extractionOptions;
-  private final LoadAppOptions loadOptions;
+  private final DatabaseOptions databaseOptions;
+  private final CcwRifLoadOptions ccwRifLoadOptions;
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
-   * @param extractionOptions the value to use for {@link #getExtractionOptions()}
-   * @param loadOptions the value to use for {@link #getLoadOptions()}
+   * @param databaseOptions the value to use for {@link #getDatabaseOptions()
+   * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    */
-  public AppConfiguration(ExtractionOptions extractionOptions, LoadAppOptions loadOptions) {
-    this.extractionOptions = extractionOptions;
-    this.loadOptions = loadOptions;
+  public AppConfiguration(DatabaseOptions databaseOptions, CcwRifLoadOptions ccwRifLoadOptions) {
+    this.databaseOptions = databaseOptions;
+    this.ccwRifLoadOptions = ccwRifLoadOptions;
   }
 
-  /** @return the {@link ExtractionOptions} that the application will use */
-  public ExtractionOptions getExtractionOptions() {
-    return extractionOptions;
+  /** @return the {@link DatabaseOptions} that the application will use */
+  public DatabaseOptions getDatabaseOptions() {
+    return databaseOptions;
   }
 
-  /** @return the {@link LoadAppOptions} that the application will use */
-  public LoadAppOptions getLoadOptions() {
-    return loadOptions;
+  /** @return the {@link CcwRifLoadOptions} that the application will use */
+  public CcwRifLoadOptions getCcwRifLoadOptions() {
+    return ccwRifLoadOptions;
   }
 
   /** @see java.lang.Object#toString() */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("AppConfiguration [extractionOptions=");
-    builder.append(extractionOptions);
-    builder.append(", loadOptions=");
-    builder.append(loadOptions);
+    builder.append("AppConfiguration [ccwRifLoadOptions=");
+    builder.append(ccwRifLoadOptions);
     builder.append("]");
     return builder.toString();
   }
@@ -256,18 +255,6 @@ public final class AppConfiguration implements Serializable {
               "Invalid value for configuration environment variable '%s'.",
               ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
 
-    String fixupsEnabledText = System.getenv(ENV_VAR_KEY_FIXUPS_ENABLED);
-    boolean fixupsEnabled = false;
-    if (fixupsEnabledText != null && !fixupsEnabledText.isEmpty()) {
-      fixupsEnabled = Boolean.parseBoolean(fixupsEnabledText);
-    }
-
-    String fixupThreadsText = System.getenv(ENV_VAR_KEY_FIXUP_THREADS);
-    int fixupThreads = RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT;
-    if (fixupThreadsText != null && !fixupThreadsText.isEmpty()) {
-      fixupThreads = Integer.parseInt(fixupThreadsText);
-    }
-
     /*
      * Just for convenience: make sure DefaultAWSCredentialsProviderChain
      * has whatever it needs.
@@ -288,18 +275,18 @@ public final class AppConfiguration implements Serializable {
           e);
     }
 
-    return new AppConfiguration(
-        new ExtractionOptions(s3BucketName, allowedRifFileType),
+    DatabaseOptions databaseOptions =
+        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword.toCharArray());
+    ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
+    LoadAppOptions loadOptions =
         new LoadAppOptions(
+            databaseOptions,
             hicnHashIterations,
             hicnHashPepper,
-            databaseUrl,
-            databaseUsername,
-            databasePassword.toCharArray(),
             loaderThreads,
-            idempotencyRequired.get().booleanValue(),
-            fixupsEnabled,
-            fixupThreads));
+            idempotencyRequired.get().booleanValue());
+    CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
+    return new AppConfiguration(databaseOptions, ccwRifLoadOptions);
   }
 
   /**
