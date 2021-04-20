@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.text.SimpleDateFormat;
@@ -13,11 +14,16 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
+import org.hl7.fhir.r4.model.Money;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -117,6 +123,12 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @Test
+  public void shouldInsuranceCoverage() {
+    Assert.assertNotNull(eob.getInsurance());
+    Assert.assertEquals("Coverage/part-b-567834", eob.getInsurance().get(0).getCoverage().getReference());
+  }
+
+  @Test
   public void shouldSetFinalAction() {
     Assert.assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
   }
@@ -146,6 +158,32 @@ public class CarrierClaimTransformerV2Test {
   public void shouldHaveCareTeamList() {
     Assert.assertEquals(4, eob.getCareTeam().size());
   }
+
+  @Test
+  public void shouldHaveClaimReceivedDateSupInfo() {
+    SupportingInformationComponent sic =
+        TransformerTestUtilsV2.findSupportingInfoByCode("clmrecvddate", eob.getSupportingInfo());
+
+    SupportingInformationComponent compare =
+        TransformerTestUtilsV2.createSupportingInfo(
+                // We don't care what the sequence number is here
+                sic.getSequence(),
+                // Category
+                Arrays.asList(
+                    new Coding(
+                        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+                        "clmrecvddate",
+                        "Claim Received Date"),
+                    new Coding(
+                        "https://bluebutton.cms.gov/resources/codesystem/information",
+                        "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+                        "NCH Weekly Claim Processing Date")))
+            // timingDate
+            .setTiming(new DateType("1999-11-06"));
+
+    Assert.assertTrue(compare.equalsDeep(sic));
+  }
+
 
    /** Diagnosis elements */
    @Test
@@ -207,6 +245,35 @@ DiagnosisComponent cmp3 =
        null);
 
 Assert.assertTrue(cmp3.equalsDeep(diag3));
+
+DiagnosisComponent diag4 =
+   TransformerTestUtilsV2.findDiagnosisByCode("H77777", eob.getDiagnosis());
+
+DiagnosisComponent cmp4 =
+   TransformerTestUtilsV2.createDiagnosis(
+       // Order doesn't matter
+       diag4.getSequence(),
+       new Coding("http://hl7.org/fhir/sid/icd-10", "H77777", null),
+       new Coding(
+           "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+           "secondary",
+           "secondary"),
+       null,
+       null);
+
+Assert.assertTrue(cmp4.equalsDeep(diag4));
+
+DiagnosisComponent diag5 =
+   TransformerTestUtilsV2.findDiagnosisByCode("H12345", eob.getDiagnosis());
+
+DiagnosisComponent cmp5 =
+   TransformerTestUtilsV2.createDiagnosis(
+       // Order doesn't matter
+       diag5.getSequence(),
+       new Coding("http://hl7.org/fhir/sid/icd-10", "H12345", null),
+       new Coding(null, null, null), null, null);
+
+Assert.assertTrue(cmp5.equalsDeep(diag5));
   }
 
 
