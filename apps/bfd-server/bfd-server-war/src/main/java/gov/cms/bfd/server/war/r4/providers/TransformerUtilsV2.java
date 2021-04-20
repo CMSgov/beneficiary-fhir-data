@@ -3490,12 +3490,6 @@ public final class TransformerUtilsV2 {
             C4BBAdjudication.NONCOVERED,
             nonCoveredChargeAmount));
 
-    // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
-    Extension drugQuantityExtension =
-    createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
-    Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
-    item.setQuantity(drugQuantity);
-
     // REV_CNTR_NDC_QTY_QLFR_CD => ExplanationOfBenefit.item.modifier
     if (nationalDrugCodeQualifierCode.isPresent()) {
       item.getModifier()
@@ -3506,7 +3500,11 @@ public final class TransformerUtilsV2 {
                   nationalDrugCodeQualifierCode));
     }
 
-    // TODO: REV_CNTR_NDC_QTY needs to be mapped once mapping is updated
+    // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
+    Extension drugQuantityExtension =
+    createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
+    Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
+    item.setQuantity(drugQuantity);
 
     return item;
   }
