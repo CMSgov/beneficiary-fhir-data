@@ -110,7 +110,12 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
   @Override
   public void close() throws Exception {
     if (channel != null) {
-      channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+      if (!channel.isShutdown()) {
+        channel.shutdown();
+      }
+      if (!channel.isTerminated()) {
+        channel.awaitTermination(5, TimeUnit.SECONDS);
+      }
       channel = null;
     }
   }

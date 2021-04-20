@@ -209,10 +209,10 @@ public class GrpcRDASourceTest {
 
   @Test
   public void testClose() throws Exception {
-    doReturn(channel).when(channel).shutdownNow();
+    doReturn(channel).when(channel).shutdown();
     source.close();
     source.close(); // second call does nothing
-    verify(channel, times(1)).shutdownNow();
+    verify(channel, times(1)).shutdown();
     verify(channel, times(1)).awaitTermination(5, TimeUnit.SECONDS);
   }
 
