@@ -282,15 +282,13 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               Optional.of(includeTaxNumbers)));
     }
 
-    /*
-    TODO: When DME and HHA are implemented
     if (claimTypes.contains(ClaimTypeV2.DME)) {
       eobs.addAll(
           transformToEobs(
               ClaimTypeV2.DME,
-              findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate) Optional.of(includeTaxNumbers)));
+              findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
     }
-    */
 
     if (claimTypes.contains(ClaimTypeV2.HHA)) {
       eobs.addAll(

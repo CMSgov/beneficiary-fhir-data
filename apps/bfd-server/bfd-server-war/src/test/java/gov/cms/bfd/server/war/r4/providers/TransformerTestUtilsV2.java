@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
+import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
@@ -338,6 +339,20 @@ public final class TransformerTestUtilsV2 {
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
         TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
+  }
+
+  /**
+   * @param expectedProviderTaxNumber the {@link Identifier#getValue()} of the provider to find a
+   *     matching {@link CareTeamComponent} for
+   * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
+   * @return the {@link CareTeamComponent} whose {@link CareTeamComponent#getProvider()} is an
+   *     {@link Identifier} with the specified provider tax number, or else <code>null</code> if no
+   *     such {@link CareTeamComponent} was found
+   */
+  static CareTeamComponent findCareTeamEntryForProviderTaxNumber(
+      String expectedProviderTaxNumber, List<CareTeamComponent> careTeam) {
+    return findCareTeamEntryForProviderIdentifier(
+        IdentifierType.TAX.getSystem(), expectedProviderTaxNumber, null, careTeam);
   }
 
   /**
