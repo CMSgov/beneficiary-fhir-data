@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
@@ -431,6 +432,15 @@ public enum StaticRifResource {
       Optional.empty()),
 
   /**
+   * The {@link Beneficiary History} records produced by {@link #generateSyntheaData()}, the amount
+   * of which will vary across Synthea versions.
+   */
+  SYNTHEA_BENE_HISTORY(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_history.csv")),
+      RifFileType.BENEFICIARY_HISTORY,
+      Optional.empty()),
+
+  /**
    * The NPIs produced by {@link #generateSyntheaData()}, the amount of which will vary across
    * Synthea runs.
    */
@@ -499,7 +509,7 @@ public enum StaticRifResource {
       Set<String> uniqueIds = new HashSet<String>();
       csvParser.forEach(
           csvRecord -> {
-            String id = csvRecord.get(idColumn);
+            String id = idColumn == null ? UUID.randomUUID().toString() : csvRecord.get(idColumn);
             uniqueIds.add(id);
           });
 
