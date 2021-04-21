@@ -98,8 +98,7 @@ public final class DatabaseTestHelper {
     }
 
     // Clean the DB so that it's fresh and ready for a new test case.
-    Flyway flyway = new Flyway();
-    flyway.setDataSource(dataSource);
+    Flyway flyway = Flyway.configure().dataSource(dataSource).connectRetries(5).load();
     flyway.clean();
     return dataSource;
   }
