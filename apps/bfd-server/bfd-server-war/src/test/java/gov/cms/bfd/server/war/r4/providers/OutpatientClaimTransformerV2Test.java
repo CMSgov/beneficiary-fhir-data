@@ -585,7 +585,7 @@ public final class OutpatientClaimTransformerV2Test {
   public void shouldHaveLineItemQuantity() {
     Quantity quantity = eob.getItemFirstRep().getQuantity();
 
-    Quantity compare = new Quantity(111);
+    Quantity compare = new Quantity(77);
 
     Assert.assertTrue(compare.equalsDeep(quantity));
   }
