@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -15,11 +16,21 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Money;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -100,10 +111,246 @@ public class CarrierClaimTransformerV2Test {
         (new SimpleDateFormat("yyy-MM-dd")).parse("1999-10-27"), eob.getBillablePeriod().getEnd());
   }
 
+  @Test
+  public void shouldHaveIdentifiers() {
+    Assert.assertEquals(2, eob.getIdentifier().size());
+
+    Identifier clmGrp1 =
+    TransformerTestUtilsV2.findIdentifierBySystem(
+        "https://bluebutton.cms.gov/resources/variables/clm_id", eob.getIdentifier());
+
+Identifier compare1 =
+    TransformerTestUtilsV2.createIdentifier(
+        "https://bluebutton.cms.gov/resources/variables/clm_id",
+        "9991831999",
+        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+        "uc",
+        "Unique Claim ID");
+
+Assert.assertTrue(compare1.equalsDeep(clmGrp1));
+
+Identifier clmGrp2 =
+TransformerTestUtilsV2.findIdentifierBySystem(
+    "https://bluebutton.cms.gov/resources/identifier/claim-group", eob.getIdentifier());
+
+Identifier compare2 =
+TransformerTestUtilsV2.createIdentifier(
+    "https://bluebutton.cms.gov/resources/identifier/claim-group",
+    "900",
+    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+    "uc",
+    "Unique Claim ID");
+
+Assert.assertTrue(compare2.equalsDeep(clmGrp2));
+  }
+
+  @Test
+  public void shouldHaveEstensions() {
+    Assert.assertEquals(7, eob.getExtension().size());
+  }
+
+  @Test
+  public void shouldHaveExtensionsWithNearLineCode(){
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
+            eob.getExtension());
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
+            new Coding("https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd", 
+            "O", "Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)"));
+
+    Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+  @Test
+  public void shouldHaveExtensionsWithCarrierNumber(){
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/carr_num",
+            eob.getExtension());
+
+    Identifier identifier = new Identifier()
+                            .setSystem("https://bluebutton.cms.gov/resources/variables/carr_num")
+                            .setValue("61026");
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_num",
+            identifier);
+
+    Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+  @Test
+  public void shouldHaveExtensionsWithCarrierClaimControlNumber(){
+   
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+            eob.getExtension());
+
+    Identifier identifier = new Identifier()
+                            .setSystem("https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num")
+                            .setValue("74655592568216");
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num",
+            identifier);
+
+    Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+  @Test
+  public void shouldHaveExtensionsWithCarrierClaimPaymentDownloadCode(){
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
+            eob.getExtension());
+
+    Coding coding = new Coding()
+                     .setSystem("https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd")
+                     .setDisplay("Physician/supplier")
+                     .setCode("1");
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
+            coding);
+
+    Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+  @Test
+  public void shouldHaveExtensionsWithCarrierAssignedClaim(){
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/asgmntcd",
+            eob.getExtension());
+
+    Coding coding = new Coding()
+                     .setSystem("https://bluebutton.cms.gov/resources/variables/asgmntcd")
+                     .setDisplay("Assigned claim")
+                     .setCode("A");
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/asgmntcd",
+            coding);
+
+    Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+  @Test
+  public void shouldHaveExtensionsWithClaimClinicalTrailNumber(){
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/clm_clncl_tril_num",
+            eob.getExtension());
+
+    Identifier identifier = new Identifier()
+                            .setSystem("https://bluebutton.cms.gov/resources/variables/clm_clncl_tril_num")
+                            .setValue("0");
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/clm_clncl_tril_num",
+            identifier);
+
+    Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+
+  @Test
+  public void shouldHaveExtensionsWithClaimEntryCodeNumber(){
+
+    Extension ex =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd",
+            eob.getExtension());
+
+            Coding coding = new Coding()
+            .setSystem("https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd")
+            .setDisplay("Original debit; void of original debit (If CLM_DISP_CD = 3, code 1 means voided original debit)")
+            .setCode("1");
+
+    Extension compare =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd",
+            coding);
+
+    Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+
+
+
   /** SupportingInfo items */
   @Test
   public void shouldHaveSupportingInfoList() {
     Assert.assertEquals(2, eob.getSupportingInfo().size());
+  }
+
+  @Test
+  public void shouldHaveSupportingInfoListForClaimReceivedDate(){
+
+    SupportingInformationComponent sic =
+        TransformerTestUtilsV2.findSupportingInfoByCode(
+            "clmrecvddate",
+            eob.getSupportingInfo());
+
+    SupportingInformationComponent compare =
+        TransformerTestUtilsV2.createSupportingInfo(
+            // We don't care what the sequence number is here
+            sic.getSequence(),
+            // Category
+            Arrays.asList(
+                new Coding(
+                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+                    "clmrecvddate",
+                    "Claim Received Date"),
+                new Coding(
+                    "https://bluebutton.cms.gov/resources/codesystem/information",
+                    "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+                    "NCH Weekly Claim Processing Date")));
+              
+              compare.setTiming(new DateType("1999-11-06"));
+
+    Assert.assertTrue(compare.equalsDeep(sic));
+  }
+
+  @Test
+  public void shouldHaveSupportingInfoListForClaimReceivedDate2(){
+  
+    SupportingInformationComponent sic =
+        TransformerTestUtilsV2.findSupportingInfoByCode(
+            "info",
+            eob.getSupportingInfo());
+
+    SupportingInformationComponent compare =
+        TransformerTestUtilsV2.createSupportingInfo(
+            // We don't care what the sequence number is here
+            sic.getSequence(),
+            // Category
+            Arrays.asList(
+                new Coding(
+                    "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+                    "info",
+                    "Information"),
+                new Coding(
+                    "https://bluebutton.cms.gov/resources/codesystem/information",
+                    "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
+                    "Hematocrit / Hemoglobin Test Results")));
+              
+              compare.setValue(new Reference("#line-observation-6"));
+
+    Assert.assertTrue(compare.equalsDeep(sic));
   }
 
   @Test
@@ -144,15 +391,24 @@ public class CarrierClaimTransformerV2Test {
     Assert.assertNotNull(eob.getMeta().getLastUpdated());
   }
 
-  /**
-   * CareTeam list
-   *
-   * <p>Based on how the code currently works, we can assume that the same CareTeam members always
-   * are added in the same order. This means we can look them up by sequence number.
-   */
   @Test
-  public void shouldHaveCareTeamList() {
-    Assert.assertEquals(4, eob.getCareTeam().size());
+  public void shouldHaveLineItemProductOrServiceCoding() {
+    CodeableConcept pos = eob.getItemFirstRep().getProductOrService();
+
+    CodeableConcept compare =
+        new CodeableConcept()
+            .setCoding(
+                Arrays.asList(
+                    new Coding(
+                        "https://bluebutton.cms.gov/resources/codesystem/hcpcs", "92999", null)));
+
+    compare.setExtension(
+        Arrays.asList(
+            new Extension(
+                "http://hl7.org/fhir/sid/ndc",
+                new Coding("http://hl7.org/fhir/sid/ndc", "49035044700", null))));
+
+    Assert.assertTrue(compare.equalsDeep(pos));
   }
 
   @Test
@@ -297,6 +553,498 @@ public class CarrierClaimTransformerV2Test {
 
     Assert.assertTrue(compare.equalsDeep(eob.getType()));
   }
+
+  /**
+   * CareTeam list
+   *
+   * <p>Based on how the code currently works, we can assume that the same CareTeam members always
+   * are added in the same order. This means we can look them up by sequence number.
+   */
+  @Test
+  public void shouldHaveCareTeamList() {
+    Assert.assertEquals(4, eob.getCareTeam().size());
+  }
+
+  @Test
+  public void shouldHaveCareTeamMembers() {
+    // First member
+    CareTeamComponent member1 = TransformerTestUtilsV2.findCareTeamBySequence(1, eob.getCareTeam());
+    CareTeamComponent compare1 =
+        TransformerTestUtilsV2.createNpiCareTeamMember(
+            1,
+            "8765676",
+            "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+            "referring",
+            "Referring");
+
+    Assert.assertTrue(compare1.equalsDeep(member1));
+
+    // Second member
+    CareTeamComponent member2 = TransformerTestUtilsV2.findCareTeamBySequence(2, eob.getCareTeam());
+    CareTeamComponent compare2 =
+        TransformerTestUtilsV2.createNpiCareTeamMember(
+            2,
+            "K25852",
+            "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+            "referring",
+            "Referring");
+
+    Assert.assertTrue(compare2.equalsDeep(member2));
+
+    //     // Third member
+    CareTeamComponent member3 = TransformerTestUtilsV2.findCareTeamBySequence(3, eob.getCareTeam());
+        CareTeamComponent compare3 =
+            TransformerTestUtilsV2.createNpiCareTeamMember(
+                3,
+                "1923124",
+                "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+                "performing",
+                "Performing provider");
+
+        compare3.setResponsible(true);
+        compare3.setQualification(new CodeableConcept().setCoding(Arrays.asList(new Coding().setSystem("https://bluebutton.cms.gov/resources/variables/prvdr_spclty").setDisplay("Optometrist").setCode("41"))));
+        compare3.addExtension("https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd", 
+           new Coding().setSystem("https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd").setCode("0"));
+
+ 
+           compare3.addExtension("https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd", 
+           new Coding().setSystem("https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd").setCode("1").setDisplay("Participating"));
+    
+           Assert.assertTrue(compare3.equalsDeep(member3));
+
+    // Fourth member
+    CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(4, eob.getCareTeam());
+    CareTeamComponent compare4 =
+        TransformerTestUtilsV2.createNpiCareTeamMember(
+            4,
+            "1497758544",
+            "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+            "primary",
+            "Primary provider");
+    compare4.getProvider().setDisplay("CUMBERLAND COUNTY HOSPITAL SYSTEM, INC");
+
+    Assert.assertTrue(compare4.equalsDeep(member4));
+  }
+
+  @Test
+  public void shouldHaveLineItemQuantity() {
+    Quantity quantity = eob.getItemFirstRep().getQuantity();
+
+    Quantity compare = new Quantity(1);
+
+    Assert.assertTrue(compare.equalsDeep(quantity));
+  }
+
+  @Test
+  public void shouldHaveLineItemAdjudications() {
+    Assert.assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
+  }
+
+  @Test
+  public void shouldHaveLineItemDenailReasonAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "denialreason",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator",
+                                    "denialreason",
+                                    "Denial Reason"))))
+                .setReason(new CodeableConcept()
+                .setCoding(
+                    Arrays.asList(
+                        new Coding(
+                            "https://bluebutton.cms.gov/resources/variables/carr_line_rdcd_pmt_phys_astn_c",
+                            "0",
+                            "N/A"))));
+               
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+
+  @Test
+  public void shouldHaveLineItemPaidToPatientAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "paidtopatient",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+                                    "paidtopatient",
+                                    "Paid to patient"),
+                                    new Coding(
+                                      "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                      "https://bluebutton.cms.gov/resources/variables/line_bene_pmt_amt",
+                                      "Line Payment Amount to Beneficiary"))))
+                .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
+               
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveLineItemBenefitAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "benefit",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://terminology.hl7.org/CodeSystem/adjudication",
+                                    "benefit",
+                                    "Benefit Amount"),
+                                    new Coding(
+                                      "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                      "https://bluebutton.cms.gov/resources/variables/line_nch_pmt_amt",
+                                      "Line NCH Medicare Payment Amount"))))
+                .setAmount(new Money().setValue(37.5).setCurrency(TransformerConstants.CODED_MONEY_USD));
+                compare.setExtension(Arrays.asList(new Extension("https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd").setValue(new Coding("https://bluebutton.cms.gov/resources/variables/line_pmt_80_100_cd", "0", "80%"))));
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveLineItemPaidToProviderAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "paidtoprovider",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+                                    "paidtoprovider",
+                                    "Paid to provider"),
+                                    new Coding(
+                                      "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                      "https://bluebutton.cms.gov/resources/variables/line_prvdr_pmt_amt",
+                                      "Line Provider Payment Amount"))))
+                .setAmount(new Money().setValue(37.5).setCurrency(TransformerConstants.CODED_MONEY_USD));
+               
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+
+  @Test
+  public void shouldHaveLineItemDeductibleAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "deductible",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://terminology.hl7.org/CodeSystem/adjudication",
+                                    "deductible",
+                                    "Deductible"),
+                                    new Coding(
+                                      "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                      "https://bluebutton.cms.gov/resources/variables/line_bene_ptb_ddctbl_amt",
+                                      "Line Beneficiary Part B Deductible Amount"))))
+                .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
+               
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+
+
+  @Test
+  public void shouldHaveLineItemPriorPayerPaidAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "priorpayerpaid",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+                                    "priorpayerpaid",
+                                    "Prior payer paid"),
+                                    new Coding(
+                                      "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                      "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_pd_amt",
+                                      "Line Primary Payer (if not Medicare) Paid Amount"))))
+                .setAmount(new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
+               
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveLineItemCoInsuranceAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "coinsurance",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+                                    "coinsurance",
+                                    "Co-insurance"),
+                                    new Coding(
+                                      "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                      "https://bluebutton.cms.gov/resources/variables/line_coinsrnc_amt",
+                                      "Line Beneficiary Coinsurance Amount"))))
+                .setAmount(new Money().setValue(9.57).setCurrency(TransformerConstants.CODED_MONEY_USD));
+               
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+
+  @Test
+  public void shouldHaveLineItemSubmittedAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "submitted",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://terminology.hl7.org/CodeSystem/adjudication",
+                                    "submitted",
+                                    "Submitted Amount"),
+                                    new Coding(
+                                      "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                      "https://bluebutton.cms.gov/resources/variables/line_sbmtd_chrg_amt",
+                                      "Line Submitted Charge Amount"))))
+                .setAmount(new Money().setValue(75).setCurrency(TransformerConstants.CODED_MONEY_USD));
+               
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveLineItemEligibleAdjudication() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "eligible",
+            eob.getItemFirstRep().getAdjudication());
+
+            AdjudicationComponent compare =
+            new AdjudicationComponent()
+                .setCategory(
+                    new CodeableConcept()
+                        .setCoding(
+                            Arrays.asList(
+                                new Coding(
+                                    "http://terminology.hl7.org/CodeSystem/adjudication",
+                                    "eligible",
+                                    "Eligible Amount"),
+                                    new Coding(
+                                      "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                      "https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt",
+                                      "Line Allowed Charge Amount"))))
+                .setAmount(new Money().setValue(75).setCurrency(TransformerConstants.CODED_MONEY_USD));
+               
+        Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveBenefitBalanceFinancial() {
+    Assert.assertEquals(5, eob.getBenefitBalanceFirstRep().getFinancial().size());
+  }
+
+  @Test
+  public void shouldHaveClmPassThruCashDeductibleFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/carr_clm_cash_ddctbl_apld_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/carr_clm_cash_ddctbl_apld_amt",
+                                "Carrier Claim Cash Deductible Applied Amount (sum of all line-level deductible amounts)"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("777.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+
+  @Test
+  public void shouldHaveClmPassThruClaimProviderPaymentAmountFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_clm_prvdr_pmt_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_clm_prvdr_pmt_amt",
+                                "NCH Claim Provider Payment Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("123.45"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmPassThruClaimProviderPaymentAmountToBeneficiaryFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_clm_bene_pmt_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_clm_bene_pmt_amt",
+                                "NCH Claim Payment Amount to Beneficiary"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("888.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmPassThruClaimSubmittedChargeFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_carr_clm_sbmtd_chrg_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_carr_clm_sbmtd_chrg_amt",
+                                "NCH Carrier Claim Submitted Charge Amount (sum of all line-level submitted charges)"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("245.04"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+
+  @Test
+  public void shouldHaveClmPassThruClaimAllowedChargeFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_carr_clm_alowd_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_carr_clm_alowd_amt",
+                                "NCH Carrier Claim Allowed Charge Amount (sum of all line-level allowed charges)"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("166.23"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmTotChrgAmtTotal() {
+    // Only one so just pull it directly and compare
+    TotalComponent total = eob.getTotalFirstRep();
+
+    TotalComponent compare =
+        new TotalComponent()
+            .setCategory(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+                                "priorpayerpaid",
+                                "Prior payer paid"),
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                "https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt",
+                                "Claim Total Charge Amount"))))
+            .setAmount(
+                new Money().setValue(0).setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(total));
+  }
+
+
+  /** Procedures */
+  @Test
+  public void shouldHaveProcedureList() {
+    Assert.assertEquals(0, eob.getProcedure().size());
+  }
+
 
   /**
    * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
