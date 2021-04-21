@@ -9,7 +9,29 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-/** Models the status of a {@link PipelineJob} that has been submitted for execution. */
+/**
+ * Models the status of a {@link PipelineJob} that has been submitted for execution. This is
+ * basically a state machine data store, that models the various states and transitions that a job
+ * can proceed through. Jobs can be in the following states:
+ *
+ * <ul>
+ *   <li>Created: This is the initial state for every job.
+ *   <li>Cancelled: Jobs can be cancelled before or during execution.
+ *   <li>Enqueued: Once a job has been submitted for execution.
+ *   <li>Started: Once a job has started running.
+ *   <li>Succeeded: A job that has successfully finished running, without exceptions.
+ *   <li>Failed: A job that started running but then threw an exception, rather than completing
+ *       successfully.
+ * </ul>
+ *
+ * <p>Design Note: I considered coding this <em>as</em> an actual state machine, but all of the
+ * libraries and patterns available for doing so in Java looked like they'd add more complexity than
+ * they removed. Also: if we ever decided to scale job execution across multiple nodes, this
+ * data/class would need to become a JPA entity, and none of the state machine patterns seemed
+ * suited to that. For example, <a href="https://spring.io/projects/spring-statemachine">Spring
+ * Statemachine</a> will persist all of the state machine's data as a combined serialized blob,
+ * which is not what we need.
+ */
 public final class PipelineJobRecord<A extends PipelineJobArguments> {
   private final PipelineJobRecordId id;
   private final PipelineJobType<A> jobType;
@@ -21,11 +43,6 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   private Optional<Instant> cancelTime;
   private Optional<PipelineJobOutcome> outcome;
   private Optional<PipelineJobFailure> failure;
-
-  /*
-   * TODO This class is a state machine and would be best modeled as such. Is there any reasonably
-   * simple way to do that in Java?
-   */
 
   /**
    * Constructs a new {@link PipelineJobRecord} instance.
