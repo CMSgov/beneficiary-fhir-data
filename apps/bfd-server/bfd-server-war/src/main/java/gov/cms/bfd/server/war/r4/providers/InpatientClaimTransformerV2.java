@@ -58,9 +58,6 @@ public class InpatientClaimTransformerV2 {
     // Required values not directly mapped
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 
-    // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
-    // eob.setOutcome(?)
-
     // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
@@ -320,8 +317,7 @@ public class InpatientClaimTransformerV2 {
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.quantity
-      // REV_CNTR_NDC_QTY           => TODO: ??
+      // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
       // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
@@ -330,7 +326,6 @@ public class InpatientClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
-          line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 
