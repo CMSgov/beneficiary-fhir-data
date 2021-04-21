@@ -5,6 +5,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobRecordId;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -16,12 +17,12 @@ import java.util.Optional;
  *
  * <ul>
  *   <li>Created: This is the initial state for every job.
- *   <li>Cancelled: Jobs can be cancelled before or during execution.
+ *   <li>Canceled: Jobs can be cancelled before or during execution.
  *   <li>Enqueued: Once a job has been submitted for execution.
  *   <li>Started: Once a job has started running.
- *   <li>Succeeded: A job that has successfully finished running, without exceptions.
- *   <li>Failed: A job that started running but then threw an exception, rather than completing
- *       successfully.
+ *   <li>Completed (Succeeded): A job that has successfully finished running, without exceptions.
+ *   <li>Completed (Failed): A job that started running but then threw an exception, rather than
+ *       completing successfully.
  * </ul>
  *
  * <p>Design Note: I considered coding this <em>as</em> an actual state machine, but all of the
@@ -36,11 +37,11 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   private final PipelineJobRecordId id;
   private final PipelineJobType<A> jobType;
   private final A jobArguments;
-  private final Instant creationTime;
-  private Optional<Instant> enqueueTime;
-  private Optional<Instant> startTime;
-  private Optional<Instant> stopTime;
-  private Optional<Instant> cancelTime;
+  private final Instant createdTime;
+  private Optional<Instant> canceledTime;
+  private Optional<Instant> enqueuedTime;
+  private Optional<Instant> startedTime;
+  private Optional<Instant> completedTime;
   private Optional<PipelineJobOutcome> outcome;
   private Optional<PipelineJobFailure> failure;
 
@@ -52,14 +53,14 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
    */
   public PipelineJobRecord(PipelineJobType<A> jobType, A jobArguments) {
     this.id = new PipelineJobRecordId();
-    this.creationTime = Instant.now();
     this.jobType = jobType;
     this.jobArguments = jobArguments;
+    this.createdTime = Instant.now();
 
-    this.enqueueTime = Optional.empty();
-    this.startTime = Optional.empty();
-    this.stopTime = Optional.empty();
-    this.cancelTime = Optional.empty();
+    this.canceledTime = Optional.empty();
+    this.enqueuedTime = Optional.empty();
+    this.startedTime = Optional.empty();
+    this.completedTime = Optional.empty();
     this.outcome = Optional.empty();
     this.failure = Optional.empty();
   }
@@ -85,43 +86,67 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   }
 
   /** @return the {@link Instant} that this {@link PipelineJobRecord} was created at */
-  public Instant getCreationTime() {
-    return creationTime;
+  public Instant getCreatedTime() {
+    return createdTime;
+  }
+
+  /** @return the {@link Instant} that this job was canceled at, if any */
+  public Optional<Instant> getCanceledTime() {
+    return canceledTime;
+  }
+
+  /** @return <code>true</code> if the job has been canceled, <code>false</code> if it has not */
+  public boolean isCanceled() {
+    return canceledTime.isPresent();
+  }
+
+  /** @param canceledTime the value to set {@link #getCanceledTime()} to */
+  public void setCanceledTime(Instant canceledTime) {
+    if (this.canceledTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.completedTime.isPresent()) throw new BadCodeMonkeyException();
+
+    this.canceledTime = Optional.of(canceledTime);
   }
 
   /** @return the {@link Instant} that this job was enqueued to an executor for execution, if any */
-  public Optional<Instant> getEnqueueTime() {
-    return enqueueTime;
+  public Optional<Instant> getEnqueuedTime() {
+    return enqueuedTime;
   }
 
-  /** @param enqueueTime the value to set {@link #getEnqueueTime()} to */
-  public void setEnqueueTime(Instant enqueueTime) {
-    this.enqueueTime = Optional.of(enqueueTime);
+  /** @param enqueuedTime the value to set {@link #getEnqueuedTime()} to */
+  public void setEnqueuedTime(Instant enqueuedTime) {
+    // Validate the state transition.
+    if (this.enqueuedTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.canceledTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.startedTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.completedTime.isPresent()) throw new BadCodeMonkeyException();
+
+    this.enqueuedTime = Optional.of(enqueuedTime);
   }
 
   /** @return the {@link Instant} that this job started running at, if any */
-  public Optional<Instant> getStartTime() {
-    return startTime;
+  public Optional<Instant> getStartedTime() {
+    return startedTime;
   }
 
   /** @return <code>true</code> if this job has started running, <code>false</code> if it has not */
   public boolean isStarted() {
-    return startTime.isPresent();
+    return startedTime.isPresent();
   }
 
-  /** @param startTime the value to set {@link #getStartTime()} to */
-  public void setStartTime(Instant startTime) {
-    this.startTime = Optional.of(startTime);
+  /** @param startedTime the value to set {@link #getStartedTime()} to */
+  public void setStartedTime(Instant startedTime) {
+    if (!this.enqueuedTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.canceledTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.startedTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.completedTime.isPresent()) throw new BadCodeMonkeyException();
+
+    this.startedTime = Optional.of(startedTime);
   }
 
   /** @return the {@link Instant} that this job completed at, if any */
-  public Optional<Instant> getStopTime() {
-    return stopTime;
-  }
-
-  /** @param stopTime the value to set {@link #getStopTime()} to */
-  public void setStopTime(Instant stopTime) {
-    this.stopTime = Optional.of(stopTime);
+  public Optional<Instant> getCompletedTime() {
+    return completedTime;
   }
 
   /**
@@ -129,22 +154,7 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
    *     <code>false</code> if it has not
    */
   public boolean isCompleted() {
-    return stopTime.isPresent();
-  }
-
-  /** @return the {@link Instant} that this job was canceled at, if any */
-  public Optional<Instant> getCancelTime() {
-    return cancelTime;
-  }
-
-  /** @param cancelTime the value to set {@link #getCancelTime()} to */
-  public void setCancelTime(Instant cancelTime) {
-    this.cancelTime = Optional.of(cancelTime);
-  }
-
-  /** @return <code>true</code> if the job has been canceled, <code>false</code> if it has not */
-  public boolean isCanceled() {
-    return cancelTime.isPresent();
+    return completedTime.isPresent();
   }
 
   /**
@@ -153,9 +163,9 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
    */
   public Optional<Duration> getDuration() {
     if (isCompleted()) {
-      return Optional.of(Duration.between(startTime.get(), stopTime.get()));
+      return Optional.of(Duration.between(startedTime.get(), completedTime.get()));
     } else if (isCanceled()) {
-      return Optional.of(Duration.between(startTime.get(), cancelTime.get()));
+      return Optional.of(Duration.between(startedTime.get(), canceledTime.get()));
     } else {
       return Optional.empty();
     }
@@ -171,18 +181,6 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   }
 
   /**
-   * @return <code>true</code> if {@link #getOutcome()} is present, <code>false</code> if it's not
-   */
-  public boolean isSuccessful() {
-    return outcome.isPresent();
-  }
-
-  /** @param outcome the value to set {@link #getOutcome()} to */
-  public void setOutcome(PipelineJobOutcome outcome) {
-    this.outcome = Optional.of(outcome);
-  }
-
-  /**
    * @return the {@link PipelineJobFailure} for this job if it has completed with a failure, or
    *     {@link Optional#empty()} if it is either as-yet-incomplete or if it succeeded (in which
    *     case, {@link #getOutcome()} will have a value)
@@ -191,8 +189,42 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
     return failure;
   }
 
-  /** @param failure the value to set {@link #getFailure()} to */
-  public void setFailure(PipelineJobFailure failure) {
+  /**
+   * @return <code>true</code> if {@link #getOutcome()} is present, <code>false</code> if it's not
+   */
+  public boolean isCompletedSuccessfully() {
+    return outcome.isPresent();
+  }
+
+  /**
+   * Marks the {@link PipelineJob} as having completed successfully.
+   *
+   * @param completedTime the value to use for {@link #getCompletedTime()}
+   * @param outcome the value to use for {@link #getOutcome()}
+   */
+  public void setCompleted(Instant completedTime, PipelineJobOutcome outcome) {
+    if (!this.enqueuedTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.canceledTime.isPresent()) throw new BadCodeMonkeyException();
+    if (!this.startedTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.completedTime.isPresent()) throw new BadCodeMonkeyException();
+
+    this.completedTime = Optional.of(completedTime);
+    this.outcome = Optional.of(outcome);
+  }
+
+  /**
+   * Marks the {@link PipelineJob} as having completed with an exception.
+   *
+   * @param completedTime the value to use for {@link #getCompletedTime()}
+   * @param failure the value to use for {@link #getFailure()}
+   */
+  public void setCompleted(Instant completedTime, PipelineJobFailure failure) {
+    if (!this.enqueuedTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.canceledTime.isPresent()) throw new BadCodeMonkeyException();
+    if (!this.startedTime.isPresent()) throw new BadCodeMonkeyException();
+    if (this.completedTime.isPresent()) throw new BadCodeMonkeyException();
+
+    this.completedTime = Optional.of(completedTime);
     this.failure = Optional.of(failure);
   }
 
@@ -206,16 +238,16 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
     builder.append(jobType);
     builder.append(", jobArguments=");
     builder.append(jobArguments);
-    builder.append(", creationTime=");
-    builder.append(creationTime);
-    builder.append(", enqueueTime=");
-    builder.append(enqueueTime);
-    builder.append(", startTime=");
-    builder.append(startTime);
-    builder.append(", stopTime=");
-    builder.append(stopTime);
-    builder.append(", cancelTime=");
-    builder.append(cancelTime);
+    builder.append(", createdTime=");
+    builder.append(createdTime);
+    builder.append(", canceledTime=");
+    builder.append(canceledTime);
+    builder.append(", enqueuedTime=");
+    builder.append(enqueuedTime);
+    builder.append(", startedTime=");
+    builder.append(startedTime);
+    builder.append(", completedTime=");
+    builder.append(completedTime);
     builder.append(", outcome=");
     builder.append(outcome);
     builder.append(", failure=");

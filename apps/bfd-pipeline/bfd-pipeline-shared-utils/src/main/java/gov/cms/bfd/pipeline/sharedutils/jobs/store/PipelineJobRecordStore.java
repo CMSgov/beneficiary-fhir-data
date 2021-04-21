@@ -61,7 +61,7 @@ public final class PipelineJobRecordStore {
   /**
    * @param type the {@link PipelineJobRecord#getJobType()} to match against
    * @return the {@link PipelineJobRecord} that matches the criteria with the most recent {@link
-   *     PipelineJobRecord#getCreationTime()} value
+   *     PipelineJobRecord#getCreatedTime()} value
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public <A extends PipelineJobArguments> Optional<PipelineJobRecord<A>> findMostRecent(
@@ -71,7 +71,7 @@ public final class PipelineJobRecordStore {
     Optional mostRecentRecord =
         jobRecords.values().stream()
             .filter(j -> type.equals(j.getJobType()))
-            .max(Comparator.comparing(PipelineJobRecord::getCreationTime));
+            .max(Comparator.comparing(PipelineJobRecord::getCreatedTime));
     return mostRecentRecord;
   }
 
@@ -98,7 +98,7 @@ public final class PipelineJobRecordStore {
   }
 
   /**
-   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getEnqueueTime()} value for the
+   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getEnqueuedTime()} value for the
    * {@link PipelineJobRecord} with the specified {@link PipelineJobRecordId}.
    *
    * @param jobRecordId the {@link PipelineJobRecord#getId()} value of the {@link PipelineJobRecord}
@@ -108,12 +108,12 @@ public final class PipelineJobRecordStore {
     PipelineJobRecord<?> jobRecord = jobRecords.get(jobRecordId);
     if (jobRecord == null) throw new IllegalStateException();
 
-    jobRecord.setEnqueueTime(Instant.now());
+    jobRecord.setEnqueuedTime(Instant.now());
     LOGGER.trace("recordJobEnqueue(...) called: jobRecord='{}'", jobRecord);
   }
 
   /**
-   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getStartTime()} value for the
+   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getStartedTime()} value for the
    * {@link PipelineJobRecord} with the specified {@link PipelineJobRecordId}.
    *
    * @param jobRecordId the {@link PipelineJobRecord#getId()} value of the {@link PipelineJobRecord}
@@ -123,12 +123,12 @@ public final class PipelineJobRecordStore {
     PipelineJobRecord<?> jobRecord = jobRecords.get(jobRecordId);
     if (jobRecord == null) throw new IllegalStateException();
 
-    jobRecord.setStartTime(Instant.now());
+    jobRecord.setStartedTime(Instant.now());
     LOGGER.trace("recordJobStart(...) called: jobRecord='{}'", jobRecord);
   }
 
   /**
-   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getCancelTime()} value for the
+   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getCanceledTime()} value for the
    * {@link PipelineJobRecord} with the specified {@link PipelineJobRecordId}.
    *
    * @param jobRecordId the {@link PipelineJobRecord#getId()} value of the {@link PipelineJobRecord}
@@ -138,12 +138,12 @@ public final class PipelineJobRecordStore {
     PipelineJobRecord<?> jobRecord = jobRecords.get(jobRecordId);
     if (jobRecord == null) throw new IllegalStateException();
 
-    jobRecord.setCancelTime(Instant.now());
+    jobRecord.setCanceledTime(Instant.now());
     LOGGER.trace("recordJobCancellation(...) called: jobRecord='{}'", jobRecord);
   }
 
   /**
-   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getStopTime()} value for the
+   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getCompletedTime()} value for the
    * {@link PipelineJobRecord} with the specified {@link PipelineJobRecordId}, along with the other
    * data provided.
    *
@@ -155,13 +155,12 @@ public final class PipelineJobRecordStore {
     PipelineJobRecord<?> jobRecord = jobRecords.get(jobRecordId);
     if (jobRecord == null) throw new IllegalStateException();
 
-    jobRecord.setStopTime(Instant.now());
-    jobRecord.setOutcome(jobOutcome);
+    jobRecord.setCompleted(Instant.now(), jobOutcome);
     LOGGER.trace("recordJobCompletion(...) called: jobRecord='{}'", jobRecord);
   }
 
   /**
-   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getStopTime()} value for the
+   * Records {@link Instant#now()} as the {@link PipelineJobRecord#getCompletedTime()} value for the
    * {@link PipelineJobRecord} with the specified {@link PipelineJobRecordId}, along with the other
    * data provided.
    *
@@ -173,8 +172,7 @@ public final class PipelineJobRecordStore {
     PipelineJobRecord<?> jobRecord = jobRecords.get(jobRecordId);
     if (jobRecord == null) throw new IllegalStateException();
 
-    jobRecord.setStopTime(Instant.now());
-    jobRecord.setFailure(jobFailure);
+    jobRecord.setCompleted(Instant.now(), jobFailure);
     LOGGER.trace("recordJobFailure(...) called: jobRecord='{}'", jobRecord);
   }
 

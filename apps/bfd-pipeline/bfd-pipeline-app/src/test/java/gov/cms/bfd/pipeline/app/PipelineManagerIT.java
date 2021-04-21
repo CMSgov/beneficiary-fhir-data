@@ -209,7 +209,7 @@ public final class PipelineManagerIT {
     pipelineManager.stop();
     PipelineJobRecord<NullPipelineJobArguments> mockJobRecord =
         jobRecordStore.findMostRecent(MockJob.JOB_TYPE).get();
-    Assert.assertTrue(mockJobRecord.getCancelTime().isPresent());
+    Assert.assertTrue(mockJobRecord.getCanceledTime().isPresent());
     Assert.assertTrue(mockJobRecord.getDuration().get().toMillis() < 500);
   }
 

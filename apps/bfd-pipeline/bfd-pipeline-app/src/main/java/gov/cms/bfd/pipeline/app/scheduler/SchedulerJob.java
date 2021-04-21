@@ -86,13 +86,13 @@ public final class SchedulerJob implements PipelineJob<NullPipelineJobArguments>
             // If the job's still pending or running, don't double-trigger it.
             shouldTriggerJob = false;
           } else {
-            if (mostRecentExecution.get().isSuccessful()) {
+            if (mostRecentExecution.get().isCompletedSuccessfully()) {
               // If the job's not running, check to see if it's time to trigger it again.
               // Note: This calculation is based on completion time, not submission or start time.
               Instant nextExecution =
                   mostRecentExecution
                       .get()
-                      .getStartTime()
+                      .getStartedTime()
                       .get()
                       .plus(jobSchedule.getRepeatDelay(), jobSchedule.getRepeatDelayUnit());
               shouldTriggerJob = now.equals(nextExecution) || now.isAfter(nextExecution);
