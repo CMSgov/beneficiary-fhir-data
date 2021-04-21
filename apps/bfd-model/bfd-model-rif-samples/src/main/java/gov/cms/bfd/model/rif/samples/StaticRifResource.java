@@ -422,6 +422,15 @@ public enum StaticRifResource {
       Optional.empty()),
 
   /**
+   * The {@link DME} records produced by {@link #generateSyntheaData()}, the amount of which will
+   * vary across Synthea versions.
+   */
+  SYNTHEA_DME(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/dme.csv")),
+      RifFileType.DME,
+      Optional.empty()),
+
+  /**
    * The NPIs produced by {@link #generateSyntheaData()}, the amount of which will vary across
    * Synthea runs.
    */

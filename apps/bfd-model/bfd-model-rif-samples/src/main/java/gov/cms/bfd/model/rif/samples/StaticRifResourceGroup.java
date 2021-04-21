@@ -103,7 +103,8 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SYNTHEA_INPATIENT,
       StaticRifResource.SYNTHEA_OUTPATIENT,
       StaticRifResource.SYNTHEA_PDE,
-      StaticRifResource.SYNTHEA_CARRIER);
+      StaticRifResource.SYNTHEA_CARRIER,
+      StaticRifResource.SYNTHEA_DME);
 
   private final StaticRifResource[] resources;
 
