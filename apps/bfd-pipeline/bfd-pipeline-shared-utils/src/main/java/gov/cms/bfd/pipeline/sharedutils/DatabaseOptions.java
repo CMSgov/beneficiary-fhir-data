@@ -1,9 +1,12 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
+import java.io.Serializable;
 import javax.sql.DataSource;
 
 /** The user-configurable options that specify how to access the application's database. */
-public final class DatabaseOptions {
+public final class DatabaseOptions implements Serializable {
+  private static final long serialVersionUID = 1L;
+
   private final String databaseUrl;
   private final String databaseUsername;
   private final char[] databasePassword;
