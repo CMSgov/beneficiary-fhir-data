@@ -48,7 +48,7 @@ public final class RifLoaderIT {
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
   @Test
   public void loadSampleA() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
   }
 
@@ -166,7 +166,7 @@ public final class RifLoaderIT {
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
   @Test
   public void loadSampleU() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
@@ -256,7 +256,7 @@ public final class RifLoaderIT {
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
   @Test
   public void loadSampleUUnchanged() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // this should insert a new beneficiary history record
     /*
@@ -318,7 +318,7 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount12() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     // Loads sample A Data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
@@ -345,7 +345,7 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount24() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     // Loads first year of data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
@@ -372,7 +372,7 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount20SinceThereIsAUpdateOf8Months() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     // Loads first year of data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
@@ -403,7 +403,7 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount21SinceThereIsAUpdateOf8MonthsAndAUpdateOf9Months() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     // Load first year of data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Load 8 months of data in year two
@@ -511,14 +511,14 @@ public final class RifLoaderIT {
         "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
         Runtime.getRuntime().maxMemory()),
     Runtime.getRuntime().maxMemory() >= 4500000000L); */
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_MCT} data. */
   @Test
   public void loadSampleMctData() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT.getResources()));
     loadSample(
         dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1.getResources()));
