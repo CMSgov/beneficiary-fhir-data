@@ -83,15 +83,15 @@ public final class PipelineManager {
    * this field <strong>SHALL</strong> conform to the following rules:
    *
    * <ul>
-   *   <li>The values SHALL only be incremented on the {@link SchedulerJob}'s thread.
-   *   <li>The values SHALL only be read on the {@link SchedulerJob}'s thread (aside from reads for
+   *   <li>The values SHALL only be incremented on the {@link VolunteerJob}'s thread.
+   *   <li>The values SHALL only be read on the {@link VolunteerJob}'s thread (aside from reads for
    *       metrics, which SHALL NOT be used for any application logic).
    *   <li>The values SHALL only be decremented by {@link PipelineJobWrapper}.
    * </ul>
    *
    * <p>Following these rules will result in this value being eventually consistent but nevertheless
    * ALWAYS >= the number of jobs that are actually running, from the view of the {@link
-   * SchedulerJob}'s thread. This aligns with what the {@link SchedulerJob} needs the value for, as
+   * VolunteerJob}'s thread. This aligns with what the {@link VolunteerJob} needs the value for, as
    * we're using it to avoid over-subscribing on work. Under-subscribing is fine, in the context.
    *
    * @return the counter for how many tasks are currently running on the {@link PipelineJob}s {@link
