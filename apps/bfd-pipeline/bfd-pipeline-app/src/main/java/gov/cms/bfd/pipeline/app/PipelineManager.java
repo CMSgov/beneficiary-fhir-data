@@ -27,14 +27,12 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,34 +76,39 @@ public final class PipelineManager {
   private final ListeningScheduledExecutorService jobExecutor;
 
   /**
-   * Tracks the number of currently running tasks in {@link #jobExecutor}. Note: this isn't really
-   * thread-safe; it's subject to race conditions, unless used very carefully. Accordingly, usage of
-   * this field <strong>SHALL</strong> conform to the following rules:
+   * This {@link Map} stores handles to all enqueued job {@link Future}s. We need to keep track of
+   * these for two use reasons:
+   *
+   * <ol>
+   *   <li>So that we can ensure that we don't over-commit and enqueue more work than we have
+   *       executors available for.
+   *   <li>So that we can ensure that jobs can be cancelled when {@link #stop()} is called.
+   * </ol>
+   *
+   * <p>Note: this isn't really thread-safe; it's subject to race conditions, unless used very
+   * carefully. Accordingly, usage of this field <strong>SHALL</strong> conform to the following
+   * rules:
    *
    * <ul>
-   *   <li>The values SHALL only be incremented on the {@link VolunteerJob}'s thread.
-   *   <li>The values SHALL only be read on the {@link VolunteerJob}'s thread (aside from reads for
-   *       metrics, which SHALL NOT be used for any application logic).
-   *   <li>The values SHALL only be decremented by {@link PipelineJobWrapper}.
+   *   <li>Jobs SHALL only be added to it on the {@link VolunteerJob}'s thread, ensuring that the
+   *       job is submitted to {@link #jobExecutor} <strong>and</strong> added to {@link
+   *       #jobsEnqueuedHandles} in a block that is {@code synchronized} on {@link
+   *       #jobsEnqueuedHandles}.
+   *   <li>{@link ConcurrentMap#size()} SHALL only be read on the {@link VolunteerJob}'s thread
+   *       (aside from reads for metrics, which SHALL NOT be used for any application logic).
+   *   <li>Jobs SHALL only be removed by {@link PipelineJobWrapper} and {@link PipelineJobCallback}.
+   *       (This is just to prevent runaway memory growth.)
+   *   <li>All other reads of this collection (e.g. {@link #stop()}) SHALL {@code synchronize} on
+   *       it.
    * </ul>
    *
-   * <p>Following these rules will result in this value being eventually consistent but nevertheless
-   * ALWAYS >= the number of jobs that are actually running, from the view of the {@link
-   * VolunteerJob}'s thread. This aligns with what the {@link VolunteerJob} needs the value for, as
-   * we're using it to avoid over-subscribing on work. Under-subscribing is fine, in the context.
-   *
-   * @return the counter for how many tasks are currently running on the {@link PipelineJob}s {@link
-   *     Executor}
+   * <p>Following these rules will result in {@link ConcurrentMap#size()} being eventually
+   * consistent but nevertheless ALWAYS >= the number of jobs that are actually enqueued, from the
+   * view of the {@link VolunteerJob}'s thread. This aligns with what the {@link VolunteerJob} needs
+   * the value for, as we're using it to avoid over-subscribing on work. Under-subscribing is fine,
+   * in the context.
    */
-  private final AtomicInteger jobsRunningCounter;
-
-  /**
-   * This {@link Set} stores handles to all active job {@link Future}s. We need to keep track of
-   * these so that we can ensure that jobs can be cancelled when {@link #stop()} is called. It needs
-   * to be thread-safe because, to prevent runaway memory growth, we remove jobs from the set as
-   * they finish.
-   */
-  private final ConcurrentMap<PipelineJobRecordId, PipelineJobHandle<?>> jobActiveHandles;
+  private final ConcurrentMap<PipelineJobRecordId, PipelineJobHandle<?>> jobsEnqueuedHandles;
 
   /**
    * Used to run the job monitoring tasks, e.g. {@link ListenableFuture} callbacks. Those tasks are
@@ -136,8 +139,7 @@ public final class PipelineManager {
     this.appMetrics = appMetrics;
     this.jobRecordStore = jobRecordStore;
     this.jobExecutor = createJobExecutor();
-    this.jobActiveHandles = new ConcurrentHashMap<>();
-    this.jobsRunningCounter = new AtomicInteger(0);
+    this.jobsEnqueuedHandles = new ConcurrentHashMap<>();
     this.jobMonitorsExecutor = Executors.newCachedThreadPool();
     this.jobRegistry = new HashMap<>();
 
@@ -176,17 +178,23 @@ public final class PipelineManager {
   }
 
   /**
-   * <strong>Warning:</strong> See the note on {@link #jobsRunningCounter} for the thread-safety
-   * rules for usage of this field. It is <strong>not</strong> safe to use outside of those
+   * <strong>Warning:</strong> See the note on {@link #jobsEnqueuedHandles} for the thread-safety
+   * rules for usage of this property. It is <strong>not</strong> safe to use outside of those
    * conditions.
+   *
+   * <p>This property, and its invariants, allow us to avoid over-committing and accepting more work
+   * than we are guaranteed to have {@link #jobExecutor} threads/slots available for. This isn't
+   * strictly necessary if jobs are only running on a single node, but is nevertheless a nice
+   * property, and becomes very important if jobs are being run across multiple nodes (as otherwise
+   * we'd have unnecessarily stalled work).
    *
    * @return the number of available executor slots (technically, an eventually consistent
    *     approximation of that value, which is guaranteed to be less-than-or-equal-to the true
-   *     value, provided that the thread-safety rules described in {@link #jobsRunningCounter} are
+   *     value, provided that the thread-safety rules described in {@link #jobsEnqueuedHandles} are
    *     adhered to)
    */
   public int getOpenExecutorSlots() {
-    return JOB_EXECUTOR_THREADS - jobsRunningCounter.get();
+    return JOB_EXECUTOR_THREADS - jobsEnqueuedHandles.size();
   }
 
   /**
@@ -217,29 +225,31 @@ public final class PipelineManager {
       throw new IllegalArgumentException(
           String.format("Unknown or unregistered job type '%s'.", jobRecord.getJobType()));
 
-    /*
-     * Design Note: Java's Executor framework is great at running things and returning results, but
-     * provides no built-in facilities at all for monitoring and tracking the things that have been
-     * run. We need that monitoring here, so we use PipelineJobWrapper to catch these events:
-     * enqueue, start, complete-successfully, complete-with-exception. (See Futures.addCallback(...)
-     * a little bit further below for a discussion of some additional monitoring we need and add
-     * in.)
-     */
-    PipelineJobWrapper<A> jobWrapper = new PipelineJobWrapper<>(job, jobRecord);
-
-    // Ensure code below doesn't accidentally use the unwrapped job.
-    job = jobWrapper;
-
     // Submit the job to be run!
+    PipelineJobWrapper<A> jobWrapper;
     ListenableFuture<PipelineJobOutcome> jobFuture;
-    try {
-      jobFuture = jobExecutor.submit(jobWrapper);
-    } catch (RejectedExecutionException e) {
-      // Indicates that the executor has been shutdown.
-      return false;
+    synchronized (jobsEnqueuedHandles) {
+      /*
+       * Design Note: Java's Executor framework is great at running things and returning results,
+       * but provides no built-in facilities at all for monitoring and tracking the things that have
+       * been run. We need that monitoring here, so we use PipelineJobWrapper to catch these events:
+       * enqueue, start, complete-successfully, complete-with-exception. (See
+       * Futures.addCallback(...) a little bit further below for a discussion of some additional
+       * monitoring we need and add in.)
+       */
+      jobWrapper = new PipelineJobWrapper<>(job, jobRecord);
+
+      // Ensure code below doesn't accidentally use the unwrapped job.
+      job = jobWrapper;
+
+      try {
+        jobFuture = jobExecutor.submit(jobWrapper);
+      } catch (RejectedExecutionException e) {
+        // Indicates that the executor has been shutdown.
+        return false;
+      }
+      jobsEnqueuedHandles.put(jobRecord.getId(), new PipelineJobHandle<>(jobWrapper, jobFuture));
     }
-    jobActiveHandles.put(jobRecord.getId(), new PipelineJobHandle<>(jobWrapper, jobFuture));
-    jobsRunningCounter.incrementAndGet();
 
     /*
      * Design Note: We can't catch job-cancellation-before-start events in PipelineJobWrapper,
@@ -280,14 +290,25 @@ public final class PipelineManager {
       LOGGER.info("Shut down job executor, cancelling existing jobs.");
     }
 
-    // Try to stop all jobs that are either not running yet or are interruptible.
-    jobActiveHandles
-        .values()
-        .parallelStream()
-        .forEach(
-            j -> {
-              j.cancelIfPendingOrInterruptible();
-            });
+    /*
+     * Try to stop all jobs that are either not running yet or are interruptible. Note: VolunteerJob
+     * might still be trying to submit jobs over on its thread, so we synchronize to keep things
+     * consistent and ensure we don't miss any jobs.
+     */
+    synchronized (jobsEnqueuedHandles) {
+      jobsEnqueuedHandles
+          .values()
+          .parallelStream()
+          .forEach(
+              j -> {
+                /*
+                 * Note: There's a race condition here, where the job may have completed just before
+                 * we try to cancel it, but that's okay because Future.cancel(...) is basically a
+                 * no-op for jobs that have already completed.
+                 */
+                j.cancelIfInterruptible();
+              });
+    }
 
     /*
      * Wait for everything to halt.
@@ -342,7 +363,7 @@ public final class PipelineManager {
      * Attempts to cancel the job execution by calling {@link Future#cancel(boolean)}, respecting
      * the value of {@link PipelineJob#isInterruptible()}.
      */
-    public void cancelIfPendingOrInterruptible() {
+    public void cancelIfInterruptible() {
       LOGGER.trace("cancelIfPendingOrInterruptible() called: job.getType()='{}'", job.getType());
       future.cancel(job.isInterruptible());
     }
@@ -421,8 +442,7 @@ public final class PipelineManager {
         // Wrap and re-thrown the failure.
         throw new Exception("Re-throwing job failure.", e);
       } finally {
-        jobActiveHandles.remove(jobRecord.getId());
-        jobsRunningCounter.decrementAndGet();
+        jobsEnqueuedHandles.remove(jobRecord.getId());
       }
     }
   }
@@ -460,7 +480,7 @@ public final class PipelineManager {
          * way we have to catch cancel-before-start events (the PipelineJobWrapper can't do it,
          * since it won't get called in the first place).
          */
-        jobActiveHandles.remove(jobRecord.getId());
+        jobsEnqueuedHandles.remove(jobRecord.getId());
         jobRecordStore.recordJobCancellation(jobRecord.getId());
       }
     }
