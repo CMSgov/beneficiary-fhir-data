@@ -143,10 +143,9 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
         return testSnfClaim(eob);
       case PDE:
         return testPartDEvent(eob);
+      default:
+        throw new BadCodeMonkeyException("Unsupported claim type: " + claimType);
     }
-    if (claimType == ClaimTypeV2.PDE) {
-      return testPartDEvent(eob);
-    } else throw new BadCodeMonkeyException("Unsupported claim type: " + claimType);
   }
 
   /**
