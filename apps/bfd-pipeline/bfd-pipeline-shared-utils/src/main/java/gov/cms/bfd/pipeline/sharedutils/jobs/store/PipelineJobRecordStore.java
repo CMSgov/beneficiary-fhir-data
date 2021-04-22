@@ -27,6 +27,14 @@ public final class PipelineJobRecordStore {
   /** The number of milliseconds to wait between polling job dependencies' status. */
   private static final int JOB_DEPENDENCY_POLL_MILLIS = 100;
 
+  /**
+   * The "database" for all {@link PipelineJobRecord}s in the application.
+   *
+   * <p>This will be read and modified from almost every thread in the application, and from the
+   * perspective of any one of them, is only eventually consistent. This tends to work out okay for
+   * our use cases, as you're not likely to have two separate jobs racing to create the
+   * <em>same</em> new job, but care should still be taken when working with it.
+   */
   private final ConcurrentMap<PipelineJobRecordId, PipelineJobRecord<?>> jobRecords;
 
   /** Constructs a new {@link PipelineJobRecordStore} instance. */
