@@ -220,8 +220,7 @@ public class HHAClaimTransformerV2 {
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.quantity
-      // REV_CNTR_NDC_QTY           => TODO: ??
+      // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
       // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
@@ -230,7 +229,6 @@ public class HHAClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
-          line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 
