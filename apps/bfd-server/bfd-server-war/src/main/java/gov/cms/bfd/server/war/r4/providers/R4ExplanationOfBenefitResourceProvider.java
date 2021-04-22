@@ -243,7 +243,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
     boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
-    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    Operation operation = new Operation(Operation.Endpoint.V2_EOB);
     operation.setOption("by", "patient");
     operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption(

@@ -83,7 +83,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>3.1.2</metrics.version>
+		<metrics.version>4.1.2</metrics.version>
 		<hibernate.version>5.2.10.Final</hibernate.version>
 		
 		<!-- The default DB that will be used in integration tests. -->
@@ -220,7 +220,9 @@
 				<!-- In-memory database that is used in some tests to speed things up. -->
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
-				<version>2.4.1</version>
+				<!-- The 2.5.x series is the last to support Java 8. -->
+				<version>2.5.2</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 

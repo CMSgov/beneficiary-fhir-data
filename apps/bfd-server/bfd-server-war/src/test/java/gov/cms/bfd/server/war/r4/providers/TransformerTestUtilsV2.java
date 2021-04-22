@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -28,8 +29,12 @@ import org.hl7.fhir.r4.model.BaseDateTimeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
@@ -1025,5 +1030,340 @@ public final class TransformerTestUtilsV2 {
       assertDateEquals(expectedStartDate.get(), actualPeriod.getStartElement());
     if (expectedEndDate.isPresent())
       assertDateEquals(expectedEndDate.get(), actualPeriod.getEndElement());
+  }
+
+  /**
+   * Finds an {@link Identifier} in a list based on the System URL
+   *
+   * @param system
+   * @param identifiers
+   */
+  static Identifier findIdentifierBySystem(String system, List<Identifier> identifiers) {
+    Optional<Identifier> id =
+        identifiers.stream().filter(i -> system.equals(i.getSystem())).findFirst();
+
+    Assert.assertTrue(id.isPresent());
+
+    return id.get();
+  }
+
+  /**
+   * Creates an {@link Identifier} to be used in tests
+   *
+   * @param system
+   * @param identifiers
+   */
+  static Identifier createIdentifier(
+      String system, String value, String codeSystem, String code, String codeDisplay) {
+    return new Identifier()
+        .setType(
+            new CodeableConcept()
+                .setCoding(Arrays.asList(new Coding(codeSystem, code, codeDisplay))))
+        .setSystem(system)
+        .setValue(value);
+  }
+
+  /**
+   * Finds an {@link Extension} in a list based on the Extension URL
+   *
+   * @param url
+   * @param extensions
+   */
+  static Extension findExtensionByUrl(String url, List<Extension> extensions) {
+    Optional<Extension> ex = extensions.stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    Assert.assertTrue(ex.isPresent());
+
+    return ex.get();
+  }
+
+  /**
+   * Finds a specific {@link Coding} in a list given the system
+   *
+   * @param system
+   * @param codings
+   */
+  static Coding findCodingBySystem(String system, List<Coding> codings) {
+    Optional<Coding> coding =
+        codings.stream().filter(c -> system.equals(c.getSystem())).findFirst();
+
+    Assert.assertTrue(coding.isPresent());
+
+    return coding.get();
+  }
+
+  /**
+   * Finds a Care Team member by Sequence value
+   *
+   * @param seq
+   * @param team
+   */
+  static CareTeamComponent findCareTeamBySequence(int seq, List<CareTeamComponent> team) {
+    Optional<CareTeamComponent> ctc = team.stream().filter(c -> c.getSequence() == seq).findFirst();
+
+    Assert.assertTrue(ctc.isPresent());
+
+    return ctc.get();
+  }
+
+  /**
+   * Helper that creates a {@link CareTeamComponent} to be used in unit tests
+   *
+   * @param sequence The sequence to set
+   * @param npi The NPI for the member
+   * @param system System defining the type of member
+   * @param code Code defining the type of member
+   * @param display Display for the type of member
+   * @return {@link CareTeamComponent}
+   */
+  static CareTeamComponent createNpiCareTeamMember(
+      int sequence, String npi, String system, String code, String display) {
+    return new CareTeamComponent()
+        .setSequence(sequence)
+        .setProvider(
+            new Reference()
+                .setIdentifier(
+                    createIdentifier(
+                        null,
+                        npi,
+                        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+                        "npi",
+                        "National Provider Identifier")))
+        .setRole(new CodeableConcept().setCoding(Arrays.asList(new Coding(system, code, display))));
+  }
+
+  /**
+   * Finds a {@link SupportingInformationComponent} based on the value of a Code of the Category
+   *
+   * @param code
+   * @param components
+   * @return
+   */
+  static SupportingInformationComponent findSupportingInfoByCode(
+      String code, List<SupportingInformationComponent> components) {
+    Optional<SupportingInformationComponent> si =
+        components.stream()
+            .filter(
+                cmp ->
+                    cmp.getCategory().getCoding().stream()
+                            .filter(c -> code.equals(c.getCode()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(si.isPresent());
+
+    return si.get();
+  }
+
+  /**
+   * Helper to create a {@link SupportingInformationComponent}
+   *
+   * @param sequence The sequence number to set
+   * @param category A list of {@link Coding} elements to use for Category
+   * @param code A Coding to use for Code
+   * @return
+   */
+  static SupportingInformationComponent createSupportingInfo(
+      int sequence, List<Coding> category, Coding code) {
+    return new SupportingInformationComponent()
+        .setSequence(sequence)
+        .setCategory(new CodeableConcept().setCoding(category))
+        .setCode(new CodeableConcept().setCoding(Arrays.asList(code)));
+  }
+
+  /**
+   * Helper to create a {@link SupportingInformationComponent}
+   *
+   * @param sequence The sequence number to set
+   * @param category A list of {@link Coding} elements to use for Category
+   * @return
+   */
+  static SupportingInformationComponent createSupportingInfo(int sequence, List<Coding> category) {
+    return new SupportingInformationComponent()
+        .setSequence(sequence)
+        .setCategory(new CodeableConcept().setCoding(category));
+  }
+
+  /**
+   * Finds a {@link DiagnosisComponent} in a list based on the coding of the diagnosis
+   *
+   * @param code
+   * @param components
+   * @return
+   */
+  static DiagnosisComponent findDiagnosisByCode(String code, List<DiagnosisComponent> components) {
+    Optional<DiagnosisComponent> diag =
+        components.stream()
+            .filter(
+                cmp ->
+                    cmp.getDiagnosis().castToCodeableConcept(cmp.getDiagnosis()).getCoding()
+                            .stream()
+                            .filter(c -> code.equals(c.getCode()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(diag.isPresent());
+
+    return diag.get();
+  }
+
+  /**
+   * Helper that creates a {@link DiagnosisComponent} for testing
+   *
+   * @param seq The sequence number
+   * @param code A coding to use for the Diagnosis CodeableConcept
+   * @param type A coding to use for the Diagnosis Type
+   * @param poasw Nullable - The increment for the "Present on Admission" extension
+   * @param poaval Nullable - The type for the "Present on Admission" extension
+   * @param poa Nullable - The Code to set for "Present on Admission" ("Y" or "N")
+   * @return
+   */
+  static DiagnosisComponent createDiagnosis(
+      int seq, Coding code, Coding type, Integer poasw, String poaval, String poa) {
+    DiagnosisComponent diag =
+        new DiagnosisComponent()
+            .setSequence(seq)
+            .setDiagnosis(new CodeableConcept().setCoding(Arrays.asList(code)))
+            .setType(Arrays.asList(new CodeableConcept().setCoding(Arrays.asList(type))));
+
+    if (poasw != null) {
+      diag.addExtension()
+          .setUrl("https://bluebutton.cms.gov/resources/variables/" + poa + poasw)
+          .setValue(
+              new Coding(
+                  "https://bluebutton.cms.gov/resources/variables/" + poa + poasw,
+                  poaval,
+                  "Y".equals(poaval)
+                      ? "Diagnosis was present at the time of admission (POA)"
+                      : "Diagnosis was not present at the time of admission"));
+    }
+
+    return diag;
+  }
+
+  /** Creates a {@link DiagnosisComponent} using the "clm_poa_ind_sw" type */
+  static DiagnosisComponent createDiagnosis(
+      int seq, Coding code, Coding type, Integer poasw, String poaval) {
+    return createDiagnosis(seq, code, type, poasw, poaval, "clm_poa_ind_sw");
+  }
+
+  /** Creates a {@link DiagnosisComponent} using the "clm_e_poa_ind_sw" (external) type */
+  static DiagnosisComponent createExDiagnosis(
+      int seq, Coding code, Coding type, Integer poasw, String poaval) {
+    return createDiagnosis(seq, code, type, poasw, poaval, "clm_e_poa_ind_sw");
+  }
+
+  /**
+   * Finds a {@link ProcedureComponent} in a list, based on a code in the Procedure's
+   * CodeableConcept
+   *
+   * @param code
+   * @param components
+   * @return
+   */
+  static ProcedureComponent findProcedureByCode(String code, List<ProcedureComponent> components) {
+    Optional<ProcedureComponent> proc =
+        components.stream()
+            .filter(
+                cmp ->
+                    cmp.getProcedureCodeableConcept().getCoding().stream()
+                            .filter(c -> code.equals(c.getCode()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(proc.isPresent());
+
+    return proc.get();
+  }
+
+  /**
+   * Creates a {@link ProcedureComponent} for use in testing
+   *
+   * @param seq The sequence number to set
+   * @param code A {@link Coding} to set to the procedureCodeableConcept
+   * @param date A String date when the procedure was performed
+   * @return
+   */
+  static ProcedureComponent createProcedure(int seq, Coding code, String date) {
+    // The CCW Procedure extraction uses a LocalDate and converts it to Date
+    LocalDate ldate =
+        LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+
+    return new ProcedureComponent()
+        .setSequence(seq)
+        .setProcedure(new CodeableConcept().setCoding(Arrays.asList(code)))
+        .setDate(TransformerUtilsV2.convertToDate(ldate));
+  }
+
+  /**
+   * Finds an {@link AdjudicationComponent} using a code in the category
+   *
+   * @param code
+   * @param components
+   * @return
+   */
+  static AdjudicationComponent findAdjudicationByCategory(
+      String code, List<AdjudicationComponent> components) {
+    Optional<AdjudicationComponent> adjudication =
+        components.stream()
+            .filter(
+                cmp ->
+                    cmp.getCategory().getCoding().stream()
+                            .filter(c -> code.equals(c.getCode()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(adjudication.isPresent());
+
+    return adjudication.get();
+  }
+
+  /**
+   * Finds an {@link AdjudicationComponent} using a code in the reason
+   *
+   * @param code
+   * @param components
+   * @return
+   */
+  static AdjudicationComponent findAdjudicationByReason(
+      String code, List<AdjudicationComponent> components) {
+    Optional<AdjudicationComponent> adjudication =
+        components.stream()
+            .filter(
+                cmp ->
+                    cmp.getReason().getCoding().stream()
+                            .filter(c -> code.equals(c.getCode()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(adjudication.isPresent());
+
+    return adjudication.get();
+  }
+
+  /**
+   * Finds a {@link BenefitComponent} in a list based on a Code in the component's Type
+   *
+   * @param code
+   * @param components
+   * @return
+   */
+  static BenefitComponent findFinancial(String code, List<BenefitComponent> components) {
+    Optional<BenefitComponent> benefit =
+        components.stream()
+            .filter(
+                cmp ->
+                    cmp.getType().getCoding().stream().filter(c -> code.equals(c.getCode())).count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(benefit.isPresent());
+
+    return benefit.get();
   }
 }
