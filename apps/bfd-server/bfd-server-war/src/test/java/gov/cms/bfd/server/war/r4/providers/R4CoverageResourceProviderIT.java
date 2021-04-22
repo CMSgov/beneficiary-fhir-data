@@ -396,9 +396,6 @@ public final class R4CoverageResourceProviderIT {
 
     Date nowDate = new Date();
     Date secondsAgoDate = Date.from(Instant.now().minusSeconds(100));
-    /*
-    TODO: I can't get this to work.  I don't know enough about why but it could be an issue in V2.
-    Test always returns 0 responses.
 
     DateRangeParam inBoundsRange =
         new DateRangeParam().setLowerBoundInclusive(secondsAgoDate).setUpperBoundExclusive(nowDate);
@@ -414,7 +411,7 @@ public final class R4CoverageResourceProviderIT {
 
     Assert.assertNotNull(searchInBoundsResults);
     Assert.assertEquals(MedicareSegment.values().length, searchInBoundsResults.getTotal());
-    */
+
     Date hourAgoDate = Date.from(Instant.now().minusSeconds(3600));
     DateRangeParam outOfBoundsRange = new DateRangeParam(hourAgoDate, secondsAgoDate);
     Bundle searchOutOfBoundsResult =
