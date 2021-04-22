@@ -137,7 +137,7 @@
 				class. -->
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>7.8.1</version>
+			<version>4.2.0</version>
 		</dependency>
 
 		<dependency>
