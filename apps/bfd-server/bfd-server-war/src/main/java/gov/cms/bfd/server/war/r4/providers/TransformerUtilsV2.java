@@ -3180,7 +3180,8 @@ public final class TransformerUtilsV2 {
     // LINE_HCT_HGB_TYPE_CD => Observation.code
     // LINE_HCT_HGB_RSLT_NUM => Observation.value
     if (hctHgbTestTypeCode.isPresent()) {
-      String observationRef = "#line-observation-" + sequence;
+      String observationId = "line-observation-" + sequence;
+      String observationRef = "#" + observationId;
 
       // The `item` will link to a `supportingInfo` that references the embedded Observation
       SupportingInformationComponent comp =
@@ -3188,7 +3189,7 @@ public final class TransformerUtilsV2 {
       comp.setValue(new Reference(observationRef));
 
       // Create embedded Observation in ExplanationOfBenefit.contained
-      Observation hctHgbObservation = findOrCreateContainedObservation(eob, observationRef);
+      Observation hctHgbObservation = findOrCreateContainedObservation(eob, observationId);
       hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
       hctHgbObservation.setCode(
           createCodeableConcept(eob, CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode));

@@ -46,15 +46,17 @@ import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitBalanceComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Money;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -1495,26 +1497,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Implements the same List `compareDeep` as in the Base FHIR class
-   *
-   * @param expected
-   * @param actual
-   */
-  private static void assertEquals(List<? extends Base> expected, List<? extends Base> actual) {
-    Assert.assertTrue(Base.compareDeep(expected, actual, true));
-  }
-
-  /**
-   * Implements the same `compareDeep` as in the Base FHIR class
-   *
-   * @param expected
-   * @param actual
-   */
-  private static void assertEquals(Base expected, Base actual) {
-    Assert.assertTrue(Base.compareDeep(expected, actual, true));
-  }
-
-  /**
    * Asserts that two Money values ignoring differences like "0" vs "0.0"
    *
    * @param expected
@@ -1545,12 +1527,40 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     // matches up
     Assert.assertTrue(actual.getId().endsWith(expected.getId()));
 
-    // Check other fields.
-    // It is hard to do a line by line comparison because the transformer serializes differently
-    // than the HAPI server does so there are cases where the tranformer creates a "0" and the
-    // endpoint returns "0.0" so they don't match on an `equalsDeep`
-    // Dates are another thing that can not easily be compared
-    assertEquals(expected.getMeta().getProfile(), actual.getMeta().getProfile());
+    // Clean them out so we can do a deep compare later
+    actual.setId("");
+    expected.setId("");
+
+    // If there are any contained resources, they might have lastupdate times in them too
+    Assert.assertEquals(expected.getContained().size(), actual.getContained().size());
+    for (int i = 0; i < expected.getContained().size(); i++) {
+      Resource expectedContained = expected.getContained().get(i);
+      Resource actualContained = actual.getContained().get(i);
+
+      expectedContained.getMeta().setLastUpdated(null);
+      actualContained.getMeta().setLastUpdated(null);
+
+      // TODO: HAPI seems to be inserting the `#` in the ID of the contained element.
+      // This is incorrect according to the FHIR spec:
+      // https://build.fhir.org/references.html#contained
+      // This works around that problem
+      Assert.assertEquals("#" + expectedContained.getId(), actualContained.getId());
+
+      expectedContained.setId("");
+      actualContained.setId("");
+    }
+
+    // Dates are not easy to compare so just make sure they are there
+    Assert.assertNotNull(actual.getMeta().getLastUpdated());
+
+    // We compared all of meta that we care about so get it out of the way
+    expected.getMeta().setLastUpdated(null);
+    actual.getMeta().setLastUpdated(null);
+
+    // Created is required, but can't be compared
+    Assert.assertNotNull(actual.getCreated());
+    expected.setCreated(null);
+    actual.setCreated(null);
 
     // Extensions may have `valueMoney` elements
     Assert.assertEquals(expected.getExtension().size(), actual.getExtension().size());
@@ -1567,20 +1577,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         expectedEx.setValue(null);
         actualEx.setValue(null);
       }
-
-      // Money is handled, check the rest
-      assertEquals(expectedEx, actualEx);
     }
-
-    assertEquals(expected.getIdentifier(), actual.getIdentifier());
-    Assert.assertEquals(expected.getStatus(), actual.getStatus());
-    assertEquals(expected.getType(), actual.getType());
-    Assert.assertEquals(expected.getUse(), actual.getUse());
-    assertEquals(expected.getPatient(), actual.getPatient());
-    assertEquals(expected.getBillablePeriod(), actual.getBillablePeriod());
-    assertEquals(expected.getReferral(), actual.getReferral());
-    Assert.assertEquals(expected.getDisposition(), actual.getDisposition());
-    assertEquals(expected.getCareTeam(), actual.getCareTeam());
 
     // SupportingInfo can have `valueQuantity` that has the 0 vs 0.0 issue
     Assert.assertEquals(expected.getSupportingInfo().size(), actual.getSupportingInfo().size());
@@ -1600,13 +1597,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         expectedSup.setValue(null);
         actualSup.setValue(null);
       }
-
-      // Money is handled, check the rest
-      assertEquals(expectedSup, actualSup);
     }
-
-    assertEquals(expected.getDiagnosis(), actual.getDiagnosis());
-    assertEquals(expected.getInsurance(), actual.getInsurance());
 
     // line items
     Assert.assertEquals(expected.getItem().size(), actual.getItem().size());
@@ -1614,22 +1605,14 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
       ItemComponent expectedItem = expected.getItem().get(i);
       ItemComponent actualItem = actual.getItem().get(i);
 
-      assertEquals(expectedItem.getExtension(), actualItem.getExtension());
-      Assert.assertEquals(expectedItem.getSequence(), actualItem.getSequence());
-      assertEquals(expectedItem.getCareTeamSequence(), actualItem.getCareTeamSequence());
-      assertEquals(expectedItem.getDiagnosisSequence(), actualItem.getDiagnosisSequence());
-      assertEquals(expectedItem.getInformationSequence(), actualItem.getInformationSequence());
-      assertEquals(expectedItem.getCategory(), actualItem.getCategory());
-      assertEquals(expectedItem.getProductOrService(), actualItem.getProductOrService());
-      assertEquals(expectedItem.getModifier(), actualItem.getModifier());
-      assertEquals(expectedItem.getServiced(), actualItem.getServiced());
-      assertEquals(expectedItem.getLocation(), actualItem.getLocation());
-
       // Compare value directly because SimpleQuantity vs Quantity can't be compared
       Assert.assertEquals(
           expectedItem.getQuantity().getValue().floatValue(),
           actualItem.getQuantity().getValue().floatValue(),
           0.0);
+
+      expectedItem.setQuantity(null);
+      actualItem.setQuantity(null);
 
       Assert.assertEquals(
           expectedItem.getAdjudication().size(), actualItem.getAdjudication().size());
@@ -1649,18 +1632,14 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         // We just checked manually, so null them out and check the rest of the fields
         expectedAdj.setAmount(null);
         actualAdj.setAmount(null);
-
-        assertEquals(expectedAdj, actualAdj);
       }
     }
 
     // Total has the same problem with values
     Assert.assertEquals(expected.getTotal().size(), actual.getTotal().size());
     for (int i = 0; i < expected.getTotal().size(); i++) {
-      TotalComponent expectedTot = expected.getTotal().get(0);
-      TotalComponent actualTot = actual.getTotal().get(0);
-
-      assertEquals(expectedTot.getCategory(), actualTot.getCategory());
+      TotalComponent expectedTot = expected.getTotal().get(i);
+      TotalComponent actualTot = actual.getTotal().get(i);
 
       if (expectedTot.hasAmount()) {
         Assert.assertNotNull(actualTot.getAmount());
@@ -1668,6 +1647,32 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
       } else {
         // If expected doesn't have an amount, actual shouldn't
         Assert.assertFalse(actualTot.hasAmount());
+      }
+
+      expectedTot.setAmount(null);
+      actualTot.setAmount(null);
+    }
+
+    // Benefit Balance Financial components
+    Assert.assertEquals(expected.getBenefitBalance().size(), actual.getBenefitBalance().size());
+    for (int i = 0; i < expected.getBenefitBalance().size(); i++) {
+      BenefitBalanceComponent expectedBen = expected.getBenefitBalance().get(i);
+      BenefitBalanceComponent actualBen = actual.getBenefitBalance().get(i);
+
+      Assert.assertEquals(expectedBen.getFinancial().size(), actualBen.getFinancial().size());
+      for (int j = 0; j < expectedBen.getFinancial().size(); j++) {
+        BenefitComponent expectedFinancial = expectedBen.getFinancial().get(j);
+        BenefitComponent actualFinancial = actualBen.getFinancial().get(j);
+
+        // Are we dealing with Money?
+        if (expectedFinancial.hasUsedMoney()) {
+          Assert.assertNotNull(actualFinancial.getUsedMoney());
+          assertEquals(expectedFinancial.getUsedMoney(), actualFinancial.getUsedMoney());
+
+          // Clean up
+          expectedFinancial.setUsed(null);
+          actualFinancial.setUsed(null);
+        }
       }
     }
 
@@ -1679,6 +1684,12 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
       // If expected doesn't have an amount, actual shouldn't
       Assert.assertFalse(actual.hasPayment());
     }
+
+    expected.getPayment().setAmount(null);
+    actual.getPayment().setAmount(null);
+
+    // Now for the grand finale, we can do an `equalsDeep` on the rest
+    Assert.assertTrue(expected.equalsDeep(actual));
   }
 
   /**
