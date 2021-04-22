@@ -9,10 +9,10 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +27,11 @@ public final class PipelineJobRecordStore {
   /** The number of milliseconds to wait between polling job dependencies' status. */
   private static final int JOB_DEPENDENCY_POLL_MILLIS = 100;
 
-  private final Map<PipelineJobRecordId, PipelineJobRecord<?>> jobRecords;
+  private final ConcurrentMap<PipelineJobRecordId, PipelineJobRecord<?>> jobRecords;
 
   /** Constructs a new {@link PipelineJobRecordStore} instance. */
   public PipelineJobRecordStore() {
-    this.jobRecords = new HashMap<>();
+    this.jobRecords = new ConcurrentHashMap<>();
   }
 
   /**
