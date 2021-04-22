@@ -126,8 +126,8 @@ public final class PipelineManager {
   private final Map<PipelineJobType<?>, PipelineJob<?>> jobRegistry;
 
   /**
-   * Constructs a new {@link PipelineManager} instance. Note that this must be used as a singleton
-   * service in the application: only one instance running at a time is supported.
+   * Constructs a new {@link PipelineManager} instance. Note that this intended for use as a
+   * singleton service in the application: only one instance running at a time.
    *
    * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param jobRecordStore the {@link PipelineJobRecordStore} for the overall application
