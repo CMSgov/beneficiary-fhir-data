@@ -8,6 +8,8 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Optional;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -95,18 +97,53 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_KEY_FIXUP_THREADS = "FIXUP_THREADS";
 
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricKey()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "NEW_RELIC_METRIC_KEY";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicAppName()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_APP_NAME = "NEW_RELIC_METRIC_APP_NAME";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricHost()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_HOST = "NEW_RELIC_METRIC_HOST";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricPath()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_PATH = "NEW_RELIC_METRIC_PATH";
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricPeriod()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "NEW_RELIC_METRIC_PERIOD";
+
   private final ExtractionOptions extractionOptions;
   private final LoadAppOptions loadOptions;
+  private final MetricOptions metricOptions;
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
    * @param extractionOptions the value to use for {@link #getExtractionOptions()}
    * @param loadOptions the value to use for {@link #getLoadOptions()}
+   * @param metricOptions the value to use for {@link #getMetricOptions()}
    */
-  public AppConfiguration(ExtractionOptions extractionOptions, LoadAppOptions loadOptions) {
+  public AppConfiguration(
+      ExtractionOptions extractionOptions,
+      LoadAppOptions loadOptions,
+      MetricOptions metricOptions) {
     this.extractionOptions = extractionOptions;
     this.loadOptions = loadOptions;
+    this.metricOptions = metricOptions;
   }
 
   /** @return the {@link ExtractionOptions} that the application will use */
@@ -119,6 +156,11 @@ public final class AppConfiguration implements Serializable {
     return loadOptions;
   }
 
+  /** @return the {@link MetricOptions} that the application will use */
+  public MetricOptions getMetricOptions() {
+    return metricOptions;
+  }
+
   /** @see java.lang.Object#toString() */
   @Override
   public String toString() {
@@ -127,6 +169,8 @@ public final class AppConfiguration implements Serializable {
     builder.append(extractionOptions);
     builder.append(", loadOptions=");
     builder.append(loadOptions);
+    builder.append(", metricOptinos=");
+    builder.append(metricOptions);
     builder.append("]");
     return builder.toString();
   }
@@ -288,6 +332,27 @@ public final class AppConfiguration implements Serializable {
           e);
     }
 
+    // New Relic Metrics
+
+    String newRelicMetricKey = System.getenv(ENV_VAR_NEW_RELIC_METRIC_KEY);
+    String newRelicAppName = System.getenv(ENV_VAR_NEW_RELIC_METRIC_APP_NAME);
+    String newRelicMetricHost = System.getenv(ENV_VAR_NEW_RELIC_METRIC_HOST);
+    String newRelicMetricPath = System.getenv(ENV_VAR_NEW_RELIC_METRIC_PATH);
+    String rawNewRelicMetricPeriod = System.getenv(ENV_VAR_NEW_RELIC_METRIC_PERIOD);
+    int newRelicMetricPeriod;
+    try {
+      newRelicMetricPeriod = Integer.parseInt(rawNewRelicMetricPeriod);
+    } catch (NumberFormatException ex) {
+      newRelicMetricPeriod = 15;
+    }
+
+    String hostname;
+    try {
+      hostname = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      hostname = "unknown";
+    }
+
     return new AppConfiguration(
         new ExtractionOptions(s3BucketName, allowedRifFileType),
         new LoadAppOptions(
@@ -299,7 +364,14 @@ public final class AppConfiguration implements Serializable {
             loaderThreads,
             idempotencyRequired.get().booleanValue(),
             fixupsEnabled,
-            fixupThreads));
+            fixupThreads),
+        new MetricOptions(
+            newRelicMetricKey,
+            newRelicAppName,
+            newRelicMetricHost,
+            newRelicMetricPath,
+            newRelicMetricPeriod,
+            hostname));
   }
 
   /**
