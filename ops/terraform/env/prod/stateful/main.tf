@@ -10,6 +10,11 @@ provider "aws" {
 module "stateful" {
   source = "../../../modules/stateful"
 
+  # feature toggles
+  module_features = {
+    beta_reader = false
+  }
+
   aurora_config = {
     instance_class = "db.r5.12xlarge"
     cluster_nodes  = 3
