@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -149,12 +150,12 @@ public final class PipelineManager {
      * the other jobs get executed, as and when needed. Note that it will permanently tie up two of
      * the job executors, as they're designed to run forever.
      */
-    VolunteerJob volunteerJob = new VolunteerJob(this, jobRecordStore);
+    VolunteerJob volunteerJob = new VolunteerJob(appMetrics, this, jobRecordStore);
     registerJob(volunteerJob);
     PipelineJobRecord<NullPipelineJobArguments> volunteerJobRecord =
         jobRecordStore.submitPendingJob(VolunteerJob.JOB_TYPE, null);
     enqueueJob(volunteerJobRecord);
-    SchedulerJob schedulerJob = new SchedulerJob(this, jobRecordStore);
+    SchedulerJob schedulerJob = new SchedulerJob(appMetrics, this, jobRecordStore);
     registerJob(schedulerJob);
     jobRecordStore.submitPendingJob(SchedulerJob.JOB_TYPE, null);
   }
@@ -219,6 +220,9 @@ public final class PipelineManager {
    *     not be (e.g. because {@link #stop()} has been called)
    */
   public <A extends PipelineJobArguments> boolean enqueueJob(PipelineJobRecord<A> jobRecord) {
+    Timer.Context timerEnqueue =
+        appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "enqueue")).time();
+
     // First, find the specified job.
     @SuppressWarnings("unchecked")
     PipelineJob<A> job = (PipelineJob<A>) jobRegistry.get(jobRecord.getJobType());
@@ -262,6 +266,7 @@ public final class PipelineManager {
     Futures.addCallback(
         jobFuture, new PipelineJobCallback<A>(jobWrapper.getJobRecord()), this.jobMonitorsExecutor);
 
+    timerEnqueue.stop();
     return true;
   }
 
@@ -275,6 +280,8 @@ public final class PipelineManager {
       return;
     }
 
+    Timer.Context timerStop =
+        appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "stop")).time();
     LOGGER.info("Stopping PipelineManager...");
 
     /*
@@ -335,6 +342,7 @@ public final class PipelineManager {
       }
     }
     LOGGER.info("Stopped PipelineManager.");
+    timerStop.stop();
   }
 
   /**
@@ -439,6 +447,7 @@ public final class PipelineManager {
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
         jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
+        LOGGER.warn(String.format("Job failed: jobRecord='%s'", jobRecord), e);
 
         // Wrap and re-thrown the failure.
         throw new Exception("Re-throwing job failure.", e);

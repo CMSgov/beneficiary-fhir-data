@@ -1,10 +1,13 @@
 package gov.cms.bfd.pipeline.sharedutils.jobs.store;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobRecordId;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +30,8 @@ public final class PipelineJobRecordStore {
   /** The number of milliseconds to wait between polling job dependencies' status. */
   private static final int JOB_DEPENDENCY_POLL_MILLIS = 100;
 
+  private final MetricRegistry appMetrics;
+
   /**
    * The "database" for all {@link PipelineJobRecord}s in the application.
    *
@@ -37,8 +42,13 @@ public final class PipelineJobRecordStore {
    */
   private final ConcurrentMap<PipelineJobRecordId, PipelineJobRecord<?>> jobRecords;
 
-  /** Constructs a new {@link PipelineJobRecordStore} instance. */
-  public PipelineJobRecordStore() {
+  /**
+   * Constructs a new {@link PipelineJobRecordStore} instance.
+   *
+   * @param appMetrics the {@link MetricRegistry} for the overall application
+   */
+  public PipelineJobRecordStore(MetricRegistry appMetrics) {
+    this.appMetrics = appMetrics;
     this.jobRecords = new ConcurrentHashMap<>();
   }
 
@@ -58,12 +68,22 @@ public final class PipelineJobRecordStore {
    *     PipelineJobRecord#isStarted()} is <code>false</code>
    */
   public Set<PipelineJobRecord<?>> findPendingJobs(int maxJobRecords) {
-    // TODO Is this actually performant at our production scale? I'd guess not.
-    // TODO This is almost certainly not FIFO, and should be.
-    return jobRecords.values().stream()
-        .filter(j -> !j.isStarted())
-        .limit(maxJobRecords)
-        .collect(Collectors.toSet());
+    try (Timer.Context timer =
+        appMetrics
+            .timer(MetricRegistry.name(getClass().getSimpleName(), "findPendingJobs"))
+            .time()) {
+      /*
+       * Design note: We don't garbage collect completed jobs, so this will get slower as job count
+       * grows. However, in tests to simulate this behavior, it looks like it only gets up to the
+       * tens of milliseconds after a week of operation, worst-case, with our current number of
+       * jobs. That's acceptable, since only VolunteerJob calls this.
+       */
+      return jobRecords.values().stream()
+          .filter(j -> !j.isStarted())
+          .sorted(Comparator.comparing(PipelineJobRecord::getCreatedTime))
+          .limit(maxJobRecords)
+          .collect(Collectors.toSet());
+    }
   }
 
   /**
@@ -74,13 +94,24 @@ public final class PipelineJobRecordStore {
   @SuppressWarnings({"unchecked", "rawtypes"})
   public <A extends PipelineJobArguments> Optional<PipelineJobRecord<A>> findMostRecent(
       PipelineJobType<A> type) {
-    // TODO Is this actually performant at our production scale? I'd guess not.
-    if (type == null) throw new IllegalArgumentException();
-    Optional mostRecentRecord =
-        jobRecords.values().stream()
-            .filter(j -> type.equals(j.getJobType()))
-            .max(Comparator.comparing(PipelineJobRecord::getCreatedTime));
-    return mostRecentRecord;
+    try (Timer.Context timer =
+        appMetrics
+            .timer(MetricRegistry.name(getClass().getSimpleName(), "findMostRecent"))
+            .time()) {
+      if (type == null) throw new IllegalArgumentException();
+
+      /*
+       * Design note: We don't garbage collect completed jobs, so this will get slower as job count
+       * grows. However, in tests to simulate this behavior, it looks like it only gets up to the
+       * tens of milliseconds after a week of operation, worst-case, with our current number of
+       * jobs. That's acceptable, since only SchedulerJob calls this.
+       */
+      Optional mostRecentRecord =
+          jobRecords.values().stream()
+              .filter(j -> type.equals(j.getJobType()))
+              .max(Comparator.comparing(PipelineJobRecord::getCreatedTime));
+      return mostRecentRecord;
+    }
   }
 
   /**
@@ -117,6 +148,12 @@ public final class PipelineJobRecordStore {
     if (jobRecord == null) throw new IllegalStateException();
 
     jobRecord.setEnqueuedTime(Instant.now());
+
+    // Record how long it took the job to go from being created to being enqueued.
+    appMetrics
+        .timer(MetricRegistry.name(PipelineJob.class.getSimpleName(), "createdToEnqueued"))
+        .update(Duration.between(jobRecord.getCreatedTime(), jobRecord.getEnqueuedTime().get()));
+
     LOGGER.trace("recordJobEnqueue(...) called: jobRecord='{}'", jobRecord);
   }
 
@@ -132,6 +169,13 @@ public final class PipelineJobRecordStore {
     if (jobRecord == null) throw new IllegalStateException();
 
     jobRecord.setStartedTime(Instant.now());
+
+    // Record how long it took the job to go from being enqueued to being started.
+    appMetrics
+        .timer(MetricRegistry.name(PipelineJob.class.getSimpleName(), "enqueuedToStarted"))
+        .update(
+            Duration.between(jobRecord.getEnqueuedTime().get(), jobRecord.getStartedTime().get()));
+
     LOGGER.trace("recordJobStart(...) called: jobRecord='{}'", jobRecord);
   }
 
@@ -147,6 +191,16 @@ public final class PipelineJobRecordStore {
     if (jobRecord == null) throw new IllegalStateException();
 
     jobRecord.setCanceledTime(Instant.now());
+
+    // Record how long it took the job to go from being started to being canceled.
+    if (jobRecord.getStartedTime().isPresent()) {
+      appMetrics
+          .timer(MetricRegistry.name(PipelineJob.class.getSimpleName(), "startedToCanceled"))
+          .update(
+              Duration.between(
+                  jobRecord.getStartedTime().get(), jobRecord.getCanceledTime().get()));
+    }
+
     LOGGER.trace("recordJobCancellation(...) called: jobRecord='{}'", jobRecord);
   }
 
@@ -164,6 +218,15 @@ public final class PipelineJobRecordStore {
     if (jobRecord == null) throw new IllegalStateException();
 
     jobRecord.setCompleted(Instant.now(), jobOutcome);
+
+    // Record how long it took the job to go from being started to being completed (succeeded).
+    appMetrics
+        .timer(
+            MetricRegistry.name(
+                PipelineJob.class.getSimpleName(), "startedToCompleted", "succeeded"))
+        .update(
+            Duration.between(jobRecord.getStartedTime().get(), jobRecord.getCompletedTime().get()));
+
     LOGGER.trace("recordJobCompletion(...) called: jobRecord='{}'", jobRecord);
   }
 
@@ -181,6 +244,14 @@ public final class PipelineJobRecordStore {
     if (jobRecord == null) throw new IllegalStateException();
 
     jobRecord.setCompleted(Instant.now(), jobFailure);
+
+    // Record how long it took the job to go from being started to being completed (failed).
+    appMetrics
+        .timer(
+            MetricRegistry.name(PipelineJob.class.getSimpleName(), "startedToCompleted", "failed"))
+        .update(
+            Duration.between(jobRecord.getStartedTime().get(), jobRecord.getCompletedTime().get()));
+
     LOGGER.trace("recordJobFailure(...) called: jobRecord='{}'", jobRecord);
   }
 

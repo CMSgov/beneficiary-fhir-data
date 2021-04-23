@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.app.volunteer;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.pipeline.app.PipelineManager;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -31,17 +33,23 @@ public final class VolunteerJob implements PipelineJob<NullPipelineJobArguments>
    */
   public static long VOLUNTEER_TICK_MILLIS = 10 * 1000;
 
+  private final MetricRegistry appMetrics;
   private final PipelineManager pipelineManager;
   private final PipelineJobRecordStore jobRecordsStore;
 
   /**
    * Constructs the {@link VolunteerJob}, which should be a singleton within its JVM.
    *
+   * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param pipelineManager the {@link PipelineManager} that jobs should be run on
    * @param jobRecordsStore the {@link PipelineJobRecordStore} tracking jobs that have been
    *     submitted for execution
    */
-  public VolunteerJob(PipelineManager pipelineManager, PipelineJobRecordStore jobRecordsStore) {
+  public VolunteerJob(
+      MetricRegistry appMetrics,
+      PipelineManager pipelineManager,
+      PipelineJobRecordStore jobRecordsStore) {
+    this.appMetrics = appMetrics;
     this.pipelineManager = pipelineManager;
     this.jobRecordsStore = jobRecordsStore;
   }
@@ -63,21 +71,28 @@ public final class VolunteerJob implements PipelineJob<NullPipelineJobArguments>
   public PipelineJobOutcome call() throws Exception {
     boolean enqueuedAJob = false;
     while (true) {
-      /*
-       * We want to submit up to as many jobs for execution as we can actually work, each iteration
-       * of this loop.
-       */
-      int executorSlotsOpen = pipelineManager.getOpenExecutorSlots();
-      Set<PipelineJobRecord<?>> jobsToStart = jobRecordsStore.findPendingJobs(executorSlotsOpen);
-      LOGGER.trace(
-          "call() called: executorSlotsOpen='{}', jobsToStart='{}'",
-          executorSlotsOpen,
-          jobsToStart);
+      try (Timer.Context timer =
+          appMetrics
+              .timer(MetricRegistry.name(getClass().getSimpleName(), "call", "iteration"))
+              .time()) {
+        /*
+         * We want to submit up to as many jobs for execution as we can actually work, each
+         * iteration of this loop.
+         */
+        int executorSlotsOpen = pipelineManager.getOpenExecutorSlots();
+        if (executorSlotsOpen <= 0) continue;
 
-      // Submit those jobs to start running!
-      for (PipelineJobRecord<?> jobToStart : jobsToStart) {
-        pipelineManager.enqueueJob(jobToStart);
-        enqueuedAJob = true;
+        Set<PipelineJobRecord<?>> jobsToStart = jobRecordsStore.findPendingJobs(executorSlotsOpen);
+        LOGGER.trace(
+            "call() called: executorSlotsOpen='{}', jobsToStart='{}'",
+            executorSlotsOpen,
+            jobsToStart);
+
+        // Submit those jobs to start running!
+        for (PipelineJobRecord<?> jobToStart : jobsToStart) {
+          pipelineManager.enqueueJob(jobToStart);
+          enqueuedAJob = true;
+        }
       }
 
       try {

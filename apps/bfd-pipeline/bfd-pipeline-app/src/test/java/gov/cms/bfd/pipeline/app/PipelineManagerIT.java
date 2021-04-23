@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.pipeline.app.scheduler.SchedulerJob;
 import gov.cms.bfd.pipeline.app.volunteer.VolunteerJob;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
@@ -13,15 +14,22 @@ import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Integration tests for {@link PipelineManager}, {@link PipelineJobRecordStore}, and friends. */
 public final class PipelineManagerIT {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManagerIT.class);
+
   /**
    * Verifies that {@link PipelineManager} automatically runs {@link MockJob} and {@link
    * SchedulerJob}, as expected.
@@ -29,8 +37,9 @@ public final class PipelineManagerIT {
   @Test
   public void runBuiltinJobs() {
     // Create the pipeline.
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
-    new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MetricRegistry appMetrics = new MetricRegistry();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+    new PipelineManager(appMetrics, jobRecordStore);
 
     // Verify that there are job records for the built-ins.
     Assert.assertEquals(2, jobRecordStore.getJobRecords().size());
@@ -46,8 +55,9 @@ public final class PipelineManagerIT {
   @Test
   public void runSuccessfulMockOneshotJob() {
     // Create the pipeline and have it run a mock job.
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
-    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MetricRegistry appMetrics = new MetricRegistry();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     MockJob mockJob = new MockJob(Optional.empty(), () -> PipelineJobOutcome.WORK_DONE);
     pipelineManager.registerJob(mockJob);
     jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
@@ -75,8 +85,9 @@ public final class PipelineManagerIT {
   @Test
   public void runFailingMockOneshotJob() {
     // Create the pipeline and have it run a mock job.
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
-    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MetricRegistry appMetrics = new MetricRegistry();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     MockJob mockJob =
         new MockJob(
             Optional.empty(),
@@ -109,8 +120,9 @@ public final class PipelineManagerIT {
   @Test
   public void runSuccessfulScheduledJob() {
     // Create the pipeline and have it run a mock job.
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
-    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MetricRegistry appMetrics = new MetricRegistry();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     MockJob mockJob =
         new MockJob(
             Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
@@ -141,8 +153,9 @@ public final class PipelineManagerIT {
   @Test
   public void runFailingScheduledJob() {
     // Create the pipeline and have it run a mock job.
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
-    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MetricRegistry appMetrics = new MetricRegistry();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     MockJob mockJob =
         new MockJob(
             Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
@@ -182,8 +195,9 @@ public final class PipelineManagerIT {
   @Test
   public void runInterruptibleJobsThenStop() {
     // Create the pipeline and have it run a mock job.
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
-    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MetricRegistry appMetrics = new MetricRegistry();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     MockJob mockJob =
         new MockJob(
             Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
@@ -217,8 +231,9 @@ public final class PipelineManagerIT {
   @Test
   public void runUninterruptibleJobsThenStop() {
     // Create the pipeline and have it run a mock job.
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
-    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MetricRegistry appMetrics = new MetricRegistry();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     MockJob mockJob =
         new MockJob(
             Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
@@ -247,8 +262,9 @@ public final class PipelineManagerIT {
   @Test
   public void runThenStopAndCancelPendingJobs() {
     // Create the pipeline and a slow mock job that we can use.
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
-    PipelineManager pipelineManager = new PipelineManager(new MetricRegistry(), jobRecordStore);
+    MetricRegistry appMetrics = new MetricRegistry();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     MockJob mockJob =
         new MockJob(
             Optional.empty(),
@@ -298,6 +314,98 @@ public final class PipelineManagerIT {
             .isPresent());
   }
 
+  /**
+   * Verifies that {@link PipelineManager} can performantly handle large numbers of job executions,
+   * as expected. Note that "performantly" is relative to what we need: fast enough to run a few
+   * jobs every second of the day. Mostly, though, this test case is used as a good way to inspect
+   * and evaluate the various metrics that the application collects.
+   *
+   * <p>This is intentionally left ignored most of the time, so as to not slow down our builds. It
+   * should only be run if/when someone is looking into performance issues.
+   */
+  @Test
+  @Ignore
+  public void runWayTooManyJobsThenStop() {
+    // Let's speed things up a bit, so we can run more iterations, faster.
+    SchedulerJob.SCHEDULER_TICK_MILLIS = 1;
+    VolunteerJob.VOLUNTEER_TICK_MILLIS = 1;
+
+    try {
+      MetricRegistry appMetrics = new MetricRegistry();
+      Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build().start(30, TimeUnit.SECONDS);
+
+      // Create the pipeline.
+      PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
+      PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
+
+      // Register a mock unscheduled job.
+      MockJob mockUnscheduledJob =
+          new MockJob(
+              Optional.empty(),
+              () -> {
+                return PipelineJobOutcome.WORK_DONE;
+              });
+      pipelineManager.registerJob(mockUnscheduledJob);
+
+      // Register a second scheduled job.
+      MockJob mockScheduledJob =
+          new MockJob(
+              Optional.of(new PipelineJobSchedule(1, ChronoUnit.MILLIS)),
+              () -> {
+                return PipelineJobOutcome.WORK_DONE;
+              }) {
+            /*
+             * Very hacky, but here we're extending MockJob with an anonymous class that has a
+             * different getType() value.
+             */
+
+            /** @see gov.cms.bfd.pipeline.app.PipelineManagerIT.MockJob#getType() */
+            @Override
+            public PipelineJobType<NullPipelineJobArguments> getType() {
+              return new PipelineJobType<>(this);
+            }
+          };
+      pipelineManager.registerJob(mockScheduledJob);
+
+      /*
+       * Submit way too many executions of the unscheduled job. The number here corresponds to how
+       * many executions you'd get if it was run once a second, every second of the day.
+       */
+      for (int i = 0; i < 24 * 60 * 60; i++) {
+        jobRecordStore.submitPendingJob(MockJob.JOB_TYPE, null);
+      }
+
+      /*
+       * Wait until all of the jobs have completed, with a large timeout. Don't worry: it only takes
+       * about 500 seconds on my system.
+       */
+      Awaitility.await()
+          .atMost(20, TimeUnit.MINUTES)
+          .until(
+              () ->
+                  jobRecordStore.getJobRecords().stream()
+                          .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isCompleted())
+                          .findAny()
+                          .isPresent()
+                      == false);
+
+      // Stop the pipeline.
+      pipelineManager.stop();
+
+      // Verify that all jobs completed successfully.
+      Set<PipelineJobRecord<?>> unsuccessfulJobs =
+          jobRecordStore.getJobRecords().stream()
+              .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isCompletedSuccessfully())
+              .collect(Collectors.toSet());
+      Assert.assertEquals(0, unsuccessfulJobs.size());
+
+      // Ensure that the final metrics get logged.
+      Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build().report();
+    } finally {
+      configureTimers();
+    }
+  }
+
   /** Reduce tick time on built-in jobs, to speed test execution. */
   @BeforeClass
   public static void configureTimers() {
@@ -306,7 +414,7 @@ public final class PipelineManagerIT {
   }
 
   /** This mock {@link PipelineJob} returns a specified result. */
-  private static final class MockJob implements PipelineJob<NullPipelineJobArguments> {
+  private static class MockJob implements PipelineJob<NullPipelineJobArguments> {
     public static final PipelineJobType<NullPipelineJobArguments> JOB_TYPE =
         new PipelineJobType<NullPipelineJobArguments>(MockJob.class);
 

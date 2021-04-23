@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.app.scheduler;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import gov.cms.bfd.pipeline.app.PipelineManager;
 import gov.cms.bfd.pipeline.app.volunteer.VolunteerJob;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
@@ -36,6 +38,7 @@ public final class SchedulerJob implements PipelineJob<NullPipelineJobArguments>
    */
   public static long SCHEDULER_TICK_MILLIS = 10 * 1000;
 
+  private final MetricRegistry appMetrics;
   private final PipelineManager pipelineManager;
   private final PipelineJobRecordStore jobRecordsStore;
 
@@ -43,11 +46,16 @@ public final class SchedulerJob implements PipelineJob<NullPipelineJobArguments>
    * Constructs the {@link SchedulerJob}, which should be a singleton within the application
    * environment.
    *
+   * @param appMetrics the {@link MetricRegistry} for the overall application
    * @param pipelineManager the {@link PipelineManager} that jobs should be run on
    * @param jobRecordsStore the {@link PipelineJobRecordStore} tracking jobs that have been
    *     submitted for execution
    */
-  public SchedulerJob(PipelineManager pipelineManager, PipelineJobRecordStore jobRecordsStore) {
+  public SchedulerJob(
+      MetricRegistry appMetrics,
+      PipelineManager pipelineManager,
+      PipelineJobRecordStore jobRecordsStore) {
+    this.appMetrics = appMetrics;
     this.pipelineManager = pipelineManager;
     this.jobRecordsStore = jobRecordsStore;
   }
@@ -69,47 +77,53 @@ public final class SchedulerJob implements PipelineJob<NullPipelineJobArguments>
   public PipelineJobOutcome call() throws Exception {
     boolean scheduledAJob = false;
     while (true) {
-      Instant now = Instant.now();
-      Set<PipelineJob<NullPipelineJobArguments>> scheduledJobs = pipelineManager.getScheduledJobs();
-      for (PipelineJob<NullPipelineJobArguments> scheduledJob : scheduledJobs) {
-        PipelineJobSchedule jobSchedule = scheduledJob.getSchedule().get();
-        Optional<PipelineJobRecord<NullPipelineJobArguments>> mostRecentExecution =
-            jobRecordsStore.findMostRecent(scheduledJob.getType());
+      try (Timer.Context timer =
+          appMetrics
+              .timer(MetricRegistry.name(getClass().getSimpleName(), "call", "iteration"))
+              .time()) {
+        Instant now = Instant.now();
+        Set<PipelineJob<NullPipelineJobArguments>> scheduledJobs =
+            pipelineManager.getScheduledJobs();
+        for (PipelineJob<NullPipelineJobArguments> scheduledJob : scheduledJobs) {
+          PipelineJobSchedule jobSchedule = scheduledJob.getSchedule().get();
+          Optional<PipelineJobRecord<NullPipelineJobArguments>> mostRecentExecution =
+              jobRecordsStore.findMostRecent(scheduledJob.getType());
 
-        /* Calculate whether or not we should trigger an execution of the next job. */
-        boolean shouldTriggerJob;
-        if (!mostRecentExecution.isPresent()) {
-          // If the job has never run, we'll always trigger it now, regardless of schedule.
-          shouldTriggerJob = true;
-        } else {
-          if (!mostRecentExecution.get().isCompleted()) {
-            // If the job's still pending or running, don't double-trigger it.
-            shouldTriggerJob = false;
+          /* Calculate whether or not we should trigger an execution of the next job. */
+          boolean shouldTriggerJob;
+          if (!mostRecentExecution.isPresent()) {
+            // If the job has never run, we'll always trigger it now, regardless of schedule.
+            shouldTriggerJob = true;
           } else {
-            if (mostRecentExecution.get().isCompletedSuccessfully()) {
-              // If the job's not running, check to see if it's time to trigger it again.
-              // Note: This calculation is based on completion time, not submission or start time.
-              Instant nextExecution =
-                  mostRecentExecution
-                      .get()
-                      .getStartedTime()
-                      .get()
-                      .plus(jobSchedule.getRepeatDelay(), jobSchedule.getRepeatDelayUnit());
-              shouldTriggerJob = now.equals(nextExecution) || now.isAfter(nextExecution);
-            } else {
-              // We don't re-run failed jobs.
+            if (!mostRecentExecution.get().isCompleted()) {
+              // If the job's still pending or running, don't double-trigger it.
               shouldTriggerJob = false;
+            } else {
+              if (mostRecentExecution.get().isCompletedSuccessfully()) {
+                // If the job's not running, check to see if it's time to trigger it again.
+                // Note: This calculation is based on completion time, not submission or start time.
+                Instant nextExecution =
+                    mostRecentExecution
+                        .get()
+                        .getStartedTime()
+                        .get()
+                        .plus(jobSchedule.getRepeatDelay(), jobSchedule.getRepeatDelayUnit());
+                shouldTriggerJob = now.equals(nextExecution) || now.isAfter(nextExecution);
+              } else {
+                // We don't re-run failed jobs.
+                shouldTriggerJob = false;
+              }
             }
           }
-        }
 
-        // If we shouldn't trigger this job, move on to the next.
-        if (!shouldTriggerJob) {
-          continue;
-        }
+          // If we shouldn't trigger this job, move on to the next.
+          if (!shouldTriggerJob) {
+            continue;
+          }
 
-        // Trigger the job (for future execution, when VolunteerJob picks it up)!
-        jobRecordsStore.submitPendingJob(scheduledJob.getType(), null);
+          // Trigger the job (for future execution, when VolunteerJob picks it up)!
+          jobRecordsStore.submitPendingJob(scheduledJob.getType(), null);
+        }
       }
 
       try {

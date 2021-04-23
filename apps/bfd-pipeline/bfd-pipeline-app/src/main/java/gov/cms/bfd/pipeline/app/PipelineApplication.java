@@ -122,7 +122,7 @@ public final class PipelineApplication {
      * Create the PipelineManager that will be responsible for running and managing the various
      * jobs.
      */
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore();
+    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
     PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
     registerShutdownHook(appMetrics, pipelineManager);
     LOGGER.info("Job processing started.");
