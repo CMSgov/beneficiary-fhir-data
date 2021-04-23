@@ -96,8 +96,9 @@ public final class PipelineManager {
    *       #jobsEnqueuedHandles}.
    *   <li>{@link ConcurrentMap#size()} SHALL only be read on the {@link VolunteerJob}'s thread
    *       (aside from reads for metrics, which SHALL NOT be used for any application logic).
-   *   <li>Jobs SHALL only be removed by {@link PipelineJobWrapper} and {@link PipelineJobCallback}.
-   *       (This is just to prevent runaway memory growth.)
+   *   <li>Jobs SHALL only be removed by {@link PipelineJobWrapper} and {@link PipelineJobCallback},
+   *       ensuring that the job is removed from to {@link #jobsEnqueuedHandles} in a block that is
+   *       {@code synchronized} on {@link #jobsEnqueuedHandles}.
    *   <li>All other reads of this collection (e.g. {@link #stop()}) SHALL {@code synchronize} on
    *       it.
    * </ul>
@@ -442,7 +443,9 @@ public final class PipelineManager {
         // Wrap and re-thrown the failure.
         throw new Exception("Re-throwing job failure.", e);
       } finally {
-        jobsEnqueuedHandles.remove(jobRecord.getId());
+        synchronized (jobsEnqueuedHandles) {
+          jobsEnqueuedHandles.remove(jobRecord.getId());
+        }
       }
     }
   }
@@ -480,7 +483,9 @@ public final class PipelineManager {
          * way we have to catch cancel-before-start events (the PipelineJobWrapper can't do it,
          * since it won't get called in the first place).
          */
-        jobsEnqueuedHandles.remove(jobRecord.getId());
+        synchronized (jobsEnqueuedHandles) {
+          jobsEnqueuedHandles.remove(jobRecord.getId());
+        }
         jobRecordStore.recordJobCancellation(jobRecord.getId());
       }
     }
