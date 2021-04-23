@@ -1,0 +1,18 @@
+# This file configures the New Relic Agent.  New Relic monitors
+# Java applications with deep visibility and low overhead.  For more details and additional
+# configuration options visit https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file.
+
+transaction_events:
+  custom_request_headers:
+    - header_name: "BlueButton-OriginalQueryId"
+    - header_name: "BlueButton-OriginalQueryId"
+    - header_name: "BlueButton-OriginalQueryCounter"
+    - header_name: "BlueButton-OriginalQueryTimestamp"
+    - header_name: "BlueButton-DeveloperId"
+    - header_name: "BlueButton-Developer"
+    - header_name: "BlueButton-ApplicationId"
+    - header_name: "BlueButton-Application"
+    - header_name: "BlueButton-UserId"
+    - header_name: "BlueButton-User"
+    - header_name: "BlueButton-BeneficiaryId"
+    - header_name: "x-forwarded-for"

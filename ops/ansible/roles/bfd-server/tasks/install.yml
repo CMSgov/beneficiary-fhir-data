@@ -71,6 +71,16 @@
     mode: u=rw,g=r,o=r
   become: true
 
+- name: Copy New Relic Java Agent Config
+  copy:
+    src: 'newrelic.yml.j2'
+    dest: "{{ data_server_dir }}/newrelic/newrelic.yml"
+    remote_src: true
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=r,o=r
+  become: true
+
 - name: Configure New Relic Extensions
   template:
     src: 'newrelic_tracing.xml.j2'
