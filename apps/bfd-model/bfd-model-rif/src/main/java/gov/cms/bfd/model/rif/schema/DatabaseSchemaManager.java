@@ -7,7 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.configuration.FluentConfiguration;
+import org.flywaydb.core.internal.dbsupport.DbSupport;
+import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
+import org.flywaydb.core.internal.dbsupport.SqlScript;
+import org.flywaydb.core.internal.util.PlaceholderReplacer;
+import org.flywaydb.core.internal.util.jdbc.JdbcUtils;
+import org.flywaydb.core.internal.util.scanner.classpath.ClassPathResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,28 +39,41 @@ public final class DatabaseSchemaManager {
   public static void createOrUpdateSchema(DataSource dataSource) {
     LOGGER.info("Schema create/upgrade: running...");
 
-    Flyway flyway = createFlyway(dataSource);
+    Flyway flyway = new Flyway();
+
+    // Trying to prevent career-limiting mistakes.
+    flyway.setCleanDisabled(true);
+
+    flyway.setDataSource(dataSource);
+    flyway.setPlaceholders(createScriptPlaceholdersMap(dataSource));
     flyway.migrate();
 
     LOGGER.info("Schema create/upgrade: complete.");
   }
 
   /**
-   * @param dataSource the {@link DataSource} to run {@link Flyway} against
-   * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
+   * <strong>WARNING:</strong> This method should never be run against a production database that is
+   * in-service. Any queries against the database will take over ten minutes to complete. This
+   * method is only intended for (very careful) use when initially loading an empty database. Drops
+   * all indexes in the specified database.
+   *
+   * @param dataSource the JDBC {@link DataSource} for the database whose schema should be modified
    */
-  private static Flyway createFlyway(DataSource dataSource) {
-    FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
-    flywayBuilder.placeholders(createScriptPlaceholdersMap(dataSource));
+  public static void dropIndexes(DataSource dataSource) {
+    Connection connectionMetaDataTable = JdbcUtils.openConnection(dataSource);
+    DbSupport dbSupport = DbSupportFactory.createDbSupport(connectionMetaDataTable, true);
 
-    // Seems to be required in our tests for some reason that I couldn't debug.
-    flywayBuilder.connectRetries(5);
+    String source =
+        new ClassPathResource(
+                "db/scripts/Drop_all_constraints.sql", DatabaseSchemaManager.class.getClassLoader())
+            .loadAsString("UTF-8");
+    source =
+        new PlaceholderReplacer(createScriptPlaceholdersMap(dataSource), "${", "}")
+            .replacePlaceholders(source);
 
-    // Trying to prevent career-limiting mistakes.
-    flywayBuilder.cleanDisabled(true);
+    SqlScript disableConstraintsScript = new SqlScript(source, dbSupport);
 
-    Flyway flyway = flywayBuilder.load();
-    return flyway;
+    disableConstraintsScript.execute(dbSupport.getJdbcTemplate());
   }
 
   /**
