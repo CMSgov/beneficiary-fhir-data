@@ -39,7 +39,35 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   private final A jobArguments;
   private final Instant createdTime;
   private Optional<Instant> canceledTime;
-  private Optional<Instant> enqueuedTime;
+
+  /**
+   * "Why is this variable {@code volatile}," you might ask? Good question! The short answer is the
+   * unhelpful, "because things can crash unless it is." The <em>better</em> answer is complicated:
+   * When the VolunteerJob is bootstrapped, it's enqueued by PipelineManager's constructor, and ends
+   * up setting this field -- on the application's main thread. Then, VolunteerJob starts running,
+   * and goes looking for non-enqueued jobs. Unless this field is volatile, it will sometimes "find
+   * itself" (lol), thinking that it's not enqueued, because it's reading a stale value of it. That
+   * causes things to go boom. So: we mark this as volatile, and everything's copacetic. Isn't
+   * concurrency fun?!
+   *
+   * <p>There's also be an issue with the other jobs, where they get enqueued by the VolunteerJob on
+   * its thread and then, when they try to fire their start event on their thread, notice that
+   * they're not enqueued and freak out about it. Marking this as {@code volatile} fixes that, too.
+   *
+   * <p>"Okay, so why aren't the other fields {@code volatile}, too," you might then ask? Also a
+   * good question! It's because the start and completed events always run on the job's worker
+   * thread and those events aren't queried on any other threads for anything important. (Worth
+   * noting: the {@code final} are safe, just due to how they're treated in the Java Memory Model.)
+   *
+   * <p>"You left out cancel, though," you might follow up with. Good catch! But mostly, it just
+   * doesn't really matter, even though it is set by a different thread, as it's not relied on for
+   * anything important.
+   *
+   * <p>If <strong>any</strong> of these other fields end up landing in application logic, we may
+   * need to mark them volatile -- depending on exactly how they're used and accessed.
+   */
+  private volatile Optional<Instant> enqueuedTime;
+
   private Optional<Instant> startedTime;
   private Optional<Instant> completedTime;
   private Optional<PipelineJobOutcome> outcome;
