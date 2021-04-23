@@ -309,6 +309,12 @@ public final class TransformerConstants {
       "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
 
   /**
+   * The {@link Identifier#getSystem()} used in {@link Patient} resources to store the beneficiaryId
+   * (BENE_ID)
+   */
+  public static final String CODING_BBAPI_BENE_ID = BASE_URL_BBAPI_RESOURCES + "/variables/bene_id";
+
+  /**
    * Fallback value to use when a record does not have a lastUpdated value. These records where
    * loaded before the lastUpdated feature was in place.
    */

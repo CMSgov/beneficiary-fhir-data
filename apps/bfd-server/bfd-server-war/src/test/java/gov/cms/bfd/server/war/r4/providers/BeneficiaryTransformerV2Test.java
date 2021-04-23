@@ -28,8 +28,8 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -85,10 +85,20 @@ public final class BeneficiaryTransformerV2Test {
     patient = BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders);
   }
 
-  @After
-  public void tearDown() {
-    beneficiary = null;
-    patient = null;
+  /** Common top level Patient ouput to console */
+  @Ignore
+  @Test
+  public void shouldOutputJSON() {
+    Assert.assertNotNull(patient);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
+  }
+
+  @Ignore
+  @Test
+  public void shouldOutputMbiHistory() {
+    createPatient(getRHwithIncldIdentityHdr("mbi"));
+    Assert.assertNotNull(patient);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
   }
 
   /** Common top level Patient values */
@@ -113,25 +123,137 @@ public final class BeneficiaryTransformerV2Test {
 
   /** Top level Identifiers */
   @Test
-  public void shouldHaveKnownIdentifiers() {
-    Assert.assertEquals(1, patient.getIdentifier().size());
+  public void shouldHaveKnownIdentifiersNoMbiHistory() {
+    Assert.assertEquals(2, patient.getIdentifier().size());
+  }
+
+  @Test
+  public void shouldHaveKnownIdentifiersWithMbiHistory() {
+    createPatient(getRHwithIncldIdentityHdr("mbi"));
+    Assert.assertEquals(3, patient.getIdentifier().size());
   }
 
   @Test
   public void shouldIncludeMemberIdentifier() {
     Identifier mbId =
         TransformerTestUtilsV2.findIdentifierBySystem(
-            "http://terminology.hl7.org/CodeSystem/v2-0203", patient.getIdentifier());
+            "https://bluebutton.cms.gov/resources/variables/bene_id", patient.getIdentifier());
 
     Identifier compare =
         TransformerTestUtilsV2.createIdentifier(
-            "http://terminology.hl7.org/CodeSystem/v2-0203",
-            "3456789",
+            "https://bluebutton.cms.gov/resources/variables/bene_id",
+            "567834",
             "http://terminology.hl7.org/CodeSystem/v2-0203",
             "MB",
             "");
 
     Assert.assertTrue(compare.equalsDeep(mbId));
+  }
+
+  @Test
+  public void shouldIncludeMedicareExtensionIdentifierCurrent() {
+    Identifier mcId =
+        TransformerTestUtilsV2.findIdentifierBySystem(
+            "http://hl7.org/fhir/sid/us-mbi", patient.getIdentifier());
+
+    Extension extension =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "current",
+                "Current"));
+
+    Period period = new Period();
+    try {
+      Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
+      period.setStart(start, TemporalPrecisionEnum.DAY);
+    } catch (Exception e) {
+    }
+
+    Identifier compare = new Identifier();
+    compare
+        .setValue("3456789")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .setPeriod(period)
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+
+    Assert.assertTrue(compare.equalsDeep(mcId));
+  }
+
+  @Test
+  public void shouldIncludeMedicareExtensionIdentifierWithHistory() {
+    createPatient(getRHwithIncldIdentityHdr("mbi"));
+
+    List<Identifier> patientIdentList = patient.getIdentifier();
+    Assert.assertEquals(3, patientIdentList.size());
+
+    ArrayList<Identifier> compareIdentList = new ArrayList<Identifier>();
+
+    Identifier ident =
+        TransformerTestUtilsV2.createIdentifier(
+            "https://bluebutton.cms.gov/resources/variables/bene_id",
+            "567834",
+            "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "MB",
+            "");
+
+    compareIdentList.add(ident);
+
+    Extension extension =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "current",
+                "Current"));
+
+    Period period = new Period();
+    try {
+      Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
+      period.setStart(start, TemporalPrecisionEnum.DAY);
+    } catch (Exception e) {
+    }
+
+    ident = new Identifier();
+    ident
+        .setValue("3456789")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .setPeriod(period)
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+    compareIdentList.add(ident);
+
+    extension =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "historic",
+                "Historic"));
+
+    ident = new Identifier();
+    ident
+        .setValue("9AB2WW3GR44")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+    compareIdentList.add(ident);
+
+    Assert.assertEquals(compareIdentList.size(), patientIdentList.size());
+    for (int i = 0; i < compareIdentList.size(); i++) {
+      Assert.assertTrue(compareIdentList.get(i).equalsDeep(patientIdentList.get(i)));
+    }
   }
 
   /** Top level Extension(s) */

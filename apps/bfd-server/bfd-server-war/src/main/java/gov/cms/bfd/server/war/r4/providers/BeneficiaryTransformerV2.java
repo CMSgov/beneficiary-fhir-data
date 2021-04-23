@@ -102,23 +102,18 @@ final class BeneficiaryTransformerV2 {
 
     // Required values not directly mapped
     patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
-
     patient.setId(beneficiary.getBeneficiaryId());
-    Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
 
+    // BENE_ID => patient.identifier
     TransformerUtilsV2.addIdentifierSlice(
         patient,
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE, "MB"),
-        mbiUnhashedCurrent,
-        Optional.of(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE));
+        Optional.of(beneficiary.getBeneficiaryId()),
+        Optional.of(TransformerConstants.CODING_BBAPI_BENE_ID));
 
-    // Add lastUpdated
-    TransformerUtilsV2.setLastUpdated(patient, beneficiary.getLastUpdated());
-
-    // NOTE - No longer returning any HCIN value(s) in V2
-
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
+    // Unhashed MBI
+    if (beneficiary.getMedicareBeneficiaryId().isPresent()) {
       Period mbiPeriod = new Period();
       if (beneficiary.getMbiEffectiveDate().isPresent()) {
         TransformerUtilsV2.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
@@ -129,11 +124,18 @@ final class BeneficiaryTransformerV2 {
 
       addUnhashedIdentifier(
           patient,
-          mbiUnhashedCurrent.get(),
-          TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+          beneficiary.getMedicareBeneficiaryId().get(),
+          TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
           TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT),
           mbiPeriod);
+    }
 
+    // Add lastUpdated
+    TransformerUtilsV2.setLastUpdated(patient, beneficiary.getLastUpdated());
+
+    // NOTE - No longer returning any HCIN value(s) in V2
+
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
       Extension historicalIdentifier =
           TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
       List<String> unhashedMbis = new ArrayList<String>();
@@ -153,7 +155,7 @@ final class BeneficiaryTransformerV2 {
         addUnhashedIdentifier(
             patient,
             mbi,
-            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
             historicalIdentifier,
             null);
       }
@@ -354,7 +356,6 @@ final class BeneficiaryTransformerV2 {
       Period mbiPeriod) {
 
     if (mbiPeriod != null && (mbiPeriod.hasStart() || mbiPeriod.hasEnd())) {
-
       patient
           .addIdentifier()
           .setValue(value)
@@ -362,8 +363,8 @@ final class BeneficiaryTransformerV2 {
           .setPeriod(mbiPeriod)
           .getType()
           .addCoding()
-          .setCode("MB")
-          .setDisplay("Member Number")
+          .setCode("MC")
+          .setDisplay("Patient's Medicare number")
           .addExtension(identifierCurrencyExtension);
     } else {
       patient
@@ -372,8 +373,8 @@ final class BeneficiaryTransformerV2 {
           .setSystem(system)
           .getType()
           .addCoding()
-          .setCode("MB")
-          .setDisplay("Member Number")
+          .setCode("MC")
+          .setDisplay("Patient's Medicare number")
           .addExtension(identifierCurrencyExtension);
     }
   }
