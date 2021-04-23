@@ -127,10 +127,11 @@ public final class BeneficiaryTransformerV2Test {
     Assert.assertEquals(2, patient.getIdentifier().size());
   }
 
+  /** Sample_A data */
   @Test
   public void shouldHaveKnownIdentifiersWithMbiHistory() {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
-    Assert.assertEquals(3, patient.getIdentifier().size());
+    Assert.assertEquals(2, patient.getIdentifier().size());
   }
 
   @Test
@@ -145,7 +146,7 @@ public final class BeneficiaryTransformerV2Test {
             "567834",
             "http://terminology.hl7.org/CodeSystem/v2-0203",
             "MB",
-            "");
+            "Member Number");
 
     Assert.assertTrue(compare.equalsDeep(mbId));
   }
@@ -179,6 +180,7 @@ public final class BeneficiaryTransformerV2Test {
         .getType()
         .addCoding()
         .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
         .setDisplay("Patient's Medicare number")
         .addExtension(extension);
 
@@ -190,7 +192,7 @@ public final class BeneficiaryTransformerV2Test {
     createPatient(getRHwithIncldIdentityHdr("mbi"));
 
     List<Identifier> patientIdentList = patient.getIdentifier();
-    Assert.assertEquals(3, patientIdentList.size());
+    Assert.assertEquals(2, patientIdentList.size());
 
     ArrayList<Identifier> compareIdentList = new ArrayList<Identifier>();
 
@@ -200,7 +202,7 @@ public final class BeneficiaryTransformerV2Test {
             "567834",
             "http://terminology.hl7.org/CodeSystem/v2-0203",
             "MB",
-            "");
+            "Member Number");
 
     compareIdentList.add(ident);
 
@@ -227,10 +229,20 @@ public final class BeneficiaryTransformerV2Test {
         .getType()
         .addCoding()
         .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
         .setDisplay("Patient's Medicare number")
         .addExtension(extension);
+
     compareIdentList.add(ident);
 
+    /**
+     * We have implemented a rule that for a valid MBI history record it has to have an end date; if
+     * no end date then the MBI has probably been provided by the CURRENT MBI extension. the
+     * following code is therefore commented out until the current Sample_A rif data provides a
+     * valid MedicareBeneficiaryIdHistory record.
+     */
+
+    /*
     extension =
         new Extension(
             "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
@@ -246,9 +258,11 @@ public final class BeneficiaryTransformerV2Test {
         .getType()
         .addCoding()
         .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
         .setDisplay("Patient's Medicare number")
         .addExtension(extension);
     compareIdentList.add(ident);
+    */
 
     Assert.assertEquals(compareIdentList.size(), patientIdentList.size());
     for (int i = 0; i < compareIdentList.size(); i++) {

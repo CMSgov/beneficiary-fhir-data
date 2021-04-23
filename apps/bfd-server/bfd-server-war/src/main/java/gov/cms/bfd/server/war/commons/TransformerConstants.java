@@ -350,6 +350,13 @@ public final class TransformerConstants {
   public static final String PATIENT_MC_ID_DISPLAY = "Patient's Medicare number";
 
   /**
+   * CARIN Code System Display Value for Member Identifier Type <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
+   * C4BB Identifier Type</a>
+   */
+  public static final String PATIENT_MB_ID_DISPLAY = "Member Number";
+
+  /**
    * US Core Value Set URL for Race Category unknown <a href=
    * "https://www.hl7.org/fhir/us/core/ValueSet-omb-race-category.html">ValueSet Omb Race
    * Category</a>
