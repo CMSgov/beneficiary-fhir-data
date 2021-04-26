@@ -191,6 +191,28 @@
         "display" : "Pharmacy (DMERC)"
       } ]
     }
+  }, {
+    "sequence" : 3,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "TAX",
+            "display" : "Federal tax number"
+          } ]
+        },
+        "value" : "9994931888"
+      }
+    },
+    "responsible" : true,
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "other",
+        "display" : "Other"
+      } ]
+    }
   } ],
   "supportingInfo" : [ {
     "sequence" : 1,
@@ -349,7 +371,7 @@
       }
     } ],
     "sequence" : 1,
-    "careTeamSequence" : [ 2 ],
+    "careTeamSequence" : [ 2, 3 ],
     "diagnosisSequence" : [ 3 ],
     "informationSequence" : [ 2 ],
     "category" : {

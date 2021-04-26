@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -357,7 +357,10 @@ public final class TransformerTestUtilsV2 {
   static CareTeamComponent findCareTeamEntryForProviderTaxNumber(
       String expectedProviderTaxNumber, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        IdentifierType.TAX.getSystem(), expectedProviderTaxNumber, null, careTeam);
+        C4BBPractitionerIdentifierType.TAX.getSystem(),
+        expectedProviderTaxNumber,
+        C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER,
+        careTeam);
   }
 
   /**
