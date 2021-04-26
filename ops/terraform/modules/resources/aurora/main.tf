@@ -171,7 +171,7 @@ resource "aws_rds_cluster_endpoint" "beta_reader" {
   cluster_endpoint_identifier = "bfd-${ var.env_config.env }-beta-reader"
   custom_endpoint_type        = "READER"
 
-  // assign all but the last reader node to this endpoint
+  // assign the last reader node to this endpoint
   static_members = [
     element(aws_rds_cluster_instance.aurora_nodes, length(aws_rds_cluster_instance.aurora_nodes) - 1).id
   ]
