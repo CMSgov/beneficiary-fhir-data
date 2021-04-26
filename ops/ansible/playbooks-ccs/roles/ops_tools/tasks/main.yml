@@ -4,7 +4,9 @@
 # Please see rhel_prep role for details. 
 ##
   
-# pip is taking 20 to 30 minutes and up to install ansible, just use yum
+# pip is broken on fips enabled rhel 7 systems, so use default yum pkg
+# this is currently v2.9, but 2.10 or even 2.11 should be ok if they ever
+# update.
 - name: Install latest version of Ansible via yum
   yum: 
     name: ansible 

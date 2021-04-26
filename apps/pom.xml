@@ -83,7 +83,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>3.1.2</metrics.version>
+		<metrics.version>4.1.2</metrics.version>
 		<hibernate.version>5.2.10.Final</hibernate.version>
 		
 		<!-- The default DB that will be used in integration tests. -->

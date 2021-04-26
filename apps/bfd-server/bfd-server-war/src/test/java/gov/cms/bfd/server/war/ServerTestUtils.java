@@ -16,6 +16,8 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -489,5 +491,20 @@ public final class ServerTestUtils {
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     executor.scheduleAtFixedRate(
         collector, period.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS);
+  }
+
+  /**
+   * helper
+   *
+   * @return the client with extra params registered
+   */
+  public static IGenericClient createFhirClientWithHeaders(RequestHeaders requestHeader) {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    if (requestHeader != null) {
+      ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+      extraParamsInterceptor.setHeaders(requestHeader);
+      fhirClient.registerInterceptor(extraParamsInterceptor);
+    }
+    return fhirClient;
   }
 }

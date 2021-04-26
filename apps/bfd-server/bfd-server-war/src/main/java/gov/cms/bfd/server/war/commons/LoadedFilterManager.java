@@ -30,8 +30,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoadedFilterManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManager.class);
-  private static final Logger REFRESHLOGGER =
-      LoggerFactory.getLogger(LoadedFilterManager.class + "LoadedFilterManager");
 
   // A date before the lastUpdate feature was rolled out
   private static final Date BEFORE_LAST_UPDATED_FEATURE =
@@ -216,65 +214,43 @@ public class LoadedFilterManager {
      * past refresh period. If no files have been loaded, this refresh should take less than a
      * millisecond.
      */
-    REFRESHLOGGER.debug("LoadedFilterManger.refreshFilters(): 1. entering method");
     try {
       // If new batches are present, then build new filters for the affected files
-      REFRESHLOGGER.debug(
-          "LoadedFilterManger.refreshFilters(): 2. Set currentLastBatchCreated variable");
       final Date currentLastBatchCreated =
           fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
-      REFRESHLOGGER.debug(
-          "LoadedFilterManger.refreshFilters(): 3. Set currentLastBatchCreated to: "
-              + currentLastBatchCreated.toString());
-      if (this.lastBatchCreated == null || this.lastBatchCreated.before(currentLastBatchCreated)) {
+
+      if (this.lastBatchCreated == null
+          || this.lastBatchCreated.toInstant().isBefore(currentLastBatchCreated.toInstant())) {
         LOGGER.info(
             "Refreshing LoadedFile filters with new filters from {} to {}",
             lastBatchCreated,
             currentLastBatchCreated);
-        REFRESHLOGGER.debug(
-            "LoadedFilterManger.refreshFilters(): 4. Refreshing LoadedFile filters with new filters from {} to {}",
-            lastBatchCreated,
-            currentLastBatchCreated);
 
-        REFRESHLOGGER.debug("LoadedFilterManger.refreshFilters(): 5. starting fetch loaded tuples");
         List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);
-        REFRESHLOGGER.debug("LoadedFilterManger.refreshFilters(): 6. Creating new filters");
         List<LoadedFileFilter> newFilters =
             updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
 
         // If batches been trimmed, then remove filters which are no longer present
-        REFRESHLOGGER.debug(
-            "LoadedFilterManger.refreshFilters(): 6. setting currentFirstBatchUpdate");
         final Date currentFirstBatchUpdate =
             fetchFirstLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
-        REFRESHLOGGER.debug(
-            "LoadedFilterManger.refreshFilters(): 7. currentFirstBatchUpdate is :"
-                + currentFirstBatchUpdate.toString());
+
         if (this.firstBatchCreated == null
             || this.firstBatchCreated.before(currentFirstBatchUpdate)) {
-          REFRESHLOGGER.debug(
-              "LoadedFilterManger.refreshFilters(): 8. Trimmed LoadedFile filters before {}",
-              currentFirstBatchUpdate.toString());
           LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
           List<LoadedFile> loadedFiles = fetchLoadedFiles();
-          REFRESHLOGGER.debug("LoadedFilterManger.refreshFilters(): 9. Trimfilters");
           newFilters = trimFilters(newFilters, loadedFiles);
         }
-        REFRESHLOGGER.debug("LoadedFilterManger.refreshFilters(): 10. setting function");
+
+        LOGGER.info(
+            "Updating timestamps. currentFirstBatchUpdate={} currentLastBatchCreated={}",
+            currentFirstBatchUpdate,
+            currentLastBatchCreated);
+
         set(newFilters, currentFirstBatchUpdate, currentLastBatchCreated);
       }
-    } catch (Exception ex) {
-      REFRESHLOGGER.debug(
-          "LoadedFilterManger.refreshFilters(): Exception Error found refreshing LoadedFile filters",
-          ex);
-      LOGGER.error("Error found refreshing LoadedFile filters", ex);
     } catch (Throwable ex) {
-      REFRESHLOGGER.debug(
-          "LoadedFilterManger.refreshFilters(): Throwable Error found refreshing LoadedFile filters",
-          ex);
       LOGGER.error("Error found refreshing LoadedFile filters", ex);
     }
-    REFRESHLOGGER.debug("LoadedFilterManger.refreshFilters(): 11. exiting method");
   }
 
   /**

@@ -30,7 +30,8 @@ public class HospiceClaimTransformerV2 {
    *     HospiceClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -160,8 +161,8 @@ public class HospiceClaimTransformerV2 {
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
-    for (Diagnosis diagnosis : TransformerUtilsV2.extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.HOSPICE);
     }
 
     // Map care team
@@ -190,8 +191,7 @@ public class HospiceClaimTransformerV2 {
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.quantity
-      // REV_CNTR_NDC_QTY           => TODO: ??
+      // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
       // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
@@ -200,7 +200,6 @@ public class HospiceClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           line.getNonCoveredChargeAmount(),
-          line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 

@@ -10,6 +10,7 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -56,7 +57,8 @@ public final class SamhsaMatcherTest {
                   else if (r instanceof BeneficiaryHistory) return null;
                   else if (r instanceof MedicareBeneficiaryIdHistory) return null;
 
-                  return TransformerUtils.transformRifRecordToEob(new MetricRegistry(), r);
+                  return TransformerUtils.transformRifRecordToEob(
+                      new MetricRegistry(), r, Optional.empty());
                 })
             .filter(ExplanationOfBenefit.class::isInstance)
             .collect(Collectors.toList());
@@ -699,7 +701,8 @@ public final class SamhsaMatcherTest {
     Object sampleRifRecordForClaimType =
         sampleRifRecords.stream().filter(claimType.getEntityClass()::isInstance).findFirst().get();
     ExplanationOfBenefit sampleEobForClaimType =
-        TransformerUtils.transformRifRecordToEob(new MetricRegistry(), sampleRifRecordForClaimType);
+        TransformerUtils.transformRifRecordToEob(
+            new MetricRegistry(), sampleRifRecordForClaimType, Optional.empty());
 
     return sampleEobForClaimType;
   }
