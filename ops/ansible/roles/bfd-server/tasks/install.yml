@@ -72,7 +72,7 @@
   become: true
 
 - name: Copy New Relic Java Agent Config
-  copy:
+  template:
     src: 'newrelic.yml.j2'
     dest: "{{ data_server_dir }}/newrelic/newrelic.yml"
     owner: "{{ data_server_user }}"
