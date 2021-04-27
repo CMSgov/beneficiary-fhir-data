@@ -78,7 +78,7 @@
     remote_src: true
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
-    mode: u=rw,g=r,o=r
+    mode: u=rw,g=r
   become: true
 
 - name: Configure New Relic Extensions
