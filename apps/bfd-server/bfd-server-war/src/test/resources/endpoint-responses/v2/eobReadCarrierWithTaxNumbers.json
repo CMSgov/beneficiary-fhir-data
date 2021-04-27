@@ -246,7 +246,7 @@
           "coding" : [ {
             "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
             "code" : "TAX",
-            "display" : "Federal tax number"
+            "display" : "Tax ID number"
           } ]
         },
         "value" : "204299999"

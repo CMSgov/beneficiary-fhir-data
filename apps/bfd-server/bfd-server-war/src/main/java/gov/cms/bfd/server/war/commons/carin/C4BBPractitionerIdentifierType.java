@@ -44,7 +44,7 @@ public enum C4BBPractitionerIdentifierType {
       case PIN:
         return "Premises Identifier Number (US Official)";
       case TAX:
-        return "Federal tax number";
+        return "Tax ID number";
       default:
         return "?";
     }
@@ -59,7 +59,7 @@ public enum C4BBPractitionerIdentifierType {
       case PIN:
         return "Identifier that uniquely identifies a geographic location in the US.";
       case TAX:
-        return "Federal tax number";
+        return "Tax ID number";
 
       default:
         return "?";
