@@ -6,7 +6,7 @@
 
 #BFD Pipeline and Server Codeowners
 /rfcs @jzulim @cbrunefearless @mackec1 @keithdadkins
-/ops @jzulim @keithdadkins @njdister 
+/ops @jzulim @keithdadkins @njdister @rtravitz
 /apps @jzulim @cbrunefearless @mackec1 @rtravitz
 
 #BFD Insights Codeowners
