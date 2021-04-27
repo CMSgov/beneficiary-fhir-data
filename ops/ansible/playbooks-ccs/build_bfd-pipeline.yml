@@ -47,6 +47,8 @@
         data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
         data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
         #data_pipeline_loader_threads: (see group_vars/all/main.yml
+        data_pipeline_new_relic_app_name: "BFD Pipeline ({{ env_name_std }})"
+        data_pipeline_new_relic_metric_key: "{{ vault_data_pipeline_new_relic_metric_key }}"
 
     - name: Add SSH users
       import_role:
