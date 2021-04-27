@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Contract;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -962,6 +963,11 @@ final class CoverageTransformer {
                   };
 
               if (mapOfMonth.containsKey(month)) {
+                if (!beneMonthly.getPartDContractNumberId().isPresent()
+                    || beneMonthly.getPartDContractNumberId().get().isEmpty()) {
+                  beneMonthly.setPartDContractNumberId(Optional.of("0"));
+                }
+
                 coverage.addExtension(
                     TransformerUtils.createExtensionCoding(
                         coverage,

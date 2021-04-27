@@ -37,6 +37,30 @@ export NEW_RELIC_ENVIRONMENT='{{ data_server_new_relic_environment }}'
 {% endif %}
 {% endif %}
 
+# The New Relic reporter sending Dropwizard metrics needs additional env vars.
+# Some of those duplicate variables that the New Relic agent configuration also
+# sets, but setting them to the same value here allows one to be run without the other.
+{% if data_server_new_relic_metric_key is defined %}
+export NEW_RELIC_METRIC_KEY='{{ data_server_new_relic_metric_key }}'
+
+{% if data_server_new_relic_app_name is defined %}
+export NEW_RELIC_APP_NAME='{{ data_server_new_relic_app_name }}'
+{% endif %}
+
+{% if data_server_new_relic_metric_host is defined %}
+export NEW_RELIC_METRIC_HOST='{{ data_server_new_relic_metric_host }}'
+{% endif %}
+
+{% if data_server_new_relic_metric_path is defined %}
+export NEW_RELIC_METRIC_PATH='{{ data_server_new_relic_metric_path }}'
+{% endif %}
+
+{% if data_server_new_relic_metric_period is defined %}
+export NEW_RELIC_METRIC_PERIOD='{{ data_server_new_relic_metric_period }}'
+{% endif %}
+
+{% endif %}
+
 # Begin smoke testing startup routine
 STARTUP_TESTING_RETRIES='3'
 STARTUP_TESTING_BOOT_TIMEOUT='60'
