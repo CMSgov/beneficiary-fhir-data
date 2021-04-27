@@ -75,7 +75,6 @@
   copy:
     src: 'newrelic.yml.j2'
     dest: "{{ data_server_dir }}/newrelic/newrelic.yml"
-    remote_src: true
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: u=rw,g=r
