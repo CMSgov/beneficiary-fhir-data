@@ -373,7 +373,7 @@ public final class TransformerTestUtilsV2 {
    *     {@link Identifier} with the specified provider NPI, or else <code>null</code> if no such
    *     {@link CareTeamComponent} was found
    */
-  private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
+  public static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedIdentifierSystem,
       String expectedIdentifierValue,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole expectedRole,
