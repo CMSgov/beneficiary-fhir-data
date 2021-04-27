@@ -1,7 +1,9 @@
 locals {
+  # note: this captures both prod and prod-sbx
   is_prod = substr(var.env_config.env, 0, 4) == "prod"
 
   # see https://github.com/CMSgov/beneficiary-fhir-data/pull/476 for reference
+  # on why prod's naming is different
   node_identifier = {
     "prod" = "bfd-prod-aurora-cluster",
     "prod-sbx" = "bfd-prod-sbx-aurora",
@@ -101,7 +103,8 @@ resource "aws_rds_cluster_instance" "aurora_nodes" {
   identifier         = "${lookup(local.node_identifier, var.env_config.env)}-node-${count.index}"
   cluster_identifier = aws_rds_cluster.aurora_cluster.id
 
-  availability_zone       = var.stateful_config.azs[count.index]
+  # note: element(list,index) function wraps. e.g., element([az1,az2,az3],3) == az1
+  availability_zone       = element(var.stateful_config.azs, count.index)
   db_subnet_group_name    = aws_db_subnet_group.aurora_cluster.name
   db_parameter_group_name = aws_db_parameter_group.aurora_node.name
 
