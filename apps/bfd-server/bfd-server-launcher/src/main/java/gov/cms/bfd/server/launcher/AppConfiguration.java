@@ -8,7 +8,13 @@ import java.util.Optional;
 
 /** Models the configuration options for the launcher. */
 public final class AppConfiguration implements Serializable {
-  private static final long serialVersionUID = -8134110339292440841L;
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link #getHost()}
+   * value.
+   */
+  public static final String ENV_VAR_KEY_HOST = "BFD_HOST";
 
   /**
    * The name of the environment variable that should be used to provide the {@link #getPort()}
@@ -34,6 +40,7 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_KEY_WAR = "BFD_WAR";
 
+  private final String host;
   private final int port;
   private final String keystore;
   private final String truststore;
@@ -42,16 +49,29 @@ public final class AppConfiguration implements Serializable {
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
+   * @param host the value to use for {@link #getHost()}
    * @param port the value to use for {@link #getPort()}
    * @param keystore the value to use for {@link #getKeystore()}
    * @param truststore the value to use for {@link #getTruststore()}
    * @param war the value to use for {@link #getWar()}
    */
-  public AppConfiguration(int port, Path keystore, Path truststore, Path war) {
+  public AppConfiguration(
+      Optional<String> host, int port, Path keystore, Path truststore, Path war) {
+    this.host = host.orElse(null);
     this.port = port;
     this.keystore = keystore.toString();
     this.truststore = truststore.toString();
     this.war = war.toString();
+  }
+
+  /**
+   * @return the host/address that the server will bind to and listen for HTTPS connections on, if
+   *     {@link Optional#empty()} or <code>"0.0.0.0"</code>, then it will try to bind to all
+   *     interfaces (though note that the port may not be available on all of them, and Jetty just
+   *     kinda' silently ignores that)
+   */
+  public Optional<String> getHost() {
+    return Optional.ofNullable(host);
   }
 
   /** @return the port that the server will listen for HTTPS connections on */
@@ -104,6 +124,12 @@ public final class AppConfiguration implements Serializable {
    *     configuration passed to the application are incomplete or incorrect.
    */
   static AppConfiguration readConfigFromEnvironmentVariables() {
+    Optional<String> host = readEnvVarAsString(ENV_VAR_KEY_HOST);
+    if (host.isPresent() && host.get().trim().isEmpty())
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s'.", ENV_VAR_KEY_HOST));
+
     int port = readEnvVarAsInt(ENV_VAR_KEY_PORT);
     if (port < 0)
       throw new AppConfigurationException(
@@ -129,7 +155,17 @@ public final class AppConfiguration implements Serializable {
               "Invalid value for configuration environment variable '%s'.",
               ENV_VAR_KEY_TRUSTSTORE));
 
-    return new AppConfiguration(port, keystore, truststore, war);
+    return new AppConfiguration(host, port, keystore, truststore, war);
+  }
+
+  /**
+   * @param envVarKey the name of the environment variable to read
+   * @return the specified environment variable's value, as a {@link String}, or {@link
+   *     Optional#empty()} if it's not defined
+   */
+  private static Optional<String> readEnvVarAsString(String envVarKey) {
+    String value = System.getenv(envVarKey);
+    return Optional.ofNullable(value);
   }
 
   /**
