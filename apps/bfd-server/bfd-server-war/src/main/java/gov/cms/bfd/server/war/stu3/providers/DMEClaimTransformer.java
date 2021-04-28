@@ -209,6 +209,17 @@ final class DMEClaimTransformer {
                 claimLine.getProviderTaxNumber(),
                 ClaimCareteamrole.OTHER);
         providerTaxNumber.setResponsible(true);
+
+        // backwards compatible
+        ExplanationOfBenefit.CareTeamComponent providerTaxNumber2 =
+            TransformerUtils.addCareTeamMemberWithoutMatchingPrexistingEOB(
+                eob,
+                item,
+                IdentifierType.TAX,
+                IdentifierType.TAX.getSystem(),
+                claimLine.getProviderTaxNumber(),
+                ClaimCareteamrole.OTHER);
+        providerTaxNumber2.setResponsible(true);
       }
 
       item.addAdjudication()

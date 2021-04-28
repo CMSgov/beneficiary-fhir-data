@@ -208,6 +208,29 @@
         "display" : "Other"
       } ]
     }
+  }, {
+    "sequence" : 4,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "TAX",
+            "display" : "Tax ID number"
+          } ]
+        },
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "value" : "9994931888"
+      }
+    },
+    "responsible" : true,
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "other",
+        "display" : "Other"
+      } ]
+    }
   } ],
   "diagnosis" : [ {
     "sequence" : 1,
@@ -300,7 +323,7 @@
       }
     } ],
     "sequence" : 1,
-    "careTeamLinkId" : [ 2, 3 ],
+    "careTeamLinkId" : [ 2, 3, 4 ],
     "diagnosisLinkId" : [ 3 ],
     "category" : {
       "coding" : [ {

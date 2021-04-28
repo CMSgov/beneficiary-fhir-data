@@ -232,11 +232,19 @@ final class DMEClaimTransformerV2 {
               line.getHcpcsFourthModifierCode()));
 
       if (includeTaxNumbers.orElse(false)) {
-        item.addExtension(
-            TransformerUtilsV2.createExtensionCoding(
-                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
-      }
+        Optional<CareTeamComponent> providerTaxNumber =
+            TransformerUtilsV2.addCareTeamMember(
+                eob,
+                item,
+                C4BBPractitionerIdentifierType.TAX,
+                C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER,
+                Optional.of(line.getProviderTaxNumber()));
 
+        providerTaxNumber.ifPresent(
+            p -> {
+              p.setResponsible(true);
+            });
+      }
       // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(
           item,

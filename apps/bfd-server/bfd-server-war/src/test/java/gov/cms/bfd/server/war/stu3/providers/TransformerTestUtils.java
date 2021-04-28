@@ -344,7 +344,7 @@ final class TransformerTestUtils {
       ExplanationOfBenefit eob) {
     CareTeamComponent careTeamEntry =
         findCareTeamEntryForProviderIdentifier(
-            TransformerConstants.CODING_NPI_US,
+            Optional.of(TransformerConstants.CODING_NPI_US),
             expectedPractitioner,
             expectedCareTeamRole,
             eob.getCareTeam());
@@ -938,7 +938,7 @@ final class TransformerTestUtils {
     Assert.assertTrue(
         "Reference doesn't match: " + actualReference,
         doesReferenceMatchIdentifier(
-            expectedIdentifierSystem, expectedIdentifierValue, actualReference));
+            Optional.of(expectedIdentifierSystem), expectedIdentifierValue, actualReference));
   }
 
   /**
@@ -1017,10 +1017,16 @@ final class TransformerTestUtils {
    *     Identifier}
    */
   private static boolean doesReferenceMatchIdentifier(
-      String expectedIdentifierSystem, String expectedIdentifierValue, Reference actualReference) {
+      Optional<String> expectedIdentifierSystem,
+      String expectedIdentifierValue,
+      Reference actualReference) {
     if (!actualReference.hasIdentifier()) return false;
-    return expectedIdentifierSystem.equals(actualReference.getIdentifier().getSystem())
-        && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    if (expectedIdentifierSystem.isPresent()) {
+      return expectedIdentifierSystem.get().equals(actualReference.getIdentifier().getSystem())
+          && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    } else {
+      return expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    }
   }
 
   /**
@@ -1050,7 +1056,7 @@ final class TransformerTestUtils {
   static CareTeamComponent findCareTeamEntryForProviderNpi(
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
+        Optional.of(TransformerConstants.CODING_NPI_US), expectedProviderNpi, null, careTeam);
   }
 
   /**
@@ -1064,7 +1070,7 @@ final class TransformerTestUtils {
   static CareTeamComponent findCareTeamEntryForProviderTaxNumber(
       String expectedProviderTaxNumber, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        IdentifierType.TAX.getSystem(), expectedProviderTaxNumber, null, careTeam);
+        Optional.of(IdentifierType.TAX.getSystem()), expectedProviderTaxNumber, null, careTeam);
   }
 
   /**
@@ -1078,7 +1084,7 @@ final class TransformerTestUtils {
    *     {@link CareTeamComponent} was found
    */
   private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
-      String expectedIdentifierSystem,
+      Optional<String> expectedIdentifierSystem,
       String expectedIdentifierValue,
       ClaimCareteamrole expectedRole,
       List<CareTeamComponent> careTeam) {

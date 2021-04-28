@@ -10,7 +10,8 @@ public enum C4BBClaimProfessionalAndNonClinicianCareTeamRole {
   SUPERVISOR,
   PERFORMING,
   PURCHASED_SERVICE,
-  REFERRING;
+  REFERRING,
+  OTHER;
 
   public String getSystem() {
     switch (this) {
@@ -35,6 +36,8 @@ public enum C4BBClaimProfessionalAndNonClinicianCareTeamRole {
         return "purchasedservice";
       case REFERRING:
         return "referring";
+      case OTHER:
+        return "other";
       default:
         return "?";
     }
@@ -52,6 +55,8 @@ public enum C4BBClaimProfessionalAndNonClinicianCareTeamRole {
         return "Purchased Service";
       case REFERRING:
         return "Referring";
+      case OTHER:
+        return "Other";
       default:
         return "?";
     }

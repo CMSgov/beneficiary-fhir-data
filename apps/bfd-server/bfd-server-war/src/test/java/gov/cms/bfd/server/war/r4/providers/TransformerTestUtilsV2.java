@@ -342,7 +342,7 @@ public final class TransformerTestUtilsV2 {
   static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
+        Optional.of(TransformerConstants.CODING_NPI_US), expectedProviderNpi, null, careTeam);
   }
 
   /**
@@ -356,7 +356,7 @@ public final class TransformerTestUtilsV2 {
    *     {@link CareTeamComponent} was found
    */
   private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
-      String expectedIdentifierSystem,
+      Optional<String> expectedIdentifierSystem,
       String expectedIdentifierValue,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole expectedRole,
       List<CareTeamComponent> careTeam) {
@@ -379,10 +379,16 @@ public final class TransformerTestUtilsV2 {
    *     Identifier}
    */
   private static boolean doesReferenceMatchIdentifier(
-      String expectedIdentifierSystem, String expectedIdentifierValue, Reference actualReference) {
+      Optional<String> expectedIdentifierSystem,
+      String expectedIdentifierValue,
+      Reference actualReference) {
     if (!actualReference.hasIdentifier()) return false;
-    return expectedIdentifierSystem.equals(actualReference.getIdentifier().getSystem())
-        && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    if (expectedIdentifierSystem.isPresent()) {
+      return expectedIdentifierSystem.get().equals(actualReference.getIdentifier().getSystem())
+          && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    } else {
+      return expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    }
   }
 
   /**

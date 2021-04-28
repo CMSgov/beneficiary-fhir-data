@@ -354,6 +354,57 @@ public final class TransformerUtils {
   }
 
   /**
+   * Ensures that the specified {@link ExplanationOfBenefit} has the specified {@link
+   * CareTeamComponent}, and links the specified {@link ItemComponent} to that {@link
+   * CareTeamComponent} (via {@link ItemComponent#addCareTeamLinkId(int)}).
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param eobItem the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param identifierType the {@link IdentifierTyope} of the practitioner to reference in {@link
+   *     CareTeamComponent}
+   * @param practitionerIdSystem the {@link Identifier#getSystem()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param practitionerIdValue the {@link Identifier#getValue()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param careTeamRole the {@link ClaimCareteamrole} to use for the {@link
+   *     CareTeamComponent#getRole()}
+   * @return the {@link CareTeamComponent} that was created/linked
+   */
+  static CareTeamComponent addCareTeamMemberWithoutMatchingPrexistingEOB(
+      ExplanationOfBenefit eob,
+      ItemComponent eobItem,
+      IdentifierType identifierType,
+      String practitionerIdSystem,
+      String practitionerIdValue,
+      ClaimCareteamrole careTeamRole) {
+    // Try to find a matching pre-existing entry.
+    CareTeamComponent careTeamEntry = eob.addCareTeam();
+    careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
+    careTeamEntry.setProvider(createIdentifierReference(identifierType, practitionerIdValue));
+
+    CodeableConcept careTeamRoleConcept =
+        createCodeableConcept(ClaimCareteamrole.OTHER.getSystem(), careTeamRole.toCode());
+    careTeamRoleConcept.getCodingFirstRep().setDisplay(careTeamRole.getDisplay());
+    careTeamEntry.setRole(careTeamRoleConcept);
+    // }
+
+    // care team entry is at eob level so no need to create item link id
+    if (eobItem == null) {
+      return careTeamEntry;
+    }
+
+    // Link the EOB.item to the care team entry (if it isn't already).
+    final int careTeamEntrySequence = careTeamEntry.getSequence();
+    if (eobItem.getCareTeamLinkId().stream()
+        .noneMatch(id -> id.getValue() == careTeamEntrySequence)) {
+      eobItem.addCareTeamLinkId(careTeamEntrySequence);
+    }
+
+    return careTeamEntry;
+  }
+
+  /**
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
    * @param diagnosis the {@link Diagnosis} to add, if it's not already present
    * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry

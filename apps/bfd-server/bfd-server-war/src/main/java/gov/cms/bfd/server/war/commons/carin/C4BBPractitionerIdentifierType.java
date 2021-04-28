@@ -8,7 +8,8 @@ package gov.cms.bfd.server.war.commons.carin;
 public enum C4BBPractitionerIdentifierType {
   NPI,
   UPIN,
-  PIN;
+  PIN,
+  TAX;
 
   public String getSystem() {
     switch (this) {
@@ -27,6 +28,8 @@ public enum C4BBPractitionerIdentifierType {
         return "UPIN";
       case PIN:
         return "PIN";
+      case TAX:
+        return "PIN";
       default:
         return "?";
     }
@@ -40,6 +43,8 @@ public enum C4BBPractitionerIdentifierType {
         return "Medicare/CMS (formerly HCFA)'s Universal Physician Identification numbers";
       case PIN:
         return "Premises Identifier Number (US Official)";
+      case TAX:
+        return "Tax ID Number";
       default:
         return "?";
     }
@@ -53,7 +58,8 @@ public enum C4BBPractitionerIdentifierType {
         return "An identifier for a provider within the CMS/Medicare program. A globally unique identifier for the provider in the Medicare program.";
       case PIN:
         return "Identifier that uniquely identifies a geographic location in the US.";
-
+      case TAX:
+        return "Tax ID Number";
       default:
         return "?";
     }
