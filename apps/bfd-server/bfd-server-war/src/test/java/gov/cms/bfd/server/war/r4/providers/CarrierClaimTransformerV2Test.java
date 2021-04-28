@@ -641,7 +641,7 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @Test
-  public void shouldHaveLineItemDenailReasonAdjudication() {
+  public void shouldHaveLineItemDenialReasonAdjudication() {
     AdjudicationComponent adjudication =
         TransformerTestUtilsV2.findAdjudicationByCategory(
             "denialreason", eob.getItemFirstRep().getAdjudication());
