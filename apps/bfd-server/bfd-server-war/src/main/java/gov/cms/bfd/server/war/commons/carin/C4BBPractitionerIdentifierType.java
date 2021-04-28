@@ -29,7 +29,7 @@ public enum C4BBPractitionerIdentifierType {
       case PIN:
         return "PIN";
       case TAX:
-        return "PIN";
+        return "TAX";
       default:
         return "?";
     }
