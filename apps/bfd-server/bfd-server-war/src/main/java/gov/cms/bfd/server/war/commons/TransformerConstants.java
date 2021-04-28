@@ -241,7 +241,7 @@ public final class TransformerConstants {
    * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
    * identifier is a TAX.
    */
-  public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Federal tax number";
+  public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Tax ID number";
 
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Measure (UCUM)", a

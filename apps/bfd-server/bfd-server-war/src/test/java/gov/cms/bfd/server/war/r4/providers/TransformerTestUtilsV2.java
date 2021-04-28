@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
@@ -343,7 +342,7 @@ public final class TransformerTestUtilsV2 {
   static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
+        Optional.of(TransformerConstants.CODING_NPI_US), expectedProviderNpi, null, careTeam);
   }
 
   /**
@@ -357,7 +356,10 @@ public final class TransformerTestUtilsV2 {
   static CareTeamComponent findCareTeamEntryForProviderTaxNumber(
       String expectedProviderTaxNumber, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        IdentifierType.TAX.getSystem(), expectedProviderTaxNumber, null, careTeam);
+        Optional.empty(),
+        expectedProviderTaxNumber,
+        C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER,
+        careTeam);
   }
 
   /**
@@ -370,8 +372,8 @@ public final class TransformerTestUtilsV2 {
    *     {@link Identifier} with the specified provider NPI, or else <code>null</code> if no such
    *     {@link CareTeamComponent} was found
    */
-  private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
-      String expectedIdentifierSystem,
+  public static CareTeamComponent findCareTeamEntryForProviderIdentifier(
+      Optional<String> expectedIdentifierSystem,
       String expectedIdentifierValue,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole expectedRole,
       List<CareTeamComponent> careTeam) {
@@ -394,10 +396,17 @@ public final class TransformerTestUtilsV2 {
    *     Identifier}
    */
   private static boolean doesReferenceMatchIdentifier(
-      String expectedIdentifierSystem, String expectedIdentifierValue, Reference actualReference) {
+      Optional<String> expectedIdentifierSystem,
+      String expectedIdentifierValue,
+      Reference actualReference) {
     if (!actualReference.hasIdentifier()) return false;
-    return expectedIdentifierSystem.equals(actualReference.getIdentifier().getSystem())
-        && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+
+    if (expectedIdentifierSystem.isPresent()) {
+      return expectedIdentifierSystem.get().equals(actualReference.getIdentifier().getSystem())
+          && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    } else {
+      return expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    }
   }
 
   /**
