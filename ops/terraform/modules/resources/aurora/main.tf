@@ -140,3 +140,39 @@ resource "aws_route53_record" "aurora_reader" {
 
   records = [aws_rds_cluster.aurora_cluster.reader_endpoint]
 }
+
+// If beta_reader toggle is true, it means we have added an extra reader node
+// to the cluster for testing purposes (e.g., so we can test against prod without
+// impacting prod performance). This means we want to create two custom reader
+// endpoints: one for normal traffic (containing all but one reader node) and
+// a "beta", aka test, reader node containing one reader node only. This assume
+// we have adjusted the number of cluster nodes accordingly (which is defined
+// within each environments aurora_config.cluster_nodes variable.
+
+// this endpoint contains all but one reader node (the last node) and is behind a feature toggle
+resource "aws_rds_cluster_endpoint" "readers" {
+  count = var.module_features.beta_reader ? 1 : 0
+
+  cluster_identifier          = aws_rds_cluster.aurora_cluster.id
+  cluster_endpoint_identifier = "bfd-${ var.env_config.env }-ro"
+  custom_endpoint_type        = "READER"
+
+  // assign all but the last reader node to this endpoint
+  excluded_members = [
+    element(aws_rds_cluster_instance.aurora_nodes, length(aws_rds_cluster_instance.aurora_nodes) - 1).id
+  ]
+}
+
+// this endpoint only contains one reader node (the last node) and is behind a feature toggle
+resource "aws_rds_cluster_endpoint" "beta_reader" {
+  count = var.module_features.beta_reader ? 1 : 0
+
+  cluster_identifier          = aws_rds_cluster.aurora_cluster.id
+  cluster_endpoint_identifier = "bfd-${ var.env_config.env }-beta-reader"
+  custom_endpoint_type        = "READER"
+
+  // assign the last reader node to this endpoint
+  static_members = [
+    element(aws_rds_cluster_instance.aurora_nodes, length(aws_rds_cluster_instance.aurora_nodes) - 1).id
+  ]
+}
