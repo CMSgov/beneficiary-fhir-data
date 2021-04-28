@@ -40,6 +40,10 @@ Variables that must be defined to use the role:
 * `data_server_new_relic_environment`: Optional. The value to use for the `newrelic.environment` setting. If provided, should be one of "test", "prod-sbx", or "prod". 
 * `data_server_proxy_host`: Optional. The hostname/IP address of the HTTP/S proxy server to use.
 * `data_server_proxy_port`: Optional. The port of the HTTP/S proxy server to use.
+* `data_server_new_relic_metric_key`: Optional. The key that enables Dropwizard metrics to go to New Relic.
+* `data_server_new_relic_metric_host`: Optional. The New Relic Metric API host. Needed if the metric key is set.
+* `data_server_new_relic_metric_path`: Optional. The New Relic Metric API path to use. Needed if the metric key is set.
+* `data_server_new_relic_metric_period`: Optional. How often to send batches of telemetry ot the New Relic metric API. Needed if the metric key is set.
 
 See [defaults/main.yml](./defaults/main.yml) for the list of optional/defaulted variables and their default values.
 
