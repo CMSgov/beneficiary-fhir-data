@@ -33,3 +33,8 @@ variable "is_public" {
   type        = bool
   default     = false
 }
+
+variable "mpm_rda_vpc_config" {
+  description = "Config for all variables related to the MPM RDA VPC"
+  type        = object({ cidr_block = string })
+}
