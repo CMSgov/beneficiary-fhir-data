@@ -144,6 +144,7 @@ public final class DataServerLauncherApp {
             server,
             new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.toString()),
             new HttpConnectionFactory(httpsConfig));
+    serverConnector.setHost(appConfig.getHost().orElse("0.0.0.0"));
     serverConnector.setPort(appConfig.getPort());
     server.setConnectors(new Connector[] {serverConnector});
 
@@ -220,7 +221,7 @@ public final class DataServerLauncherApp {
       LOGGER.info(
           "{} Server available at: '{}'",
           LOG_MESSAGE_STARTED_JETTY,
-          String.format("https://localhost:%d/", server.getURI().getPort()));
+          String.format("https://%s:%d/", server.getURI().getHost(), server.getURI().getPort()));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
