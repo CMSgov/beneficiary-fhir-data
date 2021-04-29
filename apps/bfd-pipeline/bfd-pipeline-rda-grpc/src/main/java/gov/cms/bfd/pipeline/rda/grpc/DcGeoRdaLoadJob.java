@@ -101,7 +101,7 @@ public final class DcGeoRdaLoadJob implements PipelineJob {
     if (error != null) {
       failuresMeter.mark();
       LOGGER.error("processing aborted by an exception: message={}", error.getMessage(), error);
-      throw error;
+      throw new ProcessingException(error, processedCount);
     }
     successesMeter.mark();
     return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;

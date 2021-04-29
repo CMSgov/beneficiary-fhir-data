@@ -48,8 +48,8 @@ public class DcGeoRdaLoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getMessage());
-      MatcherAssert.assertThat(ex, Matchers.instanceOf(IOException.class));
+      Assert.assertEquals("oops", ex.getCause().getMessage());
+      MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verifyNoInteractions(sinkFactory);
     Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
@@ -64,8 +64,8 @@ public class DcGeoRdaLoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getMessage());
-      MatcherAssert.assertThat(ex, Matchers.instanceOf(IOException.class));
+      Assert.assertEquals("oops", ex.getCause().getMessage());
+      MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verify(source).close();
     Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
@@ -83,8 +83,8 @@ public class DcGeoRdaLoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getMessage());
-      MatcherAssert.assertThat(ex, Matchers.instanceOf(IOException.class));
+      Assert.assertEquals("oops", ex.getCause().getMessage());
+      MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verify(source).close();
     verify(sink).close();
