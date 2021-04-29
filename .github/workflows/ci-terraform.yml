@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tf_version: [0.12.8]
+        tf_version: [0.12.31]
         tf_environment: [test, prod-sbx, prod, mgmt]
         tf_resources: [stateless, stateful]
     steps:
