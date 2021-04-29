@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * General RDASource implementation that delegates actual service call and result mapping to another
- * class.
+ * class. This current implementation is a placeholder to demonstrate the structure that will be
+ * used as the RDA API develops to call their RPC's to download Part A and Part B claims.
  *
  * @param <T> type of objects returned by the gRPC service
  */
@@ -71,6 +72,18 @@ public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
     batchesMeter = appMetrics.meter(BATCHES_METER);
   }
 
+  /**
+   * Repeatedly call the service until either our max allowed run time has elapsed or our maximum
+   * number of objects have been processed. Calls the service through a specific implementation of
+   * GrpcStreamCaller created by the callerFactory.
+   *
+   * @param maxToProcess maximum number of objects to retrieve from the source
+   * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
+   * @param maxRunTime maximum amount of time to run before returning
+   * @param sink to receive batches of objects
+   * @return the number of objects that were successfully processed
+   * @throws ProcessingException wrapper around any Exception thrown by the service
+   */
   @Override
   public int retrieveAndProcessObjects(
       int maxToProcess, int maxPerBatch, Duration maxRunTime, RdaSink<PreAdjudicatedClaim> sink)
