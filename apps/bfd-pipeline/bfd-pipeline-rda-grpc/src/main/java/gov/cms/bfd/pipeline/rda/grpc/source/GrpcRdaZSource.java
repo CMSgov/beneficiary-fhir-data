@@ -5,8 +5,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
-import gov.cms.bfd.pipeline.rda.grpc.RDASink;
-import gov.cms.bfd.pipeline.rda.grpc.RDASource;
+import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.time.Clock;
@@ -25,16 +25,16 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> type of objects returned by the gRPC service
  */
-public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRDASource.class);
+public class GrpcRdaZSource<T> implements RdaSource<PreAdjudicatedClaim> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaZSource.class);
   public static final String CALLS_METER =
-      MetricRegistry.name(GrpcRDASource.class.getSimpleName(), "calls");
+      MetricRegistry.name(GrpcRdaZSource.class.getSimpleName(), "calls");
   public static final String RECORDS_RECEIVED_METER =
-      MetricRegistry.name(GrpcRDASource.class.getSimpleName(), "recordsReceived");
+      MetricRegistry.name(GrpcRdaZSource.class.getSimpleName(), "recordsReceived");
   public static final String RECORDS_STORED_METER =
-      MetricRegistry.name(GrpcRDASource.class.getSimpleName(), "recordsStored");
+      MetricRegistry.name(GrpcRdaZSource.class.getSimpleName(), "recordsStored");
   public static final String BATCHES_METER =
-      MetricRegistry.name(GrpcRDASource.class.getSimpleName(), "batches");
+      MetricRegistry.name(GrpcRdaZSource.class.getSimpleName(), "batches");
 
   private final GrpcStreamCaller.Factory<T> callerFactory;
   private final Clock clock;
@@ -44,7 +44,7 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
   private final Meter batchesMeter;
   private ManagedChannel channel;
 
-  public GrpcRDASource(
+  public GrpcRdaZSource(
       Config config, GrpcStreamCaller.Factory<T> callerFactory, MetricRegistry appMetrics) {
     this(
         ManagedChannelBuilder.forAddress(config.host, config.port)
@@ -57,7 +57,7 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
   }
 
   @VisibleForTesting
-  GrpcRDASource(
+  GrpcRdaZSource(
       ManagedChannel channel,
       GrpcStreamCaller.Factory<T> callerFactory,
       Clock clock,
@@ -73,7 +73,7 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
 
   @Override
   public int retrieveAndProcessObjects(
-      int maxToProcess, int maxPerBatch, Duration maxRunTime, RDASink<PreAdjudicatedClaim> sink)
+      int maxToProcess, int maxPerBatch, Duration maxRunTime, RdaSink<PreAdjudicatedClaim> sink)
       throws ProcessingException {
     callsMeter.mark();
     int processed = 0;
@@ -132,7 +132,7 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
     return true;
   }
 
-  private int submitBatchToSink(RDASink<PreAdjudicatedClaim> sink, List<PreAdjudicatedClaim> batch)
+  private int submitBatchToSink(RdaSink<PreAdjudicatedClaim> sink, List<PreAdjudicatedClaim> batch)
       throws ProcessingException {
     LOGGER.info("submitting batch to sink: size={}", batch.size());
     int processed = sink.writeBatch(batch);
