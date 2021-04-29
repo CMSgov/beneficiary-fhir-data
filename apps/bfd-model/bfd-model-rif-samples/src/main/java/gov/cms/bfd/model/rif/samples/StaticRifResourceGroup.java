@@ -105,6 +105,9 @@ public enum StaticRifResourceGroup {
       StaticRifResource.SYNTHEA_PDE,
       StaticRifResource.SYNTHEA_CARRIER,
       StaticRifResource.SYNTHEA_DME,
+      StaticRifResource.SYNTHEA_HHA,
+      StaticRifResource.SYNTHEA_HOSPICE,
+      StaticRifResource.SYNTHEA_SNF,
       StaticRifResource.SYNTHEA_BENE_HISTORY);
 
   private final StaticRifResource[] resources;

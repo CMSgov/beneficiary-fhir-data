@@ -432,6 +432,33 @@ public enum StaticRifResource {
       Optional.empty()),
 
   /**
+   * The {@link HHA} records produced by {@link #generateSyntheaData()}, the amount of which will
+   * vary across Synthea versions.
+   */
+  SYNTHEA_HHA(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/home.csv")),
+      RifFileType.HHA,
+      Optional.empty()),
+
+  /**
+   * The {@link HOSPICE} records produced by {@link #generateSyntheaData()}, the amount of which
+   * will vary across Synthea versions.
+   */
+  SYNTHEA_HOSPICE(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/hospice.csv")),
+      RifFileType.HOSPICE,
+      Optional.empty()),
+
+  /**
+   * The {@link SNF} records produced by {@link #generateSyntheaData()}, the amount of which will
+   * vary across Synthea versions.
+   */
+  SYNTHEA_SNF(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/snf.csv")),
+      RifFileType.SNF,
+      Optional.empty()),
+
+  /**
    * The {@link Beneficiary History} records produced by {@link #generateSyntheaData()}, the amount
    * of which will vary across Synthea versions.
    */
