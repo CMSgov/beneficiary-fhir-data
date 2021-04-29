@@ -163,6 +163,18 @@
 			<artifactId>newrelic-api</artifactId>
 			<version>5.9.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>dropwizard-metrics-newrelic</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>telemetry-http-okhttp</artifactId>
+			<version>0.6.1</version>
+		</dependency>
 		
 		<dependency>
 			<!-- Used to parse and read various CSV data resources. -->

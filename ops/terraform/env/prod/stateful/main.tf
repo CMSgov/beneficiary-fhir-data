@@ -12,7 +12,10 @@ module "stateful" {
 
   aurora_config = {
     instance_class = "db.r5.12xlarge"
-    cluster_nodes  = 3
+
+    # With aurora you do not designate primary and replicas. Instead, you simply add RDS Instances and
+    # Aurora manages the replication. So if you want 1 writer and 3 readers, you set cluster_nodes to 4
+    cluster_nodes  = 4
     engine_version = "11.6"
     param_version  = "aurora-postgresql11"
   }
@@ -26,29 +29,6 @@ module "stateful" {
     { name = "random_page_cost", value = "1.1", apply_on_reboot = false },
     { name = "work_mem", value = "32768", apply_on_reboot = false }
   ]
-
-  # db_config = {
-  #   instance_class    = "db.r5.24xlarge"
-  #   iops              = 16000
-  #   allocated_storage = 16000
-  # }
-
-  # db_params = [
-  #   {name="auto_explain.log_min_duration", value="6000", apply_on_reboot=false},
-  #   {name="effective_io_concurrency", value="300", apply_on_reboot=false},
-  #   {name="default_statistics_target", value="1000", apply_on_reboot=false},
-  #   {name="max_worker_processes", value="96", apply_on_reboot=true},
-  #   {name="max_wal_senders", value="15", apply_on_reboot=true},
-  #   {name="max_parallel_workers_per_gather", value="48", apply_on_reboot=false},
-  #   {name="random_page_cost", value="1", apply_on_reboot=false},
-  #   {name="temp_buffers", value="8192", apply_on_reboot=false},
-  #   {name="work_mem", value="32768", apply_on_reboot=false}
-  # ]
-
-  # db_import_mode = {
-  #   enabled = false
-  #   maintenance_work_mem = "4194304"
-  # }
 
   env_config = {
     env  = "prod"
