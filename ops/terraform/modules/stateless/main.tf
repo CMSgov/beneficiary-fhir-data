@@ -431,6 +431,6 @@ module "bfd_pipeline" {
 
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
+
+  mpm_rda_cidr_block = var.mpm_rda_vpc_config.cidr_block
 }
-
-

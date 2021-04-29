@@ -134,6 +134,35 @@ resource "aws_security_group_rule" "allow_db_primary_access" {
   source_security_group_id = aws_security_group.app.id # The EC2 instance for the BFD Pipeline app.
 }
 
+# NACL to manage communication between the BFD and RDA environments
+# By default this NACL won't add any additonal security, however if for any reason
+# we need to shut off communication between the two VPCs, one could simply flip the
+# action(s) defined in these rules from "ALLOW" to "DENY"
+resource "aws_network_acl" "rda" {
+  count = var.mpm_rda_cidr_block ? 1 : 0
+
+  vpc_id      = var.env_config.vpc_id
+  tags        = merge({ Name = "bfd-${var.env_config.env}-etl-app" }, var.env_config.tags)
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    rule_no     = 100
+    action      = "allow"
+    protocol    = "all"
+    cidr_block  = var.mpm_rda_cidr_block
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    rule_no     = 200
+    action      = "allow"
+    protocol    = "all"
+    cidr_block  = var.mpm_rda_cidr_block
+  }
+}
+
 # IAM policy and role to allow the BFD Pipeline read-write access to ETL bucket.
 #
 resource "aws_iam_policy" "bfd_pipeline_rif" {

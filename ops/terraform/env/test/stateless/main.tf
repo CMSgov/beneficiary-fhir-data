@@ -22,4 +22,8 @@ module "stateless" {
   ssh_key_name    = var.ssh_key_name
   git_branch_name = var.git_branch_name
   git_commit_id   = var.git_commit_id
+
+  mpm_rda_vpc_config = {
+    cidr_block = "10.234.232.0/21"
+  }
 }
