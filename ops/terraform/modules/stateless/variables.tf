@@ -34,7 +34,8 @@ variable "is_public" {
   default     = false
 }
 
-variable "mpm_rda_vpc_config" {
-  description = "Config for all variables related to the MPM RDA VPC"
-  type        = object({ cidr_block = string })
+variable "mpm_rda_cidr_block" {
+  description = "CIDR block of hosts available through the MPM VPC Peered environment"
+  type        = string
+  default     = null
 }
