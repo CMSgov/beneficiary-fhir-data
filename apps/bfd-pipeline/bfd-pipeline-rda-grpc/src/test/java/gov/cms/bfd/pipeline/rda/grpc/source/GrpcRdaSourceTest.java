@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
-public class GrpcRdaZSourceTest {
+public class GrpcRdaSourceTest {
   private static final PreAdjudicatedClaim CLAIM_1 = new PreAdjudicatedClaim();
   private static final PreAdjudicatedClaim CLAIM_2 = new PreAdjudicatedClaim();
   private static final PreAdjudicatedClaim CLAIM_3 = new PreAdjudicatedClaim();
@@ -36,7 +36,7 @@ public class GrpcRdaZSourceTest {
   private GrpcStreamCaller<Integer> caller;
   private ManagedChannel channel;
   private RdaSink<PreAdjudicatedClaim> sink;
-  private GrpcRdaZSource<Integer> source;
+  private GrpcRdaSource<Integer> source;
 
   @SuppressWarnings("unchecked")
   @Before
@@ -51,7 +51,7 @@ public class GrpcRdaZSourceTest {
     doReturn(CLAIM_3).when(caller).convertResultToClaim(3);
     doReturn(CLAIM_4).when(caller).convertResultToClaim(4);
     doReturn(CLAIM_5).when(caller).convertResultToClaim(5);
-    source = new GrpcRdaZSource<>(channel, this::callerFactory, clock, appMetrics);
+    source = new GrpcRdaSource<>(channel, this::callerFactory, clock, appMetrics);
   }
 
   @Test
@@ -63,10 +63,10 @@ public class GrpcRdaZSourceTest {
 
     final int result = source.retrieveAndProcessObjects(3, 2, Duration.ofSeconds(10), sink);
     assertEquals(3, result);
-    assertMeterReading(1, GrpcRdaZSource.CALLS_METER);
-    assertMeterReading(3, GrpcRdaZSource.RECORDS_RECEIVED_METER);
-    assertMeterReading(3, GrpcRdaZSource.RECORDS_STORED_METER);
-    assertMeterReading(2, GrpcRdaZSource.BATCHES_METER);
+    assertMeterReading(1, GrpcRdaSource.CALLS_METER);
+    assertMeterReading(3, GrpcRdaSource.RECORDS_RECEIVED_METER);
+    assertMeterReading(3, GrpcRdaSource.RECORDS_STORED_METER);
+    assertMeterReading(2, GrpcRdaSource.BATCHES_METER);
   }
 
   @Test
@@ -87,17 +87,17 @@ public class GrpcRdaZSourceTest {
       assertEquals(3, ex.getProcessedCount());
       assertSame(error, ex.getCause());
     }
-    assertMeterReading(1, GrpcRdaZSource.CALLS_METER);
-    assertMeterReading(4, GrpcRdaZSource.RECORDS_RECEIVED_METER);
-    assertMeterReading(2, GrpcRdaZSource.RECORDS_STORED_METER);
-    assertMeterReading(1, GrpcRdaZSource.BATCHES_METER);
+    assertMeterReading(1, GrpcRdaSource.CALLS_METER);
+    assertMeterReading(4, GrpcRdaSource.RECORDS_RECEIVED_METER);
+    assertMeterReading(2, GrpcRdaSource.RECORDS_STORED_METER);
+    assertMeterReading(1, GrpcRdaSource.BATCHES_METER);
   }
 
   @Test
   public void testHandlesExceptionFromCallerFactory() {
     final Exception error = new IOException("oops");
     source =
-        new GrpcRdaZSource<>(
+        new GrpcRdaSource<>(
             channel,
             c -> {
               throw error;
@@ -112,10 +112,10 @@ public class GrpcRdaZSourceTest {
       assertEquals(0, ex.getProcessedCount());
       assertSame(error, ex.getCause());
     }
-    assertMeterReading(1, GrpcRdaZSource.CALLS_METER);
-    assertMeterReading(0, GrpcRdaZSource.RECORDS_RECEIVED_METER);
-    assertMeterReading(0, GrpcRdaZSource.RECORDS_STORED_METER);
-    assertMeterReading(0, GrpcRdaZSource.BATCHES_METER);
+    assertMeterReading(1, GrpcRdaSource.CALLS_METER);
+    assertMeterReading(0, GrpcRdaSource.RECORDS_RECEIVED_METER);
+    assertMeterReading(0, GrpcRdaSource.RECORDS_STORED_METER);
+    assertMeterReading(0, GrpcRdaSource.BATCHES_METER);
   }
 
   @Test
@@ -134,10 +134,10 @@ public class GrpcRdaZSourceTest {
       assertEquals(2, ex.getProcessedCount());
       assertSame(error, ex.getCause());
     }
-    assertMeterReading(1, GrpcRdaZSource.CALLS_METER);
-    assertMeterReading(4, GrpcRdaZSource.RECORDS_RECEIVED_METER);
-    assertMeterReading(2, GrpcRdaZSource.RECORDS_STORED_METER);
-    assertMeterReading(1, GrpcRdaZSource.BATCHES_METER);
+    assertMeterReading(1, GrpcRdaSource.CALLS_METER);
+    assertMeterReading(4, GrpcRdaSource.RECORDS_RECEIVED_METER);
+    assertMeterReading(2, GrpcRdaSource.RECORDS_STORED_METER);
+    assertMeterReading(1, GrpcRdaSource.BATCHES_METER);
   }
 
   @Test
@@ -149,10 +149,10 @@ public class GrpcRdaZSourceTest {
 
     final int result = source.retrieveAndProcessObjects(4, 2, Duration.ofSeconds(10), sink);
     assertEquals(4, result);
-    assertMeterReading(1, GrpcRdaZSource.CALLS_METER);
-    assertMeterReading(4, GrpcRdaZSource.RECORDS_RECEIVED_METER);
-    assertMeterReading(4, GrpcRdaZSource.RECORDS_STORED_METER);
-    assertMeterReading(2, GrpcRdaZSource.BATCHES_METER);
+    assertMeterReading(1, GrpcRdaSource.CALLS_METER);
+    assertMeterReading(4, GrpcRdaSource.RECORDS_RECEIVED_METER);
+    assertMeterReading(4, GrpcRdaSource.RECORDS_STORED_METER);
+    assertMeterReading(2, GrpcRdaSource.BATCHES_METER);
   }
 
   @Test
@@ -175,10 +175,10 @@ public class GrpcRdaZSourceTest {
 
     final int result = source.retrieveAndProcessObjects(5, 2, Duration.ofSeconds(4), sink);
     assertEquals(3, result);
-    assertMeterReading(1, GrpcRdaZSource.CALLS_METER);
-    assertMeterReading(3, GrpcRdaZSource.RECORDS_RECEIVED_METER);
-    assertMeterReading(3, GrpcRdaZSource.RECORDS_STORED_METER);
-    assertMeterReading(2, GrpcRdaZSource.BATCHES_METER);
+    assertMeterReading(1, GrpcRdaSource.CALLS_METER);
+    assertMeterReading(3, GrpcRdaSource.RECORDS_RECEIVED_METER);
+    assertMeterReading(3, GrpcRdaSource.RECORDS_STORED_METER);
+    assertMeterReading(2, GrpcRdaSource.BATCHES_METER);
   }
 
   @Test
@@ -201,10 +201,10 @@ public class GrpcRdaZSourceTest {
 
     final int result = source.retrieveAndProcessObjects(5, 2, Duration.ofSeconds(6), sink);
     assertEquals(4, result);
-    assertMeterReading(1, GrpcRdaZSource.CALLS_METER);
-    assertMeterReading(4, GrpcRdaZSource.RECORDS_RECEIVED_METER);
-    assertMeterReading(4, GrpcRdaZSource.RECORDS_STORED_METER);
-    assertMeterReading(2, GrpcRdaZSource.BATCHES_METER);
+    assertMeterReading(1, GrpcRdaSource.CALLS_METER);
+    assertMeterReading(4, GrpcRdaSource.RECORDS_RECEIVED_METER);
+    assertMeterReading(4, GrpcRdaSource.RECORDS_STORED_METER);
+    assertMeterReading(2, GrpcRdaSource.BATCHES_METER);
   }
 
   @Test

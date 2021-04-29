@@ -25,16 +25,16 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> type of objects returned by the gRPC service
  */
-public class GrpcRdaZSource<T> implements RdaSource<PreAdjudicatedClaim> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaZSource.class);
+public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
   public static final String CALLS_METER =
-      MetricRegistry.name(GrpcRdaZSource.class.getSimpleName(), "calls");
+      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "calls");
   public static final String RECORDS_RECEIVED_METER =
-      MetricRegistry.name(GrpcRdaZSource.class.getSimpleName(), "recordsReceived");
+      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "recordsReceived");
   public static final String RECORDS_STORED_METER =
-      MetricRegistry.name(GrpcRdaZSource.class.getSimpleName(), "recordsStored");
+      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "recordsStored");
   public static final String BATCHES_METER =
-      MetricRegistry.name(GrpcRdaZSource.class.getSimpleName(), "batches");
+      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "batches");
 
   private final GrpcStreamCaller.Factory<T> callerFactory;
   private final Clock clock;
@@ -44,7 +44,7 @@ public class GrpcRdaZSource<T> implements RdaSource<PreAdjudicatedClaim> {
   private final Meter batchesMeter;
   private ManagedChannel channel;
 
-  public GrpcRdaZSource(
+  public GrpcRdaSource(
       Config config, GrpcStreamCaller.Factory<T> callerFactory, MetricRegistry appMetrics) {
     this(
         ManagedChannelBuilder.forAddress(config.host, config.port)
@@ -57,7 +57,7 @@ public class GrpcRdaZSource<T> implements RdaSource<PreAdjudicatedClaim> {
   }
 
   @VisibleForTesting
-  GrpcRdaZSource(
+  GrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller.Factory<T> callerFactory,
       Clock clock,
