@@ -7,8 +7,8 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class RDASinkTest {
-  private final RDASink<Integer> sink = new TestSink();
+public class RdaSinkTest {
+  private final RdaSink<Integer> sink = new TestSink();
 
   @Test
   public void batchSuccessful() throws Exception {
@@ -34,7 +34,7 @@ public class RDASinkTest {
     }
   }
 
-  private static class TestSink implements RDASink<Integer> {
+  private static class TestSink implements RdaSink<Integer> {
     @Override
     public int writeObject(Integer object) throws ProcessingException {
       if (object == 5) {

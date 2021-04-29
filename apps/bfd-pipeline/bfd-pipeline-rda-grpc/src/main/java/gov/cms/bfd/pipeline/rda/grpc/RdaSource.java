@@ -9,7 +9,7 @@ import java.time.Duration;
  *
  * @param <T> the type of objects processed
  */
-public interface RDASource<T> extends AutoCloseable {
+public interface RdaSource<T> extends AutoCloseable {
   /**
    * Retrieve some number of objects from the source and pass them to the sink for processing.
    *
@@ -20,6 +20,6 @@ public interface RDASource<T> extends AutoCloseable {
    * @return total number of objects processed (sum of results from calls to sink)
    */
   int retrieveAndProcessObjects(
-      int maxToProcess, int maxPerBatch, Duration maxRunTime, RDASink<T> sink)
+      int maxToProcess, int maxPerBatch, Duration maxRunTime, RdaSink<T> sink)
       throws ProcessingException;
 }

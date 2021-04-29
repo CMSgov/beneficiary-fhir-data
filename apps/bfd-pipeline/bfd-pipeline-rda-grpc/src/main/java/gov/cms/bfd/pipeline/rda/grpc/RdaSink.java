@@ -9,7 +9,7 @@ import java.util.Collections;
  *
  * @param <T> the type of objects processed
  */
-public interface RDASink<T> extends AutoCloseable {
+public interface RdaSink<T> extends AutoCloseable {
   /**
    * Write the object to the data store and return the number of objects successfully written.
    *
