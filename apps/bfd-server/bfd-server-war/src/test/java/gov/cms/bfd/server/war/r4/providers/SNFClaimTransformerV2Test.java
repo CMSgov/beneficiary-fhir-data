@@ -11,10 +11,15 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class SNFClaimTransformerV2Test {
+  SNFClaim claim;
+  ExplanationOfBenefit eob;
+
   /**
    * Generates the Claim object to be used in multiple tests
    *
@@ -25,29 +30,33 @@ public class SNFClaimTransformerV2Test {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    return parsedRecords.stream()
-        .filter(r -> r instanceof SNFClaim)
-        .map(r -> (SNFClaim) r)
-        .findFirst()
-        .get();
+    SNFClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof SNFClaim)
+            .map(r -> (SNFClaim) r)
+            .findFirst()
+            .get();
+
+    return claim;
   }
 
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SNFClaimTransformer#transform(Object)} works as expected
-   * when run against the {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Test
-  public void transformSampleARecord() throws FHIRException {
-    SNFClaim claim = generateClaim();
-
-    assertMatches(
-        claim, SNFClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)));
+  @Before
+  public void before() {
+    claim = generateClaim();
+    eob = SNFClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
+
+  @Test
+  public void shouldSetID() {
+    Assert.assertEquals("snf-" + claim.getClaimId(), eob.getId());
+  }
+
+  @Test
+  public void shouldSetLastUpdated() {
+    Assert.assertNotNull(eob.getMeta().getLastUpdated());
+  }
 
   /**
    * Serializes the EOB and prints to the command line
