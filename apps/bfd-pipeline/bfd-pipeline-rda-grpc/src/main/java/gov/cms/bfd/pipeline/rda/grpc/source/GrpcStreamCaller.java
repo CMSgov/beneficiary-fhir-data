@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
 import io.grpc.ManagedChannel;
-import java.time.Duration;
 import java.util.Iterator;
 
 /**
@@ -15,11 +14,10 @@ public interface GrpcStreamCaller<T> {
   /**
    * Make the call to the service and return a blocking Iterator over the results.
    *
-   * @param maxRunTime maximum remaining runtime for the service call.
    * @return a blocking Iterator over stream results
    * @throws Exception any exception will terminate the stream
    */
-  Iterator<T> callService(Duration maxRunTime) throws Exception;
+  Iterator<T> callService() throws Exception;
 
   /**
    * Convert the service result object into a PreAdjudicatedClaim object.

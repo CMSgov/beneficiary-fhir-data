@@ -9,7 +9,6 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
       MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "batches");
 
   private final GrpcStreamCaller.Factory<T> callerFactory;
-  private final Clock clock;
   private final Meter callsMeter;
   private final Meter recordsReceivedMeter;
   private final Meter recordsStoredMeter;
@@ -53,7 +51,6 @@ public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
             .idleTimeout(config.maxIdle.toMillis(), TimeUnit.MILLISECONDS)
             .build(),
         callerFactory,
-        Clock.systemDefaultZone(),
         appMetrics);
   }
 
@@ -61,11 +58,9 @@ public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
   GrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller.Factory<T> callerFactory,
-      Clock clock,
       MetricRegistry appMetrics) {
     this.callerFactory = callerFactory;
     this.channel = channel;
-    this.clock = clock;
     callsMeter = appMetrics.meter(CALLS_METER);
     recordsReceivedMeter = appMetrics.meter(RECORDS_RECEIVED_METER);
     recordsStoredMeter = appMetrics.meter(RECORDS_STORED_METER);
@@ -77,40 +72,31 @@ public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
    * number of objects have been processed. Calls the service through a specific implementation of
    * GrpcStreamCaller created by the callerFactory.
    *
-   * @param maxToProcess maximum number of objects to retrieve from the source
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
-   * @param maxRunTime maximum amount of time to run before returning
    * @param sink to receive batches of objects
    * @return the number of objects that were successfully processed
    * @throws ProcessingException wrapper around any Exception thrown by the service
    */
   @Override
-  public int retrieveAndProcessObjects(
-      int maxToProcess, int maxPerBatch, Duration maxRunTime, RdaSink<PreAdjudicatedClaim> sink)
+  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<PreAdjudicatedClaim> sink)
       throws ProcessingException {
     callsMeter.mark();
     int processed = 0;
     try {
       final GrpcStreamCaller<T> caller = callerFactory.createCaller(channel);
       final List<PreAdjudicatedClaim> batch = new ArrayList<>();
-      Instant now = clock.instant();
-      final Instant stopTime = now.plus(maxRunTime);
-      while (shouldContinue(processed, maxToProcess, now, stopTime)) {
-        final Iterator<T> resultIterator = caller.callService(Duration.between(now, stopTime));
-        now = clock.instant();
-        while (resultIterator.hasNext() && shouldContinue(processed, maxToProcess, now, stopTime)) {
-          final T result = resultIterator.next();
-          final PreAdjudicatedClaim claim = caller.convertResultToClaim(result);
-          recordsReceivedMeter.mark();
-          batch.add(claim);
-          if (batch.size() >= maxPerBatch) {
-            processed += submitBatchToSink(sink, batch);
-          }
-          now = clock.instant();
-        }
-        if (batch.size() > 0) {
+      final Iterator<T> resultIterator = caller.callService();
+      while (resultIterator.hasNext()) {
+        final T result = resultIterator.next();
+        final PreAdjudicatedClaim claim = caller.convertResultToClaim(result);
+        recordsReceivedMeter.mark();
+        batch.add(claim);
+        if (batch.size() >= maxPerBatch) {
           processed += submitBatchToSink(sink, batch);
         }
+      }
+      if (batch.size() > 0) {
+        processed += submitBatchToSink(sink, batch);
       }
     } catch (ProcessingException ex) {
       throw new ProcessingException(ex.getCause(), processed + ex.getProcessedCount());

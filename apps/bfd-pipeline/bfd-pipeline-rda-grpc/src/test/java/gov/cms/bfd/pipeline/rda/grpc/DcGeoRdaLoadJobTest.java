@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -35,8 +34,7 @@ public class DcGeoRdaLoadJobTest {
     sinkFactory = mock(Callable.class);
     source = mock(RdaSource.class);
     sink = mock(RdaSink.class);
-    DcGeoRdaLoadJob.Config config =
-        new DcGeoRdaLoadJob.Config(Duration.ofSeconds(10), Duration.ofSeconds(25), 5, 3);
+    DcGeoRdaLoadJob.Config config = new DcGeoRdaLoadJob.Config(Duration.ofSeconds(10), 3);
     appMetrics = new MetricRegistry();
     job = new DcGeoRdaLoadJob(config, sourceFactory, sinkFactory, appMetrics);
   }
@@ -78,7 +76,7 @@ public class DcGeoRdaLoadJobTest {
     doReturn(sink).when(sinkFactory).call();
     doThrow(new ProcessingException(new IOException("oops"), 7))
         .when(source)
-        .retrieveAndProcessObjects(anyInt(), anyInt(), any(), same(sink));
+        .retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       job.call();
       Assert.fail("job should have thrown exception");
@@ -96,7 +94,7 @@ public class DcGeoRdaLoadJobTest {
   public void nothingToDo() throws Exception {
     doReturn(source).when(sourceFactory).call();
     doReturn(sink).when(sinkFactory).call();
-    doReturn(0).when(source).retrieveAndProcessObjects(anyInt(), anyInt(), any(), same(sink));
+    doReturn(0).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       PipelineJobOutcome outcome = job.call();
       Assert.assertEquals(PipelineJobOutcome.NOTHING_TO_DO, outcome);
@@ -113,7 +111,7 @@ public class DcGeoRdaLoadJobTest {
   public void workDone() throws Exception {
     doReturn(source).when(sourceFactory).call();
     doReturn(sink).when(sinkFactory).call();
-    doReturn(25000).when(source).retrieveAndProcessObjects(anyInt(), anyInt(), any(), same(sink));
+    doReturn(25000).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       PipelineJobOutcome outcome = job.call();
       Assert.assertEquals(PipelineJobOutcome.WORK_DONE, outcome);

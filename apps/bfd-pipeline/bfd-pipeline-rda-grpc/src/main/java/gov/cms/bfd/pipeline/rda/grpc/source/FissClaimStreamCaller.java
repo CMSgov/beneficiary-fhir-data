@@ -5,9 +5,7 @@ import gov.cms.mpsm.rda.v1.EmptyRequest;
 import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.ManagedChannel;
-import java.time.Duration;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 /** GrpcStreamCaller implementation that calls the RDA HealthCheck service. */
 public class FissClaimStreamCaller implements GrpcStreamCaller<FissClaim> {
@@ -18,10 +16,9 @@ public class FissClaimStreamCaller implements GrpcStreamCaller<FissClaim> {
   }
 
   @Override
-  public Iterator<FissClaim> callService(Duration maxRunTime) throws Exception {
+  public Iterator<FissClaim> callService() throws Exception {
     final EmptyRequest request = EmptyRequest.newBuilder().build();
-    return stub.withDeadlineAfter(maxRunTime.toMillis(), TimeUnit.MILLISECONDS)
-        .getFissClaims(request);
+    return stub.getFissClaims(request);
   }
 
   @Override

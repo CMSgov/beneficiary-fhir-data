@@ -20,11 +20,7 @@ import org.slf4j.LoggerFactory;
 public final class DcGeoRdaLoadJob implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRdaLoadJob.class);
   public static final String SCAN_INTERVAL_PROPERTY = "DCGeoRDALoadIntervalSeconds";
-  public static final String RUN_TIME_PROPERTY = "DCGeoRDALoadRunSeconds";
-  public static final String MAX_RECORDS_PROPERTY = "DCGeoRDALoadMaxRecords";
   public static final int SCAN_INTERVAL_DEFAULT = 300;
-  public static final int RUN_TIME_DEFAULT = 300;
-  public static final int MAX_RECORDS_DEFAULT = Integer.MAX_VALUE;
   public static final String BATCH_SIZE_PROPERTY = "DCGeoBatchSize";
   public static final int BATCH_SIZE_DEFAULT = 1;
   public static final String CALLS_METER_NAME =
@@ -85,9 +81,7 @@ public final class DcGeoRdaLoadJob implements PipelineJob {
       callsMeter.mark();
       try (RdaSource<PreAdjudicatedClaim> source = sourceFactory.call();
           RdaSink<PreAdjudicatedClaim> sink = sinkFactory.call()) {
-        processedCount =
-            source.retrieveAndProcessObjects(
-                config.getMaxObjectsPerCall(), config.getBatchSize(), config.getMaxRunTime(), sink);
+        processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
       }
     } catch (ProcessingException ex) {
       processedCount += ex.getProcessedCount();
@@ -110,36 +104,21 @@ public final class DcGeoRdaLoadJob implements PipelineJob {
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
   public static final class Config {
     private final Duration scanInterval;
-    private final Duration maxRunTime;
-    private final int maxObjectsPerCall;
     private final int batchSize;
 
-    public Config(
-        Duration scanInterval, Duration maxRunTime, int maxObjectsPerCall, int batchSize) {
+    public Config(Duration scanInterval, int batchSize) {
       this.scanInterval = scanInterval;
-      this.maxRunTime = maxRunTime;
-      this.maxObjectsPerCall = maxObjectsPerCall;
       this.batchSize = batchSize;
     }
 
     public Config() {
       this(
           Duration.ofSeconds(ConfigUtils.getInt(SCAN_INTERVAL_PROPERTY, SCAN_INTERVAL_DEFAULT)),
-          Duration.ofSeconds(ConfigUtils.getInt(RUN_TIME_PROPERTY, RUN_TIME_DEFAULT)),
-          ConfigUtils.getInt(MAX_RECORDS_PROPERTY, MAX_RECORDS_DEFAULT),
           ConfigUtils.getInt(BATCH_SIZE_PROPERTY, BATCH_SIZE_DEFAULT));
     }
 
     public Duration getScanInterval() {
       return scanInterval;
-    }
-
-    public Duration getMaxRunTime() {
-      return maxRunTime;
-    }
-
-    public int getMaxObjectsPerCall() {
-      return maxObjectsPerCall;
     }
 
     public int getBatchSize() {

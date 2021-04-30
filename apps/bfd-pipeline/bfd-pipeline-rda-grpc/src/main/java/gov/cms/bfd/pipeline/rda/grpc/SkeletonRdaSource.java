@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +19,7 @@ public class SkeletonRdaSource implements RdaSource<PreAdjudicatedClaim> {
   }
 
   @Override
-  public int retrieveAndProcessObjects(
-      int maxToProcess, int maxPerBatch, Duration maxRunTime, RdaSink<PreAdjudicatedClaim> sink)
+  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<PreAdjudicatedClaim> sink)
       throws ProcessingException {
     LOGGER.warn("simulating object processing");
     callsMeter.mark();

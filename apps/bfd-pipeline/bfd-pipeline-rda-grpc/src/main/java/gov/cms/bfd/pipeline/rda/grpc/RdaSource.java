@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import java.time.Duration;
-
 /**
  * Interface for objects that retrieve objects from some source and pass them to a sink for
  * processing. All implementations are AutoCloseable since they will generally hold a network or
@@ -19,7 +17,5 @@ public interface RdaSource<T> extends AutoCloseable {
    * @param sink to receive batches of objects
    * @return total number of objects processed (sum of results from calls to sink)
    */
-  int retrieveAndProcessObjects(
-      int maxToProcess, int maxPerBatch, Duration maxRunTime, RdaSink<T> sink)
-      throws ProcessingException;
+  int retrieveAndProcessObjects(int maxPerBatch, RdaSink<T> sink) throws ProcessingException;
 }
