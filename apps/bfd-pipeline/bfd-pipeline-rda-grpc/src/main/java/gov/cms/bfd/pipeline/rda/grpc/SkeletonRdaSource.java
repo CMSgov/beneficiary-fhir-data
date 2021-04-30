@@ -10,18 +10,18 @@ import org.slf4j.LoggerFactory;
  * Skeleton RDASource implementation that just updates a Meter to count the number of times it has
  * been called. This implementation satisfies the requirements of DCGEO-18.
  */
-public class SkeletonRDASource implements RDASource<PreAdjudicatedClaim> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRDASource.class);
+public class SkeletonRdaSource implements RdaSource<PreAdjudicatedClaim> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRdaSource.class);
 
   private final Meter callsMeter;
 
-  public SkeletonRDASource(MetricRegistry appMetrics) {
+  public SkeletonRdaSource(MetricRegistry appMetrics) {
     callsMeter = appMetrics.meter(MetricRegistry.name(getClass().getSimpleName(), "calls"));
   }
 
   @Override
   public int retrieveAndProcessObjects(
-      int maxToProcess, int maxPerBatch, Duration maxRunTime, RDASink<PreAdjudicatedClaim> sink)
+      int maxToProcess, int maxPerBatch, Duration maxRunTime, RdaSink<PreAdjudicatedClaim> sink)
       throws ProcessingException {
     LOGGER.warn("simulating object processing");
     callsMeter.mark();

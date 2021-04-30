@@ -83,7 +83,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>3.1.2</metrics.version>
+		<metrics.version>4.1.2</metrics.version>
 		<hibernate.version>5.2.10.Final</hibernate.version>
 		
 		<!-- The default DB that will be used in integration tests. -->
@@ -95,11 +95,6 @@
 
 		<!-- Whether the V2 endpoints should be enabled -->
 		<local.v2.enabled>true</local.v2.enabled>
-
-		<!-- Version of gRPC related dependencies and plugins -->
-		<!-- These need to be defined here so they can be referenced in a plugin config in lower level poms -->
-		<grpc_java.version>1.37.0</grpc_java.version>
-		<protoc.version>3.15.8</protoc.version>
 	</properties>
 
 	<dependencyManagement>

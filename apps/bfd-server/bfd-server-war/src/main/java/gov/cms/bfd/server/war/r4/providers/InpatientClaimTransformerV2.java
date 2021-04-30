@@ -58,9 +58,6 @@ public class InpatientClaimTransformerV2 {
     // Required values not directly mapped
     eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 
-    // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
-    // eob.setOutcome(?)
-
     // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
     // CLM_ID                   => ExplanationOfBenefit.identifier
@@ -295,13 +292,6 @@ public class InpatientClaimTransformerV2 {
             CcwCodebookVariable.NCH_WKLY_PROC_DT,
             Optional.of(claimGroup.getWeeklyProcessDate())));
 
-    // NCH_PTNT_STATUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
-    TransformerUtilsV2.addInformationWithCode(
-        eob,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        claimGroup.getPatientStatusCd());
-
     // CLM_PPS_CPTL_DRG_WT_NUM => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
         eob,
@@ -327,8 +317,7 @@ public class InpatientClaimTransformerV2 {
       // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
-      // REV_CNTR_UNIT_CNT          => ExplanationOfBenefit.item.quantity
-      // REV_CNTR_NDC_QTY           => TODO: ??
+      // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
       // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
       TransformerUtilsV2.mapEobCommonItemRevenue(
           item,
@@ -337,7 +326,6 @@ public class InpatientClaimTransformerV2 {
           line.getRateAmount(),
           line.getTotalChargeAmount(),
           Optional.of(line.getNonCoveredChargeAmount()),
-          line.getUnitCount(),
           line.getNationalDrugCodeQuantity(),
           line.getNationalDrugCodeQualifierCode());
 

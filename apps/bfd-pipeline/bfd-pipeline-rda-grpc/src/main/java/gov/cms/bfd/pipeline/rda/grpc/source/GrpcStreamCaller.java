@@ -30,6 +30,12 @@ public interface GrpcStreamCaller<T> {
    */
   PreAdjudicatedClaim convertResultToClaim(T result) throws Exception;
 
+  /**
+   * An interface for factory objects that can create implementations tied to a specific channel.
+   * This will be called by GrpcRdaSource when it needs to make a new call to the gRPC service.
+   *
+   * @param <T> type of objects returned by the streaming service.
+   */
   @FunctionalInterface
   interface Factory<T> {
     GrpcStreamCaller<T> createCaller(ManagedChannel channel) throws Exception;

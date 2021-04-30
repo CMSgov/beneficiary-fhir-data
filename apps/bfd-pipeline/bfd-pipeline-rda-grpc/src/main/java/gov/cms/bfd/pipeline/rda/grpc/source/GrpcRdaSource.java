@@ -5,8 +5,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
-import gov.cms.bfd.pipeline.rda.grpc.RDASink;
-import gov.cms.bfd.pipeline.rda.grpc.RDASource;
+import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.time.Clock;
@@ -21,20 +21,21 @@ import org.slf4j.LoggerFactory;
 
 /**
  * General RDASource implementation that delegates actual service call and result mapping to another
- * class.
+ * class. This current implementation is a placeholder to demonstrate the structure that will be
+ * used as the RDA API develops to call their RPC's to download Part A and Part B claims.
  *
  * @param <T> type of objects returned by the gRPC service
  */
-public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRDASource.class);
+public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
   public static final String CALLS_METER =
-      MetricRegistry.name(GrpcRDASource.class.getSimpleName(), "calls");
+      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "calls");
   public static final String RECORDS_RECEIVED_METER =
-      MetricRegistry.name(GrpcRDASource.class.getSimpleName(), "recordsReceived");
+      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "recordsReceived");
   public static final String RECORDS_STORED_METER =
-      MetricRegistry.name(GrpcRDASource.class.getSimpleName(), "recordsStored");
+      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "recordsStored");
   public static final String BATCHES_METER =
-      MetricRegistry.name(GrpcRDASource.class.getSimpleName(), "batches");
+      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "batches");
 
   private final GrpcStreamCaller.Factory<T> callerFactory;
   private final Clock clock;
@@ -44,7 +45,7 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
   private final Meter batchesMeter;
   private ManagedChannel channel;
 
-  public GrpcRDASource(
+  public GrpcRdaSource(
       Config config, GrpcStreamCaller.Factory<T> callerFactory, MetricRegistry appMetrics) {
     this(
         ManagedChannelBuilder.forAddress(config.host, config.port)
@@ -57,7 +58,7 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
   }
 
   @VisibleForTesting
-  GrpcRDASource(
+  GrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller.Factory<T> callerFactory,
       Clock clock,
@@ -71,9 +72,21 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
     batchesMeter = appMetrics.meter(BATCHES_METER);
   }
 
+  /**
+   * Repeatedly call the service until either our max allowed run time has elapsed or our maximum
+   * number of objects have been processed. Calls the service through a specific implementation of
+   * GrpcStreamCaller created by the callerFactory.
+   *
+   * @param maxToProcess maximum number of objects to retrieve from the source
+   * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
+   * @param maxRunTime maximum amount of time to run before returning
+   * @param sink to receive batches of objects
+   * @return the number of objects that were successfully processed
+   * @throws ProcessingException wrapper around any Exception thrown by the service
+   */
   @Override
   public int retrieveAndProcessObjects(
-      int maxToProcess, int maxPerBatch, Duration maxRunTime, RDASink<PreAdjudicatedClaim> sink)
+      int maxToProcess, int maxPerBatch, Duration maxRunTime, RdaSink<PreAdjudicatedClaim> sink)
       throws ProcessingException {
     callsMeter.mark();
     int processed = 0;
@@ -132,7 +145,7 @@ public class GrpcRDASource<T> implements RDASource<PreAdjudicatedClaim> {
     return true;
   }
 
-  private int submitBatchToSink(RDASink<PreAdjudicatedClaim> sink, List<PreAdjudicatedClaim> batch)
+  private int submitBatchToSink(RdaSink<PreAdjudicatedClaim> sink, List<PreAdjudicatedClaim> batch)
       throws ProcessingException {
     LOGGER.info("submitting batch to sink: size={}", batch.size());
     int processed = sink.writeBatch(batch);

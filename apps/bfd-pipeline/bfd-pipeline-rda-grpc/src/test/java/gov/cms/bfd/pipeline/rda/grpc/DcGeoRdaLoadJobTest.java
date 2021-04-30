@@ -20,12 +20,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DcGeoRDALoadJobTest {
-  private Callable<RDASource<PreAdjudicatedClaim>> sourceFactory;
-  private Callable<RDASink<PreAdjudicatedClaim>> sinkFactory;
-  private RDASource<PreAdjudicatedClaim> source;
-  private RDASink<PreAdjudicatedClaim> sink;
-  private DcGeoRDALoadJob job;
+public class DcGeoRdaLoadJobTest {
+  private Callable<RdaSource<PreAdjudicatedClaim>> sourceFactory;
+  private Callable<RdaSink<PreAdjudicatedClaim>> sinkFactory;
+  private RdaSource<PreAdjudicatedClaim> source;
+  private RdaSink<PreAdjudicatedClaim> sink;
+  private DcGeoRdaLoadJob job;
   private MetricRegistry appMetrics;
 
   @SuppressWarnings("unchecked")
@@ -33,12 +33,12 @@ public class DcGeoRDALoadJobTest {
   public void setUp() {
     sourceFactory = mock(Callable.class);
     sinkFactory = mock(Callable.class);
-    source = mock(RDASource.class);
-    sink = mock(RDASink.class);
-    DcGeoRDALoadJob.Config config =
-        new DcGeoRDALoadJob.Config(Duration.ofSeconds(10), Duration.ofSeconds(25), 5, 3);
+    source = mock(RdaSource.class);
+    sink = mock(RdaSink.class);
+    DcGeoRdaLoadJob.Config config =
+        new DcGeoRdaLoadJob.Config(Duration.ofSeconds(10), Duration.ofSeconds(25), 5, 3);
     appMetrics = new MetricRegistry();
-    job = new DcGeoRDALoadJob(config, sourceFactory, sinkFactory, appMetrics);
+    job = new DcGeoRdaLoadJob(config, sourceFactory, sinkFactory, appMetrics);
   }
 
   @Test
@@ -48,12 +48,12 @@ public class DcGeoRDALoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getMessage());
-      MatcherAssert.assertThat(ex, Matchers.instanceOf(IOException.class));
+      Assert.assertEquals("oops", ex.getCause().getMessage());
+      MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verifyNoInteractions(sinkFactory);
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.FAILURES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -64,12 +64,12 @@ public class DcGeoRDALoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getMessage());
-      MatcherAssert.assertThat(ex, Matchers.instanceOf(IOException.class));
+      Assert.assertEquals("oops", ex.getCause().getMessage());
+      MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verify(source).close();
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.FAILURES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -83,13 +83,13 @@ public class DcGeoRDALoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getMessage());
-      MatcherAssert.assertThat(ex, Matchers.instanceOf(IOException.class));
+      Assert.assertEquals("oops", ex.getCause().getMessage());
+      MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.FAILURES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -105,8 +105,8 @@ public class DcGeoRDALoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.SUCCESSES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.SUCCESSES_METER_NAME).getCount());
   }
 
   @Test
@@ -122,7 +122,7 @@ public class DcGeoRDALoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRDALoadJob.SUCCESSES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.SUCCESSES_METER_NAME).getCount());
   }
 }

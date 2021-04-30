@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
  * handles communication with the ultimate storage system. The purpose of this class is to handle
  * general PipelineJob semantics that are common to any source or sink.
  */
-public final class DcGeoRDALoadJob implements PipelineJob {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRDALoadJob.class);
+public final class DcGeoRdaLoadJob implements PipelineJob {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRdaLoadJob.class);
   public static final String SCAN_INTERVAL_PROPERTY = "DCGeoRDALoadIntervalSeconds";
   public static final String RUN_TIME_PROPERTY = "DCGeoRDALoadRunSeconds";
   public static final String MAX_RECORDS_PROPERTY = "DCGeoRDALoadMaxRecords";
@@ -28,26 +28,26 @@ public final class DcGeoRDALoadJob implements PipelineJob {
   public static final String BATCH_SIZE_PROPERTY = "DCGeoBatchSize";
   public static final int BATCH_SIZE_DEFAULT = 1;
   public static final String CALLS_METER_NAME =
-      MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "calls");
+      MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "calls");
   public static final String FAILURES_METER_NAME =
-      MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "failures");
+      MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "failures");
   public static final String SUCCESSES_METER_NAME =
-      MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "successes");
+      MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "successes");
   public static final String PROCESSED_METER_NAME =
-      MetricRegistry.name(DcGeoRDALoadJob.class.getSimpleName(), "processed");
+      MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "processed");
 
   private final Config config;
-  private final Callable<RDASource<PreAdjudicatedClaim>> sourceFactory;
-  private final Callable<RDASink<PreAdjudicatedClaim>> sinkFactory;
+  private final Callable<RdaSource<PreAdjudicatedClaim>> sourceFactory;
+  private final Callable<RdaSink<PreAdjudicatedClaim>> sinkFactory;
   private final Meter callsMeter;
   private final Meter failuresMeter;
   private final Meter successesMeter;
   private final Meter processedMeter;
 
-  public DcGeoRDALoadJob(
+  public DcGeoRdaLoadJob(
       Config config,
-      Callable<RDASource<PreAdjudicatedClaim>> sourceFactory,
-      Callable<RDASink<PreAdjudicatedClaim>> sinkFactory,
+      Callable<RdaSource<PreAdjudicatedClaim>> sourceFactory,
+      Callable<RdaSink<PreAdjudicatedClaim>> sinkFactory,
       MetricRegistry appMetrics) {
     this.config = config;
     this.sourceFactory = sourceFactory;
@@ -64,11 +64,11 @@ public final class DcGeoRDALoadJob implements PipelineJob {
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
    */
-  public static DcGeoRDALoadJob newDcGeoRDALoadJob(MetricRegistry appMetrics) {
-    return new DcGeoRDALoadJob(
+  public static DcGeoRdaLoadJob newDcGeoRDALoadJob(MetricRegistry appMetrics) {
+    return new DcGeoRdaLoadJob(
         new Config(),
-        () -> new SkeletonRDASource(appMetrics),
-        () -> new SkeletonRDASink(appMetrics),
+        () -> new SkeletonRdaSource(appMetrics),
+        () -> new SkeletonRdaSink(appMetrics),
         appMetrics);
   }
 
@@ -83,8 +83,8 @@ public final class DcGeoRDALoadJob implements PipelineJob {
     Exception error = null;
     try {
       callsMeter.mark();
-      try (RDASource<PreAdjudicatedClaim> source = sourceFactory.call();
-          RDASink<PreAdjudicatedClaim> sink = sinkFactory.call()) {
+      try (RdaSource<PreAdjudicatedClaim> source = sourceFactory.call();
+          RdaSink<PreAdjudicatedClaim> sink = sinkFactory.call()) {
         processedCount =
             source.retrieveAndProcessObjects(
                 config.getMaxObjectsPerCall(), config.getBatchSize(), config.getMaxRunTime(), sink);
@@ -101,7 +101,7 @@ public final class DcGeoRDALoadJob implements PipelineJob {
     if (error != null) {
       failuresMeter.mark();
       LOGGER.error("processing aborted by an exception: message={}", error.getMessage(), error);
-      throw error;
+      throw new ProcessingException(error, processedCount);
     }
     successesMeter.mark();
     return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
