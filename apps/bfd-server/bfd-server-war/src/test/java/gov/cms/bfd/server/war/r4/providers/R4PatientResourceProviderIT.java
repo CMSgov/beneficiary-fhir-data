@@ -947,7 +947,9 @@ public final class R4PatientResourceProviderIT {
         4,
         patientFromSearchResult.getIdentifier().stream()
             .filter(
-                i -> TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE.equals(i.getSystem()))
+                i ->
+                    TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED.equals(
+                        i.getSystem()))
             .count());
   }
 
@@ -991,7 +993,9 @@ public final class R4PatientResourceProviderIT {
         4,
         patientFromSearchResult.getIdentifier().stream()
             .filter(
-                i -> TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE.equals(i.getSystem()))
+                i ->
+                    TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED.equals(
+                        i.getSystem()))
             .count());
   }
 
