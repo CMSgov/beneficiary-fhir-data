@@ -9,6 +9,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -98,8 +99,20 @@ public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
       if (batch.size() > 0) {
         processed += submitBatchToSink(sink, batch);
       }
+    } catch (StatusRuntimeException ex) {
+      // gRPC blocking stub will throw a StatusRuntimeException when it encounters any error.
+      // Here we check to see if the underlying cause was an InterruptedException and close down
+      // safely if it was since those are normal and expected for pipeline apps.  Any other cause
+      // is treated as a fatal error.
+      if (ex.getCause() != null && ex.getCause() instanceof InterruptedException) {
+        LOGGER.warn("gRPC call was terminated by an InterruptedException");
+      } else {
+        throw new ProcessingException(ex, processed);
+      }
     } catch (ProcessingException ex) {
       throw new ProcessingException(ex.getCause(), processed + ex.getProcessedCount());
+    } catch (InterruptedException ex) {
+      LOGGER.warn("non-gRPC code was terminated by an InterruptedException");
     } catch (Exception ex) {
       throw new ProcessingException(ex, processed);
     }
