@@ -8,21 +8,33 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.InsuranceComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.PaymentComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -628,6 +640,339 @@ public class SNFClaimTransformerV2Test {
                 "Employer group health plan (EGHP) insurance for an aged beneficiary"));
 
     Assert.assertTrue(compare.equalsDeep(sic));
+  }
+
+  /** Diagnosis elements */
+  @Test
+  public void shouldHaveDiagnosesList() {
+    Assert.assertEquals(5, eob.getDiagnosis().size());
+  }
+
+  @Test
+  public void shouldHaveDiagnosesMembers() {
+    DiagnosisComponent diag1 =
+        TransformerTestUtilsV2.findDiagnosisByCode("R4444", eob.getDiagnosis());
+
+    DiagnosisComponent cmp1 =
+        TransformerTestUtilsV2.createDiagnosis(
+            // Order doesn't matter
+            diag1.getSequence(),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R4444", null),
+            new Coding(
+                "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+                "other",
+                "Other"),
+            null,
+            null);
+
+    Assert.assertTrue(cmp1.equalsDeep(diag1));
+
+    DiagnosisComponent diag2 =
+        TransformerTestUtilsV2.findDiagnosisByCode("R5555", eob.getDiagnosis());
+
+    DiagnosisComponent cmp2 =
+        TransformerTestUtilsV2.createDiagnosis(
+            // Order doesn't matter
+            diag2.getSequence(),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R5555", null),
+            new Coding(
+                "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                "principal",
+                "Principal Diagnosis"),
+            null,
+            null);
+
+    Assert.assertTrue(cmp2.equalsDeep(diag2));
+
+    DiagnosisComponent diag3 =
+        TransformerTestUtilsV2.findDiagnosisByCode("R6666", eob.getDiagnosis());
+
+    DiagnosisComponent cmp3 =
+        TransformerTestUtilsV2.createDiagnosis(
+            // Order doesn't matter
+            diag3.getSequence(),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R6666", null),
+            new Coding(
+                "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+                "other",
+                "Other"),
+            null,
+            null);
+
+    Assert.assertTrue(cmp3.equalsDeep(diag3));
+
+    DiagnosisComponent diag4 =
+        TransformerTestUtilsV2.findDiagnosisByCode("R2222", eob.getDiagnosis());
+
+    DiagnosisComponent cmp4 =
+        TransformerTestUtilsV2.createDiagnosis(
+            // Order doesn't matter
+            diag4.getSequence(),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R2222", null),
+            new Coding(
+                "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+                "externalcauseofinjury",
+                "External Cause of Injury"),
+            null,
+            null);
+
+    Assert.assertTrue(cmp4.equalsDeep(diag4));
+
+    DiagnosisComponent diag5 =
+        TransformerTestUtilsV2.findDiagnosisByCode("R3333", eob.getDiagnosis());
+
+    DiagnosisComponent cmp5 =
+        TransformerTestUtilsV2.createDiagnosis(
+            // Order doesn't matter
+            diag5.getSequence(),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "R3333", null),
+            new Coding(
+                "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+                "externalcauseofinjury",
+                "External Cause of Injury"),
+            null,
+            null);
+
+    Assert.assertTrue(cmp5.equalsDeep(diag5));
+  }
+
+  /** Procedures */
+  @Test
+  public void shouldHaveProcedureList() {
+    Assert.assertEquals(1, eob.getProcedure().size());
+  }
+
+  @Test
+  public void shouldHaveProcedureMembers() {
+    ProcedureComponent proc1 =
+        TransformerTestUtilsV2.findProcedureByCode("0TCCCCC", eob.getProcedure());
+
+    ProcedureComponent cmp1 =
+        TransformerTestUtilsV2.createProcedure(
+            proc1.getSequence(),
+            new Coding("http://hl7.org/fhir/sid/icd-9-cm", "0TCCCCC", null),
+            "2016-01-16T00:00:00-08:00");
+
+    Assert.assertTrue("Comparing Procedure code 0TCCCCC", cmp1.equalsDeep(proc1));
+  }
+
+  /** Insurance */
+  @Test
+  public void shouldReferenceCoverageInInsurance() {
+    // Only one insurance object
+    Assert.assertEquals(1, eob.getInsurance().size());
+
+    InsuranceComponent insurance = eob.getInsuranceFirstRep();
+
+    InsuranceComponent compare =
+        new InsuranceComponent()
+            .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
+
+    Assert.assertTrue(compare.equalsDeep(insurance));
+  }
+
+  /** Line Items */
+  @Test
+  public void shouldHaveLineItems() {
+    Assert.assertEquals(1, eob.getItem().size());
+  }
+
+  @Test
+  public void shouldHaveLineItemSequence() {
+    Assert.assertEquals(1, eob.getItemFirstRep().getSequence());
+  }
+
+  @Test
+  public void shouldHaveLineItemCareTeamRef() {
+    // The order isn't important but this should reference a care team member
+    Assert.assertNotNull(eob.getItemFirstRep().getCareTeamSequence());
+    Assert.assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
+  }
+
+  @Test
+  public void shouldHaveLineItemRevenue() {
+    CodeableConcept revenue = eob.getItemFirstRep().getRevenue();
+
+    CodeableConcept compare =
+        new CodeableConcept()
+            .setCoding(
+                Arrays.asList(
+                    new Coding(
+                        "https://bluebutton.cms.gov/resources/variables/rev_cntr", "22", null),
+                    new Coding("https://www.nubc.org/CodeSystem/RevenueCodes", "A", null),
+                    new Coding(
+                        "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",
+                        "A",
+                        null)));
+
+    Assert.assertTrue(compare.equalsDeep(revenue));
+  }
+
+  @Test
+  public void shouldHaveLineItemProductOrServiceCoding() {
+    CodeableConcept pos = eob.getItemFirstRep().getProductOrService();
+
+    CodeableConcept compare =
+        new CodeableConcept()
+            .setCoding(
+                Arrays.asList(
+                    new Coding(
+                        "https://bluebutton.cms.gov/resources/codesystem/hcpcs", "MMM", null)));
+
+    Assert.assertTrue(compare.equalsDeep(pos));
+  }
+
+  @Test
+  public void shouldHaveLineItemLocation() {
+    Address address = eob.getItemFirstRep().getLocationAddress();
+
+    Address compare = new Address().setState("FL");
+
+    Assert.assertTrue(compare.equalsDeep(address));
+  }
+
+  @Test
+  public void shouldHaveLineItemQuantity() {
+    Quantity quantity = eob.getItemFirstRep().getQuantity();
+
+    Quantity compare = new Quantity(0);
+
+    Assert.assertTrue(compare.equalsDeep(quantity));
+  }
+
+  @Test
+  public void shouldHaveLineItemAdjudications() {
+    Assert.assertEquals(3, eob.getItemFirstRep().getAdjudication().size());
+  }
+
+  @Test
+  public void shouldHaveLineItemAdjudicationRevCntrRateAmt() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "https://bluebutton.cms.gov/resources/variables/rev_cntr_rate_amt",
+            eob.getItemFirstRep().getAdjudication());
+
+    // Need to maintain trailing 0s in USD amount
+    BigDecimal amt = new BigDecimal(5.00);
+    amt = amt.setScale(2, RoundingMode.HALF_DOWN);
+
+    AdjudicationComponent compare =
+        new AdjudicationComponent()
+            .setCategory(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "http://terminology.hl7.org/CodeSystem/adjudication",
+                                "submitted",
+                                "Submitted Amount"),
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                "https://bluebutton.cms.gov/resources/variables/rev_cntr_rate_amt",
+                                "Revenue Center Rate Amount"))))
+            .setAmount(new Money().setValue(amt).setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveLineItemAdjudicationRevCntrTotChrgAmt() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "https://bluebutton.cms.gov/resources/variables/rev_cntr_tot_chrg_amt",
+            eob.getItemFirstRep().getAdjudication());
+
+    // Need to maintain trailing 0s in USD amount
+    BigDecimal amt = new BigDecimal(95.00);
+    amt = amt.setScale(2, RoundingMode.HALF_DOWN);
+
+    AdjudicationComponent compare =
+        new AdjudicationComponent()
+            .setCategory(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "http://terminology.hl7.org/CodeSystem/adjudication",
+                                "submitted",
+                                "Submitted Amount"),
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                "https://bluebutton.cms.gov/resources/variables/rev_cntr_tot_chrg_amt",
+                                "Revenue Center Total Charge Amount"))))
+            .setAmount(new Money().setValue(amt).setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveLineItemAdjudicationRevCntrNcvrdChrgAmt() {
+    AdjudicationComponent adjudication =
+        TransformerTestUtilsV2.findAdjudicationByCategory(
+            "https://bluebutton.cms.gov/resources/variables/rev_cntr_ncvrd_chrg_amt",
+            eob.getItemFirstRep().getAdjudication());
+
+    // Need to maintain trailing 0s in USD amount
+    BigDecimal amt = new BigDecimal(88.00);
+    amt = amt.setScale(2, RoundingMode.HALF_DOWN);
+
+    AdjudicationComponent compare =
+        new AdjudicationComponent()
+            .setCategory(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+                                "noncovered",
+                                "Noncovered"),
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                "https://bluebutton.cms.gov/resources/variables/rev_cntr_ncvrd_chrg_amt",
+                                "Revenue Center Non-Covered Charge Amount"))))
+            .setAmount(new Money().setValue(amt).setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  /** Payment */
+  @Test
+  public void shouldHavePayment() {
+    PaymentComponent compare =
+        new PaymentComponent()
+            .setAmount(
+                new Money().setValue(3333.33).setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(eob.getPayment()));
+  }
+
+  /** Total */
+  @Test
+  public void shouldHaveTotal() {
+    Assert.assertEquals(1, eob.getTotal().size());
+  }
+
+  /** Benefit Balance */
+  @Test
+  public void shouldHaveBenefitBalance() {
+    Assert.assertEquals(1, eob.getBenefitBalance().size());
+
+    // Test Category here
+    CodeableConcept compare =
+        new CodeableConcept()
+            .setCoding(
+                Arrays.asList(
+                    new Coding(
+                        "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+                        "1",
+                        "Medical Care")));
+
+    Assert.assertTrue(compare.equalsDeep(eob.getBenefitBalanceFirstRep().getCategory()));
+  }
+
+  @Test
+  public void shouldHaveBenefitBalanceFinancial() {
+    Assert.assertEquals(15, eob.getBenefitBalanceFirstRep().getFinancial().size());
   }
 
   /**
