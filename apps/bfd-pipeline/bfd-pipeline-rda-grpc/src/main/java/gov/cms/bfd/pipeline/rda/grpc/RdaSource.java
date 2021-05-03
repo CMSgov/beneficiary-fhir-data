@@ -11,9 +11,7 @@ public interface RdaSource<T> extends AutoCloseable {
   /**
    * Retrieve some number of objects from the source and pass them to the sink for processing.
    *
-   * @param maxToProcess maximum number of objects to retrieve from the source
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
-   * @param maxRunTime maximum amount of time to run before returning
    * @param sink to receive batches of objects
    * @return total number of objects processed (sum of results from calls to sink)
    */
