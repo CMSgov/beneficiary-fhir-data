@@ -20,8 +20,10 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.AdjudicationComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.BenefitComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.DiagnosisComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ExplanationOfBenefitStatus;
@@ -35,6 +37,7 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -975,6 +978,371 @@ public class SNFClaimTransformerV2Test {
     Assert.assertEquals(15, eob.getBenefitBalanceFirstRep().getFinancial().size());
   }
 
+  @Test
+  public void shouldHaveClmUtlztnDayCntFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/clm_utlztn_day_cnt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/clm_utlztn_day_cnt",
+                                "Claim Medicare Utilization Day Count"))))
+            .setUsed(new UnsignedIntType().setValue(17));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveBeneTotCoinsrncDaysCntFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/bene_tot_coinsrnc_days_cnt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/bene_tot_coinsrnc_days_cnt",
+                                "Beneficiary Total Coinsurance Days Count"))))
+            .setUsed(new UnsignedIntType().setValue(17));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmNonUtlztnDaysCntFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/clm_non_utlztn_days_cnt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/clm_non_utlztn_days_cnt",
+                                "Claim Medicare Non Utilization Days Count"))))
+            .setUsed(new UnsignedIntType().setValue(0));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveNchBeneIpDdctblAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
+                                "NCH Beneficiary Inpatient (or other Part A) Deductible Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("112.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveNchBenePtaCoinsrncLbltyAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_bene_pta_coinsrnc_lblty_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_bene_pta_coinsrnc_lblty_amt",
+                                "NCH Beneficiary Part A Coinsurance Liability Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("5.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveNchIpNcvrdChrgAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_ip_ncvrd_chrg_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_ip_ncvrd_chrg_amt",
+                                "NCH Inpatient(or other Part A) Non-covered Charge Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("33.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveNchIpTotDdctnAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_ip_tot_ddctn_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_ip_tot_ddctn_amt",
+                                "NCH Inpatient (or other Part A) Total Deductible/Coinsurance Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("14.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmPpsCptlDsprprtntShrAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt",
+                                "Claim PPS Capital Disproportionate Share Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("7.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmPpsCptlExcptnAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_excptn_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_excptn_amt",
+                                "Claim PPS Capital Exception Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("5.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmPpsCptlFspAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_fsp_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_fsp_amt",
+                                "Claim PPS Capital Federal Specific Portion (FSP) Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("9.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmPpsCptlImeAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_ime_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_ime_amt",
+                                "Claim PPS Capital Indirect Medical Education (IME) Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("6.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmPpsCptlOutlierAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_outlier_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_outlier_amt",
+                                "Claim PPS Capital Outlier Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("8.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveClmPpsCptlHldHrmlsAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/clm_pps_old_cptl_hld_hrmls_amt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/clm_pps_old_cptl_hld_hrmls_amt",
+                                "Claim PPS Old Capital Hold Harmless Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("4.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHaveNchBeneBloodDdcblLbltyAmtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/nch_bene_blood_ddctbl_lblty_am",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/nch_bene_blood_ddctbl_lblty_am",
+                                "NCH Beneficiary Blood Deductible Liability Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("6.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
+
+  @Test
+  public void shouldHavePrpayamtFinancial() {
+    BenefitComponent benefit =
+        TransformerTestUtilsV2.findFinancial(
+            "https://bluebutton.cms.gov/resources/variables/prpayamt",
+            eob.getBenefitBalanceFirstRep().getFinancial());
+
+    BenefitComponent compare =
+        new BenefitComponent()
+            .setType(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+                                "https://bluebutton.cms.gov/resources/variables/prpayamt",
+                                "NCH Primary Payer (if not Medicare) Claim Paid Amount"))))
+            .setUsed(
+                new Money()
+                    .setValueElement(new DecimalType("11.00"))
+                    .setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(benefit));
+  }
   /**
    * Serializes the EOB and prints to the command line
    *
