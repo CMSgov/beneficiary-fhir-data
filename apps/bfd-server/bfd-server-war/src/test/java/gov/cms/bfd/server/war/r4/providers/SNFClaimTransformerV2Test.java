@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.InsuranceComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.PaymentComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ProcedureComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.SupportingInformationComponent;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit.TotalComponent;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Money;
@@ -936,6 +937,31 @@ public class SNFClaimTransformerV2Test {
             .setAmount(new Money().setValue(amt).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     Assert.assertTrue(compare.equalsDeep(adjudication));
+  }
+
+  @Test
+  public void shouldHaveClmTotChrgAmtTotal() {
+    // Only one so just pull it directly and compare
+    TotalComponent total = eob.getTotalFirstRep();
+
+    TotalComponent compare =
+        new TotalComponent()
+            .setCategory(
+                new CodeableConcept()
+                    .setCoding(
+                        Arrays.asList(
+                            new Coding(
+                                "http://terminology.hl7.org/CodeSystem/adjudication",
+                                "submitted",
+                                "Submitted Amount"),
+                            new Coding(
+                                "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+                                "https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt",
+                                "Claim Total Charge Amount"))))
+            .setAmount(
+                new Money().setValue(5555.03).setCurrency(TransformerConstants.CODED_MONEY_USD));
+
+    Assert.assertTrue(compare.equalsDeep(total));
   }
 
   /** Payment */
