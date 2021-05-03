@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.ConfigUtils;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
@@ -65,8 +66,8 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
       ManagedChannel channel,
       GrpcStreamCaller.Factory<T> callerFactory,
       MetricRegistry appMetrics) {
-    this.callerFactory = callerFactory;
-    this.channel = channel;
+    this.callerFactory = Preconditions.checkNotNull(callerFactory);
+    this.channel = Preconditions.checkNotNull(channel);
     callsMeter = appMetrics.meter(CALLS_METER);
     recordsReceivedMeter = appMetrics.meter(RECORDS_RECEIVED_METER);
     recordsStoredMeter = appMetrics.meter(RECORDS_STORED_METER);
@@ -160,9 +161,12 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
     }
 
     public Config(String host, int port, Duration maxIdle) {
-      this.host = host;
+      this.host = Preconditions.checkNotNull(host);
       this.port = port;
       this.maxIdle = maxIdle;
+      Preconditions.checkArgument(host.length() >= 1, "host name is empty");
+      Preconditions.checkArgument(port >= 1, "port is negative (%s)");
+      Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
     }
   }
 }

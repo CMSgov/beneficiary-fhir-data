@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.base.Preconditions;
 import gov.cms.mpsm.rda.v1.EmptyRequest;
 import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
@@ -11,6 +12,7 @@ public class FissClaimStreamCaller implements GrpcStreamCaller<FissClaim> {
   private final RDAServiceGrpc.RDAServiceBlockingStub stub;
 
   public FissClaimStreamCaller(ManagedChannel channel) {
+    Preconditions.checkNotNull(channel);
     stub = RDAServiceGrpc.newBlockingStub(channel);
   }
 

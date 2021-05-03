@@ -4,6 +4,7 @@ import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -47,9 +48,9 @@ public final class DcGeoRdaLoadJob<T> implements PipelineJob {
       Callable<RdaSource<T>> sourceFactory,
       Callable<RdaSink<T>> sinkFactory,
       MetricRegistry appMetrics) {
-    this.config = config;
-    this.sourceFactory = sourceFactory;
-    this.sinkFactory = sinkFactory;
+    this.config = Preconditions.checkNotNull(config);
+    this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
+    this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
     callsMeter = appMetrics.meter(CALLS_METER_NAME);
     failuresMeter = appMetrics.meter(FAILURES_METER_NAME);
     successesMeter = appMetrics.meter(SUCCESSES_METER_NAME);
@@ -110,8 +111,11 @@ public final class DcGeoRdaLoadJob<T> implements PipelineJob {
     private final int batchSize;
 
     public Config(Duration scanInterval, int batchSize) {
-      this.scanInterval = scanInterval;
+      this.scanInterval = Preconditions.checkNotNull(scanInterval);
       this.batchSize = batchSize;
+      Preconditions.checkArgument(
+          scanInterval.toMillis() >= 1_000, "scanInterval less than 1s: %s");
+      Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
     }
 
     public Config() {
