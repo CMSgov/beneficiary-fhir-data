@@ -1,0 +1,133 @@
+*****************************************************************
+** Create the BENEFICIARY_MONTHLY_AUDIT table                  **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/bene_monthly_audit.sql
+
+Notes:
+------
+Verify the table was created successfully.
+
+
+*****************************************************************
+** TRIGGER FUNCTION: track_bene_monthly_change                 **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/track_bene_monthly_change_func.sql 
+ 
+Notes:
+------
+Verify the function was created successfully.
+
+
+*****************************************************************
+** BENEFICIARY_MONTHLY Update Trigger                          **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/ccw_load_update_trigger.sql 
+
+Notes:
+------
+Verify the trigger was created successfully.
+
+
+*****************************************************************
+** Create the CCW_LOAD_TEMP table                              **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/ccw_load_temp.sql 
+
+Notes:
+------
+Verify the table was created successfully.
+
+
+*****************************************************************
+** Create UPDATE_BENE_MONTHLY stored procedure                 **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/update_bene_monthly_proc.sql 
+
+Notes:
+------
+Verify the procedure was created successfully.
+
+
+*****************************************************************
+** Create LOAD_FROM_CCW stored procedure                       **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/process_ccw_table.sql 
+
+Notes:
+------
+Verify the procedure was created successfully.
+
+
+*****************************************************************
+** COPY CCW load file into db table CCW_LOAD_TEMP              **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/ccw_load_temp_via_copy.sql
+
+Notes:
+
+The SQL script performs a 'Postgres copy' (i.e., data import) from a
+CSV file into the CCW_LOAD_TEMP table which will be subsequently used
+to fixup data discrepancies that we may have in the BeneficiaryMonthly
+table. The script itself contains a hardcoded test CSV filename; that filename
+will need to be changed to reflect that actual CCW CSV file that will be
+imported; here is the line that will need to be modified:
+
+FROM '/Users/colinchristophermackenzie/dev/bfd766/sql/test_export.sql.csv'
+
+It is still TBD as to how CCW will provide the data; BFD has requested a
+single CSV file that includes a header row that denotes the column
+structure. CCW has responded that it most likely will be two CSV files,
+one for 2019 and one for 2020 and now header row on either file.
+
+Depending on how CCW does provide two data will determine the actual
+psql 'copy' into the CCW_LOAD_TEMP table.
+
+Prior to invoking the 'copy' command, a determination of the number
+of records in the input data should be made; the easiest would be
+to cat the file into a line counter. For example:
+
+cat <filename.csv> | wc -l
+
+Take note of the record count to be used in verifying that all records
+were successfully imported into the CCW_LOAD_TEMP file.
+
+This step will need to be performed for each of the CCW files; so it
+two files are provided, then this step will need to be run twice.
+
+
+*****************************************************************
+** Run the CCW SQL load processor                              **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/run_ccw_load.sql &> "$(date +%Y-%m-%d_%H-%M.txt)"
+
+Notes:
+
+The procedure will create a log file (i.e., 2021-05-04.txt) that shows job progress as well
+as a summation of the run. For example:
+
+psql:sql/run_ccw_load.sql:1: INFO:  Starting processing of table: CCW_LOAD_TEMP...
+psql:sql/run_ccw_load.sql:1: INFO:  Expected record count in table: CCW_LOAD_TEMP: 122134
+psql:sql/run_ccw_load.sql:1: INFO:  Record Total: 122134 ...DONE!!!
+
+If the processed record count does not match the expected record count, then 
+remediation analysis will need to be performed to determine any record discrepancies.
+
+
+*****************************************************************
+** Follow-up QA                                                **         
+*****************************************************************
+
+The final step is to assess the efficacy of the entire process; in particular
+a thorough analysis of the BENEFICIARY_MONTHLY_AUDIT table. That table will have
+captured any record-level (i.e., per month) updates of the BeneficiaryMonthly table.
+
+This will be the most important assessment of whether we may have served up invalid
+data to peering partners.
+
+Each row in the BENEFICIARY_MONTHLY_AUDIT will capture that there was a change to the
+BFD BeneficiaryMonthly table; an assessment can then be made to determine if subsequent
+action(s) need to be taken.
+
+
+
+
