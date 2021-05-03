@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
@@ -15,12 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.Coverage.CoverageStatus;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
@@ -107,6 +104,10 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetExtensionsPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
+    verifyExtensionsPartA();
+  }
+
+  private static void verifyExtensionsPartA() {
     Assert.assertEquals(30, coverage.getExtension().size());
 
     // ms_cd
@@ -206,6 +207,10 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetExtensionsPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
+    verifyExtensionsPartB();
+  }
+
+  private static void verifyExtensionsPartB() {
     Assert.assertEquals(27, coverage.getExtension().size());
 
     // ms_cd
@@ -284,6 +289,10 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetExtensionsPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
+    verifyExtensionsPartC();
+  }
+
+  private static void verifyExtensionsPartC() {
     Assert.assertEquals(57, coverage.getExtension().size());
 
     // ptc_cntrct_id_01 thru ptc_cntrct_id_12
@@ -309,7 +318,7 @@ public final class CoverageTransformerV2Test {
     }
 
     // hmo_ind_01 thru hmo_ind_12
-    for (int i = 1; i < 11; i++) {
+    for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/hmo_ind_%02d", i);
       String display =
           i < 11 ? "Non-lock-in, CMS to process provider claims" : "Not a member of an HMO";
@@ -381,6 +390,10 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetExtensionsPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
+    verifyExtensionsPartD();
+  }
+
+  private static void verifyExtensionsPartD() {
     Assert.assertEquals(72, coverage.getExtension().size());
 
     // ms_cd
@@ -488,12 +501,12 @@ public final class CoverageTransformerV2Test {
   // ==================
   // Begin Common tests
   // ==================
-  private void verifyID(String idRef) {
+  private static void verifyID(String idRef) {
     Assert.assertEquals("Coverage", coverage.getIdElement().getResourceType());
     Assert.assertEquals("Coverage/" + idRef, coverage.getIdElement().toString());
   }
 
-  private void verifyMeta() {
+  private static void verifyMeta() {
     Assert.assertNotNull(coverage.getMeta().getLastUpdated());
 
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
@@ -503,7 +516,7 @@ public final class CoverageTransformerV2Test {
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_COVERAGE_URL)));
   }
 
-  private void verifyCommonExtensions() {
+  private static void verifyCommonExtensions() {
     // ms_cd
     verifyCodedExtension(
         "https://bluebutton.cms.gov/resources/variables/ms_cd", "20", "Disabled without ESRD");
@@ -529,7 +542,7 @@ public final class CoverageTransformerV2Test {
     }
   }
 
-  private void verifyCodedExtension(String url, String code, String display) {
+  private static void verifyCodedExtension(String url, String code, String display) {
     Extension ex = TransformerTestUtilsV2.findExtensionByUrl(url, coverage.getExtension());
 
     Extension compare = new Extension(url, new Coding(url, code, display));
@@ -537,11 +550,11 @@ public final class CoverageTransformerV2Test {
     Assert.assertTrue(compare.equalsDeep(ex));
   }
 
-  private void verifyCoverageStatus() {
+  private static void verifyCoverageStatus() {
     Assert.assertEquals("active", coverage.getStatus().toCode());
   }
 
-  private void verifyType() {
+  private static void verifyType() {
     // Test Category here
     CodeableConcept typ = coverage.getType();
 
@@ -554,14 +567,14 @@ public final class CoverageTransformerV2Test {
     Assert.assertTrue(compare.equalsDeep(typ));
   }
 
-  private void verifySubscriber() {
+  private static void verifySubscriber() {
     Assert.assertEquals("3456789", coverage.getSubscriberId());
     Reference ex = coverage.getBeneficiary();
     Reference compare = TransformerUtilsV2.referencePatient("567834");
     Assert.assertTrue(compare.equalsDeep(ex));
   }
 
-  private void verifyRelationship() {
+  private static void verifyRelationship() {
     CodeableConcept typ = coverage.getRelationship();
     CodeableConcept compare =
         new CodeableConcept()
@@ -574,14 +587,14 @@ public final class CoverageTransformerV2Test {
     Assert.assertTrue(compare.equalsDeep(typ));
   }
 
-  private void verifyPeriod() {
+  private static void verifyPeriod() {
     Period per = coverage.getPeriod();
     Period compare = new Period();
     TransformerUtilsV2.setPeriodStart(compare, LocalDate.parse("1963-10-03"));
     Assert.assertTrue(compare.equalsDeep(per));
   }
 
-  private void verifyPayor() {
+  private static void verifyPayor() {
     List<Reference> payers = coverage.getPayor();
     Assert.assertNotNull(payers);
     Assert.assertEquals(1, payers.size());
@@ -592,7 +605,7 @@ public final class CoverageTransformerV2Test {
     Assert.assertTrue(compare.getPayor().get(0).equalsDeep(coverage.getPayor().get(0)));
   }
 
-  private void verifyCoverageClass(String className) {
+  private static void verifyCoverageClass(String className) {
     Assert.assertEquals(2, coverage.getClass_().size());
 
     Coverage compare = new Coverage();
@@ -617,7 +630,7 @@ public final class CoverageTransformerV2Test {
     Assert.assertTrue(compare.getClass_().get(1).equalsDeep(coverage.getClass_().get(1)));
   }
 
-  private void verifyCoverageContract(String partId) {
+  private static void verifyCoverageContract(String partId) {
     Assert.assertEquals(2, coverage.getContract().size());
     Coverage compare = new Coverage();
     compare.addContract().setId("contract1");
@@ -627,7 +640,8 @@ public final class CoverageTransformerV2Test {
   }
 
   /** Standalone wrapper to create and optionall printout a MedicareSegment coverage */
-  public void transformCoverage(MedicareSegment medSeg, boolean showJson) throws FHIRException {
+  public static void transformCoverage(MedicareSegment medSeg, boolean showJson)
+      throws FHIRException {
     if (currSegment == null || currSegment != medSeg) {
       coverage = CoverageTransformerV2.transform(new MetricRegistry(), medSeg, beneficiary);
       currSegment = medSeg;
@@ -645,179 +659,100 @@ public final class CoverageTransformerV2Test {
    * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
    * @param coverage the {@link Coverage} to verify
    */
-  static void assertPartAMatches(Beneficiary beneficiary, Coverage coverage) {
-    TransformerTestUtilsV2.assertNoEncodedOptionals(coverage);
-
-    Assert.assertNotNull(coverage);
-    Assert.assertEquals(
-        TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary).getIdPart(),
-        coverage.getIdElement().getIdPart());
-    Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
-
-    TransformerTestUtilsV2.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
-    if (beneficiary.getMedicareCoverageStartDate().isPresent())
-      TransformerTestUtilsV2.assertPeriodEquals(
-          beneficiary.getMedicareCoverageStartDate(), Optional.empty(), coverage.getPeriod());
-
-    if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(), coverage);
-    if (beneficiary.getEntitlementCodeOriginal().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.OREC, beneficiary.getEntitlementCodeOriginal(), coverage);
-    if (beneficiary.getEntitlementCodeCurrent().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.CREC, beneficiary.getEntitlementCodeCurrent(), coverage);
-    if (beneficiary.getEndStageRenalDiseaseCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.ESRD_IND, beneficiary.getEndStageRenalDiseaseCode(), coverage);
-    if (beneficiary.getPartATerminationCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.A_TRM_CD, beneficiary.getPartATerminationCode(), coverage);
-    if (beneficiary.getEntitlementBuyInAprInd().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.BUYIN04, beneficiary.getEntitlementBuyInAprInd(), coverage);
-
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), coverage);
-
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
-      TransformerTestUtilsV2.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);
+  @Ignore // test only used to verify support for IT (intgration Test)
+  @Test
+  public void verifyIntegrationPartA() {
+    transformCoverage(MedicareSegment.PART_A, false);
+    assertPartAMatches(beneficiary, coverage);
   }
 
-  /**
-   * Verifies that the specified {@link
-   * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_B} {@link Coverage} "looks like" it
-   * should, if it were produced from the specified {@link Beneficiary}.
-   *
-   * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
-   * @param coverage the {@link Coverage} to verify
-   */
-  static void assertPartBMatches(Beneficiary beneficiary, Coverage coverage) {
-    Assert.assertNotNull(coverage);
-
-    Assert.assertEquals(
-        TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_B, beneficiary).getIdPart(),
-        coverage.getIdElement().getIdPart());
-
-    Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
-    TransformerTestUtilsV2.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
-
-    if (beneficiary.getMedicareCoverageStartDate().isPresent())
-      TransformerTestUtilsV2.assertPeriodEquals(
-          beneficiary.getMedicareCoverageStartDate(), Optional.empty(), coverage.getPeriod());
-
-    if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(), coverage);
-    if (beneficiary.getPartBTerminationCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.B_TRM_CD, beneficiary.getPartBTerminationCode(), coverage);
-
-    if (beneficiary.getEntitlementBuyInAprInd().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.BUYIN04, beneficiary.getEntitlementBuyInAprInd(), coverage);
-
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), coverage);
-
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
-      TransformerTestUtilsV2.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);
+  @Ignore // test only used to verify support for IT (intgration Test)
+  @Test
+  public void verifyIntegrationPartB() {
+    transformCoverage(MedicareSegment.PART_B, false);
+    assertPartBMatches(beneficiary, coverage);
   }
 
-  /**
-   * Verifies that the specified {@link
-   * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_C} {@link Coverage} "looks like" it
-   * should, if it were produced from the specified {@link Beneficiary}.
-   *
-   * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
-   * @param coverage the {@link Coverage} to verify
-   */
-  static void assertPartCMatches(Beneficiary beneficiary, Coverage coverage) {
-    Assert.assertNotNull(coverage);
-
-    Assert.assertEquals(
-        TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_C, beneficiary).getIdPart(),
-        coverage.getIdElement().getIdPart());
-
-    Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
-    TransformerTestUtilsV2.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
-
-    if (beneficiary.getPartCContractNumberAugId().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTC_CNTRCT_ID_08,
-          beneficiary.getPartCContractNumberAugId(),
-          coverage);
-    if (beneficiary.getPartCPbpNumberAugId().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTC_PBP_ID_08, beneficiary.getPartCPbpNumberAugId(), coverage);
-    if (beneficiary.getPartCPlanTypeAugCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTC_PLAN_TYPE_CD_08, beneficiary.getPartCPlanTypeAugCode(), coverage);
-
-    if (beneficiary.getHmoIndicatorFebInd().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.HMO_IND_02, beneficiary.getHmoIndicatorFebInd(), coverage);
-
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), coverage);
-
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
-      TransformerTestUtilsV2.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);
+  @Ignore // test only used to verify support for IT (intgration Test)
+  @Test
+  public void verifyIntegrationPartC() {
+    transformCoverage(MedicareSegment.PART_C, false);
+    assertPartCMatches(beneficiary, coverage);
   }
 
-  /**
-   * Verifies that the specified {@link
-   * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_D} {@link Coverage} "looks like" it
-   * should, if it were produced from the specified {@link Beneficiary}.
-   *
-   * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
-   * @param coverage the {@link Coverage} to verify
-   */
-  static void assertPartDMatches(Beneficiary beneficiary, Coverage coverage) {
+  @Ignore // test only used to verify support for IT (intgration Test)
+  @Test
+  public void verifyIntegrationPartD() {
+    transformCoverage(MedicareSegment.PART_D, false);
+    assertPartDMatches(beneficiary, coverage);
+  }
+
+  static void assertPartAMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
+    beneficiary = inBeneficiary;
+    coverage = inCoverage;
+    currSegment = MedicareSegment.PART_A;
     Assert.assertNotNull(coverage);
+    Assert.assertNotNull(beneficiary);
 
-    Assert.assertEquals(
-        TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_D, beneficiary).getIdPart(),
-        coverage.getIdElement().getIdPart());
+    verifyCoverageClass("Part A");
+    verifyID("part-a-567834");
+    verifyMeta();
+    verifyExtensionsPartA();
+    verifyCoverageStatus();
+    verifyType();
+    verifySubscriber();
+    verifyRelationship();
+    verifyPeriod();
+    verifyPayor();
+    verifyCoverageContract("part-a");
+  }
 
-    if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(), coverage);
-    Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
-    TransformerTestUtilsV2.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
+  static void assertPartBMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
+    beneficiary = inBeneficiary;
+    coverage = inCoverage;
+    currSegment = MedicareSegment.PART_B;
+    Assert.assertNotNull(coverage);
+    Assert.assertNotNull(beneficiary);
+    verifyCoverageClass("Part B");
+    verifyID("part-b-567834");
 
-    if (beneficiary.getPartDContractNumberAugId().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTDCNTRCT08, beneficiary.getPartDContractNumberAugId(), coverage);
-    if (beneficiary.getPartDPbpNumberAugId().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.PTDPBPID08, beneficiary.getPartDPbpNumberAugId(), coverage);
-    if (beneficiary.getPartDSegmentNumberAugId().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.SGMTID08, beneficiary.getPartDSegmentNumberAugId(), coverage);
+    verifyMeta();
+    verifyExtensionsPartB();
+    verifyCoverageStatus();
+    verifyType();
+    verifySubscriber();
+    verifyRelationship();
+    verifyPeriod();
+    verifyPayor();
+  }
 
-    if (beneficiary.getPartDLowIncomeCostShareGroupFebCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.CSTSHR02,
-          beneficiary.getPartDLowIncomeCostShareGroupFebCode(),
-          coverage);
-    if (beneficiary.getPartDRetireeDrugSubsidyJanInd().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.RDSIND01, beneficiary.getPartDRetireeDrugSubsidyJanInd(), coverage);
+  static void assertPartCMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
+    beneficiary = inBeneficiary;
+    coverage = inCoverage;
+    currSegment = MedicareSegment.PART_C;
+    Assert.assertNotNull(coverage);
+    Assert.assertNotNull(beneficiary);
+    verifyCoverageClass("Part C");
+    verifyExtensionsPartC();
+    verifyCoverageStatus();
+    verifyType();
+    verifySubscriber();
+    verifyRelationship();
+    verifyPayor();
+  }
 
-    if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
-      TransformerTestUtilsV2.assertExtensionCodingEquals(
-          CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode(), coverage);
-
-    if (beneficiary.getBeneEnrollmentReferenceYear().isPresent())
-      TransformerTestUtilsV2.assertExtensionDateYearEquals(
-          CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear(), coverage);
+  static void assertPartDMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
+    beneficiary = inBeneficiary;
+    coverage = inCoverage;
+    currSegment = MedicareSegment.PART_D;
+    Assert.assertNotNull(coverage);
+    Assert.assertNotNull(beneficiary);
+    verifyCoverageClass("Part D");
+    verifyExtensionsPartD();
+    verifyCoverageStatus();
+    verifyType();
+    verifySubscriber();
+    verifyRelationship();
+    verifyPayor();
   }
 }

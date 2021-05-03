@@ -59,7 +59,6 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public final class R4ExplanationOfBenefitResourceProviderIT {
@@ -1055,7 +1054,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @throws FHIRException (indicates test failure)
    */
   // TODO: Fix this test .. it isn't working. Tax number is not showing up.
-  @Ignore
   @Test
   public void searchForEobsIncludeTaxNumbersHandling() throws FHIRException {
     List<Object> loadedRecords =
@@ -1122,6 +1120,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     // Verify that tax numbers are present for carrier claims.
     carrierEob = filterToClaimType(searchResults, ClaimTypeV2.CARRIER).get(0);
+
     Assert.assertNotNull(
         TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
             carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
