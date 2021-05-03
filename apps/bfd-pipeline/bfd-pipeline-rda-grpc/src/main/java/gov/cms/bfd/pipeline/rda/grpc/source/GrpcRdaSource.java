@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.pipeline.rda.grpc.ConfigUtils;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
@@ -26,6 +27,13 @@ import org.slf4j.LoggerFactory;
  */
 public class GrpcRdaSource<T> implements RdaSource<T> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
+  public static final String HOST_PROPERTY = "DCGeoRDAFissClaimsServiceHost";
+  public static final String HOST_DEFAULT = "localhost";
+  public static final String PORT_PROPERTY = "DCGeoRDAFissClaimsServicePort";
+  public static final int PORT_DEFAULT = 443;
+  public static final String MAX_IDLE_SECONDS_PROPERTY = "DCGeoRDAFissClaimsServiceMaxIdleSeconds";
+  public static final long MAX_IDLE_SECONDS_DEFAULT = Long.MAX_VALUE;
+
   public static final String CALLS_METER =
       MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "calls");
   public static final String RECORDS_RECEIVED_METER =
@@ -46,7 +54,6 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
       Config config, GrpcStreamCaller.Factory<T> callerFactory, MetricRegistry appMetrics) {
     this(
         ManagedChannelBuilder.forAddress(config.host, config.port)
-            .usePlaintext()
             .idleTimeout(config.maxIdle.toMillis(), TimeUnit.MILLISECONDS)
             .build(),
         callerFactory,
@@ -143,6 +150,14 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
     private final String host;
     private final int port;
     private final Duration maxIdle;
+
+    public Config() {
+      this(
+          ConfigUtils.getString(HOST_PROPERTY, HOST_DEFAULT),
+          ConfigUtils.getInt(PORT_PROPERTY, PORT_DEFAULT),
+          Duration.ofSeconds(
+              ConfigUtils.getLong(MAX_IDLE_SECONDS_PROPERTY, MAX_IDLE_SECONDS_DEFAULT)));
+    }
 
     public Config(String host, int port, Duration maxIdle) {
       this.host = host;

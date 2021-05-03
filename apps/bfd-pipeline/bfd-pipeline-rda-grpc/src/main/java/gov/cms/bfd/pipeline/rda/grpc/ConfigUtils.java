@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
  * values when none are provided by the environment. Currently implemented to pull values from
  * environment variables.
  */
-class ConfigUtils {
+public class ConfigUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfigUtils.class);
 
   /**
@@ -39,6 +39,28 @@ class ConfigUtils {
     } catch (NumberFormatException ex) {
       LOGGER.error(
           "Invalid environment variable value, expected a valid integer: envvar={} error='{}'",
+          key,
+          ex.getMessage(),
+          ex);
+      throw ex;
+    }
+  }
+
+  /**
+   * Retrieve long configuration value with the given name. Returns the specified default value when
+   * there is no configuration value matching the key.
+   *
+   * @param key key that identifies the particular configuration value.
+   * @param defaultValue default value if there is no configuration value matching the key
+   * @return either the configuration value or the default
+   */
+  public static long getLong(String key, long defaultValue) {
+    try {
+      String strValue = System.getenv(key);
+      return strValue != null ? Long.parseLong(strValue) : defaultValue;
+    } catch (NumberFormatException ex) {
+      LOGGER.error(
+          "Invalid environment variable value, expected a valid long: envvar={} error='{}'",
           key,
           ex.getMessage(),
           ex);

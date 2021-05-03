@@ -4,6 +4,8 @@ import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.time.Duration;
@@ -60,11 +62,12 @@ public final class DcGeoRdaLoadJob<T> implements PipelineJob {
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
    */
-  public static PipelineJob newDcGeoRDALoadJob(MetricRegistry appMetrics) {
-    return new DcGeoRdaLoadJob<Void>(
+  public static PipelineJob newDcGeoFissClaimLoadJob(MetricRegistry appMetrics) {
+    return new DcGeoRdaLoadJob<>(
         new Config(),
-        () -> new SkeletonRdaSource(appMetrics),
-        () -> new SkeletonRdaSink(appMetrics),
+        () ->
+            new GrpcRdaSource<>(new GrpcRdaSource.Config(), FissClaimStreamCaller::new, appMetrics),
+        () -> new SkeletonRdaSink<>(appMetrics),
         appMetrics);
   }
 

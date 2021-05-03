@@ -6,7 +6,7 @@ import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.ManagedChannel;
 import java.util.Iterator;
 
-/** GrpcStreamCaller implementation that calls the RDA HealthCheck service. */
+/** GrpcStreamCaller implementation that calls the RDA FissClaim service. */
 public class FissClaimStreamCaller implements GrpcStreamCaller<FissClaim> {
   private final RDAServiceGrpc.RDAServiceBlockingStub stub;
 
