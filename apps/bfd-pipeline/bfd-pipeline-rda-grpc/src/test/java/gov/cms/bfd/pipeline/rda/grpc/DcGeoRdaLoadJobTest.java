@@ -20,10 +20,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DcGeoRdaLoadJobTest {
-  private Callable<RdaSource<PreAdjudicatedClaim>> sourceFactory;
-  private Callable<RdaSink<PreAdjudicatedClaim>> sinkFactory;
-  private RdaSource<PreAdjudicatedClaim> source;
-  private RdaSink<PreAdjudicatedClaim> sink;
+  private Callable<RdaSource<Integer>> sourceFactory;
+  private Callable<RdaSink<Integer>> sinkFactory;
+  private RdaSource<Integer> source;
+  private RdaSink<Integer> sink;
   private DcGeoRdaLoadJob job;
   private MetricRegistry appMetrics;
 

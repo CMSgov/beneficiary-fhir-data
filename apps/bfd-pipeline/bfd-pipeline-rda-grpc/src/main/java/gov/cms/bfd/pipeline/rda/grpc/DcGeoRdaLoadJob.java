@@ -61,7 +61,7 @@ public final class DcGeoRdaLoadJob<T> implements PipelineJob {
    * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
    */
   public static PipelineJob newDcGeoRDALoadJob(MetricRegistry appMetrics) {
-    return new DcGeoRdaLoadJob<PreAdjudicatedClaim>(
+    return new DcGeoRdaLoadJob<Void>(
         new Config(),
         () -> new SkeletonRdaSource(appMetrics),
         () -> new SkeletonRdaSink(appMetrics),

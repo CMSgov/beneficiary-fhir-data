@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import io.grpc.ManagedChannel;
@@ -22,15 +21,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class GrpcRdaSourceTest {
-  private static final PreAdjudicatedClaim CLAIM_1 = new PreAdjudicatedClaim();
-  private static final PreAdjudicatedClaim CLAIM_2 = new PreAdjudicatedClaim();
-  private static final PreAdjudicatedClaim CLAIM_3 = new PreAdjudicatedClaim();
-  private static final PreAdjudicatedClaim CLAIM_4 = new PreAdjudicatedClaim();
-  private static final PreAdjudicatedClaim CLAIM_5 = new PreAdjudicatedClaim();
+  private static final Integer CLAIM_1 = 101;
+  private static final Integer CLAIM_2 = 102;
+  private static final Integer CLAIM_3 = 103;
+  private static final Integer CLAIM_4 = 104;
+  private static final Integer CLAIM_5 = 105;
   private MetricRegistry appMetrics;
   private GrpcStreamCaller<Integer> caller;
   private ManagedChannel channel;
-  private RdaSink<PreAdjudicatedClaim> sink;
+  private RdaSink<Integer> sink;
   private GrpcRdaSource<Integer> source;
 
   @SuppressWarnings("unchecked")
@@ -40,17 +39,12 @@ public class GrpcRdaSourceTest {
     caller = mock(GrpcStreamCaller.class);
     channel = mock(ManagedChannel.class);
     sink = mock(RdaSink.class);
-    doReturn(CLAIM_1).when(caller).convertResultToClaim(1);
-    doReturn(CLAIM_2).when(caller).convertResultToClaim(2);
-    doReturn(CLAIM_3).when(caller).convertResultToClaim(3);
-    doReturn(CLAIM_4).when(caller).convertResultToClaim(4);
-    doReturn(CLAIM_5).when(caller).convertResultToClaim(5);
     source = new GrpcRdaSource<>(channel, this::callerFactory, appMetrics);
   }
 
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
-    doReturn(Arrays.asList(1, 2, 3).iterator()).when(caller).callService();
+    doReturn(Arrays.asList(CLAIM_1, CLAIM_2, CLAIM_3).iterator()).when(caller).callService();
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
 
@@ -65,7 +59,9 @@ public class GrpcRdaSourceTest {
   @Test
   public void testPassesThroughProcessingExceptionFromSink() throws Exception {
     final Exception error = new IOException("oops");
-    doReturn(Arrays.asList(1, 2, 3, 4, 5).iterator()).when(caller).callService();
+    doReturn(Arrays.asList(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5).iterator())
+        .when(caller)
+        .callService();
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     doThrow(new ProcessingException(error, 1))
@@ -112,7 +108,9 @@ public class GrpcRdaSourceTest {
   @Test
   public void testHandlesRuntimeExceptionFromSink() throws Exception {
     final Exception error = new RuntimeException("oops");
-    doReturn(Arrays.asList(1, 2, 3, 4, 5).iterator()).when(caller).callService();
+    doReturn(Arrays.asList(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5).iterator())
+        .when(caller)
+        .callService();
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     doThrow(error).when(sink).writeBatch(Arrays.asList(CLAIM_3, CLAIM_4));

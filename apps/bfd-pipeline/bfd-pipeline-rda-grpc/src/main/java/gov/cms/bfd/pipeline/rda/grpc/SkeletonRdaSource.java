@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  * Skeleton RDASource implementation that just updates a Meter to count the number of times it has
  * been called. This implementation satisfies the requirements of DCGEO-18.
  */
-public class SkeletonRdaSource implements RdaSource<PreAdjudicatedClaim> {
+public class SkeletonRdaSource implements RdaSource<Void> {
   private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRdaSource.class);
 
   private final Meter callsMeter;
@@ -19,7 +19,7 @@ public class SkeletonRdaSource implements RdaSource<PreAdjudicatedClaim> {
   }
 
   @Override
-  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<PreAdjudicatedClaim> sink)
+  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<Void> sink)
       throws ProcessingException {
     LOGGER.warn("simulating object processing");
     callsMeter.mark();

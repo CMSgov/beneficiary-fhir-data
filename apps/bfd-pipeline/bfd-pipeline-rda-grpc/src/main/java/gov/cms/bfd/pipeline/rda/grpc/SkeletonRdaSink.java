@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  * Skeleton RDASink implementation that just updates a Meter to count the number of times it has
  * been called. This implementation satisfies the requirements of DCGEO-18.
  */
-public class SkeletonRdaSink implements RdaSink<PreAdjudicatedClaim> {
+public class SkeletonRdaSink implements RdaSink<Void> {
   private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRdaSource.class);
   private final Meter callsMeter;
 
@@ -18,7 +18,7 @@ public class SkeletonRdaSink implements RdaSink<PreAdjudicatedClaim> {
   }
 
   @Override
-  public int writeObject(PreAdjudicatedClaim object) throws ProcessingException {
+  public int writeObject(Void ignored) throws ProcessingException {
     callsMeter.mark();
     LOGGER.warn("simulating object storage");
     return 1;

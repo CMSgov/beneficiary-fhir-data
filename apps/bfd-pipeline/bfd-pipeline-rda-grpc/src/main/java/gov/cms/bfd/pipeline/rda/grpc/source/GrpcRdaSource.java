@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
@@ -11,7 +10,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +24,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> type of objects returned by the gRPC service
  */
-public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
+public class GrpcRdaSource<T> implements RdaSource<T> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
   public static final String CALLS_METER =
       MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "calls");
@@ -79,19 +77,18 @@ public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
    * @throws ProcessingException wrapper around any Exception thrown by the service
    */
   @Override
-  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<PreAdjudicatedClaim> sink)
+  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<T> sink)
       throws ProcessingException {
     callsMeter.mark();
     int processed = 0;
     try {
       final GrpcStreamCaller<T> caller = callerFactory.createCaller(channel);
-      final List<PreAdjudicatedClaim> batch = new ArrayList<>();
+      final List<T> batch = new ArrayList<>();
       final Iterator<T> resultIterator = caller.callService();
       while (resultIterator.hasNext()) {
         final T result = resultIterator.next();
-        final PreAdjudicatedClaim claim = caller.convertResultToClaim(result);
         recordsReceivedMeter.mark();
-        batch.add(claim);
+        batch.add(result);
         if (batch.size() >= maxPerBatch) {
           processed += submitBatchToSink(sink, batch);
         }
@@ -132,20 +129,7 @@ public class GrpcRdaSource<T> implements RdaSource<PreAdjudicatedClaim> {
     }
   }
 
-  private boolean shouldContinue(int processed, int maxToProcess, Instant now, Instant stopTime) {
-    if (processed >= maxToProcess) {
-      LOGGER.info("exiting loop after processing max number of records: processed={}", processed);
-      return false;
-    }
-    if (now.compareTo(stopTime) >= 0) {
-      LOGGER.info("exiting loop after reaching max runtime");
-      return false;
-    }
-    return true;
-  }
-
-  private int submitBatchToSink(RdaSink<PreAdjudicatedClaim> sink, List<PreAdjudicatedClaim> batch)
-      throws ProcessingException {
+  private int submitBatchToSink(RdaSink<T> sink, List<T> batch) throws ProcessingException {
     LOGGER.info("submitting batch to sink: size={}", batch.size());
     int processed = sink.writeBatch(batch);
     LOGGER.info("submitted batch to sink: size={} processed={}", batch.size(), processed);

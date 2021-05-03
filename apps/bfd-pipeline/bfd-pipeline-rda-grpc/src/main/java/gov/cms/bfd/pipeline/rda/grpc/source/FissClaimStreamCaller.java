@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
 import gov.cms.mpsm.rda.v1.EmptyRequest;
 import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
@@ -19,11 +18,6 @@ public class FissClaimStreamCaller implements GrpcStreamCaller<FissClaim> {
   public Iterator<FissClaim> callService() throws Exception {
     final EmptyRequest request = EmptyRequest.newBuilder().build();
     return stub.getFissClaims(request);
-  }
-
-  @Override
-  public PreAdjudicatedClaim convertResultToClaim(FissClaim ignored) throws Exception {
-    return new PreAdjudicatedClaim();
   }
 
   public static GrpcStreamCaller.Factory<FissClaim> createFactory() {

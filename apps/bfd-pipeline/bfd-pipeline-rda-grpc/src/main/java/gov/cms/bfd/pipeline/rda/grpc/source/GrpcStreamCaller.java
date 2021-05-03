@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import gov.cms.bfd.pipeline.rda.grpc.PreAdjudicatedClaim;
 import io.grpc.ManagedChannel;
 import java.util.Iterator;
 
@@ -18,15 +17,6 @@ public interface GrpcStreamCaller<T> {
    * @throws Exception any exception will terminate the stream
    */
   Iterator<T> callService() throws Exception;
-
-  /**
-   * Convert the service result object into a PreAdjudicatedClaim object.
-   *
-   * @param result object returned by the service
-   * @return PreAdjudicatedClaim constructed from the result object
-   * @throws Exception any exception will terminate the stream
-   */
-  PreAdjudicatedClaim convertResultToClaim(T result) throws Exception;
 
   /**
    * An interface for factory objects that can create implementations tied to a specific channel.
