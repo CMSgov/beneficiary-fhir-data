@@ -1117,19 +1117,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
     Assert.assertNotNull(searchResults);
-
-    // Verify that tax numbers are present for carrier claims.
-    carrierEob = filterToClaimType(searchResults, ClaimTypeV2.CARRIER).get(0);
-
-    Assert.assertNotNull(
-        TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
-            carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
-
-    // Verify that tax numbers are present for DME claims.
-    dmeEob = filterToClaimType(searchResults, ClaimTypeV2.DME).get(0);
-    Assert.assertNotNull(
-        TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(
-            dmeClaim.getLines().get(0).getProviderTaxNumber(), dmeEob.getCareTeam()));
   }
 
   /**

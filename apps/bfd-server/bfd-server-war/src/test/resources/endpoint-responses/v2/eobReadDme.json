@@ -265,7 +265,7 @@
       "coding" : [ {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
         "code" : "secondary",
-        "display" : "secondary"
+        "display" : "Secondary"
       } ]
     } ]
   } ],

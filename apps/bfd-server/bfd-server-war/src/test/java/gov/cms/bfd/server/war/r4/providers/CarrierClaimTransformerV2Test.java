@@ -458,7 +458,7 @@ public class CarrierClaimTransformerV2Test {
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
-                "secondary"),
+                "Secondary"),
             null,
             null);
 
@@ -475,7 +475,7 @@ public class CarrierClaimTransformerV2Test {
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
-                "secondary"),
+                "Secondary"),
             null,
             null);
 
@@ -492,7 +492,7 @@ public class CarrierClaimTransformerV2Test {
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
-                "secondary"),
+                "Secondary"),
             null,
             null);
 
@@ -509,7 +509,7 @@ public class CarrierClaimTransformerV2Test {
             new Coding(
                 "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
                 "secondary",
-                "secondary"),
+                "Secondary"),
             null,
             null);
 

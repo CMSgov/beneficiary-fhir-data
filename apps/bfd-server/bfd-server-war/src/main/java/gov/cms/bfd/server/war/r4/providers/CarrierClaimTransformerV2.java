@@ -247,18 +247,9 @@ public class CarrierClaimTransformerV2 {
 
       // tax num should be as a extension
       if (includeTaxNumbers.orElse(false)) {
-        Optional<CareTeamComponent> providerTaxNumber =
-            TransformerUtilsV2.addCareTeamMember(
-                eob,
-                item,
-                C4BBPractitionerIdentifierType.TAX,
-                C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER,
-                Optional.of(line.getProviderTaxNumber()));
-
-        providerTaxNumber.ifPresent(
-            p -> {
-              p.setResponsible(true);
-            });
+        item.addExtension(
+            TransformerUtilsV2.createExtensionCoding(
+                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
       }
 
       // CARR_LINE_ANSTHSA_UNIT_CNT => ExplanationOfBenefit.item.extension
