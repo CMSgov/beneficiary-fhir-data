@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /** Models the user-configurable options for sending telemetry to New Relic. */
 public final class MetricOptions implements Serializable {
+  private static final long serialVersionUID = 1L;
+
   private final String newRelicMetricKey;
   private final String newRelicAppName;
   private final String newRelicMetricHost;
