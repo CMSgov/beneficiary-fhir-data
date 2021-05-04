@@ -21,8 +21,14 @@ data_pipeline_idempotency_required: false
 # Whether to enable BFD API V2
 data_server_v2_enabled: false
 
-# These systems are m5.xlarge (4 vCPUs, 16 GB RAM).
-data_server_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
+# New Relic Metric API
+data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
+data_server_new_relic_metric_path: '/metric/v1'
+
+# app server instance type
+# c5.4xlarge == 16 vcpu's /w 32GiB mem
+data_server_num_cores: 16
+data_server_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.

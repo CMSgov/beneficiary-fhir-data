@@ -5,7 +5,7 @@ import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.pipeline.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;

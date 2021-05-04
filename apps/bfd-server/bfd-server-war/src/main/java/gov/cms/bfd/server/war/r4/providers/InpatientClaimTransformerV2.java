@@ -7,22 +7,16 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
-import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
-import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 
 /**
  * Transforms CCW {@link InpatientClaim} instances into FHIR {@link ExplanationOfBenefit} resources.
@@ -35,7 +29,8 @@ public class InpatientClaimTransformerV2 {
    *     InpatientClaim}
    */
   @Trace
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -61,15 +56,7 @@ public class InpatientClaimTransformerV2 {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
-    eob.getMeta()
-        .addProfile(
-            "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional");
-
-    // "claim" => ExplanationOfBenefit.use
-    eob.setUse(Use.CLAIM);
-
-    // TODO: ExplanationOfBenefit.outcome is a required field.  Needs to be mapped.
-    // eob.setOutcome(?)
+    eob.getMeta().addProfile(ProfileConstants.C4BB_EOB_INPATIENT_PROFILE_URL);
 
     // Common group level fields between all claim types
     // Claim Type + Claim ID    => ExplanationOfBenefit.id
@@ -85,7 +72,7 @@ public class InpatientClaimTransformerV2 {
         eob,
         claimGroup.getClaimId(),
         claimGroup.getBeneficiaryId(),
-        ClaimType.INPATIENT,
+        ClaimTypeV2.INPATIENT,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_A,
         Optional.of(claimGroup.getDateFrom()),
@@ -100,23 +87,35 @@ public class InpatientClaimTransformerV2 {
     // NCH_NEAR_LINE_REC_IDENT_CD   => ExplanationOfBenefit.extension
     TransformerUtilsV2.mapEobType(
         eob,
-        ClaimType.INPATIENT,
+        ClaimTypeV2.INPATIENT,
         Optional.of(claimGroup.getNearLineRecordIdCode()),
         Optional.of(claimGroup.getClaimTypeCode()));
 
     // set the provider number which is common among several claim types
     // PRVDR_NUM => ExplanationOfBenefit.provider.identifier
     TransformerUtilsV2.addProviderSlice(
-        eob, C4BBIdentifierType.PAYERID, claimGroup.getProviderNumber());
+        eob,
+        C4BBOrganizationIdentifierType.PRN,
+        claimGroup.getProviderNumber(),
+        claimGroup.getLastUpdated());
 
     // NCH_PTNT_STUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
-    if (claimGroup.getPatientStatusCd().isPresent()) {
-      TransformerUtilsV2.addInformationWithCode(
-          eob,
-          CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-          CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-          claimGroup.getPatientStatusCd());
-    }
+    claimGroup
+        .getPatientStatusCd()
+        .ifPresent(
+            c ->
+                TransformerUtilsV2.addInformationWithCode(
+                    eob,
+                    CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+                    CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
+                    c));
+
+    // CLM_ADMSN_DT       => ExplanationOfBenefit.supportingInfo:admissionperiod
+    // NCH_BENE_DSCHRG_DT => ExplanationOfBenefit.supportingInfo:admissionperiod
+    TransformerUtilsV2.addInformation(
+        eob,
+        TransformerUtilsV2.createInformationAdmPeriodSlice(
+            eob, claimGroup.getClaimAdmissionDate(), claimGroup.getBeneficiaryDischargeDate()));
 
     // add EOB information to fields that are common between the Inpatient and SNF claim types
     // CLM_IP_ADMSN_TYPE_CD             => ExplanationOfBenefit.supportingInfo.code
@@ -125,7 +124,7 @@ public class InpatientClaimTransformerV2 {
     // NCH_VRFD_NCVRD_STAY_THRU_DT      => ExplanationOfBenefit.supportingInfo.timingPeriod
     // NCH_ACTV_OR_CVRD_LVL_CARE_THRU   => ExplanationOfBenefit.supportingInfo.timingDate
     // NCH_BENE_MDCR_BNFTS_EXHTD_DT_I   => ExplanationOfBenefit.supportingInfo.timingDate
-    // CLM_DRG_CD                       => ExplanationOfBenefit.diagnosis
+    // CLM_DRG_CD                       => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.addCommonEobInformationInpatientSNF(
         eob,
         claimGroup.getAdmissionTypeCd(),
@@ -219,9 +218,7 @@ public class InpatientClaimTransformerV2 {
 
     // Common group level fields between Inpatient, Outpatient and SNF
     // NCH_BENE_BLOOD_DDCTBL_LBLTY_AM   => ExplanationOfBenefit.benefitBalance.financial
-    // OP_PHYSN_NPI                     => ExplanationOfBenefit.careTeam.provider (Assisting)
-    // OT_PHYSN_NPI                     => ExplanationOfBenefit.careTeam.provider (Other)
-    // CLAIM_QUERY_CODE                 => ExplanationOfBenefit.extension
+    // CLAIM_QUERY_CODE                 => ExplanationOfBenefit.billablePeriod.extension
     // CLM_MCO_PD_SW                    => ExplanationOfBenefit.supportingInfo.code
     TransformerUtilsV2.mapEobCommonGroupInpOutSNF(
         eob,
@@ -237,7 +234,6 @@ public class InpatientClaimTransformerV2 {
     // PTNT_DSCHRG_STUS_CD      => ExplanationOfBenefit.supportingInfo
     // CLM_SRVC_CLSFCTN_TYPE_CD => ExplanationOfBenefit.extension
     // NCH_PRMRY_PYR_CD         => ExplanationOfBenefit.supportingInfo
-    // AT_PHYSN_NPI             => ExplanationOfBenefit.careTeam.provider (Primary)
     // CLM_TOT_CHRG_AMT         => ExplanationOfBenefit.total.amount
     // NCH_PRMRY_PYR_CLM_PD_AMT => ExplanationOfBenefit.benefitBalance.financial (PRPAYAMT)
     TransformerUtilsV2.mapEobCommonGroupInpOutHHAHospiceSNF(
@@ -251,7 +247,8 @@ public class InpatientClaimTransformerV2 {
         claimGroup.getClaimPrimaryPayerCode(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getLastUpdated());
 
     // CLM_UTLZTN_DAY_CNT => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
@@ -271,8 +268,8 @@ public class InpatientClaimTransformerV2 {
     // ICD_DGNS_E_CD(1-12)      => diagnosis.diagnosisCodeableConcept
     // ICD_DGNS_E_VRSN_CD(1-12) => diagnosis.diagnosisCodeableConcept
     // CLM_E_POA_IND_SW(1-12)   => diagnosis.type
-    for (Diagnosis diagnosis : extractDiagnoses(claimGroup)) {
-      TransformerUtilsV2.addDiagnosisCode(eob, diagnosis);
+    for (Diagnosis diagnosis : DiagnosisUtilV2.extractDiagnoses(claimGroup)) {
+      DiagnosisUtilV2.addDiagnosisCode(eob, diagnosis, ClaimTypeV2.INPATIENT);
     }
 
     // Handle Procedures
@@ -288,18 +285,12 @@ public class InpatientClaimTransformerV2 {
         .forEach(p -> TransformerUtilsV2.addProcedureCode(eob, p.get()));
 
     // NCH_WKLY_PROC_DT => ExplanationOfBenefit.supportinginfo.timingDate
-    TransformerUtilsV2.addInformationWithDate(
+    TransformerUtilsV2.addInformation(
         eob,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        CcwCodebookVariable.NCH_WKLY_PROC_DT,
-        Optional.of(claimGroup.getWeeklyProcessDate()));
-
-    // NCH_PTNT_STATUS_IND_CD => ExplanationOfBenefit.supportingInfo.code
-    TransformerUtilsV2.addInformationWithCode(
-        eob,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-        claimGroup.getPatientStatusCd());
+        TransformerUtilsV2.createInformationRecievedDateSlice(
+            eob,
+            CcwCodebookVariable.NCH_WKLY_PROC_DT,
+            Optional.of(claimGroup.getWeeklyProcessDate())));
 
     // CLM_PPS_CPTL_DRG_WT_NUM => ExplanationOfBenefit.benefitBalance.financial
     TransformerUtilsV2.addBenefitBalanceFinancialMedicalInt(
@@ -319,63 +310,54 @@ public class InpatientClaimTransformerV2 {
       // CLM_LINE_NUM => item.sequence
       item.setSequence(line.getLineNumber().intValue());
 
-      // PRVDR_STATE_CD => ExplanationOfBenefit.item.locationAddress
-      item.setLocation(new Address().setState((claimGroup.getProviderStateCode())));
+      // PRVDR_STATE_CD => item.location
+      TransformerUtilsV2.addLocationState(item, claimGroup.getProviderStateCode());
 
-      // REV_CNTR => item.revenue
-      item.setRevenue(
-          TransformerUtilsV2.createCodeableConcept(
-              eob, CcwCodebookVariable.REV_CNTR, line.getRevenueCenter()));
+      // REV_CNTR                   => ExplanationOfBenefit.item.revenue
+      // REV_CNTR_RATE_AMT          => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_TOT_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NCVRD_CHRG_AMT    => ExplanationOfBenefit.item.adjudication
+      // REV_CNTR_NDC_QTY           => ExplanationOfBenefit.item.quantity
+      // REV_CNTR_NDC_QTY_QLFR_CD   => ExplanationOfBenefit.modifier
+      TransformerUtilsV2.mapEobCommonItemRevenue(
+          item,
+          eob,
+          line.getRevenueCenter(),
+          line.getRateAmount(),
+          line.getTotalChargeAmount(),
+          Optional.of(line.getNonCoveredChargeAmount()),
+          line.getNationalDrugCodeQuantity(),
+          line.getNationalDrugCodeQualifierCode());
 
-      // Common group level field coinsurance between Inpatient, HHA, Hospice and SNF
-      // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue.extension
-      TransformerUtilsV2.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
-          eob, item, line.getDeductibleCoinsuranceCd());
+      // REV_CNTR_DDCTBL_COINSRNC_CD => item.revenue
+      TransformerUtilsV2.addItemRevenue(
+          item,
+          eob,
+          CcwCodebookVariable.REV_CNTR_DDCTBL_COINSRNC_CD,
+          line.getDeductibleCoinsuranceCd());
 
       // HCPCS_CD => item.productOrService
-      if (line.getHcpcsCode().isPresent()) {
-        item.setProductOrService(
-            TransformerUtilsV2.createCodeableConcept(
-                eob, CcwCodebookVariable.HCPCS_CD, line.getHcpcsCode()));
-      }
-
-      // REV_CNTR_UNIT_CNT => item.quantity
-      item.setQuantity(new SimpleQuantity().setValue(line.getUnitCount()));
-
-      // REV_CNTR_RATE_AMT => item.adjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_RATE_AMT, line.getRateAmount());
-
-      // REV_CNTR_TOT_CHRG_AMT => item.adjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_TOT_CHRG_AMT, line.getTotalChargeAmount());
-
-      // REV_CNTR_NCVRD_CHRG_AMT => item.addjudication
-      TransformerUtilsV2.addItemAdjudicationAmt(
-          item, CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT, line.getNonCoveredChargeAmount());
-
-      // REV_CNTR_NDC_QTY_QLFR_CD => item.modifier
-      if (line.getNationalDrugCodeQualifierCode().isPresent()) {
-        item.getModifier()
-            .add(
-                TransformerUtilsV2.createCodeableConcept(
-                    eob,
-                    CcwCodebookVariable.REV_CNTR_NDC_QTY_QLFR_CD,
-                    line.getNationalDrugCodeQualifierCode()));
-      }
+      line.getHcpcsCode()
+          .ifPresent(
+              c ->
+                  item.setProductOrService(
+                      TransformerUtilsV2.createCodeableConcept(
+                          eob, CcwCodebookVariable.HCPCS_CD, c)));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
-          TransformerConstants.CODING_UPIN,
-          ClaimCareteamrole.PRIMARY,
+          item,
+          C4BBPractitionerIdentifierType.UPIN,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianUPIN());
 
       // RNDRNG_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
           eob,
-          TransformerConstants.CODING_NPI_US,
-          ClaimCareteamrole.PRIMARY,
+          item,
+          C4BBPractitionerIdentifierType.NPI,
+          C4BBClaimInstitutionalCareTeamRole.PERFORMING,
           line.getRevenueCenterRenderingPhysicianNPI());
     }
 
@@ -383,72 +365,5 @@ public class InpatientClaimTransformerV2 {
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
 
     return eob;
-  }
-
-  /**
-   * @param claim the {@link InpatientClaim} to extract the {@link Diagnosis}es from
-   * @return the {@link Diagnosis} that can be extracted from the specified {@link InpatientClaim}
-   */
-  private static List<Diagnosis> extractDiagnoses(InpatientClaim claim) {
-    List<Optional<Diagnosis>> diagnosis = new ArrayList<>();
-
-    // Handle the "special" diagnosis fields
-    diagnosis.add(
-        TransformerUtilsV2.extractDiagnosis(
-            "Admitting", claim, Optional.empty(), DiagnosisLabel.ADMITTING));
-    diagnosis.add(
-        TransformerUtilsV2.extractDiagnosis(
-            "1",
-            claim,
-            Optional.of(CcwCodebookVariable.CLM_POA_IND_SW1),
-            DiagnosisLabel.PRINCIPAL));
-    diagnosis.add(
-        TransformerUtilsV2.extractDiagnosis(
-            "Principal", claim, Optional.empty(), DiagnosisLabel.PRINCIPAL));
-
-    // Generically handle the rest (2-25)
-    final int FIRST_DIAG = 2;
-    final int LAST_DIAG = 25;
-
-    IntStream.range(FIRST_DIAG, LAST_DIAG + 1)
-        .mapToObj(
-            i -> {
-              return TransformerUtilsV2.extractDiagnosis(
-                  String.valueOf(i),
-                  claim,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_POA_IND_SW" + i)));
-            })
-        .forEach(diagnosis::add);
-
-    // Handle external diagnosis
-    diagnosis.add(
-        TransformerUtilsV2.extractDiagnosis(
-            "External1",
-            claim,
-            Optional.of(CcwCodebookVariable.CLM_E_POA_IND_SW1),
-            DiagnosisLabel.FIRSTEXTERNAL));
-    diagnosis.add(
-        TransformerUtilsV2.extractDiagnosis(
-            "ExternalFirst", claim, Optional.empty(), DiagnosisLabel.FIRSTEXTERNAL));
-
-    // Generically handle the rest (2-12)
-    final int FIRST_EX_DIAG = 2;
-    final int LAST_EX_DIAG = 12;
-
-    IntStream.range(FIRST_EX_DIAG, LAST_EX_DIAG + 1)
-        .mapToObj(
-            i -> {
-              return TransformerUtilsV2.extractDiagnosis(
-                  "External" + String.valueOf(i),
-                  claim,
-                  Optional.of(CcwCodebookVariable.valueOf("CLM_E_POA_IND_SW" + i)));
-            })
-        .forEach(diagnosis::add);
-
-    // Some may be empty.  Convert from List<Optional<Diagnosis>> to List<Diagnosis>
-    return diagnosis.stream()
-        .filter(d -> d.isPresent())
-        .map(d -> d.get())
-        .collect(Collectors.toList());
   }
 }

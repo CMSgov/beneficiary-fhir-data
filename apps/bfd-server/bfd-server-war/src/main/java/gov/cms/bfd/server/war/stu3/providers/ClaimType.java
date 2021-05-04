@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaim_;
@@ -18,12 +17,12 @@ import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.PartDEvent_;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaim_;
+import gov.cms.bfd.server.war.commons.ClaimTypeTransformer;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -104,7 +103,7 @@ public enum ClaimType {
   private final SingularAttribute<?, ?> entityIdAttribute;
   private final SingularAttribute<?, String> entityBeneficiaryIdAttribute;
   private final Function<Object, LocalDate> serviceEndAttributeFunction;
-  private final BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer;
+  private final ClaimTypeTransformer transformer;
   private final Collection<PluralAttribute<?, ?, ?>> entityLazyAttributes;
 
   /**
@@ -122,7 +121,7 @@ public enum ClaimType {
       SingularAttribute<?, ?> entityIdAttribute,
       SingularAttribute<?, String> entityBeneficiaryIdAttribute,
       Function<Object, LocalDate> serviceEndAttributeFunction,
-      BiFunction<MetricRegistry, Object, ExplanationOfBenefit> transformer,
+      ClaimTypeTransformer transformer,
       PluralAttribute<?, ?, ?>... entityLazyAttributes) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
@@ -165,10 +164,10 @@ public enum ClaimType {
   }
 
   /**
-   * @return the {@link BiFunction} to use to transform the JPA {@link Entity} instances into FHIR
-   *     {@link ExplanationOfBenefit} instances
+   * @return the {@link ClaimTypeTransformer} to use to transform the JPA {@link Entity} instances
+   *     into FHIR {@link ExplanationOfBenefit} instances
    */
-  public BiFunction<MetricRegistry, Object, ExplanationOfBenefit> getTransformer() {
+  public ClaimTypeTransformer getTransformer() {
     return transformer;
   }
 
