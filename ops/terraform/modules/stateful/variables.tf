@@ -46,4 +46,8 @@ variable "partner_acct_nums" {
 variable "partner_subnets" {
   description = "Map of partner subnets requiring access to EFT EFS file systems"
   type        = map(map(list(string)))
+
+// add module feature toggles here
+variable "module_features" {
+  type = map(bool)
 }

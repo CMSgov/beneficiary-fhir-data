@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 0.12"
+  required_version = "> 0.12.30, < 0.13" 
 }
 
 provider "aws" {
@@ -9,6 +9,11 @@ provider "aws" {
 
 module "stateful" {
   source = "../../../modules/stateful"
+
+  # feature toggles
+  module_features = {
+    beta_reader = false
+  }
 
   aurora_config = {
     instance_class = "db.r5.12xlarge"
