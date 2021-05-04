@@ -44,6 +44,18 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>dropwizard-metrics-newrelic</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>telemetry-http-okhttp</artifactId>
+			<version>0.6.1</version>
+		</dependency>
+
+		<dependency>
 			<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>

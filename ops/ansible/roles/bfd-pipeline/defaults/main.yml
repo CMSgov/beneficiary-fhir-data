@@ -20,3 +20,6 @@ eft_efs_mounts:
       posix_uid: '1500',
       posix_gid: '1500',
     }
+
+data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
+data_pipeline_new_relic_metric_path: '/metric/v1'
