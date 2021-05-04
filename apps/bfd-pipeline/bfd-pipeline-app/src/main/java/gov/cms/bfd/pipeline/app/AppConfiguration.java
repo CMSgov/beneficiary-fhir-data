@@ -107,7 +107,7 @@ public final class AppConfiguration implements Serializable {
    * The name of the environment variable that should be used to provide the {@link
    * #getMetricOptions()} {@link MetricOptions#getNewRelicAppName()} value.
    */
-  public static final String ENV_VAR_NEW_RELIC_METRIC_APP_NAME = "NEW_RELIC_METRIC_APP_NAME";
+  public static final String ENV_VAR_NEW_RELIC_APP_NAME = "NEW_RELIC_APP_NAME";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -335,7 +335,7 @@ public final class AppConfiguration implements Serializable {
     // New Relic Metrics
 
     String newRelicMetricKey = System.getenv(ENV_VAR_NEW_RELIC_METRIC_KEY);
-    String newRelicAppName = System.getenv(ENV_VAR_NEW_RELIC_METRIC_APP_NAME);
+    String newRelicAppName = System.getenv(ENV_VAR_NEW_RELIC_APP_NAME);
     String newRelicMetricHost = System.getenv(ENV_VAR_NEW_RELIC_METRIC_HOST);
     String newRelicMetricPath = System.getenv(ENV_VAR_NEW_RELIC_METRIC_PATH);
     String rawNewRelicMetricPeriod = System.getenv(ENV_VAR_NEW_RELIC_METRIC_PERIOD);
