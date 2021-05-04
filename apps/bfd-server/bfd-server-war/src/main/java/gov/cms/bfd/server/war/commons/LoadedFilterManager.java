@@ -218,11 +218,14 @@ public class LoadedFilterManager {
       // If new batches are present, then build new filters for the affected files
       final Date currentLastBatchCreated =
           fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
-      if (this.lastBatchCreated == null || this.lastBatchCreated.before(currentLastBatchCreated)) {
+
+      if (this.lastBatchCreated == null
+          || this.lastBatchCreated.toInstant().isBefore(currentLastBatchCreated.toInstant())) {
         LOGGER.info(
             "Refreshing LoadedFile filters with new filters from {} to {}",
             lastBatchCreated,
             currentLastBatchCreated);
+
         List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);
         List<LoadedFileFilter> newFilters =
             updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
@@ -230,6 +233,7 @@ public class LoadedFilterManager {
         // If batches been trimmed, then remove filters which are no longer present
         final Date currentFirstBatchUpdate =
             fetchFirstLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+
         if (this.firstBatchCreated == null
             || this.firstBatchCreated.before(currentFirstBatchUpdate)) {
           LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
@@ -237,9 +241,14 @@ public class LoadedFilterManager {
           newFilters = trimFilters(newFilters, loadedFiles);
         }
 
+        LOGGER.info(
+            "Updating timestamps. currentFirstBatchUpdate={} currentLastBatchCreated={}",
+            currentFirstBatchUpdate,
+            currentLastBatchCreated);
+
         set(newFilters, currentFirstBatchUpdate, currentLastBatchCreated);
       }
-    } catch (Exception ex) {
+    } catch (Throwable ex) {
       LOGGER.error("Error found refreshing LoadedFile filters", ex);
     }
   }

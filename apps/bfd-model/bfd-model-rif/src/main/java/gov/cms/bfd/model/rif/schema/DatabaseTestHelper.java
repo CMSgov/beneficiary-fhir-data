@@ -2,7 +2,10 @@ package gov.cms.bfd.model.rif.schema;
 
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UncheckedIOException;
+import java.io.Writer;
+import java.net.Inet4Address;
 import java.net.ServerSocket;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
@@ -10,6 +13,8 @@ import org.hsqldb.jdbc.JDBCDataSource;
 import org.hsqldb.persist.HsqlProperties;
 import org.hsqldb.server.ServerAcl.AclFormatException;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides utilities for managing the database in integration tests.
@@ -18,6 +23,8 @@ import org.postgresql.ds.PGSimpleDataSource;
  * for convenience: test dependencies aren't transitive, which tends to eff things up.
  */
 public final class DatabaseTestHelper {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseTestHelper.class);
+
   /**
    * This fake JDBC URL prefix is used for custom database setups only used in integration tests,
    * e.g. {@link #createDataSourceForHsqlEmbeddedWithServer(String)}.
@@ -141,6 +148,7 @@ public final class DatabaseTestHelper {
         String.format(
             "mem:test-embedded;user=%s;password=%s", HSQL_SERVER_USERNAME, HSQL_SERVER_PASSWORD));
     hsqlProperties.setProperty("server.dbname.0", "test-embedded");
+    hsqlProperties.setProperty("server.address", "127.0.0.1");
     hsqlProperties.setProperty("server.port", "" + hsqldbPort);
     hsqlProperties.setProperty("hsqldb.tx", "mvcc");
     org.hsqldb.server.Server server = new org.hsqldb.server.Server();
@@ -151,8 +159,8 @@ public final class DatabaseTestHelper {
       throw new BadCodeMonkeyException(e);
     }
 
-    server.setLogWriter(null);
-    server.setErrWriter(null);
+    server.setLogWriter(new PrintWriter(new LoggerWriter(LOGGER, "HSQL Log: ")));
+    server.setErrWriter(new PrintWriter(new LoggerWriter(LOGGER, "HSQL Error Log: ")));
     server.start();
 
     // Create the DataSource to connect to that shiny new DB.
@@ -192,7 +200,7 @@ public final class DatabaseTestHelper {
    * @return a free local port number
    */
   private static int findFreePort() {
-    try (ServerSocket socket = new ServerSocket(0)) {
+    try (ServerSocket socket = new ServerSocket(0, 50, Inet4Address.getByName("127.0.0.1"))) {
       socket.setReuseAddress(true);
       return socket.getLocalPort();
     } catch (IOException e) {
@@ -264,6 +272,44 @@ public final class DatabaseTestHelper {
     /** @return the password that should be used to connect to the test DB */
     public String getPassword() {
       return password;
+    }
+  }
+
+  /** Sends output to a specified {@link Logger}. */
+  private static final class LoggerWriter extends Writer {
+    private final Logger logger;
+    private final String messagePrefix;
+
+    /**
+     * Constructs a new {@link LoggerWriter} instance.
+     *
+     * @param logger the {@link Logger} to output to
+     * @param messagePrefix the text to prefix every log message with
+     */
+    public LoggerWriter(Logger logger, String messagePrefix) {
+      this.logger = logger;
+      this.messagePrefix = messagePrefix;
+    }
+
+    /** @see java.io.Writer#write(char[], int, int) */
+    @Override
+    public void write(char[] cbuf, int off, int len) throws IOException {
+      String message = new String(cbuf, off, len);
+      if (message.trim().isEmpty()) return;
+
+      logger.debug(messagePrefix + message);
+    }
+
+    /** @see java.io.Writer#flush() */
+    @Override
+    public void flush() throws IOException {
+      // Nothing to do.
+    }
+
+    /** @see java.io.Writer#close() */
+    @Override
+    public void close() throws IOException {
+      // Nothing to do.
     }
   }
 }

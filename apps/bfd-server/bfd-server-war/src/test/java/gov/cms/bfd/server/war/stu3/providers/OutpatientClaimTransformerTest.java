@@ -50,7 +50,8 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        OutpatientClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     assertMatches(claim, eob);
   }
 
@@ -76,7 +77,8 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        OutpatientClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     assertMatches(claim, eob);
   }
 
@@ -110,7 +112,8 @@ public final class OutpatientClaimTransformerTest {
                   claim.getBeneficiaryId(),
                   claim.getClaimId());
               ExplanationOfBenefit eob =
-                  OutpatientClaimTransformer.transform(new MetricRegistry(), claim);
+                  OutpatientClaimTransformer.transform(
+                      new MetricRegistry(), claim, Optional.empty());
               assertMatches(claim, eob);
             });
   }

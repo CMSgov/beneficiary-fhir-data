@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -54,6 +55,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -70,6 +72,14 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
   private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+  /**
+   * The header key used to determine whether or not tax numbers should be included in responses.
+   *
+   * <p>Should be set to <code>"true"</code> if {@link CarrierClaimColumn#TAX_NUM} or {@link
+   * DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>"false"</code> if
+   * not. Defaults to <code>"false"</code>.
+   */
+  public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -121,7 +131,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
   @Trace
-  public ExplanationOfBenefit read(@IdParam IdType eobId) {
+  public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
     if (eobId == null) throw new IllegalArgumentException();
     if (eobId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
 
@@ -133,11 +143,12 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
       throw new IllegalArgumentException("Unsupported ID pattern: " + eobIdText);
 
     String eobIdTypeText = eobIdMatcher.group(1);
-    Optional<ClaimType> eobIdType = ClaimType.parse(eobIdTypeText);
+    Optional<ClaimTypeV2> eobIdType = ClaimTypeV2.parse(eobIdTypeText);
     if (!eobIdType.isPresent()) throw new ResourceNotFoundException(eobId);
     String eobIdClaimIdText = eobIdMatcher.group(2);
-
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     Operation operation = new Operation(Operation.Endpoint.V2_EOB);
+    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption("by", "id");
     operation.publishOperationName();
 
@@ -166,7 +177,11 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
           "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
 
-    ExplanationOfBenefit eob = eobIdType.get().getTransformer().apply(metricRegistry, claimEntity);
+    ExplanationOfBenefit eob =
+        eobIdType
+            .get()
+            .getTransformer()
+            .transform(metricRegistry, claimEntity, Optional.of(includeTaxNumbers));
     return eob;
   }
 
@@ -180,7 +195,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    *
    * @param patient a {@link ReferenceParam} for the {@link ExplanationOfBenefit#getPatient()} to
    *     try and find matches for {@link ExplanationOfBenefit}s
-   * @param type a list of {@link ClaimType} to include in the result. Defaults to all types.
+   * @param type a list of {@link ClaimTypeV2} to include in the result. Defaults to all types.
    * @param startIndex an {@link OptionalParam} for the startIndex (or offset) used to determine
    *     pagination
    * @param excludeSamhsa an {@link OptionalParam} that, if <code>"true"</code>, will use {@link
@@ -224,17 +239,19 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
      */
 
     String beneficiaryId = patient.getIdPart();
-    Set<ClaimType> claimTypes = parseTypeParam(type);
+    Set<ClaimTypeV2> claimTypes = parseTypeParam(type);
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
 
-    Operation operation = new Operation(Operation.Endpoint.V1_EOB);
+    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
+    Operation operation = new Operation(Operation.Endpoint.V2_EOB);
     operation.setOption("by", "patient");
+    operation.setOption("IncludeTaxNumbers", "" + includeTaxNumbers);
     operation.setOption(
         "types",
-        (claimTypes.size() == ClaimType.values().length)
+        (claimTypes.size() == ClaimTypeV2.values().length)
             ? "*"
             : claimTypes.stream()
-                .sorted(Comparator.comparing(ClaimType::name))
+                .sorted(Comparator.comparing(ClaimTypeV2::name))
                 .collect(Collectors.toList())
                 .toString());
     operation.setOption("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
@@ -257,15 +274,80 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
      * each claim type, then combine the results. It's not super efficient, but it's
      * also not so inefficient that it's worth fixing.
      */
-    if (claimTypes.contains(ClaimType.PDE))
+    if (claimTypes.contains(ClaimTypeV2.CARRIER)) {
       eobs.addAll(
           transformToEobs(
-              ClaimType.PDE,
-              findClaimTypeByPatient(ClaimType.PDE, beneficiaryId, lastUpdated, serviceDate)));
+              ClaimTypeV2.CARRIER,
+              findClaimTypeByPatient(ClaimTypeV2.CARRIER, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
+    }
 
-    if (Boolean.parseBoolean(excludeSamhsa)) filterSamhsa(eobs);
+    if (claimTypes.contains(ClaimTypeV2.DME)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.DME,
+              findClaimTypeByPatient(ClaimTypeV2.DME, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.HHA)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.HHA,
+              findClaimTypeByPatient(ClaimTypeV2.HHA, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.HOSPICE)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.HOSPICE,
+              findClaimTypeByPatient(ClaimTypeV2.HOSPICE, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.INPATIENT,
+              findClaimTypeByPatient(
+                  ClaimTypeV2.INPATIENT, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.OUTPATIENT)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.OUTPATIENT,
+              findClaimTypeByPatient(
+                  ClaimTypeV2.OUTPATIENT, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.PDE)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.PDE,
+              findClaimTypeByPatient(ClaimTypeV2.PDE, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
+    }
+
+    if (claimTypes.contains(ClaimTypeV2.SNF)) {
+      eobs.addAll(
+          transformToEobs(
+              ClaimTypeV2.SNF,
+              findClaimTypeByPatient(ClaimTypeV2.SNF, beneficiaryId, lastUpdated, serviceDate),
+              Optional.of(includeTaxNumbers)));
+    }
+
+    if (Boolean.parseBoolean(excludeSamhsa)) {
+      filterSamhsa(eobs);
+    }
 
     eobs.sort(R4ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
+
+    // Add bene_id to MDC logs
+    MDC.put("bene_id", beneficiaryId);
 
     return TransformerUtilsV2.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }
@@ -296,7 +378,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   }
 
   /**
-   * @param claimType the {@link ClaimType} to find
+   * @param claimType the {@link ClaimTypeV2} to find
    * @param patientId the {@link Beneficiary#getBeneficiaryId()} to filter by
    * @param lastUpdated the update time to filter by
    * @return the matching claim/event entities
@@ -304,7 +386,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Trace
   private <T> List<T> findClaimTypeByPatient(
-      ClaimType claimType,
+      ClaimTypeV2 claimType,
       String patientId,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate) {
@@ -375,15 +457,16 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
   }
 
   /**
-   * @param claimType the {@link ClaimType} being transformed
+   * @param claimType the {@link ClaimTypeV2} being transformed
    * @param claims the claims/events to transform
    * @return the transformed {@link ExplanationOfBenefit} instances, one for each specified
    *     claim/event
    */
   @Trace
-  private List<ExplanationOfBenefit> transformToEobs(ClaimType claimType, List<?> claims) {
+  private List<ExplanationOfBenefit> transformToEobs(
+      ClaimTypeV2 claimType, List<?> claims, Optional<Boolean> includeTaxNumbers) {
     return claims.stream()
-        .map(c -> claimType.getTransformer().apply(metricRegistry, c))
+        .map(c -> claimType.getTransformer().transform(metricRegistry, c, includeTaxNumbers))
         .collect(Collectors.toList());
   }
 
@@ -434,10 +517,10 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
 
   /**
    * @param type a {@link TokenAndListParam} for the "type" field in a search
-   * @return The {@link ClaimType}s to be searched, as computed from the specified "type" {@link
+   * @return The {@link ClaimTypeV2}s to be searched, as computed from the specified "type" {@link
    *     TokenAndListParam} search param
    */
-  static Set<ClaimType> parseTypeParam(TokenAndListParam type) {
+  static Set<ClaimTypeV2> parseTypeParam(TokenAndListParam type) {
     if (type == null)
       type =
           new TokenAndListParam()
@@ -450,13 +533,13 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
      * formulations, e.g. (in postfix notation):
      * "and(or(claimType==FOO, claimType==BAR), or(claimType==FOO))".
      */
-    Set<ClaimType> claimTypes = new HashSet<ClaimType>(Arrays.asList(ClaimType.values()));
+    Set<ClaimTypeV2> claimTypes = new HashSet<ClaimTypeV2>(Arrays.asList(ClaimTypeV2.values()));
     for (TokenOrListParam typeToken : type.getValuesAsQueryTokens()) {
       /*
        * Each OR entry is additive: we start with an empty set and add every (valid)
        * ClaimType that's encountered.
        */
-      Set<ClaimType> claimTypesInner = new HashSet<ClaimType>();
+      Set<ClaimTypeV2> claimTypesInner = new HashSet<ClaimTypeV2>();
       for (TokenParam codingToken : typeToken.getValuesAsQueryTokens()) {
         if (codingToken.getModifier() != null) throw new IllegalArgumentException();
 
@@ -466,17 +549,20 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
          * an exact or wildcard code. All of those need to be handled carefully -- see
          * the spec for details.
          */
-        Optional<ClaimType> claimType =
+        Optional<ClaimTypeV2> claimType =
             codingToken.getValue() != null
-                ? ClaimType.parse(codingToken.getValue().toLowerCase())
+                ? ClaimTypeV2.parse(codingToken.getValue().toLowerCase())
                 : Optional.empty();
+
         if (codingToken.getSystem() != null
             && codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)
             && !claimType.isPresent()) {
-          claimTypesInner.addAll(Arrays.asList(ClaimType.values()));
+          claimTypesInner.addAll(Arrays.asList(ClaimTypeV2.values()));
         } else if (codingToken.getSystem() == null
             || codingToken.getSystem().equals(TransformerConstants.CODING_SYSTEM_BBAPI_EOB_TYPE)) {
-          if (claimType.isPresent()) claimTypesInner.add(claimType.get());
+          if (claimType.isPresent()) {
+            claimTypesInner.add(claimType.get());
+          }
         }
       }
 
@@ -487,5 +573,34 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     }
 
     return claimTypes;
+  }
+
+  /**
+   * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
+   *     to parse out the HTTP header that controls this setting
+   * @return <code>true</code> if {@link CarrierClaimColumn#TAX_NUM} and {@link
+   *     DMEClaimColumn#TAX_NUM} should be mapped and included in the results, <code>false</code> if
+   *     not (defaults to <code>false</code>)
+   */
+  public static boolean returnIncludeTaxNumbers(RequestDetails requestDetails) {
+    /*
+     * Note: headers can be multi-valued and so calling the enticing-looking `getHeader(...)` method
+     * is often a bad idea, as it will often do the wrong thing.
+     */
+    List<String> headerValues = requestDetails.getHeaders(HEADER_NAME_INCLUDE_TAX_NUMBERS);
+
+    if (headerValues == null || headerValues.isEmpty()) {
+      return false;
+    } else if (headerValues.size() == 1) {
+      String headerValue = headerValues.get(0);
+      if ("true".equalsIgnoreCase(headerValue)) {
+        return true;
+      } else if ("false".equalsIgnoreCase(headerValue)) {
+        return false;
+      }
+    }
+
+    throw new InvalidRequestException(
+        "Unsupported " + HEADER_NAME_INCLUDE_TAX_NUMBERS + " header value: " + headerValues);
   }
 }

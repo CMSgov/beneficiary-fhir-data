@@ -39,7 +39,8 @@ public final class HospiceClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = HospiceClaimTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        HospiceClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     assertMatches(claim, eob);
   }
 
