@@ -169,7 +169,7 @@ public final class AppConfiguration implements Serializable {
     builder.append(extractionOptions);
     builder.append(", loadOptions=");
     builder.append(loadOptions);
-    builder.append(", metricOptinos=");
+    builder.append(", metricOptions=");
     builder.append(metricOptions);
     builder.append("]");
     return builder.toString();
