@@ -91,7 +91,7 @@ cat <filename.csv> | wc -l
 Take note of the record count to be used in verifying that all records
 were successfully imported into the CCW_LOAD_TEMP file.
 
-This step will need to be performed for each of the CCW files; so it
+This step will need to be performed for each of the CCW files; so if
 two files are provided, then this step will need to be run twice.
 
 
