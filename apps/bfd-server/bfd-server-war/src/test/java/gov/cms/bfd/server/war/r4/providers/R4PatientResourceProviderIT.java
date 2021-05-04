@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
@@ -192,7 +191,7 @@ public final class R4PatientResourceProviderIT {
     while (identifiers.hasNext()) {
       Identifier identifier = identifiers.next();
 
-      if (identifier.getSystem().equals(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)) {
+      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_ID)) {
         mbiUnhashedPresent = true;
       }
     }
@@ -292,7 +291,7 @@ public final class R4PatientResourceProviderIT {
     Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
     while (identifiers.hasNext()) {
       Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)) {
+      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_ID)) {
         mbiUnhashedPresent = true;
       }
     }
@@ -337,7 +336,7 @@ public final class R4PatientResourceProviderIT {
     Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
     while (identifiers.hasNext()) {
       Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)) {
+      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_ID)) {
         mbiUnhashedPresent = true;
       }
     }
@@ -425,6 +424,7 @@ public final class R4PatientResourceProviderIT {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
+
     Bundle searchResults =
         fhirClient
             .search()
@@ -459,7 +459,7 @@ public final class R4PatientResourceProviderIT {
                 identifier ->
                     identifier
                         .getSystem()
-                        .equals(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE))
+                        .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
             .findFirst()
             .get()
             .getValue();
@@ -509,7 +509,9 @@ public final class R4PatientResourceProviderIT {
     Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
     while (identifiers.hasNext()) {
       Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)) {
+      if (identifier
+          .getSystem()
+          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
         mbiUnhashedPresent = true;
       }
     }
@@ -897,7 +899,9 @@ public final class R4PatientResourceProviderIT {
     Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
     while (identifiers.hasNext()) {
       Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)) {
+      if (identifier
+          .getSystem()
+          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
         mbiUnhashedPresent = true;
       }
     }
@@ -944,7 +948,7 @@ public final class R4PatientResourceProviderIT {
     // Double-check that the bene has multiple identifiers.
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     Assert.assertEquals(
-        4,
+        1, // was 4
         patientFromSearchResult.getIdentifier().stream()
             .filter(
                 i ->
@@ -990,7 +994,7 @@ public final class R4PatientResourceProviderIT {
     // Double-check that the bene has multiple identifiers.
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     Assert.assertEquals(
-        4,
+        1, // was 4
         patientFromSearchResult.getIdentifier().stream()
             .filter(
                 i ->
@@ -1035,7 +1039,9 @@ public final class R4PatientResourceProviderIT {
     Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
     while (identifiers.hasNext()) {
       Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)) {
+      if (identifier
+          .getSystem()
+          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)) {
         mbiUnhashedPresent = true;
       }
     }
@@ -1264,7 +1270,6 @@ public final class R4PatientResourceProviderIT {
 
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = createFhirClient(requestHeader);
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1273,40 +1278,18 @@ public final class R4PatientResourceProviderIT {
             .findFirst()
             .get();
 
-    Patient patient =
-        fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
-
     Patient expected =
         BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, requestHeader);
 
+    IGenericClient fhirClient = createFhirClient(requestHeader);
+    Patient patient =
+        fhirClient.read().resource(Patient.class).withId(beneficiary.getBeneficiaryId()).execute();
+
     // Because of how transform doesn't go through R4PatientResourceProvider, `expected` won't have
-    // the
-    // historical MBI data. Check this independently and then copy for the overall compare.
-    List<Identifier> historical =
-        patient.getIdentifier().stream()
-            // Filter out Identifiers without a type extension
-            .filter(id -> id.getType().getCodingFirstRep().hasExtension())
-            .filter(
-                id ->
-                    "historic"
-                        .equals(
-                            ((Coding)
-                                    id.getType()
-                                        .getCodingFirstRep()
-                                        .getExtensionFirstRep()
-                                        .getValue())
-                                .getCode()))
-            .collect(Collectors.toList());
-
-    // This is only returned if `mbi` or `true` is passed in include identifiers
-    if (expectingMbi) {
-      Assert.assertEquals(1, historical.size());
-      // Add it to the one we created above so the compare below works
-      expected.addIdentifier(historical.get(0));
-    } else {
-      Assert.assertEquals(0, historical.size());
-    }
-
+    // the historical MBI data.
+    // Also, SAMPLE_A does not have mbi history (it used to); however, what used to be denoted as
+    // historical
+    // is not provided as the 'current' MBI identifier (no historical).
     comparePatient(expected, patient);
 
     /*
@@ -1316,7 +1299,7 @@ public final class R4PatientResourceProviderIT {
     Iterator<Identifier> identifiers = patient.getIdentifier().iterator();
     while (identifiers.hasNext()) {
       Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)) {
+      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_ID)) {
         mbiUnhashedPresent = true;
       }
     }

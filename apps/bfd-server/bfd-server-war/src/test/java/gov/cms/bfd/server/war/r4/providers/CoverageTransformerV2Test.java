@@ -390,11 +390,11 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetExtensionsPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
-    verifyExtensionsPartD();
+    verifyExtensionsPartD(72);
   }
 
-  private static void verifyExtensionsPartD() {
-    Assert.assertEquals(72, coverage.getExtension().size());
+  private static void verifyExtensionsPartD(int expectedSize) {
+    Assert.assertTrue(coverage.getExtension().size() == expectedSize);
 
     // ms_cd
     // rfrnc_yr
@@ -687,6 +687,11 @@ public final class CoverageTransformerV2Test {
     assertPartDMatches(beneficiary, coverage);
   }
 
+  /*
+   ** The following 4 aggregated tests will be called from the R4CoverageResourceProviderIT
+   ** (integration tests); as such they may have different results from the standalone
+   ** CoverageTransformerV2.
+   */
   static void assertPartAMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
@@ -695,7 +700,6 @@ public final class CoverageTransformerV2Test {
     Assert.assertNotNull(beneficiary);
 
     verifyCoverageClass("Part A");
-    verifyID("part-a-567834");
     verifyMeta();
     verifyExtensionsPartA();
     verifyCoverageStatus();
@@ -714,7 +718,6 @@ public final class CoverageTransformerV2Test {
     Assert.assertNotNull(coverage);
     Assert.assertNotNull(beneficiary);
     verifyCoverageClass("Part B");
-    verifyID("part-b-567834");
 
     verifyMeta();
     verifyExtensionsPartB();
@@ -748,7 +751,7 @@ public final class CoverageTransformerV2Test {
     Assert.assertNotNull(coverage);
     Assert.assertNotNull(beneficiary);
     verifyCoverageClass("Part D");
-    verifyExtensionsPartD();
+    verifyExtensionsPartD(84);
     verifyCoverageStatus();
     verifyType();
     verifySubscriber();
