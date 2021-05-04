@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * handles communication with the ultimate storage system. The purpose of this class is to handle
  * general PipelineJob semantics that are common to any source or sink.
  */
-public final class DcGeoRdaLoadJob<T> implements PipelineJob {
+public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRdaLoadJob.class);
   public static final String SCAN_INTERVAL_PROPERTY = "DCGeoRDALoadIntervalSeconds";
   public static final int SCAN_INTERVAL_DEFAULT = 300;
@@ -36,8 +36,8 @@ public final class DcGeoRdaLoadJob<T> implements PipelineJob {
       MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "processed");
 
   private final Config config;
-  private final Callable<RdaSource<T>> sourceFactory;
-  private final Callable<RdaSink<T>> sinkFactory;
+  private final Callable<RdaSource<TResponse>> sourceFactory;
+  private final Callable<RdaSink<TResponse>> sinkFactory;
   private final Meter callsMeter;
   private final Meter failuresMeter;
   private final Meter successesMeter;
@@ -45,8 +45,8 @@ public final class DcGeoRdaLoadJob<T> implements PipelineJob {
 
   public DcGeoRdaLoadJob(
       Config config,
-      Callable<RdaSource<T>> sourceFactory,
-      Callable<RdaSink<T>> sinkFactory,
+      Callable<RdaSource<TResponse>> sourceFactory,
+      Callable<RdaSink<TResponse>> sinkFactory,
       MetricRegistry appMetrics) {
     this.config = Preconditions.checkNotNull(config);
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
@@ -67,7 +67,8 @@ public final class DcGeoRdaLoadJob<T> implements PipelineJob {
     return new DcGeoRdaLoadJob<>(
         new Config(),
         () ->
-            new GrpcRdaSource<>(new GrpcRdaSource.Config(), FissClaimStreamCaller::new, appMetrics),
+            new GrpcRdaSource<>(
+                new GrpcRdaSource.Config(), new FissClaimStreamCaller(), appMetrics),
         () -> new SkeletonRdaSink<>(appMetrics),
         appMetrics);
   }
@@ -83,8 +84,8 @@ public final class DcGeoRdaLoadJob<T> implements PipelineJob {
     Exception error = null;
     try {
       callsMeter.mark();
-      try (RdaSource<T> source = sourceFactory.call();
-          RdaSink<T> sink = sinkFactory.call()) {
+      try (RdaSource<TResponse> source = sourceFactory.call();
+          RdaSink<TResponse> sink = sinkFactory.call()) {
         processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
       }
     } catch (ProcessingException ex) {

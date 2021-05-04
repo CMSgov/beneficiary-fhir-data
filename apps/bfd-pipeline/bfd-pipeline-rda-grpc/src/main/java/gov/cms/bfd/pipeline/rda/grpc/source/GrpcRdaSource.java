@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import static gov.cms.bfd.pipeline.rda.grpc.ProcessingException.isInterrupted;
+
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -10,10 +12,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.StatusRuntimeException;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
  * class. This current implementation is a placeholder to demonstrate the structure that will be
  * used as the RDA API develops to call their RPC's to download Part A and Part B claims.
  *
- * @param <T> type of objects returned by the gRPC service
+ * @param <TResponse> type of objects returned by the gRPC service
  */
-public class GrpcRdaSource<T> implements RdaSource<T> {
+public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
   public static final String HOST_PROPERTY = "DCGeoRDAFissClaimsServiceHost";
   public static final String HOST_DEFAULT = "localhost";
@@ -44,7 +44,7 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
   public static final String BATCHES_METER =
       MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "batches");
 
-  private final GrpcStreamCaller.Factory<T> callerFactory;
+  private final GrpcStreamCaller<TResponse> caller;
   private final Meter callsMeter;
   private final Meter recordsReceivedMeter;
   private final Meter recordsStoredMeter;
@@ -52,21 +52,19 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
   private ManagedChannel channel;
 
   public GrpcRdaSource(
-      Config config, GrpcStreamCaller.Factory<T> callerFactory, MetricRegistry appMetrics) {
+      Config config, GrpcStreamCaller<TResponse> caller, MetricRegistry appMetrics) {
     this(
         ManagedChannelBuilder.forAddress(config.host, config.port)
             .idleTimeout(config.maxIdle.toMillis(), TimeUnit.MILLISECONDS)
             .build(),
-        callerFactory,
+        caller,
         appMetrics);
   }
 
   @VisibleForTesting
   GrpcRdaSource(
-      ManagedChannel channel,
-      GrpcStreamCaller.Factory<T> callerFactory,
-      MetricRegistry appMetrics) {
-    this.callerFactory = Preconditions.checkNotNull(callerFactory);
+      ManagedChannel channel, GrpcStreamCaller<TResponse> caller, MetricRegistry appMetrics) {
+    this.caller = Preconditions.checkNotNull(caller);
     this.channel = Preconditions.checkNotNull(channel);
     callsMeter = appMetrics.meter(CALLS_METER);
     recordsReceivedMeter = appMetrics.meter(RECORDS_RECEIVED_METER);
@@ -75,9 +73,8 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
   }
 
   /**
-   * Repeatedly call the service until either our max allowed run time has elapsed or our maximum
-   * number of objects have been processed. Calls the service through a specific implementation of
-   * GrpcStreamCaller created by the callerFactory.
+   * Calls the service through a specific implementation of GrpcStreamCaller provided to our
+   * constructor. Cancels the response stream if reading from the stream is interrupted.
    *
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
    * @param sink to receive batches of objects
@@ -85,41 +82,49 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
    * @throws ProcessingException wrapper around any Exception thrown by the service
    */
   @Override
-  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<T> sink)
+  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TResponse> sink)
       throws ProcessingException {
     callsMeter.mark();
+    boolean interrupted = false;
+    Exception error = null;
     int processed = 0;
     try {
-      final GrpcStreamCaller<T> caller = callerFactory.createCaller(channel);
-      final List<T> batch = new ArrayList<>();
-      final Iterator<T> resultIterator = caller.callService();
-      while (resultIterator.hasNext()) {
-        final T result = resultIterator.next();
-        recordsReceivedMeter.mark();
-        batch.add(result);
-        if (batch.size() >= maxPerBatch) {
+      final GrpcResponseStream<TResponse> responseStream = caller.callService(channel);
+      final List<TResponse> batch = new ArrayList<>();
+      try {
+        while (responseStream.hasNext()) {
+          final TResponse result = responseStream.next();
+          recordsReceivedMeter.mark();
+          batch.add(result);
+          if (batch.size() >= maxPerBatch) {
+            processed += submitBatchToSink(sink, batch);
+          }
+        }
+        if (batch.size() > 0) {
           processed += submitBatchToSink(sink, batch);
         }
-      }
-      if (batch.size() > 0) {
-        processed += submitBatchToSink(sink, batch);
-      }
-    } catch (StatusRuntimeException ex) {
-      // gRPC blocking stub will throw a StatusRuntimeException when it encounters any error.
-      // Here we check to see if the underlying cause was an InterruptedException and close down
-      // safely if it was since those are normal and expected for pipeline apps.  Any other cause
-      // is treated as a fatal error.
-      if (ex.getCause() != null && ex.getCause() instanceof InterruptedException) {
-        LOGGER.warn("gRPC call was terminated by an InterruptedException");
-      } else {
-        throw new ProcessingException(ex, processed);
+      } catch (GrpcResponseStream.StreamInterruptedException ex) {
+        // If our thread is interrupted we cancel the stream so the server knows we're done
+        // and then shut down normally.
+        responseStream.cancelStream("shutting down due to InterruptedException");
+        interrupted = true;
       }
     } catch (ProcessingException ex) {
-      throw new ProcessingException(ex.getCause(), processed + ex.getProcessedCount());
-    } catch (InterruptedException ex) {
-      LOGGER.warn("non-gRPC code was terminated by an InterruptedException");
+      processed += ex.getProcessedCount();
+      error = ex.getCause();
     } catch (Exception ex) {
-      throw new ProcessingException(ex, processed);
+      error = ex;
+    }
+    if (error != null) {
+      // InterruptedException isn't really an error so we exit normally rather than rethrowing.
+      if (isInterrupted(error)) {
+        interrupted = true;
+      } else {
+        throw new ProcessingException(error, processed);
+      }
+    }
+    if (interrupted) {
+      LOGGER.warn("interrupted with processedCount {}", processed);
     }
     return processed;
   }
@@ -137,7 +142,8 @@ public class GrpcRdaSource<T> implements RdaSource<T> {
     }
   }
 
-  private int submitBatchToSink(RdaSink<T> sink, List<T> batch) throws ProcessingException {
+  private int submitBatchToSink(RdaSink<TResponse> sink, List<TResponse> batch)
+      throws ProcessingException {
     LOGGER.info("submitting batch to sink: size={}", batch.size());
     int processed = sink.writeBatch(batch);
     LOGGER.info("submitted batch to sink: size={} processed={}", batch.size(), processed);

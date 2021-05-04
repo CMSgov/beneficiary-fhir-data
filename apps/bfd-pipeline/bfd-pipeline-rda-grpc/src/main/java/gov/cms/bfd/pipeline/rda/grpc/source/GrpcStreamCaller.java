@@ -1,31 +1,20 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import io.grpc.ManagedChannel;
-import java.util.Iterator;
 
 /**
- * Interface for objects that handle streaming service calls and map their results to
- * PreAdjudicatedClaim objects.
+ * Interface for objects that call streaming gRPC service calls..
  *
- * @param <T> Type of objects returned by the streaming service.
+ * @param <TResponse> Type of objects returned by the streaming service.
  */
-public interface GrpcStreamCaller<T> {
+public interface GrpcStreamCaller<TResponse> {
   /**
-   * Make the call to the service and return a blocking Iterator over the results.
+   * Make the call to the service and return a blocking GrpcResponseStream that allows results to be
+   * traversed like an Iterator but also allows the stream to be cancelled.
    *
+   * @param channel an already open channel to the service being called
    * @return a blocking Iterator over stream results
    * @throws Exception any exception will terminate the stream
    */
-  Iterator<T> callService() throws Exception;
-
-  /**
-   * An interface for factory objects that can create implementations tied to a specific channel.
-   * This will be called by GrpcRdaSource when it needs to make a new call to the gRPC service.
-   *
-   * @param <T> type of objects returned by the streaming service.
-   */
-  @FunctionalInterface
-  interface Factory<T> {
-    GrpcStreamCaller<T> createCaller(ManagedChannel channel) throws Exception;
-  }
+  GrpcResponseStream<TResponse> callService(ManagedChannel channel) throws Exception;
 }
