@@ -77,7 +77,7 @@ FROM '/Users/colinchristophermackenzie/dev/bfd766/sql/test_export.sql.csv'
 It is still TBD as to how CCW will provide the data; BFD has requested a
 single CSV file that includes a header row that denotes the column
 structure. CCW has responded that it most likely will be two CSV files,
-one for 2019 and one for 2020 and now header row on either file.
+one for 2019 and one for 2020 with no header row on either file.
 
 Depending on how CCW does provide two data will determine the actual
 psql 'copy' into the CCW_LOAD_TEMP table.
