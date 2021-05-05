@@ -134,33 +134,35 @@ resource "aws_security_group_rule" "allow_db_primary_access" {
   source_security_group_id = aws_security_group.app.id # The EC2 instance for the BFD Pipeline app.
 }
 
-# NACL to manage communication between the BFD and RDA environments
-# By default this NACL won't add any additonal security, however if for any reason
-# we need to shut off communication between the two VPCs, one could simply flip the
-# action(s) defined in these rules from "ALLOW" to "DENY"
+# NACL to manage communication between the BFD and RDA environments.
+# The NACL rules will open communication over the known ports and close
+# everything else.  This is done by creating a "lower" rule that explicitly
+# allows communication and defining a "upper" rule that defaults to denying
 resource "aws_network_acl" "rda" {
+  # only create the NACL if the CIDR block has been defined
   count = "${var.mpm_rda_cidr_block != null ? 1 : 0}"
 
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${var.env_config.env}-etl-app" }, var.env_config.tags)
+}
 
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    rule_no     = 100
-    action      = "allow"
-    protocol    = "all"
-    cidr_block  = var.mpm_rda_cidr_block
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    rule_no     = 200
-    action      = "allow"
-    protocol    = "all"
-    cidr_block  = var.mpm_rda_cidr_block
-  }
+resource "aws_network_acl_rule" "rda_known" {
+  network_acl_id = aws_network_acl.rda.id
+  rule_number    = 100
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = var.mpm_rda_cidr_block
+  from_port      = 443
+  to_port        = 443
+}
+resource "aws_network_acl_rule" "rda_default" {
+  network_acl_id = aws_network_acl.rda.id
+  rule_number    = 110
+  protocol       = -1
+  rule_action    = "deny"
+  cidr_block     = var.mpm_rda_cidr_block
+  from_port      = 0
+  to_port        = 0
 }
 
 # IAM policy and role to allow the BFD Pipeline read-write access to ETL bucket.
