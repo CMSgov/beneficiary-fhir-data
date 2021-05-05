@@ -8,6 +8,10 @@ export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
 export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
 export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
+export NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
+export NEW_RELIC_METRIC_HOST='{{ data_pipeline_new_relic_metric_host }}'
+export NEW_RELIC_METRIC_PATH='{{ data_pipeline_new_relic_metric_path }}'
+export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
 
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"

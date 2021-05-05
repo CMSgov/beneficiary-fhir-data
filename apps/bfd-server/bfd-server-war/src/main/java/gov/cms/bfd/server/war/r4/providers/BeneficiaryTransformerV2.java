@@ -12,11 +12,10 @@ import gov.cms.bfd.server.war.commons.RaceCategory;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -102,23 +101,21 @@ final class BeneficiaryTransformerV2 {
 
     // Required values not directly mapped
     patient.getMeta().addProfile(ProfileConstants.C4BB_PATIENT_URL);
-
     patient.setId(beneficiary.getBeneficiaryId());
-    Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
 
+    // BENE_ID => patient.identifier
     TransformerUtilsV2.addIdentifierSlice(
         patient,
         TransformerUtilsV2.createCodeableConcept(
-            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE, "MB"),
-        mbiUnhashedCurrent,
-        Optional.of(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE));
+            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+            null,
+            TransformerConstants.PATIENT_MB_ID_DISPLAY,
+            "MB"),
+        Optional.of(beneficiary.getBeneficiaryId()),
+        Optional.of(TransformerConstants.CODING_BBAPI_BENE_ID));
 
-    // Add lastUpdated
-    TransformerUtilsV2.setLastUpdated(patient, beneficiary.getLastUpdated());
-
-    // NOTE - No longer returning any HCIN value(s) in V2
-
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
+    // Unhashed MBI
+    if (beneficiary.getMedicareBeneficiaryId().isPresent()) {
       Period mbiPeriod = new Period();
       if (beneficiary.getMbiEffectiveDate().isPresent()) {
         TransformerUtilsV2.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
@@ -129,33 +126,53 @@ final class BeneficiaryTransformerV2 {
 
       addUnhashedIdentifier(
           patient,
-          mbiUnhashedCurrent.get(),
-          TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+          beneficiary.getMedicareBeneficiaryId().get(),
+          TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
           TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT),
           mbiPeriod);
+    }
 
-      Extension historicalIdentifier =
-          TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
-      List<String> unhashedMbis = new ArrayList<String>();
+    // Add lastUpdated
+    TransformerUtilsV2.setLastUpdated(patient, beneficiary.getLastUpdated());
+
+    // NOTE - No longer returning any HCIN value(s) in V2
+
+    /**
+     * The following logic attempts to distill {@link MedicareBeneficiaryIdHistory} data into only
+     * those records which have an endDate present. This is due to the fact that it includes the
+     * CURRENT MBI record which was handle previously. Also, the {@link
+     * MedicareBeneficiaryIdHistory} table appears to contain spurious records with the only
+     * difference is the generated surrogate key identifier.
+     */
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
+      HashMap<LocalDate, MedicareBeneficiaryIdHistory> mbiHistMap =
+          new HashMap<LocalDate, MedicareBeneficiaryIdHistory>();
+
       for (MedicareBeneficiaryIdHistory mbiHistory :
           beneficiary.getMedicareBeneficiaryIdHistories()) {
-        Optional<String> mbiUnhashedHistoric = mbiHistory.getMedicareBeneficiaryId();
 
-        if (mbiUnhashedHistoric.isPresent()) {
-          unhashedMbis.add(mbiUnhashedHistoric.get());
+        // if rcd does not have an end date, then it's probably still active
+        // and will have been previously provided as the CURRENT rcd.
+        if (mbiHistory.getMbiEndDate().isPresent()) {
+          mbiHistMap.put(mbiHistory.getMbiEndDate().get(), mbiHistory);
         }
+        // would come in ascending order, so any rcd would have a later
+        // update date than prev rcd.
         TransformerUtilsV2.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
       }
 
-      List<String> unhashedMbisNoDupes =
-          unhashedMbis.stream().distinct().collect(Collectors.toList());
-      for (String mbi : unhashedMbisNoDupes) {
-        addUnhashedIdentifier(
-            patient,
-            mbi,
-            TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-            historicalIdentifier,
-            null);
+      if (mbiHistMap.size() > 0) {
+        Extension historicalIdentifier =
+            TransformerUtilsV2.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
+
+        for (MedicareBeneficiaryIdHistory mbi : mbiHistMap.values()) {
+          addUnhashedIdentifier(
+              patient,
+              mbi.getMedicareBeneficiaryId().get(),
+              TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+              historicalIdentifier,
+              null);
+        }
       }
     }
 
@@ -354,7 +371,6 @@ final class BeneficiaryTransformerV2 {
       Period mbiPeriod) {
 
     if (mbiPeriod != null && (mbiPeriod.hasStart() || mbiPeriod.hasEnd())) {
-
       patient
           .addIdentifier()
           .setValue(value)
@@ -362,8 +378,9 @@ final class BeneficiaryTransformerV2 {
           .setPeriod(mbiPeriod)
           .getType()
           .addCoding()
-          .setCode("MB")
-          .setDisplay("Member Number")
+          .setCode("MC")
+          .setSystem(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)
+          .setDisplay("Patient's Medicare number")
           .addExtension(identifierCurrencyExtension);
     } else {
       patient
@@ -372,8 +389,9 @@ final class BeneficiaryTransformerV2 {
           .setSystem(system)
           .getType()
           .addCoding()
-          .setCode("MB")
-          .setDisplay("Member Number")
+          .setCode("MC")
+          .setSystem(TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE)
+          .setDisplay("Patient's Medicare number")
           .addExtension(identifierCurrencyExtension);
     }
   }
