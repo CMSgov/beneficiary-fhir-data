@@ -51,6 +51,10 @@ public final class DatabaseSchemaManager {
     // Trying to prevent career-limiting mistakes.
     flywayBuilder.cleanDisabled(true);
 
+    // The default name for the schema table changed in Flyway 5.
+    // We need to specify the original table name for backwards compatability.
+    flywayBuilder.table("schema_version");
+
     Flyway flyway = flywayBuilder.load();
     return flyway;
   }
