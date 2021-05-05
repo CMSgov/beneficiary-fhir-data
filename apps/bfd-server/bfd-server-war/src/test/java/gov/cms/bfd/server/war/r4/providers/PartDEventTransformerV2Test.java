@@ -5,7 +5,6 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
@@ -872,44 +871,5 @@ public final class PartDEventTransformerV2Test {
         PartDEventTransformerV2.transform(
             new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
-  }
-
-  /**
-   * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
-   * the specified {@link InpatientClaim}.
-   *
-   * @param claim the {@link InpatientClaim} that the {@link ExplanationOfBenefit} was generated
-   *     from
-   * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
-   *     InpatientClaim}
-   * @throws FHIRException (indicates test failure)
-   */
-  static void assertMatches(PartDEvent claim, ExplanationOfBenefit eob) throws FHIRException {
-    // Test to ensure group level fields between all claim types match
-    TransformerTestUtilsV2.assertEobCommonClaimHeaderData(
-        eob,
-        claim.getEventId(),
-        claim.getBeneficiaryId(),
-        ClaimTypeV2.PDE,
-        claim.getClaimGroupId().toPlainString(),
-        MedicareSegment.PART_D,
-        Optional.empty(),
-        Optional.empty(),
-        Optional.empty(),
-        claim.getFinalAction());
-
-    // Test the common field provider NPI number is set as expected in the EOB
-    // TransformerTestUtilsV2.assertProviderNPI(eob, claim.getOrganizationNpi());
-
-    /*
-    if (claim.getPatientStatusCd().isPresent()) {
-      TransformerTestUtilsV2.assertInfoWithCodeEquals(
-          CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-          CcwCodebookVariable.NCH_PTNT_STUS_IND_CD,
-          claim.getPatientStatusCd(),
-          eob);
-    }
-    */
-
   }
 }
