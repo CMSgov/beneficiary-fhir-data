@@ -140,7 +140,7 @@ resource "aws_security_group_rule" "allow_db_primary_access" {
 # allows communication and defining a "upper" rule that defaults to denying
 resource "aws_network_acl" "rda" {
   # only create the NACL if the CIDR block has been defined
-  count = "${var.mpm_rda_cidr_block != null ? 1 : 0}"
+  count = var.mpm_rda_cidr_block != null ? 1 : 0
 
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${var.env_config.env}-etl-app" }, var.env_config.tags)
