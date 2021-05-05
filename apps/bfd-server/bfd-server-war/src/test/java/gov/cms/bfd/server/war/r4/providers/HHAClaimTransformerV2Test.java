@@ -881,28 +881,4 @@ public class HHAClaimTransformerV2Test {
         HHAClaimTransformerV2.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
-
-  /**
-   * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
-   * the specified {@link SNFClaim}.
-   *
-   * @param claim the {@link SNFClaim} that the {@link ExplanationOfBenefit} was generated from
-   * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
-   *     SNFClaim}
-   * @throws FHIRException (indicates test failure)
-   */
-  static void assertMatches(HHAClaim claim, ExplanationOfBenefit eob) throws FHIRException {
-    // Test to ensure group level fields between all claim types match
-    TransformerTestUtilsV2.assertEobCommonClaimHeaderData(
-        eob,
-        claim.getClaimId(),
-        claim.getBeneficiaryId(),
-        ClaimTypeV2.HHA,
-        claim.getClaimGroupId().toPlainString(),
-        MedicareSegment.PART_B,
-        Optional.of(claim.getDateFrom()),
-        Optional.of(claim.getDateThrough()),
-        Optional.of(claim.getPaymentAmount()),
-        claim.getFinalAction());
-  }
 }
