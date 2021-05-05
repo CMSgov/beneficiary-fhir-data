@@ -1521,6 +1521,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
 
     // Verify that tax numbers are present for carrier claims.
     carrierEob = filterToClaimType(searchResults, ClaimType.CARRIER).get(0);
+
     Assert.assertNotNull(
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             carrierClaim.getLines().get(0).getProviderTaxNumber(), carrierEob.getCareTeam()));
