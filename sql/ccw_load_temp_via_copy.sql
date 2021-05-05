@@ -26,5 +26,5 @@ copy public.ccw_load_temp (
 	meta_dual_elgbl_stus_jul_cd, meta_dual_elgbl_stus_aug_cd, meta_dual_elgbl_stus_sept_cd, meta_dual_elgbl_stus_oct_cd, meta_dual_elgbl_stus_nov_cd, meta_dual_elgbl_stus_dec_cd,
 	cst_shr_grp_jan_cd, cst_shr_grp_feb_cd, cst_shr_grp_mar_cd, cst_shr_grp_apr_cd, cst_shr_grp_may_cd, cst_shr_grp_jun_cd,
 	cst_shr_grp_jul_cd, cst_shr_grp_aug_cd, cst_shr_grp_sept_cd, cst_shr_grp_oct_cd, cst_shr_grp_nov_cd, cst_shr_grp_dec_cd)
-FROM '/Users/colinchristophermackenzie/dev/bfd766/sql/test_export.sql.csv'
+FROM '/Users/colinchristophermackenzie/dev/bfd766/sql/test/ccw_load_test_data.csv'
 DELIMITER ',' CSV HEADER;
