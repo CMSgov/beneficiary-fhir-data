@@ -139,7 +139,7 @@ resource "aws_security_group_rule" "allow_db_primary_access" {
 # we need to shut off communication between the two VPCs, one could simply flip the
 # action(s) defined in these rules from "ALLOW" to "DENY"
 resource "aws_network_acl" "rda" {
-  count = var.mpm_rda_cidr_block ? 1 : 0
+  count = "${var.mpm_rda_cidr_block != null ? 1 : 0}"
 
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${var.env_config.env}-etl-app" }, var.env_config.tags)
