@@ -6,7 +6,6 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
@@ -1380,29 +1379,5 @@ public class SNFClaimTransformerV2Test {
     ExplanationOfBenefit eob =
         SNFClaimTransformerV2.transform(new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
-  }
-
-  /**
-   * Verifies that the {@link ExplanationOfBenefit} "looks like" it should, if it were produced from
-   * the specified {@link SNFClaim}.
-   *
-   * @param claim the {@link SNFClaim} that the {@link ExplanationOfBenefit} was generated from
-   * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
-   *     SNFClaim}
-   * @throws FHIRException (indicates test failure)
-   */
-  static void assertMatches(SNFClaim claim, ExplanationOfBenefit eob) throws FHIRException {
-    // Test to ensure group level fields between all claim types match
-    TransformerTestUtilsV2.assertEobCommonClaimHeaderData(
-        eob,
-        claim.getClaimId(),
-        claim.getBeneficiaryId(),
-        ClaimTypeV2.SNF,
-        claim.getClaimGroupId().toPlainString(),
-        MedicareSegment.PART_A,
-        Optional.of(claim.getDateFrom()),
-        Optional.of(claim.getDateThrough()),
-        Optional.of(claim.getPaymentAmount()),
-        claim.getFinalAction());
   }
 }
