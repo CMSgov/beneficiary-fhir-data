@@ -90,7 +90,7 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
       }
     } catch (ProcessingException ex) {
       processedCount += ex.getProcessedCount();
-      error = ex.getCause();
+      error = ex;
     } catch (Exception ex) {
       error = ex;
     }

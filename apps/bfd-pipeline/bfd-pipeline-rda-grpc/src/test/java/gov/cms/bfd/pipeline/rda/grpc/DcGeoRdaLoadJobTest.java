@@ -81,8 +81,11 @@ public class DcGeoRdaLoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getCause().getMessage());
-      MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
+      Assert.assertNotNull(ex.getCause());
+      MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(ProcessingException.class));
+      final Throwable actualCause = ex.getCause().getCause();
+      MatcherAssert.assertThat(actualCause, Matchers.instanceOf(IOException.class));
+      Assert.assertEquals("oops", actualCause.getMessage());
     }
     verify(source).close();
     verify(sink).close();
