@@ -126,9 +126,156 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   @Override
   public boolean test(ExplanationOfBenefit eob) {
     ClaimTypeV2 claimType = TransformerUtilsV2.getClaimType(eob);
-    if (claimType == ClaimTypeV2.PDE) {
-      return testPartDEvent(eob);
-    } else throw new BadCodeMonkeyException("Unsupported claim type: " + claimType);
+
+    switch (TransformerUtilsV2.getClaimType(eob)) {
+      case CARRIER:
+      case DME:
+        return testCarrierOrDmeClaim(eob);
+      case HHA:
+        return testHhaClaim(eob);
+      case HOSPICE:
+        return testHospiceClaim(eob);
+      case INPATIENT:
+        return testInpatientClaim(eob);
+      case OUTPATIENT:
+        return testOutpatientClaim(eob);
+      case SNF:
+        return testSnfClaim(eob);
+      case PDE:
+        return testPartDEvent(eob);
+      default:
+        throw new BadCodeMonkeyException("Unsupported claim type: " + claimType);
+    }
+  }
+
+  /**
+   * @param eob the {@link ClaimType#SNF} {@link ExplanationOfBenefit} to check
+   * @return <code>true</code> if the specified {@link ClaimType#SNF} {@link ExplanationOfBenefit}
+   *     contains any known-SAMHSA-related codes, <code>false</code> if it does not
+   */
+  private boolean testSnfClaim(ExplanationOfBenefit eob) {
+    if (TransformerUtilsV2.getClaimType(eob) != ClaimTypeV2.SNF) {
+      throw new IllegalArgumentException();
+    }
+
+    if (containsSamhsaIcdCode(eob.getDiagnosis())) {
+      return true;
+    }
+
+    if (containsSamhsaIcdProcedueCode(eob.getProcedure())) {
+      return true;
+    }
+
+    for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+        return true;
+      }
+    }
+
+    // No blacklisted codes found: this claim isn't SAMHSA-related.
+    return false;
+  }
+
+  /**
+   * @param eob the {@link ClaimType#OUTPATIENT} {@link ExplanationOfBenefit} to check
+   * @return <code>true</code> if the specified {@link ClaimType#OUTPATIENT} {@link
+   *     ExplanationOfBenefit} contains any known-SAMHSA-related codes, <code>false</code> if it
+   *     does not
+   */
+  private boolean testOutpatientClaim(ExplanationOfBenefit eob) {
+    if (TransformerUtilsV2.getClaimType(eob) != ClaimTypeV2.OUTPATIENT) {
+      throw new IllegalArgumentException();
+    }
+
+    if (containsSamhsaIcdCode(eob.getDiagnosis())) {
+      return true;
+    }
+
+    if (containsSamhsaIcdProcedueCode(eob.getProcedure())) {
+      return true;
+    }
+
+    for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+        return true;
+      }
+    }
+
+    // No blacklisted codes found: this claim isn't SAMHSA-related.
+    return false;
+  }
+
+  /**
+   * @param eob the {@link ClaimType#INPATIENT} {@link ExplanationOfBenefit} to check
+   * @return <code>true</code> if the specified {@link ClaimType#INPATIENT} {@link
+   *     ExplanationOfBenefit} contains any known-SAMHSA-related codes, <code>false</code> if it
+   *     does not
+   */
+  private boolean testInpatientClaim(ExplanationOfBenefit eob) {
+    if (TransformerUtilsV2.getClaimType(eob) != ClaimTypeV2.INPATIENT)
+      throw new IllegalArgumentException();
+
+    if (containsSamhsaIcdCode(eob.getDiagnosis())) {
+      return true;
+    }
+
+    if (containsSamhsaIcdProcedueCode(eob.getProcedure())) {
+      return true;
+    }
+
+    for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+        return true;
+      }
+    }
+
+    // No blacklisted codes found: this claim isn't SAMHSA-related.
+    return false;
+  }
+
+  /**
+   * @param eob the {@link ClaimType#HOSPICE} {@link ExplanationOfBenefit} to check
+   * @return <code>true</code> if the specified {@link ClaimType#HOSPICE} {@link
+   *     ExplanationOfBenefit} contains any known-SAMHSA-related codes, <code>false</code> if it
+   *     does not
+   */
+  private boolean testHospiceClaim(ExplanationOfBenefit eob) {
+    if (TransformerUtilsV2.getClaimType(eob) != ClaimTypeV2.HOSPICE) {
+      throw new IllegalArgumentException();
+    }
+
+    if (containsSamhsaIcdCode(eob.getDiagnosis())) {
+      return true;
+    }
+
+    for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+        return true;
+      }
+    }
+
+    // No blacklisted codes found: this claim isn't SAMHSA-related.
+    return false;
+  }
+
+  /**
+   * @param eob the {@link ClaimType#HHA} {@link ExplanationOfBenefit} to check
+   * @return <code>true</code> if the specified {@link ClaimType#HHA} {@link ExplanationOfBenefit}
+   *     contains any known-SAMHSA-related codes, <code>false</code> if it does not
+   */
+  private boolean testHhaClaim(ExplanationOfBenefit eob) {
+    if (TransformerUtilsV2.getClaimType(eob) != ClaimTypeV2.HHA) {
+      throw new IllegalArgumentException();
+    }
+
+    if (containsSamhsaIcdCode(eob.getDiagnosis())) return true;
+
+    for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) return true;
+    }
+
+    // No blacklisted codes found: this claim isn't SAMHSA-related.
+    return false;
   }
 
   /**
@@ -137,10 +284,37 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
    *     contains any known-SAMHSA-related codes, <code>false</code> if it does not
    */
   private boolean testPartDEvent(ExplanationOfBenefit eob) {
-    if (TransformerUtilsV2.getClaimType(eob) != ClaimTypeV2.PDE)
+    if (TransformerUtilsV2.getClaimType(eob) != ClaimTypeV2.PDE) {
       throw new IllegalArgumentException();
+    }
 
     // There are no SAMHSA fields in PDE claims
+    return false;
+  }
+
+  /**
+   * @param eob the {@link ClaimType#CARRIER} {@link ExplanationOfBenefit} to check
+   * @return <code>true</code> if the specified {@link ClaimType#CARRIER} {@link
+   *     ExplanationOfBenefit} contains any known-SAMHSA-related codes, <code>false</code> if it
+   *     does not
+   */
+  private boolean testCarrierOrDmeClaim(ExplanationOfBenefit eob) {
+    if (!(TransformerUtilsV2.getClaimType(eob) == ClaimTypeV2.CARRIER
+        || TransformerUtilsV2.getClaimType(eob) == ClaimTypeV2.DME)) {
+      throw new IllegalArgumentException();
+    }
+
+    if (containsSamhsaIcdCode(eob.getDiagnosis())) {
+      return true;
+    }
+
+    for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+        return true;
+      }
+    }
+
+    // No blacklisted codes found: this claim isn't SAMHSA-related.
     return false;
   }
 
