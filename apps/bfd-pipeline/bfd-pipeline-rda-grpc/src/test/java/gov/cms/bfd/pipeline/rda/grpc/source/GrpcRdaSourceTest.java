@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -81,7 +82,8 @@ public class GrpcRdaSourceTest {
       fail("source should have thrown exception");
     } catch (ProcessingException ex) {
       assertEquals(3, ex.getProcessedCount());
-      assertSame(error, ex.getCause());
+      assertNotNull(ex.getCause());
+      assertSame(error, ex.getCause().getCause());
     }
     assertMeterReading(1, GrpcRdaSource.CALLS_METER);
     assertMeterReading(4, GrpcRdaSource.RECORDS_RECEIVED_METER);

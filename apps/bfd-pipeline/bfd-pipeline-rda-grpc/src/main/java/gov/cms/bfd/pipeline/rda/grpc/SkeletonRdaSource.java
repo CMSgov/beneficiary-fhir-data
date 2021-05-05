@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Skeleton RDASource implementation that just updates a Meter to count the number of times it has
+ * Skeleton RdaSource implementation that just updates a Meter to count the number of times it has
  * been called. This implementation satisfies the requirements of DCGEO-18.
  */
 public class SkeletonRdaSource<T> implements RdaSource<T> {

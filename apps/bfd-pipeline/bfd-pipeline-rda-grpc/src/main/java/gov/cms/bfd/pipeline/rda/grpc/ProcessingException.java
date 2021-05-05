@@ -44,7 +44,8 @@ public class ProcessingException extends Exception {
       if (error instanceof InterruptedException) {
         return true;
       }
-      error = error.getCause();
+      Throwable cause = error.getCause();
+      error = (cause == error) ? null : cause;
     }
     return false;
   }

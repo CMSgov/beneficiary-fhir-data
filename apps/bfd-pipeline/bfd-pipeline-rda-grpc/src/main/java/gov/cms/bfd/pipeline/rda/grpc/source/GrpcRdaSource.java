@@ -20,9 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * General RDASource implementation that delegates actual service call and result mapping to another
- * class. This current implementation is a placeholder to demonstrate the structure that will be
- * used as the RDA API develops to call their RPC's to download Part A and Part B claims.
+ * General RdaSource implementation that delegates actual service call and result mapping to other
+ * objects. This class has no dependency on a particular RPC or data type. It does maintain the
+ * ManagedChannel used to communicate with the gRPC service. The constructor creates the channel and
+ * the close() method closes the channel.
+ *
+ * <p>This object makes the RPC call and processes the stream. Stream processing consists of
+ * batching received objects and passing them to the RdaSink object for storage. Basic metrics are
+ * tracked at this level.
  *
  * @param <TResponse> type of objects returned by the gRPC service
  */
@@ -51,6 +56,14 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   private final Meter batchesMeter;
   private ManagedChannel channel;
 
+  /**
+   * The primary constructor for this class. Constructs a GrpcRdaSource and opens a channel to the
+   * gRPC service.
+   *
+   * @param config the configuration values used to establish the channel
+   * @param caller the GrpcStreamCaller used to invoke a particular RPC
+   * @param appMetrics the MetricRegistry used to track metrics
+   */
   public GrpcRdaSource(
       Config config, GrpcStreamCaller<TResponse> caller, MetricRegistry appMetrics) {
     this(
@@ -61,6 +74,15 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
         appMetrics);
   }
 
+  /**
+   * This constructor accepts a fully constructed channel instead of a configuration object. This is
+   * used internally by the primary constructor but is also used by unit tests to allow a mock
+   * channel to be provided.
+   *
+   * @param channel channel used to make RPC calls
+   * @param caller the GrpcStreamCaller used to invoke a particular RPC
+   * @param appMetrics the MetricRegistry used to track metrics
+   */
   @VisibleForTesting
   GrpcRdaSource(
       ManagedChannel channel, GrpcStreamCaller<TResponse> caller, MetricRegistry appMetrics) {
@@ -73,13 +95,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   }
 
   /**
-   * Calls the service through a specific implementation of GrpcStreamCaller provided to our
+   * Calls the service through the specific implementation of GrpcStreamCaller provided to our
    * constructor. Cancels the response stream if reading from the stream is interrupted.
    *
    * @param maxPerBatch maximum number of objects to collect into a batch before calling the sink
    * @param sink to receive batches of objects
    * @return the number of objects that were successfully processed
-   * @throws ProcessingException wrapper around any Exception thrown by the service
+   * @throws ProcessingException wrapper around any Exception thrown by the service or sink
    */
   @Override
   public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TResponse> sink)
@@ -111,7 +133,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       }
     } catch (ProcessingException ex) {
       processed += ex.getProcessedCount();
-      error = ex.getCause();
+      error = ex;
     } catch (Exception ex) {
       error = ex;
     }
@@ -129,6 +151,11 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     return processed;
   }
 
+  /**
+   * Closes the channel used to communicate with the gRPC service.
+   *
+   * @throws Exception if the channel could not be closed
+   */
   @Override
   public void close() throws Exception {
     if (channel != null) {

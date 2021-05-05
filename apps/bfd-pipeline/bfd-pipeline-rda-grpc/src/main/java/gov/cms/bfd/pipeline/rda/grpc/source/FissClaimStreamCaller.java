@@ -10,7 +10,11 @@ import io.grpc.ManagedChannel;
 import io.grpc.stub.ClientCalls;
 import java.util.Iterator;
 
-/** GrpcStreamCaller implementation that calls the RDA FissClaim service. */
+/**
+ * GrpcStreamCaller implementation that calls the RDA FissClaim service. At this stage in RDA API
+ * development there is no way to resume a stream from a given point in time so every time the
+ * service is called it sends all of its values.
+ */
 public class FissClaimStreamCaller implements GrpcStreamCaller<FissClaim> {
   @Override
   public GrpcResponseStream<FissClaim> callService(ManagedChannel channel) throws Exception {
