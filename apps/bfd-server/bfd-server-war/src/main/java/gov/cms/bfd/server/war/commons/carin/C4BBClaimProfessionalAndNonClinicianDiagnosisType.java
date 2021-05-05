@@ -34,7 +34,7 @@ public enum C4BBClaimProfessionalAndNonClinicianDiagnosisType {
       case PRINCIPAL:
         return "principal";
       case SECONDARY:
-        return "secondary";
+        return "Secondary";
       default:
         return "?";
     }
