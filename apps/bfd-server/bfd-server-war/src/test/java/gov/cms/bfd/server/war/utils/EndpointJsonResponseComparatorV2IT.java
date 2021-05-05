@@ -24,12 +24,10 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import gov.cms.bfd.server.war.stu3.providers.ClaimType;
-import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.ClaimTypeV2;
+import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -52,11 +50,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.hibernate.internal.SessionFactoryRegistry;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.Coverage;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -71,57 +69,67 @@ import org.junit.runners.Parameterized.Parameters;
  * have >= 1 EOB of every type.
  */
 @RunWith(Parameterized.class)
-public final class EndpointJsonResponseComparatorIT {
+public final class EndpointJsonResponseComparatorV2IT {
 
   @Parameters(name = "endpointId = {0}")
   public static Object[][] data() {
     return new Object[][] {
-      {"metadata", (Supplier<String>) EndpointJsonResponseComparatorIT::metadata},
-      {"patientRead", (Supplier<String>) EndpointJsonResponseComparatorIT::patientRead},
+      {"metadata", (Supplier<String>) EndpointJsonResponseComparatorV2IT::metadata},
+      {"patientRead", (Supplier<String>) EndpointJsonResponseComparatorV2IT::patientRead},
       {
         "patientReadWithIncludeIdentifiers",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::patientReadWithIncludeIdentifiers
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::patientReadWithIncludeIdentifiers
       },
-      {"patientSearchById", (Supplier<String>) EndpointJsonResponseComparatorIT::patientSearchById},
+      {
+        "patientSearchById",
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::patientSearchById
+      },
       {
         "patientSearchByIdWithIncludeIdentifiers",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::patientSearchByIdWithIncludeIdentifiers
+        (Supplier<String>)
+            EndpointJsonResponseComparatorV2IT::patientSearchByIdWithIncludeIdentifiers
       },
       {
         "patientByIdentifier",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifier
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::patientByIdentifier
       },
       {
         "patientByIdentifierWithIncludeIdentifiers",
         (Supplier<String>)
-            EndpointJsonResponseComparatorIT::patientByIdentifierWithIncludeIdentifiers
+            EndpointJsonResponseComparatorV2IT::patientByIdentifierWithIncludeIdentifiers
       },
-      {"coverageRead", (Supplier<String>) EndpointJsonResponseComparatorIT::coverageRead},
+      {"coverageRead", (Supplier<String>) EndpointJsonResponseComparatorV2IT::coverageRead},
       {
         "coverageSearchByPatientId",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::coverageSearchByPatientId
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::coverageSearchByPatientId
       },
-      {"eobByPatientIdAll", (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdAll},
+      {
+        "eobByPatientIdAll",
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobByPatientIdAll
+      },
       {
         "eobByPatientIdPaged",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdPaged
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobByPatientIdPaged
       },
-      {"eobReadCarrier", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrier},
+      {"eobReadCarrier", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadCarrier},
       {
         "eobReadCarrierWithTaxNumbers",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadCarrierWithTaxNumbers
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadCarrierWithTaxNumbers
       },
-      {"eobReadDme", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDme},
+      {"eobReadDme", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadDme},
       {
         "eobReadDmeWithTaxNumbers",
-        (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadDmeWithTaxNumbers
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadDmeWithTaxNumbers
       },
-      {"eobReadHha", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHha},
-      {"eobReadHospice", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadHospice},
-      {"eobReadInpatient", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadInpatient},
-      {"eobReadOutpatient", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadOutpatient},
-      {"eobReadPde", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadPde},
-      {"eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorIT::eobReadSnf}
+      {"eobReadHha", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadHha},
+      {"eobReadHospice", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadHospice},
+      {"eobReadInpatient", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadInpatient},
+      {
+        "eobReadOutpatient",
+        (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadOutpatient
+      },
+      {"eobReadPde", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadPde},
+      {"eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadSnf}
     };
   }
 
@@ -139,7 +147,7 @@ public final class EndpointJsonResponseComparatorIT {
    *     directory
    * @param endpointOperation the operation to be tested
    */
-  public EndpointJsonResponseComparatorIT(String endpointId, Supplier<String> endpointOperation) {
+  public EndpointJsonResponseComparatorV2IT(String endpointId, Supplier<String> endpointOperation) {
     this.endpointId = endpointId;
     this.endpointOperation = endpointOperation;
   }
@@ -191,6 +199,7 @@ public final class EndpointJsonResponseComparatorIT {
     replaceIgnoredFieldsWithFillerText(
         jsonNode, "url", Optional.of(Pattern.compile("(https://localhost:)([0-9]{4})(.*)")));
     replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
+    replaceIgnoredFieldsWithFillerText(jsonNode, "created", Optional.empty());
 
     if (endpointId == "metadata")
       replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
@@ -382,7 +391,7 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
-   *     PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
+   *     R4PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
    */
   public static String patientRead() {
     List<Object> loadedRecords =
@@ -403,7 +412,7 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
-   *     PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation when {@link
+   *     R4PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation when {@link
    *     ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to "hicn,mbi"
    */
   public static String patientReadWithIncludeIdentifiers() {
@@ -420,9 +429,9 @@ public final class EndpointJsonResponseComparatorIT {
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
     extraParamsInterceptor.setHeaders(
         RequestHeaders.getHeaderWrapper(
-            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "hicn,mbi",
-            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
             "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -433,7 +442,7 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
-   *     PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)} operation
+   *     R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)} operation
    */
   public static String patientSearchById() {
     List<Object> loadedRecords =
@@ -459,7 +468,7 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
-   *     PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)} operation
+   *     R4PatientResourceProvider#searchByLogicalId(ca.uhn.fhir.rest.param.TokenParam)} operation
    *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to
    *     "hicn, mbi"
    */
@@ -477,9 +486,9 @@ public final class EndpointJsonResponseComparatorIT {
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
     extraParamsInterceptor.setHeaders(
         RequestHeaders.getHeaderWrapper(
-            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "hicn,mbi",
-            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
             "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -495,7 +504,7 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
-   *     PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
+   *     R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
    */
   public static String patientByIdentifier() {
     List<Object> loadedRecords =
@@ -525,7 +534,7 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
-   *     PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
+   *     R4PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
    *     when {@link ExtraParamsInterceptor#setIncludeIdentifiers(IncludeIdentifiersValues)} set to
    *     "hicn,mbi"
    */
@@ -543,9 +552,9 @@ public final class EndpointJsonResponseComparatorIT {
     ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
     extraParamsInterceptor.setHeaders(
         RequestHeaders.getHeaderWrapper(
-            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
             "hicn,mbi",
-            PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS,
             "true"));
     fhirClient.registerInterceptor(extraParamsInterceptor);
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -648,7 +657,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(Coverage.class)
-        .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .withId(TransformerUtilsV2.buildCoverageId(MedicareSegment.PART_A, beneficiary))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -676,7 +685,7 @@ public final class EndpointJsonResponseComparatorIT {
         .forResource(Coverage.class)
         .where(
             Coverage.BENEFICIARY.hasId(
-                TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+                TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
         .returnBundle(Bundle.class)
         .execute();
     return jsonInterceptor.getResponse();
@@ -703,7 +712,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .search()
         .forResource(ExplanationOfBenefit.class)
-        .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+        .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
         .returnBundle(Bundle.class)
         .execute();
     return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/entry/3/resource/diagnosis/7/type");
@@ -730,7 +739,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .search()
         .forResource(ExplanationOfBenefit.class)
-        .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtils.buildPatientId(beneficiary)))
+        .where(ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
         .count(8)
         .returnBundle(Bundle.class)
         .execute();
@@ -766,7 +775,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, carrClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -792,7 +801,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.CARRIER, carrClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, carrClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -826,7 +835,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, dmeClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -852,7 +861,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.DME, dmeClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, dmeClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -878,7 +887,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.HHA, hhaClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HHA, hhaClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -904,7 +913,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, hosClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.HOSPICE, hosClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -930,7 +939,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.INPATIENT, inpClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.INPATIENT, inpClaim.getClaimId()))
         .execute();
     return sortDiagnosisTypes(jsonInterceptor.getResponse(), "/diagnosis/7/type");
   }
@@ -956,7 +965,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.OUTPATIENT, outClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.OUTPATIENT, outClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -982,7 +991,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.PDE, pdeClaim.getEventId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.PDE, pdeClaim.getEventId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1008,7 +1017,7 @@ public final class EndpointJsonResponseComparatorIT {
     fhirClient
         .read()
         .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.SNF, snfClaim.getClaimId()))
+        .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.SNF, snfClaim.getClaimId()))
         .execute();
     return jsonInterceptor.getResponse();
   }
@@ -1034,6 +1043,7 @@ public final class EndpointJsonResponseComparatorIT {
       throw new UncheckedIOException(
           "Unable to deserialize the following JSON content as tree: " + approvedJson, e);
     }
+
     JsonNode afterNode = null;
     try {
       afterNode = mapper.readTree(newJson);
@@ -1069,6 +1079,7 @@ public final class EndpointJsonResponseComparatorIT {
     StringBuilder pattern = new StringBuilder();
     pattern.append("\"/id\"");
     pattern.append("|\"/date\"");
+    pattern.append("|\"/created\"");
     pattern.append("|\"/link/[0-9]/url\"");
     pattern.append("|\"/implementation/url\"");
     pattern.append("|\"/entry/[0-9]/fullUrl\"");
@@ -1076,6 +1087,7 @@ public final class EndpointJsonResponseComparatorIT {
     pattern.append("|\"/meta/lastUpdated\"");
     pattern.append("|\"/entry/[0-9]/resource/meta/lastUpdated\"");
     pattern.append("|\"/entry/[0-9]/resource/meta\"");
+    pattern.append("|\"/entry/[0-9]/resource/created\"");
     pattern.append("|\"/procedure/[0-9]/date\"");
     pattern.append("|\"/entry/[0-9]/resource/procedure/[0-9]/date\"");
     pattern.append("|\"/software/version\"");
@@ -1085,7 +1097,7 @@ public final class EndpointJsonResponseComparatorIT {
 
   /** @return a new {@link IGenericClient} fhirClient after setting the encoding to JSON */
   private static IGenericClient createFhirClientAndSetEncoding() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
     fhirClient.setEncoding(EncodingEnum.JSON);
 
     return fhirClient;
@@ -1105,12 +1117,9 @@ public final class EndpointJsonResponseComparatorIT {
   /** @return the path to the approved endpoint response directory */
   private static Path getApprovedResponseDir() {
     Path approvedResponseDir =
-        Paths.get("..", "src", "test", "resources", "endpoint-responses", "v1");
-
-    if (!Files.isDirectory(approvedResponseDir)) {
-      approvedResponseDir = Paths.get("src", "test", "resources", "endpoint-responses", "v1");
-    }
-
+        Paths.get("..", "src", "test", "resources", "endpoint-responses", "v2");
+    if (!Files.isDirectory(approvedResponseDir))
+      approvedResponseDir = Paths.get("src", "test", "resources", "endpoint-responses", "v2");
     if (!Files.isDirectory(approvedResponseDir)) {
       throw new IllegalStateException();
     }
@@ -1121,17 +1130,15 @@ public final class EndpointJsonResponseComparatorIT {
   /** @return the path to the target endpoint response directory */
   private static Path getTargetResponseDir() {
     Path targetDir = Paths.get("..", "target");
-
     if (!Files.isDirectory(targetDir)) {
       targetDir = Paths.get("target");
     }
-
     if (!Files.isDirectory(targetDir)) {
       throw new IllegalStateException();
     }
 
-    new File(Paths.get(targetDir.toString(), "endpoint-responses", "v1").toString()).mkdirs();
-    Path targetResponseDir = Paths.get(targetDir.toString(), "endpoint-responses", "v1");
+    new File(Paths.get(targetDir.toString(), "endpoint-responses", "v2").toString()).mkdirs();
+    Path targetResponseDir = Paths.get(targetDir.toString(), "endpoint-responses", "v2");
 
     return targetResponseDir;
   }

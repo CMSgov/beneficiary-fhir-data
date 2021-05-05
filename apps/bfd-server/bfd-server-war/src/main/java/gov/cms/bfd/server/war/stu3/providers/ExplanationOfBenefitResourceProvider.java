@@ -22,7 +22,6 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
-import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
@@ -73,6 +72,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
   private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+
+  public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -564,8 +565,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
      * Note: headers can be multi-valued and so calling the enticing-looking `getHeader(...)` method
      * is often a bad idea, as it will often do the wrong thing.
      */
-    List<String> headerValues =
-        requestDetails.getHeaders(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS);
+    List<String> headerValues = requestDetails.getHeaders(HEADER_NAME_INCLUDE_TAX_NUMBERS);
 
     if (headerValues == null || headerValues.isEmpty()) {
       return false;
@@ -579,9 +579,6 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     }
 
     throw new InvalidRequestException(
-        "Unsupported "
-            + CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS
-            + " header value: "
-            + headerValues);
+        "Unsupported " + HEADER_NAME_INCLUDE_TAX_NUMBERS + " header value: " + headerValues);
   }
 }

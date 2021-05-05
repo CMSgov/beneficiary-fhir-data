@@ -7,6 +7,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
@@ -327,7 +328,8 @@ public class CarrierClaimTransformerV2 {
       DiagnosisUtilV2.addDiagnosisLink(
           eob,
           item,
-          Diagnosis.from(line.getDiagnosisCode(), line.getDiagnosisCodeVersion()),
+          Diagnosis.from(
+              line.getDiagnosisCode(), line.getDiagnosisCodeVersion(), DiagnosisLabel.OTHER),
           ClaimTypeV2.CARRIER);
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
