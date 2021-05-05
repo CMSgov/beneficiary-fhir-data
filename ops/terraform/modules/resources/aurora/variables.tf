@@ -17,3 +17,11 @@ variable "stateful_config" {
   description = "Aurora networking and security config passed from stateful"
   type        = object({ azs = list(string), vpc_sg_ids = list(string), subnet_ids = list(string), kms_key_id = string })
 }
+
+variable "module_features" {
+  description = "Module specific feature toggles"
+  type        = map(bool)
+  default = {
+    beta_reader = false
+  }
+}

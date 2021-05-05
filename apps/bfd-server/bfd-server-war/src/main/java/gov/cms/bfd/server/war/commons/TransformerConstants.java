@@ -241,7 +241,7 @@ public final class TransformerConstants {
    * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
    * identifier is a TAX.
    */
-  public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Federal tax number";
+  public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Tax ID number";
 
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Measure (UCUM)", a
@@ -309,6 +309,12 @@ public final class TransformerConstants {
       "http://bluebutton.cms.hhs.gov/identifier#hicnHash";
 
   /**
+   * The {@link Identifier#getSystem()} used in {@link Patient} resources to store the beneficiaryId
+   * (BENE_ID)
+   */
+  public static final String CODING_BBAPI_BENE_ID = BASE_URL_BBAPI_RESOURCES + "/variables/bene_id";
+
+  /**
    * Fallback value to use when a record does not have a lastUpdated value. These records where
    * loaded before the lastUpdated feature was in place.
    */
@@ -342,6 +348,13 @@ public final class TransformerConstants {
    * C4BB Identifier Type</a>
    */
   public static final String PATIENT_MC_ID_DISPLAY = "Patient's Medicare number";
+
+  /**
+   * CARIN Code System Display Value for Member Identifier Type <a
+   * href="http://build.fhir.org/ig/HL7/carin-bb/CodeSystem-C4BBIdentifierType.html">CodeSystem:
+   * C4BB Identifier Type</a>
+   */
+  public static final String PATIENT_MB_ID_DISPLAY = "Member Number";
 
   /**
    * US Core Value Set URL for Race Category unknown <a href=
