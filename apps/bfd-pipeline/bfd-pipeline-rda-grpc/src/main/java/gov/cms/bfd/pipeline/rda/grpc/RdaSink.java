@@ -7,6 +7,9 @@ import java.util.Collections;
  * implemented. All implementations are AutoCloseable since they will generally hold a database
  * connection.
  *
+ * <p>All implementations MUST be idempotent. If the same object is written multiple times the sink
+ * must ensure that it does not create duplicates or overwrite newer information.
+ *
  * @param <T> the type of objects processed
  */
 public interface RdaSink<T> extends AutoCloseable {

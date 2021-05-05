@@ -9,10 +9,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.pipeline.rda.grpc.DcGeoRdaLoadJob.Config;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -26,6 +32,7 @@ public class DcGeoRdaLoadJobTest {
   private RdaSink<Integer> sink;
   private DcGeoRdaLoadJob job;
   private MetricRegistry appMetrics;
+  private Config config;
 
   @SuppressWarnings("unchecked")
   @Before
@@ -34,7 +41,7 @@ public class DcGeoRdaLoadJobTest {
     sinkFactory = mock(Callable.class);
     source = mock(RdaSource.class);
     sink = mock(RdaSink.class);
-    DcGeoRdaLoadJob.Config config = new DcGeoRdaLoadJob.Config(Duration.ofSeconds(10), 3);
+    config = new Config(Duration.ofSeconds(10), 3);
     appMetrics = new MetricRegistry();
     job = new DcGeoRdaLoadJob(config, sourceFactory, sinkFactory, appMetrics);
   }
@@ -125,5 +132,51 @@ public class DcGeoRdaLoadJobTest {
     verify(sink).close();
     Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
     Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.SUCCESSES_METER_NAME).getCount());
+  }
+
+  @Test
+  public void enforcesOneCallAtATime() throws Exception {
+    // let the source indicate that it did some work to set the first call apart from the second one
+    doReturn(100).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
+
+    // Used to allow the second call to happen after the first call has acquired its semaphore
+    final CountDownLatch waitForStartup = new CountDownLatch(1);
+
+    // Used to allow the first call to wait until the second call has completed before it proceeds.
+    final CountDownLatch waitForCompletion = new CountDownLatch(1);
+
+    // A test job that waits for the second job to complete before doing any work itself.
+    job =
+        new DcGeoRdaLoadJob<>(
+            config,
+            () -> {
+              waitForStartup.countDown();
+              waitForCompletion.await();
+              return source;
+            },
+            () -> {
+              waitForCompletion.await();
+              return sink;
+            },
+            appMetrics);
+    final ExecutorService pool = Executors.newCachedThreadPool();
+    try {
+      // this call will grab the semaphore and hold it until we count down the waitForCompletion
+      Future<PipelineJobOutcome> firstCall = pool.submit(() -> job.call());
+
+      // wait for the first call to have grabbed the semaphore before we make the second call
+      waitForStartup.await();
+
+      // this job should exit immediately without doing any work
+      Future<PipelineJobOutcome> secondCall = pool.submit(() -> job.call());
+      Assert.assertEquals(PipelineJobOutcome.NOTHING_TO_DO, secondCall.get());
+
+      // now allow the first call to proceed and it should reflect that it has done some work
+      waitForCompletion.countDown();
+      Assert.assertEquals(PipelineJobOutcome.WORK_DONE, firstCall.get());
+    } finally {
+      pool.shutdown();
+      pool.awaitTermination(5, TimeUnit.SECONDS);
+    }
   }
 }

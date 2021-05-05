@@ -11,6 +11,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.time.Duration;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,10 @@ import org.slf4j.LoggerFactory;
  * RDASource object handles communication with the source of incoming data. The RDASink object
  * handles communication with the ultimate storage system. The purpose of this class is to handle
  * general PipelineJob semantics that are common to any source or sink.
+ *
+ * <p>Since the streaming service can run for extended periods of time this class is designed to be
+ * reentrant. If multiple threads invoke the call() method at the same time only the first thread
+ * will do any work. The other threads will all immediately return that they have no work to do.
  */
 public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
   private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRdaLoadJob.class);
@@ -42,6 +47,9 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
   private final Meter failuresMeter;
   private final Meter successesMeter;
   private final Meter processedMeter;
+  // This is used to enforce that this job can only be executed by a single thread at any given
+  // time. If multiple threads call the job at the same time only the first will do any work.
+  private final Semaphore runningSemaphore;
 
   public DcGeoRdaLoadJob(
       Config config,
@@ -55,6 +63,7 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
     failuresMeter = appMetrics.meter(FAILURES_METER_NAME);
     successesMeter = appMetrics.meter(SUCCESSES_METER_NAME);
     processedMeter = appMetrics.meter(PROCESSED_METER_NAME);
+    runningSemaphore = new Semaphore(1);
   }
 
   /**
@@ -79,31 +88,41 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
 
   @Override
   public PipelineJobOutcome call() throws Exception {
-    final long startMillis = System.currentTimeMillis();
-    int processedCount = 0;
-    Exception error = null;
+    // We only allow one outstanding call at a time.  If this job is already running any other
+    // call to the same job exits immediately with NOTHING_TO_DO.
+    if (!runningSemaphore.tryAcquire()) {
+      LOGGER.warn("job is already running");
+      return NOTHING_TO_DO;
+    }
     try {
-      callsMeter.mark();
-      try (RdaSource<TResponse> source = sourceFactory.call();
-          RdaSink<TResponse> sink = sinkFactory.call()) {
-        processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
+      final long startMillis = System.currentTimeMillis();
+      int processedCount = 0;
+      Exception error = null;
+      try {
+        callsMeter.mark();
+        try (RdaSource<TResponse> source = sourceFactory.call();
+            RdaSink<TResponse> sink = sinkFactory.call()) {
+          processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
+        }
+      } catch (ProcessingException ex) {
+        processedCount += ex.getProcessedCount();
+        error = ex;
+      } catch (Exception ex) {
+        error = ex;
       }
-    } catch (ProcessingException ex) {
-      processedCount += ex.getProcessedCount();
-      error = ex;
-    } catch (Exception ex) {
-      error = ex;
+      processedMeter.mark(processedCount);
+      final long stopMillis = System.currentTimeMillis();
+      LOGGER.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
+      if (error != null) {
+        failuresMeter.mark();
+        LOGGER.error("processing aborted by an exception: message={}", error.getMessage(), error);
+        throw new ProcessingException(error, processedCount);
+      }
+      successesMeter.mark();
+      return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
+    } finally {
+      runningSemaphore.release();
     }
-    processedMeter.mark(processedCount);
-    final long stopMillis = System.currentTimeMillis();
-    LOGGER.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
-    if (error != null) {
-      failuresMeter.mark();
-      LOGGER.error("processing aborted by an exception: message={}", error.getMessage(), error);
-      throw new ProcessingException(error, processedCount);
-    }
-    successesMeter.mark();
-    return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
   }
 
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
