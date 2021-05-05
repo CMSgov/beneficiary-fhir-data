@@ -19,7 +19,7 @@ CREATE TABLE public.beneficiary_monthly_audit
     "partDLowIncomeCostShareGroupCode"     character varying(2),
     "operation"                            char(1)   NOT NULL,
     "updateTs"                             timestamp NOT NULL,
-    CONSTRAINT "BeneficiaryMonthly_pkey"   PRIMARY KEY ("parentBeneficiary", "yearMonth")
+    CONSTRAINT "BeneficiaryMonthlyAudit_pkey"   PRIMARY KEY ("parentBeneficiary", "yearMonth")
 )
 WITH (
     OIDS = FALSE
