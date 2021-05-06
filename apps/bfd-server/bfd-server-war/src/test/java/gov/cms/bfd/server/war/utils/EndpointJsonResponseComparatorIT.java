@@ -1104,10 +1104,16 @@ public final class EndpointJsonResponseComparatorIT {
 
   /** @return the path to the approved endpoint response directory */
   private static Path getApprovedResponseDir() {
-    Path approvedResponseDir = Paths.get("..", "src", "test", "resources", "endpoint-responses");
-    if (!Files.isDirectory(approvedResponseDir))
-      approvedResponseDir = Paths.get("src", "test", "resources", "endpoint-responses");
-    if (!Files.isDirectory(approvedResponseDir)) throw new IllegalStateException();
+    Path approvedResponseDir =
+        Paths.get("..", "src", "test", "resources", "endpoint-responses", "v1");
+
+    if (!Files.isDirectory(approvedResponseDir)) {
+      approvedResponseDir = Paths.get("src", "test", "resources", "endpoint-responses", "v1");
+    }
+
+    if (!Files.isDirectory(approvedResponseDir)) {
+      throw new IllegalStateException();
+    }
 
     return approvedResponseDir;
   }
@@ -1115,11 +1121,17 @@ public final class EndpointJsonResponseComparatorIT {
   /** @return the path to the target endpoint response directory */
   private static Path getTargetResponseDir() {
     Path targetDir = Paths.get("..", "target");
-    if (!Files.isDirectory(targetDir)) targetDir = Paths.get("target");
-    if (!Files.isDirectory(targetDir)) throw new IllegalStateException();
 
-    new File(Paths.get(targetDir.toString(), "endpoint-responses").toString()).mkdirs();
-    Path targetResponseDir = Paths.get(targetDir.toString(), "endpoint-responses");
+    if (!Files.isDirectory(targetDir)) {
+      targetDir = Paths.get("target");
+    }
+
+    if (!Files.isDirectory(targetDir)) {
+      throw new IllegalStateException();
+    }
+
+    new File(Paths.get(targetDir.toString(), "endpoint-responses", "v1").toString()).mkdirs();
+    Path targetResponseDir = Paths.get(targetDir.toString(), "endpoint-responses", "v1");
 
     return targetResponseDir;
   }
