@@ -54,7 +54,7 @@ public class GrpcResponseStream<TResponse> {
 
   /**
    * Return the next available object from the stream. Callers must receive a true result from
-   * hasNext() before calling this method. May pass through any runtime exceptinos thrown by the
+   * hasNext() before calling this method. May pass through any runtime exceptions thrown by the
    * stream.
    *
    * @return the next available object from the stream
