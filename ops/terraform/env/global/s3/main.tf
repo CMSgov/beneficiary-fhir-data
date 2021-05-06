@@ -32,7 +32,7 @@ resource "aws_s3_bucket" "state_bucket" {
             "Resource": "arn:aws:s3:::bfd-tf-state/*",
             "Condition": {
                 "ArnEquals": {
-                    "aws:userid": "arn:aws:iam::755619740999:user/Jenkins"
+                    "aws:userid": "arn:aws:iam::${var.bcda_acct_num}:user/Jenkins"
                 }
                 "StringNotEquals": {
                     "s3:x-amz-server-side-encryption": "aws:kms"
@@ -62,7 +62,7 @@ EOF
 }
 
 /* Bucket for Packages, RPM, WAR, JAR, etc. */
-
+# TODO: use vars
 resource "aws_s3_bucket" "state_bucket" {
   bucket = "bfd-packages"
   acl    = "private"
@@ -87,7 +87,7 @@ resource "aws_s3_bucket" "state_bucket" {
             "Resource": "arn:aws:s3:::bfd-packages/*",
             "Condition": {
                 "ArnEquals": {
-                    "aws:userid": "arn:aws:iam::755619740999:user/Jenkins"
+                    "aws:userid": "arn:aws:iam::${var.bcda_acct_num}:user/Jenkins"
                 }
             }
         }
