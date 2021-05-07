@@ -51,3 +51,4 @@ variable "partner_subnets" {
 variable "module_features" {
   type = map(bool)
 }
+
