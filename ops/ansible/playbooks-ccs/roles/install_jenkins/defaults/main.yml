@@ -104,4 +104,4 @@ jenkins_admin_username: test
 jenkins_admin_password: supersecret
 
 # The version of Terraform to install and use.
-tf_version: '0.12.8'
+tf_version: '0.12.31'
