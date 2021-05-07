@@ -4,17 +4,11 @@ locals {
   }
 
   endpoints = {
-    "all": "*",
-    "metadata": "*/metadata*",
-    "coverageAll": "*/Coverage*",
-    "coverageByPatientId": "*/Coverage*beneficiary=*",
-    "patientAll": "*/Patient*",
-    "patientById": "*/Patient*_id=*",
-    "patientByIdentifier": "*/Patient*identifier=*hicnHash*",
-    "eobAll": "*/ExplanationOfBenefit*",
-    "eobByPatientId": "*/ExplanationOfBenefit*patient=*",
-    "eobByPaged": "*/ExplanationOfBenefit*_count=*",
-    "eobByType":  "*/ExplanationOfBenefit*type=*",
+    "all" : "*",
+    "metadata" : "*/metadata*",
+    "coverageAll" : "*/Coverage*",
+    "patientAll" : "*/Patient*",
+    "eobAll" : "*/ExplanationOfBenefit*",
   }
 }
 

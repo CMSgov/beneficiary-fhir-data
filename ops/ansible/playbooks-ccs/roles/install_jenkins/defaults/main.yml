@@ -63,6 +63,8 @@ jenkins_plugins_recommended:
   - ldap
   - email-ext
   - mailer
+  - parameterized-scheduler
+  - swarm
 
 
 # The additional plugins that users of this role would like to be installed
@@ -100,3 +102,6 @@ jenkins_packages_repo_yum_disable_proxy: true
 
 jenkins_admin_username: test
 jenkins_admin_password: supersecret
+
+# The version of Terraform to install and use.
+tf_version: '0.12.31'

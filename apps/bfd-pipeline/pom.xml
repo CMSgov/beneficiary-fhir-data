@@ -16,8 +16,9 @@
 	</description>
 
 	<modules>
-		<module>bfd-pipeline-rif-extract</module>
-		<module>bfd-pipeline-rif-load</module>
+		<module>bfd-pipeline-ccw-rif</module>
+		<module>bfd-pipeline-rda-grpc</module>
+		<module>bfd-pipeline-shared-utils</module>
 		<module>bfd-pipeline-app</module>
 		<module>bfd-pipeline-benchmarks</module>
 	</modules>
@@ -48,6 +49,16 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<!-- Provides utility code and dependencies that are shared by (more or
+				less) all of the other BFD modules. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<pluginManagement>

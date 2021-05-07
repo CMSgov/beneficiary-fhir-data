@@ -1,0 +1,145 @@
+{
+  "resourceType" : "CapabilityStatement",
+  "status" : "active",
+  "date" : "IGNORED_FIELD",
+  "publisher" : "Centers for Medicare & Medicaid Services",
+  "kind" : "instance",
+  "software" : {
+    "name" : "Blue Button API: Direct",
+    "version" : "1.0.0-SNAPSHOT"
+  },
+  "implementation" : {
+    "description" : "gov.cms.bfd:bfd-server-war",
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir"
+  },
+  "fhirVersion" : "3.0.2",
+  "acceptUnknown" : "extensions",
+  "format" : [ "application/fhir+xml", "application/fhir+json" ],
+  "rest" : [ {
+    "mode" : "server",
+    "resource" : [ {
+      "type" : "Coverage",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/Profile/Coverage"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchParam" : [ {
+        "name" : "beneficiary",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
+      }, {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
+      } ]
+    }, {
+      "type" : "ExplanationOfBenefit",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/Profile/ExplanationOfBenefit"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchParam" : [ {
+        "name" : "patient",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
+      }, {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "excludeSAMHSA",
+        "type" : "string",
+        "documentation" : "If true, exclude all SAMHSA-related resources"
+      }, {
+        "name" : "service-date",
+        "type" : "date",
+        "documentation" : "Include resources that completed in the given range"
+      }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
+      }, {
+        "name" : "type",
+        "type" : "token",
+        "documentation" : "A list of claim types to include"
+      } ]
+    }, {
+      "type" : "OperationDefinition",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/Profile/OperationDefinition"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      } ]
+    }, {
+      "type" : "Patient",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/Profile/Patient"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchParam" : [ {
+        "name" : "_has:Coverage",
+        "type" : "token",
+        "documentation" : "Part D coverage type"
+      }, {
+        "name" : "_has:Coverage",
+        "type" : "token",
+        "documentation" : "Part D reference year"
+      }, {
+        "name" : "_id",
+        "type" : "token",
+        "documentation" : "The patient identifier to search for"
+      }, {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "cursor",
+        "type" : "string",
+        "documentation" : "The cursor used for result pagination"
+      }, {
+        "name" : "identifier",
+        "type" : "token",
+        "documentation" : "The patient identifier to search for"
+      }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
+      }, {
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
+      } ]
+    }, {
+      "type" : "StructureDefinition",
+      "profile" : {
+        "reference" : "http://hl7.org/fhir/Profile/StructureDefinition"
+      },
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ]
+    } ]
+  } ]
+}

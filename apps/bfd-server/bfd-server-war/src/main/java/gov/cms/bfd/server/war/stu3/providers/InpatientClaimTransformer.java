@@ -2,11 +2,15 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
-import gov.cms.bfd.server.war.stu3.providers.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.CCWProcedure;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,10 +27,15 @@ final class InpatientClaimTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link InpatientClaim} to transform
+   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     InpatientClaim}
    */
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  @Trace
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(
@@ -61,6 +70,8 @@ final class InpatientClaimTransformer {
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
 
+    TransformerUtils.mapEobWeeklyProcessDate(eob, claimGroup.getWeeklyProcessDate());
+
     // map eob type codes into FHIR
     TransformerUtils.mapEobType(
         eob,
@@ -90,6 +101,7 @@ final class InpatientClaimTransformer {
         claimGroup.getMedicareBenefitsExhaustedDate(),
         claimGroup.getDiagnosisRelatedGroupCd());
 
+    // Claim Operational Indirect Medical Education Amount
     if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob,
@@ -97,6 +109,7 @@ final class InpatientClaimTransformer {
           claimGroup.getIndirectMedicalEducationAmount());
     }
 
+    // Claim Operational disproportionate Amount
     if (claimGroup.getDisproportionateShareAmount().isPresent()) {
       TransformerUtils.addAdjudicationTotal(
           eob, CcwCodebookVariable.DSH_OP_CLM_VAL_AMT, claimGroup.getDisproportionateShareAmount());
@@ -124,6 +137,21 @@ final class InpatientClaimTransformer {
           eob,
           CcwCodebookVariable.CLM_TOT_PPS_CPTL_AMT,
           claimGroup.getClaimTotalPPSCapitalAmount());
+    }
+
+    if (claimGroup.getIndirectMedicalEducationAmount().isPresent()) {
+      TransformerUtils.addAdjudicationTotal(
+          eob,
+          CcwCodebookVariable.IME_OP_CLM_VAL_AMT,
+          claimGroup.getIndirectMedicalEducationAmount().get());
+    }
+
+    // Claim Uncompensated Care Payment Amount
+    if (claimGroup.getClaimUncompensatedCareAmount().isPresent()) {
+      TransformerUtils.addAdjudicationTotal(
+          eob,
+          CcwCodebookVariable.CLM_UNCOMPD_CARE_PMT_AMT,
+          claimGroup.getClaimUncompensatedCareAmount().get());
     }
 
     /*
@@ -176,7 +204,9 @@ final class InpatientClaimTransformer {
         claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiOriginalClaimControlNumber());
 
     // Common group level fields between Inpatient, HHA, Hospice and SNF
     TransformerUtils.mapEobCommonGroupInpHHAHospiceSNF(
@@ -292,6 +322,7 @@ final class InpatientClaimTransformer {
       TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
           eob, item, claimLine.getDeductibleCoinsuranceCd());
     }
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 
@@ -307,9 +338,7 @@ final class InpatientClaimTransformer {
      * rather than requiring if-blocks.
      */
     Consumer<Optional<Diagnosis>> diagnosisAdder =
-        d -> {
-          if (d.isPresent()) diagnoses.add(d.get());
-        };
+        TransformerUtils.addPrincipalDiagnosis(diagnoses);
 
     diagnosisAdder.accept(
         Diagnosis.from(

@@ -2,10 +2,15 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.IdentifierType;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Optional;
@@ -20,17 +25,22 @@ final class CarrierClaimTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link CarrierClaim} to transform
+   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  @Trace
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(CarrierClaimTransformer.class.getSimpleName(), "transform"))
             .time();
 
     if (!(claim instanceof CarrierClaim)) throw new BadCodeMonkeyException();
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim);
+    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
 
     timer.stop();
     return eob;
@@ -41,7 +51,8 @@ final class CarrierClaimTransformer {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private static ExplanationOfBenefit transformClaim(CarrierClaim claimGroup) {
+  private static ExplanationOfBenefit transformClaim(
+      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -56,6 +67,8 @@ final class CarrierClaimTransformer {
         Optional.of(claimGroup.getDateThrough()),
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
+
+    TransformerUtils.mapEobWeeklyProcessDate(eob, claimGroup.getWeeklyProcessDate());
 
     // map eob type codes into FHIR
     TransformerUtils.mapEobType(
@@ -80,36 +93,25 @@ final class CarrierClaimTransformer {
         claimGroup.getProviderPaymentAmount(),
         claimGroup.getBeneficiaryPaymentAmount(),
         claimGroup.getSubmittedChargeAmount(),
-        claimGroup.getAllowedChargeAmount());
+        claimGroup.getAllowedChargeAmount(),
+        claimGroup.getClaimDispositionCode(),
+        claimGroup.getClaimCarrierControlNumber());
 
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(
-            claimGroup.getDiagnosisPrincipalCode(),
-            claimGroup.getDiagnosisPrincipalCodeVersion(),
-            claimGroup.getDiagnosis1Code(),
-            claimGroup.getDiagnosis1CodeVersion(),
-            claimGroup.getDiagnosis2Code(),
-            claimGroup.getDiagnosis2CodeVersion(),
-            claimGroup.getDiagnosis3Code(),
-            claimGroup.getDiagnosis3CodeVersion(),
-            claimGroup.getDiagnosis4Code(),
-            claimGroup.getDiagnosis4CodeVersion(),
-            claimGroup.getDiagnosis5Code(),
-            claimGroup.getDiagnosis5CodeVersion(),
-            claimGroup.getDiagnosis6Code(),
-            claimGroup.getDiagnosis6CodeVersion(),
-            claimGroup.getDiagnosis7Code(),
-            claimGroup.getDiagnosis7CodeVersion(),
-            claimGroup.getDiagnosis8Code(),
-            claimGroup.getDiagnosis8CodeVersion(),
-            claimGroup.getDiagnosis9Code(),
-            claimGroup.getDiagnosis9CodeVersion(),
-            claimGroup.getDiagnosis10Code(),
-            claimGroup.getDiagnosis10CodeVersion(),
-            claimGroup.getDiagnosis11Code(),
-            claimGroup.getDiagnosis11CodeVersion(),
-            claimGroup.getDiagnosis12Code(),
-            claimGroup.getDiagnosis12CodeVersion()))
+            claimGroup.getDiagnosisPrincipalCode(), claimGroup.getDiagnosisPrincipalCodeVersion(),
+            claimGroup.getDiagnosis1Code(), claimGroup.getDiagnosis1CodeVersion(),
+            claimGroup.getDiagnosis2Code(), claimGroup.getDiagnosis2CodeVersion(),
+            claimGroup.getDiagnosis3Code(), claimGroup.getDiagnosis3CodeVersion(),
+            claimGroup.getDiagnosis4Code(), claimGroup.getDiagnosis4CodeVersion(),
+            claimGroup.getDiagnosis5Code(), claimGroup.getDiagnosis5CodeVersion(),
+            claimGroup.getDiagnosis6Code(), claimGroup.getDiagnosis6CodeVersion(),
+            claimGroup.getDiagnosis7Code(), claimGroup.getDiagnosis7CodeVersion(),
+            claimGroup.getDiagnosis8Code(), claimGroup.getDiagnosis8CodeVersion(),
+            claimGroup.getDiagnosis9Code(), claimGroup.getDiagnosis9CodeVersion(),
+            claimGroup.getDiagnosis10Code(), claimGroup.getDiagnosis10CodeVersion(),
+            claimGroup.getDiagnosis11Code(), claimGroup.getDiagnosis11CodeVersion(),
+            claimGroup.getDiagnosis12Code(), claimGroup.getDiagnosis12CodeVersion()))
       TransformerUtils.addDiagnosisCode(eob, diagnosis);
 
     for (CarrierClaimLine claimLine : claimGroup.getLines()) {
@@ -117,13 +119,11 @@ final class CarrierClaimTransformer {
       item.setSequence(claimLine.getLineNumber().intValue());
 
       /*
-       * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing
-       * provider _should_ always be present. However, we've found some
-       * examples in production where it's not for some claim lines. (This
-       * is annoying, as it's present on other lines in the same claim,
-       * and the data indicates that the same NPI probably applies to the
-       * lines where it's not specified. Still, it's not safe to guess at
-       * this, so we'll leave it blank.)
+       * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing provider _should_ always
+       * be present. However, we've found some examples in production where it's not for some claim
+       * lines. (This is annoying, as it's present on other lines in the same claim, and the data
+       * indicates that the same NPI probably applies to the lines where it's not specified. Still,
+       * it's not safe to guess at this, so we'll leave it blank.)
        */
       if (claimLine.getPerformingPhysicianNpi().isPresent()) {
         ExplanationOfBenefit.CareTeamComponent performingCareTeamMember =
@@ -136,14 +136,11 @@ final class CarrierClaimTransformer {
         performingCareTeamMember.setResponsible(true);
 
         /*
-         * The provider's "specialty" and "type" code are equivalent.
-         * However, the "specialty" codes are more granular, and seem to
-         * better match the example FHIR
-         * `http://hl7.org/fhir/ex-providerqualification` code set.
-         * Accordingly, we map the "specialty" codes to the
-         * `qualification` field here, and stick the "type" code into an
-         * extension. TODO: suggest that the spec allows more than one
-         * `qualification` entry.
+         * The provider's "specialty" and "type" code are equivalent. However, the "specialty" codes
+         * are more granular, and seem to better match the example FHIR
+         * `http://hl7.org/fhir/ex-providerqualification` code set. Accordingly, we map the
+         * "specialty" codes to the `qualification` field here, and stick the "type" code into an
+         * extension. TODO: suggest that the spec allows more than one `qualification` entry.
          */
 
         performingCareTeamMember.setQualification(
@@ -168,6 +165,22 @@ final class CarrierClaimTransformer {
               TransformerUtils.retrieveNpiCodeDisplay(claimLine.getOrganizationNpi().get()),
               "" + claimLine.getOrganizationNpi().get());
         }
+      }
+
+      /*
+       * FIXME This value seems to be just a "synonym" for the performing physician NPI and should
+       * probably be mapped as an extra identifier with it (if/when that lands in a contained
+       * Practitioner resource).
+       */
+      if (includeTaxNumbers.orElse(false)) {
+        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
+            TransformerUtils.addCareTeamPractitioner(
+                eob,
+                item,
+                IdentifierType.TAX.getSystem(),
+                claimLine.getProviderTaxNumber(),
+                ClaimCareteamrole.OTHER);
+        providerTaxNumber.setResponsible(true);
       }
 
       item.addAdjudication(
@@ -260,6 +273,7 @@ final class CarrierClaimTransformer {
       }
     }
 
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }

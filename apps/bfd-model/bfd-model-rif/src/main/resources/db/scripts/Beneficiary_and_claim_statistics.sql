@@ -5,6 +5,38 @@
  * interactive `psql` session, or somesuch.
  */
 
+-- Count the total number of beneficiaries, in several different ways.
+SELECT
+  (
+    SELECT count(*)
+    FROM "Beneficiaries"
+  ) AS benes_all,
+  (
+    SELECT count(*)
+    FROM "Beneficiaries"
+    WHERE
+      "beneficiaryDateOfDeath" IS NULL
+      OR "validDateOfDeathSw" <> 'V'
+  ) AS benes_not_known_dead,
+  (
+    SELECT count(*)
+    FROM "Beneficiaries"
+    WHERE
+      (
+        "beneficiaryDateOfDeath" IS NULL
+        OR "validDateOfDeathSw" <> 'V'
+      ) AND
+      (
+        date_part('year',age("birthDate")) <= 110
+      )
+  ) AS benes_not_assumed_dead,
+  (
+    SELECT count(*)
+    FROM "Beneficiaries"
+    WHERE
+      "medicareBeneficiaryId" IS NOT NULL
+  ) AS benes_with_mbis;
+
 -- Count the total numbers of beneficiaries and claims.
 with
   carrier_claim_counts as (

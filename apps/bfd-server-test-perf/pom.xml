@@ -22,14 +22,14 @@
 					gets included in the shaded Uber JAR. -->
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.1</version>
+				<version>4.5.13</version>
 			</dependency>
 			<dependency>
 				<!-- Ensure that this version, which hapi-fhir-* absolutely requires, 
 					gets included in the shaded Uber JAR. -->
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.4.4</version>
+				<version>4.4.14</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -80,7 +80,7 @@
 		</dependency>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-rif-extract</artifactId>
+			<artifactId>bfd-pipeline-ccw-rif</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -93,7 +93,7 @@
 			<!-- Used for parsing JSON resources. -->
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.7.3</version>
+			<version>2.12.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opencsv</groupId>
@@ -126,7 +126,7 @@
 						include with JMeter, rather than the whole dependency tree. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>2.4.3</version>
+					<version>3.2.4</version>
 					<configuration>
 						<keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
 						<promoteTransitiveDependencies>false</promoteTransitiveDependencies>

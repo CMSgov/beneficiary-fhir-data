@@ -1,37 +1,36 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import java.io.IOException;
 
-/**
- * An interceptor class to add headers to requests for supplying additional parameters to FHIR
- * "read" operations. The operation only allows for certain parameters to be sent (e.g. {@link
- * RequestDetails}) so we add headers with our own parameters to the request in order to make use of
- * them.
- */
+/** A HAPI {@link IClientInterceptor} that allows us to add HTTP headers to our requests. */
 public class ExtraParamsInterceptor implements IClientInterceptor {
-
-  private IncludeIdentifiersMode includeIdentifiersMode =
-      IncludeIdentifiersMode.OMIT_HICNS_AND_MBIS;
+  private RequestHeaders requestHeader;
 
   @Override
   public void interceptRequest(IHttpRequest theRequest) {
-    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS)
-      theRequest.addHeader(
-          IncludeIdentifiersMode.HEADER_NAME_INCLUDE_IDENTIFIERS, Boolean.TRUE.toString());
+    // inject headers values
+    requestHeader
+        .getNVPairs()
+        .forEach(
+            (n, v) -> {
+              theRequest.addHeader(n, v.toString());
+            });
   }
 
+  /**
+   * @see
+   *     ca.uhn.fhir.rest.client.api.IClientInterceptor#interceptResponse(ca.uhn.fhir.rest.client.api.IHttpResponse)
+   */
   @Override
   public void interceptResponse(IHttpResponse theResponse) throws IOException {
-    // TODO Auto-generated method stub
-
+    // nothing needed here
   }
 
-  public void setIncludeIdentifiers(IncludeIdentifiersMode includeIdentifiersMode) {
-    this.includeIdentifiersMode = includeIdentifiersMode;
+  public void setHeaders(RequestHeaders requestHeader) {
+    this.requestHeader = requestHeader;
   }
 }

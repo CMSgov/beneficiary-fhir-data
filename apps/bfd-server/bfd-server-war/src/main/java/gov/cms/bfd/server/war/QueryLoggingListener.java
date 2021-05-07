@@ -149,6 +149,12 @@ public final class QueryLoggingListener implements QueryExecutionListener {
                 && s.contains(" join ")
                 && s.contains("\"hicn\"="))),
 
+    BENE_BY_COVERAGE(
+        "bene_by_coverage",
+        (s ->
+            s.contains("from \"Beneficiaries\"")
+                && s.contains("where beneficiar0_.\"partDContractNumber"))),
+
     EOBS_BY_BENE_ID_CARRIER(
         "eobs_by_bene_id.carrier", (s -> s.contains(" from \"CarrierClaims\" "))),
 
@@ -168,6 +174,10 @@ public final class QueryLoggingListener implements QueryExecutionListener {
     EOBS_BY_BENE_ID_PDE("eobs_by_bene_id.pde", (s -> s.contains(" from \"PartDEvents\" "))),
 
     EOBS_BY_BENE_ID_SNF("eobs_by_bene_id.snf", (s -> s.contains(" from \"SNFClaims\" "))),
+
+    LOADED_BATCH("loaded_batch", (s -> s.contains(" from \"LoadedBatches\" "))),
+
+    LOADED_FILE("loaded_file", (s -> s.contains(" from \"LoadedFiles\" "))),
 
     UNKNOWN("unknown", null);
 

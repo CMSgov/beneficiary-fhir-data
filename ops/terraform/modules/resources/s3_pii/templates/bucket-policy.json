@@ -1,0 +1,69 @@
+${jsonencode(
+{
+  "Version": "2012-10-17",
+  "Id": "bfd-${env}-${bucket_name}-s3-policy",
+  "Statement": [
+    {
+      "Sid": "BFDPIIS3ReadBucket",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          for arn in concat(readers, writers) : "${arn}"
+        ]
+      },
+      "Action": [
+        "s3:ListBucket*",
+        "s3:GetBucket*",
+        "s3:GetObject*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}",
+        "arn:aws:s3:::${bucket_id}/*"
+      ]
+    },
+    {
+      "Sid": "BFDPIIS3WriteBucket",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          for arn in writers : "${arn}"
+        ]
+      },
+      "Action": [
+        "s3:PutObject*",
+        "s3:DeleteObject*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}",
+        "arn:aws:s3:::${bucket_id}/*"
+      ]
+    },
+    {
+      "Sid": "BFDPIIS3AdminBucket",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          for arn in concat(admins, root) : "${arn}"
+        ]
+      },
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::${bucket_id}",
+        "arn:aws:s3:::${bucket_id}/*"
+      ]
+    },
+    {
+      "Sid": "BFDPIIS3DenyUnencrypted",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${bucket_id}/*",
+      "Condition": {
+        "StringNotEquals": {
+            "s3:x-amz-server-side-encryption": "aws:kms"
+        }
+      }
+    }
+  ]
+}
+)}

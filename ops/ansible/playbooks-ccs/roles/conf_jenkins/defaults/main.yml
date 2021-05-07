@@ -76,7 +76,7 @@ jenkins_plugins_retries: 3
 
 # If `true`, the Jenkins plugins will be updated when this role is run.
 # (Note that missing plugins will always be installed.)
-jenkins_plugins_update: false
+jenkins_plugins_update: true
 
 # Additional options that will be added to JAVA_ARGS
 jenkins_java_args_extra: ''

@@ -1,40 +1,85 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
-import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider.IncludeIdentifiersMode;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
+import gov.cms.bfd.server.war.commons.Sex;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
 
 /** Transforms CCW {@link Beneficiary} instances into FHIR {@link Patient} resources. */
+/**
+ * The BFD is in the process of mapping new data fields to the BFD API. We wanted to let you know of
+ * a few changes that pertain to all APIs. Currently, the following variables are sent from CCW
+ * through the FHIR export and available to all APIs in the patient resource. The source for these
+ * is EDB:
+ *
+ * <p>STATE_CODE BENE_CNTY_CD BENE_ZIP_CD
+ *
+ * <p>We'll be adding the following fields be added to the FHIR export, which come from the CME
+ * Derived Mailing Source:
+ *
+ * <p>DRVD_LINE_1_ADR DRVD_LINE_2_ADR DRVD_LINE_3_ADR DRVD_LINE_4_ADR DRVD_LINE_5_ADR
+ * DRVD_LINE_6_ADR CITY_NAME STATE_CD STATE_CNTY_ZIP_CD
+ *
+ * <p>In order to not create discrepancies in a beneficiary�s address by grabbing different
+ * components of a beneficiary�s address from data sources, we will map the following variables from
+ * the CME Derived Mailing source:
+ *
+ * <p>STATE_CD STATE_CNTY_ZIP_CD
+ *
+ * <p>and stop mapping the following fields from EDB:
+ *
+ * <p>STATE_CODE BENE_CNTY_CD BENE_ZIP_CD
+ *
+ * <p>This will result in all address-related fields coming from a single source. It also means
+ * that, if your API was sending along this field previously, they will no longer receive
+ * BENE_CNTY_CD in the payload from the BFD API. In addition, we will also be adding the following
+ * fields to the FHIR export - and your customers will receive for the first time - the following
+ * fields:
+ *
+ * <p>CLM_UNCOMPD_CARE_PMT_AMT EFCTV_BGN_DT EFCTV_END_DT CLM_CNTL_NUM FI_DOC_CLM_CNTL_NUM
+ * FI_ORIG_CLM_CNTL_NUM BENE_DEATH_DT NCH_WKLY_PROC_DT REV_CNTR_DT IME_OP_CLM_VAL_AMT
+ * DSH_OP_CLM_VAL_AMT CLM_HOSPC_START_DT_ID NCH_BENE_DSCHRG_DT
+ *
+ * <p>Note that BB2.0 API will be filtering out all derived line address fields (1-6) and CITY_NAME.
+ * Please announce this to your respective customer communities as you see fit. A list of which
+ * fields will map to which resource is forthcoming - we'll share that with you as we complete the
+ * mapping work this upcoming sprint.
+ */
 final class BeneficiaryTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersMode the {@link IncludeIdentifiersMode} to use
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
+  @Trace
   public static Patient transform(
-      MetricRegistry metricRegistry,
-      Beneficiary beneficiary,
-      IncludeIdentifiersMode includeIdentifiersMode) {
+      MetricRegistry metricRegistry, Beneficiary beneficiary, RequestHeaders requestHeader) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(BeneficiaryTransformer.class.getSimpleName(), "transform"))
             .time();
-    Patient patient = transform(beneficiary, includeIdentifiersMode);
+    Patient patient = transform(beneficiary, requestHeader);
     timer.stop();
 
     return patient;
@@ -42,11 +87,11 @@ final class BeneficiaryTransformer {
 
   /**
    * @param beneficiary the CCW {@link Beneficiary} to transform
-   * @param includeIdentifiersMode the {@link IncludeIdentifiersMode} to use
+   * @param requestHeader {@link RequestHeaders} the holder that contains all supported resource
+   *     request headers
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  private static Patient transform(
-      Beneficiary beneficiary, IncludeIdentifiersMode includeIdentifiersMode) {
+  private static Patient transform(Beneficiary beneficiary, RequestHeaders requestHeader) {
     Objects.requireNonNull(beneficiary);
 
     Patient patient = new Patient();
@@ -55,16 +100,50 @@ final class BeneficiaryTransformer {
     patient.addIdentifier(
         TransformerUtils.createIdentifier(
             CcwCodebookVariable.BENE_ID, beneficiary.getBeneficiaryId()));
-    patient
-        .addIdentifier()
-        .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
-        .setValue(beneficiary.getHicn());
 
-    if (includeIdentifiersMode == IncludeIdentifiersMode.INCLUDE_HICNS_AND_MBIS) {
-      Extension currentIdentifier =
-          TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
+    // Add hicn-hash identifier ONLY if raw hicn is requested.
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
+      patient
+          .addIdentifier()
+          .setSystem(TransformerConstants.CODING_BBAPI_BENE_HICN_HASH)
+          .setValue(beneficiary.getHicn());
+    }
 
+    if (beneficiary.getMbiHash().isPresent()) {
+      Period mbiPeriod = new Period();
+
+      if (beneficiary.getMbiEffectiveDate().isPresent()) {
+        TransformerUtils.setPeriodStart(mbiPeriod, beneficiary.getMbiEffectiveDate().get());
+      }
+
+      if (beneficiary.getMbiObsoleteDate().isPresent()) {
+        TransformerUtils.setPeriodEnd(mbiPeriod, beneficiary.getMbiObsoleteDate().get());
+      }
+
+      if (mbiPeriod.hasStart() || mbiPeriod.hasEnd()) {
+        patient
+            .addIdentifier()
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+            .setValue(beneficiary.getMbiHash().get())
+            .setPeriod(mbiPeriod);
+      } else {
+        patient
+            .addIdentifier()
+            .setSystem(TransformerConstants.CODING_BBAPI_BENE_MBI_HASH)
+            .setValue(beneficiary.getMbiHash().get());
+      }
+    }
+
+    Extension currentIdentifier =
+        TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.CURRENT);
+    Extension historicalIdentifier =
+        TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
+    // Add lastUpdated
+    TransformerUtils.setLastUpdated(patient, beneficiary.getLastUpdated());
+
+    if (requestHeader.isHICNinIncludeIdentifiers()) {
       Optional<String> hicnUnhashedCurrent = beneficiary.getHicnUnhashed();
+
       if (hicnUnhashedCurrent.isPresent())
         addUnhashedIdentifier(
             patient,
@@ -72,22 +151,13 @@ final class BeneficiaryTransformer {
             TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
             currentIdentifier);
 
-      Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
-      if (mbiUnhashedCurrent.isPresent())
-        addUnhashedIdentifier(
-            patient,
-            mbiUnhashedCurrent.get(),
-            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
-            currentIdentifier);
-
-      Extension historicalIdentifier =
-          TransformerUtils.createIdentifierCurrencyExtension(CurrencyIdentifier.HISTORIC);
-
       List<String> unhashedHicns = new ArrayList<String>();
       for (BeneficiaryHistory beneHistory : beneficiary.getBeneficiaryHistories()) {
         Optional<String> hicnUnhashedHistoric = beneHistory.getHicnUnhashed();
         if (hicnUnhashedHistoric.isPresent()) unhashedHicns.add(hicnUnhashedHistoric.get());
+        TransformerUtils.updateMaxLastUpdated(patient, beneHistory.getLastUpdated());
       }
+
       List<String> unhashedHicnsNoDupes =
           unhashedHicns.stream().distinct().collect(Collectors.toList());
       for (String hicn : unhashedHicnsNoDupes) {
@@ -97,13 +167,26 @@ final class BeneficiaryTransformer {
             TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED,
             historicalIdentifier);
       }
+    }
+
+    if (requestHeader.isMBIinIncludeIdentifiers()) {
+      Optional<String> mbiUnhashedCurrent = beneficiary.getMedicareBeneficiaryId();
+
+      if (mbiUnhashedCurrent.isPresent())
+        addUnhashedIdentifier(
+            patient,
+            mbiUnhashedCurrent.get(),
+            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED,
+            currentIdentifier);
 
       List<String> unhashedMbis = new ArrayList<String>();
       for (MedicareBeneficiaryIdHistory mbiHistory :
           beneficiary.getMedicareBeneficiaryIdHistories()) {
         Optional<String> mbiUnhashedHistoric = mbiHistory.getMedicareBeneficiaryId();
         if (mbiUnhashedHistoric.isPresent()) unhashedMbis.add(mbiUnhashedHistoric.get());
+        TransformerUtils.updateMaxLastUpdated(patient, mbiHistory.getLastUpdated());
       }
+
       List<String> unhashedMbisNoDupes =
           unhashedMbis.stream().distinct().collect(Collectors.toList());
       for (String mbi : unhashedMbisNoDupes) {
@@ -115,14 +198,39 @@ final class BeneficiaryTransformer {
       }
     }
 
-    patient
-        .addAddress()
-        .setState(beneficiary.getStateCode())
-        .setDistrict(beneficiary.getCountyCode())
-        .setPostalCode(beneficiary.getPostalCode());
+    // support header includeAddressFields from downstream components e.g. BB2
+    // per requirement of BFD-379, BB2 always send header includeAddressFields = False
+    Boolean addrHdrVal =
+        requestHeader.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
+    if (addrHdrVal != null && addrHdrVal) {
+      patient
+          .addAddress()
+          .setState(beneficiary.getStateCode())
+          .setPostalCode(beneficiary.getPostalCode())
+          .setCity(beneficiary.getDerivedCityName().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress1().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress2().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress3().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress4().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress5().orElse(null))
+          .addLine(beneficiary.getDerivedMailingAddress6().orElse(null));
+    } else {
+      patient
+          .addAddress()
+          .setState(beneficiary.getStateCode())
+          .setPostalCode(beneficiary.getPostalCode());
+    }
 
     if (beneficiary.getBirthDate() != null) {
       patient.setBirthDate(TransformerUtils.convertToDate(beneficiary.getBirthDate()));
+    }
+
+    // Death Date
+    if (beneficiary.getBeneficiaryDateOfDeath().isPresent()) {
+      patient.setDeceased(
+          new DateTimeType(
+              TransformerUtils.convertToDate(beneficiary.getBeneficiaryDateOfDeath().get()),
+              TemporalPrecisionEnum.DAY));
     }
 
     char sex = beneficiary.getSex();

@@ -1,0 +1,134 @@
+{
+	"resourceType": "Patient",
+	"id": "-20140000010000",
+	"meta": {
+		"lastUpdated": "2020-07-14T20:40:20.972+00:00"
+	},
+	"extension": [
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/race",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/race",
+				"code": "2",
+				"display": "Black"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+			"valueDate": "0003"
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_01",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_01",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_02",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_02",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_03",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_03",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_04",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_04",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_05",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_05",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_06",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_06",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_07",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_07",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_08",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_08",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_09",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_09",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_10",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_10",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_11",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_11",
+				"code": "AA"
+			}
+		},
+		{
+			"url": "https://bluebutton.cms.gov/resources/variables/dual_12",
+			"valueCoding": {
+				"system": "https://bluebutton.cms.gov/resources/variables/dual_12",
+				"code": "AA"
+			}
+		}
+	],
+	"identifier": [
+		{
+			"system": "https://bluebutton.cms.gov/resources/variables/bene_id",
+			"value": "-20140000010000"
+		},
+		{
+			"system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
+			"value": "2b034220943953861f7b17963091ea962c13548f4b1d5f4c1013ee1779d621f4"
+		}
+	],
+	"name": [
+		{
+			"use": "usual",
+			"family": "Doe",
+			"given": [
+				"John",
+				"X"
+			]
+		}
+	],
+	"gender": "male",
+	"birthDate": "2014-06-01",
+	"address": [
+		{
+			"district": "999",
+			"state": "05",
+			"postalCode": "99999"
+		}
+	]
+}

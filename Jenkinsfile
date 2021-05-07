@@ -26,10 +26,6 @@
 
 /*
  * Optionality:
- * - Deploy Env:
- *     - HealthAPT or CCS (exclusive)
- *     - hhsdevcloud (included in CCS deploys)
- *     - deploy Jenkins (optional, both envs)
  * - Performance Tests:
  *     - Default: 2 workers, 60 seconds
  *     - Extended: 4 workers, 300 seconds
@@ -43,10 +39,7 @@ properties([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
 		booleanParam(name: 'deploy_management', description: 'Whether to deploy/redeploy the management environment, which includes Jenkins. May cause the job to end early, if Jenkins is restarted.', defaultValue: false),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
-		booleanParam(name: 'deploy_hhsdevcloud', description: 'Whether to deploy to the hhsdevcloud/"old sandbox" environment.', defaultValue: false),
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
-		//booleanParam(name: 'deploy_to_lss', description: 'Whether to run the Ansible plays for LSS systems (e.g. Jenkins itself).', defaultValue: false),
-		//booleanParam(name: 'deploy_to_prod', description: 'Whether to run the Ansible plays for PROD systems (without prompting first, which is the default behavior).', defaultValue: false)
 	]),
 	buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: ''))
 ])
@@ -55,67 +48,130 @@ properties([
 def deployEnvironment
 def scriptForApps
 def scriptForDeploys
-def scriptForDeploysHhsdevcloud
 def canDeployToProdEnvs
 def willDeployToProdEnvs
 def appBuildResults
 def amiIds
+def currentStage
+def gitCommitId
+def gitRepoUrl
 
-stage('Prepare') {
-	node {
-		// Grab the commit that triggered the build.
-		checkout scm
+// send notifications to slack, email, etc
+def sendNotifications(String buildStatus = '', String stageName = '', String gitCommitId = '', String gitRepoUrl = ''){
+	// we will use this to display a link to diffs in the message. This assumes we are using git+https not git+ssh
+	def diffsUrl = "${gitRepoUrl}/commit/"
 
-		// Deployment varies a bit by environment: are we running in the CCS?
-		if (env.JENKINS_URL.contains('cmscloud')) {
-			deployEnvironment = 'ccs'
-		} else {
-			deployEnvironment = 'healthapt'
-		}
+	// buildStatus of NULL means success
+	if (!buildStatus) {
+		buildStatus = 'SUCCESS'
+	}
 
-		// Load the child Jenkinsfiles.
-		scriptForApps = load('apps/build.groovy')
-		if (deployEnvironment == 'healthapt') {
-			scriptForDeploys = load('ops/deploy-healthapt.groovy')
-		} else if (deployEnvironment == 'ccs') {
+	// build colors
+	def colorMap = [:]
+	colorMap['STARTED']  = '#0000FF'
+	colorMap['SUCCESS']  = '#00FF00'
+	colorMap['ABORTED']  = '#6A0DAD'
+	colorMap['UNSTABLE'] = '#FFFF00'
+	colorMap['FAILED']   = '#FF0000'
+	def buildColor = colorMap[buildStatus]
+	buildColor = buildColor ?: '#FF0000' // default to red
+
+	// prettyfi messages
+	def msg = ''
+	switch (buildStatus){
+		case 'UNSTABLE':
+		case 'SUCCESS':
+			msg = 'COMPLETED SUCCESSFULLY'
+			break
+		case 'FAILED':
+		case 'FAILURE':
+			msg = "FAILED ON ${stageName.toUpperCase()} STAGE"
+			break
+		case 'STARTED':
+			msg = 'HAS STARTED'
+			break
+		case 'ABORTED':
+			msg = 'WAS ABORTED'
+			break
+		default:
+			msg = "${buildStatus.toUpperCase()}"
+			break
+	}
+
+	// who launched the build
+	def specificCause = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')
+	def startedBy = "${specificCause.shortDescription}".replaceAll("[\\[\\](){}]","")
+
+	// build slack message
+	def slackMsg = ''
+	if (buildStatus == 'UNSTABLE'){
+		slackMsg = "UNSTABLE BFD BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
+	} else {
+		slackMsg = "BFD BUILD <${env.BUILD_URL}|#${env.BUILD_NUMBER}> ${msg} \n"
+	}
+	slackMsg+="\tJob '${env.JOB_NAME}' (${startedBy.toLowerCase()}) \n"
+	slackMsg+="\tBranch: ${env.BRANCH_NAME == 'main' ? 'master' : env.BRANCH_NAME} \n"
+	if (gitCommitId){
+		// we will only have a gitCommitId if we've checked out the repo
+		slackMsg+="\tView changes <${diffsUrl + gitCommitId}|here> \n"
+	}
+
+	// send Slack messages
+	slackSend(color: buildColor, message: slackMsg)
+
+	// future notifications can go here. (email, other channels, etc)
+}
+
+// begin pipeline
+try {
+	stage('Prepare') {
+		currentStage = "${env.STAGE_NAME}"
+		node {
+			// Grab the commit that triggered the build.
+			checkout scm
+
+			// Load the child Jenkinsfiles.
+			scriptForApps = load('apps/build.groovy')
 			scriptForDeploys = load('ops/deploy-ccs.groovy')
-		}
-		scriptForDeploysHhsdevcloud = load('ops/deploy-hhsdevcloud.groovy')
 
-		// Find the most current AMI IDs (if any).
-		amiIds = null
-		if (deployEnvironment == 'ccs') {
+			// Find the most current AMI IDs (if any).
+			amiIds = null
 			amiIds = scriptForDeploys.findAmis()
-		}
 
-		// These variables track our decision on whether or not to deploy to prod-like envs.
-		canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
-		willDeployToProdEnvs = false
+			// These variables track our decision on whether or not to deploy to prod-like envs.
+			canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
+			willDeployToProdEnvs = false
 
-		// Get the current commit id 
-		gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
-	}
-}
+			// Get the current commit id 
+			gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
-/* This stage switches the gitBranchName (needed for our CCS downsream stages) 
-value if the build is a PR as the BRANCH_NAME var is populated with the build 
-name during PR builds. 
-*/
-stage('Set Branch Name') {
-	script {
-		if (env.BRANCH_NAME.startsWith('PR')) {
-			gitBranchName = env.CHANGE_BRANCH
-		} else {
-			gitBranchName = env.BRANCH_NAME
+			// Get the remote repo url. This assumes we are using git+https not git+ssh.
+			gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
+
+			// Send notifications that the build has started
+			sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 		}
 	}
-}
 
-if (deployEnvironment == 'ccs') {
+	/* This stage switches the gitBranchName (needed for our CCS downsream stages) 
+	value if the build is a PR as the BRANCH_NAME var is populated with the build 
+	name during PR builds. 
+	*/
+	stage('Set Branch Name') {
+		currentStage = "${env.STAGE_NAME}"
+		script {
+			if (env.BRANCH_NAME.startsWith('PR')) {
+				gitBranchName = env.CHANGE_BRANCH
+			} else {
+				gitBranchName = env.BRANCH_NAME
+			}
+		}
+	}
+
 	stage('Build Platinum AMI') {
+		currentStage = "${env.STAGE_NAME}"
 		if (params.build_platinum || amiIds.platinumAmiId == null) {
 			milestone(label: 'stage_build_platinum_ami_start')
-
 			node {
 				amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 			}
@@ -123,143 +179,114 @@ if (deployEnvironment == 'ccs') {
 			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
 		}
 	}
-}
 
-stage('Deploy mgmt') {
-	if (canDeployToProdEnvs && params.deploy_management) {
-		lock(resource: 'env_management', inversePrecendence: true) {
-			milestone(label: 'stage_management_jenkins_start')
+	stage('Deploy mgmt') {
+		currentStage = "${env.STAGE_NAME}"
+		if (canDeployToProdEnvs && params.deploy_management) {
+			lock(resource: 'env_management', inversePrecendence: true) {
+				milestone(label: 'stage_management_jenkins_start')
 
-			node {
-				scriptForDeploy.deployManagement(amiIds)
+				node {
+					scriptForDeploy.deployManagement(amiIds)
+				}
 			}
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy mgmt')
 		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy mgmt')
 	}
-}
 
-stage('Build Apps') {
-	milestone(label: 'stage_build_apps_start')
+	stage('Build Apps') {
+		currentStage = "${env.STAGE_NAME}"
+		milestone(label: 'stage_build_apps_start')
 
-	node {
-		build_env = deployEnvironment
-		appBuildResults = scriptForApps.build(build_env)
+		node {
+			build_env = deployEnvironment
+			appBuildResults = scriptForApps.build(build_env)
+		}
 	}
-}
 
 
-if (deployEnvironment == 'ccs') {
-	stage('Build App AMIs for TEST') {
+	stage('Build App AMIs') {
+		currentStage = "${env.STAGE_NAME}"
 		milestone(label: 'stage_build_app_amis_test_start')
 
 		node {
-			amiIds = scriptForDeploys.buildAppAmis('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
 		}
 	}
-}
 
-stage('Deploy to TEST') {
-	lock(resource: 'env_test', inversePrecendence: true) {
-		milestone(label: 'stage_deploy_test_start')
+	stage('Deploy to TEST') {
+		currentStage = "${env.STAGE_NAME}"
+		lock(resource: 'env_test', inversePrecendence: true) {
+			milestone(label: 'stage_deploy_test_start')
 
-		node {
-			scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			node {
+				scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			}
 		}
 	}
-}
 
-stage('Manual Approval') {
-	if (canDeployToProdEnvs) {
-		/*
-		 * Unless it was explicitly requested at the start of the build, prompt for confirmation before
-		 * deploying to production environments.
-		 */
-		if (!params.deploy_prod_skip_confirm) {
+	stage('Manual Approval') {
+		currentStage = "${env.STAGE_NAME}"
+		if (canDeployToProdEnvs) {
 			/*
-			 * The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-			 * chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-			 * an exception will be thrown.
-			 */
-			try {
-				input 'Deploy to production environments (prod, prod-stg, dpr, and hhsdevcloud)?'
-				willDeployToProdEnvs = true
-			} catch(err) {
-				willDeployToProdEnvs = false
-				echo 'User opted not to deploy to prod-like envs.'
-			}
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
-	}
-}
-
-stage('Deploy to hhsdevcloud') {
-	if (willDeployToProdEnvs && params.deploy_hhsdevcloud) {
-		lock(resource: 'env_hhsdevcloud', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_hhsdevcloud')
-
-			node {
-				scriptForDeploysHhsdevcloud.deploy(appBuildResults)
-			}
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to hhsdevcloud')
-	}
-}
-
-if (deployEnvironment == 'ccs') {
-	stage('Build App AMIs for prod-sbx') {
-		if (willDeployToProdEnvs) {
-			milestone(label: 'stage_build_app_amis_prod-sbx_start')
-
-			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			* Unless it was explicitly requested at the start of the build, prompt for confirmation before
+			* deploying to production environments.
+			*/
+			if (!params.deploy_prod_skip_confirm) {
+				/*
+				* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
+				* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
+				* an exception will be thrown.
+				*/
+				try {
+					input 'Deploy to production environments (prod-sbx, prod)?'
+					willDeployToProdEnvs = true
+				} catch(err) {
+					willDeployToProdEnvs = false
+					echo 'User opted not to deploy to prod-like envs.'
+				}
 			}
 		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod-sbx')
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
 		}
 	}
-}
 
-stage('Deploy to prod-sbx') {
-	if (willDeployToProdEnvs) {
-		lock(resource: 'env_prod_sbx', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_prod_sbx_start')
-
-			node {
-				scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
-			}
-		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
-	}
-}
-
-if (deployEnvironment == 'ccs') {
-	stage('Build App AMIs for prod') {
+	stage('Deploy to PROD-SBX') {
+		currentStage = "${env.STAGE_NAME}"
 		if (willDeployToProdEnvs) {
-			milestone(label: 'stage_build_app_amis_prod_start')
+			lock(resource: 'env_prod_sbx', inversePrecendence: true) {
+				milestone(label: 'stage_deploy_prod_sbx_start')
 
-			node {
-				amiIds = scriptForDeploys.buildAppAmis('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+				node {
+					scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+				}
 			}
 		} else {
-			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build App AMIs for prod')
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
 		}
 	}
-}
 
-stage('Deploy to prod') {
-	if (willDeployToProdEnvs) {
-		lock(resource: 'env_prod', inversePrecendence: true) {
-			milestone(label: 'stage_deploy_prod_start')
+	stage('Deploy to PROD') {
+		currentStage = "${env.STAGE_NAME}"
+		if (willDeployToProdEnvs) {
+			lock(resource: 'env_prod', inversePrecendence: true) {
+				milestone(label: 'stage_deploy_prod_start')
 
-			node {
-				scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+				node {
+					scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+				}
 			}
+		} else {
+			org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 		}
-	} else {
-		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 	}
+} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
+	currentBuild.result = "ABORTED"
+	throw e
+} catch (ex) {
+	currentBuild.result = "FAILURE"
+	throw ex
+} finally {
+	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
 }

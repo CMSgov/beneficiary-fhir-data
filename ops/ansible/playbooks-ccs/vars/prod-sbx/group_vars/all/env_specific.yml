@@ -3,24 +3,27 @@
 # Version of the ETL Jar to deploy 
 data_pipeline_version: '0.1.0-SNAPSHOT'
 
-# Bucket where deployment artifacts are located. 
-s3_bucket_deployment: 'bfd-mgmt-artifacts-577373831711'
-
-# Name of ETL Staging Bucket 
-s3_bucket_etl_staging: 'bfd-prod-sbx-etl-577373831711'
-
 # The abbreviated name for this environment, per https://confluence.cms.gov/display/ODI/AWS+Naming+and+Tagging+Conventions.
 env_name_std: 'prod-sbx'
 
-# This system is an m5.2xlarge (8 vCPUs, 32 GB RAM).
-data_pipeline_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
-data_pipeline_ec2_instance_type_vcpu: 8
+# Whether to enable BFD API V2
+data_server_v2_enabled: true
+
+# New Relic Metric API
+data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
+data_server_new_relic_metric_path: '/metric/v1'
+
+# This system is an m5.xlarge (4 vCPUs, 16 GB RAM).
+data_pipeline_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
+data_pipeline_ec2_instance_type_vcpu: 4
 
 # There is no ongoing data refresh here: if we're loading data in the developer preview environment, it should be an initial
 # load.
 data_pipeline_idempotency_required: false
 
-# These systems are m5.2xlarge (8 vCPUs, 32 GB RAM).
+# app server instance type
+# c5.4xlarge == 16 vcpu's /w 32GiB mem
+data_server_num_cores: 16
 data_server_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
@@ -41,12 +44,16 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_bluebutton_frontend_sbx
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_sbx_certificate.pem') }}"
+  - alias: client_bluebutton_frontend_local
+    certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_local_certificate.pem') }}"
   - alias: client_bcda_dev
     certificate: "{{ lookup('file', 'files/client_data_server_bcda_dev_certificate.pem') }}"
   - alias: client_bcda_test
     certificate: "{{ lookup('file', 'files/client_data_server_bcda_test_certificate.pem') }}"
   - alias: client_bcda_sbx
     certificate: "{{ lookup('file', 'files/client_data_server_bcda_sbx_certificate.pem') }}"
+  - alias: client_bcda_local
+    certificate: "{{ lookup('file', 'files/client_data_server_bcda_local_certificate.pem') }}"  
   - alias: client_mct_test
     certificate: "{{ lookup('file', 'files/client_data_server_mct_test_certificate.pem') }}"
   - alias: client_mct_imp
@@ -57,3 +64,14 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_dpc_prod_sbx_certificate.pem') }}"
   - alias: client_dpc_test
     certificate: "{{ lookup('file', 'files/client_data_server_dpc_test_certificate.pem') }}"
+  - alias: client_dpc_dev
+    certificate: "{{ lookup('file', 'files/client_data_server_dpc_dev_certificate.pem') }}"
+  - alias: client_dpc_local
+    certificate: "{{ lookup('file', 'files/client_data_server_dpc_local_certificate.pem') }}"
+  - alias: client_ab2d_dev
+    certificate: "{{ lookup('file', 'files/client_data_server_ab2d_dev_certificate.pem') }}"
+  - alias: client_ab2d_sbx
+    certificate: "{{ lookup('file', 'files/client_data_server_ab2d_sbx_certificate.pem') }}"
+  - alias: client_ab2d_imp
+    certificate: "{{ lookup('file', 'files/client_data_server_ab2d_imp_certificate.pem') }}"
+

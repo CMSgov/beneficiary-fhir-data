@@ -7,8 +7,10 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -24,12 +26,12 @@ import org.junit.Test;
  */
 public final class SamhsaMatcherTest {
   // TODO complete and verify that these exactly match real values in our DB
-  static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
-  static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
-  static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "9445";
-  static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
-  static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
-  static final String SAMPLE_SAMHSA_DRG_CODE = "522";
+  public static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
+  public static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
+  public static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "9445";
+  public static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
+  public static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
+  public static final String SAMPLE_SAMHSA_DRG_CODE = "522";
 
   private static final String DRG =
       TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
@@ -55,7 +57,8 @@ public final class SamhsaMatcherTest {
                   else if (r instanceof BeneficiaryHistory) return null;
                   else if (r instanceof MedicareBeneficiaryIdHistory) return null;
 
-                  return TransformerUtils.transformRifRecordToEob(new MetricRegistry(), r);
+                  return TransformerUtils.transformRifRecordToEob(
+                      new MetricRegistry(), r, Optional.empty());
                 })
             .filter(ExplanationOfBenefit.class::isInstance)
             .collect(Collectors.toList());
@@ -124,6 +127,26 @@ public final class SamhsaMatcherTest {
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
     Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
     sampleEobService.setCode(SAMPLE_SAMHSA_CPT_CODE);
+
+    Assert.assertTrue(matcher.test(sampleEob));
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
+   * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
+   *
+   * @throws FHIRException (indicates problem with test data)
+   */
+  @Test
+  public void matchCarrierClaimsByCptProcedureForNewCodes() throws FHIRException {
+    SamhsaMatcher matcher = new SamhsaMatcher();
+    String SAMPLE_SAMHSA_CPT_NEW_CODE = "G2067";
+
+    ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
+    Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
+    sampleEobService.setCode(SAMPLE_SAMHSA_CPT_NEW_CODE);
 
     Assert.assertTrue(matcher.test(sampleEob));
   }
@@ -678,7 +701,8 @@ public final class SamhsaMatcherTest {
     Object sampleRifRecordForClaimType =
         sampleRifRecords.stream().filter(claimType.getEntityClass()::isInstance).findFirst().get();
     ExplanationOfBenefit sampleEobForClaimType =
-        TransformerUtils.transformRifRecordToEob(new MetricRegistry(), sampleRifRecordForClaimType);
+        TransformerUtils.transformRifRecordToEob(
+            new MetricRegistry(), sampleRifRecordForClaimType, Optional.empty());
 
     return sampleEobForClaimType;
   }

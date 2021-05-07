@@ -3,28 +3,31 @@
 # Version of the ETL Jar to deploy 
 data_pipeline_version: '0.1.0-SNAPSHOT'
 
-# Bucket where deployment artifacts are located. 
-s3_bucket_deployment: 'bfd-mgmt-artifacts-577373831711'
-
-# Name of ETL Staging Bucket 
-s3_bucket_etl_staging: 'bfd-test-etl-577373831711'
-
 # The abbreviated name for this environment, per the naming conventions used by HealthAPT.
 env_name: 'ts'
 
 # The abbreviated name for this environment, per https://confluence.cms.gov/display/ODI/AWS+Naming+and+Tagging+Conventions.
 env_name_std: 'test'
 
-# This system is an m5.2xlarge (8 vCPUs, 32 GB RAM).
-data_pipeline_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
-data_pipeline_ec2_instance_type_vcpu: 8
+# This system is an m5.xlarge (4 vCPUs, 16 GB RAM).
+data_pipeline_ec2_instance_type_mem_mib: "{{ 16 * 1024 }}"
+data_pipeline_ec2_instance_type_vcpu: 4
 
 # There is no ongoing data refresh here: if we're loading data in test, it should be an initial
 # load.
 data_pipeline_idempotency_required: false
 
-# These systems are m5.2xlarge (8 vCPUs, 32 GB RAM).
-data_server_ec2_instance_type_mem_mib: "{{ 32 * 1024 }}"
+# Whether to enable BFD API V2
+data_server_v2_enabled: true
+
+# New Relic Metric API
+data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
+data_server_new_relic_metric_path: '/metric/v1'
+
+# app server instance type
+# c5.xlarge == 4 vcpu's /w 8GiB mem
+data_server_num_cores: 4
+data_server_ec2_instance_type_mem_mib: "{{ 8 * 1024 }}"
 
 # The path (in this project) to the test keypair that will be copied to the Data Servers for local-only testing.
 # Note: This file is encrypted with Ansible Vault and will be automagically encrypted during the copy.

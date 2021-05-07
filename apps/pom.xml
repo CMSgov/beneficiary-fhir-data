@@ -58,6 +58,7 @@
 	</repositories>
 
 	<modules>
+		<module>bfd-shared-utils</module>
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>
@@ -82,7 +83,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>3.1.2</metrics.version>
+		<metrics.version>4.1.2</metrics.version>
 		<hibernate.version>5.2.10.Final</hibernate.version>
 		
 		<!-- The default DB that will be used in integration tests. -->
@@ -91,17 +92,13 @@
 		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
 		<its.db.username></its.db.username>
 		<its.db.password></its.db.password>
+
+		<!-- Whether the V2 endpoints should be enabled -->
+		<local.v2.enabled>true</local.v2.enabled>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<!-- Provides various utilities, particularly for managing DB connections. -->
-				<groupId>com.justdavis.karl.jessentials</groupId>
-				<artifactId>jessentials-misc</artifactId>
-				<version>3.2.0</version>
-			</dependency>
-
 			<dependency>
 				<!-- Provides a sane facade for the giant mess of incompatible logging 
 					frameworks in Java. -->
@@ -157,11 +154,11 @@
 				child projects use, as incompatibility problems with Spring are common. -->
 			<dependency>
 				<!-- Lock & harmonize the versions of the various Spring Framework modules. 
-					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir:pom:2.4 
-					uses the 4.3.7.RELEASE version of the Spring Framework. -->
+					We look to HAPI for a guide on what release series to use: ca.uhn.hapi.fhir:hapi-fhir:pom:4.1 
+					uses the 4.3.29.RELEASE version of the Spring Framework. -->
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
-				<version>4.3.7.RELEASE</version>
+				<version>4.3.29.RELEASE</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -170,7 +167,7 @@
 					Framework that we're using, per http://docs.spring.io/spring-data/jpa/docs/1.11.4.RELEASE/reference/html/#dependencies.spring-framework. -->
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.11.4.RELEASE</version>
+				<version>1.11.23.RELEASE</version>
 			</dependency>
 
 			<dependency>
@@ -217,13 +214,15 @@
 				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>9.4.1208</version>
+				<version>42.2.16</version>
 			</dependency>
 			<dependency>
 				<!-- In-memory database that is used in some tests to speed things up. -->
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
-				<version>2.4.1</version>
+				<!-- The 2.5.x series is the last to support Java 8. -->
+				<version>2.5.2</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP 
@@ -237,7 +236,7 @@
 				<!-- The test framework used for unit and integration tests. -->
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.12</version>
+				<version>4.13.1</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -561,6 +560,9 @@ checkJavaFormat
 						<goals>
 							<goal>jar</goal>
 						</goals>
+						<configuration>
+							<failOnError>false</failOnError>
+            			</configuration>
 					</execution>
 				</executions>
 			</plugin>

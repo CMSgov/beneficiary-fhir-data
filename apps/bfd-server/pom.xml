@@ -15,6 +15,10 @@
 		A parent POM for the bfd-server-* projects, which provide a FHIR-compliant API for querying Medicare beneficiary data.
 	</description>
 
+	<properties>
+		<hapi-fhir.version>4.1.0</hapi-fhir.version>
+	</properties>
+
 	<modules>
 		<module>bfd-server-launcher-sample</module>
 		<module>bfd-server-launcher</module>
@@ -48,7 +52,7 @@
 				<!-- The test framework used for unit and integration tests. -->
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.12</version>
+				<version>4.13.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -67,6 +71,16 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<!-- Provides utility code and dependencies that are shared by (more or
+				less) all of the other BFD modules. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<pluginManagement>

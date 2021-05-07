@@ -2,10 +2,13 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.justdavis.karl.misc.exceptions.BadCodeMonkeyException;
+import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.HHAClaimLine;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Address;
@@ -20,10 +23,15 @@ final class HHAClaimTransformer {
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claim the CCW {@link HHAClaim} to transform
+   * @param includeTaxNumbers whether or not to include tax numbers in the result (see {@link
+   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
+   *     false</code>)
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     HHAClaim}
    */
-  static ExplanationOfBenefit transform(MetricRegistry metricRegistry, Object claim) {
+  @Trace
+  static ExplanationOfBenefit transform(
+      MetricRegistry metricRegistry, Object claim, Optional<Boolean> includeTaxNumbers) {
     Timer.Context timer =
         metricRegistry
             .timer(MetricRegistry.name(HHAClaimTransformer.class.getSimpleName(), "transform"))
@@ -57,6 +65,8 @@ final class HHAClaimTransformer {
         Optional.of(claimGroup.getPaymentAmount()),
         claimGroup.getFinalAction());
 
+    TransformerUtils.mapEobWeeklyProcessDate(eob, claimGroup.getWeeklyProcessDate());
+
     // map eob type codes into FHIR
     TransformerUtils.mapEobType(
         eob,
@@ -80,7 +90,9 @@ final class HHAClaimTransformer {
         claimGroup.getAttendingPhysicianNpi(),
         claimGroup.getTotalChargeAmount(),
         claimGroup.getPrimaryPayerPaidAmount(),
-        claimGroup.getFiscalIntermediaryNumber());
+        claimGroup.getFiscalIntermediaryNumber(),
+        claimGroup.getFiDocumentClaimControlNumber(),
+        claimGroup.getFiOriginalClaimControlNumber());
 
     for (Diagnosis diagnosis :
         TransformerUtils.extractDiagnoses1Thru12(
@@ -239,6 +251,8 @@ final class HHAClaimTransformer {
       TransformerUtils.mapEobCommonGroupInpHHAHospiceSNFCoinsurance(
           eob, item, claimLine.getDeductibleCoinsuranceCd());
     }
+
+    TransformerUtils.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
 }

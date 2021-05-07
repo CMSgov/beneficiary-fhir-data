@@ -1,0 +1,433 @@
+{
+  "resourceType" : "ExplanationOfBenefit",
+  "id" : "hha-2925555555",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
+  "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
+      "code" : "P",
+      "display" : "Payment requested"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/prpayamt",
+    "valueMoney" : {
+      "value" : 11.0,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "value" : "15999"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "08683096577486"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+      "value" : "10493204767560565"
+    }
+  } ],
+  "identifier" : [ {
+    "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
+    "value" : "2925555555"
+  }, {
+    "system" : "https://bluebutton.cms.gov/resources/identifier/claim-group",
+    "value" : "900"
+  } ],
+  "status" : "active",
+  "type" : {
+    "coding" : [ {
+      "system" : "https://bluebutton.cms.gov/resources/variables/nch_clm_type_cd",
+      "code" : "10",
+      "display" : "Home Health Agency (HHA) claim"
+    }, {
+      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type",
+      "code" : "HHA"
+    }, {
+      "system" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
+      "code" : "W",
+      "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
+    }, {
+      "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+      "code" : "2"
+    } ]
+  },
+  "patient" : {
+    "reference" : "Patient/567834"
+  },
+  "billablePeriod" : {
+    "start" : "2015-06-23",
+    "end" : "2015-06-23"
+  },
+  "provider" : {
+    "identifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+      "value" : "45645"
+    }
+  },
+  "organization" : {
+    "identifier" : {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "1811111111"
+    }
+  },
+  "facility" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+        "code" : "3",
+        "display" : "Home Health Agency (HHA)"
+      }
+    } ],
+    "identifier" : {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "1811111111"
+    }
+  },
+  "information" : [ {
+    "sequence" : 1,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "2015-11-06"
+  }, {
+    "sequence" : 2,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
+        "display" : "Claim Frequency Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
+        "code" : "1",
+        "display" : "Admit thru discharge claim"
+      } ]
+    }
+  }, {
+    "sequence" : 3,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "display" : "Patient Discharge Status Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+  }, {
+    "sequence" : 4,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd",
+        "display" : "NCH Primary Payer Code (if not Medicare)"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd",
+        "code" : "A",
+        "display" : "Employer group health plan (EGHP) insurance for an aged beneficiary"
+      } ]
+    }
+  }, {
+    "sequence" : 5,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_hha_lupa_ind_cd",
+        "display" : "Claim HHA Low Utilization Payment Adjustment (LUPA) Indicator Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_hha_lupa_ind_cd",
+        "code" : "L",
+        "display" : "Low utilization payment adjustment (LUPA) claim"
+      } ]
+    }
+  }, {
+    "sequence" : 6,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_hha_rfrl_cd",
+        "display" : "Claim HHA Referral Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_hha_rfrl_cd",
+        "code" : "1",
+        "display" : "Physician referral - The patient was admitted upon the recommendation of a personal physician."
+      } ]
+    }
+  } ],
+  "careTeam" : [ {
+    "sequence" : 2,
+    "provider" : {
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "2222222222"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "sequence" : 3,
+    "provider" : {
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "345345345"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  } ],
+  "diagnosis" : [ {
+    "sequence" : 1,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm",
+        "code" : "H5555"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+        "code" : "principal",
+        "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
+      } ]
+    } ]
+  }, {
+    "sequence" : 2,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "H8888"
+      } ]
+    }
+  }, {
+    "sequence" : 3,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "R2222"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+        "code" : "external-first",
+        "display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."
+      } ]
+    } ]
+  }, {
+    "sequence" : 4,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "R3333"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+        "code" : "external",
+        "display" : "A code used to identify an external cause of injury, poisoning, or other adverse effect."
+      } ]
+    } ]
+  } ],
+  "insurance" : {
+    "coverage" : {
+      "reference" : "Coverage/part-b-567834"
+    }
+  },
+  "hospitalization" : {
+    "start" : "2015-06-23"
+  },
+  "item" : [ {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
+      "valueQuantity" : {
+        "value" : 666,
+        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+        "code" : "DD"
+      }
+    } ],
+    "sequence" : 1,
+    "careTeamLinkId" : [ 3 ],
+    "revenue" : {
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+          "code" : "A",
+          "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",
+          "code" : "4",
+          "display" : "No charge or units associated with this revenue center code. (For multiple HCPCS per single revenue center code) For revenue center code 0001, the following MSP override values may be present:"
+        }
+      } ],
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
+        "code" : "0023",
+        "display" : "Home Health services paid under PPS submitted as TOB 32X and 33X, effective 10/00. This code may appear multiple times on a claim to identify different HIPPS/Home Health Resource Groups (HRG)."
+      } ]
+    },
+    "service" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+        "code" : "2GGGG"
+      } ]
+    },
+    "modifier" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+        "code" : "KO"
+      } ]
+    } ],
+    "servicedDate" : "2015-06-23",
+    "locationAddress" : {
+      "state" : "UT"
+    },
+    "quantity" : {
+      "value" : 1
+    },
+    "adjudication" : [ {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd",
+          "display" : "Revenue Center 1st ANSI Code"
+        } ]
+      },
+      "reason" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd",
+          "code" : "CO120"
+        } ]
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_rate_amt",
+          "display" : "Revenue Center Rate Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 0.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_tot_chrg_amt",
+          "display" : "Revenue Center Total Charge Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 25.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ncvrd_chrg_amt",
+          "display" : "Revenue Center Non-Covered Charge Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 24.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_pmt_amt_amt",
+          "display" : "Revenue Center (Medicare) Payment Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 26.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    } ]
+  } ],
+  "totalCost" : {
+    "value" : 199.99,
+    "system" : "urn:iso:std:iso:4217",
+    "code" : "USD"
+  },
+  "payment" : {
+    "amount" : {
+      "value" : 188.0,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  },
+  "benefitBalance" : [ {
+    "category" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/benefit-category",
+        "code" : "medical",
+        "display" : "Medical Health Coverage"
+      } ]
+    },
+    "financial" : [ {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_hha_tot_visit_cnt",
+          "display" : "Claim HHA Total Visit Count"
+        } ]
+      },
+      "usedUnsignedInt" : 3
+    } ]
+  } ]
+}

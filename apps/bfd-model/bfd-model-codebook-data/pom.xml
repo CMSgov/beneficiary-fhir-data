@@ -42,12 +42,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides various generic utilities. -->
-			<groupId>com.justdavis.karl.jessentials</groupId>
-			<artifactId>jessentials-misc</artifactId>
-		</dependency>
-
-		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>

@@ -1,0 +1,276 @@
+From 30a4253cbf60a7800613ef5c782b7eb113a98762 Mon Sep 17 00:00:00 2001
+From: Ryan Travitz <rtravitz@gmail.com>
+Date: Mon, 22 Mar 2021 14:44:37 -0700
+Subject: [PATCH] Update files that load local synthetic data to new directory
+
+---
+ .../model/rif/samples/StaticRifResource.java  | 180 ++++++++++++++++++
+ .../rif/samples/StaticRifResourceGroup.java   |  33 ++++
+ .../pipeline/ccw/rif/load/RifLoaderIT.java    |  11 ++
+ 3 files changed, 224 insertions(+)
+
+diff --git a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
+index 9c0f140a..d45acb36 100644
+--- a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
++++ b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResource.java
+@@ -323,6 +323,161 @@ public enum StaticRifResource {
+       RifFileType.OUTPATIENT,
+       27955),
+ 
++  LOCAL_SYNTHETIC_BENEFICIARY_1999(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-1999.rif"),
++      RifFileType.BENEFICIARY,
++      10000),
++
++  LOCAL_SYNTHETIC_BENEFICIARY_2000(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-2000.rif"),
++      RifFileType.BENEFICIARY,
++      10000),
++
++  LOCAL_SYNTHETIC_BENEFICIARY_2014(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-2014.rif"),
++      RifFileType.BENEFICIARY,
++      10000),
++
++  LOCAL_SYNTHETIC_CARRIER_1999_1999(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-1999.rif"),
++      RifFileType.CARRIER,
++      102617),
++
++  LOCAL_SYNTHETIC_CARRIER_1999_2000(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-2000.rif"),
++      RifFileType.CARRIER,
++      107665),
++
++  LOCAL_SYNTHETIC_CARRIER_1999_2001(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-2001.rif"),
++      RifFileType.CARRIER,
++      113604),
++
++  LOCAL_SYNTHETIC_CARRIER_2000_2000(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2000.rif"),
++      RifFileType.CARRIER,
++      102178),
++
++  LOCAL_SYNTHETIC_CARRIER_2000_2001(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2001.rif"),
++      RifFileType.CARRIER,
++      108801),
++
++  LOCAL_SYNTHETIC_CARRIER_2000_2002(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2002.rif"),
++      RifFileType.CARRIER,
++      113806),
++
++  LOCAL_SYNTHETIC_CARRIER_2014_2014(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2014.rif"),
++      RifFileType.CARRIER,
++      108172),
++
++  LOCAL_SYNTHETIC_CARRIER_2014_2015(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2015.rif"),
++      RifFileType.CARRIER,
++      106577),
++
++  LOCAL_SYNTHETIC_CARRIER_2014_2016(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2016.rif"),
++      RifFileType.CARRIER,
++      86736),
++
++  LOCAL_SYNTHETIC_INPATIENT_1999_1999(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-1999.rif"),
++      RifFileType.INPATIENT,
++      650),
++
++  LOCAL_SYNTHETIC_INPATIENT_1999_2000(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-2000.rif"),
++      RifFileType.INPATIENT,
++      646),
++
++  LOCAL_SYNTHETIC_INPATIENT_1999_2001(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-2001.rif"),
++      RifFileType.INPATIENT,
++      700),
++
++  LOCAL_SYNTHETIC_INPATIENT_2000_2000(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2000.rif"),
++      RifFileType.INPATIENT,
++      706),
++
++  LOCAL_SYNTHETIC_INPATIENT_2000_2001(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2001.rif"),
++      RifFileType.INPATIENT,
++      641),
++
++  LOCAL_SYNTHETIC_INPATIENT_2000_2002(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2002.rif"),
++      RifFileType.INPATIENT,
++      680),
++
++  LOCAL_SYNTHETIC_INPATIENT_2014_2014(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2014.rif"),
++      RifFileType.INPATIENT,
++      352),
++
++  LOCAL_SYNTHETIC_INPATIENT_2014_2015(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2015.rif"),
++      RifFileType.INPATIENT,
++      309),
++
++  LOCAL_SYNTHETIC_INPATIENT_2014_2016(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2016.rif"),
++      RifFileType.INPATIENT,
++      387),
++
++  LOCAL_SYNTHETIC_PDE_2014(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2014.rif"),
++      RifFileType.PDE,
++      127643),
++
++  LOCAL_SYNTHETIC_PDE_2015(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2015.rif"),
++      RifFileType.PDE,
++      140176),
++
++  LOCAL_SYNTHETIC_PDE_2016(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2016.rif"),
++      RifFileType.PDE,
++      145526),
++
++  LOCAL_SYNTHETIC_OUTPATIENT_1999_1999(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-1999-1999.rif"),
++      RifFileType.OUTPATIENT,
++      20744),
++
++  LOCAL_SYNTHETIC_OUTPATIENT_2000_1999(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2000-1999.rif"),
++      RifFileType.OUTPATIENT,
++      22439),
++
++  LOCAL_SYNTHETIC_OUTPATIENT_2001_1999(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2001-1999.rif"),
++      RifFileType.OUTPATIENT,
++      23241),
++
++  LOCAL_SYNTHETIC_OUTPATIENT_2002_2000(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2002-2000.rif"),
++      RifFileType.OUTPATIENT,
++      24575),
++
++  LOCAL_SYNTHETIC_OUTPATIENT_2014_2014(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2014-2014.rif"),
++      RifFileType.OUTPATIENT,
++      25194),
++
++  LOCAL_SYNTHETIC_OUTPATIENT_2015_2014(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2015-2014.rif"),
++      RifFileType.OUTPATIENT,
++      26996),
++
++  LOCAL_SYNTHETIC_OUTPATIENT_2016_2014(
++      localData(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2016-2014.rif"),
++      RifFileType.OUTPATIENT,
++      27955),
++
+   SAMPLE_MCT_BENES(
+       resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
+ 
+@@ -411,6 +566,31 @@ public enum StaticRifResource {
+     };
+   }
+ 
++  /**
++   * @param dataSetLocation the {@link TestDataSetLocation} of the file to get a local copy of
++   * @param fileName the name of the specific file in the specified {@link TestDataSetLocation} to
++   *     get a local copy of, e.g. "beneficiaries.rif"
++   * @return a {@link URL} to a local copy of the specified test data file from S3
++   */
++  private static Supplier<URL> localData(TestDataSetLocation dataSetLocation, String fileName) {
++    return () -> {
++      // Find the build output `target` directory.
++      Path resourceDir = Paths.get(System.getenv("LOCAL_SYNTHETIC_DATA"));
++      if (!Files.exists(resourceDir))
++        throw new IllegalStateException(
++            "Unable to find directory: " + resourceDir.toAbsolutePath().toString());
++      // Build the path that the resources will be downloaded to.
++      Path resourceLocalCopy = resourceDir.resolve(fileName);
++
++      // We now know the file exists, so return it.
++      try {
++        return resourceLocalCopy.toUri().toURL();
++      } catch (MalformedURLException e) {
++        throw new BadCodeMonkeyException(e);
++      }
++    };
++  }
++
+   /**
+    * @param dataSetLocation the {@link TestDataSetLocation} of the file to get a local copy of
+    * @param fileName the name of the specific file in the specified {@link TestDataSetLocation} to
+diff --git a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
+index fbc6727a..40f50380 100644
+--- a/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
++++ b/apps/bfd-model/bfd-model-rif-samples/src/main/java/gov/cms/bfd/model/rif/samples/StaticRifResourceGroup.java
+@@ -86,6 +86,39 @@ public enum StaticRifResourceGroup {
+       StaticRifResource.SYNTHETIC_OUTPATIENT_2015_2014,
+       StaticRifResource.SYNTHETIC_OUTPATIENT_2016_2014),
+ 
++  LOCAL_SYNTHETIC(
++      StaticRifResource.LOCAL_SYNTHETIC_BENEFICIARY_1999,
++      StaticRifResource.LOCAL_SYNTHETIC_BENEFICIARY_2000,
++      StaticRifResource.LOCAL_SYNTHETIC_BENEFICIARY_2014,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_1999_1999,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_1999_2000,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_1999_2001,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_2000_2000,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_2000_2001,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_2000_2002,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_2014_2014,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_2014_2015,
++      StaticRifResource.LOCAL_SYNTHETIC_CARRIER_2014_2016,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_1999_1999,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_1999_2000,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_1999_2001,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_2000_2000,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_2000_2001,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_2000_2002,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_2014_2014,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_2014_2015,
++      StaticRifResource.LOCAL_SYNTHETIC_INPATIENT_2014_2016,
++      StaticRifResource.LOCAL_SYNTHETIC_PDE_2014,
++      StaticRifResource.LOCAL_SYNTHETIC_PDE_2015,
++      StaticRifResource.LOCAL_SYNTHETIC_PDE_2016,
++      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_1999_1999,
++      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_2000_1999,
++      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_2001_1999,
++      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_2002_2000,
++      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_2014_2014,
++      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_2015_2014,
++      StaticRifResource.LOCAL_SYNTHETIC_OUTPATIENT_2016_2014),
++
+   SAMPLE_MCT(StaticRifResource.SAMPLE_MCT_BENES, StaticRifResource.SAMPLE_MCT_PDE),
+ 
+   SAMPLE_MCT_UPDATE_1(StaticRifResource.SAMPLE_MCT_UPDATE_1_BENES),
+diff --git a/apps/bfd-pipeline/bfd-pipeline-ccw-rif/src/test/java/gov/cms/bfd/pipeline/ccw/rif/load/RifLoaderIT.java b/apps/bfd-pipeline/bfd-pipeline-ccw-rif/src/test/java/gov/cms/bfd/pipeline/ccw/rif/load/RifLoaderIT.java
+index 8d049012..e792afc7 100644
+--- a/apps/bfd-pipeline/bfd-pipeline-ccw-rif/src/test/java/gov/cms/bfd/pipeline/ccw/rif/load/RifLoaderIT.java
++++ b/apps/bfd-pipeline/bfd-pipeline-ccw-rif/src/test/java/gov/cms/bfd/pipeline/ccw/rif/load/RifLoaderIT.java
+@@ -1130,4 +1130,15 @@ public final class RifLoaderIT {
+               return true;
+             });
+   }
++
++  @Test
++  public void loadLocalSyntheticData() {
++    /*Assume.assumeTrue(
++    String.format(
++        "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
++        Runtime.getRuntime().maxMemory()),
++    Runtime.getRuntime().maxMemory() >= 4500000000L); */
++    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
++    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.LOCAL_SYNTHETIC.getResources()));
++  }
+ }
+-- 
+2.30.0
+

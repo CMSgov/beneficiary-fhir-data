@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dataSetManifest xmlns="http://cms.hhs.gov/bluebutton/api/schema/ccw-rif/v9" 
+  timestamp="2016-12-19T10:29:51Z" sequenceId="1">
+<entry name="bene.txt" type="BENEFICIARY" />
+<entry name="bcarrier.txt" type="CARRIER" />
+<entry name="dme.txt" type="DME" />
+<entry name="hha.txt" type="HHA" />
+<entry name="hospice.txt" type="HOSPICE" />
+<entry name="inpatient.txt" type="INPATIENT" />
+<entry name="outpatient.txt" type="OUTPATIENT" />
+<entry name="snf.txt" type="SNF" />
+<entry name="pde.txt" type="PDE" />
+</dataSetManifest>

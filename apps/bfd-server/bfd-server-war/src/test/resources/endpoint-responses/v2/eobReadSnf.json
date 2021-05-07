@@ -1,0 +1,848 @@
+{
+  "resourceType" : "ExplanationOfBenefit",
+  "id" : "snf-777777777",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional" ]
+  },
+  "contained" : [ {
+    "resourceType" : "Organization",
+    "id" : "provider-org",
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization" ]
+    },
+    "identifier" : [ {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "code" : "PRN"
+        } ]
+      },
+      "value" : "299999"
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+          "code" : "npi"
+        } ]
+      },
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "1111111111"
+    } ],
+    "active" : true
+  } ],
+  "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
+      "code" : "V",
+      "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
+      "code" : "B",
+      "display" : "Benefit exhausted"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+      "code" : "1"
+    }
+  } ],
+  "identifier" : [ {
+    "type" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+        "code" : "uc",
+        "display" : "Unique Claim ID"
+      } ]
+    },
+    "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
+    "value" : "777777777"
+  }, {
+    "type" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+        "code" : "uc",
+        "display" : "Unique Claim ID"
+      } ]
+    },
+    "system" : "https://bluebutton.cms.gov/resources/identifier/claim-group",
+    "value" : "900"
+  } ],
+  "status" : "active",
+  "type" : {
+    "coding" : [ {
+      "system" : "https://bluebutton.cms.gov/resources/variables/nch_clm_type_cd",
+      "code" : "20",
+      "display" : "Non swing bed Skilled Nursing Facility (SNF) claim"
+    }, {
+      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type",
+      "code" : "SNF"
+    }, {
+      "system" : "http://terminology.hl7.org/CodeSystem/claim-type",
+      "code" : "institutional",
+      "display" : "Institutional"
+    } ]
+  },
+  "use" : "claim",
+  "patient" : {
+    "reference" : "Patient/567834"
+  },
+  "billablePeriod" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+        "code" : "3",
+        "display" : "Final bill"
+      }
+    } ],
+    "start" : "2013-12-01",
+    "end" : "2013-12-18"
+  },
+  "created" : "IGNORED_FIELD",
+  "insurer" : {
+    "identifier" : {
+      "value" : "CMS"
+    }
+  },
+  "provider" : {
+    "reference" : "#provider-org"
+  },
+  "facility" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+        "code" : "2",
+        "display" : "Skilled Nursing Facility (SNF)"
+      }
+    } ]
+  },
+  "outcome" : "complete",
+  "careTeam" : [ {
+    "sequence" : 1,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "2222222222"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "attending",
+        "display" : "Attending"
+      } ]
+    }
+  }, {
+    "sequence" : 2,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "3333333333"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "operating",
+        "display" : "Operating"
+      } ]
+    }
+  }, {
+    "sequence" : 3,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "4444444444"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "otheroperating",
+        "display" : "Other Operating"
+      } ]
+    }
+  }, {
+    "sequence" : 4,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "345345345"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "performing",
+        "display" : "Performing provider"
+      } ]
+    }
+  } ],
+  "supportingInfo" : [ {
+    "sequence" : 1,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code" : "clmrecvddate",
+        "display" : "Claim Received Date"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "2014-02-14"
+  }, {
+    "sequence" : 2,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+        "display" : "Claim Inpatient Admission Type Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_ip_admsn_type_cd",
+        "code" : "3",
+        "display" : "Elective - The patient's condition permitted adequate time to schedule the availability of suitable accommodations."
+      } ]
+    }
+  }, {
+    "sequence" : 3,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd",
+        "display" : "Claim Source Inpatient Admission Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_src_ip_admsn_cd",
+        "code" : "4"
+      } ]
+    }
+  }, {
+    "sequence" : 4,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_vrfd_ncvrd_stay_from_dt",
+        "display" : "NCH Verified Non-covered Stay From Date"
+      } ]
+    },
+    "timingPeriod" : {
+      "start" : "2002-01-11",
+      "end" : "2002-01-21"
+    }
+  }, {
+    "sequence" : 5,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_mdcr_bnfts_exhtd_dt_i",
+        "display" : "NCH Beneficiary Medicare Benefits Exhausted Date"
+      } ]
+    },
+    "timingDate" : "2002-01-31"
+  }, {
+    "sequence" : 6,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
+        "display" : "Claim Diagnosis Related Group Code (or MS-DRG Code)"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
+        "code" : "645"
+      } ]
+    }
+  }, {
+    "sequence" : 7,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_ptnt_stus_ind_cd",
+        "display" : "NCH Patient Status Indicator Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/nch_ptnt_stus_ind_cd",
+        "code" : "A",
+        "display" : "Discharged"
+      } ]
+    }
+  }, {
+    "sequence" : 8,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code" : "admissionperiod",
+        "display" : "Admission Period"
+      } ]
+    },
+    "timingPeriod" : {
+      "start" : "2013-11-05",
+      "end" : "2013-12-18"
+    }
+  }, {
+    "sequence" : 9,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_qlfyd_stay_from_dt",
+        "display" : "NCH Qualified Stay From Date"
+      } ]
+    },
+    "timingPeriod" : {
+      "start" : "2013-09-23",
+      "end" : "2013-11-05"
+    }
+  }, {
+    "sequence" : 10,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_pps_ind_cd",
+        "display" : "Claim PPS Indicator Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_pps_ind_cd",
+        "code" : "2",
+        "display" : "PPS bill; claim contains PPS indicator"
+      } ]
+    }
+  }, {
+    "sequence" : 11,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_blood_pnts_frnshd_qty",
+        "display" : "NCH Blood Pints Furnished Quantity"
+      } ]
+    },
+    "valueQuantity" : {
+      "value" : 19,
+      "unit" : "pint",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "[pt_us]"
+    }
+  }, {
+    "sequence" : 12,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw",
+        "display" : "Claim MCO Paid Switch"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw",
+        "code" : "0",
+        "display" : "No managed care organization (MCO) payment"
+      } ]
+    }
+  }, {
+    "sequence" : 13,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code" : "typeofbill",
+        "display" : "Type of Bill"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
+        "code" : "1",
+        "display" : "Admit thru discharge claim"
+      } ]
+    }
+  }, {
+    "sequence" : 14,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code" : "discharge-status",
+        "display" : "Discharge Status"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "1"
+      } ]
+    }
+  }, {
+    "sequence" : 15,
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd",
+        "display" : "NCH Primary Payer Code (if not Medicare)"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd",
+        "code" : "A",
+        "display" : "Employer group health plan (EGHP) insurance for an aged beneficiary"
+      } ]
+    }
+  } ],
+  "diagnosis" : [ {
+    "sequence" : 1,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm",
+        "code" : "R4444"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+        "code" : "other",
+        "display" : "Other"
+      } ]
+    } ]
+  }, {
+    "sequence" : 2,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm",
+        "code" : "R5555"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+        "code" : "principal",
+        "display" : "Principal Diagnosis"
+      } ]
+    } ]
+  }, {
+    "sequence" : 3,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm",
+        "code" : "R6666"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+        "code" : "other",
+        "display" : "Other"
+      } ]
+    } ]
+  }, {
+    "sequence" : 4,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm",
+        "code" : "R2222"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+        "code" : "externalcauseofinjury",
+        "display" : "External Cause of Injury"
+      } ]
+    } ]
+  }, {
+    "sequence" : 5,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm",
+        "code" : "R3333"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+        "code" : "externalcauseofinjury",
+        "display" : "External Cause of Injury"
+      } ]
+    } ]
+  } ],
+  "procedure" : [ {
+    "sequence" : 1,
+    "date" : "2016-01-16T00:00:00-05:00",
+    "procedureCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm",
+        "code" : "0TCCCCC"
+      } ]
+    }
+  } ],
+  "insurance" : [ {
+    "coverage" : {
+      "reference" : "Coverage/part-a-567834"
+    }
+  } ],
+  "item" : [ {
+    "sequence" : 1,
+    "careTeamSequence" : [ 4 ],
+    "revenue" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
+        "code" : "22"
+      }, {
+        "system" : "https://www.nubc.org/CodeSystem/RevenueCodes",
+        "code" : "A"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",
+        "code" : "A"
+      } ]
+    },
+    "productOrService" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+        "code" : "MMM"
+      } ]
+    },
+    "locationAddress" : {
+      "state" : "FL"
+    },
+    "quantity" : {
+      "value" : 0
+    },
+    "adjudication" : [ {
+      "category" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication",
+          "code" : "submitted",
+          "display" : "Submitted Amount"
+        }, {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_rate_amt",
+          "display" : "Revenue Center Rate Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 5.0,
+        "currency" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication",
+          "code" : "submitted",
+          "display" : "Submitted Amount"
+        }, {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_tot_chrg_amt",
+          "display" : "Revenue Center Total Charge Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 95.0,
+        "currency" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+          "code" : "noncovered",
+          "display" : "Noncovered"
+        }, {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ncvrd_chrg_amt",
+          "display" : "Revenue Center Non-Covered Charge Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 88.0,
+        "currency" : "USD"
+      }
+    } ]
+  } ],
+  "total" : [ {
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication",
+        "code" : "submitted",
+        "display" : "Submitted Amount"
+      }, {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_tot_chrg_amt",
+        "display" : "Claim Total Charge Amount"
+      } ]
+    },
+    "amount" : {
+      "value" : 5555.03,
+      "currency" : "USD"
+    }
+  } ],
+  "payment" : {
+    "amount" : {
+      "value" : 3333.33,
+      "currency" : "USD"
+    }
+  },
+  "benefitBalance" : [ {
+    "category" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+        "code" : "1",
+        "display" : "Medical Care"
+      } ]
+    },
+    "financial" : [ {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_utlztn_day_cnt",
+          "display" : "Claim Medicare Utilization Day Count"
+        } ]
+      },
+      "usedUnsignedInt" : 17
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/bene_tot_coinsrnc_days_cnt",
+          "display" : "Beneficiary Total Coinsurance Days Count"
+        } ]
+      },
+      "usedUnsignedInt" : 17
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_non_utlztn_days_cnt",
+          "display" : "Claim Medicare Non Utilization Days Count"
+        } ]
+      },
+      "usedUnsignedInt" : 0
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ip_ddctbl_amt",
+          "display" : "NCH Beneficiary Inpatient (or other Part A) Deductible Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 112.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_pta_coinsrnc_lblty_amt",
+          "display" : "NCH Beneficiary Part A Coinsurance Liability Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 5.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/nch_ip_ncvrd_chrg_amt",
+          "display" : "NCH Inpatient(or other Part A) Non-covered Charge Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 33.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/nch_ip_tot_ddctn_amt",
+          "display" : "NCH Inpatient (or other Part A) Total Deductible/Coinsurance Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 14.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_dsprprtnt_shr_amt",
+          "display" : "Claim PPS Capital Disproportionate Share Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 7.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_excptn_amt",
+          "display" : "Claim PPS Capital Exception Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 5.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_fsp_amt",
+          "display" : "Claim PPS Capital Federal Specific Portion (FSP) Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 9.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_ime_amt",
+          "display" : "Claim PPS Capital Indirect Medical Education (IME) Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 6.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_pps_cptl_outlier_amt",
+          "display" : "Claim PPS Capital Outlier Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 8.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/clm_pps_old_cptl_hld_hrmls_amt",
+          "display" : "Claim PPS Old Capital Hold Harmless Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 4.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/nch_bene_blood_ddctbl_lblty_am",
+          "display" : "NCH Beneficiary Blood Deductible Liability Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 6.0,
+        "currency" : "USD"
+      }
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/benefit-balance",
+          "code" : "https://bluebutton.cms.gov/resources/variables/prpayamt",
+          "display" : "NCH Primary Payer (if not Medicare) Claim Paid Amount"
+        } ]
+      },
+      "usedMoney" : {
+        "value" : 11.0,
+        "currency" : "USD"
+      }
+    } ]
+  } ]
+}

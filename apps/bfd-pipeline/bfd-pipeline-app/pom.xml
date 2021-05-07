@@ -19,19 +19,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-rif-load</artifactId>
+			<artifactId>bfd-pipeline-ccw-rif</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-pipeline-rif-extract</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<!-- Provides various utilities, particularly for managing DB connections. -->
-			<groupId>com.justdavis.karl.jessentials</groupId>
-			<artifactId>jessentials-misc</artifactId>
 		</dependency>
 
 		<dependency>
@@ -52,6 +41,18 @@
 				at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-jvm</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>dropwizard-metrics-newrelic</artifactId>
+			<version>0.5.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.newrelic.telemetry</groupId>
+			<artifactId>telemetry-http-okhttp</artifactId>
+			<version>0.6.1</version>
 		</dependency>
 
 		<dependency>
@@ -98,7 +99,7 @@
 					<groupId>com.github.chrischristo</groupId>
 					<artifactId>capsule-maven-plugin</artifactId>
 					<configuration>
-						<appClass>gov.cms.bfd.pipeline.app.S3ToDatabaseLoadApp</appClass>
+						<appClass>gov.cms.bfd.pipeline.app.PipelineApplication</appClass>
 
 						<!-- Building the "really executable" .x files is tempting, but ultimately 
 							not very useful, as there's no way to pass JVM args into such launchers, 

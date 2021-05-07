@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import gov.cms.bfd.server.war.commons.CCWProcedure;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.CodeableConcept;

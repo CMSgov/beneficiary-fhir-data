@@ -33,6 +33,7 @@ public final class MappingSpec {
   private String headerEntityIdField;
   private String headerEntityGeneratedIdField;
   private boolean hasLines = false;
+  private boolean hasBeneficiaryMonthly = false;
   private String lineTable;
   private List<String> headerEntityTransientFields;
   private List<RifField> headerEntityAdditionalDatabaseFields;
@@ -61,7 +62,10 @@ public final class MappingSpec {
     return rifLayout;
   }
 
-  /** @param rifLayout the new value for {@link #getRifLayout()} */
+  /**
+   * @param rifLayout the new value for {@link #getRifLayout()}
+   * @return the {@link MappingSpec} whose rifLayout is set
+   */
   public MappingSpec setRifLayout(RifLayout rifLayout) {
     this.rifLayout = rifLayout;
     return this;
@@ -83,7 +87,10 @@ public final class MappingSpec {
     return ClassName.get(packageName, headerEntity);
   }
 
-  /** @param headerEntity the new value for {@link #getHeaderEntity()} */
+  /**
+   * @param headerEntity the new value for {@link #getHeaderEntity()}
+   * @return the {@link MappingSpec} whose headerEntity is set
+   */
   public MappingSpec setHeaderEntity(String headerEntity) {
     this.headerEntity = headerEntity;
     return this;
@@ -152,9 +159,29 @@ public final class MappingSpec {
     return hasLines;
   }
 
-  /** @param hasLines the new value for {@link #getHasLines()} */
+  /**
+   * @param hasLines the new value for {@link #getHasLines()}
+   * @return the {@link MappingSpec} whose hasLines is set
+   */
   public MappingSpec setHasLines(boolean hasLines) {
     this.hasLines = hasLines;
+    return this;
+  }
+
+  /**
+   * @return <code>true</code> if the RIF layout has child line fields that should be stored
+   *     separately from its parent header fields, <code>false</code> if not
+   */
+  public boolean getHasBeneficiaryMonthly() {
+    return hasBeneficiaryMonthly;
+  }
+
+  /**
+   * @param hasBeneficiaryMonthly the new value for {@link #setHasBeneficiaryMonthly(boolean)}
+   * @return the {@link MappingSpec} whose hasBeneficiaryMonthly will be set
+   */
+  public MappingSpec setHasBeneficiaryMonthly(boolean hasBeneficiaryMonthly) {
+    this.hasBeneficiaryMonthly = hasBeneficiaryMonthly;
     return this;
   }
 
@@ -182,6 +209,15 @@ public final class MappingSpec {
   public ClassName getLineEntity() {
     if (!hasLines) throw new IllegalStateException();
     return ClassName.get(packageName, headerEntity + "Line");
+  }
+
+  /**
+   * @return the name of the JPA {@link Entity} class that will be used to store data from this RIF
+   *     layout for the line fields, if any
+   */
+  public ClassName getBeneficiaryMonthlyEntity() {
+    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
+    return ClassName.get(packageName, "BeneficiaryMonthly");
   }
 
   /**
@@ -219,12 +255,31 @@ public final class MappingSpec {
   }
 
   /**
+   * @return the name of the field in the {@link #getBeneficiaryMonthlyEntityParentField()} {@link
+   *     Entity} that should be used to store and refer to the parentBeneficiary {@link
+   *     #getBeneficiaryMonthlyEntityParentField()} {@link Entity}s, if any
+   */
+  public String getBeneficiaryMonthlyEntityParentField() {
+    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
+    return "parentBeneficiary";
+  }
+
+  /**
    * @return the name of the field in the {@link #getLineEntity()} {@link Entity} that should be
    *     used for the identifying line number, if any
    */
   public String getLineEntityLineNumberField() {
     if (!hasLines) throw new IllegalStateException();
     return "lineNumber";
+  }
+
+  /**
+   * @return the name of the field in the {@link #getEntityBeneficiaryMonthlyField()} {@link Entity}
+   *     that should be used for the identifying yearMonth, if any
+   */
+  public String getEntityBeneficiaryMonthlyField() {
+    if (!hasBeneficiaryMonthly) throw new IllegalStateException();
+    return "yearMonth";
   }
 
   /** @return the fields in {@link #getHeaderEntity()} that should be marked as {@link Transient} */

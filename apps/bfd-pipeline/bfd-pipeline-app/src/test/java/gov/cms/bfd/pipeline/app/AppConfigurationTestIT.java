@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.app;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
-import gov.cms.bfd.pipeline.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

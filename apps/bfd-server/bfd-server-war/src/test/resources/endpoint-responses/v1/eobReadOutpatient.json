@@ -1,0 +1,635 @@
+{
+  "resourceType" : "ExplanationOfBenefit",
+  "id" : "outpatient-1234567890",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
+  "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/resources/variables/nch_profnl_cmpnt_chrg_amt",
+    "valueMoney" : {
+      "value" : 66.89,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ptb_ddctbl_amt",
+    "valueMoney" : {
+      "value" : 112.0,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_ptb_coinsrnc_amt",
+    "valueMoney" : {
+      "value" : 175.73,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/clm_op_prvdr_pmt_amt",
+    "valueMoney" : {
+      "value" : 693.92,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/clm_op_bene_pmt_amt",
+    "valueMoney" : {
+      "value" : 44.0,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/nch_bene_blood_ddctbl_lblty_am",
+    "valueMoney" : {
+      "value" : 6.0,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/clm_mdcr_non_pmt_rsn_cd",
+      "code" : "A",
+      "display" : "Covered worker's compensation (Obsolete)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/prpayamt",
+    "valueMoney" : {
+      "value" : 11.0,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_num",
+      "value" : "15444"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntl_num",
+      "value" : "32490593716374487"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+    "valueIdentifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/fi_orig_clm_cntl_num",
+      "value" : "373273882012"
+    }
+  } ],
+  "identifier" : [ {
+    "system" : "https://bluebutton.cms.gov/resources/variables/clm_id",
+    "value" : "1234567890"
+  }, {
+    "system" : "https://bluebutton.cms.gov/resources/identifier/claim-group",
+    "value" : "900"
+  } ],
+  "status" : "active",
+  "type" : {
+    "coding" : [ {
+      "system" : "https://bluebutton.cms.gov/resources/variables/nch_clm_type_cd",
+      "code" : "40",
+      "display" : "Hospital Outpatient claim"
+    }, {
+      "system" : "https://bluebutton.cms.gov/resources/codesystem/eob-type",
+      "code" : "OUTPATIENT"
+    }, {
+      "system" : "http://hl7.org/fhir/ex-claimtype",
+      "code" : "professional",
+      "display" : "Professional"
+    }, {
+      "system" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
+      "code" : "W",
+      "display" : "Part B institutional claim record (outpatient [HOP], HHA)"
+    }, {
+      "system" : "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+      "code" : "3"
+    } ]
+  },
+  "patient" : {
+    "reference" : "Patient/567834"
+  },
+  "billablePeriod" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/claim_query_cd",
+        "code" : "3",
+        "display" : "Final bill"
+      }
+    } ],
+    "start" : "2011-01-24",
+    "end" : "2011-01-24"
+  },
+  "provider" : {
+    "identifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+      "value" : "999999"
+    }
+  },
+  "organization" : {
+    "identifier" : {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "1497758544"
+    },
+    "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+  },
+  "facility" : {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+        "code" : "1",
+        "display" : "Hospital"
+      }
+    } ],
+    "identifier" : {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "value" : "1497758544"
+    },
+    "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
+  },
+  "information" : [ {
+    "sequence" : 1,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_wkly_proc_dt",
+        "display" : "NCH Weekly Claim Processing Date"
+      } ]
+    },
+    "timingDate" : "2011-02-26"
+  }, {
+    "sequence" : 2,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw",
+        "display" : "Claim MCO Paid Switch"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_mco_pd_sw",
+        "code" : "0",
+        "display" : "No managed care organization (MCO) payment"
+      } ]
+    }
+  }, {
+    "sequence" : 3,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
+        "display" : "Claim Frequency Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
+        "code" : "1",
+        "display" : "Admit thru discharge claim"
+      } ]
+    }
+  }, {
+    "sequence" : 4,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "display" : "Patient Discharge Status Code"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "1"
+      } ]
+    }
+  }, {
+    "sequence" : 5,
+    "category" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+        "code" : "https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd",
+        "display" : "NCH Primary Payer Code (if not Medicare)"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/nch_prmry_pyr_cd",
+        "code" : "A",
+        "display" : "Employer group health plan (EGHP) insurance for an aged beneficiary"
+      } ]
+    }
+  } ],
+  "careTeam" : [ {
+    "sequence" : 2,
+    "provider" : {
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "3333333333"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "assist",
+        "display" : "Assisting Provider"
+      } ]
+    }
+  }, {
+    "sequence" : 3,
+    "provider" : {
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "4444"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "other",
+        "display" : "Other"
+      } ]
+    }
+  }, {
+    "sequence" : 4,
+    "provider" : {
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "2222222222"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "sequence" : 5,
+    "provider" : {
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "345345345"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    }
+  } ],
+  "diagnosis" : [ {
+    "sequence" : 1,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "R5555"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+        "code" : "principal",
+        "display" : "The single medical diagnosis that is most relevant to the patient's chief complaint or need for treatment."
+      } ]
+    } ]
+  }, {
+    "sequence" : 2,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "I9999"
+      } ]
+    }
+  }, {
+    "sequence" : 3,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "R2222"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+        "code" : "external-first",
+        "display" : "The code used to identify the 1st external cause of injury, poisoning, or other adverse effect."
+      } ]
+    } ]
+  }, {
+    "sequence" : 4,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "R3333"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+        "code" : "external",
+        "display" : "A code used to identify an external cause of injury, poisoning, or other adverse effect."
+      } ]
+    } ]
+  }, {
+    "sequence" : 5,
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "R1122"
+      } ]
+    },
+    "type" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/diagnosis-type",
+        "code" : "reason-for-visit",
+        "display" : "A diagnosis code used to identify the patient's reason for the visit."
+      } ]
+    } ]
+  } ],
+  "procedure" : [ {
+    "sequence" : 1,
+    "date" : "2016-01-16T00:00:00-05:00",
+    "procedureCodeableConcept" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/sid/icd-10",
+        "code" : "0AABBZZ"
+      } ]
+    }
+  } ],
+  "insurance" : {
+    "coverage" : {
+      "reference" : "Coverage/part-b-567834"
+    }
+  },
+  "item" : [ {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty",
+      "valueQuantity" : {
+        "value" : 77,
+        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ndc_qty_qlfr_cd",
+        "code" : "GG"
+      }
+    } ],
+    "sequence" : 25,
+    "careTeamLinkId" : [ 5 ],
+    "revenue" : {
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
+          "code" : "A",
+          "display" : "Services not paid under OPPS; uses a different fee schedule (e.g., ambulance, PT, mammography)"
+        }
+      } ],
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr",
+        "code" : "1"
+      } ]
+    },
+    "service" : {
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ide_ndc_upc_num",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ide_ndc_upc_num",
+          "code" : "987654321"
+        }
+      } ],
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+        "code" : "M99"
+      } ]
+    },
+    "modifier" : [ {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+        "code" : "XX"
+      } ]
+    } ],
+    "servicedDate" : "1942-01-03",
+    "locationAddress" : {
+      "state" : "KY"
+    },
+    "quantity" : {
+      "value" : 111
+    },
+    "adjudication" : [ {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd",
+          "display" : "Revenue Center 1st ANSI Code"
+        } ]
+      },
+      "reason" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_ansi_cd",
+          "code" : "CO120"
+        } ]
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_2nd_ansi_cd",
+          "display" : "Revenue Center 2nd ANSI Code"
+        } ]
+      },
+      "reason" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_2nd_ansi_cd",
+          "code" : "CR121"
+        } ]
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_blood_ddctbl_amt",
+          "display" : "Revenue Center Blood Deductible Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 10.45,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_cash_ddctbl_amt",
+          "display" : "Revenue Center Cash Deductible Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 12.89,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_coinsrnc_wge_adjstd_c",
+          "display" : "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 15.23,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_rdcd_coinsrnc_amt",
+          "display" : "Revenue Center Reduced Coinsurance Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 11.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_1st_msp_pd_amt",
+          "display" : "Revenue Center 1st Medicare Secondary Payer (MSP) Paid Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 0.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_2nd_msp_pd_amt",
+          "display" : "Revenue Center 2nd Medicare Secondary Payer (MSP) Paid Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 0.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_prvdr_pmt_amt",
+          "display" : "Revenue Center (Medicare) Provider Payment Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 200.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_bene_pmt_amt",
+          "display" : "Revenue Center Payment Amount to Beneficiary"
+        } ]
+      },
+      "amount" : {
+        "value" : 300.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ptnt_rspnsblty_pmt",
+          "display" : "Revenue Center Patient Responsibility Payment Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 500.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_pmt_amt_amt",
+          "display" : "Revenue Center (Medicare) Payment Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 5000.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_rate_amt",
+          "display" : "Revenue Center Rate Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 5.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_tot_chrg_amt",
+          "display" : "Revenue Center Total Charge Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 999.85,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "system" : "https://bluebutton.cms.gov/resources/codesystem/adjudication",
+          "code" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ncvrd_chrg_amt",
+          "display" : "Revenue Center Non-Covered Charge Amount"
+        } ]
+      },
+      "amount" : {
+        "value" : 134.0,
+        "system" : "urn:iso:std:iso:4217",
+        "code" : "USD"
+      }
+    } ]
+  } ],
+  "totalCost" : {
+    "value" : 8888.85,
+    "system" : "urn:iso:std:iso:4217",
+    "code" : "USD"
+  },
+  "payment" : {
+    "amount" : {
+      "value" : 693.11,
+      "system" : "urn:iso:std:iso:4217",
+      "code" : "USD"
+    }
+  }
+}

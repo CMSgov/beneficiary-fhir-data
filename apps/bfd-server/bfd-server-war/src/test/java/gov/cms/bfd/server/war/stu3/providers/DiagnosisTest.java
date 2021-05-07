@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import gov.cms.bfd.server.war.stu3.providers.Diagnosis.DiagnosisLabel;
+import gov.cms.bfd.server.war.commons.Diagnosis;
+import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;

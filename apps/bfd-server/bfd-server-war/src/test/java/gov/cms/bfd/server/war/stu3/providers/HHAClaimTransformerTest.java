@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rif.HHAClaimLine;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +39,8 @@ public final class HHAClaimTransformerTest {
             .findFirst()
             .get();
 
-    ExplanationOfBenefit eob = HHAClaimTransformer.transform(new MetricRegistry(), claim);
+    ExplanationOfBenefit eob =
+        HHAClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
     assertMatches(claim, eob);
   }
 
@@ -82,7 +84,9 @@ public final class HHAClaimTransformerTest {
         claim.getAttendingPhysicianNpi(),
         claim.getTotalChargeAmount(),
         claim.getPrimaryPayerPaidAmount(),
-        claim.getFiscalIntermediaryNumber());
+        claim.getFiscalIntermediaryNumber(),
+        claim.getFiDocumentClaimControlNumber(),
+        claim.getFiOriginalClaimControlNumber());
 
     Assert.assertEquals(4, eob.getDiagnosis().size());
 
@@ -139,6 +143,7 @@ public final class HHAClaimTransformerTest {
     TransformerTestUtils.assertEobCommonGroupInpHHAHospiceSNFCoinsuranceEquals(
         eobItem0, claimLine1.getDeductibleCoinsuranceCd());
 
+    String claimControlNumber = "0000000000";
     // Test to ensure item level fields between Inpatient, Outpatient, HHA, Hopsice
     // and SNF match
     TransformerTestUtils.assertEobCommonItemRevenueEquals(
@@ -149,6 +154,7 @@ public final class HHAClaimTransformerTest {
         claimLine1.getTotalChargeAmount(),
         claimLine1.getNonCoveredChargeAmount(),
         claimLine1.getUnitCount(),
+        claimControlNumber,
         claimLine1.getNationalDrugCodeQuantity(),
         claimLine1.getNationalDrugCodeQualifierCode(),
         claimLine1.getRevenueCenterRenderingPhysicianNPI(),
@@ -170,5 +176,8 @@ public final class HHAClaimTransformerTest {
         Optional.empty(),
         Optional.of(claim.getNearLineRecordIdCode()),
         Optional.of(claim.getClaimTypeCode()));
+
+    // Test lastUpdated
+    TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
   }
 }

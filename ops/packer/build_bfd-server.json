@@ -2,8 +2,7 @@
   "variables": {
     "source_ami": "",
     "subnet_id": "",
-    "vault_password_file": "",
-    "env": ""
+    "vault_password_file": ""
   },
   "builders": [{
       "type": "amazon-ebs",
@@ -19,10 +18,10 @@
           "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
-      "ami_name": "bfd-fhir-{{user `env`}}-{{isotime \"20060102030405\"}}",
+      "ami_name": "bfd-fhir-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
       "tags": {
-        "Name": "bfd-fhir-{{user `env`}}-{{isotime \"20060102030405\"}}",
+        "Name": "bfd-fhir-{{isotime \"20060102030405\"}}",
         "Application": "BFD",
         "Environment": "{{user `env`}}",
         "Function": "FHIR APP SERVER",
@@ -54,7 +53,7 @@
   ],
   "post-processors": [{
     "type": "manifest",
-    "output": "manifest_{{user `env`}}_data-server.json",
+    "output": "manifest_data-server.json",
     "strip_path": true
   }]
 }
