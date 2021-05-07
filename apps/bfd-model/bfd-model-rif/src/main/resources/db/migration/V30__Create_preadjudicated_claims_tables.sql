@@ -3,17 +3,12 @@
  * https://confluenceent.cms.gov/pages/viewpage.action?spaceKey=MPSM&title=MVP+0.1+Data+Dictionary+for+Replicated+Data+Access+API
  */
 
+CREATE SCHEMA IF NOT EXISTS "pre_adj";
+
 /*
- TODO - Determine whether we want to store tables in public schema or create a new one.
- For now the table names are prefixed with PreAdj (pre-adjudicated).
+ * Where possible column names map directly to fields in the RDA API result message.
  */
-
-/*
-TODO - what tablespace should we use as a default?
-*/
-${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
-
-create table "PreAdjFissClaims"
+create table "pre_adj"."FissClaims"
 (
     "dcn"               varchar(23) not null,
     "hicNo"             varchar(12) not null,
@@ -31,13 +26,8 @@ create table "PreAdjFissClaims"
     "mbiHash"           varchar(64),
     "fedTaxNumber"      varchar(10),
     "lastUpdated"       timestamp with time zone,
-    constraint "PreAdjFissClaims_pkey" primary key ("dcn")
-)
-/*
-TODO - should we have a tablespace for this table or just use the default?
-${logic.tablespaces-escape} tablespace "preadjfissclaims_ts"
-*/
-;
+    constraint "FissClaims_pkey" primary key ("dcn")
+);
 
 /*
  * Index the MedicareBeneficiaryIdentifier (MBI) hash column for mbi searches.
@@ -45,29 +35,23 @@ ${logic.tablespaces-escape} tablespace "preadjfissclaims_ts"
  * Since this is a frequent operation, the hash is indexed.
  */
 
-create index "PreAdjFissClaims_mbi_hash_idx"
-    on "PreAdjFissClaims" ("mbiHash");
+create index "FissClaims_mbi_hash_idx"
+    on "pre_adj"."FissClaims" ("mbiHash");
 
 /*
- * Columns with leading underscore in the name are unique to our database.
- * Other columns map directly to fields in the RDA API result message.
+ * Where possible column names map directly to fields in the RDA API result message.
  *
- * The _priority column is a 0 based index indicating the order in which the codes
+ * The priority column is a 0 based index indicating the order in which the codes
  * appear in the RDA API result message for the claim.
  */
-create table "PreAdjFissProcCodes"
+create table "pre_adj"."FissProcCodes"
 (
     "dcn"         varchar(23) not null,
-    "_priority"   smallint    not null,
+    "priority"    smallint    not null,
     "procCode"    varchar(10) not null,
     "procFlag"    varchar(4),
     "procDate"    date,
     "lastUpdated" timestamp with time zone,
-    constraint "PreAdjFissProcCodes_pkey" primary key ("dcn", "_priority"),
-    constraint "PreAdjFissProcCodes_claim" foreign key ("dcn") references "PreAdjFissClaims" ("dcn")
-)
-/*
-TODO - should we have a tablespace for this table or just use the default?
-${logic.tablespaces-escape} tablespace "preadjfissproccodes_ts"
-*/
-;
+    constraint "FissProcCodes_pkey" primary key ("dcn", "priority"),
+    constraint "FissProcCodes_claim" foreign key ("dcn") references "pre_adj"."FissClaims" ("dcn")
+);
