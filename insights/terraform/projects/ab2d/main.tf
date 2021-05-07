@@ -15,16 +15,7 @@ module "bucket" {
   name            = local.project
   sensitivity     = "moderate"
   tags            = local.tags  
-  cross_accounts  = [
-    # Needed for firehoses
-    "arn:aws:iam::777200079629:role/Ab2dBfdInsightsRole",  
-    "arn:aws:iam::349849222861:role/Ab2dBfdInsightsRole",
-    "arn:aws:iam::330810004472:role/Ab2dBfdInsightsRole",  
-    # Needed for developers
-    "arn:aws:iam::777200079629:role/ab2d-spe-developer",   
-    "arn:aws:iam::349849222861:role/ab2d-spe-developer",
-    "arn:aws:iam::330810004472:role/ab2d-spe-developer"
-  ]
+  cross_accounts  = var.ab2d_cross_accounts
 }
 
 data "aws_s3_bucket" "moderate_bucket" {
