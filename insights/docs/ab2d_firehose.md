@@ -2,9 +2,9 @@
 
 # Bucket
 
-The bucket for AB2D data is `bfd-insights-ab2d-577373831711`
+The bucket for AB2D data is `bfd-insights-ab2d-BFDACCTNUM`
 
-The CMK for the bucket is `arn:aws:kms:us-east-1:577373831711:key/97973f21-cdc5-421e-83a8-8545b007999f`
+The CMK for the bucket is `arn:aws:kms:us-east-1:BFDACCTNUM:key/KEYID`
 
 # Kinesis Firehose Setup
 
