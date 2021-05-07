@@ -15,9 +15,7 @@ module "bucket" {
   name        = local.project
   sensitivity = "moderate"
   tags        = local.tags
-  cross_accounts = [
-    "arn:aws:iam::755619740999:role/BcdaBfdInsightsRole"
-  ]
+  cross_accounts = var.bcda_cross_accounts
 }
 
 data "aws_s3_bucket" "moderate_bucket" {
