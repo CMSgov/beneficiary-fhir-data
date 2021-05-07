@@ -36,6 +36,10 @@ locals {
 # Find resources defined outside this script 
 # 
 
+# Acct num
+#
+data "aws_caller_identity" "current" {}
+
 # VPC
 #
 data "aws_vpc" "main" {
@@ -68,8 +72,6 @@ data "aws_route53_zone" "local_zone" {
 
 # S3 Buckets
 #
-data "aws_caller_identity" "current" {}
-
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
 }
@@ -152,7 +154,7 @@ data "aws_security_group" "remote" {
 # Find ansible vault pw read only policy by hardcoded ARN, no other options for this data source
 #
 data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
-  arn = "arn:aws:iam::577373831711:policy/bfd-ansible-vault-pw-ro-s3"
+  arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
 }
 
 ##
