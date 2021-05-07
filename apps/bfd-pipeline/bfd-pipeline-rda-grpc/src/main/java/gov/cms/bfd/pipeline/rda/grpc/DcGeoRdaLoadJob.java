@@ -7,9 +7,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
@@ -25,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * reentrant. If multiple threads invoke the call() method at the same time only the first thread
  * will do any work. The other threads will all immediately return that they have no work to do.
  */
-public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
+public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobArguments> {
   private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRdaLoadJob.class);
   public static final String SCAN_INTERVAL_PROPERTY = "DCGeoRDALoadIntervalSeconds";
   public static final int SCAN_INTERVAL_DEFAULT = 300;
@@ -72,7 +76,8 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
    */
-  public static PipelineJob newDcGeoFissClaimLoadJob(MetricRegistry appMetrics) {
+  public static PipelineJob<NullPipelineJobArguments> newDcGeoFissClaimLoadJob(
+      MetricRegistry appMetrics) {
     return new DcGeoRdaLoadJob<>(
         new Config(),
         () ->
@@ -80,10 +85,6 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
                 new GrpcRdaSource.Config(), new FissClaimStreamCaller(), appMetrics),
         () -> new SkeletonRdaSink<>(appMetrics),
         appMetrics);
-  }
-
-  public Duration getScanInterval() {
-    return config.getScanInterval();
   }
 
   @Override
@@ -125,16 +126,43 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
     }
   }
 
+  /**
+   * This job will tend to run for a long time during each exccution but has a schedule so that it
+   * can be automatically restarted if it exits for any reason. The job detects when it's already
+   * running so periodic execution is safe.
+   *
+   * @return
+   */
+  @Override
+  public Optional<PipelineJobSchedule> getSchedule() {
+    return Optional.of(
+        new PipelineJobSchedule(config.getRunInterval().toMillis(), ChronoUnit.MILLIS));
+  }
+
+  @Override
+  public boolean isInterruptible() {
+    return true;
+  }
+
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
   public static final class Config {
-    private final Duration scanInterval;
+    /**
+     * runInterval specifies how often the job should be scheduled. It is used to create a return
+     * value for the PipelineJob.getSchedule() method.
+     */
+    private final Duration runInterval;
+
+    /**
+     * batchSize specifies the number of records per batch sent to the RdaSink for processing. This
+     * value will likely be tuned for a specific type of sink object and for performance tuning
+     * purposes (i.e. finding most efficient transaction size for a specific database).
+     */
     private final int batchSize;
 
-    public Config(Duration scanInterval, int batchSize) {
-      this.scanInterval = Preconditions.checkNotNull(scanInterval);
+    public Config(Duration runInterval, int batchSize) {
+      this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
-      Preconditions.checkArgument(
-          scanInterval.toMillis() >= 1_000, "scanInterval less than 1s: %s");
+      Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "scanInterval less than 1s: %s");
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
     }
 
@@ -144,8 +172,8 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob {
           ConfigUtils.getInt(BATCH_SIZE_PROPERTY, BATCH_SIZE_DEFAULT));
     }
 
-    public Duration getScanInterval() {
-      return scanInterval;
+    public Duration getRunInterval() {
+      return runInterval;
     }
 
     public int getBatchSize() {
