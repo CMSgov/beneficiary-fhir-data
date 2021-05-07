@@ -204,8 +204,8 @@ resource "aws_iam_policy" "packer_s3" {
                 "s3:GetObjectVersion"
             ],
             "Resource": [
-                "arn:aws:s3:::bfd-packages/*",
-                "arn:aws:s3:::bfd-packages"
+                "arn:aws:s3:::${var.bfd_packages_bucket}/*",
+                "arn:aws:s3:::${var.bfd_packages_bucket}"
             ]
         }
     ]
