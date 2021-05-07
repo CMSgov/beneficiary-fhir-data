@@ -1,21 +1,12 @@
-locals {
-  # Add new group members here
-  member_map  = {
-    analysts  = ["HWRI", "SKKH", "DBWD", "FSTV", "SH7V"]
-    authors   = ["TUVE"]
-    readers   = []
-  }
-}
-
 # Add to the IAM groups
 
 data "aws_iam_group" "groups" {
-  for_each    = local.member_map
+  for_each    = var.insights_group_members
   group_name  = "bfd-insights-${each.key}"
 }
 
 resource "aws_iam_group_membership" "team" {
-  for_each    = local.member_map
+  for_each    = var.insights_group_members
   name        = "bfd-insights-${each.key}-team"
   group       = data.aws_iam_group.groups[each.key].group_name
   users       = each.value
@@ -31,7 +22,7 @@ data "aws_s3_bucket" "main" {
 }
 
 resource "aws_s3_bucket_object" "user_folder" {
-  for_each      = toset(local.member_map["analysts"])
+  for_each      = toset(var.insights_group_members["analysts"])
   bucket        = data.aws_s3_bucket.main.id
   content_type  = "application/x-directory"
   key           = "users/${each.value}/"
@@ -43,7 +34,7 @@ resource "aws_s3_bucket_object" "user_folder" {
 
 resource "aws_s3_bucket_object" "user_output_folder" {
   depends_on    = [aws_s3_bucket_object.user_folder]
-  for_each      = toset(local.member_map["analysts"])
+  for_each      = toset(var.insights_group_members["analysts"])
   bucket        = data.aws_s3_bucket.main.id
   content_type  = "application/x-directory"
   key           = "users/${each.value}/query_results"

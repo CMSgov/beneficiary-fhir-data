@@ -7,12 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.internal.dbsupport.DbSupport;
-import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
-import org.flywaydb.core.internal.dbsupport.SqlScript;
-import org.flywaydb.core.internal.util.PlaceholderReplacer;
-import org.flywaydb.core.internal.util.jdbc.JdbcUtils;
-import org.flywaydb.core.internal.util.scanner.classpath.ClassPathResource;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,41 +31,32 @@ public final class DatabaseSchemaManager {
   public static void createOrUpdateSchema(DataSource dataSource) {
     LOGGER.info("Schema create/upgrade: running...");
 
-    Flyway flyway = new Flyway();
-
-    // Trying to prevent career-limiting mistakes.
-    flyway.setCleanDisabled(true);
-
-    flyway.setDataSource(dataSource);
-    flyway.setPlaceholders(createScriptPlaceholdersMap(dataSource));
+    Flyway flyway = createFlyway(dataSource);
     flyway.migrate();
 
     LOGGER.info("Schema create/upgrade: complete.");
   }
 
   /**
-   * <strong>WARNING:</strong> This method should never be run against a production database that is
-   * in-service. Any queries against the database will take over ten minutes to complete. This
-   * method is only intended for (very careful) use when initially loading an empty database. Drops
-   * all indexes in the specified database.
-   *
-   * @param dataSource the JDBC {@link DataSource} for the database whose schema should be modified
+   * @param dataSource the {@link DataSource} to run {@link Flyway} against
+   * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
    */
-  public static void dropIndexes(DataSource dataSource) {
-    Connection connectionMetaDataTable = JdbcUtils.openConnection(dataSource);
-    DbSupport dbSupport = DbSupportFactory.createDbSupport(connectionMetaDataTable, true);
+  private static Flyway createFlyway(DataSource dataSource) {
+    FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
+    flywayBuilder.placeholders(createScriptPlaceholdersMap(dataSource));
 
-    String source =
-        new ClassPathResource(
-                "db/scripts/Drop_all_constraints.sql", DatabaseSchemaManager.class.getClassLoader())
-            .loadAsString("UTF-8");
-    source =
-        new PlaceholderReplacer(createScriptPlaceholdersMap(dataSource), "${", "}")
-            .replacePlaceholders(source);
+    // Seems to be required in our tests for some reason that I couldn't debug.
+    flywayBuilder.connectRetries(5);
 
-    SqlScript disableConstraintsScript = new SqlScript(source, dbSupport);
+    // Trying to prevent career-limiting mistakes.
+    flywayBuilder.cleanDisabled(true);
 
-    disableConstraintsScript.execute(dbSupport.getJdbcTemplate());
+    // The default name for the schema table changed in Flyway 5.
+    // We need to specify the original table name for backwards compatibility.
+    flywayBuilder.table("schema_version");
+
+    Flyway flyway = flywayBuilder.load();
+    return flyway;
   }
 
   /**
