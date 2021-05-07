@@ -22,10 +22,28 @@ Verify the function was created successfully.
 ** BENEFICIARY_MONTHLY Update Trigger                          **         
 *****************************************************************
 psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/ccw_load_update_trigger.sql 
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/ccw_load_delete_trigger.sql 
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/ccw_load_insert_trigger.sql 
 
 Notes:
 ------
-Verify the trigger was created successfully.
+Per the PR review process, it was suggested that we also have an
+INSERT and a DELETE trigger available.
+
+Verify the triggers were created successfully.
+
+select
+	trigger_name,
+	string_agg(event_manipulation, ',') as event,
+	action_timing as activation
+from information_schema.triggers
+group by 1, 3;
+
+If triggers were successfully created, we should see something like the following:
+
+"BeneficiaryMonthly"    "audit_ccw_delete"  "DELETE"
+"BeneficiaryMonthly"    "audit_ccw_insert"  "INSERT"
+"BeneficiaryMonthly"    "audit_ccw_update"  "UPDATE"
 
 
 *****************************************************************
@@ -43,11 +61,6 @@ Verify the table was created successfully.
 *****************************************************************
 psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/update_bene_monthly_proc.sql 
 
-Notes:
-------
-Verify the procedure was created successfully.
-
-
 *****************************************************************
 ** Create LOAD_FROM_CCW stored procedure                       **         
 *****************************************************************
@@ -55,13 +68,41 @@ psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/process_ccw_table.sql
 
 Notes:
 ------
-Verify the procedure was created successfully.
+Verify all procedures were created successfully.
+
+select
+    p.proname as specific_name,
+    case
+        when
+            l.lanname = 'internal' 
+        then
+            p.prosrc 
+        else
+            pg_get_functiondef(p.oid) 
+    end
+    as definition 
+from
+    pg_proc p 
+    left join pg_namespace n on p.pronamespace = n.oid 
+    left join pg_language l on p.prolang = l.oid 
+    left join pg_type t on t.oid = p.prorettype 
+where
+    n.nspname not in ('pg_catalog', 'information_schema')
+    and p.prokind = 'p' 
+order by
+    specific_name;
+
+
+If procedures were successfully created, we should see something like the following:
+
+load_from_ccw
+update_bene_monthly
 
 
 *****************************************************************
 ** COPY CCW load file into db table CCW_LOAD_TEMP              **         
 *****************************************************************
-psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/ccw_load_temp_via_copy.sql
+psql -h 127.0.0.1 -U bfd -d fihr -a -f sql/ccw_load_temp_via_copy_nohdr.sql
 
 Notes:
 
@@ -74,13 +115,16 @@ imported; here is the line that will need to be modified:
 
 FROM '/Users/colinchristophermackenzie/dev/bfd766/sql/test_export.sql.csv'
 
-It is still TBD as to how CCW will provide the data; BFD has requested a
-single CSV file that includes a header row that denotes the column
-structure. CCW has responded that it most likely will be two CSV files,
-one for 2019 and one for 2020 with no header row on either file.
+CCW has provided the data into two S3 buckets:
 
-Depending on how CCW does provide two data will determine the actual
-psql 'copy' into the CCW_LOAD_TEMP table.
+s3://bfd-prod-etl-577373831711/Incoming/BB_MBSF_2019.csv
+s3://bfd-prod-etl-577373831711/Incoming/BB_MBSF_2020.csv
+
+The files do not include a CSV header and all non-numeric values
+are wrapped in double quotes. Therefore the CCW_LOAD_TEMP will
+be loaded using:
+
+sql/ccw_load_temp_via_copy_nohdr.sql
 
 Prior to invoking the 'copy' command, a determination of the number
 of records in the input data should be made; the easiest would be
