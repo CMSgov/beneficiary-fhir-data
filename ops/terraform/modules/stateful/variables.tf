@@ -43,6 +43,3 @@ variable "module_features" {
   type = map(bool)
 }
 
-variable "bfd_packages_bucket" {
-  type = string
-}
