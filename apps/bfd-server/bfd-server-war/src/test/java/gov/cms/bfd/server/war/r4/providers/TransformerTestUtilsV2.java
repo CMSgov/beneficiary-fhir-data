@@ -342,7 +342,24 @@ public final class TransformerTestUtilsV2 {
   static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
+        Optional.of(TransformerConstants.CODING_NPI_US), expectedProviderNpi, null, careTeam);
+  }
+
+  /**
+   * @param expectedProviderTaxNumber the {@link Identifier#getValue()} of the provider to find a
+   *     matching {@link CareTeamComponent} for
+   * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
+   * @return the {@link CareTeamComponent} whose {@link CareTeamComponent#getProvider()} is an
+   *     {@link Identifier} with the specified provider tax number, or else <code>null</code> if no
+   *     such {@link CareTeamComponent} was found
+   */
+  static CareTeamComponent findCareTeamEntryForProviderTaxNumber(
+      String expectedProviderTaxNumber, List<CareTeamComponent> careTeam) {
+    return findCareTeamEntryForProviderIdentifier(
+        Optional.empty(),
+        expectedProviderTaxNumber,
+        C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER,
+        careTeam);
   }
 
   /**
@@ -355,8 +372,8 @@ public final class TransformerTestUtilsV2 {
    *     {@link Identifier} with the specified provider NPI, or else <code>null</code> if no such
    *     {@link CareTeamComponent} was found
    */
-  private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
-      String expectedIdentifierSystem,
+  public static CareTeamComponent findCareTeamEntryForProviderIdentifier(
+      Optional<String> expectedIdentifierSystem,
       String expectedIdentifierValue,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole expectedRole,
       List<CareTeamComponent> careTeam) {
@@ -379,10 +396,17 @@ public final class TransformerTestUtilsV2 {
    *     Identifier}
    */
   private static boolean doesReferenceMatchIdentifier(
-      String expectedIdentifierSystem, String expectedIdentifierValue, Reference actualReference) {
+      Optional<String> expectedIdentifierSystem,
+      String expectedIdentifierValue,
+      Reference actualReference) {
     if (!actualReference.hasIdentifier()) return false;
-    return expectedIdentifierSystem.equals(actualReference.getIdentifier().getSystem())
-        && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+
+    if (expectedIdentifierSystem.isPresent()) {
+      return expectedIdentifierSystem.get().equals(actualReference.getIdentifier().getSystem())
+          && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    } else {
+      return expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    }
   }
 
   /**
