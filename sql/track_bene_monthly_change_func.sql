@@ -7,14 +7,13 @@ AS $beneficiary_monthly_audit$
         --
         IF (TG_OP = 'UPDATE') THEN
                 INSERT INTO public.beneficiary_monthly_audit VALUES (OLD.*, 'U', now());
-            --END IF;
             RETURN NEW;
         ELSIF (TG_OP = 'INSERT') THEN
             INSERT INTO public.beneficiary_monthly_audit VALUES(NEW.*, 'I', now());
             RETURN NEW;
         ELSIF (TG_OP = 'DELETE') THEN
             INSERT INTO public.beneficiary_monthly_audit VALUES(OLD.*, 'D', now());
-            RETURN NEW;
+            RETURN OLD;
         END IF;
         RETURN NULL; -- result is ignored since this is an AFTER trigger
     END;
