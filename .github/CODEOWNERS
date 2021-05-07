@@ -10,16 +10,16 @@
 /apps @jzulim @cbrunefearless @mackec1 @rtravitz
 
 #BFD Insights Codeowners
-/insights @jzulim @keithdadkins @njdister @mackec1 @rtravitz
+/insights @jzulim @keithdadkins @njdister @mackec1 @rtravitz @jzulim
 
 #BCDA Insights Codeowners
-/insights/terraform/projects/bcda @msnook @orenfromberg
+/insights/terraform/projects/bcda @msnook @orenfromberg @jzulim
 
 #AB2D Insights Codeowners
-/insights/terraform/projects/ab2d @lailasharshar @nflearl @wnyffenegger
+/insights/terraform/projects/ab2d @lailasharshar @nflearl @wnyffenegger @jzulim
 
 #BB2 Insights Codeowners
-/insights/terraform/projects/bb2 @dtisza1 @njdister @jzulim
+/insights/terraform/projects/bb2 @dtisza1 @njdister @jzulim @jzulim
 
 #DCGEO Pipeline Codeowners
-/apps/bfd-pipeline/bfd-pipeline-rda-grpc @ericbuckley @brianburton
+/apps/bfd-pipeline/bfd-pipeline-rda-grpc @ericbuckley @brianburton @jzulim
