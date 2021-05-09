@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # partner info
-PARTNER="${PARTNER:-bcda}" # bcda, dpc, etc
+PARTNER="${PARTNER:-}" # bcda, dpc, etc
 EFT_ENV="${EFT_ENV:-test}" # prod, test, etc
 
 # where you want the efs file system mounted under (defaults to /mnt/eft)
