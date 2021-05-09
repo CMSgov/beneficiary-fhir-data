@@ -2,28 +2,30 @@
 # eft efs mount helper script
 set -euo pipefail
 
-# partner info
+# you must provide these values for the script to work
 PARTNER="${PARTNER:-}" # bcda, dpc, etc
-EFT_ENV="${EFT_ENV:-test}" # prod, test, etc
+EFT_ENV="${EFT_ENV:-}" # prod, test, etc
+BFD_EFS_ROLE_ARN="${BFD_EFS_ROLE_ARN:-}" # contact BFD ops team for this value
 
 # where you want the efs file system mounted under (defaults to /mnt/eft)
 # note: the directory must be empty and we will create the directories if they do not exist
 MOUNT_DIR="${MOUNT_DIR:-/mnt/eft}"
-MOUNT_USER_ID="${MOUNT_USER_ID:-}" # who will own the mount directories (defaults to user running script)
-MOUNT_GROUP_ID="${MOUNT_GROUP_ID:-}" # what group will own the mount directories (defaults to the user running this scripts primary gid)
+MOUNT_USER_ID="${MOUNT_USER_ID:-}" # who will own the mount directories (defaults to current user)
+MOUNT_GROUP_ID="${MOUNT_GROUP_ID:-}" # what group will own the mount directories (defaults to current group)
 MOUNT_PERMS="${MOUNT_PERMS:-0640}" # defaults to owner=rw group=r others=none
 
-# you should not need to change these (they are variables for testing purposes)
-BFD_EFS_ROLE_ARN=${BFD_EFS_ROLE_ARN:-}
-ETC_HOSTS_FILE="${ETC_HOSTS_FILE:-/etc/hosts}"
-FSTAB_FILE="${FSTAB_FILE:-/etc/fstab}"
-MOUNT_SAME_AZ_ONLY="${MOUNT_SAME_AZ_ONLY:-true}" # only mount if fs is hosted on the same physical AZ as us
+# other options (defaults are likely ok here)
+MOUNT_SAME_AZ_ONLY="${MOUNT_SAME_AZ_ONLY:-true}" # only mount if we find a mount target on the same az as us
 MOUNT_NOW="${MOUNT_NOW:-true}" # mount the file system when the script runs
-ADD_FSTAB_ENTRY="${ADD_FSTAB_ENTRY:-true}" # add a persistant mount entry in $FSTAB_FILE
 ADD_HOST_ENTRY="${ADD_HOST_ENTRY:-true}" # add a host entry for the file system (this must be true if the instance is not in BFD VPC)
+ADD_FSTAB_ENTRY="${ADD_FSTAB_ENTRY:-true}" # add a persistant mount entry in $FSTAB_FILE
 FSTAB_OPTIONS="${FSTAB_OPTIONS:-'_netdev,noresvport,tls,iam 0 0'}"
 
-# creds we will use to call assume-role
+# you should not need to edit these (they are variables for testing purposes)
+ETC_HOSTS_FILE="${ETC_HOSTS_FILE:-/etc/hosts}"
+FSTAB_FILE="${FSTAB_FILE:-/etc/fstab}"
+
+# we will use these creds to assume the role
 AWS_REGION="${AWS_REGION:-us-east-1}"
 AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-}"
 AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
