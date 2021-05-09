@@ -9,6 +9,9 @@ EFT_ENV="${EFT_ENV:-test}" # prod, test, etc
 # where you want the efs file system mounted under (defaults to /mnt/eft)
 # note: the directory must be empty and we will create the directories if they do not exist
 MOUNT_DIR="${MOUNT_DIR:-/mnt/eft}"
+MOUNT_USER_ID="${MOUNT_USER_ID:-}" # who will own the mount directories (defaults to user running script)
+MOUNT_GROUP_ID="${MOUNT_GROUP_ID:-}" # what group will own the mount directories (defaults to the user running this scripts primary gid)
+MOUNT_PERMS="${MOUNT_PERMS:-0640}" # defaults to owner=rw group=r others=none
 
 # you should not need to change these (they are variables for testing purposes)
 BFD_EFS_ROLE_ARN=${BFD_EFS_ROLE_ARN:-}
@@ -48,7 +51,7 @@ system_check(){
 
 # assumes the bcda-efs-rw-access-role
 assume_role(){
-  results=$(aws sts assume-role --role-arn "$BFD_EFS_ROLE_ARN" --role-session-name "${PARTNER}-eft-mount-helper")
+  results=$(aws sts assume-role --role-arn "$BFD_EFS_ROLE_ARN" --role-session-name "${PARTNER}_eft_mount_helper")
   AWS_ACCESS_KEY_ID=$(jq -r '.Credentials.AccessKeyId' <(echo "$results"))
   AWS_SECRET_ACCESS_KEY=$(jq -r '.Credentials.SecretAccessKey' <(echo "$results"))
   AWS_SESSION_TOKEN=$(jq -r '.Credentials.SessionToken' <(echo "$results"))
@@ -137,16 +140,43 @@ add_host_entry() {
 # prepares a mount directory for the given file system
 # $1 file system id
 prepare_mount_directory(){
-  # ensure mount directory exists
-  if ! mkdir -p "$MOUNT_DIR/$1"; then
-    echo "Error: could not create $MOUNT_DIR/$1"
-    exit 1
+  # default to current user and group
+  [[ -z "$MOUNT_USER_ID" ]] && MOUNT_USER_ID="$(id -u -n)"
+  [[ -z "$MOUNT_GROUP_ID" ]] && MOUNT_GROUP_ID="$(id -g -n)"
+  
+  # ensure the base directory for mount points exists (create it if not)
+  if ! [[ -d "$MOUNT_DIR" ]]; then
+    # shellcheck disable=SC2174
+    if ! mkdir -p -m 0755 "$MOUNT_DIR"; then
+      # try with sudo
+      sudo mkdir -p -m 0755 "$MOUNT_DIR"
+    fi
+    
+    # chown it
+    if ! chown "${MOUNT_USER_ID}:${MOUNT_GROUP_ID}" "$MOUNT_DIR" >/dev/null 2>&1; then
+      sudo chown "${MOUNT_USER_ID}:${MOUNT_GROUP_ID}" "$MOUNT_DIR" >/dev/null 2>&1
+    fi
+  fi
+
+  # ensure file system mount directory exists
+  # shellcheck disable=SC2174
+  if ! mkdir -p -m "$MOUNT_PERMS" "$MOUNT_DIR/$1"; then
+    if ! sudo mkdir -p -m "$MOUNT_PERMS" "$MOUNT_DIR/$1"; then
+      echo "Error: could not create mount directory at $MOUNT_DIR/$1"
+      exit 1
+    fi
   fi
 
   # ensure it's empty
   if [[ -n $(ls -A "$MOUNT_DIR/$1") ]]; then
     echo "Error: $MOUNT_DIR/$1 mount directory is not empty"
     exit 1
+  fi
+
+  # chown it
+  if ! chown "${MOUNT_USER_ID}:${MOUNT_GROUP_ID}" "$MOUNT_DIR/$1" >/dev/null 2>&1; then
+    # try with sudo
+    sudo chown "${MOUNT_USER_ID}:${MOUNT_GROUP_ID}" "$MOUNT_DIR/$1"
   fi
 }
 
@@ -208,3 +238,8 @@ for fs in "${file_systems[@]}"; do
   # add a persistant mount entry to fstab if desired
   [[ "$ADD_FSTAB_ENTRY" == true ]] && add_fstab_entry "$fs"
 done 
+
+# create a friendly symlink if there is only one file system 
+if [[ "${#file_systems[@]}" -eq 1 ]]; then
+  ln -sf "${MOUNT_DIR}/${file_systems[0]}" "${MOUNT_DIR}/eft"
+fi
