@@ -23,5 +23,5 @@ module "stateless" {
   git_branch_name = var.git_branch_name
   git_commit_id   = var.git_commit_id
 
-  mpm_rda_cidr_block = "10.234.232.0/21"
+  mpm_rda_cidr_block = var.mpm_rda_cidr_block
 }
