@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # eft efs mount helper script
-set -euo pipefail
+set -eo pipefail
 
 # you must provide these values for the script to work
 PARTNER="${PARTNER:-}" # bcda, dpc, etc
@@ -10,9 +10,9 @@ BFD_EFS_ROLE_ARN="${BFD_EFS_ROLE_ARN:-}" # contact BFD ops team for this value
 # where you want the efs file system mounted under (defaults to /mnt/eft)
 # note: the directory must be empty and we will create the directories if they do not exist
 MOUNT_DIR="${MOUNT_DIR:-/mnt/eft}"
-MOUNT_USER_ID="${MOUNT_USER_ID:-}" # who will own the mount directories (defaults to current user)
-MOUNT_GROUP_ID="${MOUNT_GROUP_ID:-}" # what group will own the mount directories (defaults to current group)
-MOUNT_PERMS="${MOUNT_PERMS:-0640}" # defaults to owner=rw group=r others=none
+MOUNT_USER_NAME="${MOUNT_USER_NAME:-}" # who will own the mount directories (defaults to current user)
+MOUNT_GROUP_NAME="${MOUNT_GROUP_NAME:-}" # what group will own the mount directories (defaults to current group)
+MOUNT_PERMS="${MOUNT_PERMS:-0750}" # defaults to owner=rw group=r others=none
 
 # other options (defaults are likely ok here)
 MOUNT_SAME_AZ_ONLY="${MOUNT_SAME_AZ_ONLY:-true}" # only mount if we find a mount target on the same az as us
@@ -32,7 +32,59 @@ AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-}"
 AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN:-}"
 
 # interal script variables
+PROGNAME=${0##*/}
 file_systems=()
+
+
+usage() {
+  echo -e "Usage: $PROGNAME [-h|--help] [-p|--partner-name PARTNER]"
+}
+
+help_message() {
+  cat <<- _EOF_
+  $PROGNAME
+  BFD EFT EFS mount helper script
+
+  $(usage)
+
+  Options (either pass these with command line flags, or export using ENV vars. Corresponding env vars are in [CAPS]:
+  -h, --help  Display this help message and exit.
+  -p, --partner-name [PARTNER] bcda, dpc, etc
+  -e | --eft-environment [EFT_ENV] test, prod, etc (defaults to test)
+  -r | --bfd-role-arn [BFD_EFS_ROLE_ARN] get this value from BFD ops
+  -m | --mount-dir [MOUNT_DIR] base directory where we will mount file systems (defaults to /mnt/eft)
+  --mount-dir-user-name [MOUNT_USER_NAME] user name who will own mount dir (defaults to current user)
+  --mount-dir-group-name [MOUNT_GROUP_NAME] group name who will own mount dirs (defaults to current group)
+  --mount-dir-posix-perms [MOUNT_PERMS] posix perms in #### format (defaults to 0750)
+  --mount-same-az-only [MOUNT_SAME_AZ_ONLY] only mount file system hosted on the same azid to avoid cross az data charges (true or false - defaults to true)
+  --mount-now [MOUNT_NOW] mount file system now (true or false - defaults to true)
+  --add-fstab-entry [ADD_FSTAB_ENTRY] add an entry to /etc/fstab to persist reboots (true or false - defaults to true)
+  --add-hosts-entry [ADD_HOSTS_ENTRY] add an entry to /etc/hosts (true or false - defaults to true and is required if you are not on BFD VPC)
+  --aws-region [AWS_REGION] region used to assume BFD EFS RW role (defaults to us-east-1 if not set via env var)
+  --aws-access-key-id [AWS_ACCESS_KEY_ID] access key id used to assume BFD EFS RW role (defaults to environment)
+  --aws-secret-access-key [AWS_SECRET_ACCESS_KEY] key used to assume BFD EFS RW role (defaults to environment)
+  --aws-session-token [AWS_SESSION_TOKEN] token used to assume BFD EFS RW role (defaults to environment)
+
+  Examples:
+  # using env vars (either exported, via .env file, etc)
+  export PARTNER=bcda
+  export EFT_ENV=test
+  export BFD_EFS_ROLE_ARN='arn:aws:iam::1234567:role/bcda-eft-efs-test-role'
+  ./mount-eft-efs.sh
+
+  # using command line args
+  ./mount-eft-efs.sh -p bcda -e test -r 'arn:aws:iam::1234567:role/bcda-eft-efs-test-role' --mount-dir=/path/to/mount/directory --mount-same-az-only=false
+  
+  # editing the default values in this script. setting default partner name for example:
+  vim mount-eft-efs.sh
+  # change this line
+    PARTNER="${PARTNER:-}" # bcda, dpc, etc
+  # to this
+    PARTNER="${PARTNER:-bcda}" # bcda, dpc, etc
+  :wq
+_EOF_
+  return
+}
 
 
 # make sure we have all the stuff we need to run this script
@@ -127,7 +179,6 @@ add_host_entry() {
   fi
   
   # remove any existing hosts entries
-  # sed -i "/^.*\ ${1}/d" "$ETC_HOSTS_FILE" # remove the entry (the next line after the comment)
   sed -i.bak "/^#\ ${1}\ EFT\ EFS\ HOST\ ENTRY\ -\ DO\ NOT\ EDIT$/{N;d;}" "$ETC_HOSTS_FILE" # remove the entry (the next line found after the comment)
   sed -i "/^#\ ${1}\ EFT\ EFS\ HOST\ ENTRY\ -\ DO\ NOT\ EDIT$/d" "$ETC_HOSTS_FILE" # remove the comment
 
@@ -143,8 +194,8 @@ add_host_entry() {
 # $1 file system id
 prepare_mount_directory(){
   # default to current user and group
-  [[ -z "$MOUNT_USER_ID" ]] && MOUNT_USER_ID="$(id -u -n)"
-  [[ -z "$MOUNT_GROUP_ID" ]] && MOUNT_GROUP_ID="$(id -g -n)"
+  [[ -z "$MOUNT_USER_NAME" ]] && MOUNT_USER_NAME="$(id -u -n)"
+  [[ -z "$MOUNT_GROUP_NAME" ]] && MOUNT_GROUP_NAME="$(id -g -n)"
   
   # ensure the base directory for mount points exists (create it if not)
   if ! [[ -d "$MOUNT_DIR" ]]; then
@@ -155,8 +206,8 @@ prepare_mount_directory(){
     fi
     
     # chown it
-    if ! chown "${MOUNT_USER_ID}:${MOUNT_GROUP_ID}" "$MOUNT_DIR" >/dev/null 2>&1; then
-      sudo chown "${MOUNT_USER_ID}:${MOUNT_GROUP_ID}" "$MOUNT_DIR" >/dev/null 2>&1
+    if ! chown "${MOUNT_USER_NAME}:${MOUNT_GROUP_NAME}" "$MOUNT_DIR" >/dev/null 2>&1; then
+      sudo chown "${MOUNT_USER_NAME}:${MOUNT_GROUP_NAME}" "$MOUNT_DIR" >/dev/null 2>&1
     fi
   fi
 
@@ -176,9 +227,9 @@ prepare_mount_directory(){
   fi
 
   # chown it
-  if ! chown "${MOUNT_USER_ID}:${MOUNT_GROUP_ID}" "$MOUNT_DIR/$1" >/dev/null 2>&1; then
+  if ! chown "${MOUNT_USER_NAME}:${MOUNT_GROUP_NAME}" "$MOUNT_DIR/$1" >/dev/null 2>&1; then
     # try with sudo
-    sudo chown "${MOUNT_USER_ID}:${MOUNT_GROUP_ID}" "$MOUNT_DIR/$1"
+    sudo chown "${MOUNT_USER_NAME}:${MOUNT_GROUP_NAME}" "$MOUNT_DIR/$1"
   fi
 }
 
@@ -186,19 +237,19 @@ prepare_mount_directory(){
 # $1 == file system id
 mount_fs(){
   # mount it
-  if mount -t efs -o tls,iam "$fs" "$MOUNT_DIR/$1" >/dev/null 2>&1; then
-    echo "EFT EFS file system ($fs) mounted on $MOUNT_DIR/$1"
+  if mount -t efs -o tls,iam "${1}:/" "$MOUNT_DIR/$1" >/dev/null 2>&1; then
+    echo "EFT EFS file system $1 mounted on ${MOUNT_DIR}/$1"
   else
-    echo "Error: failed to mount $fs EFT file system on $MOUNT_DIR"
+    echo "Error: failed to mount EFT EFS file system $1 on $MOUNT_DIR"
     exit 1
   fi
 }
 
-# creates an entry in /etc/fstab to automatically mount on reboot if not already present
+# creates an entry in /etc/fstab to remount on reboots
 # $1 == file system id
 add_fstab_entry(){
   local fstab_entry # the fstab entry string
-  fstab_entry="${1}:/ ${MOUNT_DIR}/${1} efs $FSTAB_OPTIONS"
+  fstab_entry="${1}:/ $MOUNT_DIR/$1 efs $FSTAB_OPTIONS"
   
   local epdir # escaped partner dir for use in sed
   epdir=$(sed 's#/#\\/#g' <(echo "$MOUNT_DIR"))
@@ -215,6 +266,81 @@ add_fstab_entry(){
   # shellcheck disable=SC2016
   sed -i '$!N;/^\n$/{$q;D;};P;D;' "$FSTAB_FILE"
 }
+
+
+#### PARSE COMMAND LINE OPTIONS ####
+while [[ -n "$1" ]]; do
+  case $1 in
+    -h | --help)
+      help_message; exit ;;
+    -p | --partner-name)
+      shift; PARTNER="$1" ;;
+    --partner-name=*)
+      PARTNER="${1#*=}" ;;
+    -e | --eft-environment)
+      shift; EFT_ENV="$1" ;;
+    --eft-environment=*)
+      EFT_ENV="${1#*=}" ;;
+    -r | --bfd-efs-role-arn)
+      shift; BFD_EFS_ROLE_ARN="$1" ;;
+    --bfd-efs-role-arn=*)
+      BFD_EFS_ROLE_ARN="${1#*=}" ;;
+    -m | --mount-dir)
+      shift; MOUNT_DIR="$1" ;;
+    --mount-dir=*)
+      MOUNT_DIR="${1#*=}" ;;
+    --mount-dir-user-name)
+      shift; MOUNT_USER_NAME="$1" ;;
+    --mount-dir-user-name=*)
+      MOUNT_USER_NAME="${1#*=}" ;;
+    --mount-dir-group-name)
+      shift; MOUNT_GROUP_NAME="$1" ;;
+    --mount-dir-group-name=*)
+      MOUNT_GROUP_NAME="${1#*=}" ;;
+    --mount-dir-posix-perms)
+      shift; MOUNT_PERMS="$1" ;;
+    --mount-dir-posix-perms=*)
+      MOUNT_PERMS="${1#*=}" ;;
+    --mount-same-az-only)
+      shift; MOUNT_SAME_AZ_ONLY="$1" ;;
+    --mount-same-az-only=*)
+      MOUNT_SAME_AZ_ONLY="${1#*=}" ;;
+    --mount-now)
+      shift; MOUNT_NOW="$1" ;;
+    --mount-now=*)
+      MOUNT_NOW="${1#*=}" ;;
+    --add-fstab-entry)
+      shift; ADD_FSTAB_ENTRY="$1" ;;
+    --add-fstab-entry=*)
+      ADD_FSTAB_ENTRY="${1#*=}" ;;
+    --add-hosts-entry)
+      shift; ADD_HOST_ENTRY="$1" ;;
+    --add-hosts-entry=*)
+      ADD_HOST_ENTRY="${1#*=}" ;;
+    --aws-region)
+      shift; AWS_REGION="$1" ;;
+    --aws-region=*)
+      AWS_REGION="${1#*=}" ;;
+    --aws-access-key-id)
+      shift; AWS_ACCESS_KEY_ID="$1" ;;
+    --aws-access-key-id=*)
+      AWS_ACCESS_KEY_ID="${1#*=}" ;;
+    --aws-secret-access-key)
+      shift; AWS_SECRET_ACCESS_KEY="$1" ;;
+    --aws-secret-access-key=*)
+      AWS_SECRET_ACCESS_KEY="${1#*=}" ;;
+    --aws-session-token)
+      shift; AWS_SESSION_TOKEN="$1" ;;
+    --aws-session-token=*)
+      AWS_SESSION_TOKEN="${1#*=}" ;;
+    -*)
+      usage
+      echo "Unknown option $1"; exit 1;;
+    *)
+      echo "Do not know $1"; exit 1 ;;
+  esac
+  shift
+done
 
 #### BEGIN ####
 # fail early if we do not have all the tools
@@ -243,5 +369,12 @@ done
 
 # create a friendly symlink if there is only one file system 
 if [[ "${#file_systems[@]}" -eq 1 ]]; then
-  ln -sf "${MOUNT_DIR}/${file_systems[0]}" "${MOUNT_DIR}/eft"
+  echo "Creating symlink to ${file_systems[0]} at ${MOUNT_DIR}/eft"
+  if ! unlink "${MOUNT_DIR}/eft" >/dev/null 2>&1; then
+    if [[ -f "${MOUNT_DIR}/eft" ]]; then
+      echo "Error: cannot eft symlink to ${file_systems[0]}. eft file exists."
+      exit
+    fi
+  fi
+  ln -s "${MOUNT_DIR}/${file_systems[0]}" "${MOUNT_DIR}/eft"
 fi
