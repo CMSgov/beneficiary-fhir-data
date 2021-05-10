@@ -21,3 +21,7 @@ WHERE "parentClaim" LIKE '-%';
 DELETE 
 FROM "public"."OutpatientClaims"
 WHERE "claimId" LIKE '-%';
+
+DELETE 
+FROM "public"."PartDEvents"
+WHERE "eventId" LIKE '-%';
