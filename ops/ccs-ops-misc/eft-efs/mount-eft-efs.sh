@@ -66,22 +66,32 @@ help_message() {
   --aws-session-token [AWS_SESSION_TOKEN] token used to assume BFD EFS RW role (defaults to environment)
 
   Examples:
-  # using env vars (either exported, via .env file, etc)
+  # Using env vars (either exported, via .env file, etc):
   export PARTNER=bcda
   export EFT_ENV=test
   export BFD_EFS_ROLE_ARN='arn:aws:iam::1234567:role/bcda-eft-efs-test-role'
+  export MOUNT_DIR=/mnt/eft
   ./mount-eft-efs.sh
 
-  # using command line args
-  ./mount-eft-efs.sh -p bcda -e test -r 'arn:aws:iam::1234567:role/bcda-eft-efs-test-role' --mount-dir=/path/to/mount/directory --mount-same-az-only=false
+  # Using command line args to mount file system to /eft as root. The mount directories will be owned by root:
+  sudo ./mount-eft-efs.sh -p bcda -e test -r 'arn:aws:iam::1234567:role/bcda-eft-efs-test-role' --mount-dir=/eft --mount-same-az-only=false
   
-  # editing the default values in this script. setting default partner name for example:
-  vim mount-eft-efs.sh
-  # change this line
+  # Mounting the file system to /usr/share/eft owned by a dedicated "efs" account, giving user 'foo' perms to read the files:
+  sudo groupadd -g 1500 efs
+  sudo useradd -u 1500 -g efs -s /bin/false -r efs
+  sudo usermod -a -G efs foo
+  sudo ./mount-eft-efs.sh -p bcda -e test -r 'arn:aws:iam::1234567:role/bcda-eft-efs-test-role' \
+        --mount-dir=/usr/share/efs \
+        --mount-dir-user-name=efs \
+        --mount-dir-group-name=efs \
+        --mount-dir-posix-perms=0740
+
+  # You can also simply edit the default values in this script directly by setting default values.
+  # Default values go after the :- (colon+dash). E.g., ENNVAR="${ENVVAR:-}" For example, to set partner name:
+  # edit mount-eft-efs.sh and change:
     PARTNER="${PARTNER:-}" # bcda, dpc, etc
   # to this
     PARTNER="${PARTNER:-bcda}" # bcda, dpc, etc
-  :wq
 _EOF_
   return
 }
