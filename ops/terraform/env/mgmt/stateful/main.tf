@@ -9,7 +9,7 @@ provider "aws" {
 
 module "stateful" {
   source = "../../../modules/mgmt_stateful"
-
+  bfd_packages_bucket = var.bfd_packages_bucket
   env_config = {
     env  = "mgmt"
     tags = { application = "bfd", business = "oeda", stack = "mgmt", Environment = "mgmt" }
