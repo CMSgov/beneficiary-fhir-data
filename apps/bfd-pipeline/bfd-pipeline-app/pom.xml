@@ -24,6 +24,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-rda-grpc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>

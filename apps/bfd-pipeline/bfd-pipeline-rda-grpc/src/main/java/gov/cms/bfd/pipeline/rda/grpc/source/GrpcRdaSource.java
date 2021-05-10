@@ -6,7 +6,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import gov.cms.bfd.pipeline.rda.grpc.ConfigUtils;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
@@ -33,12 +32,6 @@ import org.slf4j.LoggerFactory;
  */
 public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
-  public static final String HOST_PROPERTY = "DCGeoRDAFissClaimsServiceHost";
-  public static final String HOST_DEFAULT = "localhost";
-  public static final String PORT_PROPERTY = "DCGeoRDAFissClaimsServicePort";
-  public static final int PORT_DEFAULT = 443;
-  public static final String MAX_IDLE_SECONDS_PROPERTY = "DCGeoRDAFissClaimsServiceMaxIdleSeconds";
-  public static final long MAX_IDLE_SECONDS_DEFAULT = Long.MAX_VALUE;
 
   public static final String CALLS_METER =
       MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "calls");
@@ -180,18 +173,11 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     return processed;
   }
 
+  /** This class contains the configuration settings specific to the RDA rRPC service. */
   public static class Config {
     private final String host;
     private final int port;
     private final Duration maxIdle;
-
-    public Config() {
-      this(
-          ConfigUtils.getString(HOST_PROPERTY, HOST_DEFAULT),
-          ConfigUtils.getInt(PORT_PROPERTY, PORT_DEFAULT),
-          Duration.ofSeconds(
-              ConfigUtils.getLong(MAX_IDLE_SECONDS_PROPERTY, MAX_IDLE_SECONDS_DEFAULT)));
-    }
 
     public Config(String host, int port, Duration maxIdle) {
       this.host = Preconditions.checkNotNull(host);
@@ -200,6 +186,28 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       Preconditions.checkArgument(host.length() >= 1, "host name is empty");
       Preconditions.checkArgument(port >= 1, "port is negative (%s)");
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
+    }
+
+    /** @return the hostname or IP address of the host running the RDA API. */
+    public String getHost() {
+      return host;
+    }
+
+    /** @return the port on which the RDA API listens for connections. */
+    public int getPort() {
+      return port;
+    }
+
+    /**
+     * Used to specify the maximum amount of time to wait for responses to arrive on the response
+     * stream. This is an inter-message time, not an overall connection time. For example if maxIdle
+     * is set for five minutes the stream would be kept open forever as long as messages arrive
+     * within 5 minutes of each other.
+     *
+     * @return the maximum idle time for the rRPC service's response stream.
+     */
+    public Duration getMaxIdle() {
+      return maxIdle;
     }
   }
 }

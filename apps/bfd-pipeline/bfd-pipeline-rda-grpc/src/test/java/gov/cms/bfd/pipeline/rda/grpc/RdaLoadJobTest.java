@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.pipeline.rda.grpc.DcGeoRdaLoadJob.Config;
+import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob.Config;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.io.IOException;
 import java.time.Duration;
@@ -25,12 +25,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DcGeoRdaLoadJobTest {
+public class RdaLoadJobTest {
   private Callable<RdaSource<Integer>> sourceFactory;
   private Callable<RdaSink<Integer>> sinkFactory;
   private RdaSource<Integer> source;
   private RdaSink<Integer> sink;
-  private DcGeoRdaLoadJob job;
+  private RdaLoadJob job;
   private MetricRegistry appMetrics;
   private Config config;
 
@@ -43,7 +43,7 @@ public class DcGeoRdaLoadJobTest {
     sink = mock(RdaSink.class);
     config = new Config(Duration.ofSeconds(10), 3);
     appMetrics = new MetricRegistry();
-    job = new DcGeoRdaLoadJob(config, sourceFactory, sinkFactory, appMetrics);
+    job = new RdaLoadJob(config, sourceFactory, sinkFactory, appMetrics);
   }
 
   @Test
@@ -57,8 +57,8 @@ public class DcGeoRdaLoadJobTest {
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verifyNoInteractions(sinkFactory);
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.FAILURES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -73,8 +73,8 @@ public class DcGeoRdaLoadJobTest {
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verify(source).close();
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.FAILURES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -96,8 +96,8 @@ public class DcGeoRdaLoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.FAILURES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.FAILURES_METER_NAME).getCount());
   }
 
   @Test
@@ -113,8 +113,8 @@ public class DcGeoRdaLoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.SUCCESSES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.SUCCESSES_METER_NAME).getCount());
   }
 
   @Test
@@ -130,8 +130,8 @@ public class DcGeoRdaLoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(DcGeoRdaLoadJob.SUCCESSES_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
+    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.SUCCESSES_METER_NAME).getCount());
   }
 
   @Test
@@ -147,7 +147,7 @@ public class DcGeoRdaLoadJobTest {
 
     // A test job that waits for the second job to complete before doing any work itself.
     job =
-        new DcGeoRdaLoadJob<>(
+        new RdaLoadJob<>(
             config,
             () -> {
               waitForStartup.countDown();

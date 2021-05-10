@@ -146,6 +146,14 @@ public final class PipelineApplication {
     pipelineManager.registerJob(createCcwRifLoadJob(appMetrics, appConfig));
 
     /*
+     * Register the RDA job only if it has been enabled/configured.
+     */
+    if (appConfig.getRdaLoadOptions().isPresent()) {
+      pipelineManager.registerJob(
+          appConfig.getRdaLoadOptions().get().createFissClaimsLoadJob(appMetrics));
+    }
+
+    /*
      * At this point, we're done here with the main thread. From now on, the
      * PipelineManager's executor service should be the only non-daemon
      * thread running (and whatever it kicks off). Once/if that thread

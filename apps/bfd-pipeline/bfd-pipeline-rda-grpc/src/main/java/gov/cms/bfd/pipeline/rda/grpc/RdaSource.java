@@ -3,7 +3,8 @@ package gov.cms.bfd.pipeline.rda.grpc;
 /**
  * Interface for objects that retrieve objects from some source and pass them to a RdaSink for
  * processing. All implementations are AutoCloseable since they will generally hold a network or
- * database connection.
+ * database connection. Implementations of this class MUST provide orderly shutdown when their
+ * thread receives an InterruptedException.
  *
  * @param <T> the type of objects processed
  */

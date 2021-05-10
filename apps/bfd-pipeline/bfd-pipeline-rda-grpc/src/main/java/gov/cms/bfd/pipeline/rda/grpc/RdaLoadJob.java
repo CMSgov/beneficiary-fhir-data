@@ -5,8 +5,6 @@ import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
-import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
-import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
@@ -20,29 +18,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Skeleton PipelineJob instance that delegates the actual ETL work to two other objects. The
- * RDASource object handles communication with the source of incoming data. The RDASink object
+ * General PipelineJob instance that delegates the actual ETL work to two other objects. The
+ * RdaSource object handles communication with the source of incoming data. The RdaSink object
  * handles communication with the ultimate storage system. The purpose of this class is to handle
  * general PipelineJob semantics that are common to any source or sink.
  *
  * <p>Since the streaming service can run for extended periods of time this class is designed to be
  * reentrant. If multiple threads invoke the call() method at the same time only the first thread
- * will do any work. The other threads will all immediately return that they have no work to do.
+ * will do any work. The other threads will all immediately return with an indication that they have
+ * no work to do.
  */
-public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobArguments> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DcGeoRdaLoadJob.class);
-  public static final String SCAN_INTERVAL_PROPERTY = "DCGeoRDALoadIntervalSeconds";
-  public static final int SCAN_INTERVAL_DEFAULT = 300;
-  public static final String BATCH_SIZE_PROPERTY = "DCGeoBatchSize";
-  public static final int BATCH_SIZE_DEFAULT = 1;
+public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobArguments> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(RdaLoadJob.class);
   public static final String CALLS_METER_NAME =
-      MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "calls");
+      MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "calls");
   public static final String FAILURES_METER_NAME =
-      MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "failures");
+      MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "failures");
   public static final String SUCCESSES_METER_NAME =
-      MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "successes");
+      MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "successes");
   public static final String PROCESSED_METER_NAME =
-      MetricRegistry.name(DcGeoRdaLoadJob.class.getSimpleName(), "processed");
+      MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "processed");
 
   private final Config config;
   private final Callable<RdaSource<TResponse>> sourceFactory;
@@ -55,7 +50,7 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob<NullPipelin
   // time. If multiple threads call the job at the same time only the first will do any work.
   private final Semaphore runningSemaphore;
 
-  public DcGeoRdaLoadJob(
+  public RdaLoadJob(
       Config config,
       Callable<RdaSource<TResponse>> sourceFactory,
       Callable<RdaSink<TResponse>> sinkFactory,
@@ -68,23 +63,6 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob<NullPipelin
     successesMeter = appMetrics.meter(SUCCESSES_METER_NAME);
     processedMeter = appMetrics.meter(PROCESSED_METER_NAME);
     runningSemaphore = new Semaphore(1);
-  }
-
-  /**
-   * Factory method to construct a new job instance using standard parameters.
-   *
-   * @param appMetrics MetricRegistry used to track operational metrics
-   * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
-   */
-  public static PipelineJob<NullPipelineJobArguments> newDcGeoFissClaimLoadJob(
-      MetricRegistry appMetrics) {
-    return new DcGeoRdaLoadJob<>(
-        new Config(),
-        () ->
-            new GrpcRdaSource<>(
-                new GrpcRdaSource.Config(), new FissClaimStreamCaller(), appMetrics),
-        () -> new SkeletonRdaSink<>(appMetrics),
-        appMetrics);
   }
 
   @Override
@@ -127,11 +105,11 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob<NullPipelin
   }
 
   /**
-   * This job will tend to run for a long time during each exccution but has a schedule so that it
+   * This job will tend to run for a long time during each execution but has a schedule so that it
    * can be automatically restarted if it exits for any reason. The job detects when it's already
    * running so periodic execution is safe.
    *
-   * @return
+   * @return the run interval as a PipelineJobSchedule.
    */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
@@ -166,16 +144,12 @@ public final class DcGeoRdaLoadJob<TResponse> implements PipelineJob<NullPipelin
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
     }
 
-    public Config() {
-      this(
-          Duration.ofSeconds(ConfigUtils.getInt(SCAN_INTERVAL_PROPERTY, SCAN_INTERVAL_DEFAULT)),
-          ConfigUtils.getInt(BATCH_SIZE_PROPERTY, BATCH_SIZE_DEFAULT));
-    }
-
+    /** @return the expected time between executions of the job by the scheduler */
     public Duration getRunInterval() {
       return runInterval;
     }
 
+    /** @return the number of objects to write to the database per batch/transaction. */
     public int getBatchSize() {
       return batchSize;
     }

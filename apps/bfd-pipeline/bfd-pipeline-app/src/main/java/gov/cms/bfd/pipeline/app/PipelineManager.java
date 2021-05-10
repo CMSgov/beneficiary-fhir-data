@@ -50,11 +50,12 @@ public final class PipelineManager {
   /**
    * The number of jobs that can be run at one time. Because the {@link VolunteerJob} and {@link
    * SchedulerJob} will always be running, this number must be >=3, in order for any actual jobs to
-   * get run.
+   * get run. The current value allows the {@link gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob} and
+   * {@link gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob} to run at the same time.
    *
    * @see #jobExecutor
    */
-  public static final int JOB_EXECUTOR_THREADS = 3;
+  public static final int JOB_EXECUTOR_THREADS = 4;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManager.class);
 
