@@ -46,12 +46,13 @@ data "aws_iam_role" "etl_instance" {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ENCRYPTION KEYS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-# provision the cmk TODO: update policy to use roles instead of users
+# provision the encryption cmk (keys can be managed by users in the kms-key-admins group)
 resource "aws_kms_key" "eft_efs" {
-  description = "${var.partner}-eft-efs-${var.env_config.env}-cmk"
-  key_usage   = "ENCRYPT_DECRYPT"
-  is_enabled  = true
-  tags        = merge({ Name = "${var.partner}-eft-efs-${var.env_config.env}" }, local.tags)
+  description         = "${var.partner}-eft-efs-${var.env_config.env}-cmk"
+  key_usage           = "ENCRYPT_DECRYPT"
+  enable_key_rotation = true
+  is_enabled          = true
+  tags                = merge({ Name = "${var.partner}-eft-efs-${var.env_config.env}" }, local.tags)
 
   policy = <<POLICY
 {
@@ -64,31 +65,6 @@ resource "aws_kms_key" "eft_efs" {
       "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
     },
     "Action" : "kms:*",
-    "Resource" : "*"
-  }, {
-    "Sid" : "Allow admin users",
-    "Effect" : "Allow",
-    "Principal" : {
-      "AWS" : [
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/AJHL"
-      ]
-    },
-    "Action" : [
-        "kms:Create*",
-        "kms:Describe*",
-        "kms:Enable*",
-        "kms:List*",
-        "kms:Put*",
-        "kms:Update*",
-        "kms:Revoke*",
-        "kms:Disable*",
-        "kms:Get*",
-        "kms:Delete*",
-        "kms:TagResource",
-        "kms:UntagResource",
-        "kms:ScheduleKeyDeletion",
-        "kms:CancelKeyDeletion"
-    ],
     "Resource" : "*"
   }, {
     "Sid" : "Allow use of the key",
@@ -337,8 +313,8 @@ resource "aws_efs_mount_target" "eft" {
   file_system_id = aws_efs_file_system.eft.id
 
   # for each data subnet
-  for_each       = data.aws_subnet_ids.etl.ids
-  subnet_id      = each.value
+  for_each  = data.aws_subnet_ids.etl.ids
+  subnet_id = each.value
 
   # attach our nfs rules to the moutn targets
   security_groups = [aws_security_group.eft_efs_sg.id]
