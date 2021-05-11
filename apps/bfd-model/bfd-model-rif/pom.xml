@@ -69,7 +69,7 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>4.0.1</version>
+			<version>4.1.1</version>
 		</dependency>
 		<dependency>
 			<!-- The JPA 2.1 API. (Does not provide a JPA implementation by itself; 
@@ -137,7 +137,7 @@
 				class. -->
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>4.2.0</version>
+			<version>7.8.1</version>
 		</dependency>
 
 		<dependency>
