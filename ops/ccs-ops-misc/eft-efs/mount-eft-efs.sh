@@ -65,13 +65,13 @@ help_message() {
   --aws-secret-access-key [AWS_SECRET_ACCESS_KEY] key used to assume BFD EFS RW role (defaults to environment)
   --aws-session-token [AWS_SESSION_TOKEN] token used to assume BFD EFS RW role (defaults to environment)
 
-  Examples:
+  Examples: (you will need to be sudo to add entries to /etc/fstab or /etc/hosts)
   # Using env vars (either exported, via .env file, etc):
   export PARTNER=bcda
   export EFT_ENV=test
   export BFD_EFS_ROLE_ARN='arn:aws:iam::1234567:role/bcda-eft-efs-test-role'
   export MOUNT_DIR=/mnt/eft
-  ./mount-eft-efs.sh
+  sudo ./mount-eft-efs.sh
 
   # Using command line args to mount file system to /eft as root. The mount directories will be owned by root:
   sudo ./mount-eft-efs.sh -p bcda -e test -r 'arn:aws:iam::1234567:role/bcda-eft-efs-test-role' --mount-dir=/eft --mount-same-az-only=false
