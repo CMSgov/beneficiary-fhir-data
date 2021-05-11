@@ -91,7 +91,7 @@ There are actually (up to) 3 files that will be used in this step:
 *****************************************************************
 
 This step performs the actual data update of the "BeneficiaryMonthly" table and creates audit records
-for any changes (INSErT, UPDATE, DELETE) to a given row in that table.
+for any changes (INSERT, UPDATE, DELETE) to a given row in that table.
 
 ********** I M P O R T A N T    N O T E **********
 There will be north of 130M records to process; this step will take a LONG TIME! BE PATIENT!
@@ -111,9 +111,10 @@ CALL
 ** STEP 6: Cleanup at appropriate time                         **         
 *****************************************************************
 
-There is a cleanup script that can be run AFTER VERIFYING that Step 6
-ran successfully to completion. There should be no urgency to run this
-step until you are fully confident that things ran successfully.
+There is a cleanup script that can be run AFTER VERIFYING that EVERYTHING
+has run successfull to completion. This should be the FINAL STEP
+to remove unnecessary db artifacts such as temp tables, stored
+procedures and triggers.
 
 If the processed record count does not match the expected record count, then 
 remediation analysis will need to be performed to determine any record discrepancies.
