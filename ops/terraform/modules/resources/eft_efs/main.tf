@@ -42,6 +42,8 @@ data "aws_iam_role" "etl_instance" {
   name = "bfd-${var.env_config.env}-bfd_pipeline-role"
 }
 
+# current region
+data "aws_region" "current" {}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ENCRYPTION KEYS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -209,7 +211,7 @@ resource "aws_efs_access_point" "eft" {
 }
 
 # policy to allow querying/mounting access points (via assumed role below)
-# - allows ${var.partner} to query access points and mount targets
+# - allows ${var.partner} to query file sytems, access points, and mount targets
 # - allows ${var.partner} to mount the file system
 # - grants ${var.partner} read+write privileges
 resource "aws_iam_policy" "eft_efs_ap_access" {
@@ -221,6 +223,14 @@ resource "aws_iam_policy" "eft_efs_ap_access" {
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "AllowPartnerToQueryBFDFileSystems",
+      "Effect": "Allow",
+      "Action": [
+        "elasticfilesystem:DescribeFileSystems",
+      ],
+      "Resource": "arn:aws:elasticfilesystem:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:file-system/*"
+    },
+    {
       "Sid": "AllowAccessPointMountRW",
       "Effect": "Allow",
       "Action": [
@@ -231,7 +241,8 @@ resource "aws_iam_policy" "eft_efs_ap_access" {
         "elasticfilesystem:ClientWrite"
       ],
       "Resource": [
-        "${aws_efs_access_point.eft.arn}"
+        "${aws_efs_access_point.eft.arn}",
+        "${aws_efs_file_system.eft.arn}"
       ]
     }
   ]
