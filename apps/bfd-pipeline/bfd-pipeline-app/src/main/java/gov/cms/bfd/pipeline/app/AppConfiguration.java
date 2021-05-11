@@ -14,6 +14,7 @@ import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -152,7 +153,8 @@ public final class AppConfiguration implements Serializable {
 
   private final DatabaseOptions databaseOptions;
   private final CcwRifLoadOptions ccwRifLoadOptions;
-  private final Optional<RdaLoadOptions> rdaLoadOptions;
+  // this can be null if the RDA job is not configured, Optional is not Serializable
+  @Nullable private final RdaLoadOptions rdaLoadOptions;
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
@@ -164,7 +166,7 @@ public final class AppConfiguration implements Serializable {
   public AppConfiguration(
       DatabaseOptions databaseOptions,
       CcwRifLoadOptions ccwRifLoadOptions,
-      Optional<RdaLoadOptions> rdaLoadOptions) {
+      RdaLoadOptions rdaLoadOptions) {
     this.databaseOptions = databaseOptions;
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
@@ -182,7 +184,7 @@ public final class AppConfiguration implements Serializable {
 
   /** @return the {@link RdaLoadOptions} that the application will use */
   public Optional<RdaLoadOptions> getRdaLoadOptions() {
-    return rdaLoadOptions;
+    return Optional.ofNullable(rdaLoadOptions);
   }
 
   /** @see java.lang.Object#toString() */
@@ -352,7 +354,7 @@ public final class AppConfiguration implements Serializable {
             idempotencyRequired.get().booleanValue());
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
 
-    Optional<RdaLoadOptions> rdaLoadOptions = readRdaLoadOptionsFromEnvironmentVariables();
+    RdaLoadOptions rdaLoadOptions = readRdaLoadOptionsFromEnvironmentVariables();
     return new AppConfiguration(databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
   }
 
@@ -361,28 +363,28 @@ public final class AppConfiguration implements Serializable {
    * of its settings are optional. Because the API may exist in some environments but not others a
    * separate environment variable indicates whether or not the settins should be loaded.
    *
-   * @return an empty Optional if the job is disabled, otherwise a filled job containing the
-   *     necessary settings to run the job
+   * @return a valid RdaLoadOptions if job is configured, otherwise null
    */
-  static Optional<RdaLoadOptions> readRdaLoadOptionsFromEnvironmentVariables() {
-    RdaLoadOptions config = null;
-    if (parseBoolean(ENV_VAR_KEY_RDA_JOB_ENABLED).orElse(false)) {
-      final RdaLoadJob.Config jobConfig =
-          new RdaLoadJob.Config(
-              Duration.ofSeconds(
-                  getIntOrDefault(
-                      ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, DEFAULT_RDA_JOB_INTERVAL_SECONDS)),
-              getIntOrDefault(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, DEFAULT_RDA_JOB_BATCH_SIZE));
-      final GrpcRdaSource.Config grpcConfig =
-          new GrpcRdaSource.Config(
-              getStringOrDefault(ENV_VAR_KEY_RDA_GRPC_HOST, DEFAULT_RDA_GRPC_HOST),
-              getIntOrDefault(ENV_VAR_KEY_RDA_GRPC_PORT, DEFAULT_RDA_GRPC_PORT),
-              Duration.ofSeconds(
-                  getIntOrDefault(
-                      ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
-      config = new RdaLoadOptions(jobConfig, grpcConfig);
+  @Nullable
+  static RdaLoadOptions readRdaLoadOptionsFromEnvironmentVariables() {
+    final boolean enabled = parseBoolean(ENV_VAR_KEY_RDA_JOB_ENABLED).orElse(false);
+    if (!enabled) {
+      return null;
     }
-    return Optional.ofNullable(config);
+    final RdaLoadJob.Config jobConfig =
+        new RdaLoadJob.Config(
+            Duration.ofSeconds(
+                getIntOrDefault(
+                    ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, DEFAULT_RDA_JOB_INTERVAL_SECONDS)),
+            getIntOrDefault(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, DEFAULT_RDA_JOB_BATCH_SIZE));
+    final GrpcRdaSource.Config grpcConfig =
+        new GrpcRdaSource.Config(
+            getStringOrDefault(ENV_VAR_KEY_RDA_GRPC_HOST, DEFAULT_RDA_GRPC_HOST),
+            getIntOrDefault(ENV_VAR_KEY_RDA_GRPC_PORT, DEFAULT_RDA_GRPC_PORT),
+            Duration.ofSeconds(
+                getIntOrDefault(
+                    ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
+    return new RdaLoadOptions(jobConfig, grpcConfig);
   }
 
   /**
