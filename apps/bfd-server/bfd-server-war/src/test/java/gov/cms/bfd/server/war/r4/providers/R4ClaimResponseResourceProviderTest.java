@@ -9,10 +9,8 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Test;
