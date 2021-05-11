@@ -34,8 +34,8 @@ class BFDUser(HttpUser):
     @task(1)
     def patient(self):
         id = patient_ids.pop()
-        self.client.get(f"/v2/fhir/Patient/{id}",
+        self.client.get(f"/v1/fhir/Patient/{id}",
                 cert=cert,
                 verify=False,
-                name="/v2/fhir/Patient/{id}")
+                name="/v1/fhir/Patient/{id}")
 
