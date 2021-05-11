@@ -21,45 +21,62 @@ CREATE OR REPLACE PROCEDURE update_bene_monthly(
 AS
 $$
 BEGIN
-    UPDATE public."BeneficiaryMonthly"
-    SET
-        "fipsStateCntyCode"                 = fips_cnty_code,
-        "medicareStatusCode"                = medi_status_code,
-        "entitlementBuyInInd"               = buy_in_ind,
-        "hmoIndicatorInd"                   = hmo_ind,
-        "partCContractNumberId"             = partc_contract_number_id,
-        "partCPbpNumberId"                  = partc_pbp_number_id,
-        "partCPlanTypeCode"                 = partc_plan_type,
-        "partDContractNumberId"             = partd_contract_number_id,
-        "partDPbpNumberId"                  = partd_pbp_number_id,
-        "partDSegmentNumberId"              = partd_segment_num,
-        "partDRetireeDrugSubsidyInd"        = partd_retiree_mnthly,
-        "partDLowIncomeCostShareGroupCode"  = partd_low_inc_cost_share,
-        "medicaidDualEligibilityCode"       = dual_elig_code
-    WHERE
-        "parentBeneficiary" = bene_id
-    AND
-        "yearMonth" = yr_month;
+    IF bene_id                       IS NOT NULL
+        OR yr_month                  IS NOT NULL
+        OR fips_cnty_code            IS NOT NULL
+        OR medi_status_code          IS NOT NULL
+        OR buy_in_ind                IS NOT NULL
+        OR hmo_ind                   IS NOT NULL
+        OR partc_contract_number_id  IS NOT NULL
+        OR partc_pbp_number_id       IS NOT NULL
+        OR partc_plan_type           IS NOT NULL
+        OR partd_contract_number_id  IS NOT NULL
+        OR partd_pbp_number_id       IS NOT NULL
+        OR partd_segment_num         IS NOT NULL
+        OR partd_retiree_mnthly      IS NOT NULL
+        OR partd_low_inc_cost_share  IS NOT NULL
+        OR dual_elig_code            IS NOT NULL
+    THEN
+        UPDATE public."BeneficiaryMonthly"
+        SET
+            "fipsStateCntyCode"                 = fips_cnty_code,
+            "medicareStatusCode"                = medi_status_code,
+            "entitlementBuyInInd"               = buy_in_ind,
+            "hmoIndicatorInd"                   = hmo_ind,
+            "partCContractNumberId"             = partc_contract_number_id,
+            "partCPbpNumberId"                  = partc_pbp_number_id,
+            "partCPlanTypeCode"                 = partc_plan_type,
+            "partDContractNumberId"             = partd_contract_number_id,
+            "partDPbpNumberId"                  = partd_pbp_number_id,
+            "partDSegmentNumberId"              = partd_segment_num,
+            "partDRetireeDrugSubsidyInd"        = partd_retiree_mnthly,
+            "partDLowIncomeCostShareGroupCode"  = partd_low_inc_cost_share,
+            "medicaidDualEligibilityCode"       = dual_elig_code
+        WHERE
+            "parentBeneficiary" = bene_id
+        AND
+            "yearMonth" = yr_month;
 
-    IF NOT FOUND THEN
-        INSERT INTO public."BeneficiaryMonthly"
-        VALUES(
-            bene_id,
-            yr_month,
-            fips_cnty_code,
-            medi_status_code,
-            buy_in_ind,
-            hmo_ind,
-            partc_contract_number_id,
-            partc_pbp_number_id,
-            partc_plan_type,
-            partd_contract_number_id,
-            partd_pbp_number_id,
-            partd_segment_num,
-            partd_retiree_mnthly,
-            dual_elig_code,
-            partd_low_inc_cost_share
-        );
+        IF NOT FOUND THEN
+            INSERT INTO public."BeneficiaryMonthly"
+            VALUES(
+                bene_id,
+                yr_month,
+                fips_cnty_code,
+                medi_status_code,
+                buy_in_ind,
+                hmo_ind,
+                partc_contract_number_id,
+                partc_pbp_number_id,
+                partc_plan_type,
+                partd_contract_number_id,
+                partd_pbp_number_id,
+                partd_segment_num,
+                partd_retiree_mnthly,
+                dual_elig_code,
+                partd_low_inc_cost_share
+            );
+        END IF;
     END IF;
 END;
 $$ LANGUAGE plpgsql;
