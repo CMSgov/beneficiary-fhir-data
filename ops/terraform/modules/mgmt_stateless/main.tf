@@ -133,6 +133,6 @@ module "jenkins" {
     vpn_sg    = data.aws_security_group.vpn.id
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
-    ci_cidrs  = ["${data.aws_vpc.main.cidr_block}"]
+    ci_cidrs  = [data.aws_vpc.main.cidr_block]
   }
 }
