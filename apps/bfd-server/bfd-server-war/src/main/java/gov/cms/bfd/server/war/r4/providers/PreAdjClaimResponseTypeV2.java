@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.commons.PreAdjClaimResponseTypeTransformerV2;
-
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,7 +13,6 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
-
 import org.hl7.fhir.r4.model.ClaimResponse;
 
 /**
@@ -38,49 +36,47 @@ public enum PreAdjClaimResponseTypeV2 {
   /**
    * Enum constant constructor.
    *
-   * @param entityClass                  the value to use for {@link #getEntityClass()}
-   * @param entityIdAttribute            ibute the value to u e for {@link #getEntityIdAttribute()}
+   * @param entityClass the value to use for {@link #getEntityClass()}
+   * @param entityIdAttribute ibute the value to u e for {@link #getEntityIdAttribute()}
    * @param entityBeneficiaryIdAttribute tribute the value to use for {@link
-   *                                     #getEntityBeneficiaryIdAttribute()}
-   * @param transformer                  the value to use for {@link #getTransformer()}
-   * @param entityLazyAttributes         the value to use for {@link #getEntityLazyAttributes()}
+   *     #getEntityBeneficiaryIdAttribute()}
+   * @param transformer the value to use for {@link #getTransformer()}
+   * @param entityLazyAttributes the value to use for {@link #getEntityLazyAttributes()}
    */
   PreAdjClaimResponseTypeV2(
-          Class<?> entityClass,
-          SingularAttribute<?, ?> entityIdAttribute,
-          SingularAttribute<?, String> entityBeneficiaryIdAttribute,
-          Function<Object, LocalDate> serviceEndAttributeFunction,
-          PreAdjClaimResponseTypeTransformerV2 transformer,
-          PluralAttribute<?, ?, ?>... entityLazyAttributes) {
+      Class<?> entityClass,
+      SingularAttribute<?, ?> entityIdAttribute,
+      SingularAttribute<?, String> entityBeneficiaryIdAttribute,
+      Function<Object, LocalDate> serviceEndAttributeFunction,
+      PreAdjClaimResponseTypeTransformerV2 transformer,
+      PluralAttribute<?, ?, ?>... entityLazyAttributes) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
     this.entityBeneficiaryIdAttribute = entityBeneficiaryIdAttribute;
     this.serviceEndAttributeFunction = serviceEndAttributeFunction;
     this.transformer = transformer;
     this.entityLazyAttributes =
-            entityLazyAttributes != null
-                    ? Collections.unmodifiableCollection(Arrays.asList(entityLazyAttributes))
-                    : Collections.emptyList();
+        entityLazyAttributes != null
+            ? Collections.unmodifiableCollection(Arrays.asList(entityLazyAttributes))
+            : Collections.emptyList();
   }
 
   /**
    * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
-   * PreAdjClaimResponseTypeV2} in the database
+   *     PreAdjClaimResponseTypeV2} in the database
    */
   public Class<?> getEntityClass() {
     return entityClass;
   }
 
-  /**
-   * @return the JPA {@link Entity} field used as the entity's {@link Id}
-   */
+  /** @return the JPA {@link Entity} field used as the entity's {@link Id} */
   public SingularAttribute<?, ?> getEntityIdAttribute() {
     return entityIdAttribute;
   }
 
   /**
    * @return the JPA {@link Entity} field that is a (foreign keyed) reference to {@link
-   * Beneficiary#getBeneficiaryId()}
+   *     Beneficiary#getBeneficiaryId()}
    */
   public SingularAttribute<?, String> getEntityBeneficiaryIdAttribute() {
     return entityBeneficiaryIdAttribute;
@@ -88,7 +84,7 @@ public enum PreAdjClaimResponseTypeV2 {
 
   /**
    * @return the {@link Function} to use to retrieve the {@link LocalDate} to use for service date
-   * filter
+   *     filter
    */
   public Function<Object, LocalDate> getServiceEndAttributeFunction() {
     return serviceEndAttributeFunction;
@@ -96,7 +92,7 @@ public enum PreAdjClaimResponseTypeV2 {
 
   /**
    * @return the {@link PreAdjClaimResponseTypeTransformerV2} to use to transform the JPA {@link
-   * Entity} instances into FHIR {@link ClaimResponse} instances
+   *     Entity} instances into FHIR {@link ClaimResponse} instances
    */
   public PreAdjClaimResponseTypeTransformerV2 getTransformer() {
     return transformer;
@@ -111,7 +107,7 @@ public enum PreAdjClaimResponseTypeV2 {
 
   /**
    * @param claimTypeText the lower-cased {@link PreAdjClaimResponseTypeV2#name()} value to parse
-   *                      back into a {@link PreAdjClaimResponseTypeV2}
+   *     back into a {@link PreAdjClaimResponseTypeV2}
    * @return the {@link PreAdjClaimResponseTypeV2} represented by the specified {@link String}
    */
   public static Optional<PreAdjClaimResponseTypeV2> parse(String claimTypeText) {

@@ -9,22 +9,18 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
-
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.stereotype.Component;
 
-/**
- * This FHIR {@link IResourceProvider} adds support for R4 {@link Claim} resources.
- */
+/** This FHIR {@link IResourceProvider} adds support for R4 {@link Claim} resources. */
 @Component
 public final class R4ClaimResourceProvider implements IResourceProvider {
   /**
@@ -38,41 +34,31 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
   private R4SamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
 
-  /**
-   * @param entityManager a JPA {@link EntityManager} connected to the application's database
-   */
+  /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
   public void setEntityManager(EntityManager entityManager) {
     this.entityManager = entityManager;
   }
 
-  /**
-   * @param metricRegistry the {@link MetricRegistry} to use
-   */
+  /** @param metricRegistry the {@link MetricRegistry} to use */
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
   }
 
-  /**
-   * @param samhsaMatcher the {@link R4SamhsaMatcher} to use
-   */
+  /** @param samhsaMatcher the {@link R4SamhsaMatcher} to use */
   @Inject
   public void setSamhsaFilterer(R4SamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 
-  /**
-   * @param loadedFilterManager the {@link LoadedFilterManager} to use
-   */
+  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
   @Inject
   public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
     this.loadedFilterManager = loadedFilterManager;
   }
 
-  /**
-   * @see IResourceProvider#getResourceType()
-   */
+  /** @see IResourceProvider#getResourceType() */
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return Claim.class;
@@ -86,9 +72,9 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
    * single resource instance.
    *
    * @param claimId The read operation takes one parameter, which must be of type {@link IdType} and
-   *                must be annotated with the {@link IdParam} annotation.
+   *     must be annotated with the {@link IdParam} annotation.
    * @return Returns a resource matching the specified {@link IdDt}, or <code>null</code> if none
-   * exists.
+   *     exists.
    */
   @Read(version = false)
   @Trace

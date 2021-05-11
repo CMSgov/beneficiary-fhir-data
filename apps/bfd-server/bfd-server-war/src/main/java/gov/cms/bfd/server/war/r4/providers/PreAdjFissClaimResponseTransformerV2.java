@@ -6,46 +6,44 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import org.hl7.fhir.r4.model.ClaimResponse;
 
-/**
- * Transforms Fiss/MCS instances into FHIR {@link ClaimResponse} resources.
- */
+/** Transforms Fiss/MCS instances into FHIR {@link ClaimResponse} resources. */
 public class PreAdjFissClaimResponseTransformerV2 {
-    /**
-     * @param metricRegistry the {@link MetricRegistry} to use
-     * @param claimEntity    the Fiss {@link PreAdjFissClaim} to transform
-     * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
-     */
-    @Trace
-    static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
-        Timer.Context timer =
-                metricRegistry
-                        .timer(
-                                MetricRegistry.name(
-                                        PreAdjFissClaimResponseTransformerV2.class.getSimpleName(), "transform"))
-                        .time();
+  /**
+   * @param metricRegistry the {@link MetricRegistry} to use
+   * @param claimEntity the Fiss {@link PreAdjFissClaim} to transform
+   * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
+   */
+  @Trace
+  static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
+    Timer.Context timer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(
+                    PreAdjFissClaimResponseTransformerV2.class.getSimpleName(), "transform"))
+            .time();
 
-        // TODO: Update this check when entity available
-        if (!(claimEntity instanceof Object)) {
-            throw new BadCodeMonkeyException();
-        }
-
-        // TODO: Cast to specific claim entity type
-        ClaimResponse claim = transformClaim((Object) claimEntity);
-
-        timer.stop();
-        return claim;
+    // TODO: Update this check when entity available
+    if (!(claimEntity instanceof Object)) {
+      throw new BadCodeMonkeyException();
     }
 
-    /**
-     * @param claimGroup the {@link PreAdjFissClaim} to transform
-     * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
-     * PreAdjFissClaim}
-     */
-    private static ClaimResponse transformClaim(Object claimGroup) {
-        ClaimResponse claim = new ClaimResponse();
+    // TODO: Cast to specific claim entity type
+    ClaimResponse claim = transformClaim((Object) claimEntity);
 
-        // TODO: Transform claim
+    timer.stop();
+    return claim;
+  }
 
-        return claim;
-    }
+  /**
+   * @param claimGroup the {@link PreAdjFissClaim} to transform
+   * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
+   *     PreAdjFissClaim}
+   */
+  private static ClaimResponse transformClaim(Object claimGroup) {
+    ClaimResponse claim = new ClaimResponse();
+
+    // TODO: Transform claim
+
+    return claim;
+  }
 }
