@@ -21,9 +21,7 @@ CREATE OR REPLACE PROCEDURE update_bene_monthly(
 AS
 $$
 BEGIN
-    IF bene_id                       IS NOT NULL
-        OR yr_month                  IS NOT NULL
-        OR fips_cnty_code            IS NOT NULL
+    IF     fips_cnty_code            IS NOT NULL
         OR medi_status_code          IS NOT NULL
         OR buy_in_ind                IS NOT NULL
         OR hmo_ind                   IS NOT NULL
