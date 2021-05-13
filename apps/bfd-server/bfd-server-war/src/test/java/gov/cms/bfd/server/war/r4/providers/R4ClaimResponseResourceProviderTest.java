@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.server.war.utils.AssertUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import org.hl7.fhir.r4.model.ClaimResponse;
@@ -50,51 +51,95 @@ public class R4ClaimResponseResourceProviderTest {
     assertNotNull(annotation);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void shouldThrowIllegalArgumentExceptionIfIdIsNull() {
-    new R4ClaimResponseResourceProvider().read(null, null);
+    Exception expected = new IllegalArgumentException("Resource ID can not be null");
+    // ConstantConditions - Still need to test
+    //noinspection ConstantConditions
+    Exception actual =
+        AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(null, null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void shouldThrowIllegalArgumentExceptionIfIdVersionIsNotNumeric() {
     IdType id = new IdType(null, "f-123", null, "null");
-    new R4ClaimResponseResourceProvider().read(id, null);
+
+    Exception expected = new NumberFormatException("For input string: \"null\"");
+    Exception actual =
+        AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(id, null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void shouldThrowIllegalArgumentExceptionIfIdVersionIsNumeric() {
     IdType id = new IdType(null, "f-123", null, "123");
-    new R4ClaimResponseResourceProvider().read(id, null);
+
+    Exception expected = new IllegalArgumentException("Resource ID must not define a version.");
+    Exception actual =
+        AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(id, null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void shouldThrowIllegalArgumentExceptionIfIdPartIsNull() {
     IdType id = new IdType(null, null, null, null);
-    new R4ClaimResponseResourceProvider().read(id, null);
+
+    Exception expected = new IllegalArgumentException("Resource ID can not be null/blank");
+    Exception actual =
+        AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(id, null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void shouldThrowIllegalArgumentExceptionIfIdPartIsBlank() {
     IdType id = new IdType(null, null, " ", null);
-    new R4ClaimResponseResourceProvider().read(id, null);
+
+    Exception expected = new IllegalArgumentException("Resource ID can not be null/blank");
+    Exception actual =
+        AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(id, null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void shouldThrowIllegalArgumentExceptionIfIdPartIsNumeric() {
-    IdType id = new IdType(null, null, "123", null);
-    new R4ClaimResponseResourceProvider().read(id, null);
+    String idText = "123";
+    IdType id = new IdType(null, null, idText, null);
+
+    Exception expected = new IllegalArgumentException("Unsupported ID pattern: " + idText);
+    Exception actual =
+        AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(id, null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void shouldThrowIllegalArgumentExceptionIfIdPartIsDoesNotMatchPattern() {
-    IdType id = new IdType(null, null, "abc123", null);
-    new R4ClaimResponseResourceProvider().read(id, null);
+    String idText = "abc123";
+    IdType id = new IdType(null, null, idText, null);
+
+    Exception expected = new IllegalArgumentException("Unsupported ID pattern: " + idText);
+    Exception actual =
+        AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(id, null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
-  @Test(expected = ResourceNotFoundException.class)
+  @Test
   public void shouldResourceNotFoundExceptionIfIdPartIsNotSupportedType() {
-    IdType id = new IdType(null, null, "a-123", null);
-    new R4ClaimResponseResourceProvider().read(id, null);
+    String idText = "a-123";
+    IdType id = new IdType(null, null, idText, null);
+
+    Exception expected = new ResourceNotFoundException(new IdType(idText));
+    Exception actual =
+        AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(id, null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
   @Test

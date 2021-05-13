@@ -80,11 +80,13 @@ public final class R4ClaimResponseResourceProvider implements IResourceProvider 
   @Read(version = false)
   @Trace
   public ClaimResponse read(@IdParam IdType claimId, RequestDetails requestDetails) {
-    if (claimId == null) throw new IllegalArgumentException();
-    if (claimId.getVersionIdPartAsLong() != null) throw new IllegalArgumentException();
+    if (claimId == null) throw new IllegalArgumentException("Resource ID can not be null");
+    if (claimId.getVersionIdPartAsLong() != null)
+      throw new IllegalArgumentException("Resource ID must not define a version.");
 
     String claimIdText = claimId.getIdPart();
-    if (claimIdText == null || claimIdText.trim().isEmpty()) throw new IllegalArgumentException();
+    if (claimIdText == null || claimIdText.trim().isEmpty())
+      throw new IllegalArgumentException("Resource ID can not be null/blank");
 
     Matcher claimIdMatcher = CLAIM_ID_PATTERN.matcher(claimIdText);
     if (!claimIdMatcher.matches())
