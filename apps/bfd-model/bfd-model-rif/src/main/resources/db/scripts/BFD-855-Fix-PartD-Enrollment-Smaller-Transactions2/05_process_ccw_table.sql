@@ -96,6 +96,7 @@ DECLARE
   rcd           CCW_LOAD_TEMP%ROWTYPE;
   currYear      VARCHAR(4) := '9999';
   okToCont      BOOLEAN := true;
+  inError       BOOLEAN := false;
   Jan1          DATE;
   Feb1          DATE;
   Mar1          DATE;
@@ -381,7 +382,9 @@ BEGIN
                     EXIT inner;
                 END IF;
                 
-            END LOOP;    -- end <<inner>>
+            END LOOP;   -- end <<inner>>
+
+            RAISE INFO 'implied COMMIT...Transaction ID: %', TXID_CURRENT();
         
             IF rcd_cnt % 20000 = 0
             THEN
@@ -389,9 +392,10 @@ BEGIN
             END IF;
         
         EXCEPTION WHEN others THEN
-            RAISE EXCEPTION 'Error: % : %', SQLERRM::text, SQLSTATE::text;
             okToCont := false;
-        END;    -- implicit COMMIT for end <<inner>> loop
+            inError  := true;
+            RAISE EXCEPTION 'Error: % : %', SQLERRM::text, SQLSTATE::text;
+        END;  
         
         IF NOT okToCont
         THEN
@@ -402,8 +406,7 @@ BEGIN
     END LOOP;    -- end <<outer>>
 
     CLOSE curs;
-    -- implicit COMMIT via sub-transaction BEGIN block
-    
+    RAISE INFO 'implied COMMIT...Transaction ID: %', TXID_CURRENT();
     RAISE INFO 'Record Total: % ...DONE!!!', rcd_cnt;
     
 EXCEPTION WHEN others THEN
