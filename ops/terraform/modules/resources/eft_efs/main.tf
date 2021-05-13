@@ -95,7 +95,7 @@ resource "aws_efs_file_system" "eft" {
 
 # File system Access Point
 # - will automagically root NFS client into the ${var.partner_root_dir} directory (e.g., /dropbox)
-# - all file operations made by the client will automatically be owned by posix user & group (e.g., 1500:1500)
+# - all file actions by the client will automatically be made by var.posix_uid & var.posix_gid (e.g., 1500:1500)
 resource "aws_efs_access_point" "eft" {
   file_system_id = aws_efs_file_system.eft.id
   tags           = merge({ Name = "${var.partner}-eft-efs-${var.env_config.env}-ap" }, local.tags)
@@ -110,8 +110,8 @@ resource "aws_efs_access_point" "eft" {
 
     creation_info {
       owner_gid   = var.posix_gid
-      owner_uid   = var.posix_gid
-      permissions = "0755"
+      owner_uid   = var.posix_uid
+      permissions = "0750"
     }
   }
 }
