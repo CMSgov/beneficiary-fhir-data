@@ -15,11 +15,12 @@ MOUNT_GROUP_NAME="${MOUNT_GROUP_NAME:-}" # what group will own the mount directo
 MOUNT_PERMS="${MOUNT_PERMS:-0750}" # defaults to owner=rw group=r others=none
 
 # other options (defaults are likely ok here)
-MOUNT_SAME_AZ_ONLY="${MOUNT_SAME_AZ_ONLY:-true}" # only mount if we find a mount target on the same az as us
-MOUNT_NOW="${MOUNT_NOW:-true}" # mount the file system when the script runs
 ADD_HOST_ENTRY="${ADD_HOST_ENTRY:-true}" # add a host entry for the file system (this must be true if the instance is not in BFD VPC)
 ADD_FSTAB_ENTRY="${ADD_FSTAB_ENTRY:-true}" # add a persistant mount entry in $FSTAB_FILE
-FSTAB_OPTIONS="${FSTAB_OPTIONS:-'_netdev,noresvport,tls,iam 0 0'}"
+MOUNT_SAME_AZ_ONLY="${MOUNT_SAME_AZ_ONLY:-true}" # only mount if we find a mount target on the same az as us
+MOUNT_NOW="${MOUNT_NOW:-true}" # mount the file system when the script runs
+MOUNT_ARGS="tls,iam" # mount efs using iam auth and tls
+FSTAB_OPTIONS=${FSTAB_OPTIONS:-"_netdev,noresvport,$MOUNT_ARGS"} # for EFS the trailing "0 0" is ommitted here as they are required
 
 # you should not need to edit these (they are variables for testing purposes)
 ETC_HOSTS_FILE="${ETC_HOSTS_FILE:-/etc/hosts}"
@@ -127,7 +128,7 @@ assume_role(){
 # sets the $filesystems array to {{partner}}'s eft efs file systems
 set_filesystems(){
   local fs_ids
-  if fs_ids=$(aws efs describe-file-systems --query 'FileSystems[].[FileSystemId,Name]' --output text | grep "${PARTNER}-eft-efs-${EFT_ENV}" | cut -f1); then  
+  if fs_ids=$(aws efs describe-file-systems --region "$AWS_REGION" --query 'FileSystems[].[FileSystemId,Name]' --output text | grep "${PARTNER}-eft-efs-${EFT_ENV}" | cut -f1); then  
     for fs in $fs_ids; do
       file_systems+=("$fs")
     done
@@ -135,6 +136,23 @@ set_filesystems(){
     echo "No EFT file systems found for '${PARTNER^^}'"
     exit 1
   fi
+}
+
+# returns the access point id for a file system
+# $1 == file system id
+get_accesspoint_id(){
+  local ap_id
+  if ap_id=$(aws efs describe-access-points --region "$AWS_REGION" --file-system-id "$1" --query 'AccessPoints[].[AccessPointId]' --output text); then
+    # if there are no access points for the file system, assume this is ok and return
+    [[ -z "$ap_id" ]] && return
+
+    # else, verify it's a valid id (e.g., fsap-01234566)
+    if ! [[ "$ap_id" =~ ^fsap- ]]; then
+      echo "Invalid AP ID $ap_id returned for file system $1"
+      exit 1
+    fi
+  fi
+  echo "$ap_id"
 }
 
 # checks if $1 is a valid ipv4 address
@@ -245,9 +263,17 @@ prepare_mount_directory(){
 
 # mounts a file system to its mount directory
 # $1 == file system id
+# $2 == access point id
 mount_fs(){
+  # if we are mounting with an access point, add it to our mount args unless already present
+  if ! [[ "$MOUNT_ARGS" =~ accesspoint\= ]]; then
+    if [[ -n "$2" ]]; then
+      MOUNT_ARGS="${MOUNT_ARGS},accesspoint=$2"
+    fi
+  fi
+  
   # mount it
-  if mount -t efs -o tls,iam "${1}:/" "$MOUNT_DIR/$1" >/dev/null 2>&1; then
+  if mount -t efs -o "$MOUNT_ARGS" "${1}:/" "$MOUNT_DIR/$1" >/dev/null 2>&1; then
     echo "EFT EFS file system $1 mounted on ${MOUNT_DIR}/$1"
   else
     echo "Error: failed to mount EFT EFS file system $1 on $MOUNT_DIR"
@@ -257,20 +283,44 @@ mount_fs(){
 
 # creates an entry in /etc/fstab to remount on reboots
 # $1 == file system id
+# $2 == access point id
 add_fstab_entry(){
-  local fstab_entry # the fstab entry string
-  fstab_entry="${1}:/ $MOUNT_DIR/$1 efs $FSTAB_OPTIONS"
+  local fs # mount string.. with ap == "$1" without ap == "$1:/"
+  local fstab_entry # fstab entry string we will build
   
-  local epdir # escaped partner dir for use in sed
-  epdir=$(sed 's#/#\\/#g' <(echo "$MOUNT_DIR"))
+  # if we are mounting with an access point, add it to our fstab options string
+  if [[ -n "$2" ]]; then
+    # add our access point unless one is already present
+    if ! [[ "$FSTAB_OPTIONS" =~ accesspoint\= ]]; then
+      FSTAB_OPTIONS="${FSTAB_OPTIONS},accesspoint=$2"
+      fs="$1"
+    fi
+  else
+    fs="$1:/" # mounting file system directly
+  fi
+
+  # ensure fstab options ends with 0 0 unless already present
+  if ! [[ "$FSTAB_OPTIONS " =~ 0\ 0$ ]]; then
+    FSTAB_OPTIONS="${FSTAB_OPTIONS} 0 0"
+  fi
+
+  # build the entry string
+  fstab_entry="${fs} $MOUNT_DIR/$1 efs $FSTAB_OPTIONS"
+  
+  # local emountdir # escaped mount dir string for use in sed
+  local emountdirfs efstab_entry
+  # emountdir=$(sed 's#/#\\/#g' <(echo "$MOUNT_DIR"))
+  emountdirfs=$(sed 's#/#\\/#g' <(echo "${MOUNT_DIR}/${1}"))
+  efstab_entry=$(sed 's#/#\\/#g' <(echo "$fstab_entry"))
 
   # remove any previous file system fstab entries
   cp -f "$FSTAB_FILE" "${FSTAB_FILE}.bak" # back it up
-  sed -i "/^#\ EFT\ EFS\ mount\ point\ for\ ${PARTNER}$/d" "$FSTAB_FILE" # remove entry comment
-  sed -i "/^${1}:\/[[:space:]]${epdir}.*$/d" "$FSTAB_FILE" # remove the entry
+  sed -i "/^#\ EFT\ EFS\ mount\ point\ ${emountdirfs}$/d" "$FSTAB_FILE" # remove entry comment
+  sed -i "/^${efstab_entry}$/d" "$FSTAB_FILE" # remove the entry
+  # sed -i "/^${1}:\/[[:space:]]${emountdir}.*$/d" "$FSTAB_FILE" # remove the entry
 
   # add our new fstab entry (with comment)
-  printf "\n# EFT EFS mount point for %s\n%s\n" "$PARTNER" "$fstab_entry" >> "$FSTAB_FILE"
+  printf "\n# EFT EFS mount point %s/%s\n%s\n" "$MOUNT_DIR" "$1" "$fstab_entry" >> "$FSTAB_FILE"
 
   # cleanup multiple empty lines (a byproduct if this script is run multiple times)
   # shellcheck disable=SC2016
@@ -364,17 +414,20 @@ set_filesystems
 
 # for each file system found
 for fs in "${file_systems[@]}"; do
+  # get the file systems access point id
+  ap_id=$(get_accesspoint_id "$fs")
+
   # prepare its mount directory
   prepare_mount_directory "$fs"
 
   # add an entry to /etc/hosts
-  [[ "$ADD_HOST_ENTRY" == true ]] && add_host_entry "$fs" 
+  [[ "$ADD_HOST_ENTRY" == true ]] && add_host_entry "$fs"
 
   # mount the file system now if desired
-  [[ "$MOUNT_NOW" == true ]] && mount_fs "$fs"
+  [[ "$MOUNT_NOW" == true ]] && mount_fs "$fs" "$ap_id"
   
   # add a persistant mount entry to fstab if desired
-  [[ "$ADD_FSTAB_ENTRY" == true ]] && add_fstab_entry "$fs"
+  [[ "$ADD_FSTAB_ENTRY" == true ]] && add_fstab_entry "$fs" "$ap_id"
 done 
 
 # create a friendly symlink if there is only one file system 
