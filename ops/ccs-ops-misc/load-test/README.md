@@ -18,19 +18,21 @@ If you get the product of the table size and the percentage to sample in the bal
 The rest of the command is all about taking that query and copying the results to a file on the host that is running the `psql` client. If you're running `psql` from a laptop, then the `TO` path should refer to something on your laptop's filesystem. Note that `/COPY` is different from `COPY`, which will attempt to save a file to the database host.
 
 ## Test certificate
-BFD uses mTLS to authenticate clients. The load test will need to send a valid certificate with each request. A test certificate can be provisioned from deployed BFD Server hosts in the app server's directory under `/usr/local`. That, or another valid test certificate, will need to be on the host that will run the load test.
+BFD uses mTLS to authenticate clients. The load test will need to send a valid certificate with each request. A test certificate can be provisioned from deployed BFD Server hosts in the app server's directory under `/usr/local`. That, or another valid test certificate, will need to have corresponding entry in the Java truststore on the host being tested.
+
+It may also be useful to have the load test client trust the responses from the BFD Server. If you have the public certificate available for [each environment here](https://github.com/CMSgov/beneficiary-fhir-data/tree/master/ops/ansible/playbooks-ccs/files) as `*-bluebutton-appserver-public-cert.pem`, you can provide that to the Locust script with the `SERVER_PUBLIC_KEY` environment variable. Note that if you're hitting the host directly with a private DNS name, the public certificate will fail with a SAN mismatch.
 
 ## Request script
 Locust uses files written in Python to generate "users" that make requests to an application. You can look at an example [locustfile.py](./locustfile.py).
 You can also read more about [how to write a locustfile in their docs](https://docs.locust.io/en/stable/writing-a-locustfile.html). There are more options than specified in our existing file to issue multiple types of requests, weight them, and change wait times. 
 
 ## Running locust
-To run locust, you start a server locally with `BFD_LT_IDS_FILE='path/to/file.txt' BFD_LT_CERT='path/to/client/cert.pem' locust -f locustfile.py`. Note the environment variables, which are used the provide a file with Beneficiary IDs and a client cert. You then navigate to the UI in the browser to specify the host to hit, the number of users, and how fast they ramp up. There are also options to run the test headless.
+To run locust, you start a server locally with `IDS_FILE='path/to/file.txt' CLIENT_CERT='path/to/client/cert.pem' locust -f locustfile.py`. Note the environment variables, which are used the provide a file with Beneficiary IDs and a client cert. You then navigate to the UI in the browser to specify the host to hit, the number of users, and how fast they ramp up. There are also options to run the test headless.
 
 Single-instance tests should be run against a host that has been detached from the load-balancer and ASG.
 
 ## Monitoring the results
-Locust will track the requests per second, response times, and error rates. You can also monitor the instance in New Relic by visiting the BFD Prod dashboard and filtering to only the host and timeframe that you care about.
+Locust will track the requests per second, response times, and error rates. You can also monitor the instance in New Relic by visiting the BFD Prod dashboard and filtering to only the host and timeframe that you care about. CPU utilization for the host can be viewed in Cloudwatch.
 
 ## Storing test results
-TBD on format in confluence for the results of these tests.
+Reports on test results should be stored in Confluence under `Operations -> Tests -> Load` in a similar format other entries.
