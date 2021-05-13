@@ -8,6 +8,10 @@ import org.hl7.fhir.r4.model.Claim;
 
 /** Transforms Fiss/MCS instances into FHIR {@link Claim} resources. */
 public class PreAdjFissClaimTransformerV2 {
+
+  private static final String METRIC_NAME =
+      MetricRegistry.name(PreAdjFissClaimTransformerV2.class.getSimpleName(), "transform");
+
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
    * @param claimEntity the Fiss {@link PreAdjFissClaim} to transform
@@ -15,12 +19,7 @@ public class PreAdjFissClaimTransformerV2 {
    */
   @Trace
   static Claim transform(MetricRegistry metricRegistry, Object claimEntity) {
-    Timer.Context timer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    PreAdjFissClaimTransformerV2.class.getSimpleName(), "transform"))
-            .time();
+    Timer.Context timer = metricRegistry.timer(METRIC_NAME).time();
 
     // TODO: Update this check when entity available
     if (!(claimEntity instanceof Object)) {
