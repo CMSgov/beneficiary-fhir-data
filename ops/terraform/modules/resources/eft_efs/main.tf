@@ -48,7 +48,7 @@ data "aws_region" "current" {}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ENCRYPTION KEYS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-# provision the encryption cmk (keys are managed by the kms-key-admins group)
+# provision the encryption cmk (keys can be managed by anyone in the kms-key-admins group)
 resource "aws_kms_key" "eft_efs" {
   description         = "${var.partner}-eft-efs-${var.env_config.env}-cmk"
   key_usage           = "ENCRYPT_DECRYPT"
@@ -60,45 +60,17 @@ resource "aws_kms_key" "eft_efs" {
 {
   "Version" : "2012-10-17",
   "Id" : "${var.partner}-eft-efs-${var.env_config.env}-cmk-policy",
-  "Statement" : [ {
-    "Sid" : "AllowRootFullAdmin",
-    "Effect" : "Allow",
-    "Principal" : {
-      "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-    },
-    "Action" : "kms:*",
-    "Resource" : "*"
-  }, {
-    "Sid" : "AllowKeyUse",
-    "Effect" : "Allow",
-    "Principal" : {
-      "AWS" : "${aws_iam_role.eft_efs_rw.arn}"
-    },
-    "Action" : [ "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:ReEncrypt*",
-        "kms:GenerateDataKey*",
-        "kms:DescribeKey"
-    ],
-    "Resource" : "*"
-  }, {
-    "Sid" : "AllowEFSKeyUse",
-    "Effect" : "Allow",
-    "Principal" : {
-      "AWS" : "${aws_iam_role.eft_efs_rw.arn}"
-    },
-    "Action" : [
-        "kms:CreateGrant",
-        "kms:ListGrants",
-        "kms:RevokeGrant"
-    ],
-    "Resource" : "*",
-    "Condition" : {
-      "Bool" : {
-        "kms:GrantIsForAWSResource" : "true"
-      }
+  "Statement" : [
+    {
+      "Sid" : "AllowRootFullAdmin",
+      "Effect" : "Allow",
+      "Principal" : {
+        "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+      },
+      "Action" : "kms:*",
+      "Resource" : "*"
     }
-  } ]
+  ]
 }
 POLICY
 }
@@ -121,75 +93,9 @@ resource "aws_efs_file_system" "eft" {
   }
 }
 
-# EFS file system policy that
-# - allows BFD ETL servers to mount root r+w
-# - allows ${var.partner} to query filesystems via an assumed-role
-# - denies all non-tls enabled connections
-resource "aws_efs_file_system_policy" "eft" {
-  file_system_id = aws_efs_file_system.eft.id
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Id": "${var.partner}-eft-efs-${var.env_config.env}-file-system-policy",
-  "Statement": [
-    {
-      "Sid": "AllowETLRootRW",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "*"
-      },
-      "Action": [
-        "elasticfilesystem:ClientMount",
-        "elasticfilesystem:ClientRootAccess",
-        "elasticfilesystem:ClientWrite",
-        "elasticfilesystem:DescribeFileSystem"
-      ],
-      "Resource": "${aws_efs_file_system.eft.arn}",
-      "Condition": {
-        "ArnEquals": {
-          "aws:PrincipalArn": "${data.aws_iam_role.etl_instance.arn}"
-        }
-      }
-    },
-    {
-      "Sid": "AllowAssumedRoleToQueryFS",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "*"
-      },
-      "Action": [
-        "elasticfilesystem:DescribeFileSystem"
-      ],
-      "Resource": "${aws_efs_file_system.eft.arn}",
-      "Condition": {
-        "ArnEquals": {
-          "aws:PrincipalArn": "${aws_iam_role.eft_efs_rw.arn}"
-        }
-      }
-    },
-    {
-      "Sid": "DenyAllIfNotUsingTLS",
-      "Effect": "Deny",
-      "Principal": {
-        "AWS": "*"
-      },
-      "Action": "*",
-      "Resource": "${aws_efs_file_system.eft.arn}",
-      "Condition": {
-        "Bool": {
-          "aws:SecureTransport": "false"
-        }
-      }
-    }
-  ]
-}
-POLICY
-}
-
-# Access point ${var.partner} will mount
-# - will automagically root them into the /dropbox directory
-# - will perform all file operations as specific posix user & group (e.g., 1500:1500)
+# File system Access Point
+# - will automagically root NFS client into the ${var.partner_root_dir} directory (e.g., /dropbox)
+# - all file operations made by the client will automatically be owned by posix user & group (e.g., 1500:1500)
 resource "aws_efs_access_point" "eft" {
   file_system_id = aws_efs_file_system.eft.id
   tags           = merge({ Name = "${var.partner}-eft-efs-${var.env_config.env}-ap" }, local.tags)
@@ -210,50 +116,85 @@ resource "aws_efs_access_point" "eft" {
   }
 }
 
-# policy to allow querying/mounting access points (via assumed role below)
-# - allows ${var.partner} to query file sytems, access points, and mount targets
-# - allows ${var.partner} to mount the file system
-# - grants ${var.partner} read+write privileges
-resource "aws_iam_policy" "eft_efs_ap_access" {
-  name        = "${var.partner}-eft-efs-${var.env_config.env}-ap-access-policy"
-  path        = "/"
-  description = ""
-  policy      = <<POLICY
+# EFS file system policy that
+# - allows BFD ETL servers to mount root r+w
+# - allows ${var.partner} to query filesystems via an assumed-role
+# - forces TLS (encryption-in-transit)
+# - only allows mounting file systems via mount targets
+resource "aws_efs_file_system_policy" "eft" {
+  file_system_id = aws_efs_file_system.eft.id
+
+  policy = <<POLICY
 {
   "Version": "2012-10-17",
+  "Id": "${var.partner}-eft-efs-${var.env_config.env}-file-system-policy",
   "Statement": [
     {
-      "Sid": "AllowPartnerToQueryBFDFileSystems",
+      "Sid": "AllowEtlInstanceProfileToMountRootReadWrite",
       "Effect": "Allow",
+      "Principal": {
+        "AWS": "${data.aws_iam_role.etl_instance.arn}"
+      },
       "Action": [
-        "elasticfilesystem:DescribeFileSystems",
+        "elasticfilesystem:ClientMount",
+        "elasticfilesystem:ClientWrite",
+        "elasticfilesystem:ClientRootAccess",
+        "elasticfilesystem:DescribeFileSystem"
       ],
-      "Resource": "arn:aws:elasticfilesystem:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:file-system/*"
-    },
-    {
-      "Sid": "AllowAccessPointMountRW",
+      "Resource": "${aws_efs_file_system.eft.arn}"
+    }, {
+      "Sid": "AllowPartnerToMountFileSystemReadWriteWhenUsingAP",
       "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.partner_acct_num}:root"
+      },
       "Action": [
-        "elasticfilesystem:DescribeAccessPoints",
-        "elasticfilesystem:DescribeMountTargets",
-        "elasticfilesystem:DescribeTags",
         "elasticfilesystem:ClientMount",
         "elasticfilesystem:ClientWrite"
       ],
-      "Resource": [
-        "${aws_efs_access_point.eft.arn}",
-        "${aws_efs_file_system.eft.arn}"
-      ]
+      "Resource": "${aws_efs_file_system.eft.arn}",
+      "Condition": {
+        "StringEquals": {
+          "elasticfilesystem:AccessPointArn": "${aws_efs_access_point.eft.arn}"
+        }
+      }
+    }, {
+      "Sid": "DenyAnyConnectionNotUsingTLS",
+      "Effect": "Deny",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "*",
+      "Resource": "${aws_efs_file_system.eft.arn}",
+      "Condition": {
+        "Bool": {
+          "aws:SecureTransport": "false"
+        }
+      }
+    }, {
+      "Sid": "DenyAnyConnectionNotUsingMountTargets",
+      "Effect": "Deny",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "*",
+      "Resource": "${aws_efs_file_system.eft.arn}",
+      "Condition": {
+        "Bool": {
+          "elasticfilesystem:AccessedViaMountTarget": "false"
+        }
+      }
     }
   ]
 }
 POLICY
 }
 
-# IAM role that ${var.partner} is allowed to assume
-# TODO: verify principal
-resource "aws_iam_role" "eft_efs_rw" {
-  name               = "${var.partner}-eft-efs-${var.env_config.env}-rw-access-role"
+# IAM role for querying file systems and mount targets
+# ${var.partner} will assume this role
+resource "aws_iam_role" "eft_efs_query" {
+  name               = "${var.partner}-eft-efs-${var.env_config.env}-query"
+  description        = "IAM role to allow ${var.partner} to query BFD (EFS) file systems and mount targets"
   path               = "/"
   assume_role_policy = <<POLICY
 {
@@ -272,11 +213,39 @@ resource "aws_iam_role" "eft_efs_rw" {
 POLICY
 }
 
-# attaches the eft_efs_ap_access policy to the eft_efs_rw role
-resource "aws_iam_policy_attachment" "eft_efs_ap_access" {
-  name       = "${var.partner}-eft-efs-${var.env_config.env}-ap-access-policy-attachment"
-  policy_arn = aws_iam_policy.eft_efs_ap_access.arn
-  roles      = [aws_iam_role.eft_efs_rw.name]
+
+# policy for the above role
+# allows ${var.partner} to query file sytems and mount targets
+resource "aws_iam_policy" "eft_efs_query" {
+  name        = "${var.partner}-eft-efs-${var.env_config.env}-query"
+  path        = "/"
+  description = "Assumed role policy to allow ${var.partner} to query BFD file sytems and mount targets"
+  policy      = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowRoleToQueryBfdFileSystems",
+      "Effect": "Allow",
+      "Action": "elasticfilesystem:DescribeFileSystems",
+      "Resource": "arn:aws:elasticfilesystem:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:file-system/*"
+    },
+    {
+      "Sid": "AllowRoleToQueryMountTargets",
+      "Effect": "Allow",
+      "Action": "elasticfilesystem:DescribeMountTargets",
+      "Resource": "${aws_efs_file_system.eft.arn}"
+    }
+  ]
+}
+POLICY
+}
+
+# attaches the query policy to the query role
+resource "aws_iam_policy_attachment" "eft_efs_query" {
+  name       = "${var.partner}-eft-efs-${var.env_config.env}-query-role-policy-attachment"
+  policy_arn = aws_iam_policy.eft_efs_query.arn
+  roles      = [aws_iam_role.eft_efs_query.name]
 }
 
 
