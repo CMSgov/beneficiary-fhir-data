@@ -192,10 +192,9 @@ add_host_entry() {
     case "$array_length" in
       0) echo "Error: could not find any EFT mount targets" && exit 1 ;;
       1) ip="${ips[0]}" ;;
-      
-      # else, set $ip to a random ip from the array
       *)
-        rand_num=$(("$RANDOM" % "${#ips[@]}"))
+        # set $ip to a random ip from the array
+        rand_num=$(( RANDOM % ${#ips[@]} ))
         ip="${ips[${rand_num}]}" ;;
     esac
   fi
