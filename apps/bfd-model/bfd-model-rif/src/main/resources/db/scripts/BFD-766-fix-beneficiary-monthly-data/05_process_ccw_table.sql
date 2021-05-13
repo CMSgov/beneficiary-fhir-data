@@ -113,7 +113,7 @@ DECLARE
   curs          CURSOR FOR
                       SELECT * FROM public.CCW_LOAD_TEMP;
 BEGIN
-    RAISE INFO 'Starting processing of table: CCW_LOAD_TEMP...';
+    RAISE INFO 'Starting processing of table: CCW_LOAD_TEMP at % ...', NOW();
     
     SELECT INTO expected_cnt count(*) from CCW_LOAD_TEMP;
     RAISE INFO 'Expected record count in table: CCW_LOAD_TEMP: %', expected_cnt;
@@ -388,7 +388,7 @@ BEGIN
         
             IF rcd_cnt % 20000 = 0
             THEN
-                RAISE INFO 'Record Count: % ...', rcd_cnt;
+                RAISE INFO 'Record Count: % ...%', rcd_cnt, NOW();
             END IF;
         
         EXCEPTION WHEN others THEN
@@ -407,7 +407,7 @@ BEGIN
 
     CLOSE curs;
     RAISE INFO 'implied COMMIT...Transaction ID: %', TXID_CURRENT();
-    RAISE INFO 'Record Total: % ...DONE!!!', rcd_cnt;
+    RAISE INFO 'Record Total: % ...DONE at %', rcd_cnt, NOW();
     
 EXCEPTION WHEN others THEN
     RAISE EXCEPTION 'Error: % : %', SQLERRM::text, SQLSTATE::text;
