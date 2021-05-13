@@ -94,6 +94,7 @@ public class RdaLoadJobTest {
     } catch (Exception ex) {
       Assert.assertNotNull(ex.getCause());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(ProcessingException.class));
+      Assert.assertEquals(7, ((ProcessingException) ex.getCause()).getProcessedCount());
       final Throwable actualCause = ex.getCause().getCause();
       MatcherAssert.assertThat(actualCause, Matchers.instanceOf(IOException.class));
       Assert.assertEquals("oops", actualCause.getMessage());
@@ -154,14 +155,13 @@ public class RdaLoadJobTest {
         new RdaLoadJob<>(
             config,
             () -> {
+              // lets the main thread know we've acquired the semaphore
               waitForStartup.countDown();
+              // waits until the second call is done before returning a source
               waitForCompletion.await();
               return source;
             },
-            () -> {
-              waitForCompletion.await();
-              return sink;
-            },
+            () -> sink,
             appMetrics);
     final ExecutorService pool = Executors.newCachedThreadPool();
     try {

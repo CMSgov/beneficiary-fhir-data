@@ -26,7 +26,7 @@ public class GrpcResponseStreamTest {
   }
 
   @Test
-  public void testHasNextNonInterrupt() {
+  public void hasNextPassesThroughNonInterrupts() {
     StatusRuntimeException status = Status.DEADLINE_EXCEEDED.asRuntimeException();
     doThrow(status).when(iterator).hasNext();
     try {
@@ -38,7 +38,7 @@ public class GrpcResponseStreamTest {
   }
 
   @Test
-  public void testNextNonInterrupt() {
+  public void nextPassesThroughNonInterrupts() {
     StatusRuntimeException status = Status.DEADLINE_EXCEEDED.asRuntimeException();
     doThrow(status).when(iterator).next();
     try {
@@ -50,7 +50,7 @@ public class GrpcResponseStreamTest {
   }
 
   @Test
-  public void testHasNextInterrupt() {
+  public void hasNextWrapsInterrupts() {
     StatusRuntimeException status =
         Status.CANCELLED.withCause(new InterruptedException()).asRuntimeException();
     doThrow(status).when(iterator).hasNext();
@@ -63,7 +63,7 @@ public class GrpcResponseStreamTest {
   }
 
   @Test
-  public void testNextInterrupt() {
+  public void nextWrapsInterrupts() {
     StatusRuntimeException status =
         Status.CANCELLED.withCause(new InterruptedException()).asRuntimeException();
     doThrow(status).when(iterator).next();
