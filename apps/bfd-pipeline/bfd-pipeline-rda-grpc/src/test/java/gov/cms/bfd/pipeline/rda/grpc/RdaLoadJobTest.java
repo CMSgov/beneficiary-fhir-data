@@ -11,7 +11,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob.Config;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -178,5 +182,20 @@ public class RdaLoadJobTest {
       pool.shutdown();
       pool.awaitTermination(5, TimeUnit.SECONDS);
     }
+  }
+
+  @Test
+  public void configIsSerializable() throws Exception {
+    final RdaLoadJob.Config original = new Config(Duration.ofMillis(1000), 45);
+    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+      out.writeObject(original);
+    }
+    RdaLoadJob.Config loaded;
+    try (ObjectInputStream inp =
+        new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+      loaded = (Config) inp.readObject();
+    }
+    Assert.assertEquals(original, loaded);
   }
 }

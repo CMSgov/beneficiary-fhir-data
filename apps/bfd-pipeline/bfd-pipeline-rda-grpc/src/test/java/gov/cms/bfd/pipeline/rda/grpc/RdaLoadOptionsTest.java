@@ -1,0 +1,30 @@
+package gov.cms.bfd.pipeline.rda.grpc;
+
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.time.Duration;
+import org.junit.Assert;
+import org.junit.Test;
+
+public class RdaLoadOptionsTest {
+  @Test
+  public void configIsSerializable() throws Exception {
+    final RdaLoadOptions original =
+        new RdaLoadOptions(
+            new RdaLoadJob.Config(Duration.ofDays(12), 9832),
+            new GrpcRdaSource.Config("localhost", 5432, Duration.ofMinutes(59)));
+    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+      out.writeObject(original);
+    }
+    RdaLoadOptions loaded;
+    try (ObjectInputStream inp =
+        new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+      loaded = (RdaLoadOptions) inp.readObject();
+    }
+    Assert.assertEquals(original, loaded);
+  }
+}

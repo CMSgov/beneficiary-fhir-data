@@ -9,8 +9,10 @@ import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
@@ -123,7 +125,9 @@ public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobA
   }
 
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
-  public static final class Config {
+  public static final class Config implements Serializable {
+    private static final long serialVersionUID = 1823137784819917L;
+
     /**
      * runInterval specifies how often the job should be scheduled. It is used to create a return
      * value for the PipelineJob.getSchedule() method.
@@ -152,6 +156,23 @@ public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobA
     /** @return the number of objects to write to the database per batch/transaction. */
     public int getBatchSize() {
       return batchSize;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof Config)) {
+        return false;
+      }
+      Config config = (Config) o;
+      return batchSize == config.batchSize && Objects.equals(runInterval, config.runInterval);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(runInterval, batchSize);
     }
   }
 }

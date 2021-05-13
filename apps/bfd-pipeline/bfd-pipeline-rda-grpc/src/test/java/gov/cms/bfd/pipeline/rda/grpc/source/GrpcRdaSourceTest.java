@@ -20,10 +20,16 @@ import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -168,6 +174,22 @@ public class GrpcRdaSourceTest {
     source.close(); // second call does nothing
     verify(channel, times(1)).shutdown();
     verify(channel, times(1)).awaitTermination(5, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void configIsSerializable() throws Exception {
+    final GrpcRdaSource.Config original =
+        new GrpcRdaSource.Config("localhost", 5432, Duration.ofMinutes(59));
+    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+      out.writeObject(original);
+    }
+    GrpcRdaSource.Config loaded;
+    try (ObjectInputStream inp =
+        new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+      loaded = (GrpcRdaSource.Config) inp.readObject();
+    }
+    Assert.assertEquals(original, loaded);
   }
 
   private void assertMeterReading(long expected, String meterName) {

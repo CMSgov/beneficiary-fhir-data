@@ -11,9 +11,11 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,7 +176,9 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   }
 
   /** This class contains the configuration settings specific to the RDA rRPC service. */
-  public static class Config {
+  public static class Config implements Serializable {
+    private static final long serialVersionUID = 6667857735839524L;
+
     private final String host;
     private final int port;
     private final Duration maxIdle;
@@ -208,6 +212,25 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
      */
     public Duration getMaxIdle() {
       return maxIdle;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof Config)) {
+        return false;
+      }
+      Config config = (Config) o;
+      return port == config.port
+          && Objects.equals(host, config.host)
+          && Objects.equals(maxIdle, config.maxIdle);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(host, port, maxIdle);
     }
   }
 }
