@@ -91,6 +91,7 @@ DECLARE
   rcd_cnt       INTEGER := 0;
   expected_cnt  INTEGER := 0;
   loop_cnt      INTEGER := 0;
+  MAX_INNER     INTEGER := 10000;    -- max # of rows to process in <<INNER>> LOOP
   cur_yr        VARCHAR;
   rcd           CCW_LOAD_TEMP%ROWTYPE;
   currYear      VARCHAR(4) := '9999';
@@ -375,7 +376,7 @@ BEGIN
                 rcd_cnt  := rcd_cnt + 1;
                 loop_cnt := loop_cnt + 1;
         
-                if loop_cnt % 10000 = 0
+                if loop_cnt = MAX_INNER
                 THEN
                     EXIT inner;
                 END IF;
@@ -394,7 +395,7 @@ BEGIN
         
         IF NOT okToCont
         THEN
-             RAISE INFO 'exiting <<outer>> loop!!!';
+            RAISE INFO 'exiting <<outer>> loop!!!';
             EXIT outer;
         END IF;
 
