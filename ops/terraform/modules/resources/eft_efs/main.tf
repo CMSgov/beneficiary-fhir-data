@@ -231,9 +231,12 @@ resource "aws_iam_policy" "eft_efs_query" {
       "Resource": "arn:aws:elasticfilesystem:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:file-system/*"
     },
     {
-      "Sid": "AllowRoleToQueryMountTargets",
+      "Sid": "AllowRoleToQueryMountTargetsAndAccessPoints",
       "Effect": "Allow",
-      "Action": "elasticfilesystem:DescribeMountTargets",
+      "Action": [
+        "elasticfilesystem:DescribeMountTargets",
+        "elasticfilesystem:DescribeAccessPoints"
+      ],
       "Resource": "${aws_efs_file_system.eft.arn}"
     }
   ]
