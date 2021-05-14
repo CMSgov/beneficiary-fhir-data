@@ -60,6 +60,38 @@ module "glue_jobs" {
   ]
 }
 
+module "insights_data_table_dev" {
+  source      = "../../modules/table"
+  database    = module.database.name
+  table       = "dev_insights"
+  description = "dev insights data"
+  bucket      = module.bucket.id
+  bucket_cmk  = module.bucket.bucket_cmk
+  tags        = local.tags
+  partitions  = local.partitions
+  columns = [
+    { name = "name", type = "string", comment = "" },
+    { name = "timestamp", type = "bigint", comment = "" },
+    { name = "json_result", type = "string", comment = "" },
+  ]
+}
+
+module "insights_data_table_test" {
+  source      = "../../modules/table"
+  database    = module.database.name
+  table       = "test_insights"
+  description = "test insights data"
+  bucket      = module.bucket.id
+  bucket_cmk  = module.bucket.bucket_cmk
+  tags        = local.tags
+  partitions  = local.partitions
+  columns = [
+    { name = "name", type = "string", comment = "" },
+    { name = "timestamp", type = "bigint", comment = "" },
+    { name = "json_result", type = "string", comment = "" },
+  ]
+}
+
 module "insights_data_table_opensbx" {
   source      = "../../modules/table"
   database    = module.database.name

@@ -7,7 +7,7 @@ AWS.config.apiVersions = {
 const athena = new AWS.Athena();
 
 const get_params = (env) => {
-  if (!['prod','opensbx'].includes(env)) {
+  if (!['prod','opensbx','test','dev'].includes(env)) {
     return undefined;
   }
   return {
@@ -34,7 +34,7 @@ const execute_query = (env) => {
 }
 
 const handler = (event, context, callback) => {
-      Promise.all(['prod','opensbx'].map(x => execute_query(x)))
+      Promise.all(['prod','opensbx','test','dev'].map(x => execute_query(x)))
       .then((results) => {
         console.log(`Results: ${results}`);
       })
