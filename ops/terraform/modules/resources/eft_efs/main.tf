@@ -289,8 +289,6 @@ resource "aws_security_group_rule" "partner_nfs" {
 #
 
 # Deploy mount targets into etl data subnets
-# TODO: only deploys mount targets in *existing* subnets. We will need to extend our data
-# TODO: subnets into all AZ's to ensure we do not incur cross-AZ data charges
 resource "aws_efs_mount_target" "eft" {
   file_system_id = aws_efs_file_system.eft.id
 
@@ -306,17 +304,17 @@ resource "aws_efs_mount_target" "eft" {
 #
 
 # sns topic for cloudwatch
-resource "aws_sns_topic" "cloudwatch_alarms_topic" {
+resource "aws_sns_topic" "eft_efs" {
   name = "${var.partner}-eft-efs-${var.env_config.env}-cloudwatch-alarms"
 }
 
 # hook up efs alerts
 module "cloudwatch_alarms_efs" {
-  source = "../eft_efs_alarms"
+  source = "../efs_alarms"
 
   app                         = var.partner
   env                         = var.env_config.env
-  cloudwatch_notification_arn = aws_sns_topic.cloudwatch_alarms_topic.arn
+  cloudwatch_notification_arn = aws_sns_topic.eft_efs.arn
 
   filesystem_id = aws_efs_file_system.eft.id
 }
