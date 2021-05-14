@@ -3,9 +3,13 @@ package gov.cms.bfd.model.rda;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -67,4 +71,7 @@ public class PreAdjFissClaim {
 
   @Column(name = "`lastUpdated`")
   private Timestamp lastUpdated;
+
+  @OneToMany(mappedBy = "dcn", fetch = FetchType.EAGER)
+  private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
 }
