@@ -3,6 +3,11 @@ locals {
   project    = "bcda"
   database   = "bcda"
   partitions = [{ name = "dt", type = "string", comment = "Approximate delivery time" }]
+  columns = [
+    { name = "name", type = "string", comment = "" },
+    { name = "timestamp", type = "bigint", comment = "" },
+    { name = "json_result", type = "string", comment = "" },
+  ]
 }
 
 data "aws_caller_identity" "current" {}
@@ -11,10 +16,10 @@ data "aws_caller_identity" "current" {}
 ## Bucket for the project's data
 
 module "bucket" {
-  source      = "../../modules/bucket"
-  name        = local.project
-  sensitivity = "moderate"
-  tags        = local.tags
+  source         = "../../modules/bucket"
+  name           = local.project
+  sensitivity    = "moderate"
+  tags           = local.tags
   cross_accounts = var.bcda_cross_accounts
 }
 
@@ -69,11 +74,7 @@ module "insights_data_table_dev" {
   bucket_cmk  = module.bucket.bucket_cmk
   tags        = local.tags
   partitions  = local.partitions
-  columns = [
-    { name = "name", type = "string", comment = "" },
-    { name = "timestamp", type = "bigint", comment = "" },
-    { name = "json_result", type = "string", comment = "" },
-  ]
+  columns     = local.columns
 }
 
 module "insights_data_table_test" {
@@ -85,11 +86,7 @@ module "insights_data_table_test" {
   bucket_cmk  = module.bucket.bucket_cmk
   tags        = local.tags
   partitions  = local.partitions
-  columns = [
-    { name = "name", type = "string", comment = "" },
-    { name = "timestamp", type = "bigint", comment = "" },
-    { name = "json_result", type = "string", comment = "" },
-  ]
+  columns     = local.columns
 }
 
 module "insights_data_table_opensbx" {
@@ -101,11 +98,7 @@ module "insights_data_table_opensbx" {
   bucket_cmk  = module.bucket.bucket_cmk
   tags        = local.tags
   partitions  = local.partitions
-  columns = [
-    { name = "name", type = "string", comment = "" },
-    { name = "timestamp", type = "bigint", comment = "" },
-    { name = "json_result", type = "string", comment = "" },
-  ]
+  columns     = local.columns
 }
 
 module "insights_data_table_prod" {
@@ -117,11 +110,7 @@ module "insights_data_table_prod" {
   bucket_cmk  = module.bucket.bucket_cmk
   tags        = local.tags
   partitions  = local.partitions
-  columns = [
-    { name = "name", type = "string", comment = "" },
-    { name = "timestamp", type = "bigint", comment = "" },
-    { name = "json_result", type = "string", comment = "" },
-  ]
+  columns     = local.columns
 }
 
 # lambda to reload partitions
