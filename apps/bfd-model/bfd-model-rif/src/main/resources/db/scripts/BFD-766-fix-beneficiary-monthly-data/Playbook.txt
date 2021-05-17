@@ -101,10 +101,18 @@ There will be north of 130M records to process; this step will take a LONG TIME!
  The above will create a log file that records progress and will provide a summary of processing;
  for example, after running the load process for the test data, you'd see something like:
 
- call load_from_ccw();
-psql:BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:339: INFO:  Starting processing of table: CCW_LOAD_TEMP...
-psql:BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:339: INFO:  Expected record count in table: CCW_LOAD_TEMP: 7
-psql:BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:339: INFO:  Record Total: 7 ...DONE!!!
+call load_from_ccw();
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Starting processing of table: CCW_LOAD_TEMP...
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Expected record count in table: CCW_LOAD_TEMP: 7
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2020
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2019
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2020
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2019
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  No more records to process....
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  implied COMMIT...Transaction ID: 1265
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  exiting <<outer>> loop!!!
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  implied COMMIT...Transaction ID: 1265
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Record Total: 7 ...DONE!!!
 CALL
 
 *****************************************************************
