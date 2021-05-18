@@ -1,29 +1,47 @@
 #!/bin/bash
 
-set -e
 set -o pipefail
-year=""
 
-if [ -z "$1" ]
-then
-    year="2020"
-else
-    year="$1"
-fi
+YEAR="${1:-2020}"
 
-
-if [[ "$year" != "2019" && "$year" != "2020" ]]; then
+if [[ "$YEAR" != "2019" && "$YEAR" != "2020" ]]; then
   echo "Invalid year specified...must be either 2019 or 2020!"
   exit ;
 fi
 
-echo "Begin processing year: $year at: $(date +'%T.%31')"
+# following must be passed in as either environment variables or as cmd-line args (default)
+PGHOST="${DB_HOST:-$2}"
+PGUSER="${DB_USER:-$3}"
+PGPASSWORD="${DB_PSWD:-$4}"
+# other vars that skirt security (a bit)
+PGDATABASE="${DB_NAME:-fihrdb}"
+PGPORT="${DB_PORT:-5432}"
+
+if [ -z "$PGHOST" ] || [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ]; then
+    echo "*****  E r r o r - Missing required variables  *****"
+    echo "$0 requires ENV variable(s) for: DB_HOST, DB_USER, DB_PSWD";
+    echo "or";
+    echo "$0 requires cmd-line args for: <year> <db host> <db username> <db password>";
+    exit 1;
+fi
+
+echo "Testing db connectivity..."
+now=$(psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -c "select NOW();")
+if [[ "$now" == *"2021"* ]]; then
+  echo "db connectivity: OK"
+else
+  echo "db connectivity: FAILED...exiting"
+  exit 1;
+fi
+
+echo "Begin processing year: $YEAR at: $(date +'%T.%31')"
+SQL="select public.update_bene_monthly_with_delete('$YEAR');"
 
 let tot_rcds=0
 while :; do
   echo "Starting 20k transaction at: $(date +'%T.%31')"
 
-  cnt=$(psql -h 127.0.0.1 -U bfd -d fihr --quiet -c '\t' -c "select public.update_bene_monthly_with_delete('$year');")
+  cnt=$(psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -c "$SQL")
   expr $cnt + 0
 
   if (( $cnt > 0 )); then
@@ -36,5 +54,5 @@ while :; do
 done
 
 echo "All DONE at: $(date +'%T.%31')"
-echo "Records processed: $tot_rcds"
+echo "TOTAL records processed: $tot_rcds"
 exit 0;
