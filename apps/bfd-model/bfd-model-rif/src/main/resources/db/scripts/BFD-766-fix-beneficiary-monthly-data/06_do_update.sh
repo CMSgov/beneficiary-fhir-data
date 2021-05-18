@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+set -o pipefail
 year=""
 
 if [ -z "$1" ]
