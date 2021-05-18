@@ -34,10 +34,6 @@ set_filesystems(){
   for fs in $($aws efs describe-file-systems --region "$AWS_REGION" --query 'FileSystems[].[FileSystemId,Name]' --output text | grep "${PARTNER_NAME}-eft-efs-${APP_ENV}" | cut -f1); do
     file_systems+=("$fs")
   done
-  if [[ "${#file_systems[@]}" -eq 0 ]]; then
-    echo "No EFS file systems for ${PARTNER_NAME^^} were found."
-    exit 1
-  fi
 }
 
 # ensure our mount directories are present and empty
@@ -148,6 +144,13 @@ set_azid
 
 # fetch and add file system(s) to the file_systems array
 set_filesystems
+
+# quit if there are no file systems to mount
+# this is not necessarily a bad thing, not all partners are peered to our test env, so no reason to host EFT EFS there
+if [[ "${#file_systems[@]}" -eq 0 ]]; then
+  echo "No EFT EFS file systems for ${PARTNER_NAME^^} were found."
+  exit
+fi
 
 # prepare mount directories
 prep_mount_directories
