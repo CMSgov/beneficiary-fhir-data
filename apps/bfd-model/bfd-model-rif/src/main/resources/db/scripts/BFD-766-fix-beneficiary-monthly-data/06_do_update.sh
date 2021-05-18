@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -o pipefail
+set -e
 
 YEAR="${1:-2020}"
 
@@ -15,7 +16,7 @@ PGUSER="${DB_USER:-$3}"
 PGPASSWORD="${DB_PSWD:-$4}"
 # other vars that skirt security (a bit)
 PGDATABASE="${DB_NAME:-fihrdb}"
-PGPORT="${DB_PORT:-5432}"
+export PGPORT="${DB_PORT:-5432}"
 
 if [ -z "$PGHOST" ] || [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ]; then
     echo "*****  E r r o r - Missing required variables  *****"
@@ -26,7 +27,7 @@ if [ -z "$PGHOST" ] || [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ]; then
 fi
 
 echo "Testing db connectivity..."
-now=$(psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -c "select NOW();")
+now=$(psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" --quiet --tuples-only -c "select NOW();")
 if [[ "$now" == *"2021"* ]]; then
   echo "db connectivity: OK"
 else
@@ -37,18 +38,17 @@ fi
 echo "Begin processing year: $YEAR at: $(date +'%T.%31')"
 SQL="select public.update_bene_monthly_with_delete('$YEAR');"
 
-let tot_rcds=0
+(( tot_rcds = 0 )) 
 while :; do
   echo "Starting 20k transaction at: $(date +'%T.%31')"
 
-  cnt=$(psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -c "$SQL")
-  expr $cnt + 0
+  cnt=$(psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" --quiet --tuples-only -c "$SQL")
+  ((cnt += 0))
 
-  if (( $cnt > 0 )); then
-      tot_rcds=$(( tot_rcds + $cnt ))
+  if [ "$cnt" -gt 0 ]; then
+      tot_rcds+=$cnt
       echo "Current record count: $tot_rcds at: $(date +'%T.%31')"
   else
-      echo "Completed shell loop processing at:  $(date +'%T.%31')"
       break;
   fi
 done
