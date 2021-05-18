@@ -1,4 +1,4 @@
-ansible==2.9.18
+ansible==2.9.20
 boto
 boto3
 cryptography

@@ -1,0 +1,156 @@
+NOTE: for this runbook, the db schema host (name or IP addr), db name, 
+      and db user relect a dev environment used to create the ticket.
+
+      host IP:  127.0.0.1
+      db User:  bfd
+      db Name:  fihr
+
+*****************************************************************
+** PREREQUISITES                                               **         
+*****************************************************************
+1. Will need db schema name, db host, and database credentials;
+   the db role will need to be able to:
+   - create temp tables
+   - create table triggers
+   - create stored procedures or functions
+2. Change directory to where the scripts reside:
+   - apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts
+
+*****************************************************************
+** STEP 1: Create the CCW_LOAD_TEMP table                      **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/01_create_ccw_load_temp_table.sql
+
+*****************************************************************
+** STEP 2: Create Audit table and setup audit triggers         **         
+*****************************************************************
+ psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/02_ccw_setup_bene_monthly_data_fix.sql
+
+*****************************************************************
+** STEP 3: Verify Audit table and triggers                     **         
+*****************************************************************
+psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/03_verify_setup.sql
+
+The following should be displayed:
+
+   trigger_name   | event  | activation 
+------------------+--------+------------
+ audit_ccw_delete | DELETE | AFTER
+ audit_ccw_insert | INSERT | AFTER
+ audit_ccw_update | UPDATE | AFTER
+(3 rows)
+
+*****************************************************************
+** STEP 4: Load CSV data (file) into CCW_LOAD_TEMP table       **         
+*****************************************************************
+
+There are actually (up to) 3 files that will be used in this step:
+
+  *** NOTE *** This is is for testing ONLY! DO NOT PERFORM THIS STEP IN A PRODUCTION ENVIRONMENT!!!
+
+- 04a_load_test_data.sql
+  Used to test the psql copu command; it will add 7 records to the CCW_LOAD_TEMP table.
+
+  To load the test data:
+
+  psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/04a_load_test_data.sql
+
+  ===================== THE FOLLOWING INSTRUCTIONS ARE FOR PRODUCTION ENVIRONMENT  =====================
+
+  There are over 65M+ records in the yearly CCW data feeds; THIS WILL TAKE TIME TO IMPORT!!!
+
+- 04b_load_2019_data.sql
+
+  Used to load the CCW_TEMP_TABLE with the 2019 CCW data feed:
+
+  Get a record (line) count for the input file:
+
+  cat BB_MBSF_2019.csv |wc -l
+
+  Then attempt to import data from the 2019 data feed:
+
+  psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/04b_load_2019_data.sql
+
+
+
+- 04c_load_2020_data.sql
+
+  Used to load the CCW_TEMP_TABLE with the 2020 CCW data feed:
+
+  Get a record (line) count for the input file:
+
+  cat BB_MBSF_2020.csv |wc -l
+
+  Then attempt to import data from the 2020 data feed:
+
+  psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/04b_load_2020_data.sql
+
+
+*****************************************************************
+** STEP 5: Process data in the CCW_LOAD_TEMP table             **         
+*****************************************************************
+
+This step performs the actual data update of the "BeneficiaryMonthly" table and creates audit records
+for any changes (INSERT, UPDATE, DELETE) to a given row in that table.
+
+********** I M P O R T A N T    N O T E **********
+There will be north of 130M records to process; this step will take a LONG TIME! BE PATIENT!
+
+ psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql &> "$(date +%Y-%m-%d_%H-%M.txt)"
+
+ The above will create a log file that records progress and will provide a summary of processing;
+ for example, after running the load process for the test data, you'd see something like:
+
+call load_from_ccw();
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Starting processing of table: CCW_LOAD_TEMP...
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Expected record count in table: CCW_LOAD_TEMP: 7
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2020
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2019
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2020
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2019
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  No more records to process....
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  implied COMMIT...Transaction ID: 1265
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  exiting <<outer>> loop!!!
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  implied COMMIT...Transaction ID: 1265
+BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Record Total: 7 ...DONE!!!
+CALL
+
+*****************************************************************
+** STEP 6: Cleanup at appropriate time                         **         
+*****************************************************************
+
+There is a cleanup script that can be run AFTER VERIFYING that EVERYTHING
+has run successfull to completion. This should be the FINAL STEP
+to remove unnecessary db artifacts such as temp tables, stored
+procedures and triggers.
+
+If the processed record count does not match the expected record count, then 
+remediation analysis will need to be performed to determine any record discrepancies.
+
+
+*****************************************************************
+** Follow-up QA                                                **         
+*****************************************************************
+
+The final step is to assess the efficacy of the entire process; in particular
+a thorough analysis of the BENEFICIARY_MONTHLY_AUDIT table. That table will have
+captured any record-level (i.e., per month) updates of the BeneficiaryMonthly table.
+
+This will be the most important assessment of whether we may have served up invalid
+data to peering partners.
+
+Each row in the BENEFICIARY_MONTHLY_AUDIT will capture that there was a change to the
+BFD BeneficiaryMonthly table; an assessment can then be made to determine if subsequent
+action(s) need to be taken.
+
+Q. What happens if Step 6 fails?
+
+   Step 6 can be run miultiple times; it is effectively running an idempotent UPDATE so
+   re-running would simply update data with the same data as a previous run.
+
+Q. Doesn't re-running Step 6 cause the audit table to have multiple records for the same data change?
+
+   No, it doesns't; the UPDATE audit trigger is setup to fire ONLY IF A CHANGE OCCURS; so for a
+   re-run, there would be no change to a record that was previously updated.
+
+
