@@ -21,7 +21,7 @@ BFD_V2_ENABLED='{{ data_server_v2_enabled }}'
 export NEW_RELIC_HOST='gov-collector.newrelic.com'
 export NEW_RELIC_LICENSE_KEY='{{ data_server_new_relic_license_key }}'
 export NEW_RELIC_LOG_FILE_PATH="${LOGS_DIR}"
-export NEW_RELIC_HIGH_SECURITY='true'
+export NEW_RELIC_HIGH_SECURITY='false'
 export NEW_RELIC_EXTENSIONS_DIR='{{ data_server_dir }}/newrelic/extensions/'
 {% if data_server_proxy_host is defined %}
 export NEW_RELIC_PROXY_HOST='{{ data_server_proxy_host }}'
