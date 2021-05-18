@@ -138,12 +138,9 @@ action(s) need to be taken.
 
 Q. What happens if Step 6 fails?
 
-   Step 6 can be run multiple times; it is effectively running an idempotent UPDATE so
-   re-running would simply update data with the same data as a previous run.
+   Step 6 can be run multiple times; it will pick back up where it left off.
 
 Q. Doesn't re-running Step 6 cause the audit table to have multiple records for the same data change?
 
    No, it doesns't; the UPDATE audit trigger is setup to fire ONLY IF A CHANGE OCCURS; so for a
    re-run, there would be no change to a record that was previously updated.
-
-
