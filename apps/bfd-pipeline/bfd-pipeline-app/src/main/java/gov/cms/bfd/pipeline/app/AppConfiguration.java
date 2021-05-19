@@ -127,24 +127,29 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "NEW_RELIC_METRIC_PERIOD";
 
+  private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
   private final CcwRifLoadOptions ccwRifLoadOptions;
-  private final MetricOptions metricOptions;
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
+   * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
-   * @param metricOptions the value to use for {@link #getMetricOptions()}
    */
   public AppConfiguration(
+      MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
-      CcwRifLoadOptions ccwRifLoadOptions,
-      MetricOptions metricOptions) {
+      CcwRifLoadOptions ccwRifLoadOptions) {
+    this.metricOptions = metricOptions;
     this.databaseOptions = databaseOptions;
     this.ccwRifLoadOptions = ccwRifLoadOptions;
-    this.metricOptions = metricOptions;
+  }
+
+  /** @return the {@link MetricOptions} that the application will use */
+  public MetricOptions getMetricOptions() {
+    return metricOptions;
   }
 
   /** @return the {@link DatabaseOptions} that the application will use */
@@ -157,21 +162,16 @@ public final class AppConfiguration implements Serializable {
     return ccwRifLoadOptions;
   }
 
-  /** @return the {@link MetricOptions} that the application will use */
-  public MetricOptions getMetricOptions() {
-    return metricOptions;
-  }
-
   /** @see java.lang.Object#toString() */
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("AppConfiguration [ccwRifLoadOptions=");
-    builder.append(ccwRifLoadOptions);
+    builder.append("AppConfiguration [metricOptions=");
+    builder.append(metricOptions);
     builder.append(", databaseOptions=");
     builder.append(databaseOptions);
-    builder.append(", metricOptions=");
-    builder.append(metricOptions);
+    builder.append(", ccwRifLoadOptions=");
+    builder.append(ccwRifLoadOptions);
     builder.append("]");
     return builder.toString();
   }
@@ -341,6 +341,14 @@ public final class AppConfiguration implements Serializable {
       hostname = "unknown";
     }
 
+    MetricOptions metricOptions =
+        new MetricOptions(
+            newRelicMetricKey,
+            newRelicAppName,
+            newRelicMetricHost,
+            newRelicMetricPath,
+            newRelicMetricPeriod,
+            hostname);
     DatabaseOptions databaseOptions =
         new DatabaseOptions(databaseUrl, databaseUsername, databasePassword.toCharArray());
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
@@ -352,16 +360,8 @@ public final class AppConfiguration implements Serializable {
             loaderThreads,
             idempotencyRequired.get().booleanValue());
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
-    MetricOptions metricOptions =
-        new MetricOptions(
-            newRelicMetricKey,
-            newRelicAppName,
-            newRelicMetricHost,
-            newRelicMetricPath,
-            newRelicMetricPeriod,
-            hostname);
 
-    return new AppConfiguration(databaseOptions, ccwRifLoadOptions, metricOptions);
+    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions);
   }
 
   /**
