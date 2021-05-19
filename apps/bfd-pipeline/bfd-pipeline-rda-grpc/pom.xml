@@ -30,7 +30,7 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- These dependencies are call a gRPC server. -->
+        <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
         <dependency>
           <groupId>io.grpc</groupId>
           <artifactId>grpc-netty-shaded</artifactId>

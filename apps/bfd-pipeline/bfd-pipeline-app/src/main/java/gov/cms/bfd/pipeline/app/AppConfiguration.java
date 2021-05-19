@@ -194,7 +194,7 @@ public final class AppConfiguration implements Serializable {
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    * @param metricOptions the value to use for {@link #getMetricOptions()}
-   * @param rdaLoadOptions
+   * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
    */
   public AppConfiguration(
       DatabaseOptions databaseOptions,
@@ -435,7 +435,7 @@ public final class AppConfiguration implements Serializable {
   /**
    * Loads the configuration settings related to the RDA gRPC API data load jobs. Ths job and most
    * of its settings are optional. Because the API may exist in some environments but not others a
-   * separate environment variable indicates whether or not the settins should be loaded.
+   * separate environment variable indicates whether or not the settings should be loaded.
    *
    * @return a valid RdaLoadOptions if job is configured, otherwise null
    */
