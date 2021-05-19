@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.rif.schema;
 
+import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -7,6 +8,7 @@ import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
+import java.util.Arrays;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -30,6 +32,13 @@ public final class DatabaseTestHelper {
    * e.g. {@link #createDataSourceForHsqlEmbeddedWithServer(String)}.
    */
   public static final String JDBC_URL_PREFIX_BLUEBUTTON_TEST = "jdbc:bfd-test:";
+
+  /**
+   * We need to inform Flyway of all of our schemas in order for {@link Flyway.clean()} to work
+   * properly.
+   */
+  public static final ImmutableList<String> FLYWAY_CLEAN_SCHEMAS =
+      ImmutableList.of("PUBLIC", "pre_adj");
 
   private static final String HSQL_SERVER_USERNAME = "test";
   private static final String HSQL_SERVER_PASSWORD = "test";
@@ -105,7 +114,13 @@ public final class DatabaseTestHelper {
     }
 
     // Clean the DB so that it's fresh and ready for a new test case.
-    Flyway flyway = Flyway.configure().dataSource(dataSource).connectRetries(5).load();
+    Flyway flyway =
+        Flyway.configure()
+            .dataSource(dataSource)
+            .schemas(FLYWAY_CLEAN_SCHEMAS.toArray(new String[0]))
+            .connectRetries(5)
+            .load();
+    LOGGER.warn("Cleaning schemas: {}", Arrays.asList(flyway.getConfiguration().getSchemas()));
     flyway.clean();
     return dataSource;
   }

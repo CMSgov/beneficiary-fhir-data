@@ -182,29 +182,34 @@ public final class AppConfiguration implements Serializable {
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
   public static final int DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS = Integer.MAX_VALUE;
 
+  private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
   private final CcwRifLoadOptions ccwRifLoadOptions;
-  private final MetricOptions metricOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
   @Nullable private final RdaLoadOptions rdaLoadOptions;
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
+   * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
-   * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
    */
   public AppConfiguration(
+      MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
       CcwRifLoadOptions ccwRifLoadOptions,
-      MetricOptions metricOptions,
       RdaLoadOptions rdaLoadOptions) {
+    this.metricOptions = metricOptions;
     this.databaseOptions = databaseOptions;
     this.ccwRifLoadOptions = ccwRifLoadOptions;
-    this.metricOptions = metricOptions;
     this.rdaLoadOptions = rdaLoadOptions;
+  }
+
+  /** @return the {@link MetricOptions} that the application will use */
+  public MetricOptions getMetricOptions() {
+    return metricOptions;
   }
 
   /** @return the {@link DatabaseOptions} that the application will use */
@@ -217,11 +222,6 @@ public final class AppConfiguration implements Serializable {
     return ccwRifLoadOptions;
   }
 
-  /** @return the {@link MetricOptions} that the application will use */
-  public MetricOptions getMetricOptions() {
-    return metricOptions;
-  }
-
   /** @return the {@link RdaLoadOptions} that the application will use */
   public Optional<RdaLoadOptions> getRdaLoadOptions() {
     return Optional.ofNullable(rdaLoadOptions);
@@ -231,12 +231,12 @@ public final class AppConfiguration implements Serializable {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("AppConfiguration [ccwRifLoadOptions=");
-    builder.append(ccwRifLoadOptions);
+    builder.append("AppConfiguration [metricOptions=");
+    builder.append(metricOptions);
     builder.append(", databaseOptions=");
     builder.append(databaseOptions);
-    builder.append(", metricOptions=");
-    builder.append(metricOptions);
+    builder.append(", ccwRifLoadOptions=");
+    builder.append(ccwRifLoadOptions);
     builder.append(", rdaLoadOptions=");
     builder.append(rdaLoadOptions);
     builder.append("]");
@@ -408,6 +408,14 @@ public final class AppConfiguration implements Serializable {
       hostname = "unknown";
     }
 
+    MetricOptions metricOptions =
+        new MetricOptions(
+            newRelicMetricKey,
+            newRelicAppName,
+            newRelicMetricHost,
+            newRelicMetricPath,
+            newRelicMetricPeriod,
+            hostname);
     DatabaseOptions databaseOptions =
         new DatabaseOptions(databaseUrl, databaseUsername, databasePassword.toCharArray());
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
@@ -419,17 +427,9 @@ public final class AppConfiguration implements Serializable {
             loaderThreads,
             idempotencyRequired.get().booleanValue());
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
-    MetricOptions metricOptions =
-        new MetricOptions(
-            newRelicMetricKey,
-            newRelicAppName,
-            newRelicMetricHost,
-            newRelicMetricPath,
-            newRelicMetricPeriod,
-            hostname);
 
     RdaLoadOptions rdaLoadOptions = readRdaLoadOptionsFromEnvironmentVariables();
-    return new AppConfiguration(databaseOptions, ccwRifLoadOptions, metricOptions, rdaLoadOptions);
+    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
   }
 
   /**
