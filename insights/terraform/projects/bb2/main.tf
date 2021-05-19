@@ -16,10 +16,7 @@ module "bucket" {
   name            = local.project
   sensitivity     = "moderate"
   tags            = local.tags  
-  cross_accounts  = [
-    # DEVs
-    "arn:aws:iam::501705132200:user/HWRI"
-  ]
+  cross_accounts  = var.bb2_cross_accounts
 }
 
 data "aws_s3_bucket" "moderate_bucket" {

@@ -26,12 +26,12 @@ import org.junit.Test;
  */
 public final class SamhsaMatcherTest {
   // TODO complete and verify that these exactly match real values in our DB
-  static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
-  static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
-  static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "9445";
-  static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
-  static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
-  static final String SAMPLE_SAMHSA_DRG_CODE = "522";
+  public static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
+  public static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
+  public static final String SAMPLE_SAMHSA_ICD_9_PROCEDURE_CODE = "9445";
+  public static final String SAMPLE_SAMHSA_ICD_10_DIAGNOSIS_CODE = "F1010";
+  public static final String SAMPLE_SAMHSA_ICD_10_PROCEDURE_CODE = "HZ2ZZZZ";
+  public static final String SAMPLE_SAMHSA_DRG_CODE = "522";
 
   private static final String DRG =
       TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);

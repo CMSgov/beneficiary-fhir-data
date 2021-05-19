@@ -87,7 +87,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 </toolchains>
 ```
 4. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-5. Set up a Postgres 9 database. The major version matters here—some newer versions will not work. The easiest way to set up a local database is with the following command. Data will be persisted between starts and stops in the `pgdata` volume.
+5. Set up a Postgres 11 database. The easiest way to set up a local database is with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
 ```sh
 docker run \
   -d \
@@ -95,8 +95,8 @@ docker run \
   -e 'POSTGRES_USER=bfd' \
   -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
   -p '5432:5432' \
-  -v 'pgdata:/var/lib/postgresql/data' \
-  postgres:9.6
+  -v 'bfd_pgdata:/var/lib/postgresql/data' \
+  postgres:11.6
 ```
 6. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run `mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify`. This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with `docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT "beneficiaryId" FROM "Beneficiaries" LIMIT 1;'`
 7. Run `export BFD_PORT=6500` and add it to your profile, too. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later.
