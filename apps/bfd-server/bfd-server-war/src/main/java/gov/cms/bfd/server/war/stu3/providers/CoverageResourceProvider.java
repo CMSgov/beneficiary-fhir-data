@@ -126,6 +126,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(coverageIdBeneficiaryIdText, null);
+      beneficiaryEntity.getBeneficiaryMonthlys();
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));

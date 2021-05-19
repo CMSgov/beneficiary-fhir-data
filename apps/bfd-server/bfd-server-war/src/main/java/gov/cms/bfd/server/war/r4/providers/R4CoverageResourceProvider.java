@@ -126,6 +126,8 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(coverageIdBeneficiaryIdText, null);
+      // Invoke the lazy load
+      beneficiaryEntity.getBeneficiaryMonthlys();
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
