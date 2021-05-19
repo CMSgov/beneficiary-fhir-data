@@ -14,8 +14,8 @@ import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.FileReader;
@@ -412,13 +412,11 @@ public final class ServerTestUtils {
   public static LoadAppOptions createRifLoaderOptions() {
     DataSource dataSource = createDataSource();
     return new LoadAppOptions(
+        new DatabaseOptions(dataSource),
         RifLoaderTestUtils.HICN_HASH_ITERATIONS,
         RifLoaderTestUtils.HICN_HASH_PEPPER,
-        dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED,
-        RifLoaderTestUtils.FIXUPS_ENABLED,
-        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
+        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
   }
 
   /**
