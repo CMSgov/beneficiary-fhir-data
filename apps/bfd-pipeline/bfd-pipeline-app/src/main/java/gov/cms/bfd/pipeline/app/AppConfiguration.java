@@ -12,6 +12,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -102,6 +104,35 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_FIXUP_THREADS = "FIXUP_THREADS";
 
   /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricKey()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "NEW_RELIC_METRIC_KEY";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicAppName()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_APP_NAME = "NEW_RELIC_APP_NAME";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricHost()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_HOST = "NEW_RELIC_METRIC_HOST";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricPath()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_PATH = "NEW_RELIC_METRIC_PATH";
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricPeriod()} value.
+   */
+  public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "NEW_RELIC_METRIC_PERIOD";
+
+  /**
    * The name of the environment variable that should be used to indicate whether or not to
    * configure the RDA GPC data load job. Defaults to false to mean not to load the job.
    */
@@ -153,6 +184,7 @@ public final class AppConfiguration implements Serializable {
 
   private final DatabaseOptions databaseOptions;
   private final CcwRifLoadOptions ccwRifLoadOptions;
+  private final MetricOptions metricOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
   @Nullable private final RdaLoadOptions rdaLoadOptions;
 
@@ -161,14 +193,17 @@ public final class AppConfiguration implements Serializable {
    *
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
+   * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param rdaLoadOptions
    */
   public AppConfiguration(
       DatabaseOptions databaseOptions,
       CcwRifLoadOptions ccwRifLoadOptions,
+      MetricOptions metricOptions,
       RdaLoadOptions rdaLoadOptions) {
     this.databaseOptions = databaseOptions;
     this.ccwRifLoadOptions = ccwRifLoadOptions;
+    this.metricOptions = metricOptions;
     this.rdaLoadOptions = rdaLoadOptions;
   }
 
@@ -182,6 +217,11 @@ public final class AppConfiguration implements Serializable {
     return ccwRifLoadOptions;
   }
 
+  /** @return the {@link MetricOptions} that the application will use */
+  public MetricOptions getMetricOptions() {
+    return metricOptions;
+  }
+
   /** @return the {@link RdaLoadOptions} that the application will use */
   public Optional<RdaLoadOptions> getRdaLoadOptions() {
     return Optional.ofNullable(rdaLoadOptions);
@@ -193,6 +233,12 @@ public final class AppConfiguration implements Serializable {
     StringBuilder builder = new StringBuilder();
     builder.append("AppConfiguration [ccwRifLoadOptions=");
     builder.append(ccwRifLoadOptions);
+    builder.append(", databaseOptions=");
+    builder.append(databaseOptions);
+    builder.append(", metricOptions=");
+    builder.append(metricOptions);
+    builder.append(", rdaLoadOptions=");
+    builder.append(rdaLoadOptions);
     builder.append("]");
     return builder.toString();
   }
@@ -342,6 +388,26 @@ public final class AppConfiguration implements Serializable {
           e);
     }
 
+    // New Relic Metrics
+    String newRelicMetricKey = System.getenv(ENV_VAR_NEW_RELIC_METRIC_KEY);
+    String newRelicAppName = System.getenv(ENV_VAR_NEW_RELIC_APP_NAME);
+    String newRelicMetricHost = System.getenv(ENV_VAR_NEW_RELIC_METRIC_HOST);
+    String newRelicMetricPath = System.getenv(ENV_VAR_NEW_RELIC_METRIC_PATH);
+    String rawNewRelicMetricPeriod = System.getenv(ENV_VAR_NEW_RELIC_METRIC_PERIOD);
+    int newRelicMetricPeriod;
+    try {
+      newRelicMetricPeriod = Integer.parseInt(rawNewRelicMetricPeriod);
+    } catch (NumberFormatException ex) {
+      newRelicMetricPeriod = 15;
+    }
+
+    String hostname;
+    try {
+      hostname = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      hostname = "unknown";
+    }
+
     DatabaseOptions databaseOptions =
         new DatabaseOptions(databaseUrl, databaseUsername, databasePassword.toCharArray());
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
@@ -353,9 +419,17 @@ public final class AppConfiguration implements Serializable {
             loaderThreads,
             idempotencyRequired.get().booleanValue());
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
+    MetricOptions metricOptions =
+        new MetricOptions(
+            newRelicMetricKey,
+            newRelicAppName,
+            newRelicMetricHost,
+            newRelicMetricPath,
+            newRelicMetricPeriod,
+            hostname);
 
     RdaLoadOptions rdaLoadOptions = readRdaLoadOptionsFromEnvironmentVariables();
-    return new AppConfiguration(databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+    return new AppConfiguration(databaseOptions, ccwRifLoadOptions, metricOptions, rdaLoadOptions);
   }
 
   /**

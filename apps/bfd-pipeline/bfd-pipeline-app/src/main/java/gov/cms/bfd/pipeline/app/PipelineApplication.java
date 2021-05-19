@@ -20,8 +20,6 @@ import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,45 +73,28 @@ public final class PipelineApplication {
     Slf4jReporter appMetricsReporter =
         Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
 
-    String newRelicMetricKey = System.getenv("NEW_RELIC_METRIC_KEY");
-
-    if (newRelicMetricKey != null) {
-      String newRelicAppName = System.getenv("NEW_RELIC_APP_NAME");
-      String newRelicMetricHost = System.getenv("NEW_RELIC_METRIC_HOST");
-      String newRelicMetricPath = System.getenv("NEW_RELIC_METRIC_PATH");
-      String rawNewRelicPeriod = System.getenv("NEW_RELIC_METRIC_PERIOD");
-
-      int newRelicPeriod;
-      try {
-        newRelicPeriod = Integer.parseInt(rawNewRelicPeriod);
-      } catch (NumberFormatException ex) {
-        newRelicPeriod = 15;
-      }
-
-      String hostname;
-      try {
-        hostname = InetAddress.getLocalHost().getHostName();
-      } catch (UnknownHostException e) {
-        hostname = "unknown";
-      }
-
+    MetricOptions metricOptions = appConfig.getMetricOptions();
+    if (metricOptions.getNewRelicMetricKey() != null) {
       SenderConfiguration configuration =
-          SenderConfiguration.builder(newRelicMetricHost, newRelicMetricPath)
+          SenderConfiguration.builder(
+                  metricOptions.getNewRelicMetricHost(), metricOptions.getNewRelicMetricPath())
               .httpPoster(new OkHttpPoster())
-              .apiKey(newRelicMetricKey)
+              .apiKey(metricOptions.getNewRelicMetricKey())
               .build();
 
       MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
 
       Attributes commonAttributes =
-          new Attributes().put("host", hostname).put("appName", newRelicAppName);
+          new Attributes()
+              .put("host", metricOptions.getHostname())
+              .put("appName", metricOptions.getNewRelicAppName());
 
       NewRelicReporter newRelicReporter =
           NewRelicReporter.build(appMetrics, metricBatchSender)
               .commonAttributes(commonAttributes)
               .build();
 
-      newRelicReporter.start(newRelicPeriod, TimeUnit.SECONDS);
+      newRelicReporter.start(metricOptions.getNewRelicMetricPeriod(), TimeUnit.SECONDS);
     }
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
