@@ -87,36 +87,29 @@ There are actually (up to) 3 files that will be used in this step:
 
 
 *****************************************************************
-** STEP 5: Process data in the CCW_LOAD_TEMP table             **         
+** STEP 5: Update the stored procedure/function for update     **         
+*****************************************************************
+
+psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/05_create_update_proc_and_function.sql
+
+
+*****************************************************************
+** STEP 6: Invoke bash script to perform actual update         ** 
 *****************************************************************
 
 This step performs the actual data update of the "BeneficiaryMonthly" table and creates audit records
 for any changes (INSERT, UPDATE, DELETE) to a given row in that table.
 
+It does so with a bash script that taks a single argument, the year to process; ONLY years 2019 
+
+./BFD-766-fix-beneficiary-monthly-data/06_do_update.sh 2020 &> "CCW_Load_$(date +%Y-%m-%d_%H-%M.txt)"
+
 ********** I M P O R T A N T    N O T E **********
 There will be north of 130M records to process; this step will take a LONG TIME! BE PATIENT!
 
- psql -h 127.0.0.1 -U bfd -d fihr -a -f BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql &> "$(date +%Y-%m-%d_%H-%M.txt)"
-
- The above will create a log file that records progress and will provide a summary of processing;
- for example, after running the load process for the test data, you'd see something like:
-
-call load_from_ccw();
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Starting processing of table: CCW_LOAD_TEMP...
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Expected record count in table: CCW_LOAD_TEMP: 7
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2020
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2019
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2020
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Updating monthly date cache for: 2019
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  No more records to process....
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  implied COMMIT...Transaction ID: 1265
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  exiting <<outer>> loop!!!
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  implied COMMIT...Transaction ID: 1265
-BFD-766-fix-beneficiary-monthly-data/05_process_ccw_table.sql:422: INFO:  Record Total: 7 ...DONE!!!
-CALL
 
 *****************************************************************
-** STEP 6: Cleanup at appropriate time                         **         
+** STEP 7: Cleanup at appropriate time                         **         
 *****************************************************************
 
 There is a cleanup script that can be run AFTER VERIFYING that EVERYTHING
@@ -145,12 +138,9 @@ action(s) need to be taken.
 
 Q. What happens if Step 6 fails?
 
-   Step 6 can be run miultiple times; it is effectively running an idempotent UPDATE so
-   re-running would simply update data with the same data as a previous run.
+   Step 6 can be run multiple times; it will pick back up where it left off.
 
 Q. Doesn't re-running Step 6 cause the audit table to have multiple records for the same data change?
 
    No, it doesns't; the UPDATE audit trigger is setup to fire ONLY IF A CHANGE OCCURS; so for a
    re-run, there would be no change to a record that was previously updated.
-
-
