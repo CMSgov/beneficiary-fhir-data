@@ -121,7 +121,9 @@ public final class DcGeoRdaLoadJob implements PipelineJob<NullPipelineJobArgumen
     return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
   }
 
-  /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
+  /**
+   * Immutable class containing configuration settings used by the {@link DcGeoRdaLoadJob} class.
+   */
   public static final class Config {
     private final Duration scanInterval;
     private final Duration maxRunTime;
