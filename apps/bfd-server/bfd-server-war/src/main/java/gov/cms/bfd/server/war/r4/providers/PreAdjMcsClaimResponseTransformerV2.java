@@ -6,7 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import org.hl7.fhir.r4.model.ClaimResponse;
 
-/** Transforms Fiss/MCS instances into FHIR {@link ClaimResponse} resources. */
+/** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
 public class PreAdjMcsClaimResponseTransformerV2 {
 
   private static final String METRIC_NAME =
