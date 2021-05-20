@@ -28,7 +28,7 @@ public final class R4ClaimResponseResourceProvider implements IResourceProvider 
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
    * e.g. <code>f-1234</code> or <code>m--1234</code> (for negative IDs).
    */
-  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Alnum}+)");
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -93,15 +93,15 @@ public final class R4ClaimResponseResourceProvider implements IResourceProvider 
       throw new IllegalArgumentException("Unsupported ID pattern: " + claimIdText);
 
     String claimIdTypeText = claimIdMatcher.group(1);
-    Optional<PreAdjClaimResponseTypeV2> eobIdType =
+    Optional<PreAdjClaimResponseTypeV2> claimIdType =
         PreAdjClaimResponseTypeV2.parse(claimIdTypeText);
-    if (!eobIdType.isPresent()) throw new ResourceNotFoundException(claimId);
+    if (!claimIdType.isPresent()) throw new ResourceNotFoundException(claimId);
     String claimIdString = claimIdMatcher.group(2);
 
     // TODO: Lookup claim by it's ID from the appropriate table.
 
     Object claimEntity = 5L;
 
-    return eobIdType.get().getTransformer().transform(metricRegistry, claimEntity);
+    return claimIdType.get().getTransformer().transform(metricRegistry, claimEntity);
   }
 }

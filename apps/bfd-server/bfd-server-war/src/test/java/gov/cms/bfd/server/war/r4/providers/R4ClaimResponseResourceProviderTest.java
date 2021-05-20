@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import java.lang.reflect.Method;
@@ -135,7 +134,7 @@ public class R4ClaimResponseResourceProviderTest {
     String idText = "a-123";
     IdType id = new IdType(null, null, idText, null);
 
-    Exception expected = new ResourceNotFoundException(new IdType(idText));
+    Exception expected = new IllegalArgumentException("Unsupported ID pattern: " + idText);
     Exception actual =
         AssertUtils.catchExceptions(() -> new R4ClaimResponseResourceProvider().read(id, null));
 
