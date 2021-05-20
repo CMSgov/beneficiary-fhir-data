@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -28,26 +27,25 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class RdaLoadJobTest {
-  private Callable<RdaSource<Integer>> sourceFactory;
-  private Callable<RdaSink<Integer>> sinkFactory;
-  private RdaSource<Integer> source;
-  private RdaSink<Integer> sink;
-  private RdaLoadJob job;
+  @Mock private Callable<RdaSource<Integer>> sourceFactory;
+  @Mock private Callable<RdaSink<Integer>> sinkFactory;
+  @Mock private RdaSource<Integer> source;
+  @Mock private RdaSink<Integer> sink;
+  private RdaLoadJob<Integer> job;
   private MetricRegistry appMetrics;
   private Config config;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
-    sourceFactory = mock(Callable.class);
-    sinkFactory = mock(Callable.class);
-    source = mock(RdaSource.class);
-    sink = mock(RdaSink.class);
     config = new Config(Duration.ofSeconds(10), 3);
     appMetrics = new MetricRegistry();
-    job = new RdaLoadJob(config, sourceFactory, sinkFactory, appMetrics);
+    job = new RdaLoadJob<>(config, sourceFactory, sinkFactory, appMetrics);
   }
 
   @Test
