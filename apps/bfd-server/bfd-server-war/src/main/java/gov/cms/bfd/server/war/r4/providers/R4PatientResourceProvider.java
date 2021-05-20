@@ -157,6 +157,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
             .time();
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
+      // Lazy Load Coverage Data
+      beneficiary.getBeneficiaryMonthlys();
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(patientId);
     } finally {
@@ -773,6 +775,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
       beneficiary = matchingBenes.get(0);
+      beneficiary.getBeneficiaryMonthlys();
     }
 
     // Null out the unhashed HICNs; in v2 we are ignoring HICNs

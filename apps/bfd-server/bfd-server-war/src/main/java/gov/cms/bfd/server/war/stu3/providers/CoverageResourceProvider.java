@@ -227,6 +227,8 @@ public final class CoverageResourceProvider implements IResourceProvider {
             .time();
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
+      // Lazy Load Coverage Data
+      beneficiary.getBeneficiaryMonthlys();
     } finally {
       beneByIdQueryNanoSeconds = timerBeneQuery.stop();
       TransformerUtils.recordQueryInMdc(

@@ -157,6 +157,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
             .time();
     try {
       beneficiary = entityManager.createQuery(criteria).getSingleResult();
+      // Lazy Load Coverage Data
+      beneficiary.getBeneficiaryMonthlys();
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(patientId);
     } finally {
@@ -1056,6 +1058,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
           "By hash query found more than one distinct BENE_ID: " + Long.toString(distinctBeneIds));
     } else if (distinctBeneIds == 1) {
       beneficiary = matchingBenes.get(0);
+      beneficiary.getBeneficiaryMonthlys();
     }
 
     // Null out the unhashed HICNs if we're not supposed to be returning them
