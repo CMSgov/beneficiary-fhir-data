@@ -1,10 +1,11 @@
 package gov.cms.bfd.model.rda;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -46,10 +47,10 @@ public class PreAdjFissClaim {
   private BigDecimal totalChargeAmount;
 
   @Column(name = "`receivedDate`")
-  private Date receivedDate;
+  private LocalDate receivedDate;
 
   @Column(name = "`currTranDate`")
-  private Date currTranDate;
+  private LocalDate currTranDate;
 
   @Column(name = "`admitDiagCode`", length = 7)
   private String admitDiagCode;
@@ -70,8 +71,12 @@ public class PreAdjFissClaim {
   private String fedTaxNumber;
 
   @Column(name = "`lastUpdated`")
-  private Timestamp lastUpdated;
+  private Instant lastUpdated;
 
-  @OneToMany(mappedBy = "dcn", fetch = FetchType.EAGER)
+  @OneToMany(
+      mappedBy = "dcn",
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
   private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
 }
