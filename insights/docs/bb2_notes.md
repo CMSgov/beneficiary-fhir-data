@@ -5,8 +5,8 @@
 | Category | Name |
 |----------|------|
 | Project  | `bb2`                            |
-| Bucket   | `bfd-insights-bb2-577373831711`  |
-| CMK      | `arn:aws:kms:us-east-1:577373831711:key/091d5b35-0af5-4fb2-97fb-618137a56b7e` | 
+| Bucket   | `bfd-insights-bb2-BFD_ACCT_NUM`  |
+| CMK      | `arn:aws:kms:us-east-1:BFD_ACCT_NUM:key/KEYID` | 
 | Database | `bb2` |
 | tag:project | `bb2` |
 

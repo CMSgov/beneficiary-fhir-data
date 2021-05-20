@@ -639,7 +639,7 @@ public final class TransformerUtilsV2 {
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
-  private static Coding createCoding(
+  public static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     /*
      * The code parameter is an Object to avoid needing multiple copies of this and related methods.
@@ -667,7 +667,7 @@ public final class TransformerUtilsV2 {
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
-  private static Coding createCoding(
+  public static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
     return createCoding(rootResource, ccwVariable, code.get());
   }
@@ -3180,7 +3180,8 @@ public final class TransformerUtilsV2 {
     // LINE_HCT_HGB_TYPE_CD => Observation.code
     // LINE_HCT_HGB_RSLT_NUM => Observation.value
     if (hctHgbTestTypeCode.isPresent()) {
-      String observationRef = "#line-observation-" + sequence;
+      String observationId = "line-observation-" + sequence;
+      String observationRef = "#" + observationId;
 
       // The `item` will link to a `supportingInfo` that references the embedded Observation
       SupportingInformationComponent comp =
@@ -3188,7 +3189,7 @@ public final class TransformerUtilsV2 {
       comp.setValue(new Reference(observationRef));
 
       // Create embedded Observation in ExplanationOfBenefit.contained
-      Observation hctHgbObservation = findOrCreateContainedObservation(eob, observationRef);
+      Observation hctHgbObservation = findOrCreateContainedObservation(eob, observationId);
       hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
       hctHgbObservation.setCode(
           createCodeableConcept(eob, CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode));

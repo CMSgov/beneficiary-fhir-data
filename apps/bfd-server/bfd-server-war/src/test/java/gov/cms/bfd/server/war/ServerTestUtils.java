@@ -14,8 +14,8 @@ import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.FileReader;
@@ -97,7 +97,7 @@ public final class ServerTestUtils {
    * @return a new FHIR {@link IGenericClient} for use
    */
   public static IGenericClient createFhirClientV2(Optional<ClientSslIdentity> clientSslIdentity) {
-    return createFhirClient("v2", clientSslIdentity);
+    return createFhirClient("v2", clientSslIdentity, FhirContext.forR4());
   }
 
   /**
@@ -107,6 +107,17 @@ public final class ServerTestUtils {
    */
   private static IGenericClient createFhirClient(
       String versionId, Optional<ClientSslIdentity> clientSslIdentity) {
+    // Default behavor before was to spawn a DSTU3 context, so retain that
+    return createFhirClient(versionId, clientSslIdentity, FhirContext.forDstu3());
+  }
+
+  /**
+   * @param versionId the {@link v1 or v2 identifier to use as a part of the URL for the FHIR server
+   * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FHIR server
+   * @return a new FHIR {@link IGenericClient} for use
+   */
+  private static IGenericClient createFhirClient(
+      String versionId, Optional<ClientSslIdentity> clientSslIdentity, FhirContext ctx) {
     // Figure out where the test server is running.
     String fhirBaseUrl = String.format("%s/%s/fhir", getServerBaseUrl(), versionId);
 
@@ -124,7 +135,6 @@ public final class ServerTestUtils {
      * mostly mapped, so batches were cut to 10, which ran at 12s or so,
      * each.
      */
-    FhirContext ctx = FhirContext.forDstu3();
     ctx.getRestfulClientFactory().setSocketTimeout((int) TimeUnit.MINUTES.toMillis(5));
     PoolingHttpClientConnectionManager connectionManager =
         new PoolingHttpClientConnectionManager(
@@ -402,13 +412,11 @@ public final class ServerTestUtils {
   public static LoadAppOptions createRifLoaderOptions() {
     DataSource dataSource = createDataSource();
     return new LoadAppOptions(
+        new DatabaseOptions(dataSource),
         RifLoaderTestUtils.HICN_HASH_ITERATIONS,
         RifLoaderTestUtils.HICN_HASH_PEPPER,
-        dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED,
-        RifLoaderTestUtils.FIXUPS_ENABLED,
-        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
+        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
   }
 
   /**
@@ -500,6 +508,21 @@ public final class ServerTestUtils {
    */
   public static IGenericClient createFhirClientWithHeaders(RequestHeaders requestHeader) {
     IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    if (requestHeader != null) {
+      ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+      extraParamsInterceptor.setHeaders(requestHeader);
+      fhirClient.registerInterceptor(extraParamsInterceptor);
+    }
+    return fhirClient;
+  }
+
+  /**
+   * helper
+   *
+   * @return the client with extra params registered
+   */
+  public static IGenericClient createFhirClientWithHeadersV2(RequestHeaders requestHeader) {
+    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
     if (requestHeader != null) {
       ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
       extraParamsInterceptor.setHeaders(requestHeader);
