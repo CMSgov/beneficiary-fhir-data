@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * been called. This implementation satisfies the requirements of DCGEO-18.
  */
 public class SkeletonRdaSink<T> implements RdaSink<T> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRdaSource.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SkeletonRdaSink.class);
   private final Meter callsMeter;
 
   public SkeletonRdaSink(MetricRegistry appMetrics) {
