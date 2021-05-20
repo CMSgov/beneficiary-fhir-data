@@ -32,7 +32,11 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class GrpcRdaSourceTest {
   private static final Integer CLAIM_1 = 101;
   private static final Integer CLAIM_2 = 102;
@@ -40,20 +44,15 @@ public class GrpcRdaSourceTest {
   private static final Integer CLAIM_4 = 104;
   private static final Integer CLAIM_5 = 105;
   private MetricRegistry appMetrics;
-  private GrpcStreamCaller<Integer> caller;
-  private ManagedChannel channel;
-  private RdaSink<Integer> sink;
+  @Mock private GrpcStreamCaller<Integer> caller;
+  @Mock private ManagedChannel channel;
+  @Mock private RdaSink<Integer> sink;
+  @Mock private ClientCall<Integer, Integer> clientCall;
   private GrpcRdaSource<Integer> source;
-  private ClientCall<Integer, Integer> clientCall;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() throws Exception {
     appMetrics = new MetricRegistry();
-    caller = mock(GrpcStreamCaller.class);
-    channel = mock(ManagedChannel.class);
-    sink = mock(RdaSink.class);
-    clientCall = mock(ClientCall.class);
     source = new GrpcRdaSource<>(channel, caller, appMetrics);
   }
 
