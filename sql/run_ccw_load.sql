@@ -1,1 +1,0 @@
-call load_from_ccw();
