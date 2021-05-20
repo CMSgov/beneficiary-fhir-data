@@ -4,11 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.LoadedFile;
-import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
-import gov.cms.bfd.model.rif.RifFilesEvent;
+import gov.cms.bfd.model.rif.*;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
@@ -16,6 +12,7 @@ import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.FileReader;
@@ -33,11 +30,7 @@ import java.security.cert.CertificateException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -405,7 +398,7 @@ public final class ServerTestUtils {
   /** @return an {@link EntityManagerFactory} for the test DB */
   private static EntityManagerFactory createEntityManagerFactory() {
     DataSource dataSource = createDataSource();
-    return RifLoader.createEntityManagerFactory(dataSource);
+    return DatabaseUtils.createEntityManagerFactory(dataSource);
   }
 
   /** @return the {@link LoadAppOptions} to use with {@link RifLoader} in integration tests */

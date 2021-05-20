@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -49,7 +50,7 @@ public final class RifLoaderTestUtils {
     final DataSource jdbcDataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
     DatabaseSchemaManager.createOrUpdateSchema(jdbcDataSource);
     final EntityManagerFactory entityManagerFactory =
-        RifLoader.createEntityManagerFactory(jdbcDataSource);
+        DatabaseUtils.createEntityManagerFactory(jdbcDataSource);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -131,7 +132,7 @@ public final class RifLoaderTestUtils {
     }
 
     DataSource dataSource = options.getDatabaseOptions().getDatabaseDataSource();
-    return RifLoader.createEntityManagerFactory(dataSource);
+    return DatabaseUtils.createEntityManagerFactory(dataSource);
   }
 
   /**

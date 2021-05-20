@@ -5,30 +5,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariProxyConnection;
-import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.BeneficiaryCsvWriter;
-import gov.cms.bfd.model.rif.BeneficiaryHistory;
-import gov.cms.bfd.model.rif.BeneficiaryMonthly;
-import gov.cms.bfd.model.rif.CarrierClaim;
-import gov.cms.bfd.model.rif.CarrierClaimCsvWriter;
-import gov.cms.bfd.model.rif.CarrierClaimLine;
-import gov.cms.bfd.model.rif.LoadedBatch;
-import gov.cms.bfd.model.rif.LoadedBatchBuilder;
-import gov.cms.bfd.model.rif.LoadedFile;
-import gov.cms.bfd.model.rif.RecordAction;
-import gov.cms.bfd.model.rif.RifFileEvent;
-import gov.cms.bfd.model.rif.RifFileRecords;
-import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.RifFilesEvent;
-import gov.cms.bfd.model.rif.RifRecordBase;
-import gov.cms.bfd.model.rif.RifRecordEvent;
+import gov.cms.bfd.model.rif.*;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
@@ -36,17 +17,8 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,21 +28,14 @@ import java.util.stream.Stream;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.hibernate.tool.schema.Action;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
@@ -111,64 +76,17 @@ public final class RifLoader implements AutoCloseable {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.dataSource = createDataSource(options, appMetrics);
-    this.entityManagerFactory = createEntityManagerFactory(dataSource);
-
-    this.secretKeyFactory = createSecretKeyFactory();
-  }
-
-  /**
-   * @param options the {@link LoadAppOptions} to use
-   * @param metrics the {@link MetricRegistry} to use
-   * @return a {@link HikariDataSource} for the BFD database
-   */
-  static HikariDataSource createDataSource(LoadAppOptions options, MetricRegistry metrics) {
-    HikariDataSource dataSource = new HikariDataSource();
-
     /*
-     * FIXME The pool size needs to be double the number of loader threads
+     * The pool size needs to be double the number of loader threads
      * when idempotent loads are being used. Apparently, the queries need a
      * separate Connection?
      */
-    dataSource.setMaximumPoolSize(options.getLoaderThreads());
+    this.dataSource =
+        DatabaseUtils.createDataSource(
+            options.getDatabaseOptions(), appMetrics, 2 * options.getLoaderThreads());
+    this.entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
 
-    if (options.getDatabaseOptions().getDatabaseDataSource() != null) {
-      dataSource.setDataSource(options.getDatabaseOptions().getDatabaseDataSource());
-    } else {
-      dataSource.setJdbcUrl(options.getDatabaseOptions().getDatabaseUrl());
-      dataSource.setUsername(options.getDatabaseOptions().getDatabaseUsername());
-      dataSource.setPassword(String.valueOf(options.getDatabaseOptions().getDatabasePassword()));
-    }
-
-    dataSource.setRegisterMbeans(true);
-    dataSource.setMetricRegistry(metrics);
-
-    return dataSource;
-  }
-
-  /**
-   * @param jdbcDataSource the JDBC {@link DataSource} for the Blue Button API backend database
-   * @return a JPA {@link EntityManagerFactory} for the Blue Button API backend database
-   */
-  public static EntityManagerFactory createEntityManagerFactory(DataSource jdbcDataSource) {
-    /*
-     * The number of JDBC statements that will be queued/batched within a
-     * single transaction. Most recommendations suggest this should be 5-30.
-     * Paradoxically, setting it higher seems to actually slow things down.
-     * Presumably, it's delaying work that could be done earlier in a batch,
-     * and that starts to cost more than the extra network roundtrips.
-     */
-    int jdbcBatchSize = 10;
-
-    Map<String, Object> hibernateProperties = new HashMap<>();
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, jdbcDataSource);
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
-    hibernateProperties.put(
-        org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
-
-    EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("gov.cms.bfd", hibernateProperties);
-    return entityManagerFactory;
+    this.secretKeyFactory = createSecretKeyFactory();
   }
 
   /**

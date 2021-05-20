@@ -29,6 +29,12 @@
             <artifactId>bfd-pipeline-shared-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <!-- contains the JPA entities for writing to the database -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-rda</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
         <dependency>
