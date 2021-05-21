@@ -24,6 +24,14 @@ public class FissClaimStreamCaller implements GrpcStreamCaller<PreAdjFissClaim> 
     this.transformer = transformer;
   }
 
+  /**
+   * Calls the getFissClaims RPC. The Iterator from the RPC call is wrapped with a transforming
+   * Iterator that converts the API FissClaim objects into database PreAdjFissClaim entity objects.
+   *
+   * @param channel an already open channel to the service being called
+   * @return a blocking GrpcResponseStream of PreAdjFissClaim entity objects
+   * @throws Exception passes through any gRPC framework exceptions
+   */
   @Override
   public GrpcResponseStream<PreAdjFissClaim> callService(ManagedChannel channel) throws Exception {
     Preconditions.checkNotNull(channel);

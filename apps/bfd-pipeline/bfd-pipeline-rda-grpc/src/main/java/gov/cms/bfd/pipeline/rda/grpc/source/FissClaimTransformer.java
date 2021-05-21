@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.mpsm.rda.v1.FissClaim;
+import gov.cms.mpsm.rda.v1.FissProcCodes;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class FissClaimTransformer {
     }
     if (from.hasAdmDiagCode()) {
       transformer.copyString(
-          "adminDiagCode", from.getAdmDiagCode(), true, 1, 7, to::setAdmitDiagCode);
+          "admitDiagCode", from.getAdmDiagCode(), true, 1, 7, to::setAdmitDiagCode);
     }
     if (from.hasPrincipleDiag()) {
       transformer.copyString(
@@ -57,17 +59,27 @@ public class FissClaimTransformer {
       transformer.copyString("fedTaxNumber", from.getFedTaxNb(), true, 1, 10, to::setFedTaxNumber);
     }
     to.setLastUpdated(clock.instant());
-    if (transformer.isSuccessful()) {
-      return to;
-    }
-    LOGGER.error("received invalid FissClaim from RDA: errors={}", transformer.getErrors());
-    throw new FissClaimException(
-        String.format("received invalid FissClaim from RDA: errors=%s", transformer.getErrors()));
-  }
 
-  public static class FissClaimException extends RuntimeException {
-    public FissClaimException(String message) {
-      super(message);
+    short priority = 1;
+    for (FissProcCodes fromCode : from.getFissProcCodesList()) {
+      String fieldPrefix = "procCode-" + priority + "-";
+      PreAdjFissProcCode toCode = new PreAdjFissProcCode();
+      toCode.setDcn(to.getDcn());
+      toCode.setPriority(priority);
+      transformer.copyString(
+          fieldPrefix + "procCode", fromCode.getProcCd(), false, 1, 10, toCode::setProcCode);
+      if (fromCode.hasProcFlag()) {
+        transformer.copyString(
+            fieldPrefix + "procFlag", fromCode.getProcFlag(), true, 1, 4, toCode::setProcFlag);
+      }
+      if (fromCode.hasProcDt()) {
+        transformer.copyDate(
+            fieldPrefix + "procDate", fromCode.getProcDt(), true, toCode::setProcDate);
+      }
+      toCode.setLastUpdated(to.getLastUpdated());
+      priority += 1;
     }
+    transformer.throwIfErrorsPresent();
+    return to;
   }
 }
