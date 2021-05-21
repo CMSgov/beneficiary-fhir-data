@@ -1,13 +1,17 @@
 package gov.cms.bfd.model.rda;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
@@ -16,7 +20,7 @@ import lombok.experimental.FieldNameConstants;
 @Getter
 @Setter
 @FieldNameConstants
-@IdClass(PreAdjFissProcCodePK.class)
+@IdClass(PreAdjFissProcCode.PK.class)
 @Table(name = "`FissProcCodes`", schema = "pre_adj")
 public class PreAdjFissProcCode {
 
@@ -35,8 +39,18 @@ public class PreAdjFissProcCode {
   private String procFlag;
 
   @Column(name = "`procDate`")
-  private Date procDate;
+  private LocalDate procDate;
 
   @Column(name = "`lastUpdated`")
-  private Timestamp lastUpdated;
+  private Instant lastUpdated;
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  /* PK class for the PreAdjFissProcCodes table */
+  public static class PK implements Serializable {
+
+    private String dcn;
+    private short priority;
+  }
 }
