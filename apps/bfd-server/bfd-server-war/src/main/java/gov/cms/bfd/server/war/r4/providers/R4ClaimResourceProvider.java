@@ -27,11 +27,10 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
    * A {@link Pattern} that will match the {@link Claim#getId()}s used in this application, e.g.
    * <code>f-1234</code> or <code>m--1234</code> (for negative IDs).
    */
-  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Alnum}+)");
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private R4SamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
@@ -44,12 +43,6 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
-  }
-
-  /** @param samhsaMatcher the {@link R4SamhsaMatcher} to use */
-  @Inject
-  public void setSamhsaFilterer(R4SamhsaMatcher samhsaMatcher) {
-    this.samhsaMatcher = samhsaMatcher;
   }
 
   /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
@@ -92,14 +85,14 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
       throw new IllegalArgumentException("Unsupported ID pattern: " + claimIdText);
 
     String claimIdTypeText = claimIdMatcher.group(1);
-    Optional<PreAdjClaimTypeV2> eobIdType = PreAdjClaimTypeV2.parse(claimIdTypeText);
-    if (!eobIdType.isPresent()) throw new ResourceNotFoundException(claimId);
+    Optional<PreAdjClaimTypeV2> claimIdType = PreAdjClaimTypeV2.parse(claimIdTypeText);
+    if (!claimIdType.isPresent()) throw new ResourceNotFoundException(claimId);
     String claimIdString = claimIdMatcher.group(2);
 
     // TODO: Lookup claim by it's ID from the appropriate table.
 
     Object claimEntity = 5L;
 
-    return eobIdType.get().getTransformer().transform(metricRegistry, claimEntity);
+    return claimIdType.get().getTransformer().transform(metricRegistry, claimEntity);
   }
 }
