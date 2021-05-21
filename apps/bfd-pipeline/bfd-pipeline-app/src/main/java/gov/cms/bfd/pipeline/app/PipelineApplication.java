@@ -131,7 +131,10 @@ public final class PipelineApplication {
      */
     if (appConfig.getRdaLoadOptions().isPresent()) {
       pipelineManager.registerJob(
-          appConfig.getRdaLoadOptions().get().createFissClaimsLoadJob(appMetrics));
+          appConfig
+              .getRdaLoadOptions()
+              .get()
+              .createFissClaimsLoadJob(appConfig.getDatabaseOptions(), appMetrics));
     }
 
     /*
