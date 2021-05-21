@@ -58,6 +58,11 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rif</artifactId>
 		</dependency>
+		<dependency>
+			<!-- Provides the JPA entities used to represent the RDA BFD data in the database. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rda</artifactId>
+		</dependency>
 		
 		<dependency>
 			<!-- At least one "structures" JAR must also be included -->
