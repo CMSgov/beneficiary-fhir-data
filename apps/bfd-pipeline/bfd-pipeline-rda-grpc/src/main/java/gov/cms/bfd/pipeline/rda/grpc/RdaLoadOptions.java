@@ -3,10 +3,12 @@ package gov.cms.bfd.pipeline.rda.grpc;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
+import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.Serializable;
+import java.time.Clock;
 import java.util.Objects;
 
 /**
@@ -43,7 +45,11 @@ public class RdaLoadOptions implements Serializable {
   public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(MetricRegistry appMetrics) {
     return new RdaLoadJob<>(
         jobConfig,
-        () -> new GrpcRdaSource<>(grpcConfig, new FissClaimStreamCaller(), appMetrics),
+        () ->
+            new GrpcRdaSource<>(
+                grpcConfig,
+                new FissClaimStreamCaller(new FissClaimTransformer(Clock.systemUTC())),
+                appMetrics),
         () -> new SkeletonRdaSink<>(appMetrics),
         appMetrics);
   }

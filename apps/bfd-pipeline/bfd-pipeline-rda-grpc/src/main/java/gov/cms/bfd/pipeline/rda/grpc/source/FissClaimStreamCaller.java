@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterators;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.mpsm.rda.v1.EmptyRequest;
 import gov.cms.mpsm.rda.v1.FissClaim;
@@ -9,7 +10,6 @@ import io.grpc.CallOptions;
 import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.ClientCalls;
-import java.sql.Date;
 import java.util.Iterator;
 
 /**
@@ -17,35 +17,22 @@ import java.util.Iterator;
  * development there is no way to resume a stream from a given point in time so every time the
  * service is called it sends all of its values.
  */
-public class FissClaimStreamCaller implements GrpcStreamCaller<FissClaim> {
+public class FissClaimStreamCaller implements GrpcStreamCaller<PreAdjFissClaim> {
+  private final FissClaimTransformer transformer;
+
+  public FissClaimStreamCaller(FissClaimTransformer transformer) {
+    this.transformer = transformer;
+  }
+
   @Override
-  public GrpcResponseStream<FissClaim> callService(ManagedChannel channel) throws Exception {
+  public GrpcResponseStream<PreAdjFissClaim> callService(ManagedChannel channel) throws Exception {
     Preconditions.checkNotNull(channel);
     final EmptyRequest request = EmptyRequest.newBuilder().build();
     ClientCall<EmptyRequest, FissClaim> call =
         channel.newCall(RDAServiceGrpc.getGetFissClaimsMethod(), CallOptions.DEFAULT);
-    final Iterator<FissClaim> results = ClientCalls.blockingServerStreamingCall(call, request);
-    return new GrpcResponseStream<>(call, results);
-  }
-
-  private PreAdjFissClaim transformClaimObject(FissClaim apiClaim) {
-    PreAdjFissClaim dbClaim = new PreAdjFissClaim();
-    dbClaim.setDcn(apiClaim.getDcn());
-    dbClaim.setHicNo(apiClaim.getHicNo());
-    dbClaim.setCurrStatus(parseCharString(apiClaim.getCurrStatus()));
-    dbClaim.setCurrLoc1(parseCharString(apiClaim.getCurrLoc1()));
-    dbClaim.setCurrLoc2(apiClaim.getCurrLoc2());
-    dbClaim.setMedaProvId(apiClaim.getMedaProvId());
-    dbClaim.setAdmitDiagCode(apiClaim.getAdmDiagCode());
-    dbClaim.setCurrTranDate(parseDateString(apiClaim.getCurrTranDate()));
-    return dbClaim;
-  }
-
-  private Date parseDateString(String date) {
-    return Date.valueOf(date);
-  }
-
-  private char parseCharString(String value) {
-    return value.charAt(0);
+    final Iterator<FissClaim> apiResults = ClientCalls.blockingServerStreamingCall(call, request);
+    final Iterator<PreAdjFissClaim> transformedResults =
+        Iterators.transform(apiResults, transformer::transformClaim);
+    return new GrpcResponseStream<>(call, transformedResults);
   }
 }
