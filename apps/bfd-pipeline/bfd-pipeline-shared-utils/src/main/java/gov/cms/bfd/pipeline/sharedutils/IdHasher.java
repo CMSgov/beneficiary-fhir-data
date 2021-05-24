@@ -12,10 +12,17 @@ import javax.crypto.spec.PBEKeySpec;
 import org.apache.commons.codec.binary.Hex;
 
 /**
- * Utility class to encapsulate the hash algorithm and settings used to compute secure hash values
- * for ID values such as HICN and MBI. Code adopted from RifLoader.
+ * Utility class to encapsulate the hash algorithm (PBKDF2WithHmacSHA256) and settings (iterations
+ * and salt) used to compute secure hashed versions of ID values such as HICN and MBI. Code adopted
+ * from RifLoader.
  */
 public class IdHasher {
+  /*
+   * Bigger is better here as it reduces chances of collisions, but
+   * the equivalent Python Django hashing functions used by the
+   * frontend default to this value, so we'll go with it.
+   */
+  public static final int DERIVED_KEY_LENGTH = 256;
 
   private final Config config;
   private final SecretKeyFactory secretKeyFactory;
@@ -46,21 +53,12 @@ public class IdHasher {
        * hashes for the same identifiers. Instead, we use a secret "pepper" that
        * is shared out-of-band with the frontend. This value MUST be kept
        * secret.
-       *
-       * We are re-using the same pepper between HICNs and MBIs
        */
       byte[] salt = config.hashPepper;
 
-      /*
-       * Bigger is better here as it reduces chances of collisions, but
-       * the equivalent Python Django hashing functions used by the
-       * frontend default to this value, so we'll go with it.
-       */
-      int derivedKeyLength = 256;
-
       /* We're reusing the same hicn hash iterations, so the algorithm is exactly the same */
       PBEKeySpec keySpec =
-          new PBEKeySpec(identifier.toCharArray(), salt, config.hashIterations, derivedKeyLength);
+          new PBEKeySpec(identifier.toCharArray(), salt, config.hashIterations, DERIVED_KEY_LENGTH);
       SecretKey secret = secretKeyFactory.generateSecret(keySpec);
       String hexEncodedHash = Hex.encodeHexString(secret.getEncoded());
 
@@ -96,6 +94,7 @@ public class IdHasher {
     }
 
     public byte[] getHashPepper() {
+      // arrays aren't immutable so it's safest to return a copy
       return hashPepper.clone();
     }
   }
