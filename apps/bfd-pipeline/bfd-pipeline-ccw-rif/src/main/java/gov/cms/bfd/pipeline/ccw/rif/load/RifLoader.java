@@ -115,6 +115,9 @@ public final class RifLoader implements AutoCloseable {
             options.getDatabaseOptions(), appMetrics, 2 * options.getLoaderThreads());
     this.entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
 
+    /*
+     * We are re-using the same hash configuration for HICNs and MBIs so we only need one idHasher.
+     */
     this.idHasher = new IdHasher(options.getIdHasherConfig());
   }
 

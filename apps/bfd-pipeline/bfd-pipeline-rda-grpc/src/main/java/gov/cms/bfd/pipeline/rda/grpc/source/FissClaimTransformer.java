@@ -6,11 +6,16 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.FissProcCodes;
 import java.time.Clock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * Transforms a gRPC FissClaim object into a Hibernate PreAdjClaim object. Note that the gRPC data
+ * objects are not proper java beans since their optional field getters should only be called if
+ * their corresponding &quot;has&quot; methods return true. Optional fields are ignored when not
+ * present. All other fields are validated and copied into a new PreAdjFissClaim object. A
+ * lastUpdated time stamp is set using a Clock (for easier testing) and the MBI is hashed using an
+ * IdHasher.
+ */
 public class FissClaimTransformer {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FissClaimTransformer.class);
   private final Clock clock;
   private final IdHasher idHasher;
 
