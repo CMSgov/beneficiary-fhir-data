@@ -13,8 +13,7 @@ import org.apache.commons.codec.binary.Hex;
 
 /**
  * Utility class to encapsulate the hash algorithm and settings used to compute secure hash values
- * for ID values such as HICN and MBI. Code adopted from RifLoader. TODO: refactor RifLoader to use
- * and instance of this class.
+ * for ID values such as HICN and MBI. Code adopted from RifLoader.
  */
 public class IdHasher {
 
@@ -90,6 +89,14 @@ public class IdHasher {
     public Config(int hashIterations, byte[] hashPepper) {
       this.hashIterations = hashIterations;
       this.hashPepper = hashPepper;
+    }
+
+    public int getHashIterations() {
+      return hashIterations;
+    }
+
+    public byte[] getHashPepper() {
+      return hashPepper.clone();
     }
   }
 }

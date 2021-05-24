@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -116,8 +117,7 @@ public final class RifLoaderTestUtils {
   public static LoadAppOptions getLoadOptions(DataSource dataSource) {
     return new LoadAppOptions(
         new DatabaseOptions(dataSource),
-        HICN_HASH_ITERATIONS,
-        HICN_HASH_PEPPER,
+        new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED);
   }
