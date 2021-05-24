@@ -423,14 +423,13 @@ public final class AppConfiguration implements Serializable {
     LoadAppOptions loadOptions =
         new LoadAppOptions(
             databaseOptions,
-            hicnHashIterations,
-            hicnHashPepper,
+            new IdHasher.Config(hicnHashIterations, hicnHashPepper),
             loaderThreads,
             idempotencyRequired.get().booleanValue());
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
 
-    IdHasher.Config idHasherConfig = new IdHasher.Config(hicnHashIterations, hicnHashPepper);
-    RdaLoadOptions rdaLoadOptions = readRdaLoadOptionsFromEnvironmentVariables(idHasherConfig);
+    RdaLoadOptions rdaLoadOptions =
+        readRdaLoadOptionsFromEnvironmentVariables(loadOptions.getIdHasherConfig());
     return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
   }
 

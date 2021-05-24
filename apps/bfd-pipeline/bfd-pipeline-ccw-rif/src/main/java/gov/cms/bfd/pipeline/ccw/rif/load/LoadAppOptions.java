@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.Serializable;
 
 /** Models the user-configurable application options. */
@@ -21,15 +22,14 @@ public final class LoadAppOptions implements Serializable {
       Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
 
   private final DatabaseOptions databaseOptions;
-  private final int hicnHashIterations;
-  private final byte[] hicnHashPepper;
+  private final IdHasher.Config idHasherConfig;
   private final int loaderThreads;
   private final boolean idempotencyRequired;
 
   /**
    * Constructs a new {@link LoadAppOptions} instance.
    *
-   * @param hicnHashIterations the value to use for {@link #getHicnHashIterations()}
+   * @param idHasherConfig the value to use for {@link #getIdHasherConfig()}
    * @param hicnHashPepper the value to use for {@link #getHicnHashPepper()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
    * @param loaderThreads the value to use for {@link #getLoaderThreads()}
@@ -37,15 +37,13 @@ public final class LoadAppOptions implements Serializable {
    */
   public LoadAppOptions(
       DatabaseOptions databaseOptions,
-      int hicnHashIterations,
-      byte[] hicnHashPepper,
+      IdHasher.Config idHasherConfig,
       int loaderThreads,
       boolean idempotencyRequired) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
 
     this.databaseOptions = databaseOptions;
-    this.hicnHashIterations = hicnHashIterations;
-    this.hicnHashPepper = hicnHashPepper;
+    this.idHasherConfig = idHasherConfig;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
   }
@@ -57,20 +55,9 @@ public final class LoadAppOptions implements Serializable {
     return databaseOptions;
   }
 
-  /**
-   * @return the number of <code>PBKDF2WithHmacSHA256</code> iterations to use when hashing
-   *     beneficiary HICNs
-   */
-  public int getHicnHashIterations() {
-    return hicnHashIterations;
-  }
-
-  /**
-   * @return the shared secret pepper to use (in lieu of a salt) with <code>PBKDF2WithHmacSHA256
-   *     </code> when hashing beneficiary HICNs
-   */
-  public byte[] getHicnHashPepper() {
-    return hicnHashPepper;
+  /** @return the configuration settings used when hashing beneficiary HICNs */
+  public IdHasher.Config getIdHasherConfig() {
+    return idHasherConfig;
   }
 
   /**
@@ -98,7 +85,7 @@ public final class LoadAppOptions implements Serializable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append("LoadAppOptions [hicnHashIterations=");
-    builder.append(hicnHashIterations);
+    builder.append(idHasherConfig.getHashIterations());
     builder.append(", hicnHashPepper=");
     builder.append("***");
     builder.append(", databaseOptions=");

@@ -91,5 +91,13 @@ public class IdHasher {
       this.hashIterations = hashIterations;
       this.hashPepper = hashPepper;
     }
+
+    public int getHashIterations() {
+      return hashIterations;
+    }
+
+    public byte[] getHashPepper() {
+      return hashPepper.clone();
+    }
   }
 }
