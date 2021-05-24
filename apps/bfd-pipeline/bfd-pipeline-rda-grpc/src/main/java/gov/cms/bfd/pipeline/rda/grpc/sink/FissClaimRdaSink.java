@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
@@ -18,13 +19,13 @@ import org.slf4j.LoggerFactory;
 /** RdaSink implementation that writes PreAdjFissClaim objects to the database in batches. */
 public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(FissClaimRdaSink.class);
-  public static final String CALLS_METER_NAME =
+  static final String CALLS_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "calls");
-  public static final String FAILURES_METER_NAME =
+  static final String FAILURES_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "failures");
-  public static final String PERSISTS_METER_NAME =
+  static final String PERSISTS_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "persists");
-  public static final String MERGES_METER_NAME =
+  static final String MERGES_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "merges");
 
   private final HikariDataSource dataSource;
@@ -39,6 +40,21 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
     dataSource = DatabaseUtils.createDataSource(databaseOptions, metricRegistry, 10);
     entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
     entityManager = entityManagerFactory.createEntityManager();
+    callsMeter = metricRegistry.meter(CALLS_METER_NAME);
+    failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);
+    persistsMeter = metricRegistry.meter(PERSISTS_METER_NAME);
+    mergesMeter = metricRegistry.meter(MERGES_METER_NAME);
+  }
+
+  @VisibleForTesting
+  FissClaimRdaSink(
+      HikariDataSource dataSource,
+      EntityManagerFactory entityManagerFactory,
+      EntityManager entityManager,
+      MetricRegistry metricRegistry) {
+    this.dataSource = dataSource;
+    this.entityManagerFactory = entityManagerFactory;
+    this.entityManager = entityManager;
     callsMeter = metricRegistry.meter(CALLS_METER_NAME);
     failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);
     persistsMeter = metricRegistry.meter(PERSISTS_METER_NAME);
@@ -62,6 +78,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   @Override
   public int writeBatch(Collection<PreAdjFissClaim> claims) throws ProcessingException {
     try {
+      callsMeter.mark();
       try {
         persistBatch(claims);
         persistsMeter.mark(claims.size());
@@ -77,7 +94,6 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
         } else {
           throw error;
         }
-        callsMeter.mark();
       }
     } catch (Exception error) {
       LOGGER.error("writeBatch failure: error={}", error.getMessage(), error);
@@ -112,13 +128,14 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
     entityManager.getTransaction().commit();
   }
 
-  private static boolean isDuplicateKeyException(Throwable error) {
+  @VisibleForTesting
+  static boolean isDuplicateKeyException(Throwable error) {
     while (error != null) {
       if (error instanceof EntityExistsException) {
         return true;
       }
-      if (error.getMessage().contains("already exists")
-          || error.getMessage().contains("duplicate key")) {
+      final String errorMessage = error.getMessage().toLowerCase();
+      if (errorMessage.contains("already exists") || errorMessage.contains("duplicate key")) {
         return true;
       }
       error = error.getCause() == error ? null : error.getCause();
