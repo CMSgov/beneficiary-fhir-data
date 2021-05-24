@@ -11,22 +11,30 @@ import org.hibernate.tool.schema.Action;
 
 /** Database related utility methods used by multiple pipeline jobs. */
 public final class DatabaseUtils {
+
+  public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+
+  /*
+   * The number of JDBC statements that will be queued/batched within a
+   * single transaction. Most recommendations suggest this should be 5-30.
+   * Paradoxically, setting it higher seems to actually slow things down.
+   * Presumably, it's delaying work that could be done earlier in a batch,
+   * and that starts to cost more than the extra network roundtrips.
+   */
+  public static final int JDBC_BATCH_SIZE = 10;
+
   /**
    * Create a new DataSource.
    *
-   * @param options the {@link LoadAppOptions} to use
+   * @param options the {@link DatabaseOptions} to use
    * @param metrics the {@link MetricRegistry} to use
+   * @param maximumPoolSize the maximum database bool size to use
    * @return a {@link HikariDataSource} for the BFD database
    */
   public static HikariDataSource createDataSource(
       DatabaseOptions options, MetricRegistry metrics, int maximumPoolSize) {
     HikariDataSource dataSource = new HikariDataSource();
 
-    /*
-     * FIXME The pool size needs to be double the number of loader threads
-     * when idempotent loads are being used. Apparently, the queries need a
-     * separate Connection?
-     */
     dataSource.setMaximumPoolSize(maximumPoolSize);
 
     if (options.getDatabaseDataSource() != null) {
@@ -50,23 +58,14 @@ public final class DatabaseUtils {
    * @return a JPA {@link EntityManagerFactory} for the Blue Button API backend database
    */
   public static EntityManagerFactory createEntityManagerFactory(DataSource jdbcDataSource) {
-    /*
-     * The number of JDBC statements that will be queued/batched within a
-     * single transaction. Most recommendations suggest this should be 5-30.
-     * Paradoxically, setting it higher seems to actually slow things down.
-     * Presumably, it's delaying work that could be done earlier in a batch,
-     * and that starts to cost more than the extra network roundtrips.
-     */
-    int jdbcBatchSize = 10;
-
     Map<String, Object> hibernateProperties = new HashMap<>();
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, jdbcDataSource);
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
     hibernateProperties.put(
-        org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
+        org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, JDBC_BATCH_SIZE);
 
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("gov.cms.bfd", hibernateProperties);
+        Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties);
     return entityManagerFactory;
   }
 }

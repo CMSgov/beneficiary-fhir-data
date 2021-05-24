@@ -1298,8 +1298,7 @@ public final class RifLoader implements AutoCloseable {
    * means of identifying Medicare beneficiaries between the Blue Button API frontend and backend
    * systems: the HICN is the only unique beneficiary identifier shared between those two systems.
    *
-   * @param options the {@link LoadAppOptions} to use
-   * @param secretKeyFactory the {@link SecretKeyFactory} to use
+   * @param idHasher the {@link IdHasher} to use
    * @param hicn the Medicare beneficiary HICN to be hashed
    * @return a one-way cryptographic hash of the specified HICN value, exactly 64 characters long
    */
@@ -1310,8 +1309,7 @@ public final class RifLoader implements AutoCloseable {
   /**
    * Computes a one-way cryptographic hash of the specified MBI value.
    *
-   * @param options the {@link LoadAppOptions} to use
-   * @param secretKeyFactory the {@link SecretKeyFactory} to use
+   * @param idHasher the {@link IdHasher} to use
    * @param mbi the Medicare beneficiary id to be hashed
    * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
    */
