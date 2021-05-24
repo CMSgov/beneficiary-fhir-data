@@ -63,7 +63,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   public int writeBatch(Collection<PreAdjFissClaim> claims) throws ProcessingException {
     try {
       try {
-        persistBatch(entityManager, claims);
+        persistBatch(claims);
         persistsMeter.mark(claims.size());
         LOGGER.info("wrote batch of {} claims using persist()", claims.size());
       } catch (Throwable error) {
@@ -71,7 +71,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
           LOGGER.info(
               "caught duplicate key exception: switching to merge for batch of {} claims",
               claims.size());
-          mergeBatch(entityManager, claims);
+          mergeBatch(claims);
           mergesMeter.mark(claims.size());
           LOGGER.info("wrote batch of {} claims using merge()", claims.size());
         } else {
@@ -87,29 +87,29 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
     return claims.size();
   }
 
-  private static void persistBatch(EntityManager em, Iterable<PreAdjFissClaim> claims) {
+  private void persistBatch(Iterable<PreAdjFissClaim> claims) {
     boolean commit = false;
     try {
-      em.getTransaction().begin();
+      entityManager.getTransaction().begin();
       for (PreAdjFissClaim claim : claims) {
-        em.persist(claim);
+        entityManager.persist(claim);
       }
       commit = true;
     } finally {
       if (commit) {
-        em.getTransaction().commit();
+        entityManager.getTransaction().commit();
       } else {
-        em.getTransaction().rollback();
+        entityManager.getTransaction().rollback();
       }
     }
   }
 
-  private static void mergeBatch(EntityManager em, Iterable<PreAdjFissClaim> claims) {
-    em.getTransaction().begin();
+  private void mergeBatch(Iterable<PreAdjFissClaim> claims) {
+    entityManager.getTransaction().begin();
     for (PreAdjFissClaim claim : claims) {
-      em.merge(claim);
+      entityManager.merge(claim);
     }
-    em.getTransaction().commit();
+    entityManager.getTransaction().commit();
   }
 
   private static boolean isDuplicateKeyException(Throwable error) {
