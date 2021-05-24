@@ -41,31 +41,6 @@ public class DataTransformerTest {
   }
 
   @Test
-  public void copyHashedString() {
-    transformer
-        .copyHashedString("length-one-ok", "1", false, 1, 5, copied::add)
-        .copyHashedString("length-five-ok", "12345", false, 1, 5, copied::add)
-        .copyHashedString("length-below-min", "1", false, 2, 5, copied::add)
-        .copyHashedString("length-above-max", "123456", false, 1, 5, copied::add)
-        .copyHashedString("null-ok", null, true, 1, 5, copied::add)
-        .copyHashedString("null-bad", null, false, 1, 5, copied::add);
-
-    Assert.assertEquals(
-        Arrays.asList(
-            "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
-            "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5"),
-        copied);
-    Assert.assertEquals(
-        Arrays.asList(
-            new DataTransformer.ErrorMessage(
-                "length-below-min", "invalid length: expected=[2,5] actual=1"),
-            new DataTransformer.ErrorMessage(
-                "length-above-max", "invalid length: expected=[1,5] actual=6"),
-            new DataTransformer.ErrorMessage("null-bad", "is null")),
-        transformer.getErrors());
-  }
-
-  @Test
   public void copyCharacter() {
     transformer
         .copyCharacter("length-one-ok", "1", copied::add)

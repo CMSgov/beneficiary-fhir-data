@@ -2,11 +2,11 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.FissProcCodes;
 import java.math.BigDecimal;
@@ -21,7 +21,8 @@ import org.junit.Test;
 public class FissClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
-  private final FissClaimTransformer transformer = new FissClaimTransformer(clock);
+  private final FissClaimTransformer transformer =
+      new FissClaimTransformer(clock, IdHasher.createInstanceForTestingOnly());
   private FissClaim.Builder builder;
   private PreAdjFissClaim claim;
 
@@ -58,7 +59,7 @@ public class FissClaimTransformerTest {
     claim.setPrincipleDiag("7654321");
     claim.setNpiNumber("npi-123456");
     claim.setMbi("1234567890123");
-    claim.setMbiHash("bca2b41a2b25e137c83fee346af7bd1e0f52bd560583ca07a1b42f9944c5c50b");
+    claim.setMbiHash("d51b083f91c62eff93b6245bc8203bafa566f41b3553314d049059b8e55eea0d");
     claim.setFedTaxNumber("1234567890");
     claim.setLastUpdated(clock.instant());
     builder

@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.FissProcCodes;
 import java.time.Clock;
@@ -11,9 +12,11 @@ import org.slf4j.LoggerFactory;
 public class FissClaimTransformer {
   private static final Logger LOGGER = LoggerFactory.getLogger(FissClaimTransformer.class);
   private final Clock clock;
+  private final IdHasher idHasher;
 
-  public FissClaimTransformer(Clock clock) {
+  public FissClaimTransformer(Clock clock, IdHasher idHasher) {
     this.clock = clock;
+    this.idHasher = idHasher;
   }
 
   public PreAdjFissClaim transformClaim(FissClaim from) {
@@ -53,7 +56,7 @@ public class FissClaimTransformer {
       final String mbi = from.getMbi();
       transformer
           .copyString("mbi", mbi, true, 1, 13, to::setMbi)
-          .copyHashedString("mbiHash", mbi, true, 1, 23, to::setMbiHash);
+          .copyString("mbiHash", idHasher.computeIdentifierHash(mbi), true, 64, 64, to::setMbiHash);
     }
     if (from.hasFedTaxNb()) {
       transformer.copyString("fedTaxNumber", from.getFedTaxNb(), true, 1, 10, to::setFedTaxNumber);

@@ -11,6 +11,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -428,7 +429,8 @@ public final class AppConfiguration implements Serializable {
             idempotencyRequired.get().booleanValue());
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
 
-    RdaLoadOptions rdaLoadOptions = readRdaLoadOptionsFromEnvironmentVariables();
+    IdHasher.Config idHasherConfig = new IdHasher.Config(hicnHashIterations, hicnHashPepper);
+    RdaLoadOptions rdaLoadOptions = readRdaLoadOptionsFromEnvironmentVariables(idHasherConfig);
     return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
   }
 
@@ -440,7 +442,7 @@ public final class AppConfiguration implements Serializable {
    * @return a valid RdaLoadOptions if job is configured, otherwise null
    */
   @Nullable
-  static RdaLoadOptions readRdaLoadOptionsFromEnvironmentVariables() {
+  static RdaLoadOptions readRdaLoadOptionsFromEnvironmentVariables(IdHasher.Config idHasherConfig) {
     final boolean enabled = parseBoolean(ENV_VAR_KEY_RDA_JOB_ENABLED).orElse(false);
     if (!enabled) {
       return null;
@@ -458,7 +460,7 @@ public final class AppConfiguration implements Serializable {
             Duration.ofSeconds(
                 getIntOrDefault(
                     ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
-    return new RdaLoadOptions(jobConfig, grpcConfig);
+    return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
   }
 
   /**

@@ -1,9 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -73,38 +70,6 @@ public class DataTransformer {
       Consumer<String> copier) {
     if (nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength)) {
       copier.accept(value);
-    }
-    return this;
-  }
-
-  /**
-   * Checks the nullability and length of a string and then delivers a hashed value to the Consumer
-   * if the checks are successful. Valid null values are silently accepted without calling the
-   * Consumer.
-   *
-   * <p>TODO: currently this is just using a SHA-256 hash but it needs to use the pepper hash for
-   * mbi
-   *
-   * @param fieldName name of the field from which the value originates
-   * @param value value to hash
-   * @param nullable true if null is a valid value
-   * @param minLength minimum allowed length for non-null value
-   * @param maxLength maximum allowed length for non-null value
-   * @param copier Consumer to receive the hashed value
-   * @return this
-   */
-  public DataTransformer copyHashedString(
-      String fieldName,
-      String value,
-      boolean nullable,
-      int minLength,
-      int maxLength,
-      Consumer<String> copier) {
-    if (nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength)) {
-      // TODO plug in real hasher here
-      Hasher hasher = Hashing.sha256().newHasher();
-      hasher.putString(value, Charsets.UTF_8);
-      copier.accept(hasher.hash().toString());
     }
     return this;
   }
