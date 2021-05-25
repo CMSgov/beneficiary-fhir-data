@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.FissProcCodes;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -22,7 +23,10 @@ public class FissClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
   private final FissClaimTransformer transformer =
-      new FissClaimTransformer(clock, IdHasher.createInstanceForTestingOnly());
+      new FissClaimTransformer(
+          clock,
+          new IdHasher(
+              new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8))));
   private FissClaim.Builder builder;
   private PreAdjFissClaim claim;
 

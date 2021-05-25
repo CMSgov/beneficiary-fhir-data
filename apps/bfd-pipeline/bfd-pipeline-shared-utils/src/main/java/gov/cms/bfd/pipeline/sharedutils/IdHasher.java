@@ -1,9 +1,7 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
-import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKey;
@@ -30,11 +28,6 @@ public class IdHasher {
   public IdHasher(Config config) {
     this.config = config;
     secretKeyFactory = createSecretKeyFactory();
-  }
-
-  @VisibleForTesting
-  public static IdHasher createInstanceForTestingOnly() {
-    return new IdHasher(new Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
   }
 
   /**
