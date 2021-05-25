@@ -12,7 +12,7 @@ module "stateful" {
 
   # feature toggles
   module_features = {
-    beta_reader = false
+    beta_reader = true
   }
 
   aurora_config = {
