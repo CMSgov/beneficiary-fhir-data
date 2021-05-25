@@ -73,7 +73,7 @@ public final class HospiceClaimTransformerV2Test {
    *
    * @throws FHIRException
    */
-  // @Ignore
+  @Ignore
   @Test
   public void shouldOutputJSON() throws FHIRException {
     Assert.assertNotNull(eob);
