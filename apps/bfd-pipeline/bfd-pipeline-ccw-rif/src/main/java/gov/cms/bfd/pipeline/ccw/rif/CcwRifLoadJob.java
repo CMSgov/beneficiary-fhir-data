@@ -13,13 +13,16 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetQueue;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3RifFile;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.DataSetMoveTask;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * created. Within each of those directories will be manifest files and the RIF files that they
  * reference.
  */
-public final class CcwRifLoadJob implements PipelineJob {
+public final class CcwRifLoadJob implements PipelineJob<NullPipelineJobArguments> {
   private static final Logger LOGGER = LoggerFactory.getLogger(CcwRifLoadJob.class);
 
   private static final int GIGA = 1000 * 1000 * 1000;
@@ -124,10 +127,26 @@ public final class CcwRifLoadJob implements PipelineJob {
       DataSetMonitorListener listener) {
     this.appMetrics = appMetrics;
     this.options = options;
-    this.listener = listener;
     this.s3TaskManager = s3TaskManager;
+    this.listener = listener;
 
     this.dataSetQueue = new DataSetQueue(appMetrics, options, s3TaskManager);
+  }
+
+  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
+  @Override
+  public Optional<PipelineJobSchedule> getSchedule() {
+    return Optional.of(new PipelineJobSchedule(1, ChronoUnit.SECONDS));
+  }
+
+  /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#isInterruptible() */
+  @Override
+  public boolean isInterruptible() {
+    /*
+     * TODO This would be a good enhancement: making this class properly interruptible. This would
+     * allow us to shut things down quickly when a load is running.
+     */
+    return false;
   }
 
   /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
