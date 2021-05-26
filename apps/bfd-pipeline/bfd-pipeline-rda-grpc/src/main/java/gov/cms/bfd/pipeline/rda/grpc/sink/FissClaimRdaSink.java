@@ -21,6 +21,8 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(FissClaimRdaSink.class);
   static final String CALLS_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "calls");
+  static final String SUCCESSES_METER_NAME =
+      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "successes");
   static final String FAILURES_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "failures");
   static final String PERSISTS_METER_NAME =
@@ -32,15 +34,17 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   private final EntityManagerFactory entityManagerFactory;
   private final EntityManager entityManager;
   private final Meter callsMeter;
+  private final Meter successesMeter;
   private final Meter failuresMeter;
   private final Meter persistsMeter;
   private final Meter mergesMeter;
 
   public FissClaimRdaSink(DatabaseOptions databaseOptions, MetricRegistry metricRegistry) {
     dataSource = DatabaseUtils.createDataSource(databaseOptions, metricRegistry, 10);
-    entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
+    entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource, "gov.cms.bfd.rda");
     entityManager = entityManagerFactory.createEntityManager();
     callsMeter = metricRegistry.meter(CALLS_METER_NAME);
+    successesMeter = metricRegistry.meter(SUCCESSES_METER_NAME);
     failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);
     persistsMeter = metricRegistry.meter(PERSISTS_METER_NAME);
     mergesMeter = metricRegistry.meter(MERGES_METER_NAME);
@@ -56,6 +60,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
     this.entityManagerFactory = entityManagerFactory;
     this.entityManager = entityManager;
     callsMeter = metricRegistry.meter(CALLS_METER_NAME);
+    successesMeter = metricRegistry.meter(SUCCESSES_METER_NAME);
     failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);
     persistsMeter = metricRegistry.meter(PERSISTS_METER_NAME);
     mergesMeter = metricRegistry.meter(MERGES_METER_NAME);
@@ -100,6 +105,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
       failuresMeter.mark();
       throw new ProcessingException(error, 0);
     }
+    successesMeter.mark(claims.size());
     return claims.size();
   }
 
@@ -121,11 +127,20 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   }
 
   private void mergeBatch(Iterable<PreAdjFissClaim> claims) {
-    entityManager.getTransaction().begin();
-    for (PreAdjFissClaim claim : claims) {
-      entityManager.merge(claim);
+    boolean commit = false;
+    try {
+      entityManager.getTransaction().begin();
+      for (PreAdjFissClaim claim : claims) {
+        entityManager.merge(claim);
+      }
+      commit = true;
+    } finally {
+      if (commit) {
+        entityManager.getTransaction().commit();
+      } else {
+        entityManager.getTransaction().rollback();
+      }
     }
-    entityManager.getTransaction().commit();
   }
 
   @VisibleForTesting
