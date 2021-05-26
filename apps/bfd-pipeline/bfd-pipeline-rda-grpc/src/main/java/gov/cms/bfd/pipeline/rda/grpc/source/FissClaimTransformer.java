@@ -6,6 +6,7 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.FissProcCodes;
 import java.time.Clock;
+import java.util.List;
 
 /**
  * Transforms a gRPC FissClaim object into a Hibernate PreAdjClaim object. Note that the gRPC data
@@ -88,7 +89,13 @@ public class FissClaimTransformer {
       to.getProcCodes().add(toCode);
       priority += 1;
     }
-    transformer.throwIfErrorsPresent();
+    List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
+    if (errors.size() > 0) {
+      String message =
+          String.format(
+              "failed with %d errors: dcn=%s errors=%s", errors.size(), from.getDcn(), errors);
+      throw new DataTransformer.TransformationException(message, errors);
+    }
     return to;
   }
 }
