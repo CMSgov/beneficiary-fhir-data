@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.sharedutils;
 
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKey;
@@ -80,6 +81,10 @@ public class IdHasher {
     public Config(int hashIterations, byte[] hashPepper) {
       this.hashIterations = hashIterations;
       this.hashPepper = hashPepper;
+    }
+
+    public Config(int hashIterations, String hashPepper) {
+      this(hashIterations, hashPepper.getBytes(StandardCharsets.UTF_8));
     }
 
     public int getHashIterations() {
