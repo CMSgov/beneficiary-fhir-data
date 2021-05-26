@@ -39,18 +39,19 @@ public class PreAdjFissClaimResponseTransformerV2 {
     STATUS_TEXT.put('m', "Move");
   }
 
-  private static final Map<Character, ClaimResponse.RemittanceOutcome> OUTCOME_TEXT;
+  private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME;
 
   static {
-    OUTCOME_TEXT = new HashMap<>();
-    OUTCOME_TEXT.put('a', ClaimResponse.RemittanceOutcome.QUEUED);
-    OUTCOME_TEXT.put('s', ClaimResponse.RemittanceOutcome.PARTIAL);
-    OUTCOME_TEXT.put('p', ClaimResponse.RemittanceOutcome.COMPLETE);
-    OUTCOME_TEXT.put('d', ClaimResponse.RemittanceOutcome.ERROR);
-    OUTCOME_TEXT.put('i', ClaimResponse.RemittanceOutcome.PARTIAL);
-    OUTCOME_TEXT.put('r', ClaimResponse.RemittanceOutcome.ERROR);
-    OUTCOME_TEXT.put('t', ClaimResponse.RemittanceOutcome.PARTIAL);
-    OUTCOME_TEXT.put('m', ClaimResponse.RemittanceOutcome.QUEUED);
+    STATUS_TO_OUTCOME = new HashMap<>();
+    STATUS_TO_OUTCOME.put(' ', ClaimResponse.RemittanceOutcome.QUEUED);
+    STATUS_TO_OUTCOME.put('a', ClaimResponse.RemittanceOutcome.QUEUED);
+    STATUS_TO_OUTCOME.put('s', ClaimResponse.RemittanceOutcome.PARTIAL);
+    STATUS_TO_OUTCOME.put('p', ClaimResponse.RemittanceOutcome.COMPLETE);
+    STATUS_TO_OUTCOME.put('d', ClaimResponse.RemittanceOutcome.ERROR);
+    STATUS_TO_OUTCOME.put('i', ClaimResponse.RemittanceOutcome.PARTIAL);
+    STATUS_TO_OUTCOME.put('r', ClaimResponse.RemittanceOutcome.ERROR);
+    STATUS_TO_OUTCOME.put('t', ClaimResponse.RemittanceOutcome.ERROR);
+    STATUS_TO_OUTCOME.put('m', ClaimResponse.RemittanceOutcome.PARTIAL);
   }
 
   /**
@@ -85,7 +86,7 @@ public class PreAdjFissClaimResponseTransformerV2 {
     claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
     claim.setStatus(ClaimResponse.ClaimResponseStatus.ACTIVE);
-    claim.setOutcome(OUTCOME_TEXT.get(Character.toLowerCase(claimGroup.getCurrStatus())));
+    claim.setOutcome(STATUS_TO_OUTCOME.get(Character.toLowerCase(claimGroup.getCurrStatus())));
     claim.setType(getType());
     claim.setUse(ClaimResponse.Use.CLAIM);
     claim.setCreated(new Date());

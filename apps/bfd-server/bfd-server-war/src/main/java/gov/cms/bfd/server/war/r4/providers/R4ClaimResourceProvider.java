@@ -8,18 +8,16 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import gov.cms.bfd.server.war.commons.PreAdjClaimDao;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.IdType;
@@ -37,6 +35,8 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
   private LoadedFilterManager loadedFilterManager;
+
+  private PreAdjClaimDao preAdjClaimDao;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -60,6 +60,11 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
   @Override
   public Class<? extends IBaseResource> getResourceType() {
     return Claim.class;
+  }
+
+  @PostConstruct
+  public void init() {
+    preAdjClaimDao = new PreAdjClaimDao(entityManager, metricRegistry);
   }
 
   /**
@@ -95,45 +100,14 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
     PreAdjClaimTypeV2 claimIdType = optional.get();
     String claimIdString = claimIdMatcher.group(2);
 
-    // TODO: Lookup claim by it's ID from the appropriate table.
-
-    // Object claimEntity = 5L;
     Object claimEntity;
 
     try {
-      claimEntity = getEntityById(claimIdType, claimIdString);
+      claimEntity = preAdjClaimDao.getEntityById(claimIdType, claimIdString);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(claimId);
     }
 
     return claimIdType.getTransformer().transform(metricRegistry, claimEntity);
-  }
-
-  Object getEntityById(PreAdjClaimTypeV2 claimIdType, String id) {
-    Class<?> entityClass = claimIdType.getEntityClass();
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<?> criteria = builder.createQuery(entityClass);
-    Root root = criteria.from(entityClass);
-
-    criteria.select(root);
-    criteria.where(builder.equal(root.get(claimIdType.getEntityIdAttribute()), id));
-
-    Object claimEntity = null;
-    //    Long eobByIdQueryNanoSeconds = null;
-    //    Timer.Context timerEobQuery =
-    //            metricRegistry
-    //                    .timer(MetricRegistry.name(getClass().getSimpleName(), "query",
-    // "claim_by_id"))
-    //                    .time();
-    try {
-      claimEntity = entityManager.createQuery(criteria).getSingleResult();
-      PreAdjFissClaim entity = (PreAdjFissClaim) claimEntity;
-    } finally {
-      //      eobByIdQueryNanoSeconds = timerEobQuery.stop();
-      //      TransformerUtilsV2.recordQueryInMdc(
-      //              "eob_by_id", eobByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
-    }
-
-    return claimEntity;
   }
 }
