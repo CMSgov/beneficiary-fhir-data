@@ -22,7 +22,6 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.File;
@@ -100,7 +99,6 @@ public final class RifLoader implements AutoCloseable {
   private final HikariDataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
   private final SecretKeyFactory secretKeyFactory;
-  private final RifLoaderIdleTasks idleTasks;
 
   /**
    * Constructs a new {@link RifLoader} instance.
@@ -114,21 +112,9 @@ public final class RifLoader implements AutoCloseable {
     this.options = options;
 
     this.dataSource = createDataSource(options, appMetrics);
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
     this.entityManagerFactory = createEntityManagerFactory(dataSource);
 
     this.secretKeyFactory = createSecretKeyFactory();
-    this.idleTasks =
-        new RifLoaderIdleTasks(options, appMetrics, entityManagerFactory, secretKeyFactory);
-  }
-
-  /**
-   * Get the IdleTask manager associated with this loader. Useful for testing.
-   *
-   * @return the RifLoaderIdleTasks associated with this
-   */
-  public RifLoaderIdleTasks getIdleTasks() {
-    return idleTasks;
   }
 
   /**
@@ -146,12 +132,12 @@ public final class RifLoader implements AutoCloseable {
      */
     dataSource.setMaximumPoolSize(options.getLoaderThreads());
 
-    if (options.getDatabaseDataSource() != null) {
-      dataSource.setDataSource(options.getDatabaseDataSource());
+    if (options.getDatabaseOptions().getDatabaseDataSource() != null) {
+      dataSource.setDataSource(options.getDatabaseOptions().getDatabaseDataSource());
     } else {
-      dataSource.setJdbcUrl(options.getDatabaseUrl());
-      dataSource.setUsername(options.getDatabaseUsername());
-      dataSource.setPassword(String.valueOf(options.getDatabasePassword()));
+      dataSource.setJdbcUrl(options.getDatabaseOptions().getDatabaseUrl());
+      dataSource.setUsername(options.getDatabaseOptions().getDatabaseUsername());
+      dataSource.setPassword(String.valueOf(options.getDatabaseOptions().getDatabasePassword()));
     }
 
     dataSource.setRegisterMbeans(true);
@@ -262,11 +248,6 @@ public final class RifLoader implements AutoCloseable {
     }
 
     return result.get();
-  }
-
-  /** Do the idle tasks on the database. */
-  public void doIdleTask() {
-    idleTasks.doIdleTask();
   }
 
   /**
