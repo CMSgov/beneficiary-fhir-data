@@ -42,3 +42,4 @@ variable "medicare_opt_out_config" {
 variable "module_features" {
   type = map(bool)
 }
+

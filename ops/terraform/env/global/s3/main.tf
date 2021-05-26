@@ -4,7 +4,7 @@ provider "aws" {
 
 /* Terraform State Bucket */
 resource "aws_s3_bucket" "state_bucket" {
-  bucket = "bfd-tf-state"
+  bucket = var.bfd_tf_state_bucket
   acl    = "private"
 
   policy = <<EOF
@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "state_bucket" {
             "Effect": "Deny",
             "Principal": "*",
             "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::bfd-tf-state/*",
+            "Resource": "arn:aws:s3:::${var.bfd_tf_state_bucket}/*",
             "Condition": {
               "StringNotEquals": {
                 "s3:x-amz-server-side-encryption": "aws:kms"
@@ -29,10 +29,10 @@ resource "aws_s3_bucket" "state_bucket" {
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::bfd-tf-state/*",
+            "Resource": "arn:aws:s3:::${var.bfd_tf_state_bucket}/*",
             "Condition": {
                 "ArnEquals": {
-                    "aws:userid": "arn:aws:iam::755619740999:user/Jenkins"
+                    "aws:userid": "arn:aws:iam::${var.bcda_acct_num}:user/Jenkins"
                 }
                 "StringNotEquals": {
                     "s3:x-amz-server-side-encryption": "aws:kms"
@@ -62,9 +62,8 @@ EOF
 }
 
 /* Bucket for Packages, RPM, WAR, JAR, etc. */
-
 resource "aws_s3_bucket" "state_bucket" {
-  bucket = "bfd-packages"
+  bucket = var.bfd_packages_bucket
   acl    = "private"
 
   policy = <<EOF
@@ -77,17 +76,17 @@ resource "aws_s3_bucket" "state_bucket" {
             "Effect": "Deny",
             "Principal": "*",
             "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::bfd-packages/*",
+            "Resource": "arn:aws:s3:::${var.bfd_packages_bucket}/*",
         },
         {
             "Sid": "JenkinsGetObject",
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::bfd-packages/*",
+            "Resource": "arn:aws:s3:::${var.bfd_packages_bucket}/*",
             "Condition": {
                 "ArnEquals": {
-                    "aws:userid": "arn:aws:iam::755619740999:user/Jenkins"
+                    "aws:userid": "arn:aws:iam::${var.bcda_acct_num}:user/Jenkins"
                 }
             }
         }
