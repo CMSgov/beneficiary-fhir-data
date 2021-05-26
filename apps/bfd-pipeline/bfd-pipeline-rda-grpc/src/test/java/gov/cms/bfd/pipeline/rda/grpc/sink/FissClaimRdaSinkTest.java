@@ -43,7 +43,7 @@ public class FissClaimRdaSinkTest {
   @Test
   public void persistSuccessful() throws Exception {
     final List<PreAdjFissClaim> batch =
-        ImmutableList.of(new PreAdjFissClaim(), new PreAdjFissClaim(), new PreAdjFissClaim());
+        ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
 
     final int count = sink.writeBatch(batch);
     assertEquals(3, count);
@@ -64,7 +64,7 @@ public class FissClaimRdaSinkTest {
   @Test
   public void mergeSuccessful() throws Exception {
     final List<PreAdjFissClaim> batch =
-        ImmutableList.of(new PreAdjFissClaim(), new PreAdjFissClaim(), new PreAdjFissClaim());
+        ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(1));
 
     final int count = sink.writeBatch(batch);
@@ -87,7 +87,7 @@ public class FissClaimRdaSinkTest {
   @Test
   public void persistAndMergeFail() {
     final List<PreAdjFissClaim> batch =
-        ImmutableList.of(new PreAdjFissClaim(), new PreAdjFissClaim(), new PreAdjFissClaim());
+        ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(0));
     doThrow(new EntityNotFoundException()).when(entityManager).merge(batch.get(1));
 
@@ -116,7 +116,7 @@ public class FissClaimRdaSinkTest {
   @Test
   public void persistFatalError() {
     final List<PreAdjFissClaim> batch =
-        ImmutableList.of(new PreAdjFissClaim(), new PreAdjFissClaim(), new PreAdjFissClaim());
+        ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new RuntimeException("oops")).when(entityManager).persist(batch.get(1));
 
     try {
@@ -158,5 +158,11 @@ public class FissClaimRdaSinkTest {
   private void assertMeterReading(long expected, String meterName) {
     long actual = appMetrics.meter(meterName).getCount();
     assertEquals("Meter " + meterName, expected, actual);
+  }
+
+  private PreAdjFissClaim createClaim(String dcn) {
+    PreAdjFissClaim claim = new PreAdjFissClaim();
+    claim.setDcn(dcn);
+    return claim;
   }
 }

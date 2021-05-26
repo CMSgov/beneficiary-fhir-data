@@ -68,7 +68,7 @@ public class FissClaimTransformer {
     }
     to.setLastUpdated(clock.instant());
 
-    short priority = 1;
+    short priority = 0;
     for (FissProcCodes fromCode : from.getFissProcCodesList()) {
       String fieldPrefix = "procCode-" + priority + "-";
       PreAdjFissProcCode toCode = new PreAdjFissProcCode();
@@ -85,6 +85,7 @@ public class FissClaimTransformer {
             fieldPrefix + "procDate", fromCode.getProcDt(), true, toCode::setProcDate);
       }
       toCode.setLastUpdated(to.getLastUpdated());
+      to.getProcCodes().add(toCode);
       priority += 1;
     }
     transformer.throwIfErrorsPresent();

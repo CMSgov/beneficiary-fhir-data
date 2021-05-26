@@ -112,6 +112,7 @@ public class FissClaimTransformerTest {
     code.setProcCode("code-1");
     code.setProcFlag("fl-1");
     code.setLastUpdated(claim.getLastUpdated());
+    claim.getProcCodes().add(code);
     code = new PreAdjFissProcCode();
     code.setDcn("dcn");
     code.setPriority((short) 1);
@@ -119,7 +120,9 @@ public class FissClaimTransformerTest {
     code.setProcFlag("fl-2");
     code.setProcDate(LocalDate.of(2021, 7, 6));
     code.setLastUpdated(claim.getLastUpdated());
-    assertThat(transformer.transformClaim(builder.build()), samePropertyValuesAs(claim));
+    claim.getProcCodes().add(code);
+    PreAdjFissClaim transformed = transformer.transformClaim(builder.build());
+    assertThat(transformed, samePropertyValuesAs(claim));
   }
 
   @Test
@@ -195,10 +198,10 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage(
                   "fedTaxNumber", "invalid length: expected=[1,10] actual=11"),
               new DataTransformer.ErrorMessage(
-                  "procCode-1-procCode", "invalid length: expected=[1,10] actual=11"),
+                  "procCode-0-procCode", "invalid length: expected=[1,10] actual=11"),
               new DataTransformer.ErrorMessage(
-                  "procCode-1-procFlag", "invalid length: expected=[1,4] actual=5"),
-              new DataTransformer.ErrorMessage("procCode-1-procDate", "invalid date")),
+                  "procCode-0-procFlag", "invalid length: expected=[1,4] actual=5"),
+              new DataTransformer.ErrorMessage("procCode-0-procDate", "invalid date")),
           ex.getErrors());
     }
   }
