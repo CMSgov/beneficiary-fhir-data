@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.server.war.commons.PreAdjClaimResponseTypeTransformerV2;
 import gov.cms.bfd.server.war.commons.PreAdjClaimTypeTransformerV2;
 import java.util.Optional;
 import javax.persistence.Entity;
@@ -12,7 +11,7 @@ import org.hl7.fhir.r4.model.ClaimResponse;
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
  * {@link R4ClaimResponseResourceProvider}.
  */
-public enum PreAdjClaimTypeV2 {
+public enum PreAdjClaimTypeV2 implements IPreAdjClaimTypeV2 {
 
   // TODO: Complete null fields when entity available
   F(PreAdjFissClaim.class, PreAdjFissClaim.Fields.dcn, PreAdjFissClaimTransformerV2::transform),
@@ -51,8 +50,8 @@ public enum PreAdjClaimTypeV2 {
   }
 
   /**
-   * @return the {@link PreAdjClaimResponseTypeTransformerV2} to use to transform the JPA {@link
-   *     Entity} instances into FHIR {@link ClaimResponse} instances
+   * @return the {@link PreAdjClaimTypeTransformerV2} to use to transform the JPA {@link Entity}
+   *     instances into FHIR {@link ClaimResponse} instances
    */
   public PreAdjClaimTypeTransformerV2 getTransformer() {
     return transformer;
@@ -63,7 +62,7 @@ public enum PreAdjClaimTypeV2 {
    *     a {@link PreAdjClaimTypeV2}
    * @return the {@link PreAdjClaimTypeV2} represented by the specified {@link String}
    */
-  public static Optional<PreAdjClaimTypeV2> parse(String claimTypeText) {
+  public static Optional<IPreAdjClaimTypeV2> parse(String claimTypeText) {
     for (PreAdjClaimTypeV2 claimType : PreAdjClaimTypeV2.values())
       if (claimType.name().toLowerCase().equals(claimTypeText)) return Optional.of(claimType);
     return Optional.empty();

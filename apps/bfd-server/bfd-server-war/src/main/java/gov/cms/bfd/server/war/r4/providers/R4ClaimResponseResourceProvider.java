@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.PreAdjClaimDao;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 /** This FHIR {@link IResourceProvider} adds support for R4 {@link ClaimResponse} resources. */
 @Component
-public final class R4ClaimResponseResourceProvider implements IResourceProvider {
+public class R4ClaimResponseResourceProvider implements IResourceProvider {
 
   /**
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
@@ -96,9 +97,9 @@ public final class R4ClaimResponseResourceProvider implements IResourceProvider 
       throw new IllegalArgumentException("Unsupported ID pattern: " + claimIdText);
 
     String claimIdTypeText = claimIdMatcher.group(1);
-    Optional<PreAdjClaimResponseTypeV2> optional = PreAdjClaimResponseTypeV2.parse(claimIdTypeText);
+    Optional<IPreAdjClaimResponseTypeV2> optional = parseClaimType(claimIdTypeText);
     if (!optional.isPresent()) throw new ResourceNotFoundException(claimId);
-    PreAdjClaimResponseTypeV2 claimIdType = optional.get();
+    IPreAdjClaimResponseTypeV2 claimIdType = optional.get();
     String claimIdString = claimIdMatcher.group(2);
 
     Object claimEntity;
@@ -110,5 +111,16 @@ public final class R4ClaimResponseResourceProvider implements IResourceProvider 
     }
 
     return claimIdType.getTransformer().transform(metricRegistry, claimEntity);
+  }
+
+  /**
+   * Helper method to make mocking easier in tests.
+   *
+   * @param typeText String to parse representing the claim type.
+   * @return The parsed {@link PreAdjClaimResponseTypeV2} type.
+   */
+  @VisibleForTesting
+  Optional<IPreAdjClaimResponseTypeV2> parseClaimType(String typeText) {
+    return PreAdjClaimResponseTypeV2.parse(typeText);
   }
 }

@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.PreAdjClaimDao;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 /** This FHIR {@link IResourceProvider} adds support for R4 {@link Claim} resources. */
 @Component
-public final class R4ClaimResourceProvider implements IResourceProvider {
+public class R4ClaimResourceProvider implements IResourceProvider {
   /**
    * A {@link Pattern} that will match the {@link Claim#getId()}s used in this application, e.g.
    * <code>f-1234</code> or <code>m--1234</code> (for negative IDs).
@@ -95,9 +96,9 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
       throw new IllegalArgumentException("Unsupported ID pattern: " + claimIdText);
 
     String claimIdTypeText = claimIdMatcher.group(1);
-    Optional<PreAdjClaimTypeV2> optional = PreAdjClaimTypeV2.parse(claimIdTypeText);
+    Optional<IPreAdjClaimTypeV2> optional = parseClaimType(claimIdTypeText);
     if (!optional.isPresent()) throw new ResourceNotFoundException(claimId);
-    PreAdjClaimTypeV2 claimIdType = optional.get();
+    IPreAdjClaimTypeV2 claimIdType = optional.get();
     String claimIdString = claimIdMatcher.group(2);
 
     Object claimEntity;
@@ -109,5 +110,16 @@ public final class R4ClaimResourceProvider implements IResourceProvider {
     }
 
     return claimIdType.getTransformer().transform(metricRegistry, claimEntity);
+  }
+
+  /**
+   * Helper method to make mocking easier in tests.
+   *
+   * @param typeText String to parse representing the claim type.
+   * @return The parsed {@link PreAdjClaimTypeV2} type.
+   */
+  @VisibleForTesting
+  Optional<IPreAdjClaimTypeV2> parseClaimType(String typeText) {
+    return PreAdjClaimTypeV2.parse(typeText);
   }
 }
