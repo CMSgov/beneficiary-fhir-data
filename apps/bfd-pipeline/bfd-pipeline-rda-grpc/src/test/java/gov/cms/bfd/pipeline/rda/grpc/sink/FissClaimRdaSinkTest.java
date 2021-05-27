@@ -56,8 +56,9 @@ public class FissClaimRdaSinkTest {
     verify(transaction).commit();
 
     assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(3, FissClaimRdaSink.PERSISTS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.MERGES_METER_NAME);
+    assertMeterReading(3, FissClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
+    assertMeterReading(0, FissClaimRdaSink.OBJECTS_MERGED_METER_NAME);
+    assertMeterReading(3, FissClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
     assertMeterReading(0, FissClaimRdaSink.FAILURES_METER_NAME);
   }
 
@@ -76,11 +77,15 @@ public class FissClaimRdaSinkTest {
     for (PreAdjFissClaim claim : batch) {
       verify(entityManager).merge(claim);
     }
+    // the persist transaction will be rolled back
+    verify(transaction).rollback();
+    // the merge transaction will be committed
     verify(transaction).commit();
 
     assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.PERSISTS_METER_NAME);
-    assertMeterReading(3, FissClaimRdaSink.MERGES_METER_NAME);
+    assertMeterReading(0, FissClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
+    assertMeterReading(3, FissClaimRdaSink.OBJECTS_MERGED_METER_NAME);
+    assertMeterReading(3, FissClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
     assertMeterReading(0, FissClaimRdaSink.FAILURES_METER_NAME);
   }
 
@@ -105,11 +110,12 @@ public class FissClaimRdaSinkTest {
     verify(entityManager).merge(batch.get(0));
     verify(entityManager).merge(batch.get(1));
     verify(entityManager, times(0)).persist(batch.get(2)); // not called once a merge fails
-    verify(transaction).rollback();
+    verify(transaction, times(2)).rollback(); // both persist and merge transactions are rolled back
 
     assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.PERSISTS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.MERGES_METER_NAME);
+    assertMeterReading(0, FissClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
+    assertMeterReading(0, FissClaimRdaSink.OBJECTS_MERGED_METER_NAME);
+    assertMeterReading(0, FissClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
     assertMeterReading(1, FissClaimRdaSink.FAILURES_METER_NAME);
   }
 
@@ -135,8 +141,9 @@ public class FissClaimRdaSinkTest {
     verify(transaction).rollback();
 
     assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.PERSISTS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.MERGES_METER_NAME);
+    assertMeterReading(0, FissClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
+    assertMeterReading(0, FissClaimRdaSink.OBJECTS_MERGED_METER_NAME);
+    assertMeterReading(0, FissClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
     assertMeterReading(1, FissClaimRdaSink.FAILURES_METER_NAME);
   }
 

@@ -19,35 +19,40 @@ import org.slf4j.LoggerFactory;
 /** RdaSink implementation that writes PreAdjFissClaim objects to the database in batches. */
 public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(FissClaimRdaSink.class);
+  /** Counts the number of times that writeBatch() is called. */
   static final String CALLS_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "calls");
-  static final String SUCCESSES_METER_NAME =
-      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "successes");
+  /** Counts the number of times that writeBatch() is called and fails. */
   static final String FAILURES_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "failures");
-  static final String PERSISTS_METER_NAME =
-      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "persists");
-  static final String MERGES_METER_NAME =
-      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "merges");
+  /** Counts the number of objects successfully written to the database. */
+  static final String OBJECTS_WRITTEN_METER_NAME =
+      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "writes", "total");
+  /** Counts the number of objects written to the database using persist(). */
+  static final String OBJECTS_PERSISTED_METER_NAME =
+      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "writes", "persisted");
+  /** Counts the number of objects written to the database using merge(). */
+  static final String OBJECTS_MERGED_METER_NAME =
+      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "writes", "merged");
 
   private final HikariDataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
   private final EntityManager entityManager;
   private final Meter callsMeter;
-  private final Meter successesMeter;
   private final Meter failuresMeter;
-  private final Meter persistsMeter;
-  private final Meter mergesMeter;
+  private final Meter objectsWrittenMeter;
+  private final Meter objectsPersistedMeter;
+  private final Meter objectsMergedMeter;
 
   public FissClaimRdaSink(DatabaseOptions databaseOptions, MetricRegistry metricRegistry) {
     dataSource = DatabaseUtils.createDataSource(databaseOptions, metricRegistry, 10);
     entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
     entityManager = entityManagerFactory.createEntityManager();
     callsMeter = metricRegistry.meter(CALLS_METER_NAME);
-    successesMeter = metricRegistry.meter(SUCCESSES_METER_NAME);
     failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);
-    persistsMeter = metricRegistry.meter(PERSISTS_METER_NAME);
-    mergesMeter = metricRegistry.meter(MERGES_METER_NAME);
+    objectsWrittenMeter = metricRegistry.meter(OBJECTS_WRITTEN_METER_NAME);
+    objectsPersistedMeter = metricRegistry.meter(OBJECTS_PERSISTED_METER_NAME);
+    objectsMergedMeter = metricRegistry.meter(OBJECTS_MERGED_METER_NAME);
   }
 
   @VisibleForTesting
@@ -60,10 +65,10 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
     this.entityManagerFactory = entityManagerFactory;
     this.entityManager = entityManager;
     callsMeter = metricRegistry.meter(CALLS_METER_NAME);
-    successesMeter = metricRegistry.meter(SUCCESSES_METER_NAME);
+    objectsWrittenMeter = metricRegistry.meter(OBJECTS_WRITTEN_METER_NAME);
     failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);
-    persistsMeter = metricRegistry.meter(PERSISTS_METER_NAME);
-    mergesMeter = metricRegistry.meter(MERGES_METER_NAME);
+    objectsPersistedMeter = metricRegistry.meter(OBJECTS_PERSISTED_METER_NAME);
+    objectsMergedMeter = metricRegistry.meter(OBJECTS_MERGED_METER_NAME);
   }
 
   @Override
@@ -86,7 +91,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
       callsMeter.mark();
       try {
         persistBatch(claims);
-        persistsMeter.mark(claims.size());
+        objectsPersistedMeter.mark(claims.size());
         LOGGER.info("wrote batch of {} claims using persist()", claims.size());
       } catch (Throwable error) {
         if (isDuplicateKeyException(error)) {
@@ -94,7 +99,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
               "caught duplicate key exception: switching to merge for batch of {} claims",
               claims.size());
           mergeBatch(claims);
-          mergesMeter.mark(claims.size());
+          objectsMergedMeter.mark(claims.size());
           LOGGER.info("wrote batch of {} claims using merge()", claims.size());
         } else {
           throw error;
@@ -105,7 +110,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
       failuresMeter.mark();
       throw new ProcessingException(error, 0);
     }
-    successesMeter.mark(claims.size());
+    objectsWrittenMeter.mark(claims.size());
     return claims.size();
   }
 
