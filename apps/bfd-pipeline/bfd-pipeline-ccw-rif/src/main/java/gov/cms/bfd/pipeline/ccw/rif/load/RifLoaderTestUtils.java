@@ -6,7 +6,6 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +34,9 @@ public final class RifLoaderTestUtils {
 
   /** The value to use for {@link LoadAppOptions#isIdempotencyRequired()}. */
   public static final boolean IDEMPOTENCY_REQUIRED = true;
+
+  /** The value to use for {@link LoadAppOptions#isFixupsEnabled()} */
+  public static final boolean FIXUPS_ENABLED = true;
 
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderTestUtils.class);
@@ -114,11 +116,13 @@ public final class RifLoaderTestUtils {
    */
   public static LoadAppOptions getLoadOptions(DataSource dataSource) {
     return new LoadAppOptions(
-        new DatabaseOptions(dataSource),
         HICN_HASH_ITERATIONS,
         HICN_HASH_PEPPER,
+        dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        IDEMPOTENCY_REQUIRED);
+        IDEMPOTENCY_REQUIRED,
+        FIXUPS_ENABLED,
+        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
   }
 
   /**
@@ -126,11 +130,11 @@ public final class RifLoaderTestUtils {
    * @return a JPA {@link EntityManagerFactory} for the database server used in tests
    */
   public static EntityManagerFactory createEntityManagerFactory(LoadAppOptions options) {
-    if (options.getDatabaseOptions().getDatabaseDataSource() == null) {
+    if (options.getDatabaseDataSource() == null) {
       throw new IllegalStateException("DB DataSource (not URLs) must be used in tests.");
     }
 
-    DataSource dataSource = options.getDatabaseOptions().getDatabaseDataSource();
+    DataSource dataSource = options.getDatabaseDataSource();
     return RifLoader.createEntityManagerFactory(dataSource);
   }
 
