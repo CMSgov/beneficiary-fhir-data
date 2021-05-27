@@ -12,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
@@ -20,12 +21,14 @@ import lombok.experimental.FieldNameConstants;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @Table(name = "`FissClaims`", schema = "pre_adj")
 public class PreAdjFissClaim {
 
   @Id
   @Column(name = "`dcn`", length = 23, nullable = false)
+  @EqualsAndHashCode.Include
   private String dcn;
 
   @Column(name = "`hicNo`", length = 12, nullable = false)
