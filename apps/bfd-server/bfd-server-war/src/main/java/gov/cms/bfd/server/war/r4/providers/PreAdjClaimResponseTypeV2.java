@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ClaimResponse;
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
  * {@link R4ClaimResponseResourceProvider}.
  */
-public enum PreAdjClaimResponseTypeV2 {
+public enum PreAdjClaimResponseTypeV2 implements IPreAdjClaimResponseTypeV2 {
 
   // TODO: Complete null fields when entity available
   F(
@@ -67,7 +67,7 @@ public enum PreAdjClaimResponseTypeV2 {
    *     back into a {@link PreAdjClaimResponseTypeV2}
    * @return the {@link PreAdjClaimResponseTypeV2} represented by the specified {@link String}
    */
-  public static Optional<PreAdjClaimResponseTypeV2> parse(String claimTypeText) {
+  public static Optional<IPreAdjClaimResponseTypeV2> parse(String claimTypeText) {
     for (PreAdjClaimResponseTypeV2 claimType : PreAdjClaimResponseTypeV2.values())
       if (claimType.name().toLowerCase().equals(claimTypeText)) return Optional.of(claimType);
     return Optional.empty();
