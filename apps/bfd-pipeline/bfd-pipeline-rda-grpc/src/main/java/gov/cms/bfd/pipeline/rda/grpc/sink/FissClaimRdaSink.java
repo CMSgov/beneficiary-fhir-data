@@ -41,7 +41,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
 
   public FissClaimRdaSink(DatabaseOptions databaseOptions, MetricRegistry metricRegistry) {
     dataSource = DatabaseUtils.createDataSource(databaseOptions, metricRegistry, 10);
-    entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource, "gov.cms.bfd.rda");
+    entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
     entityManager = entityManagerFactory.createEntityManager();
     callsMeter = metricRegistry.meter(CALLS_METER_NAME);
     successesMeter = metricRegistry.meter(SUCCESSES_METER_NAME);
