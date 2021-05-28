@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.ProtocolMessageEnum;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -70,6 +72,39 @@ public class DataTransformer {
       Consumer<String> copier) {
     if (nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength)) {
       copier.accept(value);
+    }
+    return this;
+  }
+
+  /**
+   * RDA API 0.2 MVP has some enums that have numeric values matching the ASCII character from the
+   * upstream source record. Check the integer value and copy it if it represents an ASCII character
+   * or add an error otherwise.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param enumValue value of the enum
+   * @param unsetValue enum instance for unset values
+   * @param unrecognizedValue enum instance for unrecognized values
+   * @param copier Consumer to receive the character value
+   * @return this
+   */
+  public <E extends ProtocolMessageEnum> DataTransformer copyEnumAsAsciiCharacter(
+      String fieldName,
+      E enumValue,
+      E unsetValue,
+      E unrecognizedValue,
+      Consumer<Character> copier) {
+    if (enumValue == null || enumValue.equals(unsetValue)) {
+      addError(fieldName, "no value set");
+    } else if (enumValue.equals(unrecognizedValue)) {
+      addError(fieldName, "unrecognized enum value");
+    } else {
+      char charValue = (char) enumValue.getNumber();
+      if (CharMatcher.ascii().matches(charValue)) {
+        copier.accept(charValue);
+      } else {
+        addError(fieldName, "enum value is not ascii (%d)", enumValue.getNumber());
+      }
     }
     return this;
   }
@@ -176,7 +211,7 @@ public class DataTransformer {
     return true;
   }
 
-  private void addError(String fieldName, String errorFormat, Object... args) {
+  public void addError(String fieldName, String errorFormat, Object... args) {
     final String message = String.format(errorFormat, args);
     errors.add(new ErrorMessage(fieldName, message));
   }

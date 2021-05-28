@@ -3,8 +3,10 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.mpsm.rda.v1.FissClaim;
-import gov.cms.mpsm.rda.v1.FissProcCodes;
+import gov.cms.mpsm.rda.v1.fiss.FissClaim;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
 import java.time.Clock;
 import java.util.List;
 
@@ -31,8 +33,18 @@ public class FissClaimTransformer {
     transformer
         .copyString("dcn", from.getDcn(), false, 1, 23, to::setDcn)
         .copyString("hicNo", from.getHicNo(), false, 1, 12, to::setHicNo)
-        .copyCharacter("currStatus", from.getCurrStatus(), to::setCurrStatus)
-        .copyCharacter("currLoc1", from.getCurrLoc1(), to::setCurrLoc1)
+        .copyEnumAsAsciiCharacter(
+            "currStatus",
+            from.getCurrStatus(),
+            FissClaimStatus.CLAIM_STATUS_UNSET,
+            FissClaimStatus.UNRECOGNIZED,
+            to::setCurrStatus)
+        .copyEnumAsAsciiCharacter(
+            "currLoc1",
+            from.getCurrLoc1(),
+            FissProcessingType.PROCESSING_TYPE_UNSET,
+            FissProcessingType.UNRECOGNIZED,
+            to::setCurrLoc1)
         .copyString("currLoc2", from.getCurrLoc2(), false, 1, 5, to::setCurrLoc2);
     if (from.hasMedaProvId()) {
       transformer.copyString("medaProvId", from.getMedaProvId(), true, 1, 13, to::setMedaProvId);
@@ -70,7 +82,7 @@ public class FissClaimTransformer {
     to.setLastUpdated(clock.instant());
 
     short priority = 0;
-    for (FissProcCodes fromCode : from.getFissProcCodesList()) {
+    for (FissProcedureCode fromCode : from.getFissProcCodesList()) {
       String fieldPrefix = "procCode-" + priority + "-";
       PreAdjFissProcCode toCode = new PreAdjFissProcCode();
       toCode.setDcn(to.getDcn());

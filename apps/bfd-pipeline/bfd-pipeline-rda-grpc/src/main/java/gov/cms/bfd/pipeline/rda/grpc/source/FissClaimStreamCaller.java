@@ -2,13 +2,14 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
+import com.google.protobuf.Empty;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.mpsm.rda.v1.EmptyRequest;
-import gov.cms.mpsm.rda.v1.FissClaim;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
+import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
+import io.grpc.MethodDescriptor;
 import io.grpc.stub.ClientCalls;
 import java.util.Iterator;
 
@@ -35,9 +36,9 @@ public class FissClaimStreamCaller implements GrpcStreamCaller<PreAdjFissClaim> 
   @Override
   public GrpcResponseStream<PreAdjFissClaim> callService(ManagedChannel channel) throws Exception {
     Preconditions.checkNotNull(channel);
-    final EmptyRequest request = EmptyRequest.newBuilder().build();
-    ClientCall<EmptyRequest, FissClaim> call =
-        channel.newCall(RDAServiceGrpc.getGetFissClaimsMethod(), CallOptions.DEFAULT);
+    final Empty request = Empty.newBuilder().build();
+    final MethodDescriptor<Empty, FissClaim> method = RDAServiceGrpc.getGetFissClaimsMethod();
+    final ClientCall<Empty, FissClaim> call = channel.newCall(method, CallOptions.DEFAULT);
     final Iterator<FissClaim> apiResults = ClientCalls.blockingServerStreamingCall(call, request);
     final Iterator<PreAdjFissClaim> transformedResults =
         Iterators.transform(apiResults, transformer::transformClaim);

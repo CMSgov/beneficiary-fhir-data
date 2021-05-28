@@ -7,8 +7,10 @@ import static org.junit.Assert.*;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.mpsm.rda.v1.FissClaim;
-import gov.cms.mpsm.rda.v1.FissProcCodes;
+import gov.cms.mpsm.rda.v1.fiss.FissClaim;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -40,11 +42,16 @@ public class FissClaimTransformerTest {
   public void minimumValidClaim() {
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setCurrStatus('S');
-    claim.setCurrLoc1('A');
+    claim.setCurrStatus('T');
+    claim.setCurrLoc1('M');
     claim.setCurrLoc2("two");
     claim.setLastUpdated(clock.instant());
-    builder.setDcn("dcn").setHicNo("hicn").setCurrStatus("S").setCurrLoc1("A").setCurrLoc2("two");
+    builder
+        .setDcn("dcn")
+        .setHicNo("hicn")
+        .setCurrStatus(FissClaimStatus.CLAIM_STATUS_RTP)
+        .setCurrLoc1(FissProcessingType.PROCESSING_TYPE_MANUAL)
+        .setCurrLoc2("two");
     assertThat(transformer.transformClaim(builder.build()), samePropertyValuesAs(claim));
   }
 
@@ -52,8 +59,8 @@ public class FissClaimTransformerTest {
   public void allFields() {
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setCurrStatus('S');
-    claim.setCurrLoc1('A');
+    claim.setCurrStatus('M');
+    claim.setCurrLoc1('M');
     claim.setCurrLoc2("two");
     claim.setMedaProvId("mpi");
     claim.setTotalChargeAmount(new BigDecimal("1002.54"));
@@ -69,8 +76,8 @@ public class FissClaimTransformerTest {
     builder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setCurrStatus("S")
-        .setCurrLoc1("A")
+        .setCurrStatus(FissClaimStatus.CLAIM_STATUS_MOVE)
+        .setCurrLoc1(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2("two")
         .setMedaProvId("mpi")
         .setTotalChargeAmount("1002.54")
@@ -89,21 +96,21 @@ public class FissClaimTransformerTest {
     builder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setCurrStatus("A")
-        .setCurrLoc1("1")
+        .setCurrStatus(FissClaimStatus.CLAIM_STATUS_MOVE)
+        .setCurrLoc1(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2("2")
         .addFissProcCodes(
-            FissProcCodes.newBuilder().setProcCd("code-1").setProcFlag("fl-1").build())
+            FissProcedureCode.newBuilder().setProcCd("code-1").setProcFlag("fl-1").build())
         .addFissProcCodes(
-            FissProcCodes.newBuilder()
+            FissProcedureCode.newBuilder()
                 .setProcCd("code-2")
                 .setProcFlag("fl-2")
                 .setProcDt("2021-07-06")
                 .build());
     claim.setDcn("dcn");
     claim.setHicNo("hicn");
-    claim.setCurrStatus('A');
-    claim.setCurrLoc1('1');
+    claim.setCurrStatus('M');
+    claim.setCurrLoc1('M');
     claim.setCurrLoc2("2");
     claim.setLastUpdated(clock.instant());
     PreAdjFissProcCode code = new PreAdjFissProcCode();
@@ -135,10 +142,8 @@ public class FissClaimTransformerTest {
           Arrays.asList(
               new DataTransformer.ErrorMessage("dcn", "invalid length: expected=[1,23] actual=0"),
               new DataTransformer.ErrorMessage("hicNo", "invalid length: expected=[1,12] actual=0"),
-              new DataTransformer.ErrorMessage(
-                  "currStatus", "invalid length: expected=[1,1] actual=0"),
-              new DataTransformer.ErrorMessage(
-                  "currLoc1", "invalid length: expected=[1,1] actual=0"),
+              new DataTransformer.ErrorMessage("currStatus", "no value set"),
+              new DataTransformer.ErrorMessage("currLoc1", "no value set"),
               new DataTransformer.ErrorMessage(
                   "currLoc2", "invalid length: expected=[1,5] actual=0")),
           ex.getErrors());
@@ -151,8 +156,8 @@ public class FissClaimTransformerTest {
       builder
           .setDcn("123456789012345678901234")
           .setHicNo("1234567890123")
-          .setCurrStatus("12")
-          .setCurrLoc1("12")
+          .setCurrStatusValue(-1)
+          .setCurrLoc1Value(-1)
           .setCurrLoc2("123456")
           .setMedaProvId("12345678901234")
           .setTotalChargeAmount("not-a-number")
@@ -164,7 +169,7 @@ public class FissClaimTransformerTest {
           .setMbi("12345678901234")
           .setFedTaxNb("12345678901")
           .addFissProcCodes(
-              FissProcCodes.newBuilder()
+              FissProcedureCode.newBuilder()
                   .setProcCd("12345678901")
                   .setProcFlag("12345")
                   .setProcDt("not-a-date")
@@ -177,10 +182,8 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage("dcn", "invalid length: expected=[1,23] actual=24"),
               new DataTransformer.ErrorMessage(
                   "hicNo", "invalid length: expected=[1,12] actual=13"),
-              new DataTransformer.ErrorMessage(
-                  "currStatus", "invalid length: expected=[1,1] actual=2"),
-              new DataTransformer.ErrorMessage(
-                  "currLoc1", "invalid length: expected=[1,1] actual=2"),
+              new DataTransformer.ErrorMessage("currStatus", "unrecognized enum value"),
+              new DataTransformer.ErrorMessage("currLoc1", "unrecognized enum value"),
               new DataTransformer.ErrorMessage(
                   "currLoc2", "invalid length: expected=[1,5] actual=6"),
               new DataTransformer.ErrorMessage(
