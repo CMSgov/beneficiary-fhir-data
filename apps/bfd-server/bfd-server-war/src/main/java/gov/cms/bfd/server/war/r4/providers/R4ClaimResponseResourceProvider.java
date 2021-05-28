@@ -36,7 +36,6 @@ public final class R4ClaimResponseResourceProvider implements IResourceProvider 
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private R4SamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
@@ -49,12 +48,6 @@ public final class R4ClaimResponseResourceProvider implements IResourceProvider 
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
-  }
-
-  /** @param samhsaMatcher the {@link R4SamhsaMatcher} to use */
-  @Inject
-  public void setSamhsaFilterer(R4SamhsaMatcher samhsaMatcher) {
-    this.samhsaMatcher = samhsaMatcher;
   }
 
   /** @param loadedFilterManager the {@link LoadedFilterManager} to use */

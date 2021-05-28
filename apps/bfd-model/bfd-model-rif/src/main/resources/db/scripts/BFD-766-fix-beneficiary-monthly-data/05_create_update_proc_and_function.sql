@@ -79,70 +79,36 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
---
--- Create PROCEDURE load_from_ccw which is a cursor-based
--- processor of data in the CCW_LOAD_TEMP table
---
-CREATE OR REPLACE PROCEDURE load_from_ccw()
-AS
-$$
+
+CREATE OR REPLACE FUNCTION update_bene_monthly_with_delete(
+   IN in_year varchar
+)
+returns INTEGER
+LANGUAGE plpgsql
+AS $$
 DECLARE
-  msg           VARCHAR(255);
-  rcd_cnt       INTEGER := 0;
-  expected_cnt  INTEGER := 0;
-  cur_yr        VARCHAR;
   rcd           CCW_LOAD_TEMP%ROWTYPE;
-  currYear      VARCHAR(4) := '9999';
-  Jan1          DATE;
-  Feb1          DATE;
-  Mar1          DATE;
-  Apr1          DATE;
-  May1          DATE;
-  Jun1          DATE;
-  Jul1          DATE;
-  Aug1          DATE;
-  Sep1          DATE;
-  Oct1          DATE;
-  Nov1          DATE;
-  Dec1          DATE;
+  rcd_cnt       INTEGER := 0;
+  Jan1          DATE := TO_DATE(in_year || '-01-01', 'YYYY-MM-DD');
+  Feb1          DATE := TO_DATE(in_year || '-02-01', 'YYYY-MM-DD');
+  Mar1          DATE := TO_DATE(in_year || '-03-01', 'YYYY-MM-DD');
+  Apr1          DATE := TO_DATE(in_year || '-04-01', 'YYYY-MM-DD');
+  May1          DATE := TO_DATE(in_year || '-05-01', 'YYYY-MM-DD');
+  Jun1          DATE := TO_DATE(in_year || '-06-01', 'YYYY-MM-DD');
+  Jul1          DATE := TO_DATE(in_year || '-07-01', 'YYYY-MM-DD');
+  Aug1          DATE := TO_DATE(in_year || '-08-01', 'YYYY-MM-DD');
+  Sep1          DATE := TO_DATE(in_year || '-09-01', 'YYYY-MM-DD');
+  Oct1          DATE := TO_DATE(in_year || '-10-01', 'YYYY-MM-DD');
+  Nov1          DATE := TO_DATE(in_year || '-11-01', 'YYYY-MM-DD');
+  Dec1          DATE := TO_DATE(in_year || '-12-01', 'YYYY-MM-DD');
   
-  curs          CURSOR FOR
-                      SELECT * FROM public.CCW_LOAD_TEMP;
+  -- Modeled after Postgresql Trnasaction Management
+  --
+  -- https://www.postgresql.org/docs/11/plpgsql-transactions.html
+ --
 BEGIN
-    RAISE INFO 'Starting processing of table: CCW_LOAD_TEMP...';
-    
-    SELECT INTO expected_cnt count(*) from CCW_LOAD_TEMP;
-    RAISE INFO 'Expected record count in table: CCW_LOAD_TEMP: %', expected_cnt;
-
-    open curs;
-  
+    FOR rcd IN SELECT * FROM public.CCW_LOAD_TEMP WHERE RFRNC_YR = in_year LIMIT 20000
     LOOP
-
-        FETCH curs INTO rcd;
-        EXIT WHEN NOT FOUND;
-
-        -- try for some efficiency w/ monthly dates since the cursor
-        -- will have exec'd a simple fetch (no index used) and we know
-        -- the structure of the table is all 2019 rcds then 2020 rcds;
-        -- so (if lucky) we may just calc dates twice!
-        IF rcd.RFRNC_YR <> currYear
-        THEN
-            RAISE INFO 'Updating monthly date cache for: %', rcd.RFRNC_YR;
-            Jan1 := TO_DATE(rcd.RFRNC_YR || '-01-01', 'YYYY-MM-DD');
-            Feb1 := TO_DATE(rcd.RFRNC_YR || '-02-01', 'YYYY-MM-DD');
-            Mar1 := TO_DATE(rcd.RFRNC_YR || '-03-01', 'YYYY-MM-DD');
-            Apr1 := TO_DATE(rcd.RFRNC_YR || '-04-01', 'YYYY-MM-DD');
-            May1 := TO_DATE(rcd.RFRNC_YR || '-05-01', 'YYYY-MM-DD');
-            Jun1 := TO_DATE(rcd.RFRNC_YR || '-06-01', 'YYYY-MM-DD');
-            Jul1 := TO_DATE(rcd.RFRNC_YR || '-07-01', 'YYYY-MM-DD');
-            Aug1 := TO_DATE(rcd.RFRNC_YR || '-08-01', 'YYYY-MM-DD');
-            Sep1 := TO_DATE(rcd.RFRNC_YR || '-09-01', 'YYYY-MM-DD');
-            Oct1 := TO_DATE(rcd.RFRNC_YR || '-10-01', 'YYYY-MM-DD');
-            Nov1 := TO_DATE(rcd.RFRNC_YR || '-11-01', 'YYYY-MM-DD');
-            Dec1 := TO_DATE(rcd.RFRNC_YR || '-12-01', 'YYYY-MM-DD');
-            currYear := rcd.RFRNC_YR;
-        END IF;
-        
         -- Jan
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -160,7 +126,7 @@ BEGIN
             rcd.RDS_JAN_IND,
             rcd.CST_SHR_GRP_JAN_CD,
             rcd.META_DUAL_ELGBL_STUS_JAN_CD);
-            
+    
         -- Feb
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -178,7 +144,7 @@ BEGIN
             rcd.RDS_FEB_IND,
             rcd.CST_SHR_GRP_FEB_CD,
             rcd.META_DUAL_ELGBL_STUS_FEB_CD);
-            
+    
         -- Mar
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -196,7 +162,7 @@ BEGIN
             rcd.RDS_MAR_IND,
             rcd.CST_SHR_GRP_MAR_CD,
             rcd.META_DUAL_ELGBL_STUS_MAR_CD);
-            
+    
         -- Apr
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -214,7 +180,7 @@ BEGIN
             rcd.RDS_APR_IND,
             rcd.CST_SHR_GRP_APR_CD,
             rcd.META_DUAL_ELGBL_STUS_APR_CD);
-            
+    
         -- May
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -232,7 +198,7 @@ BEGIN
             rcd.RDS_MAY_IND,
             rcd.CST_SHR_GRP_MAY_CD,
             rcd.META_DUAL_ELGBL_STUS_MAY_CD);
-            
+    
         -- Jun
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -250,7 +216,7 @@ BEGIN
             rcd.RDS_JUN_IND,
             rcd.CST_SHR_GRP_JUN_CD,
             rcd.META_DUAL_ELGBL_STUS_JUN_CD);
-            
+    
         -- Jul
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -268,7 +234,7 @@ BEGIN
             rcd.RDS_JUL_IND,
             rcd.CST_SHR_GRP_JUL_CD,
             rcd.META_DUAL_ELGBL_STUS_JUL_CD);
-            
+    
         -- Aug
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -286,7 +252,7 @@ BEGIN
             rcd.RDS_AUG_IND,
             rcd.CST_SHR_GRP_AUG_CD,
             rcd.META_DUAL_ELGBL_STUS_AUG_CD);
-            
+    
         -- Sept
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -304,7 +270,7 @@ BEGIN
             rcd.RDS_SEPT_IND,
             rcd.CST_SHR_GRP_SEPT_CD,
             rcd.META_DUAL_ELGBL_STUS_SEPT_CD);
-            
+    
         -- Oct
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -322,7 +288,7 @@ BEGIN
             rcd.RDS_OCT_IND,
             rcd.CST_SHR_GRP_OCT_CD,
             rcd.META_DUAL_ELGBL_STUS_OCT_CD);
-            
+    
         -- Nov
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -340,7 +306,7 @@ BEGIN
             rcd.RDS_NOV_IND,
             rcd.CST_SHR_GRP_NOV_CD,
             rcd.META_DUAL_ELGBL_STUS_NOV_CD);
-            
+    
         -- Dec
         call update_bene_monthly(
             rcd.BENE_ID,
@@ -358,30 +324,10 @@ BEGIN
             rcd.RDS_DEC_IND,
             rcd.CST_SHR_GRP_DEC_CD,
             rcd.META_DUAL_ELGBL_STUS_DEC_CD);
-            
+
+        DELETE FROM CCW_LOAD_TEMP WHERE BENE_ID = rcd.BENE_ID AND RFRNC_YR = in_year;
         rcd_cnt := rcd_cnt + 1;
-        
-        if rcd_cnt % 10000 = 0
-        THEN
-            COMMIT;
-            RAISE INFO 'Record Count: % ...', rcd_cnt;
-        END IF;
-
     END LOOP;
-
-    CLOSE curs;
-    -- implicit COMMIT via sub-transaction BEGIN block
-    
-    RAISE INFO 'Record Total: % ...DONE!!!', rcd_cnt;
-    
-EXCEPTION WHEN others THEN
-    RAISE EXCEPTION 'Error: % : %', SQLERRM::text, SQLSTATE::text;
-    -- implicit ROOLBACK via BEGIN sub-transaction block
+    RETURN rcd_cnt;
 END;
-
-$$ LANGUAGE plpgsql;
-
---
--- Call our cursor-based processor of data in the CCW_LOAD_TEMP table
---
-call load_from_ccw();
+$$;
