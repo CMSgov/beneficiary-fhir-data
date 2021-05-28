@@ -32,7 +32,7 @@ public final class R4ClaimResponseResourceProvider implements IResourceProvider 
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
    * e.g. <code>f-1234</code> or <code>m--1234</code> (for negative IDs).
    */
-  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Alnum}+)");
+  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([f])-(-?\\p{Alnum}+)");
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
