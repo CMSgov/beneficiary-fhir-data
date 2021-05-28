@@ -25,6 +25,7 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class R4ClaimResponseResourceProviderTest {
@@ -210,6 +211,8 @@ public class R4ClaimResponseResourceProviderTest {
     assertTrue(expected.equalsShallow(actual));
   }
 
+  // Ignoring till we have MCS claims
+  @Ignore
   @Test
   public void shouldReturnClaimObjectForMcsClaim()
       throws NoSuchFieldException, IllegalAccessException {
