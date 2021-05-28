@@ -38,8 +38,6 @@ except FileNotFoundError as err:
     print(f'key file not found: {err}')
     sys.exit(1)
 
-after_date = '2021-04-26'
-
 class BFDUser(HttpUser):
     @task
     def patient_by_id(self):
