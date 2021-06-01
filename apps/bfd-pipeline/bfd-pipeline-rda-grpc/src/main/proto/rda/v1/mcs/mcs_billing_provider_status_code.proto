@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+enum McsBillingProviderStatusCode {
+  BILLING_PROVIDER_STATUS_CODE_UNSET = 0;
+
+  // ASCII N
+  BILLING_PROVIDER_STATUS_CODE_NON_PARTICIPATING = 78;
+
+  // ASCII P
+  BILLING_PROVIDER_STATUS_CODE_PARTICIPATING = 80;
+}
