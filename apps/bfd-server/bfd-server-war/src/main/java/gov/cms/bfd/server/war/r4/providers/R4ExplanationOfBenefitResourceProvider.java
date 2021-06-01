@@ -369,7 +369,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     ExplanationOfBenefit eob1 = (ExplanationOfBenefit) res1;
     ExplanationOfBenefit eob2 = (ExplanationOfBenefit) res2;
     if (TransformerUtilsV2.getUnprefixedClaimId(eob1)
-        == TransformerUtilsV2.getUnprefixedClaimId(eob2)) {
+        .equals(TransformerUtilsV2.getUnprefixedClaimId(eob2))) {
       return TransformerUtilsV2.getClaimType(eob1).compareTo(TransformerUtilsV2.getClaimType(eob2));
     } else {
       return TransformerUtilsV2.getUnprefixedClaimId(eob1)
