@@ -11,6 +11,7 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -1318,6 +1319,34 @@ public final class TransformerTestUtilsV2 {
       String code, List<AdjudicationComponent> components) {
     Optional<AdjudicationComponent> adjudication =
         components.stream()
+            .filter(
+                cmp ->
+                    cmp.getCategory().getCoding().stream()
+                            .filter(c -> code.equals(c.getCode()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(adjudication.isPresent());
+
+    return adjudication.get();
+  }
+
+  /**
+   * Finds an {@link AdjudicationComponent} using a code in the category and value in amount
+   *
+   * @param code
+   * @param amount
+   * @param components
+   * @return
+   */
+  static AdjudicationComponent findAdjudicationByCategoryAndAmount(
+      String code, BigDecimal amount, List<AdjudicationComponent> components) {
+    final BigDecimal amt = amount.setScale(2, RoundingMode.HALF_DOWN);
+
+    Optional<AdjudicationComponent> adjudication =
+        components.stream()
+            .filter(cmp -> (amt.equals(cmp.getAmount().getValue())))
             .filter(
                 cmp ->
                     cmp.getCategory().getCoding().stream()
