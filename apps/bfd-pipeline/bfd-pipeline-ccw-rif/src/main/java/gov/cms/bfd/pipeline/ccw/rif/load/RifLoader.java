@@ -106,12 +106,14 @@ public final class RifLoader implements AutoCloseable {
    * @param appMetrics the {@link MetricRegistry} being used for the overall application (as opposed
    *     to a specific data set)
    * @param options the {@link LoadAppOptions} to use
+   * @param dataSource the {@link DataSource} to use that will be converted to a {@link
+   *     HikariDataSource}
    */
-  public RifLoader(MetricRegistry appMetrics, LoadAppOptions options) {
+  public RifLoader(MetricRegistry appMetrics, LoadAppOptions options, DataSource dataSource) {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.dataSource = createDataSource(options, appMetrics);
+    this.dataSource = createDataSource(dataSource, options.getLoaderThreads(), appMetrics);
     this.entityManagerFactory = createEntityManagerFactory(dataSource);
 
     this.secretKeyFactory = createSecretKeyFactory();
@@ -122,28 +124,21 @@ public final class RifLoader implements AutoCloseable {
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
-  static HikariDataSource createDataSource(LoadAppOptions options, MetricRegistry metrics) {
-    HikariDataSource dataSource = new HikariDataSource();
+  static HikariDataSource createDataSource(
+      DataSource dataSource, int maxPoolSize, MetricRegistry metrics) {
+    HikariDataSource hikariDataSource = new HikariDataSource();
 
     /*
-     * FIXME The pool size needs to be double the number of loader threads
-     * when idempotent loads are being used. Apparently, the queries need a
-     * separate Connection?
+     * FIXME The pool size needs to be double the number of loader threads when
+     * idempotent loads are being used. Apparently, the queries need a separate
+     * Connection?
      */
-    dataSource.setMaximumPoolSize(options.getLoaderThreads());
+    hikariDataSource.setMaximumPoolSize(maxPoolSize);
+    hikariDataSource.setDataSource(dataSource);
+    hikariDataSource.setRegisterMbeans(true);
+    hikariDataSource.setMetricRegistry(metrics);
 
-    if (options.getDatabaseOptions().getDatabaseDataSource() != null) {
-      dataSource.setDataSource(options.getDatabaseOptions().getDatabaseDataSource());
-    } else {
-      dataSource.setJdbcUrl(options.getDatabaseOptions().getDatabaseUrl());
-      dataSource.setUsername(options.getDatabaseOptions().getDatabaseUsername());
-      dataSource.setPassword(String.valueOf(options.getDatabaseOptions().getDatabasePassword()));
-    }
-
-    dataSource.setRegisterMbeans(true);
-    dataSource.setMetricRegistry(metrics);
-
-    return dataSource;
+    return hikariDataSource;
   }
 
   /**
