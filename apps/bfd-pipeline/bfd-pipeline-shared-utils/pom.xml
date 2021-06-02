@@ -17,12 +17,6 @@
 
 	<dependencies>
 		<dependency>
-			<!-- TODO remove/change this once the DatabaseSchemaManager is relocated -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-rif</artifactId>
-		</dependency>
-
-		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>
@@ -33,13 +27,6 @@
 				at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-jvm</artifactId>
-		</dependency>
-
-		<dependency>
-			<!-- Used to serialize and deserialize objects to JSON. -->
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.11.1</version>
 		</dependency>
 
 		<dependency>
