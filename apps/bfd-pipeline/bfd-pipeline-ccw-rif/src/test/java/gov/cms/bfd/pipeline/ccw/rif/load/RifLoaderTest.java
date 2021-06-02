@@ -26,7 +26,6 @@ public final class RifLoaderTest {
         RifLoaderTestUtils.getLoadOptions(DatabaseTestHelper.getTestDatabase());
     options =
         new LoadAppOptions(
-            options.getDatabaseOptions(),
             1000,
             "nottherealpepper".getBytes(StandardCharsets.UTF_8),
             options.getLoaderThreads(),
@@ -58,7 +57,6 @@ public final class RifLoaderTest {
         RifLoaderTestUtils.getLoadOptions(DatabaseTestHelper.getTestDatabase());
     options =
         new LoadAppOptions(
-            options.getDatabaseOptions(),
             1000,
             "nottherealpepper".getBytes(StandardCharsets.UTF_8),
             options.getLoaderThreads(),

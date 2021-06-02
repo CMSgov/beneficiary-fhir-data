@@ -104,28 +104,16 @@ public final class AppConfigurationTestIT {
         testAppConfig.getCcwRifLoadOptions().getLoadOptions().getHicnHashPepper());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabaseUrl());
+        testAppConfig.getDatabaseOptions().getDatabaseUrl());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabaseUsername());
+        testAppConfig.getDatabaseOptions().getDatabaseUsername());
     Assert.assertArrayEquals(
         testAppBuilder
             .environment()
             .get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD)
             .toCharArray(),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabasePassword());
+        testAppConfig.getDatabaseOptions().getDatabasePassword());
     Assert.assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
