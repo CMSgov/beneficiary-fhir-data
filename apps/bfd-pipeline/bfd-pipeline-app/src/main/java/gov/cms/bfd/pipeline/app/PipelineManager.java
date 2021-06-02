@@ -49,8 +49,8 @@ public final class PipelineManager {
 
   /**
    * The number of jobs that can be run at one time. Because the {@link VolunteerJob} and {@link
-   * SchedulerJob} will always be running, this number must be >=3, in order for any actual jobs to
-   * get run.
+   * SchedulerJob} will always be running, this number must be greater than or equal to 3, in order
+   * for any actual jobs to get run.
    *
    * @see #jobExecutor
    */
