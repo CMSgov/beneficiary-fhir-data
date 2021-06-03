@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -25,10 +25,12 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
-public class PreAdjFissClaimTransformerV2 {
+public class FissClaimTransformerV2 {
 
   private static final String METRIC_NAME =
-      MetricRegistry.name(PreAdjFissClaimTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(FissClaimTransformerV2.class.getSimpleName(), "transform");
+
+  private FissClaimTransformerV2() {}
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
@@ -37,16 +39,13 @@ public class PreAdjFissClaimTransformerV2 {
    */
   @Trace
   static Claim transform(MetricRegistry metricRegistry, Object claimEntity) {
-    Timer.Context timer = metricRegistry.timer(METRIC_NAME).time();
-
     if (!(claimEntity instanceof PreAdjFissClaim)) {
       throw new BadCodeMonkeyException();
     }
 
-    Claim claim = transformClaim((PreAdjFissClaim) claimEntity);
-
-    timer.stop();
-    return claim;
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
+      return transformClaim((PreAdjFissClaim) claimEntity);
+    }
   }
 
   /**

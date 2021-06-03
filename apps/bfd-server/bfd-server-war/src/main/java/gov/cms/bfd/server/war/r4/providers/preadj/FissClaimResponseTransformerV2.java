@@ -1,14 +1,14 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.collect.ImmutableMap;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.r4.model.ClaimResponse;
@@ -20,39 +20,45 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
-public class PreAdjFissClaimResponseTransformerV2 {
+public class FissClaimResponseTransformerV2 {
 
   private static final String METRIC_NAME =
-      MetricRegistry.name(PreAdjFissClaimResponseTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   private static final Map<Character, String> STATUS_TEXT;
 
   static {
-    STATUS_TEXT = new HashMap<>();
-    STATUS_TEXT.put('a', "Active");
-    STATUS_TEXT.put('s', "Suspend");
-    STATUS_TEXT.put('p', "Paid");
-    STATUS_TEXT.put('d', "Denied");
-    STATUS_TEXT.put('i', "Inactive");
-    STATUS_TEXT.put('r', "Reject");
-    STATUS_TEXT.put('t', "RTP");
-    STATUS_TEXT.put('m', "Move");
+    STATUS_TEXT =
+        ImmutableMap.<Character, String>builder()
+            .put('a', "Active")
+            .put('s', "Suspend")
+            .put('p', "Paid")
+            .put('d', "Denied")
+            .put('i', "Inactive")
+            .put('r', "Reject")
+            .put('t', "RTP")
+            .put('m', "Move")
+            .build();
   }
 
   private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME;
 
   static {
-    STATUS_TO_OUTCOME = new HashMap<>();
-    STATUS_TO_OUTCOME.put(' ', ClaimResponse.RemittanceOutcome.QUEUED);
-    STATUS_TO_OUTCOME.put('a', ClaimResponse.RemittanceOutcome.QUEUED);
-    STATUS_TO_OUTCOME.put('s', ClaimResponse.RemittanceOutcome.PARTIAL);
-    STATUS_TO_OUTCOME.put('p', ClaimResponse.RemittanceOutcome.COMPLETE);
-    STATUS_TO_OUTCOME.put('d', ClaimResponse.RemittanceOutcome.ERROR);
-    STATUS_TO_OUTCOME.put('i', ClaimResponse.RemittanceOutcome.PARTIAL);
-    STATUS_TO_OUTCOME.put('r', ClaimResponse.RemittanceOutcome.ERROR);
-    STATUS_TO_OUTCOME.put('t', ClaimResponse.RemittanceOutcome.ERROR);
-    STATUS_TO_OUTCOME.put('m', ClaimResponse.RemittanceOutcome.PARTIAL);
+    STATUS_TO_OUTCOME =
+        ImmutableMap.<Character, ClaimResponse.RemittanceOutcome>builder()
+            .put(' ', ClaimResponse.RemittanceOutcome.QUEUED)
+            .put('a', ClaimResponse.RemittanceOutcome.QUEUED)
+            .put('s', ClaimResponse.RemittanceOutcome.PARTIAL)
+            .put('p', ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put('d', ClaimResponse.RemittanceOutcome.ERROR)
+            .put('i', ClaimResponse.RemittanceOutcome.PARTIAL)
+            .put('r', ClaimResponse.RemittanceOutcome.ERROR)
+            .put('t', ClaimResponse.RemittanceOutcome.ERROR)
+            .put('m', ClaimResponse.RemittanceOutcome.PARTIAL)
+            .build();
   }
+
+  private FissClaimResponseTransformerV2() {}
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
@@ -61,16 +67,13 @@ public class PreAdjFissClaimResponseTransformerV2 {
    */
   @Trace
   static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
-    Timer.Context timer = metricRegistry.timer(METRIC_NAME).time();
-
     if (!(claimEntity instanceof PreAdjFissClaim)) {
       throw new BadCodeMonkeyException();
     }
 
-    ClaimResponse claim = transformClaim((PreAdjFissClaim) claimEntity);
-
-    timer.stop();
-    return claim;
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
+      return transformClaim((PreAdjFissClaim) claimEntity);
+    }
   }
 
   /**

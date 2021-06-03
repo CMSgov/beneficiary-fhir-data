@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.commons;
+package gov.cms.bfd.server.war.r4.providers.preadj.common;
 
 import com.codahale.metrics.MetricRegistry;
 import org.hl7.fhir.r4.model.Claim;
@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Claim;
  * FHIR {@link Claim} resources.
  */
 @FunctionalInterface
-public interface PreAdjClaimTypeTransformerV2 {
+public interface ClaimTypeTransformerV2 {
   /**
    * Transforms the specified into a new FHIR {@link Claim} resource.
    *

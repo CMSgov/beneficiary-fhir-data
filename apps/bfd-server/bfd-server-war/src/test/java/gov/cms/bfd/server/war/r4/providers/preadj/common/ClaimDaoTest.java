@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.commons;
+package gov.cms.bfd.server.war.r4.providers.preadj.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,8 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.server.war.r4.providers.IPreAdjClaimResponseTypeV2;
-import gov.cms.bfd.server.war.r4.providers.IPreAdjClaimTypeV2;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -21,7 +19,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.junit.Test;
 
-public class PreAdjClaimDaoTest {
+public class ClaimDaoTest {
 
   @Test
   public void shouldInvokeGetByIdForClaimType() {
@@ -32,9 +30,9 @@ public class PreAdjClaimDaoTest {
 
     Object expected = 5L;
 
-    IPreAdjClaimTypeV2 mockClaimType = new MockClaimType();
+    IClaimTypeV2 mockClaimType = new MockClaimType();
 
-    PreAdjClaimDao daoSpy = spy(new PreAdjClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
 
     // unchecked - This is fine for the purposes of this test.
     //noinspection unchecked
@@ -59,9 +57,9 @@ public class PreAdjClaimDaoTest {
 
     Object expected = 5L;
 
-    IPreAdjClaimResponseTypeV2 mockClaimType = new MockClaimResponseType();
+    IClaimResponseTypeV2 mockClaimType = new MockClaimResponseType();
 
-    PreAdjClaimDao daoSpy = spy(new PreAdjClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
 
     // unchecked - This is fine for the purposes of this test.
     //noinspection unchecked
@@ -87,7 +85,7 @@ public class PreAdjClaimDaoTest {
     MetricRegistry registry = new MetricRegistry();
     EntityManager mockEntityManager = mock(EntityManager.class);
 
-    PreAdjClaimDao daoSpy = spy(new PreAdjClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
 
     CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
     CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
@@ -127,7 +125,7 @@ public class PreAdjClaimDaoTest {
     assertEquals(expected, actual);
   }
 
-  private static class MockClaimType implements IPreAdjClaimTypeV2 {
+  private static class MockClaimType implements IClaimTypeV2 {
 
     @Override
     public Class<?> getEntityClass() {
@@ -140,12 +138,12 @@ public class PreAdjClaimDaoTest {
     }
 
     @Override
-    public PreAdjClaimTypeTransformerV2 getTransformer() {
+    public ClaimTypeTransformerV2 getTransformer() {
       return null;
     }
   }
 
-  private static class MockClaimResponseType implements IPreAdjClaimResponseTypeV2 {
+  private static class MockClaimResponseType implements IClaimResponseTypeV2 {
 
     @Override
     public Class<?> getEntityClass() {
@@ -158,7 +156,7 @@ public class PreAdjClaimDaoTest {
     }
 
     @Override
-    public PreAdjClaimResponseTypeTransformerV2 getTransformer() {
+    public ClaimResponseTypeTransformerV2 getTransformer() {
       return null;
     }
   }

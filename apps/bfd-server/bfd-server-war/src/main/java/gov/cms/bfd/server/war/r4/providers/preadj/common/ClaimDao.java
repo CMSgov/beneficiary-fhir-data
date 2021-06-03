@@ -1,10 +1,8 @@
-package gov.cms.bfd.server.war.commons;
+package gov.cms.bfd.server.war.r4.providers.preadj.common;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
-import gov.cms.bfd.server.war.r4.providers.IPreAdjClaimResponseTypeV2;
-import gov.cms.bfd.server.war.r4.providers.IPreAdjClaimTypeV2;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -12,16 +10,16 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 /** Provides common logic for performing DB interactions */
-public class PreAdjClaimDao {
+public class ClaimDao {
 
   private static final String CLAIM_METRIC_QUERY_ID = "claim_by_id";
   private static final String CLAIM_METRIC_NAME =
-      MetricRegistry.name(PreAdjClaimDao.class.getSimpleName(), "query", CLAIM_METRIC_QUERY_ID);
+      MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_METRIC_QUERY_ID);
 
   private final EntityManager entityManager;
   private final MetricRegistry metricRegistry;
 
-  public PreAdjClaimDao(EntityManager entityManager, MetricRegistry metricRegistry) {
+  public ClaimDao(EntityManager entityManager, MetricRegistry metricRegistry) {
     this.entityManager = entityManager;
     this.metricRegistry = metricRegistry;
   }
@@ -31,9 +29,9 @@ public class PreAdjClaimDao {
    *
    * @param type The type of claim to retrieve.
    * @param id The id of the claim to retrieve.
-   * @return An entity object of the given type provided in {@link IPreAdjClaimTypeV2}
+   * @return An entity object of the given type provided in {@link IClaimTypeV2}
    */
-  public Object getEntityById(IPreAdjClaimTypeV2 type, String id) {
+  public Object getEntityById(IClaimTypeV2 type, String id) {
     return getEntityById(type.getEntityClass(), type.getEntityIdAttribute(), id);
   }
 
@@ -42,9 +40,9 @@ public class PreAdjClaimDao {
    *
    * @param type The type of claim to retrieve.
    * @param id The id of the claim to retrieve.
-   * @return An entity object of the given type provided in {@link IPreAdjClaimResponseTypeV2}
+   * @return An entity object of the given type provided in {@link IClaimResponseTypeV2}
    */
-  public Object getEntityById(IPreAdjClaimResponseTypeV2 type, String id) {
+  public Object getEntityById(IClaimResponseTypeV2 type, String id) {
     return getEntityById(type.getEntityClass(), type.getEntityIdAttribute(), id);
   }
 
