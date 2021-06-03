@@ -24,13 +24,18 @@ public class ReflectionTestUtils {
   public static void setField(Object object, String propertyName, Object newValue)
       throws NoSuchFieldException, IllegalAccessException {
     Field field = ReflectionUtils.findField(object.getClass(), propertyName);
-    field.setAccessible(true);
 
-    Field fieldModifiers = Field.class.getDeclaredField("modifiers");
-    fieldModifiers.setAccessible(true);
-    fieldModifiers.setInt(field, fieldModifiers.getModifiers() & ~Modifier.FINAL);
+    if (field != null) {
+      field.setAccessible(true);
 
-    field.set(object, newValue);
-    field.setAccessible(false);
+      Field fieldModifiers = Field.class.getDeclaredField("modifiers");
+      fieldModifiers.setAccessible(true);
+      fieldModifiers.setInt(field, fieldModifiers.getModifiers() & ~Modifier.FINAL);
+
+      field.set(object, newValue);
+      field.setAccessible(false);
+    } else {
+      throw new IllegalAccessException("Could not access given method for target class");
+    }
   }
 }

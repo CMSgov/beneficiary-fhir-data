@@ -1,16 +1,16 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.r4.providers.preadj.common;
 
-import gov.cms.bfd.server.war.commons.PreAdjClaimTypeTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.preadj.ClaimResponseTypeV2;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import org.hl7.fhir.r4.model.ClaimResponse;
 
 /** Interface to allow for easier mocking during testing. */
-public interface IPreAdjClaimTypeV2 {
+public interface IClaimResponseTypeV2 {
 
   /**
    * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
-   *     PreAdjClaimResponseTypeV2} in the database
+   *     ClaimResponseTypeV2} in the database
    */
   Class<?> getEntityClass();
 
@@ -18,8 +18,8 @@ public interface IPreAdjClaimTypeV2 {
   String getEntityIdAttribute();
 
   /**
-   * @return the {@link PreAdjClaimTypeTransformerV2} to use to transform the JPA {@link Entity}
+   * @return the {@link ClaimResponseTypeTransformerV2} to use to transform the JPA {@link Entity}
    *     instances into FHIR {@link ClaimResponse} instances
    */
-  PreAdjClaimTypeTransformerV2 getTransformer();
+  ClaimResponseTypeTransformerV2 getTransformer();
 }

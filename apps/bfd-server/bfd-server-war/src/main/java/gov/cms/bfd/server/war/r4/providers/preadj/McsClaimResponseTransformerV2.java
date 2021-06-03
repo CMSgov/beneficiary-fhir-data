@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -7,10 +7,10 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import org.hl7.fhir.r4.model.ClaimResponse;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
-public class PreAdjMcsClaimResponseTransformerV2 {
+public class McsClaimResponseTransformerV2 {
 
   private static final String METRIC_NAME =
-      MetricRegistry.name(PreAdjMcsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+      MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
@@ -19,18 +19,14 @@ public class PreAdjMcsClaimResponseTransformerV2 {
    */
   @Trace
   static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
-    Timer.Context timer = metricRegistry.timer(METRIC_NAME).time();
-
     // TODO: Update this check when entity available
     if (!(claimEntity instanceof Object)) {
       throw new BadCodeMonkeyException();
     }
 
-    // TODO: Cast to specific claim entity type
-    ClaimResponse claim = transformClaim((Object) claimEntity);
-
-    timer.stop();
-    return claim;
+    try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
+      return transformClaim((Object) claimEntity);
+    }
   }
 
   /**

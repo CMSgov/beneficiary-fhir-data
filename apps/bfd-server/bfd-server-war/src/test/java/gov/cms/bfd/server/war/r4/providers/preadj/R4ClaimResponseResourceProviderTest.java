@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -15,8 +15,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.server.war.commons.PreAdjClaimDao;
-import gov.cms.bfd.server.war.commons.PreAdjClaimResponseTypeTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimResponseTypeTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.IClaimResponseTypeV2;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.ReflectionTestUtils;
 import java.lang.reflect.Method;
@@ -177,12 +178,12 @@ public class R4ClaimResponseResourceProviderTest {
     MetricRegistry registry = new MetricRegistry();
     EntityManager mockEntityManager = mock(EntityManager.class);
 
-    PreAdjClaimDao daoSpy = spy(new PreAdjClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
     PreAdjFissClaim mockClaim = mock(PreAdjFissClaim.class);
 
-    IPreAdjClaimResponseTypeV2 mockClaimType = mock(IPreAdjClaimResponseTypeV2.class);
+    IClaimResponseTypeV2 mockClaimType = mock(IClaimResponseTypeV2.class);
 
-    doReturn(null).when(daoSpy).getEntityById(any(PreAdjClaimResponseTypeV2.class), anyString());
+    doReturn(null).when(daoSpy).getEntityById(any(ClaimResponseTypeV2.class), anyString());
 
     doReturn(mockClaim).when(daoSpy).getEntityById(mockClaimType, "123");
 
@@ -190,8 +191,7 @@ public class R4ClaimResponseResourceProviderTest {
 
     doReturn(null).when(providerSpy).parseClaimType(anyString());
 
-    PreAdjClaimResponseTypeTransformerV2 mockTransformer =
-        mock(PreAdjClaimResponseTypeTransformerV2.class);
+    ClaimResponseTypeTransformerV2 mockTransformer = mock(ClaimResponseTypeTransformerV2.class);
 
     ClaimResponse expected = new ClaimResponse();
     expected.setId("Expected claim");
@@ -204,15 +204,14 @@ public class R4ClaimResponseResourceProviderTest {
 
     providerSpy.setMetricRegistry(registry);
 
-    ReflectionTestUtils.setField(providerSpy, "preAdjClaimDao", daoSpy);
+    ReflectionTestUtils.setField(providerSpy, "claimDao", daoSpy);
 
     ClaimResponse actual = providerSpy.read(id, null);
 
     assertTrue(expected.equalsShallow(actual));
   }
 
-  // Ignoring till we have MCS claims
-  @Ignore
+  @Ignore("Ignoring until we have MCS claims")
   @Test
   public void shouldReturnClaimObjectForMcsClaim()
       throws NoSuchFieldException, IllegalAccessException {
@@ -221,12 +220,12 @@ public class R4ClaimResponseResourceProviderTest {
     MetricRegistry registry = new MetricRegistry();
     EntityManager mockEntityManager = mock(EntityManager.class);
 
-    PreAdjClaimDao daoSpy = spy(new PreAdjClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
     PreAdjFissClaim mockClaim = mock(PreAdjFissClaim.class);
 
-    IPreAdjClaimResponseTypeV2 mockClaimType = mock(IPreAdjClaimResponseTypeV2.class);
+    IClaimResponseTypeV2 mockClaimType = mock(IClaimResponseTypeV2.class);
 
-    doReturn(null).when(daoSpy).getEntityById(any(PreAdjClaimResponseTypeV2.class), anyString());
+    doReturn(null).when(daoSpy).getEntityById(any(ClaimResponseTypeV2.class), anyString());
 
     doReturn(mockClaim).when(daoSpy).getEntityById(mockClaimType, "123");
 
@@ -234,8 +233,7 @@ public class R4ClaimResponseResourceProviderTest {
 
     doReturn(null).when(providerSpy).parseClaimType(anyString());
 
-    PreAdjClaimResponseTypeTransformerV2 mockTransformer =
-        mock(PreAdjClaimResponseTypeTransformerV2.class);
+    ClaimResponseTypeTransformerV2 mockTransformer = mock(ClaimResponseTypeTransformerV2.class);
 
     ClaimResponse expected = new ClaimResponse();
     expected.setId("Expected claim");
