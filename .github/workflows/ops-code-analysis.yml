@@ -1,0 +1,193 @@
+name: 'ops static code analysis'
+# Runs static code analysis and linting on designated ops files
+#
+on: 
+  pull_request:
+    paths:
+      - ops/**
+    paths-ignore:
+      - ops/**.txt
+      - ops/**.md
+      
+env:
+  # terraform versions
+  tf_version: '0.12.x'
+
+jobs:
+  ## CHANGED FILES
+  # searches changed files and add outputs for use by other jobs
+  # e.g., ${{ needs.changed_files.outputs.tf }} would output all changed terraform (*.tf) files
+  changed_files:
+    name: checking
+    runs-on: ubuntu-latest
+    outputs:
+      all: ${{ steps.changed_files.outputs.all }}
+      sh: ${{ steps.changed_files.outputs.sh }}
+      tf: ${{ steps.changed_files.outputs.tf }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+      - name: Get changed files
+        id: changed_files
+        run: |
+          # all files
+          echo "::set-output name=all::$(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD | xargs)"
+
+          # terraform .tf files
+          echo "::set-output name=tf::$(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD | grep .tf$ | xargs)"
+          
+          # shell scripts
+          shell_scripts=()
+          for f in $(git diff --name-only HEAD^ HEAD); do
+            [[ $(file "$f") =~ shell\ script ]] && shell_scripts+=("$f")
+          done
+          echo "::set-output name=sh::${shell_scripts[*]}"
+
+          # handle other file types here
+          
+  # Run shellcheck against shell scripts (bash, ksh, etc)
+  shellcheck:
+    runs-on: ubuntu-latest
+    needs: changed_files
+    if: ${{ needs.changed_files.outputs.sh }}
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      # checkout the repo and install shellcheck (yes, you can use brew on ubuntu)
+      - uses: actions/checkout@v2
+      - name: install shellcheck
+        run: |
+          brew install shellcheck
+      
+      # Getting the output from shellcheck was complicated due to the way they use
+      # tty's (the default format). The other shellcheck formats were just not as useful.
+      - name: run shellchecks
+        id: shellchecks
+        continue-on-error: true # do not change this here (so we can see all the results)
+        run: |
+          # run shellcheck on shell scripts
+          statuscode=0
+          > results.txt
+          for f in ${{ needs.changed_files.outputs.sh }}; do
+            echo ">>>>>>>>>> $f" >> results.txt
+            # use script command to capture the results
+            script -a -e -q -c "shellcheck --color=never $f" results.txt || statuscode=$?
+          done
+          # remove script's "Script started" "Script done" lines (even though the -q 'quiet' flag was set :/)
+          sed -i '/^Script\ [s,d]/d' results.txt
+
+          # export results to an env var
+          sed -i 's/\$/\\$/g' results.txt
+          echo 'SHELL_CHECK_RESULTS<<EOF' >> $GITHUB_ENV
+          cat results.txt >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+          
+          # set status code
+          echo "::set-output name=statuscode::${statuscode}"
+      
+      # Create a PR comment showing the results
+      - uses: actions/github-script@0.9.0
+        if: steps.shellchecks.outputs.statuscode != 0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            let status = (${{ steps.shellchecks.outputs.statuscode }} > 0) ? "failed" : "passed"
+            const output = `
+            #### shellcheck warnings
+            ---
+            \`\`\`
+            ${{ env.SHELL_CHECK_RESULTS }}
+            \`\`\`
+            `;
+              
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+      
+      # Print results to logs and exit 
+      - name: results
+        continue-on-error: true # change it here
+        run: |
+          echo "Checked files: ${{ needs.changed_files.outputs.sh }}"
+          echo ${{ env.SHELL_CHECK_RESULTS }}'
+          exit ${{ steps.shellchecks.outputs.statuscode }}'
+  
+  # runs terraform fmt on changed .tf files
+  tf_format:
+    runs-on: ubuntu-latest
+    needs: changed_files
+    if: needs.changed_files.outputs.tf
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ env.tf_version }}
+          terraform_wrapper: false
+      - name: terraform fmt
+        id: fmt
+        continue-on-error: true # do not change this here (so we can get all the results)
+        run: |
+          statuscode=0
+          > results.txt
+          > fixes.txt
+          tf_files=( ${{needs.changed_files.outputs.tf}} )
+          for f in "${tf_files[@]}"; do
+            echo -e ">>>>>>>>>> ${f}\n" >> results.txt
+            terraform fmt -check -diff -no-color "$f" | sed 1d >> results.txt
+            statuscode="${PIPESTATUS[0]}"
+            if [[ "$statuscode" != "0" ]]; then
+              echo "terraform fmt $f" >> fixes.txt
+            fi 
+            echo -e "\n" >> results.txt
+          done
+          
+          # export fmt results to an env var
+          sed -i 's/\$/\\$/g' results.txt
+          echo 'TF_FMT_RESULTS<<EOF' >> $GITHUB_ENV
+          cat results.txt >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+          
+          # export the fixes to an env var
+          sed -i 's/\$/\\$/g' results.txt
+          echo 'TF_FMT_FIXES<<EOF' >> $GITHUB_ENV
+          cat fixes.txt >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+
+          # set status code
+          echo "::set-output name=statuscode::${statuscode}"
+      
+      # Create a PR comment showing the fixes
+      - uses: actions/github-script@0.9.0
+        if: steps.fmt.outputs.statuscode != 0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `
+            #### terraform formatting checks failed - run the following to fix:
+            \`\`\`
+            ${{ env.TF_FMT_FIXES }}
+            \`\`\`
+            `;
+              
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+     
+     # Print the terraform fmt results here and exit
+      - name: results
+        continue-on-error: false # change it here
+        run: |
+          echo "Checked files: ${{ needs.changed_files.outputs.tf }}"
+          echo $'${{ env.TF_FMT_RESULTS }}'
+          echo "---"
+          echo $'${{ env.TF_FMT_FIXES }}'
+          exit ${{ steps.fmt.outputs.statuscode }}
