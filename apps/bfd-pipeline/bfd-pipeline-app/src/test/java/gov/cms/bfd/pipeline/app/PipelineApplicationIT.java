@@ -97,7 +97,11 @@ public final class PipelineApplicationIT {
       appRunConsumerThread.start();
 
       // Wait for it to exit with an error.
-      appProcess.waitFor(1, TimeUnit.MINUTES);
+      // TODO: check other test cases for same logic error where the waitFor result is ignored
+      if (!appProcess.waitFor(30, TimeUnit.SECONDS)) {
+        throw new IllegalStateException(
+            "Application failed to exit. STDOUT: {\n" + appRunConsumer.getStdoutContents() + "\n}");
+      }
       appRunConsumerThread.join();
 
       // Verify that the application exited as expected.

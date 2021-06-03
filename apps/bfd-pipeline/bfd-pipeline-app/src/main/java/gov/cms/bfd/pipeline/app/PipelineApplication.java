@@ -44,6 +44,7 @@ public final class PipelineApplication {
    * This {@link System#exit(int)} value should be used when the application exits due to an
    * unhandled exception.
    */
+  // TODO rename this to EXIT_CODE_JOB_FAILED
   static final int EXIT_CODE_MONITOR_ERROR = PipelineManager.EXIT_CODE_MONITOR_ERROR;
 
   /**
@@ -135,10 +136,18 @@ public final class PipelineApplication {
     pipelineManager.registerJob(createCcwRifLoadJob(appMetrics, appConfig, dataSource));
 
     /*
-     * At this point, we're done here with the main thread. From now on, the
-     * PipelineManager's executor service should be the only non-daemon
-     * thread running (and whatever it kicks off). Once/if that thread
-     * stops, the application will run all registered shutdown hooks and
+     * Wait for the PipelineManager to stop running jobs, and then check to see if we should exit normally with 0 or abnormally with a non-0 because a job failed.
+     */
+    pipelineManager.waitForStop();
+    if (jobRecordStore.getJobRecords().stream()
+        .filter(r -> r.getFailure().isPresent())
+        .findAny()
+        .isPresent()) {
+      System.exit(EXIT_CODE_MONITOR_ERROR);
+    }
+
+    /* Everything is copacetic: exit normally.
+     * At this point, we're done here with the main thread. Next up: the application will run all registered shutdown hooks and
      * exit.
      */
   }
