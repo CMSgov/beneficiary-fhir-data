@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -10,7 +10,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
-import gov.cms.bfd.server.war.commons.PreAdjClaimDao;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.IClaimTypeV2;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +38,7 @@ public class R4ClaimResourceProvider implements IResourceProvider {
   private MetricRegistry metricRegistry;
   private LoadedFilterManager loadedFilterManager;
 
-  private PreAdjClaimDao preAdjClaimDao;
+  private ClaimDao claimDao;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
   @PersistenceContext
@@ -65,7 +66,7 @@ public class R4ClaimResourceProvider implements IResourceProvider {
 
   @PostConstruct
   public void init() {
-    preAdjClaimDao = new PreAdjClaimDao(entityManager, metricRegistry);
+    claimDao = new ClaimDao(entityManager, metricRegistry);
   }
 
   /**
@@ -96,15 +97,15 @@ public class R4ClaimResourceProvider implements IResourceProvider {
       throw new IllegalArgumentException("Unsupported ID pattern: " + claimIdText);
 
     String claimIdTypeText = claimIdMatcher.group(1);
-    Optional<IPreAdjClaimTypeV2> optional = parseClaimType(claimIdTypeText);
+    Optional<IClaimTypeV2> optional = parseClaimType(claimIdTypeText);
     if (!optional.isPresent()) throw new ResourceNotFoundException(claimId);
-    IPreAdjClaimTypeV2 claimIdType = optional.get();
+    IClaimTypeV2 claimIdType = optional.get();
     String claimIdString = claimIdMatcher.group(2);
 
     Object claimEntity;
 
     try {
-      claimEntity = preAdjClaimDao.getEntityById(claimIdType, claimIdString);
+      claimEntity = claimDao.getEntityById(claimIdType, claimIdString);
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(claimId);
     }
@@ -116,10 +117,10 @@ public class R4ClaimResourceProvider implements IResourceProvider {
    * Helper method to make mocking easier in tests.
    *
    * @param typeText String to parse representing the claim type.
-   * @return The parsed {@link PreAdjClaimTypeV2} type.
+   * @return The parsed {@link ClaimTypeV2} type.
    */
   @VisibleForTesting
-  Optional<IPreAdjClaimTypeV2> parseClaimType(String typeText) {
-    return PreAdjClaimTypeV2.parse(typeText);
+  Optional<IClaimTypeV2> parseClaimType(String typeText) {
+    return ClaimTypeV2.parse(typeText);
   }
 }

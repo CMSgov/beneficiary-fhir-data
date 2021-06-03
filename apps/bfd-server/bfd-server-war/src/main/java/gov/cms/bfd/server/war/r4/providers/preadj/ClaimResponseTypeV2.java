@@ -1,7 +1,8 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.server.war.commons.PreAdjClaimTypeTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimResponseTypeTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.IClaimResponseTypeV2;
 import java.util.Optional;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -11,16 +12,16 @@ import org.hl7.fhir.r4.model.ClaimResponse;
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
  * {@link R4ClaimResponseResourceProvider}.
  */
-public enum PreAdjClaimTypeV2 implements IPreAdjClaimTypeV2 {
+public enum ClaimResponseTypeV2 implements IClaimResponseTypeV2 {
 
   // TODO: Complete null fields when entity available
-  F(PreAdjFissClaim.class, PreAdjFissClaim.Fields.dcn, PreAdjFissClaimTransformerV2::transform),
+  F(PreAdjFissClaim.class, PreAdjFissClaim.Fields.dcn, FissClaimResponseTransformerV2::transform),
 
-  M(null, null, PreAdjMcsClaimTransformerV2::transform);
+  M(null, null, McsClaimResponseTransformerV2::transform);
 
   private final Class<?> entityClass;
   private final String entityIdAttribute;
-  private final PreAdjClaimTypeTransformerV2 transformer;
+  private final ClaimResponseTypeTransformerV2 transformer;
 
   /**
    * Enum constant constructor.
@@ -29,8 +30,8 @@ public enum PreAdjClaimTypeV2 implements IPreAdjClaimTypeV2 {
    * @param entityIdAttribute the value to use for {@link #getEntityIdAttribute()}
    * @param transformer the value to use for {@link #getTransformer()}
    */
-  PreAdjClaimTypeV2(
-      Class<?> entityClass, String entityIdAttribute, PreAdjClaimTypeTransformerV2 transformer) {
+  ClaimResponseTypeV2(
+      Class<?> entityClass, String entityIdAttribute, ClaimResponseTypeTransformerV2 transformer) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
     this.transformer = transformer;
@@ -38,7 +39,7 @@ public enum PreAdjClaimTypeV2 implements IPreAdjClaimTypeV2 {
 
   /**
    * @return the JPA {@link Entity} {@link Class} used to store instances of this {@link
-   *     PreAdjClaimResponseTypeV2} in the database
+   *     ClaimResponseTypeV2} in the database
    */
   public Class<?> getEntityClass() {
     return entityClass;
@@ -50,20 +51,20 @@ public enum PreAdjClaimTypeV2 implements IPreAdjClaimTypeV2 {
   }
 
   /**
-   * @return the {@link PreAdjClaimTypeTransformerV2} to use to transform the JPA {@link Entity}
+   * @return the {@link ClaimResponseTypeTransformerV2} to use to transform the JPA {@link Entity}
    *     instances into FHIR {@link ClaimResponse} instances
    */
-  public PreAdjClaimTypeTransformerV2 getTransformer() {
+  public ClaimResponseTypeTransformerV2 getTransformer() {
     return transformer;
   }
 
   /**
-   * @param claimTypeText the lower-cased {@link PreAdjClaimTypeV2#name()} value to parse back into
-   *     a {@link PreAdjClaimTypeV2}
-   * @return the {@link PreAdjClaimTypeV2} represented by the specified {@link String}
+   * @param claimTypeText the lower-cased {@link ClaimResponseTypeV2#name()} value to parse back
+   *     into a {@link ClaimResponseTypeV2}
+   * @return the {@link ClaimResponseTypeV2} represented by the specified {@link String}
    */
-  public static Optional<IPreAdjClaimTypeV2> parse(String claimTypeText) {
-    for (PreAdjClaimTypeV2 claimType : PreAdjClaimTypeV2.values())
+  public static Optional<IClaimResponseTypeV2> parse(String claimTypeText) {
+    for (ClaimResponseTypeV2 claimType : ClaimResponseTypeV2.values())
       if (claimType.name().toLowerCase().equals(claimTypeText)) return Optional.of(claimType);
     return Optional.empty();
   }

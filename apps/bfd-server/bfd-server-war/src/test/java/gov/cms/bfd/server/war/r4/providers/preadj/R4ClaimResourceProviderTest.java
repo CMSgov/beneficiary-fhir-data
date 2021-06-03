@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers;
+package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -15,8 +15,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.server.war.commons.PreAdjClaimDao;
-import gov.cms.bfd.server.war.commons.PreAdjClaimTypeTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimTypeTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.IClaimTypeV2;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.ReflectionTestUtils;
 import java.lang.reflect.Method;
@@ -177,12 +178,12 @@ public class R4ClaimResourceProviderTest {
     MetricRegistry registry = new MetricRegistry();
     EntityManager mockEntityManager = mock(EntityManager.class);
 
-    PreAdjClaimDao daoSpy = spy(new PreAdjClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
     PreAdjFissClaim mockClaim = mock(PreAdjFissClaim.class);
 
-    IPreAdjClaimTypeV2 mockClaimType = mock(IPreAdjClaimTypeV2.class);
+    IClaimTypeV2 mockClaimType = mock(IClaimTypeV2.class);
 
-    doReturn(null).when(daoSpy).getEntityById(any(PreAdjClaimTypeV2.class), anyString());
+    doReturn(null).when(daoSpy).getEntityById(any(ClaimTypeV2.class), anyString());
 
     doReturn(mockClaim).when(daoSpy).getEntityById(mockClaimType, "123");
 
@@ -190,7 +191,7 @@ public class R4ClaimResourceProviderTest {
 
     doReturn(null).when(providerSpy).parseClaimType(anyString());
 
-    PreAdjClaimTypeTransformerV2 mockTransformer = mock(PreAdjClaimTypeTransformerV2.class);
+    ClaimTypeTransformerV2 mockTransformer = mock(ClaimTypeTransformerV2.class);
 
     Claim expected = new Claim();
     expected.setId("Expected claim");
@@ -203,15 +204,14 @@ public class R4ClaimResourceProviderTest {
 
     providerSpy.setMetricRegistry(registry);
 
-    ReflectionTestUtils.setField(providerSpy, "preAdjClaimDao", daoSpy);
+    ReflectionTestUtils.setField(providerSpy, "claimDao", daoSpy);
 
     Claim actual = providerSpy.read(id, null);
 
     assertTrue(expected.equalsShallow(actual));
   }
 
-  // Ignoring till we have MCS claims
-  @Ignore
+  @Ignore("Ignoring until we have MCS claims")
   @Test
   public void shouldReturnClaimObjectForMcsClaim()
       throws NoSuchFieldException, IllegalAccessException {
@@ -220,12 +220,12 @@ public class R4ClaimResourceProviderTest {
     MetricRegistry registry = new MetricRegistry();
     EntityManager mockEntityManager = mock(EntityManager.class);
 
-    PreAdjClaimDao daoSpy = spy(new PreAdjClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
     PreAdjFissClaim mockClaim = mock(PreAdjFissClaim.class);
 
-    IPreAdjClaimTypeV2 mockClaimType = mock(IPreAdjClaimTypeV2.class);
+    IClaimTypeV2 mockClaimType = mock(IClaimTypeV2.class);
 
-    doReturn(null).when(daoSpy).getEntityById(any(PreAdjClaimTypeV2.class), anyString());
+    doReturn(null).when(daoSpy).getEntityById(any(ClaimTypeV2.class), anyString());
 
     doReturn(mockClaim).when(daoSpy).getEntityById(mockClaimType, "123");
 
@@ -233,7 +233,7 @@ public class R4ClaimResourceProviderTest {
 
     doReturn(null).when(providerSpy).parseClaimType(anyString());
 
-    PreAdjClaimTypeTransformerV2 mockTransformer = mock(PreAdjClaimTypeTransformerV2.class);
+    ClaimTypeTransformerV2 mockTransformer = mock(ClaimTypeTransformerV2.class);
 
     Claim expected = new Claim();
     expected.setId("Expected claim");
