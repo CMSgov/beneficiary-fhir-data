@@ -3090,20 +3090,24 @@ public final class TransformerUtils {
       ndcProductsIn.readLine();
       while ((line = ndcProductsIn.readLine()) != null) {
         String ndcProductColumns[] = line.split("\t");
-        String nationalDrugCodeManufacturer =
-            StringUtils.leftPad(
-                ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-        String nationalDrugCodeIngredient =
-            StringUtils.leftPad(
-                ndcProductColumns[1].substring(
-                    ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-                4,
-                '0');
-        // ndcProductColumns[3] - Proprietary Name
-        // ndcProductColumns[13] - Substance Name
-        ndcProductHashMap.put(
-            String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-            ndcProductColumns[3] + " - " + ndcProductColumns[13]);
+        try {
+          String nationalDrugCodeManufacturer =
+              StringUtils.leftPad(
+                  ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
+          String nationalDrugCodeIngredient =
+              StringUtils.leftPad(
+                  ndcProductColumns[1].substring(
+                      ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
+                  4,
+                  '0');
+          // ndcProductColumns[3] - Proprietary Name
+          // ndcProductColumns[13] - Substance Name
+          ndcProductHashMap.put(
+              String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+              ndcProductColumns[3] + " - " + ndcProductColumns[13]);
+        } catch (StringIndexOutOfBoundsException e) {
+          continue;
+        }
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
