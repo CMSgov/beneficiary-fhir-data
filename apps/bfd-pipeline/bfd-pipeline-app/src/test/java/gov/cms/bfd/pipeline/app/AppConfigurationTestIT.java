@@ -87,54 +87,42 @@ public final class AppConfigurationTestIT {
     Assert.assertNotNull(testAppConfig);
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_BUCKET),
-        testAppConfig.getCcwRifLoadOptions().getExtractionOptions().getS3BucketName());
+        testAppConfig.getExtractionOptions().getS3BucketName());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE),
-        testAppConfig.getCcwRifLoadOptions().getExtractionOptions().getAllowedRifFileType().name());
+        testAppConfig.getExtractionOptions().getAllowedRifFileType().name());
     Assert.assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS)),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getHicnHashIterations());
+        testAppConfig.getLoadOptions().getHicnHashIterations());
     Assert.assertArrayEquals(
         Hex.decodeHex(
             testAppBuilder
                 .environment()
                 .get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER)
                 .toCharArray()),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getHicnHashPepper());
+        testAppConfig.getLoadOptions().getHicnHashPepper());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabaseUrl());
+        testAppConfig.getLoadOptions().getDatabaseUrl());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabaseUsername());
+        testAppConfig.getLoadOptions().getDatabaseUsername());
     Assert.assertArrayEquals(
         testAppBuilder
             .environment()
             .get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD)
             .toCharArray(),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabasePassword());
+        testAppConfig.getLoadOptions().getDatabasePassword());
     Assert.assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getLoaderThreads());
+        testAppConfig.getLoadOptions().getLoaderThreads());
     Assert.assertEquals(
         AppConfiguration.parseBoolean(
                 testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED))
             .get(),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().isIdempotencyRequired());
+        testAppConfig.getLoadOptions().isIdempotencyRequired());
   }
 
   /**
