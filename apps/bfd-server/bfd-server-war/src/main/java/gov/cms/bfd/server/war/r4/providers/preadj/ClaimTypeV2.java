@@ -1,18 +1,19 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimTypeTransformerV2;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.IClaimTypeV2;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTransformer;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.util.Optional;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
 
 /**
  * Enumerates the various Beneficiary FHIR Data Server (BFD) claim types that are supported by
  * {@link R4ClaimResponseResourceProvider}.
  */
-public enum ClaimTypeV2 implements IClaimTypeV2 {
+public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
 
   // TODO: Complete null fields when entity available
   F(PreAdjFissClaim.class, PreAdjFissClaim.Fields.dcn, FissClaimTransformerV2::transform),
@@ -21,7 +22,7 @@ public enum ClaimTypeV2 implements IClaimTypeV2 {
 
   private final Class<?> entityClass;
   private final String entityIdAttribute;
-  private final ClaimTypeTransformerV2 transformer;
+  private final ResourceTransformer<Claim> transformer;
 
   /**
    * Enum constant constructor.
@@ -30,7 +31,8 @@ public enum ClaimTypeV2 implements IClaimTypeV2 {
    * @param entityIdAttribute the value to use for {@link #getEntityIdAttribute()}
    * @param transformer the value to use for {@link #getTransformer()}
    */
-  ClaimTypeV2(Class<?> entityClass, String entityIdAttribute, ClaimTypeTransformerV2 transformer) {
+  ClaimTypeV2(
+      Class<?> entityClass, String entityIdAttribute, ResourceTransformer<Claim> transformer) {
     this.entityClass = entityClass;
     this.entityIdAttribute = entityIdAttribute;
     this.transformer = transformer;
@@ -53,7 +55,7 @@ public enum ClaimTypeV2 implements IClaimTypeV2 {
    * @return the {@link ClaimTypeTransformerV2} to use to transform the JPA {@link Entity} instances
    *     into FHIR {@link ClaimResponse} instances
    */
-  public ClaimTypeTransformerV2 getTransformer() {
+  public ResourceTransformer<Claim> getTransformer() {
     return transformer;
   }
 
@@ -62,7 +64,7 @@ public enum ClaimTypeV2 implements IClaimTypeV2 {
    *     {@link ClaimTypeV2}
    * @return the {@link ClaimTypeV2} represented by the specified {@link String}
    */
-  public static Optional<IClaimTypeV2> parse(String claimTypeText) {
+  public static Optional<ResourceTypeV2<Claim>> parse(String claimTypeText) {
     for (ClaimTypeV2 claimType : ClaimTypeV2.values())
       if (claimType.name().toLowerCase().equals(claimTypeText)) return Optional.of(claimType);
     return Optional.empty();
