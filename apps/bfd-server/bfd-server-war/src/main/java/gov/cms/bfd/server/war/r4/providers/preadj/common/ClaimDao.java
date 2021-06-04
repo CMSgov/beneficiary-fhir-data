@@ -12,9 +12,9 @@ import javax.persistence.criteria.Root;
 /** Provides common logic for performing DB interactions */
 public class ClaimDao {
 
-  private static final String CLAIM_METRIC_QUERY_ID = "claim_by_id";
-  private static final String CLAIM_METRIC_NAME =
-      MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_METRIC_QUERY_ID);
+  private static final String CLAIM_BY_ID_METRIC_QUERY = "claim_by_id";
+  private static final String CLAIM_BY_ID_METRIC_NAME =
+      MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_BY_ID_METRIC_QUERY);
 
   private final EntityManager entityManager;
   private final MetricRegistry metricRegistry;
@@ -29,20 +29,9 @@ public class ClaimDao {
    *
    * @param type The type of claim to retrieve.
    * @param id The id of the claim to retrieve.
-   * @return An entity object of the given type provided in {@link IClaimTypeV2}
+   * @return An entity object of the given type provided in {@link ResourceTypeV2}
    */
-  public Object getEntityById(IClaimTypeV2 type, String id) {
-    return getEntityById(type.getEntityClass(), type.getEntityIdAttribute(), id);
-  }
-
-  /**
-   * Gets an entity by it's ID for the given claim type.
-   *
-   * @param type The type of claim to retrieve.
-   * @param id The id of the claim to retrieve.
-   * @return An entity object of the given type provided in {@link IClaimResponseTypeV2}
-   */
-  public Object getEntityById(IClaimResponseTypeV2 type, String id) {
+  public Object getEntityById(ResourceTypeV2<?> type, String id) {
     return getEntityById(type.getEntityClass(), type.getEntityIdAttribute(), id);
   }
 
@@ -66,13 +55,13 @@ public class ClaimDao {
     criteria.select(root);
     criteria.where(builder.equal(root.get(entityIdAttribute), id));
 
-    Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_METRIC_NAME).time();
+    Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_ID_METRIC_NAME).time();
     try {
       claimEntity = entityManager.createQuery(criteria).getSingleResult();
     } finally {
       long claimByIdQueryNanoSeconds = timerClaimQuery.stop();
       TransformerUtilsV2.recordQueryInMdc(
-          CLAIM_METRIC_QUERY_ID, claimByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
+          CLAIM_BY_ID_METRIC_QUERY, claimByIdQueryNanoSeconds, claimEntity == null ? 0 : 1);
     }
 
     return claimEntity;
