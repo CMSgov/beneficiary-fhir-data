@@ -13,6 +13,7 @@ import org.hibernate.tool.schema.Action;
 public final class DatabaseUtils {
 
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+  public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda-only";
 
   /*
    * The number of JDBC statements that will be queued/batched within a
@@ -58,6 +59,17 @@ public final class DatabaseUtils {
    * @return a JPA {@link EntityManagerFactory} for the Blue Button API backend database
    */
   public static EntityManagerFactory createEntityManagerFactory(DataSource jdbcDataSource) {
+    return createEntityManagerFactory(jdbcDataSource, PERSISTENCE_UNIT_NAME);
+  }
+
+  /**
+   * Create an EntityManagerFactory using the provided DataSource.
+   *
+   * @param jdbcDataSource the JDBC {@link DataSource} for the Blue Button API backend database
+   * @return a JPA {@link EntityManagerFactory} for the Blue Button API backend database
+   */
+  public static EntityManagerFactory createEntityManagerFactory(
+      DataSource jdbcDataSource, String persistenceUnitName) {
     Map<String, Object> hibernateProperties = new HashMap<>();
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, jdbcDataSource);
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
@@ -65,7 +77,7 @@ public final class DatabaseUtils {
         org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, JDBC_BATCH_SIZE);
 
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties);
+        Persistence.createEntityManagerFactory(persistenceUnitName, hibernateProperties);
     return entityManagerFactory;
   }
 }

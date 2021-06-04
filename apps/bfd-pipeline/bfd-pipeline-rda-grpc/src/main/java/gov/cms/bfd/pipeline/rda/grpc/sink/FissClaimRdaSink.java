@@ -44,9 +44,11 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   private final Meter objectsPersistedMeter;
   private final Meter objectsMergedMeter;
 
-  public FissClaimRdaSink(DatabaseOptions databaseOptions, MetricRegistry metricRegistry) {
+  public FissClaimRdaSink(
+      DatabaseOptions databaseOptions, String persistenceUnitName, MetricRegistry metricRegistry) {
     dataSource = DatabaseUtils.createDataSource(databaseOptions, metricRegistry, 10);
-    entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
+    entityManagerFactory =
+        DatabaseUtils.createEntityManagerFactory(dataSource, persistenceUnitName);
     entityManager = entityManagerFactory.createEntityManager();
     callsMeter = metricRegistry.meter(CALLS_METER_NAME);
     failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);

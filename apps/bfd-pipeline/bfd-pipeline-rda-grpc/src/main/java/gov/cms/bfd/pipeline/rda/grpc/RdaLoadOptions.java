@@ -48,11 +48,13 @@ public class RdaLoadOptions implements Serializable {
   /**
    * Factory method to construct a new job instance using standard parameters.
    *
+   * @param databaseOptions configuration for connecting to database
+   * @param persistenceUnitName Name of JPA persistence unit to use.
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
    */
   public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(
-      DatabaseOptions databaseOptions, MetricRegistry appMetrics) {
+      DatabaseOptions databaseOptions, String persistenceUnitName, MetricRegistry appMetrics) {
     return new RdaLoadJob<>(
         jobConfig,
         () ->
@@ -61,7 +63,7 @@ public class RdaLoadOptions implements Serializable {
                 new FissClaimStreamCaller(
                     new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
                 appMetrics),
-        () -> new FissClaimRdaSink(databaseOptions, appMetrics),
+        () -> new FissClaimRdaSink(databaseOptions, persistenceUnitName, appMetrics),
         appMetrics);
   }
 

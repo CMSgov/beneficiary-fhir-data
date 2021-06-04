@@ -15,6 +15,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
@@ -134,7 +135,8 @@ public final class PipelineApplication {
           appConfig
               .getRdaLoadOptions()
               .get()
-              .createFissClaimsLoadJob(appConfig.getDatabaseOptions(), appMetrics));
+              .createFissClaimsLoadJob(
+                  appConfig.getDatabaseOptions(), DatabaseUtils.PERSISTENCE_UNIT_NAME, appMetrics));
     }
 
     /*
