@@ -7,7 +7,7 @@ on:
       - 'ops/terraform/**'
 
 env:
-  # default terraform version
+  # default terraform version if no tools.yaml file(s) are found
   DEFAULT_terraform_version: '0.12.x'
 
 jobs:

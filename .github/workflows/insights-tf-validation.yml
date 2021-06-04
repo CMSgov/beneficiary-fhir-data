@@ -7,7 +7,7 @@ on:
       - 'insights/terraform/**'
 
 env:
-  # default terraform version if no .terraform-version is found
+  # default terraform version if no tools.yaml file(s) are found
   DEFAULT_TF_VERSION: '0.12.x'
 
 jobs:
