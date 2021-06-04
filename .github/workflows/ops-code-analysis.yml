@@ -5,10 +5,7 @@ on:
   pull_request:
     paths:
       - ops/**
-    paths-ignore:
-      - ops/**.txt
-      - ops/**.md
-      
+
 env:
   # terraform versions
   tf_version: '0.12.x'

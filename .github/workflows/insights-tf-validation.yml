@@ -4,7 +4,7 @@ name: 'validate insights terraform'
 on:
   pull_request:
     paths:
-      - 'insights/**.tf'
+      - 'insights/terraform/**'
 
 env:
   # default terraform version if no .terraform-version is found

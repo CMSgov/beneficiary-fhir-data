@@ -3,10 +3,6 @@ on:
   pull_request:
     paths:
       - 'apps/**'
-    paths-ignore:
-      - apps/**.md
-      - apps/**.groovy
-      - apps/dev/**.yml
 
 jobs:
   mvn-job:
