@@ -11,18 +11,18 @@ public final class SampleCode {
    * @param args (not used)
    */
   public static void main(String[] args) {
+    RifToJpaMappingBuilder rifMappingBuilder = new RifToJpaMappingBuilder();
+
     RifLayout rifBeneficiariesLayout =
         new RifLayoutBuilder("rif_beneficiaries", "RIF: Beneficiaries")
             .groupedColumn(RifBeneficiaryFields.BENE_ID)
             .build();
 
-    RifToJpaMappingBuilder rifBeneficiariesToJpaBuilder = new RifToJpaMappingBuilder();
-    RifToJpaMappingBuilderEntity rifBeneficiariesToJpaBuilderEntity =
-        rifBeneficiariesToJpaBuilder.outputEntity("gov.cms.bfd.model.rif.Beneficiary");
-    rifBeneficiariesToJpaBuilderEntity
-        .addField("beneficiaryId")
-        .selectValue(String.class, "BENE_ID");
-    RifToJpaMapping rifBeneficiariesToJpa = rifBeneficiariesToJpaBuilder.build();
+    RifToJpaMappingBuilderEntity beneficiariesMapping =
+        rifMappingBuilder.addRootEntityMapping(
+            rifBeneficiariesLayout, "gov.cms.bfd.model.rif.Beneficiary");
+    beneficiariesMapping.addField(
+        "beneficiaryId", beneficiariesMapping.selectValue(RifBeneficiaryFields.BENE_ID));
 
     RifLayout rifClaimsCarrierLayout =
         new RifLayoutBuilder("rif_claims_carrier", "RIF: Carrier Claims")
@@ -31,23 +31,23 @@ public final class SampleCode {
             .ungroupedColumn(RifCarrierClaimFields.LINE_NUM)
             .build();
 
-    RifToJpaMappingBuilder rifClaimsCarrierToJpaBuilder = new RifToJpaMappingBuilder();
-    RifToJpaMappingBuilderEntity rifClaimsCarrierToJpaBuilderEntity =
-        rifClaimsCarrierToJpaBuilder.outputEntity("gov.cms.bfd.model.rif.CarrierClaim");
-    rifClaimsCarrierToJpaBuilderEntity.addField("claimId").selectValue(String.class, "CLM_ID");
-    rifClaimsCarrierToJpaBuilderEntity
-        .addField("beneficiaryId")
-        .selectValue(String.class, "BENE_ID");
-    rifClaimsCarrierToJpaBuilderEntity.addField("lines"); // TODO value
+    RifToJpaMappingBuilderEntity claimsCarrierLineMapping =
+        rifMappingBuilder.addChildEntityMapping("gov.cms.bfd.model.rif.CarrierClaimLine");
+    claimsCarrierLineMapping.addField(
+        "parentClaim", claimsCarrierLineMapping.selectGroupParentEntity());
+    claimsCarrierLineMapping.addField(
+        "lineNumber", claimsCarrierLineMapping.selectValue(RifCarrierClaimFields.LINE_NUM));
 
-    RifToJpaMappingBuilder rifClaimsCarrierLinesToJpaBuilder = new RifToJpaMappingBuilder();
-    RifToJpaMappingBuilderEntity rifClaimsCarrierLinesToJpaBuilderEntity =
-        rifClaimsCarrierLinesToJpaBuilder.outputEntity("gov.cms.bfd.model.rif.CarrierClaimLine");
-    rifClaimsCarrierLinesToJpaBuilderEntity.addField("parentClaim"); // TODO value
-    rifClaimsCarrierLinesToJpaBuilderEntity
-        .addField("lineNumber")
-        .selectValue(Integer.class, "LINE_NUM"); // TODO select is wrong -- need descent
+    RifToJpaMappingBuilderEntity claimsCarrierMapping =
+        rifMappingBuilder.addRootEntityMapping(
+            rifClaimsCarrierLayout, "gov.cms.bfd.model.rif.CarrierClaim");
+    claimsCarrierMapping.addField(
+        "claimId", claimsCarrierMapping.selectValue(RifCarrierClaimFields.CLM_ID));
+    claimsCarrierMapping.addField(
+        "beneficiaryId", claimsCarrierMapping.selectValue(RifCarrierClaimFields.BENE_ID));
+    claimsCarrierMapping.addField(
+        "lines", claimsCarrierMapping.selectGroupedRows(claimsCarrierLineMapping));
 
-    RifToJpaMapping rifClaimsCarrierToJpaBuilder = rifClaimsCarrierToJpaBuilderEntity.build();
+    RifToJpaMapping rifMapping = rifMappingBuilder.build();
   }
 }
