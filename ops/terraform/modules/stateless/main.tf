@@ -90,29 +90,6 @@ data "aws_sns_topic" "cloudwatch_ok" {
   name = "bfd-${var.env_config.env}-cloudwatch-ok"
 }
 
-# # RDS Replicas
-# #
-# data "aws_db_instance" "replica" {
-#   count                   = 3
-#   db_instance_identifier  = "bfd-${var.env_config.env}-replica${count.index+1}"
-# }
-
-# # RDS Security Groups
-# #
-# data "aws_security_group" "db_primary" {
-#   filter {
-#     name        = "tag:Name"
-#     values      = ["bfd-${var.env_config.env}-master-rds"]
-#   }
-# }
-
-# data "aws_security_group" "db_replicas" {
-#   filter {
-#     name        = "tag:Name"
-#     values      = ["bfd-${var.env_config.env}-rds"]
-#   }
-# }
-
 # Aurora security group
 #
 data "aws_security_group" "aurora_cluster" {
