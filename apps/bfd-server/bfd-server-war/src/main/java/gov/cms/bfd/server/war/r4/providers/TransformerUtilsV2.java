@@ -1446,20 +1446,24 @@ public final class TransformerUtilsV2 {
       ndcProductsIn.readLine();
       while ((line = ndcProductsIn.readLine()) != null) {
         String ndcProductColumns[] = line.split("\t");
-        String nationalDrugCodeManufacturer =
-            StringUtils.leftPad(
-                ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-        String nationalDrugCodeIngredient =
-            StringUtils.leftPad(
-                ndcProductColumns[1].substring(
-                    ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-                4,
-                '0');
-        // ndcProductColumns[3] - Proprietary Name
-        // ndcProductColumns[13] - Substance Name
-        ndcProductHashMap.put(
-            String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-            ndcProductColumns[3] + " - " + ndcProductColumns[13]);
+        try {
+          String nationalDrugCodeManufacturer =
+              StringUtils.leftPad(
+                  ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
+          String nationalDrugCodeIngredient =
+              StringUtils.leftPad(
+                  ndcProductColumns[1].substring(
+                      ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
+                  4,
+                  '0');
+          // ndcProductColumns[3] - Proprietary Name
+          // ndcProductColumns[13] - Substance Name
+          ndcProductHashMap.put(
+              String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+              ndcProductColumns[3] + " - " + ndcProductColumns[13]);
+        } catch (StringIndexOutOfBoundsException e) {
+          continue;
+        }
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
@@ -3480,12 +3484,14 @@ public final class TransformerUtilsV2 {
             totalChargeAmount));
 
     // REV_CNTR_NCVRD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
-    addAdjudication(
-        item,
-        createAdjudicationAmtSlice(
-            CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT,
-            C4BBAdjudication.NONCOVERED,
-            nonCoveredChargeAmount));
+    if (nonCoveredChargeAmount.isPresent()) {
+      addAdjudication(
+          item,
+          createAdjudicationAmtSlice(
+              CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT,
+              C4BBAdjudication.NONCOVERED,
+              nonCoveredChargeAmount));
+    }
 
     // REV_CNTR_NDC_QTY_QLFR_CD => ExplanationOfBenefit.item.modifier
     if (nationalDrugCodeQualifierCode.isPresent()) {
@@ -3498,10 +3504,12 @@ public final class TransformerUtilsV2 {
     }
 
     // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
-    Extension drugQuantityExtension =
-        createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
-    Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
-    item.setQuantity(drugQuantity);
+    if (nationalDrugCodeQuantity.isPresent()) {
+      Extension drugQuantityExtension =
+          createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
+      Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
+      item.setQuantity(drugQuantity);
+    }
 
     return item;
   }

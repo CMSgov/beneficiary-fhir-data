@@ -121,7 +121,7 @@ resource "aws_lambda_function" "bcda_load_partitions" {
   role             = aws_iam_role.bcda_load_partitions.arn
   handler          = "index.handler"
   source_code_hash = data.archive_file.bcda_load_partitions.output_base64sha256
-  runtime          = "nodejs10.x"
+  runtime          = "nodejs12.x"
   timeout          = 90
 }
 

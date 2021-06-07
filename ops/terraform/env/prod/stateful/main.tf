@@ -12,7 +12,7 @@ module "stateful" {
 
   # feature toggles
   module_features = {
-    beta_reader = false
+    beta_reader = true
   }
 
   aurora_config = {
@@ -41,6 +41,9 @@ module "stateful" {
   }
 
   victor_ops_url = var.victor_ops_url
+
+  partner_acct_nums = var.partner_acct_nums
+  partner_subnets   = var.partner_subnets
 
   medicare_opt_out_config = var.medicare_opt_out_config
 }
