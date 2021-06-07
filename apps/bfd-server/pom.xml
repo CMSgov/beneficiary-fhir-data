@@ -39,7 +39,7 @@
 				<!-- Used as a logging backed/target for SLF4J. -->
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.2.3</version>
+				<version>1.2.0</version>
 			</dependency>
 			<dependency>
 				<!-- Provides an HTTP request log for Jetty. -->
