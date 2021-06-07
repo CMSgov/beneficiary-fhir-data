@@ -52,7 +52,7 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
   }
 
   /**
-   * @return the {@link ClaimTypeTransformerV2} to use to transform the JPA {@link Entity} instances
+   * @return the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances
    *     into FHIR {@link ClaimResponse} instances
    */
   public ResourceTransformer<Claim> getTransformer() {

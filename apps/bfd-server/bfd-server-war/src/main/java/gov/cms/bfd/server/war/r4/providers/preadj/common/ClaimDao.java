@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
+import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -65,5 +66,19 @@ public class ClaimDao {
     }
 
     return claimEntity;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ClaimDao claimDao = (ClaimDao) o;
+    return Objects.equals(entityManager, claimDao.entityManager)
+        && Objects.equals(metricRegistry, claimDao.metricRegistry);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(entityManager, metricRegistry);
   }
 }

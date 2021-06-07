@@ -53,8 +53,8 @@ public enum ClaimResponseTypeV2 implements ResourceTypeV2<ClaimResponse> {
   }
 
   /**
-   * @return the {@link ClaimResponseTypeTransformerV2} to use to transform the JPA {@link Entity}
-   *     instances into FHIR {@link ClaimResponse} instances
+   * @return the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances
+   *     into FHIR {@link ClaimResponse} instances
    */
   public ResourceTransformer<ClaimResponse> getTransformer() {
     return transformer;
