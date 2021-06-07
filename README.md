@@ -305,5 +305,5 @@ The repository can easily be added to your Eclipse workspace using the **Import*
 1. Specify the **Root Directory** using the **Browse...** button or by typing in a path: `~/workspaces/bfd/beneficiary-fhir-data.git`.
 1. Verify that it found the projects in the **Projects** table.
 1. Click **Finish**.
-1. The projects and packages you selected will now appear in the **Project Explorer** window.
+1. The projects and packages you selected will now appear in the **Project Explorer** window..
 
