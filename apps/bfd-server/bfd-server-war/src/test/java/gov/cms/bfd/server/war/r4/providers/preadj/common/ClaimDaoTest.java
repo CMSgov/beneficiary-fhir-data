@@ -17,6 +17,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 
 public class ClaimDaoTest {
@@ -30,34 +31,7 @@ public class ClaimDaoTest {
 
     Object expected = 5L;
 
-    IClaimTypeV2 mockClaimType = new MockClaimType();
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
-
-    // unchecked - This is fine for the purposes of this test.
-    //noinspection unchecked
-    doReturn(null).when(daoSpy).getEntityById(any(Class.class), anyString(), anyString());
-
-    doReturn(expected)
-        .when(daoSpy)
-        .getEntityById(
-            mockClaimType.getEntityClass(), mockClaimType.getEntityIdAttribute(), claimId);
-
-    Object actual = daoSpy.getEntityById(mockClaimType, claimId);
-
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void shouldInvokeGetByIdForClaimResponseType() {
-    String claimId = "123";
-
-    MetricRegistry registry = new MetricRegistry();
-    EntityManager mockEntityManager = mock(EntityManager.class);
-
-    Object expected = 5L;
-
-    IClaimResponseTypeV2 mockClaimType = new MockClaimResponseType();
+    ResourceTypeV2<IBaseResource> mockClaimType = new MockClaimType();
 
     ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
 
@@ -125,7 +99,7 @@ public class ClaimDaoTest {
     assertEquals(expected, actual);
   }
 
-  private static class MockClaimType implements IClaimTypeV2 {
+  private static class MockClaimType implements ResourceTypeV2<IBaseResource> {
 
     @Override
     public Class<?> getEntityClass() {
@@ -138,25 +112,7 @@ public class ClaimDaoTest {
     }
 
     @Override
-    public ClaimTypeTransformerV2 getTransformer() {
-      return null;
-    }
-  }
-
-  private static class MockClaimResponseType implements IClaimResponseTypeV2 {
-
-    @Override
-    public Class<?> getEntityClass() {
-      return Long.class;
-    }
-
-    @Override
-    public String getEntityIdAttribute() {
-      return "somePropertyName";
-    }
-
-    @Override
-    public ClaimResponseTypeTransformerV2 getTransformer() {
+    public ResourceTransformer<IBaseResource> getTransformer() {
       return null;
     }
   }
