@@ -354,6 +354,101 @@ public final class TransformerUtils {
   }
 
   /**
+   * Ensures that the specified {@link ExplanationOfBenefit} has the specified {@link
+   * CareTeamComponent}, and links the specified {@link ItemComponent} to that {@link
+   * CareTeamComponent} (via {@link ItemComponent#addCareTeamLinkId(int)}).
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param eobItem the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param practitionerIdSystem the {@link Identifier#getSystem()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param practitionerIdValue the {@link Identifier#getValue()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param careTeamRole the {@link ClaimCareteamrole} to use for the {@link
+   *     CareTeamComponent#getRole()}
+   * @return the {@link CareTeamComponent} that was created/linked
+   */
+  public static CareTeamComponent addCareTeamPractitioner(
+      ExplanationOfBenefit eob,
+      ItemComponent eobItem,
+      IdentifierType type,
+      String practitionerIdValue,
+      String roleSystem,
+      String roleCode,
+      String roleDisplay) {
+    // Try to find a matching pre-existing entry.
+    CareTeamComponent careTeamEntry =
+        eob.getCareTeam().stream()
+            .filter(ctc -> ctc.getProvider().hasIdentifier())
+            .filter(
+                ctc ->
+                    type.getSystem().equals(ctc.getProvider().getIdentifier().getSystem())
+                        && practitionerIdValue.equals(ctc.getProvider().getIdentifier().getValue()))
+            .filter(ctc -> ctc.hasRole())
+            .filter(
+                ctc ->
+                    roleCode.equals(ctc.getRole().getCodingFirstRep().getCode())
+                        && roleSystem.equals(ctc.getRole().getCodingFirstRep().getSystem()))
+            .findAny()
+            .orElse(null);
+
+    // If no match was found, add one to the EOB.
+    // <ID Value> => ExplanationOfBenefit.careTeam.provider
+    if (careTeamEntry == null) {
+      careTeamEntry = eob.addCareTeam();
+      // addItem adds and returns, so we want size() not size() + 1 here
+      careTeamEntry.setSequence(eob.getCareTeam().size());
+      careTeamEntry.setProvider(createPractitionerIdentifierReference(type, practitionerIdValue));
+
+      CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
+      careTeamRoleConcept.getCodingFirstRep().setDisplay(roleDisplay);
+      careTeamEntry.setRole(careTeamRoleConcept);
+    }
+
+    // care team entry is at eob level so no need to create item link id
+    if (eobItem == null) {
+      return careTeamEntry;
+    }
+
+    // Link the EOB.item to the care team entry (if it isn't already).
+    final int careTeamEntrySequence = careTeamEntry.getSequence();
+    if (eobItem.getCareTeamLinkId().stream()
+        .noneMatch(id -> id.getValue() == careTeamEntrySequence)) {
+      eobItem.addCareTeamLinkId(careTeamEntrySequence);
+    }
+
+    return careTeamEntry;
+  }
+
+  /**
+   * Used for creating Identifier references for Practitioners
+   *
+   * @param type the {@link C4BBPractitionerIdentifierType} to use in {@link
+   *     Reference#getIdentifier()}
+   * @param value the {@link Identifier#getValue()} to use in {@link Reference#getIdentifier()}
+   * @return a {@link Reference} with the specified {@link Identifier}
+   */
+  static Reference createPractitionerIdentifierReference(IdentifierType type, String value) {
+    Reference response =
+        new Reference()
+            .setIdentifier(
+                new Identifier()
+                    .setType(
+                        new CodeableConcept()
+                            .addCoding(
+                                new Coding(type.getSystem(), type.getCode(), type.getDisplay())))
+                    .setValue(value));
+
+    // If this is an NPI perform the extra lookup
+    if (IdentifierType.NPI.equals(type)) {
+      response.setDisplay(retrieveNpiCodeDisplay(value));
+    }
+
+    return response;
+  }
+
+  /**
    * @param eob the {@link ExplanationOfBenefit} to (possibly) modify
    * @param diagnosis the {@link Diagnosis} to add, if it's not already present
    * @return the {@link DiagnosisComponent#getSequence()} of the existing or newly-added entry

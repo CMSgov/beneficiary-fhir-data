@@ -209,6 +209,17 @@ final class DMEClaimTransformer {
                 claimLine.getProviderTaxNumber(),
                 ClaimCareteamrole.OTHER);
         providerTaxNumber.setResponsible(true);
+
+        providerTaxNumber =
+            TransformerUtils.addCareTeamPractitioner(
+                eob,
+                item,
+                IdentifierType.TAX,
+                claimLine.getProviderTaxNumber(),
+                ClaimCareteamrole.OTHER.getSystem(),
+                ClaimCareteamrole.OTHER.name(),
+                ClaimCareteamrole.OTHER.getDisplay());
+        providerTaxNumber.setResponsible(true);
       }
 
       item.addAdjudication()

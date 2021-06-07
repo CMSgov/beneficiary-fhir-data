@@ -173,6 +173,7 @@ final class CarrierClaimTransformer {
        * Practitioner resource).
        */
       if (includeTaxNumbers.orElse(false)) {
+
         ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
             TransformerUtils.addCareTeamPractitioner(
                 eob,
@@ -180,6 +181,17 @@ final class CarrierClaimTransformer {
                 IdentifierType.TAX.getSystem(),
                 claimLine.getProviderTaxNumber(),
                 ClaimCareteamrole.OTHER);
+        providerTaxNumber.setResponsible(true);
+
+        providerTaxNumber =
+            TransformerUtils.addCareTeamPractitioner(
+                eob,
+                item,
+                IdentifierType.TAX,
+                claimLine.getProviderTaxNumber(),
+                ClaimCareteamrole.OTHER.getSystem(),
+                ClaimCareteamrole.OTHER.name(),
+                ClaimCareteamrole.OTHER.getDisplay());
         providerTaxNumber.setResponsible(true);
       }
 

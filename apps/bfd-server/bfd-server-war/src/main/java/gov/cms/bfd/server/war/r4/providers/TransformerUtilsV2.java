@@ -1866,7 +1866,7 @@ public final class TransformerUtilsV2 {
    *     CareTeamComponent#getRole()}
    * @return the {@link CareTeamComponent} that was created/linked
    */
-  private static CareTeamComponent addCareTeamPractitioner(
+  public static CareTeamComponent addCareTeamPractitioner(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
       C4BBPractitionerIdentifierType type,
