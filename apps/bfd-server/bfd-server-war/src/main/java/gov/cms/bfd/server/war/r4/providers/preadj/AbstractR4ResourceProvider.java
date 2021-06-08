@@ -1,9 +1,15 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
@@ -14,17 +20,22 @@ import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 
 public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     implements IResourceProvider {
@@ -144,4 +155,62 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    */
   @VisibleForTesting
   abstract Optional<ResourceTypeV2<T>> parseClaimType(String typeText);
+
+  @Search
+  @Trace
+  public Bundle findByPatient(
+      @RequiredParam(name = "mbi")
+          @Description(shortDefinition = "The patient identifier to search for")
+          ReferenceParam mbi,
+      @RequiredParam(name = "type")
+          @Description(shortDefinition = "A list of claim types to include")
+          String type,
+      @OptionalParam(name = "isHashed")
+          @Description(shortDefinition = "A list of claim types to include")
+          String hashed,
+      @OptionalParam(name = "_lastUpdated")
+          @Description(shortDefinition = "Include resources last updated in the given range")
+          DateRangeParam lastUpdated,
+      @OptionalParam(name = "service-date")
+          @Description(shortDefinition = "Include resources that completed in the given range")
+          DateRangeParam serviceDate,
+      RequestDetails requestDetails) {
+    if (mbi != null && !StringUtils.isBlank(mbi.getIdPart())) {
+      String mbiString = mbi.getIdPart();
+
+      Bundle bundleResource = new Bundle();
+
+      boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
+
+      Optional<ResourceTypeV2<T>> optional = parseClaimType(type);
+      if (optional.isPresent()) {
+        ResourceTypeV2<T> claimType = optional.get();
+
+        List<?> entities;
+
+        if (isHashed) {
+          entities = claimDao.findAllByMbiHash(claimType.getEntityClass(), mbiString, lastUpdated);
+        } else {
+          entities = claimDao.findAllByMbi(claimType.getEntityClass(), mbiString, lastUpdated);
+        }
+
+        List<IBaseResource> claims =
+            entities.stream()
+                .map(e -> claimType.getTransformer().transform(metricRegistry, e))
+                .collect(Collectors.toList());
+
+        claims.forEach(
+            c -> {
+              Bundle.BundleEntryComponent entry = bundleResource.addEntry();
+              entry.setResource((Resource) c);
+            });
+
+        return bundleResource;
+      } else {
+        throw new ResourceNotFoundException(new IdType(mbiString));
+      }
+    } else {
+      throw new IllegalArgumentException("mbi can't be null/blank");
+    }
+  }
 }

@@ -1,18 +1,32 @@
 package gov.cms.bfd.server.war.r4.providers.preadj.common;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.apache.commons.lang3.ObjectUtils;
 
 /** Provides common logic for performing DB interactions */
 public class ClaimDao {
 
+  // (9999-01-01) Postgres doesn't seem to like dates that are too big, this should be adequate
+  private static final long EFFECTIVE_END_OF_TIME_EPOCH = 253370765800000L;
+
+  private static final String CLAIM_BY_MBI_METRIC_QUERY = "claim_by_mbi";
+  private static final String CLAIM_BY_MBI_METRIC_NAME =
+      MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_BY_MBI_METRIC_QUERY);
   private static final String CLAIM_BY_ID_METRIC_QUERY = "claim_by_id";
   private static final String CLAIM_BY_ID_METRIC_NAME =
       MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_BY_ID_METRIC_QUERY);
@@ -66,6 +80,74 @@ public class ClaimDao {
     }
 
     return claimEntity;
+  }
+
+  public <T> List<T> findAllByMbiHash(
+      Class<T> entityClass, String mbiHash, DateRangeParam lastUpdated) {
+    return findAllByAttribute(entityClass, "mbiHash", mbiHash, lastUpdated);
+  }
+
+  public <T> List<T> findAllByMbi(Class<T> entityClass, String mbi, DateRangeParam lastUpdated) {
+    return findAllByAttribute(entityClass, "mbi", mbi, lastUpdated);
+  }
+
+  @VisibleForTesting
+  <T> List<T> findAllByAttribute(
+      Class<T> entityClass,
+      String attributeName,
+      String attributeValue,
+      DateRangeParam lastUpdated) {
+    List<T> claimEntities = null;
+
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<T> criteria = builder.createQuery(entityClass);
+    Root<T> root = criteria.from(entityClass);
+
+    criteria.select(root);
+    criteria.where(
+        builder.and(
+            builder.equal(root.get(attributeName), attributeValue),
+            lastUpdated == null
+                ? builder.and()
+                : createDateRangePredicate(root.get("lastUpdated"), lastUpdated, builder)));
+
+    Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_MBI_METRIC_NAME).time();
+    try {
+      claimEntities = entityManager.createQuery(criteria).getResultList();
+    } finally {
+      long claimByIdQueryNanoSeconds = timerClaimQuery.stop();
+      TransformerUtilsV2.recordQueryInMdc(
+          CLAIM_BY_MBI_METRIC_QUERY,
+          claimByIdQueryNanoSeconds,
+          claimEntities == null || claimEntities.isEmpty() ? 0 : 1);
+    }
+
+    return claimEntities;
+  }
+
+  @VisibleForTesting
+  Predicate createDateRangePredicate(
+      Path<Instant> datePath, DateRangeParam dateRange, CriteriaBuilder builder) {
+    Instant from =
+        ObjectUtils.defaultIfNull(dateRange.getLowerBoundAsInstant(), new Date(Long.MIN_VALUE))
+            .toInstant();
+    Instant to =
+        ObjectUtils.defaultIfNull(
+                dateRange.getUpperBoundAsInstant(), new Date(EFFECTIVE_END_OF_TIME_EPOCH))
+            .toInstant();
+
+    Predicate fromPredicate =
+        dateRange.getLowerBound() != null
+                && ParamPrefixEnum.GREATERTHAN.equals(dateRange.getLowerBound().getPrefix())
+            ? builder.greaterThan(datePath, from)
+            : builder.greaterThanOrEqualTo(datePath, from);
+    Predicate toPredicate =
+        dateRange.getUpperBound() != null
+                && ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(dateRange.getUpperBound().getPrefix())
+            ? builder.lessThanOrEqualTo(datePath, to)
+            : builder.lessThan(datePath, to);
+
+    return builder.and(fromPredicate, toPredicate);
   }
 
   @Override
