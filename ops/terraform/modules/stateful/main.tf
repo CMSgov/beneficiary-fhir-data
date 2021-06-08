@@ -9,6 +9,9 @@ locals {
   enable_victor_ops = local.is_prod # only wake people up for prod alarms
 }
 
+# account number
+data "aws_caller_identity" "current" {}
+
 # vpc
 data "aws_vpc" "main" {
   filter {
@@ -217,7 +220,6 @@ module "medicare_opt_out" {
 
 ## CloudWatch Log Groups
 #
-
 resource "aws_cloudwatch_log_group" "var_log_messages" {
   name       = "/bfd/${var.env_config.env}/var/log/messages"
   kms_key_id = data.aws_kms_key.master_key.arn
@@ -264,4 +266,68 @@ resource "aws_cloudwatch_log_group" "bfd_server_gc" {
   name       = "/bfd/${var.env_config.env}/bfd-server/gc.log"
   kms_key_id = data.aws_kms_key.master_key.arn
   tags       = var.env_config.tags
+}
+
+
+## ECR repository
+#
+
+# provision an encryption key for the repo
+resource "aws_kms_key" "ecr" {
+  description         = "${var.env_config.env}-ecr-cmk"
+  key_usage           = "ENCRYPT_DECRYPT"
+  enable_key_rotation = true
+  is_enabled          = true
+  tags                = merge({ Name = "${var.env_config.env}-ecr" }, local.env_config.tags)
+
+  policy = <<POLICY
+{
+  "Version" : "2012-10-17",
+  "Id" : ${var.env_config.env}-ecr-cmk-policy",
+  "Statement" : [
+    {
+      "Sid" : "AllowRootFullAdmin",
+      "Effect" : "Allow",
+      "Principal" : {
+        "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+      },
+      "Action" : "kms:*",
+      "Resource" : "*"
+    }
+  ]
+}
+POLICY
+}
+
+# provision the ECR repo
+module "ecr" {
+  source = "../resources/ecr"
+  name = "${var.env_config.env}-ecr"
+  env_config = local.env_config
+
+  # TODO: provision a dedicated encryption key for the repo, use master key for now
+  encryption_configuration = {
+    encryption_type: "KMS",
+    kms_key: aws_kms_key.ecr.arn
+  }
+
+  lifecycle_policy = <<EOF
+{
+    "rules": [
+        {
+            "rulePriority": 1,
+            "description": "Expire untagged images older than 7 days",
+            "selection": {
+                "tagStatus": "untagged",
+                "countType": "sinceImagePushed",
+                "countUnit": "days",
+                "countNumber": 7
+            },
+            "action": {
+                "type": "expire"
+            }
+        }
+    ]
+}
+EOF
 }
