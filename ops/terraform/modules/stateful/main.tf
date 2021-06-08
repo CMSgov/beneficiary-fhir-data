@@ -1,8 +1,5 @@
-#
-# Build the stateful resources for an environment.
-#
-# This script also builds the associated KMS needed by the stateful and stateless resources
-#
+## 
+# Stateful resources for an environment and associated KMS needed by both stateful and stateless resources
 
 locals {
   azs               = ["us-east-1a", "us-east-1b", "us-east-1c"]
@@ -12,8 +9,7 @@ locals {
   enable_victor_ops = local.is_prod # only wake people up for prod alarms
 }
 
-# VPC
-#
+# vpc
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
@@ -21,18 +17,12 @@ data "aws_vpc" "main" {
   }
 }
 
-# KMS 
-#
-# The customer master key is created outside of this script
-#
+# kms 
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
-# Subnets
-# 
-# Subnets are created by CCS VPC setup
-#
+# subnets
 data "aws_subnet" "data_subnets" {
   count             = length(local.azs)
   vpc_id            = data.aws_vpc.main.id
@@ -43,10 +33,7 @@ data "aws_subnet" "data_subnets" {
   }
 }
 
-# Other Security Groups
-#
-# Find the security group for the Cisco VPN
-#
+# vpn
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
@@ -54,8 +41,7 @@ data "aws_security_group" "vpn" {
   }
 }
 
-# Find the management group
-#
+# management security group
 data "aws_security_group" "tools" {
   filter {
     name   = "tag:Name"
@@ -63,8 +49,7 @@ data "aws_security_group" "tools" {
   }
 }
 
-# Find the tools group 
-#
+# tools security group 
 data "aws_security_group" "management" {
   filter {
     name   = "tag:Name"
@@ -72,13 +57,8 @@ data "aws_security_group" "management" {
   }
 }
 
-#
-# Start to build things
-#
 
-# DNS
-#
-# Build a VPC private local zone for CNAME records
+## VPC Private Local Zone for CNAME Records
 #
 module "local_zone" {
   source     = "../resources/dns"
@@ -86,7 +66,8 @@ module "local_zone" {
   public     = false
 }
 
-# CloudWatch SNS Topic
+
+## CloudWatch SNS Topics for Alarms
 #
 resource "aws_sns_topic" "cloudwatch_alarms" {
   name         = "bfd-${var.env_config.env}-cloudwatch-alarms"
@@ -116,8 +97,8 @@ resource "aws_sns_topic_subscription" "ok" {
   endpoint_auto_confirms = true
 }
 
-# Aurora module: supplants separate param groups, rds modules, and rds
-# alarms modules
+
+## Aurora module: supplants separate param groups, rds modules, and rds alarms modules
 #
 module "aurora" {
   source             = "../resources/aurora"
@@ -137,8 +118,11 @@ module "aurora" {
   }
 }
 
-# S3 Admin bucket for adminstrative stuff
+
+## S3 Buckets
 #
+
+# admin bucket for adminstrative stuff
 module "admin" {
   source     = "../resources/s3"
   role       = "admin"
@@ -147,8 +131,7 @@ module "admin" {
   log_bucket = module.logs.id
 }
 
-# S3 bucket for logs 
-#
+# bucket for logs
 module "logs" {
   source     = "../resources/s3"
   role       = "logs"
@@ -157,8 +140,7 @@ module "logs" {
   kms_key_id = null                 # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
-# S3 bucket for ETL files
-#
+# bucket for etl files
 module "etl" {
   source     = "../resources/s3"
   role       = "etl"
@@ -167,14 +149,12 @@ module "etl" {
   log_bucket = module.logs.id
 }
 
-# IAM policy, user, and attachment to allow external read-write
-# access to ETL bucket
-#
+
+## IAM policy, user, and attachment to allow external read-write access to ETL bucket
 # NOTE: We only need this for production, however it is ok to
 # provision these resources for all environments since the mechanism
 # by which we control access is through a manually provisioned
 # access key
-#
 resource "aws_iam_policy" "etl_rw_s3" {
   name        = "bfd-${local.env_config.env}-etl-rw-s3"
   description = "ETL read-write S3 policy"
@@ -218,7 +198,8 @@ resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
   policy_arn = aws_iam_policy.etl_rw_s3.arn
 }
 
-# S3 bucket, policy, and KMS key for medicare opt out data
+
+## S3 bucket, policy, and KMS key for medicare opt out data
 #
 module "medicare_opt_out" {
   source     = "../resources/s3_pii"
@@ -233,8 +214,10 @@ module "medicare_opt_out" {
   }
 }
 
-# CloudWatch Log Groups
+
+## CloudWatch Log Groups
 #
+
 resource "aws_cloudwatch_log_group" "var_log_messages" {
   name       = "/bfd/${var.env_config.env}/var/log/messages"
   kms_key_id = data.aws_kms_key.master_key.arn

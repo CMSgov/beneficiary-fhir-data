@@ -33,8 +33,7 @@ variable "partner_subnets" {
   type        = map(map(list(string)))
 }
 
-// add module feature toggles here
+# add module feature toggles here
 variable "module_features" {
   type = map(bool)
 }
-

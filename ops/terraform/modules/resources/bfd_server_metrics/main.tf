@@ -13,7 +13,6 @@ locals {
 }
 
 # Count requests per endpoint, per partner
-#
 resource "aws_cloudwatch_log_metric_filter" "http-requests-count" {
   for_each       = local.endpoints
   name           = "bfd-${var.env}/bfd-server/http-requests/count/${each.key}/${var.metric_config.partner_name}"
@@ -29,7 +28,6 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count" {
 }
 
 # Count HTTP 500s per partner
-#
 resource "aws_cloudwatch_log_metric_filter" "http-requests-count-500" {
   name           = "bfd-${var.env}/bfd-server/http-requests/count-500/${var.metric_config.partner_name}"
   pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user = \"${var.metric_config.partner_regex}\", timestamp, request, query_string, status_code = 500, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
@@ -44,7 +42,6 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-500" {
 }
 
 # Count HTTP non-2XXs per partner
-#
 resource "aws_cloudwatch_log_metric_filter" "http-requests-count-not-2xx" {
   name           = "bfd-${var.env}/bfd-server/http-requests/count-not-2xx/${var.metric_config.partner_name}"
   pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user = \"${var.metric_config.partner_regex}\", timestamp, request, query_string, status_code != 2*, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
@@ -59,7 +56,6 @@ resource "aws_cloudwatch_log_metric_filter" "http-requests-count-not-2xx" {
 }
 
 # Latency per endpoint, per partner
-#
 resource "aws_cloudwatch_log_metric_filter" "http-requests-latency" {
   for_each       = local.endpoints
   name           = "bfd-${var.env}/bfd-server/http-requests/latency/${each.key}/${var.metric_config.partner_name}"
