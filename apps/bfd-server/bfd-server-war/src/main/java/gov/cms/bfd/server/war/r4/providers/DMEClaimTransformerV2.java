@@ -381,7 +381,8 @@ final class DMEClaimTransformerV2 {
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
-          line.getNationalDrugCode());
+          line.getNationalDrugCode(),
+          line.getProviderTaxNumber());
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

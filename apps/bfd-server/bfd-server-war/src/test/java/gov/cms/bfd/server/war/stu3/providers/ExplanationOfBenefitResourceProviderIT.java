@@ -141,25 +141,108 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     Assert.assertNotNull(eob);
-    DMEClaimTransformerTest.assertMatches(claim, eob, Optional.empty());
+    DMEClaimTransformerTest.assertMatches(
+        claim, eob, TransformerTestUtils.getRHwithIncldTaxNumFldHdr("false"));
   }
 
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist
+   * in the DB.
+   *
+   * @throws FHIRException (indicates test failure)
    */
-  @Test(expected = ResourceNotFoundException.class)
-  public void readEobForMissingDMEClaim() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+  @Test
+  public void readEobForExistingDMEClaimWithTaxHeaderSetToTrue() throws FHIRException {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(
+            ExplanationOfBenefitResourceProvider.HEADER_NAME_INCLUDE_TAX_NUM_FIELDS, "true");
+    IGenericClient fhirClient = createFhirClient(requestHeader);
 
-    // No data is loaded, so this should return nothing.
-    fhirClient
-        .read()
-        .resource(ExplanationOfBenefit.class)
-        .withId(TransformerUtils.buildEobId(ClaimType.DME, "1234"))
-        .execute();
+    DMEClaim claim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+    ExplanationOfBenefit eob =
+        fhirClient
+            .read()
+            .resource(ExplanationOfBenefit.class)
+            .withId(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()))
+            .execute();
+
+    Assert.assertNotNull(eob);
+    DMEClaimTransformerTest.assertMatches(claim, eob, requestHeader);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist
+   * in the DB.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void readEobForExistingDMEClaimWithTaxHeaderSetToFalse() throws FHIRException {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(
+            ExplanationOfBenefitResourceProvider.HEADER_NAME_INCLUDE_TAX_NUM_FIELDS, "false");
+    IGenericClient fhirClient = createFhirClient(requestHeader);
+
+    DMEClaim claim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+    ExplanationOfBenefit eob =
+        fhirClient
+            .read()
+            .resource(ExplanationOfBenefit.class)
+            .withId(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()))
+            .execute();
+
+    Assert.assertNotNull(eob);
+    DMEClaimTransformerTest.assertMatches(claim, eob, requestHeader);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist
+   * in the DB.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void readEobForExistingDMEClaimWithTaxHeaderSetToBlank() throws FHIRException {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper("", "");
+    IGenericClient fhirClient = createFhirClient(requestHeader);
+
+    DMEClaim claim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+    ExplanationOfBenefit eob =
+        fhirClient
+            .read()
+            .resource(ExplanationOfBenefit.class)
+            .withId(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()))
+            .execute();
+
+    Assert.assertNotNull(eob);
+    DMEClaimTransformerTest.assertMatches(claim, eob, requestHeader);
   }
 
   /**
@@ -258,6 +341,40 @@ public final class ExplanationOfBenefitResourceProviderIT {
         .resource(ExplanationOfBenefit.class)
         .withId(TransformerUtils.buildEobId(ClaimType.HOSPICE, "1234"))
         .execute();
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
+   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist
+   * in the DB.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void readEobForExistingDMEClaimWithTaxHeaderSetToFalse() throws FHIRException {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(
+            ExplanationOfBenefitResourceProvider.HEADER_NAME_INCLUDE_TAX_NUM_FIELDS, "false");
+    IGenericClient fhirClient = createFhirClient(requestHeader);
+
+    DMEClaim claim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+    ExplanationOfBenefit eob =
+        fhirClient
+            .read()
+            .resource(ExplanationOfBenefit.class)
+            .withId(TransformerUtils.buildEobId(ClaimType.DME, claim.getClaimId()))
+            .execute();
+
+    Assert.assertNotNull(eob);
+    DMEClaimTransformerTest.assertMatches(claim, eob, requestHeader);
   }
 
   /**
