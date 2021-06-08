@@ -22,7 +22,7 @@ WHERE "claimId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%'
 DELETE 
 FROM "public"."OutpatientClaimLines"
 WHERE "parentClaim" IN (SELECT "claimId"
-FROM "public"."OutpatientClaimLines"
+FROM "public"."OutpatientClaims"
 WHERE "claimId" NOT LIKE '-%' AND "beneficiaryId" LIKE '-%');
 
 DELETE 
