@@ -16,7 +16,7 @@ data "template_file" "dashboard-template" {
 }
 
 resource "aws_cloudwatch_dashboard" "main-dash" {
-  count = var.dashboard_enable
+  count          = var.dashboard_enable
   dashboard_name = "MainDashboard-${var.app}-${var.env}"
   dashboard_body = data.template_file.dashboard-template.rendered
 }

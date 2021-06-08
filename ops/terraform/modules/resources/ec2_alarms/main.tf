@@ -47,13 +47,13 @@ resource "aws_cloudwatch_metric_alarm" "status_check_failed_instance" {
   unit               = "Count"
   treat_missing_data = "notBreaching"
 
-  alarm_actions = [var.cloudwatch_notification_arn}
-  ok_actions    = [var.cloudwatch_notification_arn}
+  alarm_actions = [var.cloudwatch_notification_arn]
+  ok_actions    = [var.cloudwatch_notification_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "status_check_failed_system" {
   count               = var.alarm_status_check_failed_system_enable
-  alarm_name          = var.app}-${var.env}-status_check_syste
+  alarm_name          = "${var.app}-${var.env}-status_check_system"
   comparison_operator = "GreaterThanOrEqualToThreshold"
 
   evaluation_periods = var.alarm_status_check_failed_system_eval_periods
