@@ -1,0 +1,9 @@
+[Unit]
+Desription=Mount EFS file systems for {{ item.name }}
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/sbin/mount-{{ item.name }}-eft-efs-file-systems.sh
+
+[Install]
+WantedBy=default.target
