@@ -214,6 +214,21 @@
                 </exclusion>
             </exclusions>
         </dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.10.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Hibernate brings in an older version of byte-buddy which seems
+		to conflict with mockito, which wants version 1.11.0.  Bringing it
+		in as a first class dependency to resolve the issue. -->
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.11.0</version>
+			<scope>test</scope>
+		</dependency>
         <!-- This will get hamcrest-core automatically -->
         <dependency>
             <groupId>org.hamcrest</groupId>
