@@ -36,3 +36,6 @@ Locust will track the requests per second, response times, and error rates. You 
 
 ## Storing test results
 Reports on test results should be stored in Confluence under `Operations -> Tests -> Load` in a similar format other entries.
+
+## Patient Cursors
+To test batch requests for Patient resources, you'll need offsets for the requests to feed to Locust so that it can run different requests at the same time. There is a `patient-cursors.go` script that does that gathering, albeit very slowly, since each request takes roughly 8 seconds to complete. To gather them up from a deployed box, build a binary with `GOOS=linux GOARCH=amd64 go build patient-cursors.go`. Then you can copy the binary to the box. It requires certain environment variables and can be run with a command like the following: `CLIENT_CERT='/path/to/cert.pem' CONTRACT_ID='Z0012' CONTRACT_MONTH='01' BFD_PORT='6500' BFD_HOST='localhost' ./patient-cursors`. The `Z0012` contract ID is from the synthetic data and will work locally.

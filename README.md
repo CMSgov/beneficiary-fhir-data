@@ -87,7 +87,9 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 </toolchains>
 ```
 4. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-5. Set up a Postgres 11 database. The easiest way to set up a local database is with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
+5. Set up a Postgres 12 database. Change to the `contributing` directory. Make sure there is an active aws cli session, and the following variables are set: `SYNTHETIC_DATA_LOCATION` (A directory in an AWS S3 public bucket with the Synthetic Data RIF files -- Double check for the most recent location) i.e. run `export SYNTHETIC_DATA_LOCATION=https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields`, and `LOCAL_SYNTHETIC_DATA` - run `export LOCAL_SYNTHETIC_DATA=$BFD_PATH/contributing/synthetic-data`. 
+
+Then run `./create-db.sh` to set up a database with the latest synthetic data update. If unable to, the easiest way to set up a local database is with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
 ```sh
 docker run \
   -d \
@@ -96,7 +98,7 @@ docker run \
   -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
   -p '5432:5432' \
   -v 'bfd_pgdata:/var/lib/postgresql/data' \
-  postgres:11.6
+  postgres:12
 ```
 6. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run `mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify`. This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with `docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT "beneficiaryId" FROM "Beneficiaries" LIMIT 1;'`
 7. Run `export BFD_PORT=6500` and add it to your profile, too. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later.
