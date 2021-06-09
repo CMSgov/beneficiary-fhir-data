@@ -17,6 +17,8 @@ import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.preadj.R4ClaimResponseResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
@@ -40,6 +42,7 @@ import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -341,6 +344,19 @@ public class SpringConfiguration {
   }
 
   /**
+   * Determines if the fhir resources related to pre adj claim data should be accessible via the
+   * fhir api service.
+   *
+   * @return True if the resources should be available to consume, False otherwise.
+   */
+  private static boolean isPreAdjResourcesEnabled() {
+    return Boolean.TRUE
+        .toString()
+        .equalsIgnoreCase(
+            ObjectUtils.defaultIfNull(System.getProperty("bfdServer.preadj.enabled"), "false"));
+  }
+
+  /**
    * @param r4PatientResourceProvider the application's {@link R4PatientResourceProvider} bean
    * @return the {@link List} of R4 {@link IResourceProvider} beans for the application
    */
@@ -348,12 +364,18 @@ public class SpringConfiguration {
   public List<IResourceProvider> r4ResourceProviders(
       R4PatientResourceProvider r4PatientResourceProvider,
       R4CoverageResourceProvider r4CoverageResourceProvider,
-      R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider) {
+      R4ExplanationOfBenefitResourceProvider r4EOBResourceProvider,
+      R4ClaimResourceProvider r4ClaimResourceProvider,
+      R4ClaimResponseResourceProvider r4ClaimResponseResourceProvider) {
 
     List<IResourceProvider> r4ResourceProviders = new ArrayList<IResourceProvider>();
     r4ResourceProviders.add(r4PatientResourceProvider);
     r4ResourceProviders.add(r4CoverageResourceProvider);
     r4ResourceProviders.add(r4EOBResourceProvider);
+    if (isPreAdjResourcesEnabled()) {
+      r4ResourceProviders.add(r4ClaimResourceProvider);
+      r4ResourceProviders.add(r4ClaimResponseResourceProvider);
+    }
     return r4ResourceProviders;
   }
 
