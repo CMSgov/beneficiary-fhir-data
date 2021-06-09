@@ -20,4 +20,6 @@ module "stateless" {
   ssh_key_name    = var.ssh_key_name
   git_branch_name = var.git_branch_name
   git_commit_id   = var.git_commit_id
+
+  mpm_rda_cidr_block = var.mpm_rda_cidr_block
 }
