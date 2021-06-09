@@ -13,7 +13,7 @@ import org.hibernate.tool.schema.Action;
 public final class DatabaseUtils {
 
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
-  public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda-only";
+  public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   /*
    * The number of JDBC statements that will be queued/batched within a
