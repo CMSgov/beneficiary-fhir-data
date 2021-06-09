@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+# mounts the partner's EFT EFS file system
+set -euo pipefail
+PARTNER_NAME="{{ item.name }}"
+EFT_EFS_BASE_DIR="{{ eft_efs_base_dir }}"
+{# NO TEMPLATING BELOW HERE, SO JUST PASS RAW #}
+{% raw %}
+DEFAULT_PARTNER_DIR="${EFT_EFS_BASE_DIR}/${PARTNER_NAME}"
+PARTNER_DIR="${DEFAULT_PARTNER_DIR:-}"
+APP_ENV="${APP_ENV:-test}"
+AWS_REGION="${AWS_REGION:-us-east-1}"
+AZID="${AZID:-}"
+ADD_FSTAB_ENTRY="${ADD_FSTAB_ENTRY:-true}"
+ADD_HOST_ENTRY="${ADD_HOST_ENTRY:-true}"
+SAME_AZ_ONLY="${SAME_AZ_ONLY:-true}" # only mount if fs is hosted on the same physical AZ as us
+AWS_BIN="${AWS_BIN:-/usr/local/bin/aws}"
+aws=$AWS_BIN
+fstab_options='_netdev,noresvport,tls,iam 0 0'
+file_systems=()
+
+# sets AZID to this instances Availability Zone (the pyhsical id, not the "us-east-1b" type label)
+set_azid(){
+  AZID=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone-id)
+  # az id's look like use1-az1, use1-az2, use1-az3, and so on (for us-east-1 region)
+  # so, make sure the AZID looks similar.
+  if ! [[ "$AZID" =~ ^.*-az[0-9]{1,2}$ ]]; then
+    echo "Malformed AZID '$AZID'."
+    exit 1
+  fi
+}
+
+# updates file_systems array to a list of partner file systems. likely only one entry.
+set_filesystems(){
+  for fs in $($aws efs describe-file-systems --region "$AWS_REGION" --query 'FileSystems[].[FileSystemId,Name]' --output text | grep "${PARTNER_NAME}-eft-efs-${APP_ENV}" | cut -f1); do
+    file_systems+=("$fs")
+  done
+}
+
+# ensure our mount directories are present and empty
+prep_mount_directories(){
+  mkdir -p "$PARTNER_DIR"
+}
+
+# checks if $1 is a valid ipv4 address
+is_valid_ip(){
+  if ! [[ "$1" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+    return 1
+  fi
+}
+
+# Adds an entry to /etc/hosts
+# $1 == file system id
+add_host_entry() {
+  local ip # mount target ip
+  
+  # the default here is to only mount file systems available on the same physical AZ (to avoid cross-az fees)
+  if [[ "$SAME_AZ_ONLY" == "true" ]]; then
+    if ! ip=$($aws efs describe-mount-targets --region "$AWS_REGION" --file-system-id="$1" --query 'MountTargets[*].{ID:AvailabilityZoneId,IP:IpAddress}' --output text | grep "$AZID" | cut -f2); then
+      echo "Could not find a mount target in AZ $AZID and SAME_AZ_ONLY is true."
+      exit 1
+    fi
+  else
+    # else, randomly pick an ip address (you cannot round robin dns in /etc/hosts file)
+    local ips
+    ips=()
+    for mt_ip in $($aws efs describe-mount-targets --region "$AWS_REGION" --file-system-id="$1" --query 'MountTargets[*].{ID:AvailabilityZoneId,IP:IpAddress}' --output text | cut -f2); do
+      ips+=("$mt_ip")
+    done
+
+    # pick a random ip
+    local array_length rand_num
+    array_length="${#ips[@]}"
+    case "$array_length" in
+      0) echo "Error: could not find any EFT mount targets" && exit 1 ;;
+      1) ip="${ips[0]}" ;;
+      *)
+        # set $ip to a random ip from the array
+        rand_num=$(( RANDOM % ${#ips[@]} ))
+        ip="${ips[${rand_num}]}" ;;
+    esac
+  fi
+  
+  # simple ipv4 test
+  if ! is_valid_ip "$ip" >/dev/null 2>&1; then
+    echo "Unable to retrieve a valid mount target IP address for file system $1 on AZ $AZID."
+    exit 1
+  fi
+  
+  # remove any existing /etc/hosts entries pointing to our file system id
+  sed -i.bak "/^.*\ ${1}/d" /etc/hosts
+
+  # now add the new entry
+  printf '%s %s %s.efs.%s.amazonaws.com\n' "$ip" "$1" "$1" "$AWS_REGION" >> /etc/hosts
+
+  # smoke test our host entry
+  if command -v getent >/dev/null 2>&1; then
+    getent ahosts "$1" >/dev/null 2>&1 || exit 1
+  fi
+}
+
+# mounts the file system
+# $1 == file system id
+mount_fs(){
+  if mount -t efs -o tls,iam "$fs" "${PARTNER_DIR}" >/dev/null 2>&1; then
+    echo "EFT EFS file system successfully mounted for ${PARTNER_NAME^^} at ${PARTNER_DIR}."
+  else
+    # humm.
+    echo "Failed to mount $fs to ${PARTNER_DIR}."
+    exit 1
+  fi
+}
+
+# creates an entry in /etc/fstab to automatically mount on reboot if not already present
+# $1 == file system id
+add_fstab_entry(){
+  local fstab # fstab entry string
+  fstab="${1}:/ ${PARTNER_DIR} efs ${fstab_options}"
+  
+  local epdir # escaped partner dir for use in sed
+  epdir=$(sed 's#/#\\/#g' <(echo "${PARTNER_DIR}"))
+
+  # remove any previous commends and entries for this file system
+  cp -f /etc/fstab /etc/fstab.bak # back it up
+  sed -i "/^#\ EFT\ EFS\ mount\ point\ for\ ${PARTNER_NAME}$/d" /etc/fstab # the comment
+  sed -i "/^${1}:\/[[:space:]]${epdir}.*$/d" /etc/fstab # the entry
+
+  # now append our comment and fstab entry
+  printf "\n# EFT EFS mount point for %s\n%s\n" "$PARTNER_NAME" "$fstab" >> /etc/fstab
+
+  # cleanup multiple empty lines (a byproduct if this script is run multiple times)
+  # shellcheck disable=SC2016
+  sed -i '$!N;/^\n$/{$q;D;};P;D;' /etc/fstab
+}
+
+#### BEGIN ####
+
+# need to be root to run this script
+if [ "$EUID" -ne 0 ]
+  then echo "This script needs to run as root.. exiting."
+  exit 1
+fi
+
+# query aws and find out what physical AZ we are in
+set_azid
+
+# fetch and add file system(s) to the file_systems array
+set_filesystems
+
+# quit if there are no file systems to mount
+# this is not necessarily a bad thing, not all partners are peered to our test env, so no reason to host EFT EFS there
+if [[ "${#file_systems[@]}" -eq 0 ]]; then
+  echo "No EFT EFS file systems for ${PARTNER_NAME^^} were found."
+  exit
+fi
+
+# prepare mount directories
+prep_mount_directories
+
+# for each file system in the array
+for fs in "${file_systems[@]}"; do
+  # add an entry to /etc/hosts
+  [[ "$ADD_HOST_ENTRY" == true ]] && add_host_entry "$fs" 
+
+  # mount the file system if desired
+  if mount_fs "$fs"; then
+    # add mount entry to fstab if desired
+    [[ "$ADD_FSTAB_ENTRY" == true ]] && add_fstab_entry "$fs"
+  fi
+done
+{% endraw %}
