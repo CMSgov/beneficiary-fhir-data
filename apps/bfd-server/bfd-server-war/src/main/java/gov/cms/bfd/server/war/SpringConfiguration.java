@@ -269,7 +269,7 @@ public class SpringConfiguration {
     LocalContainerEntityManagerFactoryBean containerEmfBean =
         new LocalContainerEntityManagerFactoryBean();
     containerEmfBean.setDataSource(dataSource);
-    containerEmfBean.setPackagesToScan("gov.cms.bfd.model.rif");
+    containerEmfBean.setPackagesToScan("gov.cms.bfd.model");
     containerEmfBean.setPersistenceProvider(new HibernatePersistenceProvider());
     containerEmfBean.setJpaProperties(jpaProperties());
     containerEmfBean.afterPropertiesSet();
