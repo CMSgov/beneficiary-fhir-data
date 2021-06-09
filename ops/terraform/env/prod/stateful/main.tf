@@ -1,9 +1,9 @@
 terraform {
-  required_version = "> 0.12.30, < 0.13" 
+  required_version = "> 0.12.30, < 0.13"
 }
 
 provider "aws" {
-  version = "~> 2.25"
+  version = "~> 3.44.0"
   region  = "us-east-1"
 }
 

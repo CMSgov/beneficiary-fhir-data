@@ -1,19 +1,12 @@
-#
 # Build a single ec2 instance 
 #
+
 locals {
   tags    = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
   is_prod = substr(var.env_config.env, 0, 4) == "prod"
 }
 
-##
-# Data providers
-##
-
 # Subnets
-# 
-# Subnets are created by CCS VPC setup
-#
 data "aws_subnet" "main" {
   vpc_id            = var.env_config.vpc_id
   availability_zone = var.az
@@ -24,25 +17,16 @@ data "aws_subnet" "main" {
 }
 
 # KMS 
-#
-# The customer master key is created outside of this script
-#
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
 data "aws_caller_identity" "current" {}
 
-##
-# Resources
-##
-
-#
 # Security groups
 #
 
 # Base security includes management VPC access
-#
 resource "aws_security_group" "base" {
   name        = "bfd-${var.env_config.env}-${var.role}-base"
   description = "Allow CI access to app servers"
@@ -50,7 +34,6 @@ resource "aws_security_group" "base" {
   tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-base" }, local.tags)
 
   # Note: If we want to allow Jenkins to SSH into boxes, that would go here.
-
   egress {
     from_port   = 0
     protocol    = "-1"
@@ -59,9 +42,7 @@ resource "aws_security_group" "base" {
   }
 }
 
-#
 # Build an instance
-#
 resource "aws_instance" "main" {
   ami                  = var.launch_config.ami_id
   instance_type        = var.launch_config.instance_type
