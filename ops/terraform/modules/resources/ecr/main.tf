@@ -2,7 +2,7 @@
 # Provisions an Elastic Container Registry
 
 locals {
-  tags = merge({ Name = "${var.name}-ecr" }, var.env_config.tags)
+  tags = merge({ Name = var.name }, var.env_config.tags)
 }
 
 # current account number

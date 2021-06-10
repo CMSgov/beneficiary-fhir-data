@@ -285,7 +285,7 @@ data "aws_iam_policy_document" "ecr_cmk" {
     actions = [
       "kms:*"
     ]
-    resources = [aws_kms_key.ecr.arn]
+    resources = ["arn:aws:kms:*:${data.aws_caller_identity.current.account_id}:key/*"]
   }
 }
 
