@@ -1,88 +1,107 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.io.Serializable;
+import java.util.Objects;
+import javax.annotation.Nullable;
 import javax.sql.DataSource;
 
-/** The user-configurable options that specify how to access the application's database. */
-public final class DatabaseOptions implements Serializable {
-  private static final long serialVersionUID = 1L;
-
+/**
+ * Immutable object to hold database configuration information. Can be initialized either using
+ * connection parameters (url, uid, password) or an already configured DataSource object. Its
+ * primary function is to initialize an HikariDataSource object so there is no need for it to
+ * publish the value of its properties.
+ */
+public class DatabaseOptions implements Serializable {
   private final String databaseUrl;
   private final String databaseUsername;
-  private final char[] databasePassword;
+  private final String databasePassword;
   private final DataSource databaseDataSource;
 
-  /**
-   * Constructs a new {@link DatabaseOptions} instance.
-   *
-   * @param databaseUrl the value to use for {@link #getDatabaseUrl()}
-   * @param databaseUsername the value to use for {@link #getDatabaseUsername()}
-   * @param databasePassword the value to use for {@link #getDatabasePassword()}
-   */
-  public DatabaseOptions(String databaseUrl, String databaseUsername, char[] databasePassword) {
+  public DatabaseOptions(DataSource dataSource) {
+    this(null, null, null, dataSource);
+  }
+
+  public DatabaseOptions(String databaseUrl, String databaseUsername, String databasePassword) {
+    this(databaseUrl, databaseUsername, databasePassword, null);
+  }
+
+  private DatabaseOptions(
+      String databaseUrl, String databaseUsername, String databasePassword, DataSource dataSource) {
     this.databaseUrl = databaseUrl;
     this.databaseUsername = databaseUsername;
     this.databasePassword = databasePassword;
-    this.databaseDataSource = null;
+    this.databaseDataSource = dataSource;
   }
 
-  /**
-   * Constructs a new {@link DatabaseOptions} instance.
-   *
-   * @param databaseDataSource the value to use for {@link #getDatabaseDataSource()}
-   */
-  public DatabaseOptions(DataSource databaseDataSource) {
-    this.databaseUrl = null;
-    this.databaseUsername = null;
-    this.databasePassword = null;
-    this.databaseDataSource = databaseDataSource;
+  public void initializeHikariDataSource(HikariDataSource dataSource) {
+    if (this.databaseDataSource != null) {
+      dataSource.setDataSource(this.databaseDataSource);
+    } else {
+      dataSource.setJdbcUrl(databaseUrl);
+      dataSource.setUsername(databaseUsername);
+      dataSource.setPassword(databasePassword);
+    }
   }
 
-  /**
-   * @return the JDBC URL of the database to load into, or <code>null</code> if {@link
-   *     #getDatabaseDataSource()} is used, instead
-   */
-  public String getDatabaseUrl() {
-    return databaseUrl;
-  }
-
-  /**
-   * @return the database username to connect as when loading data, or <code>null</code> if {@link
-   *     #getDatabaseDataSource()} is used, instead
-   */
-  public String getDatabaseUsername() {
-    return databaseUsername;
-  }
-
-  /**
-   * @return the database password to connect with when loading data, or <code>null</code> if {@link
-   *     #getDatabaseDataSource()} is used, instead
-   */
-  public char[] getDatabasePassword() {
-    return databasePassword;
-  }
-
-  /**
-   * @return a {@link DataSource} for the database to connect to when loading data, or <code>null
-   *     </code> if {@link #getDatabaseUrl()} is used, instead
-   */
+  @Nullable
   public DataSource getDatabaseDataSource() {
     return databaseDataSource;
   }
 
-  /** @see java.lang.Object#toString() */
+  @Nullable
+  public String getDatabaseUrl() {
+    return databaseUrl;
+  }
+
+  @Nullable
+  public String getDatabaseUsername() {
+    return databaseUsername;
+  }
+
+  @Nullable
+  public String getDatabasePassword() {
+    return databasePassword;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof DatabaseOptions)) {
+      return false;
+    }
+    DatabaseOptions that = (DatabaseOptions) o;
+    return Objects.equals(databaseUrl, that.databaseUrl)
+        && Objects.equals(databaseUsername, that.databaseUsername)
+        && Objects.equals(databasePassword, that.databasePassword)
+        && Objects.equals(databaseDataSource, that.databaseDataSource);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(databaseUrl, databaseUsername, databasePassword, databaseDataSource);
+  }
+
+  /**
+   * Includes just enough information to tell how the object was configured but not enough to
+   * accidentally log sensitive information.
+   *
+   * @return a string representation of how the object was configured
+   */
   @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("DatabaseOptions [databaseUrl=");
-    builder.append(databaseUrl);
-    builder.append(", databaseUsername=");
-    builder.append("***");
-    builder.append(", databasePassword=");
-    builder.append("***");
-    builder.append(", databaseDataSource=");
-    builder.append("***");
-    builder.append("]");
-    return builder.toString();
+    final StringBuilder sb = new StringBuilder();
+    sb.append("[");
+    if (databaseDataSource != null) {
+      sb.append("dataSource");
+    } else {
+      sb.append("databaseUrl=");
+      sb.append(databaseUrl);
+      sb.append(",databaseUsername=***,databasePassword=***");
+    }
+    sb.append("]");
+    return sb.toString();
   }
 }
