@@ -1,8 +1,17 @@
+## Terraform State and Build Buckets
+#
 provider "aws" {
-  region = "us-east-1"
+  version = "~> 3.44.0"
+  region  = "us-east-1"
 }
 
-/* Terraform State Bucket */
+data "aws_kms_key" "tf_state" {
+  key_id = "alias/bfd-tf-state"
+}
+
+
+## TF State Bucket
+#
 resource "aws_s3_bucket" "state_bucket" {
   bucket = var.bfd_tf_state_bucket
   acl    = "private"
@@ -50,7 +59,7 @@ EOF
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = "${aws_kms_key.state_kms_key.arn}"
+        kms_master_key_id = data.aws_kms_key.tf_state.id
         sse_algorithm     = "aws:kms"
       }
     }
@@ -61,8 +70,10 @@ EOF
   }
 }
 
-/* Bucket for Packages, RPM, WAR, JAR, etc. */
-resource "aws_s3_bucket" "state_bucket" {
+
+## Bucket for Packages, RPM, WAR, JAR, etc.
+#
+resource "aws_s3_bucket" "bfd_packages_bucket" {
   bucket = var.bfd_packages_bucket
   acl    = "private"
 

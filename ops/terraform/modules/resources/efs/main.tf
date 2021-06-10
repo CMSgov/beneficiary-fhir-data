@@ -1,6 +1,4 @@
-# EFS
-# 
-# Create a EFS Resource, Mount Target and Security Group  
+# Create a EFS Resource, Mount Target and Security Group for our mgmt servers
 #
 
 locals {
@@ -24,6 +22,9 @@ data "aws_subnet" "main" {
 }
 
 
+##
+# RESOURCES
+
 resource "aws_efs_file_system" "efs" {
   creation_token   = "bfd-${var.env_config.env}-${var.role}-efs"
   performance_mode = "generalPurpose"
@@ -40,27 +41,27 @@ resource "aws_security_group" "efs-sg" {
   description = "EFS Security Group"
   vpc_id      = data.aws_vpc.main.id
 
-  // NFS
+  # NFS
   ingress {
     description = "Inbound access for EFS"
     from_port   = 2049
     to_port     = 2049
     protocol    = "tcp"
-    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 
-  // Terraform removes the default rule
+  #Terraform removes the default rule
   egress {
     description = "Outbound Access for EFS"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["${data.aws_vpc.main.cidr_block}"]
+    cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 }
 
 resource "aws_efs_mount_target" "efs-mnt" {
-  file_system_id  = "${aws_efs_file_system.efs.id}"
+  file_system_id  = aws_efs_file_system.efs.id
   subnet_id       = data.aws_subnet.main.id
-  security_groups = ["${aws_security_group.efs-sg.id}"]
+  security_groups = [aws_security_group.efs-sg.id]
 }
