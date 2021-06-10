@@ -7,7 +7,6 @@ import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -33,7 +32,7 @@ public class DirectRdaLoadApp {
     }
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(props);
     final DatabaseOptions databaseConfig = readDatabaseOptions(props);
-    final PipelineJob<NullPipelineJobArguments> job =
+    final PipelineJob job =
         jobConfig.createFissClaimsLoadJob(
             databaseConfig, DatabaseUtils.RDA_PERSISTENCE_UNIT_NAME, new MetricRegistry());
     job.call();
@@ -43,7 +42,7 @@ public class DirectRdaLoadApp {
     return new DatabaseOptions(
         props.getProperty("database.url"),
         props.getProperty("database.user"),
-        props.getProperty("database.password").toCharArray());
+        props.getProperty("database.password"));
   }
 
   static RdaLoadOptions readRdaLoadOptionsFromProperties(Properties props) {

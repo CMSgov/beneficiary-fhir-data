@@ -14,6 +14,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
@@ -418,7 +419,9 @@ public final class ServerTestUtils {
         new IdHasher.Config(
             RifLoaderTestUtils.HICN_HASH_ITERATIONS, RifLoaderTestUtils.HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
+        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED,
+        RifLoaderTestUtils.FIXUPS_ENABLED,
+        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
   }
 
   /**

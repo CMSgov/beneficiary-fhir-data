@@ -37,14 +37,7 @@ public final class DatabaseUtils {
     HikariDataSource dataSource = new HikariDataSource();
 
     dataSource.setMaximumPoolSize(maximumPoolSize);
-
-    if (options.getDatabaseDataSource() != null) {
-      dataSource.setDataSource(options.getDatabaseDataSource());
-    } else {
-      dataSource.setJdbcUrl(options.getDatabaseUrl());
-      dataSource.setUsername(options.getDatabaseUsername());
-      dataSource.setPassword(String.valueOf(options.getDatabasePassword()));
-    }
+    options.initializeHikariDataSource(dataSource);
 
     dataSource.setRegisterMbeans(true);
     dataSource.setMetricRegistry(metrics);

@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.app;
 import ch.qos.logback.classic.LoggerContext;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
+import com.codahale.metrics.Timer;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.newrelic.NewRelicReporter;
@@ -10,18 +11,17 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.model.rif.RifFileEvent;
+import gov.cms.bfd.model.rif.RifFileRecords;
+import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
-import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
-import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
-import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
-import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
+import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,10 @@ import org.slf4j.LoggerFactory;
  * #main(String[])}.
  */
 public final class PipelineApplication {
-  static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplication.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplication.class);
+
+  /** How often the {@link PipelineManager} will wait between scans for new data sets. */
+  private static final Duration S3_SCAN_INTERVAL = Duration.ofSeconds(1L);
 
   /**
    * This {@link System#exit(int)} value should be used when the provided configuration values are
@@ -51,10 +54,8 @@ public final class PipelineApplication {
    *
    * @param args (should be empty, as this application accepts configuration via environment
    *     variables)
-   * @throws InterruptedException Any {@link InterruptedException}s encountered on this thread will
-   *     be bubbled up.
    */
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String[] args) {
     LOGGER.info("Application starting up!");
     configureUnexpectedExceptionHandlers();
 
@@ -101,43 +102,101 @@ public final class PipelineApplication {
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
     /*
-     * Create the PipelineManager that will be responsible for running and managing the various
-     * jobs.
+     * Create the services that will be used to handle each stage in the
+     * extract, transform, and load process.
      */
-    PipelineJobRecordStore jobRecordStore = new PipelineJobRecordStore(appMetrics);
-    PipelineManager pipelineManager = new PipelineManager(appMetrics, jobRecordStore);
+    RifFilesProcessor rifProcessor = new RifFilesProcessor();
+    RifLoader rifLoader = new RifLoader(appMetrics, appConfig.getLoadOptions());
+
+    /*
+     * Create the DataSetMonitorListener that will glue those stages
+     * together and run them all for each data set that is found.
+     */
+    DataSetMonitorListener dataSetMonitorListener =
+        new DataSetMonitorListener() {
+          @Override
+          public void dataAvailable(RifFilesEvent rifFilesEvent) {
+            Timer.Context timerDataSet =
+                appMetrics
+                    .timer(
+                        MetricRegistry.name(
+                            PipelineApplication.class.getSimpleName(), "dataSet", "processed"))
+                    .time();
+
+            Consumer<Throwable> errorHandler =
+                error -> {
+                  /*
+                   * This will be called on the same thread used to run each
+                   * RifLoader task (probably a background one). This is not
+                   * the right place to do any error _recovery_ (that'd have
+                   * to be inside RifLoader itself), but it is likely the
+                   * right place to decide when/if a failure is "bad enough"
+                   * that the rest of processing should be stopped. Right now
+                   * we stop that way for _any_ failure, but we probably want
+                   * to be more discriminating than that.
+                   */
+                  errorOccurred(error);
+                };
+
+            Consumer<RifRecordLoadResult> resultHandler =
+                result -> {
+                  /*
+                   * Don't really *need* to do anything here. The RifLoader
+                   * already records metrics for each data set.
+                   */
+                };
+
+            /*
+             * Each ETL stage produces a stream that will be handed off to
+             * and processed by the next stage.
+             */
+            for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+              Slf4jReporter dataSetFileMetricsReporter =
+                  Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics())
+                      .outputTo(LOGGER)
+                      .build();
+              dataSetFileMetricsReporter.start(2, TimeUnit.MINUTES);
+
+              RifFileRecords rifFileRecords = rifProcessor.produceRecords(rifFileEvent);
+              rifLoader.process(rifFileRecords, errorHandler, resultHandler);
+
+              dataSetFileMetricsReporter.stop();
+              dataSetFileMetricsReporter.report();
+            }
+            timerDataSet.stop();
+          }
+
+          /**
+           * @see
+           *     gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener#errorOccurred(java.lang.Throwable)
+           */
+          @Override
+          public void errorOccurred(Throwable error) {
+            handleUncaughtException(error);
+          }
+
+          /** Called when no RIF files are available to process. */
+          @Override
+          public void noDataAvailable() {
+            rifLoader.doIdleTask();
+            DataSetMonitorListener.super.noDataAvailable();
+          }
+        };
+
+    /*
+     * Create and start the PipelineManager that will find data sets as
+     * they're pushed into S3. As each data set is found, it will be handed
+     * off to the DataSetMonitorListener to be run through the ETL pipeline.
+     */
+    PipelineManager pipelineManager =
+        new PipelineManager(
+            appMetrics,
+            appConfig.getExtractionOptions(),
+            (int) S3_SCAN_INTERVAL.toMillis(),
+            dataSetMonitorListener);
     registerShutdownHook(appMetrics, pipelineManager);
-    LOGGER.info("Job processing started.");
-
-    /*
-     * Register and wait for the database schema job to run, so that we don't have to worry about
-     * declaring it as a dependency (since it is for pretty much everything right now).
-     */
-    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(appConfig.getDatabaseOptions()));
-    PipelineJobRecord<NullPipelineJobArguments> dbSchemaJobRecord =
-        jobRecordStore.submitPendingJob(DatabaseSchemaUpdateJob.JOB_TYPE, null);
-    try {
-      jobRecordStore.waitForJobs(dbSchemaJobRecord);
-    } catch (InterruptedException e) {
-      throw new InterruptedException();
-    }
-
-    /*
-     * Create and register the other jobs.
-     */
-    pipelineManager.registerJob(createCcwRifLoadJob(appMetrics, appConfig));
-
-    /*
-     * Register the RDA job only if it has been enabled/configured.
-     */
-    if (appConfig.getRdaLoadOptions().isPresent()) {
-      pipelineManager.registerJob(
-          appConfig
-              .getRdaLoadOptions()
-              .get()
-              .createFissClaimsLoadJob(
-                  appConfig.getDatabaseOptions(), DatabaseUtils.PERSISTENCE_UNIT_NAME, appMetrics));
-    }
+    pipelineManager.start();
+    LOGGER.info("Monitoring S3 for new data sets to process...");
 
     /*
      * At this point, we're done here with the main thread. From now on, the
@@ -146,40 +205,6 @@ public final class PipelineApplication {
      * stops, the application will run all registered shutdown hooks and
      * exit.
      */
-  }
-
-  /**
-   * @param appMetrics the application's {@link MetricRegistry}
-   * @param appConfig the {@link AppConfiguration}
-   * @return a {@link CcwRifLoadJob} instance for the application to use
-   */
-  private static CcwRifLoadJob createCcwRifLoadJob(
-      MetricRegistry appMetrics, AppConfiguration appConfig) {
-    /*
-     * Create the services that will be used to handle each stage in the extract, transform, and
-     * load process.
-     */
-    S3TaskManager s3TaskManager =
-        new S3TaskManager(appMetrics, appConfig.getCcwRifLoadOptions().getExtractionOptions());
-    RifFilesProcessor rifProcessor = new RifFilesProcessor();
-    RifLoader rifLoader =
-        new RifLoader(appMetrics, appConfig.getCcwRifLoadOptions().getLoadOptions());
-
-    /*
-     * Create the DataSetMonitorListener that will glue those stages together and run them all for
-     * each data set that is found.
-     */
-    DataSetMonitorListener dataSetMonitorListener =
-        new DefaultDataSetMonitorListener(
-            appMetrics, PipelineApplication::handleUncaughtException, rifProcessor, rifLoader);
-    CcwRifLoadJob ccwRifLoadJob =
-        new CcwRifLoadJob(
-            appMetrics,
-            appConfig.getCcwRifLoadOptions().getExtractionOptions(),
-            s3TaskManager,
-            dataSetMonitorListener);
-
-    return ccwRifLoadJob;
   }
 
   /**
@@ -273,7 +298,7 @@ public final class PipelineApplication {
    *
    * @param throwable the error that occurred
    */
-  static void handleUncaughtException(Throwable throwable) {
+  private static void handleUncaughtException(Throwable throwable) {
     /*
      * If an error is caught, log it and then shut everything down.
      */

@@ -3,10 +3,10 @@ package gov.cms.bfd.pipeline.app;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
+import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
@@ -185,26 +185,29 @@ public final class AppConfiguration implements Serializable {
 
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
-  private final CcwRifLoadOptions ccwRifLoadOptions;
+  private final ExtractionOptions extractionOptions;
+  private final LoadAppOptions loadOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
   @Nullable private final RdaLoadOptions rdaLoadOptions;
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
-   * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()
-   * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
-   * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
+   * @param extractionOptions the value to use for {@link #getExtractionOptions()}
+   * @param loadOptions the value to use for {@link #getLoadOptions()}
+   * @param metricOptions the value to use for {@link #getMetricOptions()}
    */
   public AppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
-      CcwRifLoadOptions ccwRifLoadOptions,
+      ExtractionOptions extractionOptions,
+      LoadAppOptions loadOptions,
       RdaLoadOptions rdaLoadOptions) {
     this.metricOptions = metricOptions;
     this.databaseOptions = databaseOptions;
-    this.ccwRifLoadOptions = ccwRifLoadOptions;
+    this.extractionOptions = extractionOptions;
+    this.loadOptions = loadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
   }
 
@@ -218,9 +221,14 @@ public final class AppConfiguration implements Serializable {
     return databaseOptions;
   }
 
-  /** @return the {@link CcwRifLoadOptions} that the application will use */
-  public CcwRifLoadOptions getCcwRifLoadOptions() {
-    return ccwRifLoadOptions;
+  /** @return the {@link ExtractionOptions} that the application will use */
+  public ExtractionOptions getExtractionOptions() {
+    return extractionOptions;
+  }
+
+  /** @return the {@link LoadAppOptions} that the application will use */
+  public LoadAppOptions getLoadOptions() {
+    return loadOptions;
   }
 
   /** @return the {@link RdaLoadOptions} that the application will use */
@@ -232,14 +240,14 @@ public final class AppConfiguration implements Serializable {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("AppConfiguration [metricOptions=");
-    builder.append(metricOptions);
+    builder.append("AppConfiguration [extractionOptions=");
+    builder.append(extractionOptions);
     builder.append(", databaseOptions=");
     builder.append(databaseOptions);
-    builder.append(", ccwRifLoadOptions=");
-    builder.append(ccwRifLoadOptions);
-    builder.append(", rdaLoadOptions=");
-    builder.append(rdaLoadOptions);
+    builder.append(", loadOptions=");
+    builder.append(loadOptions);
+    builder.append(", metricOptions=");
+    builder.append(metricOptions);
     builder.append("]");
     return builder.toString();
   }
@@ -369,6 +377,18 @@ public final class AppConfiguration implements Serializable {
               "Invalid value for configuration environment variable '%s'.",
               ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
 
+    String fixupsEnabledText = System.getenv(ENV_VAR_KEY_FIXUPS_ENABLED);
+    boolean fixupsEnabled = false;
+    if (fixupsEnabledText != null && !fixupsEnabledText.isEmpty()) {
+      fixupsEnabled = Boolean.parseBoolean(fixupsEnabledText);
+    }
+
+    String fixupThreadsText = System.getenv(ENV_VAR_KEY_FIXUP_THREADS);
+    int fixupThreads = RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT;
+    if (fixupThreadsText != null && !fixupThreadsText.isEmpty()) {
+      fixupThreads = Integer.parseInt(fixupThreadsText);
+    }
+
     /*
      * Just for convenience: make sure DefaultAWSCredentialsProviderChain
      * has whatever it needs.
@@ -418,19 +438,21 @@ public final class AppConfiguration implements Serializable {
             newRelicMetricPeriod,
             hostname);
     DatabaseOptions databaseOptions =
-        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword.toCharArray());
+        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword);
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     LoadAppOptions loadOptions =
         new LoadAppOptions(
             databaseOptions,
             new IdHasher.Config(hicnHashIterations, hicnHashPepper),
             loaderThreads,
-            idempotencyRequired.get().booleanValue());
-    CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
+            idempotencyRequired.get().booleanValue(),
+            fixupsEnabled,
+            fixupThreads);
 
     RdaLoadOptions rdaLoadOptions =
         readRdaLoadOptionsFromEnvironmentVariables(loadOptions.getIdHasherConfig());
-    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+    return new AppConfiguration(
+        metricOptions, databaseOptions, extractionOptions, loadOptions, rdaLoadOptions);
   }
 
   /**
