@@ -130,11 +130,6 @@ public final class PipelineManager {
    */
   private final Map<PipelineJobType<?>, PipelineJob<?>> jobRegistry;
 
-  /*
-   * Keeps track of whether or not {@link #stop()} has been called and completed normally.
-   */
-  private boolean managerStopped;
-
   /**
    * Constructs a new {@link PipelineManager} instance. Note that this intended for use as a
    * singleton service in the application: only one instance running at a time.
@@ -149,7 +144,6 @@ public final class PipelineManager {
     this.jobsEnqueuedHandles = new ConcurrentHashMap<>();
     this.jobMonitorsExecutor = Executors.newCachedThreadPool();
     this.jobRegistry = new HashMap<>();
-    this.managerStopped = false;
 
     /*
      * Bootstrap the SchedulerJob and VolunteerJob, which are responsible for ensuring that all of
@@ -349,22 +343,6 @@ public final class PipelineManager {
     }
     LOGGER.info("Stopped PipelineManager.");
     timerStop.stop();
-
-    managerStopped = true;
-  }
-
-  /**
-   * This method will block forever unless/until the {#link #stop()} method is called and completes
-   * successfully. This method SHALL never be called on anything other than the <code>
-   * PipelineApplication</code>'s main thread (or by a test case that knows what it's doing).'
-   *
-   * @throws InterruptedException Nothing should ever try to interrupt the application's main
-   *     thread, but we bubble this exception up if encountered, regardless.
-   */
-  public void waitForStop() throws InterruptedException {
-    while (!managerStopped) {
-      Thread.sleep(100);
-    }
   }
 
   /**
@@ -469,12 +447,8 @@ public final class PipelineManager {
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
         jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
-        LOGGER.warn(String.format("Job failed: jobRecord='%s'", jobRecord), e);
 
-        /* For the time being, the sanest way to alert operators of a job failure is to have the Pipeline application exit anytime any job fails. Accordingly, we call {@link PipelineManager#stop()} here, which will kick off the applicatin exiting (see <code>PipelineApplication.main(...)</code> for details).*/
-        stop();
-
-        // Wrap and re-thrown the failure.
+        // Wrap and re-throw the failure.
         throw new Exception("Re-throwing job failure.", e);
       } finally {
         synchronized (jobsEnqueuedHandles) {

@@ -25,6 +25,12 @@ import org.slf4j.LoggerFactory;
  * PipelineJob}s.
  */
 public final class PipelineJobRecordStore {
+  /**
+   * The {@link Logger} message that will be recorded if/when the {@link PipelineManager} starts
+   * scanning for data sets.
+   */
+  public static final String LOG_MESSAGE_PREFIX_JOB_FAILED = "Job failed";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineJobRecordStore.class);
 
   /** The number of milliseconds to wait between polling job dependencies' status. */
@@ -252,6 +258,13 @@ public final class PipelineJobRecordStore {
         .update(
             Duration.between(jobRecord.getStartedTime().get(), jobRecord.getCompletedTime().get()));
 
+    // Log the failure at a high level, so that monitoring tools can pick it up.
+    LOGGER.warn("{}: jobRecord='{}'", LOG_MESSAGE_PREFIX_JOB_FAILED, jobRecord);
+
+    /*
+     * It's redundant, but we'll leave the same TRACE logging here as everything else has, for
+     * consistency's sake.
+     */
     LOGGER.trace("recordJobFailure(...) called: jobRecord='{}'", jobRecord);
   }
 
