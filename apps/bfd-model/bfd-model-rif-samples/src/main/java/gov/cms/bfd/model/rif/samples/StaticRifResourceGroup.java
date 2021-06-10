@@ -99,7 +99,17 @@ public enum StaticRifResourceGroup {
    * synthetic data for BFD.
    */
   SYNTHEA(
-      StaticRifResource.SYNTHEA_BENES,
+      StaticRifResource.SYNTHEA_BENES_2011,
+      StaticRifResource.SYNTHEA_BENES_2012,
+      StaticRifResource.SYNTHEA_BENES_2013,
+      StaticRifResource.SYNTHEA_BENES_2014,
+      StaticRifResource.SYNTHEA_BENES_2015,
+      StaticRifResource.SYNTHEA_BENES_2016,
+      StaticRifResource.SYNTHEA_BENES_2017,
+      StaticRifResource.SYNTHEA_BENES_2018,
+      StaticRifResource.SYNTHEA_BENES_2019,
+      StaticRifResource.SYNTHEA_BENES_2020,
+      StaticRifResource.SYNTHEA_BENES_2021,
       StaticRifResource.SYNTHEA_INPATIENT,
       StaticRifResource.SYNTHEA_OUTPATIENT,
       StaticRifResource.SYNTHEA_PDE,

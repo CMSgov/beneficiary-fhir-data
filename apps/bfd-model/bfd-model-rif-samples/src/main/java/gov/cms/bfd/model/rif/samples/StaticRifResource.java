@@ -381,8 +381,48 @@ public enum StaticRifResource {
    * should <em>roughly</em> (but not exactly, due to inclusion of extra deceased patients) match
    * the population size that Synthea is told to produce.
    */
-  SYNTHEA_BENES(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary.csv")),
+  SYNTHEA_BENES_2011(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2011.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2012(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2012.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2013(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2013.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2014(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2014.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2015(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2015.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2016(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2016.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2017(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2017.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2018(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2018.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2019(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2019.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2020(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2020.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2021(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2021.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
 
@@ -498,6 +538,26 @@ public enum StaticRifResource {
    */
   private StaticRifResource(
       Supplier<URL> resourceUrlSupplier, RifFileType rifFileType, Optional<Integer> recordCount) {
+    this.resourceUrlSupplier = resourceUrlSupplier;
+    this.rifFileType = rifFileType;
+
+    this.resourceUrl = Optional.empty();
+    this.recordCount = recordCount;
+  }
+
+  /**
+   * Enum constant constructor.
+   *
+   * @param resourceUrlSupplier the value to use for {@link #getResourceSupplier()}
+   * @param rifFileType the value to use for {@link #getRifFileType()}
+   * @param recordCount the value to use for {@link #getRecordCount()}, or {@link Optional#empty()}
+   *     if that count is not known in advance
+   */
+  private StaticRifResource(
+      Supplier<URL> resourceUrlSupplier,
+      RifFileType rifFileType,
+      Optional<Integer> recordCount,
+      boolean multiFile) {
     this.resourceUrlSupplier = resourceUrlSupplier;
     this.rifFileType = rifFileType;
 
@@ -815,10 +875,15 @@ public enum StaticRifResource {
                     "-cs",
                     "0",
                     "-r",
-                    "20200101",
+                    "20210520",
                     "-p",
-                    "100",
-                    "--exporter.bfd.export=true")
+                    "366",
+                    "--exporter.fhir.export=false",
+                    "--exporter.bfd.export=true",
+                    "--exporter.years_of_history=10",
+                    "--generate.only_alive_patients=true",
+                    "-a",
+                    "70-80")
                 .directory(syntheaGitDir.toFile())
                 .readOutput(true)
                 .timeout(5, TimeUnit.MINUTES)
