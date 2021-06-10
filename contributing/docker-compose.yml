@@ -3,7 +3,7 @@ version: '3.3'
 services:
 
   local_bfddb:
-    image: postgres:9.6
+    image: postgres:12
     environment:
       POSTGRES_DB: bfd
       POSTGRES_USER: bfd

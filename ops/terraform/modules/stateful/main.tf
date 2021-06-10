@@ -9,9 +9,12 @@ locals {
   enable_victor_ops = local.is_prod # only wake people up for prod alarms
 }
 
+<<<<<<< HEAD
 # account number
 data "aws_caller_identity" "current" {}
 
+=======
+>>>>>>> master
 # vpc
 data "aws_vpc" "main" {
   filter {
@@ -220,6 +223,7 @@ module "medicare_opt_out" {
 
 ## CloudWatch Log Groups
 #
+
 resource "aws_cloudwatch_log_group" "var_log_messages" {
   name       = "/bfd/${var.env_config.env}/var/log/messages"
   kms_key_id = data.aws_kms_key.master_key.arn
