@@ -12,7 +12,7 @@ locals {
   # add new peerings here (#TODO: add dcgeo)
   vpc_peerings_by_env = {
     test = [
-      "bfd-test-vpc-to-bluebutton-dev", "bfd-test-vpc-to-bluebutton-test"
+      "bfd-test-vpc-to-bluebutton-test"
     ],
     prod = [
       "bfd-prod-vpc-to-mct-prod-vpc", "bfd-prod-vpc-to-mct-prod-dr-vpc",
@@ -22,10 +22,11 @@ locals {
       "bfd-prod-to-ab2d-prod"
     ],
     prod-sbx = [
+      "bfd-prod-sbx-to-ab2d-dev", "bfd-prod-sbx-to-ab2d-impl", "bfd-prod-sbx-to-ab2d-sbx",
       "bfd-prod-sbx-to-bcda-dev", "bfd-prod-sbx-to-bcda-test", "bfd-prod-sbx-to-bcda-sbx", "bfd-prod-sbx-to-bcda-opensbx",
-      "bfd-prod-sbx-vpc-to-bluebutton-dev", "bfd-prod-sbx-vpc-to-bluebutton-impl", "bfd-prod-sbx-vpc-to-bluebutton-test",
+      "bfd-prod-sbx-vpc-to-bluebutton-impl", "bfd-prod-sbx-vpc-to-bluebutton-test",
       "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc",
-      "bfd-prod-sbx-vpc-to-mct-imp-vpc", "bfd-prod-sbx-vpc-to-mct-test-vpc"
+      "bfd-prod-sbx-vpc-to-mct-imp-vpc", "bfd-prod-sbx-vpc-to-mct-test-vpc", "bfd-prod-sbx-to-mpm-rda-dev"
     ]
   }
   vpc_peerings = local.vpc_peerings_by_env[var.env_config.env]
