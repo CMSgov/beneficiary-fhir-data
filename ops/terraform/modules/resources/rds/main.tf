@@ -1,10 +1,9 @@
-# Setup an RDS instance. Each RDS instance is deployed to specific AZ with their own dns entry.
+## Setup an RDS instance. Each RDS instance is deployed to specific AZ with their own dns entry.
 #
 
 locals {
-  name       = "bfd-${var.env_config.env}-${var.role}"
-  identifier = local.name
-  #snapshot_identifier     = var.snapshot_identifier == "" ? local.identifier : var.snapshot_identifier
+  name                = "bfd-${var.env_config.env}-${var.role}"
+  identifier          = local.name
   tags                = merge({ Layer = "data", role = var.role }, var.env_config.tags)
   is_prod             = substr(var.env_config.env, 0, 4) == "prod"
   deletion_protection = local.is_prod
@@ -15,7 +14,8 @@ data "aws_iam_role" "rds_monitoring" {
   name = "rds-monitoring-role"
 }
 
-# Build a RDS with the following
+
+## Build a RDS with the following
 #   - Encryption using a Customer Managed Key
 #   - Autoscale storage size
 #   - Single AZ with replication to multiple az
@@ -31,6 +31,7 @@ resource "aws_db_instance" "db" {
   identifier        = local.identifier
   multi_az          = false
   availability_zone = var.availability_zone
+
   # temp db to get started
   name                            = local.is_master ? "bfdtemp" : null
   username                        = local.is_master ? "bfduser" : null
@@ -54,6 +55,7 @@ resource "aws_db_instance" "db" {
   performance_insights_enabled    = false                    # Not supported in postgres 9.6
   final_snapshot_identifier       = local.deletion_protection ? "${local.name}-final" : null
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"] # Could add 'listener' and "audit"
+
   # depends on the state of var.db_import_mode.enabled in the parent module
   parameter_group_name = var.parameter_group_name
   apply_immediately    = var.apply_immediately
@@ -69,7 +71,5 @@ resource "aws_route53_record" "db" {
   zone_id = var.env_config.zone_id
   ttl     = "300"
 
-  records = [
-    aws_db_instance.db.address,
-  ]
+  records = [aws_db_instance.db.address]
 }
