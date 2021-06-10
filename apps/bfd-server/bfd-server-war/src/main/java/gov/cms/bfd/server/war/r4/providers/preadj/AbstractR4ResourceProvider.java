@@ -37,6 +37,12 @@ import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
+/**
+ * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
+ * exact same logic for looking up, transforming, and returning data.
+ *
+ * @param <T> The specific fhir resource the concrete provider will serve.
+ */
 public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     implements IResourceProvider {
 
@@ -44,6 +50,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
    * e.g. <code>f-1234</code> or <code>m--1234</code> (for negative IDs).
    */
+  // TODO: [DCGEO-98] Update to include support for 'm' (MCS) prefix
   private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([f])-(-?\\p{Alnum}+)");
 
   private EntityManager entityManager;
