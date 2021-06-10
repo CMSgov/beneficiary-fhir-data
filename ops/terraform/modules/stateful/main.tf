@@ -9,12 +9,9 @@ locals {
   enable_victor_ops = local.is_prod # only wake people up for prod alarms
 }
 
-<<<<<<< HEAD
 # account number
 data "aws_caller_identity" "current" {}
 
-=======
->>>>>>> master
 # vpc
 data "aws_vpc" "main" {
   filter {
