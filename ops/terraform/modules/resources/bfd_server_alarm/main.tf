@@ -1,5 +1,6 @@
 # Flexible BFD server alarm to handle different configurations for different partners
 #
+
 resource "aws_cloudwatch_metric_alarm" "bfd-server-alarm" {
   alarm_name        = "bfd-${var.env}-server-${var.alarm_config.alarm_name}"
   alarm_description = ""

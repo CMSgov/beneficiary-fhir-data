@@ -1,7 +1,6 @@
-# Cloudwatch Metric Filters
-# 
 # Creates the BFD Server CloudWatch log metric filters and log group. 
 #
+
 locals {
 
   log_groups = {

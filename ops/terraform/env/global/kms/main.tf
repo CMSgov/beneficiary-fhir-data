@@ -1,5 +1,6 @@
 provider "aws" {
-  region = "us-east-1"
+  version = "~> 3.44.0"
+  region  = "us-east-1"
 }
 
 resource "aws_kms_key" "state_kms_key" {
@@ -10,5 +11,5 @@ resource "aws_kms_key" "state_kms_key" {
 
 resource "aws_kms_alias" "state_kms_alias" {
   name          = "alias/bfd-tf-state"
-  target_key_id = "${aws_kms_key.state_kms_key.key_id}"
+  target_key_id = aws_kms_key.state_kms_key.key_id
 }

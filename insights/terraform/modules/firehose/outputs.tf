@@ -3,8 +3,5 @@ output "name" {
 }
 
 output "partitions" {
-  value = [{name="dt", type="string", comment="Approximate delivery time"}]
+  value = [{name="dt", type=string, comment="Approximate delivery time"}]
 }
-
-
-
