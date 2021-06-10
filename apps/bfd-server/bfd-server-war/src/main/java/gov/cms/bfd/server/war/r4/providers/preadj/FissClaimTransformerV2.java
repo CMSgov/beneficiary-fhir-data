@@ -211,7 +211,7 @@ public class FissClaimTransformerV2 {
       PreAdjFissProcCode procCode = procCodes.get(i);
       Claim.ProcedureComponent component = new Claim.ProcedureComponent();
 
-      component.setSequence(++i);
+      component.setSequence((i + 1));
       component.setDate(
           Date.from(procCode.getProcDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
       component.setProcedure(
