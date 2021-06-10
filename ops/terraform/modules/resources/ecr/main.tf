@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "read_only" {
       "ecr:ListImages",
       "ecr:ListTagsForResource",
     ]
-    resources = aws_ecr_repository.main.arn
+    resources = [aws_ecr_repository.main.arn]
   }
 }
 
@@ -40,7 +40,7 @@ data "aws_iam_policy_document" "full_access" {
     sid       = "FullAccess"
     effect    = "Allow"
     actions   = ["ecr:*"]
-    resources = aws_ecr_repository.main.arn
+    resources = [aws_ecr_repository.main.arn]
   }
 }
 
@@ -50,23 +50,23 @@ data "aws_iam_policy_document" "full_access" {
 
 # create a read only group (add members using the console)
 resource "aws_iam_group" "read_only" {
-  name = "${var.name}-ecr-read-only-access"
+  name = "${aws_ecr_repository.main.name}-read-only-access"
 }
 
 # create a full access group (add members using the console)
 resource "aws_iam_group" "full_access" {
-  name = "${var.name}-ecr-full-access"
+  name = "${aws_ecr_repository.main.name}-full-access"
 }
 
 # read only group policy
 resource "aws_iam_group_policy" "ecr_read_only" {
-  group  = aws_iam_group.read_only
+  group  = aws_iam_group.read_only.name
   policy = data.aws_iam_policy_document.read_only.json
 }
 
 # full access group policy
 resource "aws_iam_group_policy" "full_access" {
-  group  = aws_iam_group.read_only
+  group  = aws_iam_group.read_only.name
   policy = data.aws_iam_policy_document.full_access.json
 }
 

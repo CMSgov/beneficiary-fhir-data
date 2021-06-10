@@ -5,7 +5,7 @@ variable "env_config" {
 
 variable "name" {
   type        = string
-  description = "What to name the registry (bfd, public, ops, etc)"
+  description = "What to name the registry (bfd-ecr, ops-ecr, etc)"
 }
 
 variable "scan_images_on_push" {

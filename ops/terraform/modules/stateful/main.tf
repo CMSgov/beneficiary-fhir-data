@@ -273,45 +273,46 @@ resource "aws_cloudwatch_log_group" "bfd_server_gc" {
 ## ECR repository
 #
 
+# define cmk policy
+data "aws_iam_policy_document" "ecr_cmk" {
+  statement {
+    sid    = "AllRootFullAdmin"
+    effect = "Allow"
+    principals {
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+      type = "AWS"
+    }
+    actions = [
+      "kms:*"
+    ]
+    resources = [aws_kms_key.ecr.arn]
+  }
+}
+
 # provision an encryption key for the repo
 resource "aws_kms_key" "ecr" {
-  description         = "${var.env_config.env}-ecr-cmk"
+  description         = "bfd-${var.env_config.env}-ecr-cmk"
   key_usage           = "ENCRYPT_DECRYPT"
   enable_key_rotation = true
   is_enabled          = true
-  tags                = merge({ Name = "${var.env_config.env}-ecr" }, local.env_config.tags)
+  tags                = merge({ Name = "bfd-${var.env_config.env}-ecr" }, local.env_config.tags)
 
-  policy = <<POLICY
-{
-  "Version" : "2012-10-17",
-  "Id" : ${var.env_config.env}-ecr-cmk-policy",
-  "Statement" : [
-    {
-      "Sid" : "AllowRootFullAdmin",
-      "Effect" : "Allow",
-      "Principal" : {
-        "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-      },
-      "Action" : "kms:*",
-      "Resource" : "*"
-    }
-  ]
-}
-POLICY
+  policy = data.aws_iam_policy_document.ecr_cmk.json
 }
 
-# provision the ECR repo
-module "ecr" {
+# provision the BFD ECR
+module "bfd_ecr" {
   source = "../resources/ecr"
-  name = "${var.env_config.env}-ecr"
+  name = "bfd-${var.env_config.env}-ecr"
   env_config = local.env_config
 
-  # encrypt repo using the ecr key generated above
+  # encrypt the repo using the kms key generated above
   encryption_configuration = {
     encryption_type: "KMS",
     kms_key: aws_kms_key.ecr.arn
   }
 
+  # expire untagged images after 7 days
   lifecycle_policy = <<EOF
 {
     "rules": [
