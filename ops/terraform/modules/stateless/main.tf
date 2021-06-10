@@ -1,7 +1,5 @@
-#
-# Build the stateless resources for an environment. This includes the autoscale groups and 
-# associated networking.
-#
+## 
+# Build the stateless resources for an environment (ASG, security groups, etc)
 
 locals {
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
@@ -11,7 +9,7 @@ locals {
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
 
-  # Add new peerings here
+  # add new peerings here (#TODO: add dcgeo)
   vpc_peerings_by_env = {
     test = [
       "bfd-test-vpc-to-bluebutton-dev", "bfd-test-vpc-to-bluebutton-test"
@@ -33,15 +31,11 @@ locals {
   vpc_peerings = local.vpc_peerings_by_env[var.env_config.env]
 }
 
-# Find resources defined outside this script 
-# 
 
-# Acct num
-#
+# account number
 data "aws_caller_identity" "current" {}
 
-# VPC
-#
+# vpc
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
@@ -49,6 +43,7 @@ data "aws_vpc" "main" {
   }
 }
 
+# mgmt vpc
 data "aws_vpc" "mgmt" {
   filter {
     name   = "tag:Name"
@@ -56,22 +51,19 @@ data "aws_vpc" "mgmt" {
   }
 }
 
-# VPC peerings
-#
+# peerings
 data "aws_vpc_peering_connection" "peers" {
   count = length(local.vpc_peerings)
   tags  = { Name = local.vpc_peerings[count.index] }
 }
 
-# DNS
-#
+# dns
 data "aws_route53_zone" "local_zone" {
   name         = "bfd-${var.env_config.env}.local"
   private_zone = true
 }
 
-# S3 Buckets
-#
+# s3 buckets
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
 }
@@ -80,41 +72,15 @@ data "aws_s3_bucket" "logs" {
   bucket = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
 
-# CloudWatch
-#
+# cloudwatch topics
 data "aws_sns_topic" "cloudwatch_alarms" {
   name = "bfd-${var.env_config.env}-cloudwatch-alarms"
 }
-
 data "aws_sns_topic" "cloudwatch_ok" {
   name = "bfd-${var.env_config.env}-cloudwatch-ok"
 }
 
-# # RDS Replicas
-# #
-# data "aws_db_instance" "replica" {
-#   count                   = 3
-#   db_instance_identifier  = "bfd-${var.env_config.env}-replica${count.index+1}"
-# }
-
-# # RDS Security Groups
-# #
-# data "aws_security_group" "db_primary" {
-#   filter {
-#     name        = "tag:Name"
-#     values      = ["bfd-${var.env_config.env}-master-rds"]
-#   }
-# }
-
-# data "aws_security_group" "db_replicas" {
-#   filter {
-#     name        = "tag:Name"
-#     values      = ["bfd-${var.env_config.env}-rds"]
-#   }
-# }
-
-# Aurora security group
-#
+# aurora security group
 data "aws_security_group" "aurora_cluster" {
   filter {
     name   = "tag:Name"
@@ -122,10 +88,7 @@ data "aws_security_group" "aurora_cluster" {
   }
 }
 
-# Other Security Groups
-#
-# Find the security group for the Cisco VPN
-#
+# vpc security group
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
@@ -133,8 +96,7 @@ data "aws_security_group" "vpn" {
   }
 }
 
-# Find the tools group
-#
+# tools security group
 data "aws_security_group" "tools" {
   filter {
     name   = "tag:Name"
@@ -142,8 +104,7 @@ data "aws_security_group" "tools" {
   }
 }
 
-# Find the management group
-#
+# management security group
 data "aws_security_group" "remote" {
   filter {
     name   = "tag:Name"
@@ -151,32 +112,31 @@ data "aws_security_group" "remote" {
   }
 }
 
-# Find ansible vault pw read only policy by hardcoded ARN, no other options for this data source
-#
+# ansible vault pw read only policy
 data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
 }
 
-##
-# Start to build stuff
-##
 
-# IAM roles
+## BEGIN
 # 
-# Create one for the FHIR server and one for the ETL
+
+
+## IAM role for FHIR
+#
 module "fhir_iam" {
   source = "../resources/iam"
 
   env_config = local.env_config
   name       = "fhir"
 }
-
 resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
   role       = module.fhir_iam.role
   policy_arn = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
 }
 
-# NLB for the FHIR server (SSL terminated by the FHIR server)
+
+## NLB for the FHIR server (SSL terminated by the FHIR server)
 #
 module "fhir_lb" {
   source = "../resources/lb"
@@ -222,7 +182,7 @@ module "lb_alarms" {
 }
 
 
-# Autoscale group for the FHIR server
+## Autoscale group for the FHIR server
 #
 module "fhir_asg" {
   source = "../resources/asg"
@@ -270,8 +230,11 @@ module "fhir_asg" {
   }
 }
 
-# FHIR server metrics, per partner
+
+## FHIR server metrics, per partner
 #
+
+# all
 module "bfd_server_metrics_all" {
   source = "../resources/bfd_server_metrics"
 
@@ -283,6 +246,7 @@ module "bfd_server_metrics_all" {
   }
 }
 
+# bluebutton
 module "bfd_server_metrics_bb" {
   source = "../resources/bfd_server_metrics"
 
@@ -294,6 +258,7 @@ module "bfd_server_metrics_bb" {
   }
 }
 
+# bcda
 module "bfd_server_metrics_bcda" {
   source = "../resources/bfd_server_metrics"
 
@@ -305,6 +270,7 @@ module "bfd_server_metrics_bcda" {
   }
 }
 
+# mct
 module "bfd_server_metrics_mct" {
   source = "../resources/bfd_server_metrics"
 
@@ -316,6 +282,7 @@ module "bfd_server_metrics_mct" {
   }
 }
 
+# dpc
 module "bfd_server_metrics_dpc" {
   source = "../resources/bfd_server_metrics"
 
@@ -327,6 +294,7 @@ module "bfd_server_metrics_dpc" {
   }
 }
 
+# ab2d
 module "bfd_server_metrics_ab2d" {
   source = "../resources/bfd_server_metrics"
 
@@ -338,12 +306,12 @@ module "bfd_server_metrics_ab2d" {
   }
 }
 
-# FHIR server alarms, partner specific
+
+## FHIR server alarms, partner specific
 #
 
 # TODO: Deprecate this alarm in favor of metric math expression to more accurately
 # represet our error budget
-#
 module "bfd_server_alarm_all_500s" {
   source = "../resources/bfd_server_alarm"
 
@@ -404,13 +372,14 @@ module "bfd_server_alarm_mct_eob_3s_p95" {
   }
 }
 
-# ETL server
+
+## ETL server
 #
 module "bfd_pipeline" {
   source = "../resources/bfd_pipeline"
 
   env_config = local.env_config
-  az         = "us-east-1b" # Same as the master db
+  az         = "us-east-1b" # same as the master db
 
   launch_config = {
     ami_id       = var.etl_ami
@@ -433,6 +402,6 @@ module "bfd_pipeline" {
 
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
   ok_notification_arn    = data.aws_sns_topic.cloudwatch_ok.arn
+
+  mpm_rda_cidr_block = var.mpm_rda_cidr_block
 }
-
-
