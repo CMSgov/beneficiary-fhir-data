@@ -306,7 +306,7 @@ module "ecr" {
   name = "${var.env_config.env}-ecr"
   env_config = local.env_config
 
-  # TODO: provision a dedicated encryption key for the repo, use master key for now
+  # encrypt repo using the ecr key generated above
   encryption_configuration = {
     encryption_type: "KMS",
     kms_key: aws_kms_key.ecr.arn
