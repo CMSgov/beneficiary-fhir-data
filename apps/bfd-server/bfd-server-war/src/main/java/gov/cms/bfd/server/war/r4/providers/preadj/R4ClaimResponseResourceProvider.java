@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class R4ClaimResponseResourceProvider extends AbstractR4ResourceProvider<ClaimResponse> {
 
   /**
-   * Helper method to make mocking easier in tests.
+   * Specifies the exact resource configuration class to use for parsing.
    *
    * @param typeText String to parse representing the claim type.
    * @return The parsed {@link ClaimResponseTypeV2} type.

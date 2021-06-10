@@ -13,10 +13,9 @@ import org.hl7.fhir.r4.model.ClaimResponse;
  * {@link R4ClaimResponseResourceProvider}.
  */
 public enum ClaimResponseTypeV2 implements ResourceTypeV2<ClaimResponse> {
-
-  // TODO: Complete null fields when entity available
   F(PreAdjFissClaim.class, PreAdjFissClaim.Fields.dcn, FissClaimResponseTransformerV2::transform),
 
+  // TODO: [DCGEO-88, DCGEO-98] Complete null fields when entity available
   M(null, null, McsClaimResponseTransformerV2::transform);
 
   private final Class<?> entityClass;
