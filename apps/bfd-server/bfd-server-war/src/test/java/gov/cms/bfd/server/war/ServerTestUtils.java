@@ -15,7 +15,6 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.FileReader;
@@ -266,6 +265,7 @@ public final class ServerTestUtils {
    * @return the {@link List} of RIF records that were loaded (e.g. {@link Beneficiary}s, etc.)
    */
   public static List<Object> loadData(List<StaticRifResource> sampleResources) {
+    DataSource dataSource = createDataSource();
     LoadAppOptions loadOptions = createRifLoaderOptions();
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
@@ -276,7 +276,7 @@ public final class ServerTestUtils {
     MetricRegistry loadAppMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
 
-    try (RifLoader loader = new RifLoader(loadAppMetrics, loadOptions); ) {
+    try (RifLoader loader = new RifLoader(loadAppMetrics, loadOptions, dataSource); ) {
       // Link up the pipeline and run it.
       LOGGER.info("Loading RIF records...");
       List<Object> recordsLoaded = new ArrayList<>();
@@ -374,7 +374,7 @@ public final class ServerTestUtils {
   }
 
   /** @return a {@link DataSource} for the test DB */
-  private static final DataSource createDataSource() {
+  public static final DataSource createDataSource() {
     String jdbcUrl, jdbcUsername, jdbcPassword;
 
     /*
@@ -410,9 +410,7 @@ public final class ServerTestUtils {
 
   /** @return the {@link LoadAppOptions} to use with {@link RifLoader} in integration tests */
   public static LoadAppOptions createRifLoaderOptions() {
-    DataSource dataSource = createDataSource();
     return new LoadAppOptions(
-        new DatabaseOptions(dataSource),
         RifLoaderTestUtils.HICN_HASH_ITERATIONS,
         RifLoaderTestUtils.HICN_HASH_PEPPER,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
