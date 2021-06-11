@@ -108,11 +108,8 @@ public final class AppConfigurationTestIT {
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME),
         testAppConfig.getDatabaseOptions().getDatabaseUsername());
-    Assert.assertArrayEquals(
-        testAppBuilder
-            .environment()
-            .get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD)
-            .toCharArray(),
+    Assert.assertEquals(
+        testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD),
         testAppConfig.getDatabaseOptions().getDatabasePassword());
     Assert.assertEquals(
         Integer.parseInt(

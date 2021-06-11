@@ -113,6 +113,10 @@ public final class RifLoader implements AutoCloseable {
     this.appMetrics = appMetrics;
     this.options = options;
 
+    /*
+     * FIXME The pool size needs to be double the number of loader threads when idempotent loads are
+     * being used. Apparently, the queries need a separate Connection?
+     */
     this.dataSource = createDataSource(dataSource, options.getLoaderThreads(), appMetrics);
     this.entityManagerFactory = createEntityManagerFactory(dataSource);
 
@@ -128,11 +132,6 @@ public final class RifLoader implements AutoCloseable {
       DataSource dataSource, int maxPoolSize, MetricRegistry metrics) {
     HikariDataSource hikariDataSource = new HikariDataSource();
 
-    /*
-     * FIXME The pool size needs to be double the number of loader threads when
-     * idempotent loads are being used. Apparently, the queries need a separate
-     * Connection?
-     */
     hikariDataSource.setMaximumPoolSize(maxPoolSize);
     hikariDataSource.setDataSource(dataSource);
     hikariDataSource.setRegisterMbeans(true);
