@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.ZoneId;
@@ -27,6 +28,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
+import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
 public class FissClaimTransformerV2 {
@@ -103,7 +105,10 @@ public class FissClaimTransformerV2 {
 
   private static CodeableConcept getPriority() {
     return new CodeableConcept(
-        new Coding("http://hl7.org/fhir/ValueSet/process-priority", "normal", "Normal"));
+        new Coding(
+            ProcessPriority.NORMAL.getSystem(),
+            ProcessPriority.NORMAL.toCode(),
+            ProcessPriority.NORMAL.getDisplay()));
   }
 
   private static Money getTotal(PreAdjFissClaim claimGroup) {
@@ -132,9 +137,9 @@ public class FissClaimTransformerV2 {
                         .setType(
                             new CodeableConcept(
                                 new Coding(
-                                    C4BBOrganizationIdentifierType.NPI.getSystem(),
-                                    C4BBOrganizationIdentifierType.NPI.toCode(),
-                                    C4BBOrganizationIdentifierType.NPI.getDisplay())))
+                                    C4BBIdentifierType.NPI.getSystem(),
+                                    C4BBIdentifierType.NPI.toCode(),
+                                    C4BBIdentifierType.NPI.getDisplay())))
                         .setSystem("http://hl7.org/fhir/sid/us-npi")
                         .setValue(claimGroup.getNpiNumber())))
             .setId("provider-org")

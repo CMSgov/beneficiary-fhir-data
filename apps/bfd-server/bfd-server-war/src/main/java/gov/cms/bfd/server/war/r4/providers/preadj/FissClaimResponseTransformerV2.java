@@ -5,6 +5,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.codesystems.ClaimType;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
 public class FissClaimResponseTransformerV2 {
@@ -118,9 +120,9 @@ public class FissClaimResponseTransformerV2 {
             .setType(
                 new CodeableConcept(
                     new Coding(
-                        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                        "uc",
-                        "Unique Claim ID")))
+                        C4BBIdentifierType.UC.getSystem(),
+                        C4BBIdentifierType.UC.toCode(),
+                        C4BBIdentifierType.UC.getDisplay())))
             .setSystem("https://dcgeo.cms.gov/resources/variables/dcn")
             .setValue(claimGroup.getDcn()));
   }
@@ -131,9 +133,9 @@ public class FissClaimResponseTransformerV2 {
             Arrays.asList(
                 new Coding("https://dcgeo.cms.gov/resources/codesystem/rda-type", "FISS", null),
                 new Coding(
-                    "http://terminology.hl7.org/CodeSystem/claim-type",
-                    "institutional",
-                    "Institutional")));
+                    ClaimType.INSTITUTIONAL.getSystem(),
+                    ClaimType.INSTITUTIONAL.toCode(),
+                    ClaimType.INSTITUTIONAL.getDisplay())));
   }
 
   private static Reference getPatient(PreAdjFissClaim claimGroup) {
