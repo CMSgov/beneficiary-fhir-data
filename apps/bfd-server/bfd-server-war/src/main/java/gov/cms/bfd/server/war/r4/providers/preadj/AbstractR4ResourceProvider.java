@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
@@ -55,7 +54,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private LoadedFilterManager loadedFilterManager;
 
   private ClaimDao claimDao;
 
@@ -71,12 +69,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
-  }
-
-  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
-  @Inject
-  public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
-    this.loadedFilterManager = loadedFilterManager;
   }
 
   @PostConstruct
@@ -122,7 +114,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return Returns a resource matching the specified {@link IdDt}, or <code>null</code> if none
    *     exists.
    */
-  @Read(version = false)
+  @Read
   @Trace
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
     if (claimId == null) throw new IllegalArgumentException("Resource ID can not be null");
@@ -195,6 +187,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
         List<?> entities;
 
+        // TODO: [DCGEO-117] Impliment additional search by service date range
         if (isHashed) {
           entities = claimDao.findAllByMbiHash(claimType.getEntityClass(), mbiString, lastUpdated);
         } else {
