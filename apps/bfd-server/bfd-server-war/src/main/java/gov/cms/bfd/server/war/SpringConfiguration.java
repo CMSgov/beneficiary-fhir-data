@@ -42,7 +42,6 @@ import javax.persistence.PersistenceUnit;
 import javax.sql.DataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.tool.schema.Action;
@@ -352,8 +351,7 @@ public class SpringConfiguration {
   private static boolean isPreAdjResourcesEnabled() {
     return Boolean.TRUE
         .toString()
-        .equalsIgnoreCase(
-            ObjectUtils.defaultIfNull(System.getProperty("bfdServer.preadj.enabled"), "false"));
+        .equalsIgnoreCase(System.getProperty("bfdServer.preadj.enabled", "false"));
   }
 
   /**
