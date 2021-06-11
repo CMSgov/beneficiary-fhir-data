@@ -19,7 +19,7 @@ public class McsClaimResponseTransformerV2 {
    */
   @Trace
   static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
-    // TODO: Update this check when entity available
+    // TODO: [DCGEO-88, DCGEO-98] Update this check when entity available
     if (!(claimEntity instanceof Object)) {
       throw new BadCodeMonkeyException();
     }
@@ -37,7 +37,7 @@ public class McsClaimResponseTransformerV2 {
   private static ClaimResponse transformClaim(Object claimGroup) {
     ClaimResponse claim = new ClaimResponse();
 
-    // TODO: Transform claim
+    // TODO: [DCGEO-98] Transform claim
 
     return claim;
   }

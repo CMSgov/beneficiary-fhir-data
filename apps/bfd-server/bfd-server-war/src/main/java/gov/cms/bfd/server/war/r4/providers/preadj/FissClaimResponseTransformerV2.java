@@ -32,13 +32,14 @@ public class FissClaimResponseTransformerV2 {
   static {
     STATUS_TEXT =
         ImmutableMap.<Character, String>builder()
-            .put('a', "Active")
+            .put(' ', "Unknown")
+            .put('a', "Accepted")
             .put('s', "Suspend")
             .put('p', "Paid")
             .put('d', "Denied")
             .put('i', "Inactive")
-            .put('r', "Reject")
-            .put('t', "RTP")
+            .put('r', "Rejected")
+            .put('t', "Return To Provider")
             .put('m', "Move")
             .build();
   }
@@ -52,10 +53,10 @@ public class FissClaimResponseTransformerV2 {
             .put('a', ClaimResponse.RemittanceOutcome.QUEUED)
             .put('s', ClaimResponse.RemittanceOutcome.PARTIAL)
             .put('p', ClaimResponse.RemittanceOutcome.COMPLETE)
-            .put('d', ClaimResponse.RemittanceOutcome.ERROR)
+            .put('d', ClaimResponse.RemittanceOutcome.COMPLETE)
             .put('i', ClaimResponse.RemittanceOutcome.PARTIAL)
-            .put('r', ClaimResponse.RemittanceOutcome.ERROR)
-            .put('t', ClaimResponse.RemittanceOutcome.ERROR)
+            .put('r', ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put('t', ClaimResponse.RemittanceOutcome.COMPLETE)
             .put('m', ClaimResponse.RemittanceOutcome.PARTIAL)
             .build();
   }

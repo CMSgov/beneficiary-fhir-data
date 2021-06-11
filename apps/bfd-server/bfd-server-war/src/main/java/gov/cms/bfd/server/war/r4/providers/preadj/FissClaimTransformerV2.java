@@ -216,12 +216,11 @@ public class FissClaimTransformerV2 {
     List<PreAdjFissProcCode> procCodes = new ArrayList<>(claimGroup.getProcCodes());
     procCodes.sort(Comparator.comparingInt(PreAdjFissProcCode::getPriority));
 
-    int i = 0;
-
-    for (PreAdjFissProcCode procCode : procCodes) {
+    for (int i = 0; i < procCodes.size(); ++i) {
+      PreAdjFissProcCode procCode = procCodes.get(i);
       Claim.ProcedureComponent component = new Claim.ProcedureComponent();
 
-      component.setSequence(++i);
+      component.setSequence((i + 1));
       component.setDate(
           Date.from(procCode.getProcDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
       component.setProcedure(
