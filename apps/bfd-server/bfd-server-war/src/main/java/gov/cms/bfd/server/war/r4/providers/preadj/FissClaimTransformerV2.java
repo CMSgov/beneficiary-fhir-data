@@ -5,6 +5,9 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -23,6 +26,9 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.codesystems.ClaimType;
+import org.hl7.fhir.r4.model.codesystems.ExDiagnosistype;
+import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
 public class FissClaimTransformerV2 {
@@ -79,9 +85,9 @@ public class FissClaimTransformerV2 {
             .setType(
                 new CodeableConcept(
                     new Coding(
-                        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                        "uc",
-                        "Unique Claim ID")))
+                        C4BBClaimIdentifierType.UC.getSystem(),
+                        C4BBClaimIdentifierType.UC.toCode(),
+                        C4BBClaimIdentifierType.UC.getDisplay())))
             .setSystem("https://dcgeo.cms.gov/resources/variables/dcn")
             .setValue(claimGroup.getDcn()));
   }
@@ -92,14 +98,17 @@ public class FissClaimTransformerV2 {
             Arrays.asList(
                 new Coding("https://dcgeo.cms.gov/resources/codesystem/rda-type", "FISS", null),
                 new Coding(
-                    "http://terminology.hl7.org/CodeSystem/claim-type",
-                    "institutional",
-                    "Institutional")));
+                    ClaimType.INSTITUTIONAL.getSystem(),
+                    ClaimType.INSTITUTIONAL.toCode(),
+                    ClaimType.INSTITUTIONAL.getDisplay())));
   }
 
   private static CodeableConcept getPriority() {
     return new CodeableConcept(
-        new Coding("http://hl7.org/fhir/ValueSet/process-priority", "normal", "Normal"));
+        new Coding(
+            ProcessPriority.NORMAL.getSystem(),
+            ProcessPriority.NORMAL.toCode(),
+            ProcessPriority.NORMAL.getDisplay()));
   }
 
   private static Money getTotal(PreAdjFissClaim claimGroup) {
@@ -120,17 +129,17 @@ public class FissClaimTransformerV2 {
                         .setType(
                             new CodeableConcept(
                                 new Coding(
-                                    "http://terminology.hl7.org/CodeSystem/v2-0203",
-                                    "PRN",
-                                    "Provider Number")))
+                                    C4BBOrganizationIdentifierType.PRN.getSystem(),
+                                    C4BBOrganizationIdentifierType.PRN.toCode(),
+                                    C4BBOrganizationIdentifierType.PRN.getDisplay())))
                         .setValue(claimGroup.getMedaProvId()),
                     new Identifier()
                         .setType(
                             new CodeableConcept(
                                 new Coding(
-                                    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                                    "npi",
-                                    "National Provider Identifier")))
+                                    C4BBIdentifierType.NPI.getSystem(),
+                                    C4BBIdentifierType.NPI.toCode(),
+                                    C4BBIdentifierType.NPI.getDisplay())))
                         .setSystem("http://hl7.org/fhir/sid/us-npi")
                         .setValue(claimGroup.getNpiNumber())))
             .setId("provider-org")
@@ -176,9 +185,9 @@ public class FissClaimTransformerV2 {
                         .setCoding(
                             Collections.singletonList(
                                 new Coding(
-                                    "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
-                                    "principal",
-                                    "Principal Diagnosis"))))),
+                                    ExDiagnosistype.PRINCIPAL.getSystem(),
+                                    ExDiagnosistype.PRINCIPAL.toCode(),
+                                    ExDiagnosistype.PRINCIPAL.getDisplay()))))),
         new Claim.DiagnosisComponent()
             .setSequence(2)
             .setDiagnosis(
@@ -195,9 +204,9 @@ public class FissClaimTransformerV2 {
                         .setCoding(
                             Collections.singletonList(
                                 new Coding(
-                                    "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
-                                    "admitting",
-                                    "Admitting Diagnosis"))))));
+                                    ExDiagnosistype.ADMITTING.getSystem(),
+                                    ExDiagnosistype.ADMITTING.toCode(),
+                                    ExDiagnosistype.ADMITTING.getDisplay()))))));
   }
 
   private static List<Claim.ProcedureComponent> getProcedure(PreAdjFissClaim claimGroup) {
