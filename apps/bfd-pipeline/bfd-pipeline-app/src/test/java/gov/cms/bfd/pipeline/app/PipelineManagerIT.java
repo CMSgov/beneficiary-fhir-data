@@ -36,7 +36,7 @@ public final class PipelineManagerIT {
     // Start the pipeline against a bucket that doesn't exist.
     MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
     PipelineManager pipeline =
-        new PipelineManager(new MetricRegistry(), new ExtractionOptions("foo"), 1, listener);
+        new PipelineManager(new MetricRegistry(), new ExtractionOptions("foo"), 100, listener);
     pipeline.start();
 
     // Wait for the pipeline to error out.
@@ -63,7 +63,7 @@ public final class PipelineManagerIT {
 
       // Start the pipeline and then stop it.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      PipelineManager pipeline = new PipelineManager(new MetricRegistry(), options, 1, listener);
+      PipelineManager pipeline = new PipelineManager(new MetricRegistry(), options, 100, listener);
       pipeline.start();
       Awaitility.await()
           .atMost(Duration.TEN_SECONDS)
@@ -136,7 +136,7 @@ public final class PipelineManagerIT {
 
       // Start the pipeline up.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      PipelineManager pipeline = new PipelineManager(new MetricRegistry(), options, 1, listener);
+      PipelineManager pipeline = new PipelineManager(new MetricRegistry(), options, 100, listener);
       pipeline.start();
 
       // Wait for the job to generate events for the three data sets.
