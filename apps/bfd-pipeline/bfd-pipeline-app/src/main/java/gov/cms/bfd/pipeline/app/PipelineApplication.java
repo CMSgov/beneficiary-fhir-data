@@ -162,7 +162,7 @@ public final class PipelineApplication {
     dataSource.setMaximumPoolSize(maxPoolSize);
     dataSource.setJdbcUrl(options.getDatabaseUrl());
     dataSource.setUsername(options.getDatabaseUsername());
-    dataSource.setPassword(String.valueOf(options.getDatabasePassword()));
+    dataSource.setPassword(options.getDatabasePassword());
     dataSource.setRegisterMbeans(true);
     dataSource.setMetricRegistry(metrics);
 

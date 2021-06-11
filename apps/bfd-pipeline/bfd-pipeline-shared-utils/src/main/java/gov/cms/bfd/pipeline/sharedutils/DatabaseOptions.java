@@ -8,7 +8,7 @@ public final class DatabaseOptions implements Serializable {
 
   private final String databaseUrl;
   private final String databaseUsername;
-  private final char[] databasePassword;
+  private final String databasePassword;
 
   /**
    * Constructs a new {@link DatabaseOptions} instance.
@@ -17,7 +17,7 @@ public final class DatabaseOptions implements Serializable {
    * @param databaseUsername the value to use for {@link #getDatabaseUsername()}
    * @param databasePassword the value to use for {@link #getDatabasePassword()}
    */
-  public DatabaseOptions(String databaseUrl, String databaseUsername, char[] databasePassword) {
+  public DatabaseOptions(String databaseUrl, String databaseUsername, String databasePassword) {
     this.databaseUrl = databaseUrl;
     this.databaseUsername = databaseUsername;
     this.databasePassword = databasePassword;
@@ -34,7 +34,7 @@ public final class DatabaseOptions implements Serializable {
   }
 
   /** @return the database password to connect with when loading data */
-  public char[] getDatabasePassword() {
+  public String getDatabasePassword() {
     return databasePassword;
   }
 
