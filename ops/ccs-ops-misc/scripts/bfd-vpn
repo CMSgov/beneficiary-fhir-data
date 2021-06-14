@@ -21,7 +21,7 @@ _EOF_
 }
 
 setup(){
-  local config_file
+  local config_fil
   local overwrite
   overwrite=false
 
