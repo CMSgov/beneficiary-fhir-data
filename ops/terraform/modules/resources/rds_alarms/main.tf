@@ -1,8 +1,5 @@
-##
-#
-# NOTE: This module is for defining RDS CloudWatch alarms
-#
-##
+## RDS CloudWatch alarms
+# 
 
 locals {
   alarm_actions = var.alarm_notification_arn == null ? [] : [var.alarm_notification_arn]

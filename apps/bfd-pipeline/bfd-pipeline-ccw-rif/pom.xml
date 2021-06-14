@@ -161,6 +161,11 @@
 							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
+						<configuration>
+							<environmentVariables>
+								<TZ>UTC</TZ>
+							</environmentVariables>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

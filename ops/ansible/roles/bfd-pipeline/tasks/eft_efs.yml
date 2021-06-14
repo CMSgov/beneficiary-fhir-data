@@ -1,0 +1,121 @@
+---
+
+## Create posix users and groups
+#
+# When our partners mount an assigned EFS file system hosted by BFD, 
+# they are rooted to a dedicated dropbox folder and assigned a POSIX
+# user/group id. All file operations will be performed with these id's
+# so we are creating matching users and groups here so we can track
+# who owns what files and ensure these user and groups are locked
+# down.
+
+- name: Install fips compatible amazon-efs-utils
+  import_role:
+    name: ../../playbooks-ccs/roles/amazon-efs-utils
+  tags:
+    - pre-ami
+
+- name: Build fips compatible stunnel from source
+  import_role:
+    name: ../../playbooks-ccs/roles/stunnel
+  tags:
+    - pre-ami
+
+- name: Ensure partner EFT EFS groups are present
+  become: true
+  group:
+    name: "{{ item.name }}_eft"
+    gid: "{{ item.posix_gid }}"
+    system: yes
+    state: present
+  with_items: "{{ eft_efs_mounts }}"
+  tags:
+    - pre-ami
+
+- name: Ensure partner EFT EFS users are present
+  become: true
+  user:
+    name: "{{ item.name }}_eft"
+    uid: "{{ item.posix_uid }}"
+    group: "{{ item.name }}_eft" # takes a group name, not gid
+    groups: '' # empty ensures they will only be assigned to the primary group
+    append: yes
+    comment: "User to identify {{ item.name }} EFT EFS files."
+    create_home: no
+    expires: -1 # never expire
+    shell: /bin/false
+    system: yes
+    state: present
+  with_items: "{{ eft_efs_mounts }}"
+  tags:
+    - pre-ami
+
+## Create the base EFT EFS mount directory
+# e.g., /mnt/eft
+- name: Ensure base EFT mount directory exists
+  become: true
+  file:
+    path: "{{ eft_efs_base_dir }}"
+    state: directory
+    owner: 'root'
+    group: 'root'
+    mode: '0750'
+  tags:
+    - pre-ami
+
+# Create partner EFT EFS mount directories.
+# e.g., /mnt/eft/bcda
+- name: Ensure partner EFT EFS mount directories exists
+  become: true
+  file:
+    path: "{{ eft_efs_base_dir }}/{{ item.name }}"
+    state: directory
+    mode: '0640'
+    owner: "{{ item.name }}_eft"
+    group: "{{ item.name }}_eft"
+  with_items: "{{ eft_efs_mounts }}"
+  tags:
+    - pre-ami
+
+## Configure instances to mount the file systems
+# Note: Because our VPC's use custom DNS and not the default amazondns, we are unable to simply
+# mount using the EFS file system id in /etc/fstab. Instead, we will use a helper script that
+# will add the appropriate EFS entries for that instance's AZ to /etc/hosts, mount the file
+# systems, and finally add an entry to /etc/fstab so that file systems persist through reboots.
+- name: Add EFS mount helper scripts
+  become: true
+  template:
+    src: mount-eft-efs-file-systems.sh.j2
+    dest: "/usr/local/sbin/mount-{{ item.name }}-eft-efs-file-systems.sh"
+    owner: "root"
+    group: "root"
+    mode: '0755'
+  with_items: "{{ eft_efs_mounts }}"
+  tags: 
+    - pre-ami
+
+# This adds a simple systemd unit file that will call the above script
+- name: Copy systemd unit files (used for mounting)
+  become: true
+  template:
+    src: mount-eft-efs-file-systems.systemd.j2
+    dest: /etc/systemd/system/mount-{{ item.name }}-efs.service
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  with_items: "{{ eft_efs_mounts }}"
+  tags:
+    - pre-ami
+
+# This simply enables and unmasks the unit file
+- name: Enable and unmask systemd unit files
+  become: true
+  systemd:
+    name: mount-{{ item.name }}-efs.service
+    enabled: yes
+    masked: no
+    state: reloaded
+  with_items: "{{ eft_efs_mounts }}"
+  tags:
+    - pre-ami
+  
