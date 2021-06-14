@@ -18,7 +18,7 @@ module "stateful" {
   aurora_config = {
     instance_class = "db.r5.2xlarge"
     cluster_nodes  = 3
-    engine_version = "11.6"
+    engine_version = "11.9"
     param_version  = "aurora-postgresql11"
   }
 
