@@ -540,7 +540,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       return new ArrayList<Beneficiary>();
     } else {
       // Fetch the benes using the ids
-      return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids, requestHeader).getResultList();
+      return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids).getResultList();
     }
   }
 
@@ -790,16 +790,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    * @param identifiers to add for many-to-one relations
    * @return the criteria
    */
-  private TypedQuery<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(
-      List<String> ids, RequestHeaders requestHeader) {
+  private TypedQuery<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<String> ids) {
     String joinsClause = "inner join b.beneficiaryMonthlys bm ";
+    joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
     boolean passDistinctThrough = false;
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    }
-    if (requestHeader.isHICNinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.beneficiaryHistories ";
-    }
 
     String query =
         "select distinct b from Beneficiary b "
