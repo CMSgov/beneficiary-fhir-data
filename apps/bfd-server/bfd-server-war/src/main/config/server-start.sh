@@ -167,6 +167,7 @@ BFD_PORT="${serverPortHttps}" \
 	BFD_WAR="${warArtifact}" \
 	"${javaHome}/bin/java" \
 	"${maxHeapArg}" \
+	-Dcapsule.jvm.args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \

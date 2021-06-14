@@ -63,10 +63,10 @@
 	</logger>
 
 	<!-- At 'debug', Hibernate will log SQL statements. -->
-	<!-- However, please note that this doesn't work in JBoss, as Hibernate 
-		sends all log events directly to the jboss-logging subsystem, which we had 
-		to disable, due to incompatibilities with Hibernate 5. -->
-	<!-- <logger name="org.hibernate.SQL" level="debug" /> -->
+	<logger name="org.hibernate.SQL" level="debug" />
+
+	<!-- At 'trace', Hibernate will log SQL parameter values. -->
+	<logger name="org.hibernate.type" level="trace" />
 	
 	<root level="info">
 		<appender-ref ref="STDOUT" />

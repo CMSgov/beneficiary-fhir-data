@@ -21,6 +21,8 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryHistory_;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
@@ -294,7 +296,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return bundle;
   }
 
-  public Bundle searchByCoverageContractByFieldName(
+  private Bundle searchByCoverageContractByFieldName(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       @RequiredParam(name = "_has:Coverage.extension")
@@ -346,7 +348,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return bundle;
   }
 
-  public Bundle searchByCoverageContractAndYearMonth(
+  private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
       TokenParam coverageId,
@@ -360,12 +362,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     checkPageSize(paging);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
-    operation.setOption("by", "coverageContract");
+    operation.setOption("by", "coverageContractForYearMonth");
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
     operation.publishOperationName();
 
     List<Beneficiary> matchingBeneficiaries =
-        fetchBeneficiariesByContractAndYearMonth(coverageId, referenceYear, requestHeader, paging);
+        fetchBeneficiariesByContractAndYearMonth(coverageId, referenceYear, paging);
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -503,19 +505,15 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
-   * Fetch beneficiaries for the PartD coverage parameter. If includeIdentiers are present then the
-   * entity mappings are fetched as well
-   *
-   * @param coverageId coverage type
-   * @param includedIdentifiers list from the includeIdentifier header
-   * @param paging specified
-   * @return the beneficiaries
+   * @param coverageId a {@link TokenParam} specifying the Part D contract ID and the month to match
+   *     against (yeah, the combo is weird)
+   * @param referenceYear the enrollment year to match against
+   * @param paging the {@link PatientLinkBuilder} being used for paging
+   * @return the {@link Beneficiary}s that match the specified PartD contract ID for the specified
+   *     year and month
    */
   private List<Beneficiary> fetchBeneficiariesByContractAndYearMonth(
-      TokenParam coverageId,
-      TokenParam referenceYear,
-      RequestHeaders requestHeader,
-      PatientLinkBuilder paging) {
+      TokenParam coverageId, TokenParam referenceYear, PatientLinkBuilder paging) {
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
 
@@ -527,32 +525,22 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     LocalDate yearMonth = getFormattedYearMonth(contractYearField, contractMonthField);
 
-    // Fetching with joins is not compatible with setMaxResults as explained in this post:
-    // https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
-    // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
-    // with paging and then fetch full benes with joins.
-    boolean useTwoSteps =
-        (requestHeader.isHICNinIncludeIdentifiers() || requestHeader.isMBIinIncludeIdentifiers())
-            && paging.isPagingRequested();
-    if (useTwoSteps) {
-      // Fetch ids
-      List<String> ids =
-          queryBeneficiaryIdsByPartDContractCodeAndYearMonth(contractCode, yearMonth, paging)
-              .setMaxResults(paging.getPageSize() + 1)
-              .getResultList();
+    /*
+     * Fetching with joins is not compatible with setMaxResults as explained in this post:
+     * https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
+     * So, because we need to use a join, we query in two steps: first fetch bene-ids with paging
+     * and then fetch full benes with joins.
+     */
 
-      if (ids.isEmpty()) {
-        return new ArrayList<Beneficiary>();
-      } else {
-        // Fetch the benes using the ids
-        return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids, requestHeader).getResultList();
-      }
+    // Fetch the Beneficiary.id values that we will get results for.
+    List<String> ids =
+        queryBeneficiaryIdsByPartDContractCodeAndYearMonth(yearMonth, contractCode, paging);
+
+    if (ids.isEmpty()) {
+      return new ArrayList<Beneficiary>();
     } else {
-      // Fetch benes and their histories in one query
-      return queryBeneficiariesByPartDContractCodeAndYearMonth(
-              contractCode, yearMonth, paging, requestHeader)
-          .setMaxResults(paging.getPageSize() + 1)
-          .getResultList();
+      // Fetch the benes using the ids
+      return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids, requestHeader).getResultList();
     }
   }
 
@@ -706,38 +694,64 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   /**
-   * Build a criteria for a general beneficiaryId query
-   *
-   * @param field to match on
-   * @param value to match on
-   * @param paging to use for the result set
-   * @return the criteria
+   * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
+   * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
+   *     against
+   * @param paging the {@link PatientLinkBuilder} being used for paging
+   * @return the {@link List} of matching {@link Beneficiary#getBeneficiaryId()} values
    */
-  private TypedQuery<String> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
-      String contractCode, LocalDate yearMonth, PatientLinkBuilder paging) {
-    if (paging.isPagingRequested() && !paging.isFirstPage()) {
-      String query =
-          "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
-              + "where bm.partDContractNumberId = :contractCode and "
-              + "bm.yearMonth = :yearMonth and b.beneficiaryId > :cursor "
-              + "order by b.beneficiaryId asc";
+  private List<String> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
+      LocalDate yearMonth, String contractId, PatientLinkBuilder paging) {
+    // Create the query to run.
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<String> beneIdMatches = builder.createQuery(String.class);
+    Root<BeneficiaryMonthly> beneIdMatchesRoot = beneIdMatches.from(BeneficiaryMonthly.class);
+    beneIdMatches.select(
+        beneIdMatchesRoot
+            .get(BeneficiaryMonthly_.parentBeneficiary)
+            .get(Beneficiary_.beneficiaryId));
 
-      return entityManager
-          .createQuery(query, String.class)
-          .setParameter("contractCode", contractCode)
-          .setParameter("yearMonth", yearMonth)
-          .setParameter("cursor", paging.getCursor());
-    } else {
-      String query =
-          "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
-              + "where bm.partDContractNumberId = :contractCode and "
-              + "bm.yearMonth = :yearMonth "
-              + "order by b.beneficiaryId asc";
+    List<Predicate> wherePredicates = new ArrayList<>();
+    wherePredicates.add(
+        builder.equal(beneIdMatchesRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth));
+    wherePredicates.add(
+        builder.equal(
+            beneIdMatchesRoot.get(BeneficiaryMonthly_.partDContractNumberId), contractId));
+    if (paging.isPagingRequested()) {
+      wherePredicates.add(
+          builder.greaterThan(
+              beneIdMatchesRoot
+                  .get(BeneficiaryMonthly_.parentBeneficiary)
+                  .get(Beneficiary_.beneficiaryId),
+              paging.getCursor()));
+    }
+    beneIdMatches.where(
+        builder.and(wherePredicates.toArray(new Predicate[wherePredicates.size()])));
 
-      return entityManager
-          .createQuery(query, String.class)
-          .setParameter("contractCode", contractCode)
-          .setParameter("yearMonth", yearMonth);
+    // Run the query and return the results.
+    List<String> matchingBeneIds = null;
+    Long beneHistoryMatchesTimerQueryNanoSeconds = null;
+    Timer.Context beneIdMatchesTimer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(
+                    getClass().getSimpleName(),
+                    "query",
+                    "bene_ids_by_year_month_part_d_contract_id"))
+            .time();
+    try {
+      matchingBeneIds =
+          entityManager
+              .createQuery(beneIdMatches)
+              .setMaxResults(paging.getPageSize() + 1)
+              .getResultList();
+      return matchingBeneIds;
+    } finally {
+      beneHistoryMatchesTimerQueryNanoSeconds = beneIdMatchesTimer.stop();
+      TransformerUtils.recordQueryInMdc(
+          "bene_ids_by_year_month_part_d_contract_id",
+          beneHistoryMatchesTimerQueryNanoSeconds,
+          matchingBeneIds == null ? 0 : matchingBeneIds.size());
     }
   }
 
