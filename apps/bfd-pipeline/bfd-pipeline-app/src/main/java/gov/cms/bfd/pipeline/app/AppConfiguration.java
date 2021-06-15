@@ -350,7 +350,7 @@ public final class AppConfiguration implements Serializable {
             newRelicMetricPeriod,
             hostname);
     DatabaseOptions databaseOptions =
-        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword.toCharArray());
+        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword);
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     LoadAppOptions loadOptions =
         new LoadAppOptions(
