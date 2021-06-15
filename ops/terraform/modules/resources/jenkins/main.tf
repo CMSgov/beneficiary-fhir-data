@@ -5,7 +5,40 @@ locals {
   is_prod    = substr(var.env_config.env, 0, 4) == "prod"
 }
 
-# IAM: Setup Role, Profile and Policies for Jenkins
+data "aws_security_group" "managed_public" {
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-mgmt-vpn-public"]
+  }
+}
+
+data "aws_security_group" "managed_private" {
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-mgmt-vpn-private"]
+  }
+}
+
+data "aws_vpc" "managed_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-mgmt-vpc"]
+  }
+}
+
+data "aws_subnet" "app_subnets" {
+  count             = length(var.env_config.azs)
+  vpc_id            = var.env_config.vpc_id
+  availability_zone = var.env_config.azs[0]
+  filter {
+    name   = "tag:Layer"
+    values = [var.layer]
+  }
+}
+
+
+## IAM: Setup Role, Profile and Policies for Jenkins
+#
 
 resource "aws_iam_role" "jenkins" {
   name = "bfd-${var.env_config.env}-jenkins"
@@ -29,7 +62,7 @@ EOF
 
 resource "aws_iam_instance_profile" "jenkins_profile" {
   name = "bfd-${var.env_config.env}-jenkins"
-  role = "${aws_iam_role.jenkins.name}"
+  role = aws_iam_role.jenkins.name
 }
 
 resource "aws_iam_policy" "jenkins_volume" {
@@ -59,8 +92,8 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "jenkins_volume" {
-  role       = "${aws_iam_role.jenkins.name}"
-  policy_arn = "${aws_iam_policy.jenkins_volume.arn}"
+  role       = aws_iam_role.jenkins.name
+  policy_arn = aws_iam_policy.jenkins_volume.arn
 }
 
 resource "aws_iam_policy" "jenkins_boundary" {
@@ -142,47 +175,25 @@ EOT
 }
 
 resource "aws_iam_role_policy_attachment" "jenkins_boundary" {
-  role       = "${aws_iam_role.jenkins.name}"
-  policy_arn = "${aws_iam_policy.jenkins_boundary.arn}"
+  role       = aws_iam_role.jenkins.name
+  policy_arn = aws_iam_policy.jenkins_boundary.arn
 }
 
-### Lock Down Packer SG for Jenkins, Data App and Data Server
-
-data "aws_security_group" "managed_public" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-mgmt-vpn-public"]
-  }
-}
-
-data "aws_security_group" "managed_private" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-mgmt-vpn-private"]
-  }
-}
-
-data "aws_vpc" "managed_vpc" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-mgmt-vpc"]
-  }
-}
-
+# lock down packer SG for jenkins, data app and data server
 resource "aws_security_group" "packer_sg" {
   name        = "bfd-${var.env_config.env}-packer_sg"
   description = "Allow traffic to Packer Instances"
-  vpc_id      = "${var.vpc_id}"
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${data.aws_vpc.managed_vpc.cidr_block}"]
+    cidr_blocks = [data.aws_vpc.managed_vpc.cidr_block]
 
     security_groups = [
-      "${data.aws_security_group.managed_public.id}",
-      "${data.aws_security_group.managed_private.id}",
+      data.aws_security_group.managed_public.id,
+      data.aws_security_group.managed_private.id,
     ]
   }
 
@@ -198,21 +209,8 @@ resource "aws_security_group" "packer_sg" {
   }
 }
 
-# Subnets are created by CCS VPC setup
-#
-data "aws_subnet" "app_subnets" {
-  count             = length(var.env_config.azs)
-  vpc_id            = var.env_config.vpc_id
-  availability_zone = var.env_config.azs[0]
-  filter {
-    name   = "tag:Layer"
-    values = [var.layer]
-  }
-}
 
-# Base security includes management SSH access
-#
-
+# base security includes management SSH access
 resource "aws_security_group" "base" {
   name        = "bfd-${var.env_config.env}-${var.role}-base"
   description = "Allow CI access to app servers"
@@ -234,8 +232,7 @@ resource "aws_security_group" "base" {
   }
 }
 
-# Callers access to the app
-#
+# callers access to the app
 resource "aws_security_group" "app" {
   count       = var.lb_config == null ? 0 : 1
   name        = "bfd-${var.env_config.env}-${var.role}-app"
@@ -252,9 +249,8 @@ resource "aws_security_group" "app" {
   }
 }
 
-##
-# Launch template
-##
+
+# launch template
 resource "aws_launch_template" "main" {
   name                   = "bfd-${var.env_config.env}-${var.role}"
   description            = "Template for the ${var.env_config.env} environment ${var.role} servers"
@@ -277,20 +273,17 @@ resource "aws_launch_template" "main" {
   }
 }
 
-
-##
-# Autoscaling group
-##
+# ASG
 resource "aws_autoscaling_group" "main" {
-  # Generate a new group on every revision of the launch template. 
-  # This does a simple version of a blue/green deployment
+  # generate a new group on every revision of the launch template. 
+  # this does a simple version of a blue/green deployment
   #
   name             = "${aws_launch_template.main.name}-${aws_launch_template.main.latest_version}"
   desired_capacity = var.asg_config.desired
   max_size         = var.asg_config.max
   min_size         = var.asg_config.min
 
-  # If an lb is defined, wait for the ELB 
+  # if an lb is defined, wait for the ELB 
   min_elb_capacity          = var.lb_config == null ? null : var.asg_config.min
   wait_for_capacity_timeout = var.lb_config == null ? null : "20m"
 
@@ -334,4 +327,3 @@ resource "aws_autoscaling_group" "main" {
     create_before_destroy = false
   }
 }
-

@@ -1,11 +1,9 @@
 terraform {
-  required_version = "> 0.12.30, < 0.13" 
+  required_version = "> 0.12.30, < 0.13"
 }
 
 provider "aws" {
-  # FIXME BFD-211: Revert once this is fixed: https://github.com/terraform-providers/terraform-provider-aws/issues/13236
-  # version = "~> 2.25"
-  version = "<= 2.60.0"
+  version = "~> 3.44.0"
   region  = "us-east-1"
 }
 

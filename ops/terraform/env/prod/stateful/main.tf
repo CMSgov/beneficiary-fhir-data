@@ -1,9 +1,9 @@
 terraform {
-  required_version = "> 0.12.30, < 0.13" 
+  required_version = "> 0.12.30, < 0.13"
 }
 
 provider "aws" {
-  version = "~> 2.25"
+  version = "~> 3.44.0"
   region  = "us-east-1"
 }
 
@@ -21,7 +21,7 @@ module "stateful" {
     # With aurora you do not designate primary and replicas. Instead, you simply add RDS Instances and
     # Aurora manages the replication. So if you want 1 writer and 3 readers, you set cluster_nodes to 4
     cluster_nodes  = 4
-    engine_version = "11.6"
+    engine_version = "11.9"
     param_version  = "aurora-postgresql11"
   }
 

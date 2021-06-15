@@ -1,9 +1,7 @@
-##
 # Create a Data Lifecycle Manager (DLM) schedule that snapshots EBS volumes that have the "snapshot=true" tag 
-##
+#
 
 # IAM Roles and Policy for the DLM policy
-#
 resource "aws_iam_role" "dlm_lifecycle_role" {
   name               = "dlm-lifecycle-role"
   assume_role_policy = <<EOF
@@ -54,7 +52,6 @@ EOF
 }
 
 # DLM policy and schedule
-#
 resource "aws_dlm_lifecycle_policy" "main" {
   description        = "BFDs snapshot policy"
   execution_role_arn = aws_iam_role.dlm_lifecycle_role.arn

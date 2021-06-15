@@ -1,4 +1,4 @@
-# Setup an S3 bucket intended for PII
+## Setup an S3 bucket intended for PII
 #
 
 locals {
@@ -7,6 +7,10 @@ locals {
 }
 
 data "aws_caller_identity" "current" {}
+
+
+## S3 Bucket
+#
 
 resource "aws_kms_key" "pii_bucket_key" {
   description             = "bfd-${var.env_config.env}-${var.pii_bucket_config.name}-cmk"
