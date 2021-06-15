@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryCsvWriter;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
+import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimCsvWriter;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
@@ -64,6 +65,8 @@ import javax.persistence.Persistence;
 import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
@@ -604,6 +607,18 @@ public final class RifLoader implements AutoCloseable {
       oldBeneficiaryRecord =
           Optional.ofNullable(
               entityManager.find(Beneficiary.class, newBeneficiaryRecord.getBeneficiaryId()));
+
+      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
+      Root<Beneficiary> root = criteria.from(Beneficiary.class);
+      root.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.LEFT);
+      criteria.select(root);
+      criteria.where(
+          builder.equal(
+              root.get(Beneficiary_.beneficiaryId), newBeneficiaryRecord.getBeneficiaryId()));
+
+      oldBeneficiaryRecord =
+          Optional.ofNullable(entityManager.createQuery(criteria).getSingleResult());
     }
 
     /*
