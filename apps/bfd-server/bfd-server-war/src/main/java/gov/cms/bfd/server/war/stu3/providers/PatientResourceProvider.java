@@ -35,6 +35,8 @@ import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,6 +58,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Identifier;
@@ -200,9 +203,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       @OptionalParam(name = "_has:Coverage.rfrncyr")
           @Description(shortDefinition = "Part D reference year")
           TokenParam referenceYear,
-      @OptionalParam(name = "cursor")
-          @Description(shortDefinition = "The cursor used for result pagination")
-          String cursor,
       RequestDetails requestDetails) {
     // Figure out what month they're searching for.
     String contractMonth =
@@ -211,17 +211,13 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     String contractMonthValue = partDFieldByMonth(partDContractMonth);
 
     // Figure out which year they're searching for.
-    String contractYearValue;
-    if (referenceYear == null || referenceYear.getValue() == null) {
-      contractYearValue = "" + LocalDate.now().getYear();
-    } else {
-      contractYearValue = referenceYear.getValueNotNull();
+    int year = Year.now().getValue();
+    if (referenceYear != null && !StringUtils.isEmpty(referenceYear.getValueNotNull())) {
+      year = Integer.parseInt(referenceYear.getValueNotNull());
     }
+    YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
 
-    LocalDate yearMonth =
-        LocalDate.parse(String.format("%s-%s-01", contractYearValue, contractMonthValue));
-
-    return searchByCoverageContractAndYearMonth(coverageId, yearMonth, cursor, requestDetails);
+    return searchByCoverageContractAndYearMonth(coverageId, ym.atDay(1), requestDetails);
   }
 
   /**
@@ -304,10 +300,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      TokenParam coverageId,
-      TokenParam referenceYear,
-      String cursor,
-      RequestDetails requestDetails) {
+      TokenParam coverageId, LocalDate monthYear, RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
@@ -320,7 +313,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     operation.publishOperationName();
 
     List<Beneficiary> matchingBeneficiaries =
-        fetchBeneficiariesByContractAndYearMonth(coverageId, referenceYear, paging);
+        fetchBeneficiariesByContractAndYearMonth(coverageId, monthYear, paging);
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -390,23 +383,17 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   /**
    * @param coverageId a {@link TokenParam} specifying the Part D contract ID and the month to match
    *     against (yeah, the combo is weird)
-   * @param referenceYear the enrollment year to match against
+   * @param yearMonth the enrollment month and year to match against
    * @param paging the {@link PatientLinkBuilder} being used for paging
    * @return the {@link Beneficiary}s that match the specified PartD contract ID for the specified
    *     year and month
    */
   private List<Beneficiary> fetchBeneficiariesByContractAndYearMonth(
-      TokenParam coverageId, TokenParam referenceYear, PatientLinkBuilder paging) {
+      TokenParam coverageId, LocalDate yearMonth, PatientLinkBuilder paging) {
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
 
-    CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
-    String contractMonthField = partDFieldByMonth(partDContractMonth);
-    String contractYearField = referenceYear.getValueNotNull();
-
     String contractCode = coverageId.getValueNotNull();
-
-    LocalDate yearMonth = getFormattedYearMonth(contractYearField, contractMonthField);
 
     /*
      * Fetching with joins is not compatible with setMaxResults as explained in this post:
@@ -493,7 +480,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    * Build a criteria for a beneficiary query using the passed in list of ids
    *
    * @param ids to use
-   * @param identifiers to add for many-to-one relations
    * @return the criteria
    */
   private TypedQuery<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<String> ids) {
