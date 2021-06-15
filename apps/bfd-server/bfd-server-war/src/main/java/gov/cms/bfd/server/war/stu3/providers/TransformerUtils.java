@@ -397,8 +397,7 @@ public final class TransformerUtils {
     // <ID Value> => ExplanationOfBenefit.careTeam.provider
     if (careTeamEntry == null) {
       careTeamEntry = eob.addCareTeam();
-      // addItem adds and returns, so we want size() not size() + 1 here
-      careTeamEntry.setSequence(eob.getCareTeam().size());
+      careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
       careTeamEntry.setProvider(createPractitionerIdentifierReference(type, practitionerIdValue));
 
       CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);
@@ -1923,6 +1922,7 @@ public final class TransformerUtils {
   static ItemComponent mapEobCommonItemCarrierDME(
       ItemComponent item,
       ExplanationOfBenefit eob,
+      Optional<Boolean> includeTaxNumbers,
       String claimId,
       BigDecimal serviceCount,
       String placeOfServiceCode,
@@ -1946,7 +1946,8 @@ public final class TransformerUtils {
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
-      Optional<String> nationalDrugCode) {
+      Optional<String> nationalDrugCode,
+      String taxNumber) {
 
     SimpleQuantity serviceCnt = new SimpleQuantity();
     serviceCnt.setValue(serviceCount);
@@ -1968,6 +1969,25 @@ public final class TransformerUtils {
           new Period()
               .setStart((convertToDate(firstExpenseDate.get())), TemporalPrecisionEnum.DAY)
               .setEnd((convertToDate(lastExpenseDate.get())), TemporalPrecisionEnum.DAY));
+    }
+
+    if (includeTaxNumbers.orElse(false)) {
+
+      ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
+          TransformerUtils.addCareTeamPractitioner(
+              eob, item, IdentifierType.TAX.getSystem(), taxNumber, ClaimCareteamrole.OTHER);
+      providerTaxNumber.setResponsible(true);
+
+      ExplanationOfBenefit.CareTeamComponent providerTaxNumberWithIdentifier =
+          TransformerUtils.addCareTeamPractitioner(
+              eob,
+              item,
+              IdentifierType.TAX,
+              taxNumber,
+              ClaimCareteamrole.OTHER.getSystem(),
+              ClaimCareteamrole.OTHER.name(),
+              ClaimCareteamrole.OTHER.getDisplay());
+      providerTaxNumber.setResponsible(true);
     }
 
     AdjudicationComponent adjudicationForPayment = item.addAdjudication();

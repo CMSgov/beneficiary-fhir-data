@@ -120,15 +120,6 @@ public final class DMEClaimTransformerTest {
         claimLine1.getProviderStateCode(),
         eobItem0.getLocation());
 
-    CareTeamComponent taxNumberCareTeamEntry =
-        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
-            claimLine1.getProviderTaxNumber(), eob.getCareTeam());
-    if (includedTaxNumbers.orElse(false)) {
-      Assert.assertNotNull(taxNumberCareTeamEntry);
-    } else {
-      Assert.assertNull(taxNumberCareTeamEntry);
-    }
-
     TransformerTestUtils.assertHcpcsCodes(
         eobItem0,
         claimLine1.getHcpcsCode(),
@@ -200,6 +191,7 @@ public final class DMEClaimTransformerTest {
     TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(
         eobItem0,
         eob,
+        includedTaxNumbers,
         claimLine1.getServiceCount(),
         claimLine1.getPlaceOfServiceCode(),
         claimLine1.getFirstExpenseDate(),
@@ -222,7 +214,8 @@ public final class DMEClaimTransformerTest {
         claimLine1.getHctHgbTestTypeCode(),
         claimLine1.getHctHgbTestResult(),
         claimLine1.getCmsServiceTypeCode(),
-        claimLine1.getNationalDrugCode());
+        claimLine1.getNationalDrugCode(),
+        claimLine1.getProviderTaxNumber());
 
     // Test lastUpdated
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);

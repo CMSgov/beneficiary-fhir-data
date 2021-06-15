@@ -540,6 +540,7 @@ public final class TransformerTestUtilsV2 {
   static void assertEobCommonItemCarrierDMEEquals(
       ItemComponent item,
       ExplanationOfBenefit eob,
+      Optional<Boolean> includeTaxNumbers,
       BigDecimal serviceCount,
       String placeOfServiceCode,
       Optional<LocalDate> firstExpenseDate,
@@ -630,6 +631,18 @@ public final class TransformerTestUtilsV2 {
         TransformerConstants.CODING_NDC,
         nationalDrugCode.get());
         */
+  }
+
+  static void assertEobCommonItemCarrierDMETaxNumberEquals(
+      ExplanationOfBenefit eob, Optional<Boolean> includeTaxNumbers, String taxNumber) {
+    CareTeamComponent taxNumberCareTeamEntry =
+        TransformerTestUtilsV2.findCareTeamEntryForProviderTaxNumber(taxNumber, eob.getCareTeam());
+
+    if (includeTaxNumbers.orElse(false)) {
+      Assert.assertNotNull(taxNumberCareTeamEntry);
+    } else {
+      Assert.assertNull(taxNumberCareTeamEntry);
+    }
   }
 
   /**

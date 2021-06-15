@@ -175,19 +175,6 @@ public class CarrierClaimTransformerV2 {
       // LINE_NUM => ExplanationOfBenefit.item.sequence
       item.setSequence(line.getLineNumber().intValue());
 
-      if (includeTaxNumbers.orElse(false)) {
-        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-            TransformerUtilsV2.addCareTeamPractitioner(
-                eob,
-                item,
-                C4BBPractitionerIdentifierType.TAX,
-                line.getProviderTaxNumber(),
-                C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.getSystem(),
-                C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.name(),
-                C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.getDisplay());
-        providerTaxNumber.setResponsible(true);
-      }
-
       // PRF_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
       Optional<CareTeamComponent> performing =
           TransformerUtilsV2.addCareTeamMember(
@@ -312,6 +299,7 @@ public class CarrierClaimTransformerV2 {
       TransformerUtilsV2.mapEobCommonItemCarrierDME(
           item,
           eob,
+          includeTaxNumbers,
           claimGroup.getClaimId(),
           item.getSequence(),
           line.getServiceCount(),

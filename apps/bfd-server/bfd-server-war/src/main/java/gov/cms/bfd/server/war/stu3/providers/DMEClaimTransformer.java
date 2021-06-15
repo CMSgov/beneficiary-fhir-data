@@ -7,7 +7,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -195,33 +194,6 @@ final class DMEClaimTransformer {
               claimLine.getHcpcsThirdModifierCode(),
               claimLine.getHcpcsFourthModifierCode()));
 
-      /*
-       * FIXME This value seems to be just a "synonym" for the performing physician NPI and should
-       * probably be mapped as an extra identifier with it (if/when that lands in a contained
-       * Practitioner resource).
-       */
-      if (includeTaxNumbers.orElse(false)) {
-        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-            TransformerUtils.addCareTeamPractitioner(
-                eob,
-                item,
-                IdentifierType.TAX.getSystem(),
-                claimLine.getProviderTaxNumber(),
-                ClaimCareteamrole.OTHER);
-        providerTaxNumber.setResponsible(true);
-
-        providerTaxNumber =
-            TransformerUtils.addCareTeamPractitioner(
-                eob,
-                item,
-                IdentifierType.TAX,
-                claimLine.getProviderTaxNumber(),
-                ClaimCareteamrole.OTHER.getSystem(),
-                ClaimCareteamrole.OTHER.name(),
-                ClaimCareteamrole.OTHER.getDisplay());
-        providerTaxNumber.setResponsible(true);
-      }
-
       item.addAdjudication()
           .setCategory(
               TransformerUtils.createAdjudicationCategory(
@@ -255,6 +227,7 @@ final class DMEClaimTransformer {
       TransformerUtils.mapEobCommonItemCarrierDME(
           item,
           eob,
+          includeTaxNumbers,
           claimGroup.getClaimId(),
           claimLine.getServiceCount(),
           claimLine.getPlaceOfServiceCode(),
@@ -278,7 +251,8 @@ final class DMEClaimTransformer {
           claimLine.getHctHgbTestTypeCode(),
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
-          claimLine.getNationalDrugCode());
+          claimLine.getNationalDrugCode(),
+          claimLine.getProviderTaxNumber());
 
       if (!claimLine.getProviderStateCode().isEmpty()) {
         // FIXME Should this be pulled to a common mapping method?

@@ -25,6 +25,7 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -1638,7 +1639,7 @@ final class TransformerTestUtils {
   static void assertEobCommonItemCarrierDMEEquals(
       ItemComponent item,
       ExplanationOfBenefit eob,
-      RequestHeaders requestHeader,
+      Optional<Boolean> includeTaxNumbers,
       BigDecimal serviceCount,
       String placeOfServiceCode,
       Optional<LocalDate> firstExpenseDate,
@@ -1727,15 +1728,13 @@ final class TransformerTestUtils {
         TransformerConstants.CODING_NDC,
         nationalDrugCode.get());
 
-    Boolean inclTaxNumFlds =
-        (Boolean)
-            requestHeader.getValue(
-                ExplanationOfBenefitResourceProvider.HEADER_NAME_INCLUDE_TAX_NUM_FIELDS);
+    CareTeamComponent taxNumberCareTeamEntry =
+        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(taxNumber, eob.getCareTeam());
 
-    if (inclTaxNumFlds) {
-      assertExtensionCodingEquals(CcwCodebookVariable.TAX_NUM, taxNumber, item);
+    if (includeTaxNumbers.orElse(false)) {
+      Assert.assertNotNull(taxNumberCareTeamEntry);
     } else {
-      assertExtensionCodingNotEquals(CcwCodebookVariable.TAX_NUM, taxNumber, item);
+      Assert.assertNull(taxNumberCareTeamEntry);
     }
   }
 
@@ -2112,7 +2111,6 @@ final class TransformerTestUtils {
    * @return RequestHeaders instance derived from value
    */
   public static RequestHeaders getRHwithIncldTaxNumFldHdr(String value) {
-    return RequestHeaders.getHeaderWrapper(
-        ExplanationOfBenefitResourceProvider.HEADER_NAME_INCLUDE_TAX_NUM_FIELDS, value);
+    return RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, value);
   }
 }

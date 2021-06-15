@@ -3038,6 +3038,7 @@ public final class TransformerUtilsV2 {
   static ItemComponent mapEobCommonItemCarrierDME(
       ItemComponent item,
       ExplanationOfBenefit eob,
+      Optional<Boolean> includeTaxNumbers,
       String claimId,
       int sequence,
       BigDecimal serviceCount,
@@ -3060,7 +3061,8 @@ public final class TransformerUtilsV2 {
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
-      Optional<String> nationalDrugCode) {
+      Optional<String> nationalDrugCode,
+      String taxNumber) {
 
     // LINE_SRVC_CNT => ExplanationOfBenefit.item.quantity
     item.setQuantity(new SimpleQuantity().setValue(serviceCount));
@@ -3076,6 +3078,19 @@ public final class TransformerUtilsV2 {
     // BETOS_CD => ExplanationOfBenefit.item.extension
     betosCode.ifPresent(
         code -> item.addExtension(createExtensionCoding(eob, CcwCodebookVariable.BETOS_CD, code)));
+
+    if (includeTaxNumbers.orElse(false)) {
+      ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
+          TransformerUtilsV2.addCareTeamPractitioner(
+              eob,
+              item,
+              C4BBPractitionerIdentifierType.TAX,
+              taxNumber,
+              C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.getSystem(),
+              C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.name(),
+              C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.getDisplay());
+      providerTaxNumber.setResponsible(true);
+    }
 
     // LINE_1ST_EXPNS_DT => ExplanationOfBenefit.item.servicedPeriod
     // LINE_LAST_EXPNS_DT => ExplanationOfBenefit.item.servicedPeriod

@@ -174,28 +174,6 @@
       } ]
     }
   }, {
-    "sequence" : 3,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
-            "code" : "TAX",
-            "display" : "Tax ID number"
-          } ]
-        },
-        "value" : "204299999"
-      }
-    },
-    "responsible" : true,
-    "role" : {
-      "coding" : [ {
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
-        "code" : "OTHER",
-        "display" : "Other"
-      } ]
-    }
-  }, {
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
       "valueCoding" : {
@@ -210,7 +188,7 @@
         "display" : "Participating"
       }
     } ],
-    "sequence" : 4,
+    "sequence" : 3,
     "provider" : {
       "identifier" : {
         "type" : {
@@ -239,7 +217,7 @@
       } ]
     }
   }, {
-    "sequence" : 5,
+    "sequence" : 4,
     "provider" : {
       "identifier" : {
         "type" : {
@@ -258,6 +236,28 @@
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
         "code" : "primary",
         "display" : "Primary provider"
+      } ]
+    }
+  }, {
+    "sequence" : 5,
+    "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "TAX",
+            "display" : "Tax ID number"
+          } ]
+        },
+        "value" : "204299999"
+      }
+    },
+    "responsible" : true,
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "OTHER",
+        "display" : "Other"
       } ]
     }
   } ],

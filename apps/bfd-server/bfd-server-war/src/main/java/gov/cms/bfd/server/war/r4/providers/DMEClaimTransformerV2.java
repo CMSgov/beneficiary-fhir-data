@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -172,21 +171,6 @@ final class DMEClaimTransformerV2 {
       // CLM_LINE_NUM => item.sequence
       item.setSequence(line.getLineNumber().intValue());
 
-      if (includeTaxNumbers.orElse(false)) {
-        if (!Strings.isNullOrEmpty(line.getProviderTaxNumber())) {
-          ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-              TransformerUtilsV2.addCareTeamPractitioner(
-                  eob,
-                  item,
-                  C4BBPractitionerIdentifierType.TAX,
-                  line.getProviderTaxNumber(),
-                  C4BBPractitionerIdentifierType.TAX.getSystem(),
-                  C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.name(),
-                  C4BBPractitionerIdentifierType.TAX.getDisplay());
-          providerTaxNumber.setResponsible(true);
-        }
-      }
-
       // add an extension for the provider billing number as there is not a good place
       // to map this in the existing FHIR specification
       // PRVDR_NUM => ExplanationOfBenefit.provider.value
@@ -247,19 +231,6 @@ final class DMEClaimTransformerV2 {
               line.getHcpcsSecondModifierCode(),
               line.getHcpcsThirdModifierCode(),
               line.getHcpcsFourthModifierCode()));
-
-      if (includeTaxNumbers.orElse(false)) {
-        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-            TransformerUtilsV2.addCareTeamPractitioner(
-                eob,
-                item,
-                C4BBPractitionerIdentifierType.TAX,
-                line.getProviderTaxNumber(),
-                C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.getSystem(),
-                C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.name(),
-                C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER.getDisplay());
-        providerTaxNumber.setResponsible(true);
-      }
 
       // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(
@@ -359,6 +330,7 @@ final class DMEClaimTransformerV2 {
       TransformerUtilsV2.mapEobCommonItemCarrierDME(
           item,
           eob,
+          includeTaxNumbers,
           claimGroup.getClaimId(),
           item.getSequence(),
           line.getServiceCount(),

@@ -224,7 +224,7 @@
       } ]
     }
   }, {
-    "sequence" : 3,
+    "sequence" : 4,
     "provider" : {
       "identifier" : {
         "type" : {
@@ -237,7 +237,6 @@
         "value" : "204299999"
       }
     },
-    "responsible" : true,
     "role" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/claimcareteamrole",
@@ -346,7 +345,7 @@
       }
     } ],
     "sequence" : 6,
-    "careTeamLinkId" : [ 2, 3 ],
+    "careTeamLinkId" : [ 2, 3, 4 ],
     "diagnosisLinkId" : [ 5 ],
     "category" : {
       "coding" : [ {

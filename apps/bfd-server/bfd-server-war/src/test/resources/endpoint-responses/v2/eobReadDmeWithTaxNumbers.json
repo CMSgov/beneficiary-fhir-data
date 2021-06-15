@@ -155,28 +155,6 @@
       } ]
     }
   }, {
-    "sequence" : 2,
-    "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
-            "code" : "TAX",
-            "display" : "Tax ID number"
-          } ]
-        },
-        "value" : "999493188"
-      }
-    },
-    "responsible" : true,
-    "role" : {
-      "coding" : [ {
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
-        "code" : "OTHER",
-        "display" : "Tax ID number"
-      } ]
-    }
-  }, {
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
       "valueCoding" : {
@@ -185,7 +163,7 @@
         "display" : "Participating"
       }
     } ],
-    "sequence" : 3,
+    "sequence" : 2,
     "provider" : {
       "identifier" : {
         "type" : {
@@ -214,7 +192,7 @@
       } ]
     }
   }, {
-    "sequence" : 4,
+    "sequence" : 3,
     "provider" : {
       "identifier" : {
         "type" : {
@@ -387,7 +365,7 @@
       }
     } ],
     "sequence" : 1,
-    "careTeamSequence" : [ 2, 3, 4 ],
+    "careTeamSequence" : [ 2, 3 ],
     "diagnosisSequence" : [ 3 ],
     "informationSequence" : [ 2 ],
     "category" : {

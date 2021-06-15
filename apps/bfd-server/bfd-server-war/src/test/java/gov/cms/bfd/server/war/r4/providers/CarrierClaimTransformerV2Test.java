@@ -81,7 +81,8 @@ public class CarrierClaimTransformerV2Test {
 
     assertMatches(
         claim,
-        CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)));
+        CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)),
+        false);
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -1051,7 +1052,8 @@ public class CarrierClaimTransformerV2Test {
    *     InpatientClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(CarrierClaim claim, ExplanationOfBenefit eob) throws FHIRException {
+  static void assertMatches(CarrierClaim claim, ExplanationOfBenefit eob, Boolean includeTaxNumbers)
+      throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtilsV2.assertEobCommonClaimHeaderData(
         eob,
