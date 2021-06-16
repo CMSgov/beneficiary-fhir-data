@@ -1,5 +1,6 @@
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ VARS & DATA SOURCES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## VARS & DATA SOURCES
 #
+
 locals {
   tags = merge({ Layer = var.layer, role = var.role }, var.env_config.tags)
 }
@@ -45,7 +46,8 @@ data "aws_iam_role" "etl_instance" {
 # current region
 data "aws_region" "current" {}
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ENCRYPTION KEYS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## ENCRYPTION KEYS
 #
 
 # provision the encryption cmk (keys can be managed by anyone in the kms-key-admins group)
@@ -75,7 +77,8 @@ resource "aws_kms_key" "eft_efs" {
 POLICY
 }
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ FILE SYSTEMS AND ACCESS POINTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## FILE SYSTEMS AND ACCESS POINTS
 #
 
 # ${var.partner} EFT file system
@@ -85,9 +88,9 @@ resource "aws_efs_file_system" "eft" {
   kms_key_id     = aws_kms_key.eft_efs.arn
   tags           = merge({ Name = "${var.partner}-eft-efs-${var.env_config.env}" }, local.tags)
 
-  // ${var.partner} will be responsible for cleaning up after ingestion, but just in case, we transition
-  // files not accessed after 7 days to slower storage to save $
-  // TODO: create alert if any files are in IA class
+  # ${var.partner} will be responsible for cleaning up after ingestion, but just in case, we transition
+  # files not accessed after 7 days to slower storage to save $
+  # TODO: create alert if any files are in IA class
   lifecycle_policy {
     transition_to_ia = "AFTER_7_DAYS"
   }
@@ -252,7 +255,7 @@ resource "aws_iam_policy_attachment" "eft_efs_query" {
 }
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ NETWORK ACL's ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## NETWORK ACL's
 #
 
 # security group that allows NFS traffic (TCP/2049) from BFD and ${var.partner} subnets
@@ -285,7 +288,8 @@ resource "aws_security_group_rule" "partner_nfs" {
   cidr_blocks       = var.partner_subnets[var.env_config.env]
 }
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MOUNT TARGETS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## MOUNT TARGETS
 #
 
 # Deploy mount targets into etl data subnets
@@ -300,7 +304,7 @@ resource "aws_efs_mount_target" "eft" {
   security_groups = [aws_security_group.eft_efs_sg.id]
 }
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MONITORING/ALERTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## MONITORING/ALERTING
 #
 
 # sns topic for cloudwatch
