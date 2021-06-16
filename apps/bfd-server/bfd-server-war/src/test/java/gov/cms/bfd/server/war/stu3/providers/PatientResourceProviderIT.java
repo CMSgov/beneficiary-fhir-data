@@ -1,5 +1,21 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Year;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.persistence.criteria.CriteriaBuilder;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -9,25 +25,14 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly;
+import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
 public final class PatientResourceProviderIT {
@@ -1594,91 +1599,111 @@ public final class PatientResourceProviderIT {
     Assert.assertEquals(0, searchResults.getTotal());
   }
 
+  /**
+   * Verifies that
+   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
+   * works as expected.
+   */
   @Test
-  public void searchForExistingPatientByPartDContractNum() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient();
+  public void searchByPartDContract() {
+    List<Object> loadedRecords = ServerTestUtils.loadData(Arrays.asList(
+        StaticRifResource.SAMPLE_A_BENES,
+        StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
+        StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
     // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .returnBundle(Bundle.class)
-            .execute();
+    Bundle searchResults = fhirClient.search().forResource(Patient.class)
+        .where(new TokenClientParam("_has:Coverage.extension").exactly().systemAndIdentifier(
+            TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
+            "S4607"))
+        .where(new TokenClientParam("_has:Coverage.rfrncyr").exactly().systemAndIdentifier(
+            TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR), "2018"))
+        .returnBundle(Bundle.class).execute();
 
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getEntry().size());
-  }
-
-  @Test
-  public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrue() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("true", "true");
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .returnBundle(Bundle.class)
-            .execute();
-
+    // Verify that it found the expected bene.
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getEntry().size());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
-    Assert.assertEquals(
-        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
+    Assert.assertEquals(expectedBene.getBeneficiaryId(),
+        patientFromSearchResult.getIdElement().getIdPart());
 
-    Boolean hicnUnhashedPresent = false;
-    Boolean mbiUnhashedPresent = false;
-    Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
-    while (identifiers.hasNext()) {
-      Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
-        hicnUnhashedPresent = true;
-      if (identifier
-          .getSystem()
-          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
-        mbiUnhashedPresent = true;
-    }
-
-    Assert.assertTrue(hicnUnhashedPresent);
-    Assert.assertTrue(mbiUnhashedPresent);
+    /*
+     * Verify that the unhashed MBIs are present, as expected. Note that checking for more than just
+     * one MBI and verifying that they're all unique is a regression test for BFD-525.
+     */
+    Assert.assertEquals(3, patientFromSearchResult.getIdentifier().stream()
+        .filter(i -> i.getSystem()
+            .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
+        .collect(Collectors.toSet()).size());
   }
 
   /**
-   * Regression test for part of BFD-525, which verifies that duplicate entries are not returned
-   * when 1) plain-text identifiers are requested, 2) a beneficiary has multiple historical
-   * identifiers, and 3) paging is requested. (This oddly specific combo had been bugged earlier and
-   * was quite tricky to resolve).
+   * Verifies that
+   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
+   * works as expected, when no year is specified (hopefully causing it to substitute the current
+   * year).
+   */
+  @Test
+  public void searchByPartDContractWithoutYear() {
+    /*
+     * TODO Once AB2D has switched to always specifying the year, this needs to become an invalid
+     * request and this test will need to be updated to reflect that, then.
+     */
+
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    // First, adjust the bene's reference year in the DB.
+    ServerTestUtils.doTransaction(
+        (em) -> {
+          // FIXME need to change this to a query, and for every result, update just the year.
+
+          CriteriaBuilder cb = em.getCriteriaBuilder();
+          CriteriaUpdate<BeneficiaryMonthly> update = cb.createCriteriaUpdate(BeneficiaryMonthly.class);
+          Root<BeneficiaryMonthly> e = update.from(BeneficiaryMonthly.class);
+          update.set(BeneficiaryMonthly_.yearMonth, LocalDate.now().getYear());
+   
+          em.createQuery(update).executeUpdate();
+        });
+
+    // Should return a single match
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .returnBundle(Bundle.class)
+            .execute();
+
+    // Verify that it found the expected bene.
+    Assert.assertNotNull(searchResults);
+    Assert.assertEquals(1, searchResults.getEntry().size());
+    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
+    Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
+    Assert.assertEquals(expectedBene.getBeneficiaryId(),
+        patientFromSearchResult.getIdElement().getIdPart());
+  }
+
+  /**
+   * Verifies that
+   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
+   * works as expected, when paging is requested.
    */
   @Test
   public void
-      searchForExistingPatientByPartDContractNumIncludeIdentifiersTrueWithPagingAndMultipleMbis() {
+      searchByPartDContractWithPaging() {
     ServerTestUtils.loadData(
         Arrays.asList(
-            StaticRifResource.SAMPLE_A_BENES,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+            StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = createFhirClient("mbi", "true");
 
     // Should return a single match
@@ -1693,6 +1718,10 @@ public final class PatientResourceProviderIT {
                         TransformerUtils.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr").exactly()
+                    .systemAndIdentifier(TransformerUtils
+                        .calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR), "2018"))
             .count(1)
             .returnBundle(Bundle.class)
             .execute();
@@ -1714,19 +1743,14 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Regression test for part of BFD-525, which verifies that duplicate entries are not returned
-   * when 1) plain-text identifiers are requested, 2) a beneficiary has multiple historical
-   * identifiers, and 3) paging is not requested. (This oddly specific combo had been bugged earlier
-   * and was quite tricky to resolve).
+   * Verifies that
+   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
+   * works as expected, when searching for a contract-year-month with no benes.
    */
   @Test
-  public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrueAndMultipleMbis() {
-    ServerTestUtils.loadData(
-        Arrays.asList(
-            StaticRifResource.SAMPLE_A_BENES,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
-    IGenericClient fhirClient = createFhirClient("mbi", "true");
+  public void searchByPartDContractForEmptyContract() {
+    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
 
     // Should return a single match
     Bundle searchResults =
@@ -1739,126 +1763,38 @@ public final class PatientResourceProviderIT {
                     .systemAndIdentifier(
                         TransformerUtils.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    // Verify that the bene wasn't duplicated.
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getEntry().size());
-
-    // Double-check that the bene has multiple identifiers.
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    Assert.assertEquals(
-        3,
-        patientFromSearchResult.getIdentifier().stream()
-            .filter(
-                i ->
-                    TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED.equals(
-                        i.getSystem()))
-            .count());
-  }
-
-  @Test
-  public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("false", "true");
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
+                        "A1234"))
             .where(
-                new TokenClientParam("_has:Coverage.extension")
+                new TokenClientParam("_has:Coverage.rfrncyr")
                     .exactly()
                     .systemAndIdentifier(
                         TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getEntry().size());
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-
-    Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
-    Assert.assertEquals(
-        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
-
-    Boolean hicnUnhashedPresent = false;
-    Boolean mbiUnhashedPresent = false;
-    Iterator<Identifier> identifiers = patientFromSearchResult.getIdentifier().iterator();
-    while (identifiers.hasNext()) {
-      Identifier identifier = identifiers.next();
-      if (identifier.getSystem().equals(TransformerConstants.CODING_BBAPI_BENE_HICN_UNHASHED))
-        hicnUnhashedPresent = true;
-      if (identifier
-          .getSystem()
-          .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
-        mbiUnhashedPresent = true;
-    }
-
-    Assert.assertFalse(hicnUnhashedPresent);
-    Assert.assertFalse(mbiUnhashedPresent);
-  }
-
-  @Test
-  public void searchForPatientByPartDContractNumWithPaging() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient();
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .count(10)
-            .returnBundle(Bundle.class)
-            .execute();
-
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getEntry().size());
-
-    /*
-     * Verify that only the first and last paging links exist, since there should
-     * only be one page.
-     */
-    Assert.assertNotNull(searchResults.getLink(Constants.LINK_FIRST));
-    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
-  }
-
-  @Test
-  public void searchForMissingPatientByPartDContractNum() {
-    IGenericClient fhirClient = createFhirClient();
-
-    // No data is loaded, so this should return 0 matches.
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "12345"))
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2010"))
             .returnBundle(Bundle.class)
             .execute();
 
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(0, searchResults.getEntry().size());
+  }
+
+  /**
+   * Verifies that
+   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
+   * works as expected, when an invalid year is specfied.
+   */
+  @Test(expected = InvalidRequestException.class)
+  public void searchByPartDContractWithInvalidYear() {
+    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+
+    fhirClient.search().forResource(Patient.class)
+        .where(new TokenClientParam("_has:Coverage.extension").exactly().systemAndIdentifier(
+            TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
+            "S4607"))
+        .where(new TokenClientParam("_has:Coverage.rfrncyr").exactly().systemAndIdentifier(
+            TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR), "ABC"))
+        .returnBundle(Bundle.class).execute();
   }
 
   @Test
@@ -1890,131 +1826,6 @@ public final class PatientResourceProviderIT {
     List<String> emptyUrls =
         Arrays.asList("_lastUpdated=lt" + earlyDateTime, "_lastUpdated=le" + earlyDateTime);
     testLastUpdatedUrls(fhirClient, beneficiary.getBeneficiaryId(), emptyUrls, 0);
-  }
-
-  @Test
-  public void searchForExistingPatientByPartDContractNumAndYear() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .where(
-                new TokenClientParam("_has:Coverage.rfrncyr")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.RFRNC_YR),
-                        "2018"))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(1, searchResults.getEntry().size());
-  }
-
-  @Test
-  public void searchForNonExistingPatientByPartDContractNumAndYear() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .where(
-                new TokenClientParam("_has:Coverage.rfrncyr")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.RFRNC_YR),
-                        "2010"))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(0, searchResults.getEntry().size());
-  }
-
-  @Test
-  public void searchForPatientByPartDContractNumWithAInvalidContract() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4600"))
-            .where(
-                new TokenClientParam("_has:Coverage.rfrncyr")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.RFRNC_YR),
-                        "2010"))
-            .returnBundle(Bundle.class)
-            .execute();
-
-    Assert.assertNotNull(searchResults);
-    Assert.assertEquals(0, searchResults.getEntry().size());
-  }
-
-  @Test(expected = InvalidRequestException.class)
-  public void searchForPatientByPartDContractNumWithAInvalidYear() {
-    List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
-
-    // Should return a single match
-    Bundle searchResults =
-        fhirClient
-            .search()
-            .forResource(Patient.class)
-            .where(
-                new TokenClientParam("_has:Coverage.extension")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.PTDCNTRCT01),
-                        "S4607"))
-            .where(
-                new TokenClientParam("_has:Coverage.rfrncyr")
-                    .exactly()
-                    .systemAndIdentifier(
-                        TransformerUtils.calculateVariableReferenceUrl(
-                            CcwCodebookVariable.RFRNC_YR),
-                        "201"))
-            .returnBundle(Bundle.class)
-            .execute();
   }
 
   /**

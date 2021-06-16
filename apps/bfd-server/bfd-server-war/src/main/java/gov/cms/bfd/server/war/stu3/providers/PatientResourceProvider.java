@@ -203,6 +203,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       @OptionalParam(name = "_has:Coverage.rfrncyr")
           @Description(shortDefinition = "Part D reference year")
           TokenParam referenceYear,
+      @OptionalParam(name = "cursor")
+          @Description(shortDefinition = "The cursor used for result pagination")
+          String cursor,
       RequestDetails requestDetails) {
     // Figure out what month they're searching for.
     String contractMonth =
@@ -213,6 +216,10 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     // Figure out which year they're searching for.
     int year = Year.now().getValue();
     if (referenceYear != null && !StringUtils.isEmpty(referenceYear.getValueNotNull())) {
+      /*
+       * TODO Once AB2D has switched to always specifying the year, this needs to become an invalid
+       * request.
+       */
       year = Integer.parseInt(referenceYear.getValueNotNull());
     }
     YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
@@ -300,7 +307,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
-      TokenParam coverageId, LocalDate monthYear, RequestDetails requestDetails) {
+      TokenParam coverageId, LocalDate yearMonth, RequestDetails requestDetails) {
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
@@ -313,7 +320,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     operation.publishOperationName();
 
     List<Beneficiary> matchingBeneficiaries =
-        fetchBeneficiariesByContractAndYearMonth(coverageId, monthYear, paging);
+        fetchBeneficiariesByContractAndYearMonth(coverageId, yearMonth, paging);
     boolean hasAnotherPage = matchingBeneficiaries.size() > paging.getPageSize();
     if (hasAnotherPage) {
       matchingBeneficiaries = matchingBeneficiaries.subList(0, paging.getPageSize());
@@ -390,9 +397,6 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    */
   private List<Beneficiary> fetchBeneficiariesByContractAndYearMonth(
       TokenParam coverageId, LocalDate yearMonth, PatientLinkBuilder paging) {
-    String contractMonth =
-        coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
-
     String contractCode = coverageId.getValueNotNull();
 
     /*
@@ -889,17 +893,5 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   public static void checkPageSize(LinkBuilder paging) {
     if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
     if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
-  }
-
-  private static LocalDate getFormattedYearMonth(String contractYear, String contractMonth) {
-    if (Strings.isNullOrEmpty(contractYear))
-      throw new InvalidRequestException("A null or empty year is not supported");
-    if (Strings.isNullOrEmpty(contractMonth))
-      throw new InvalidRequestException("A null or empty month is not supported");
-    if (contractYear.length() != 4)
-      throw new InvalidRequestException("A invalid year is not supported");
-
-    String localDateString = String.format("%s-%s-%s", contractYear, contractMonth, "01");
-    return LocalDate.parse(localDateString);
   }
 }
