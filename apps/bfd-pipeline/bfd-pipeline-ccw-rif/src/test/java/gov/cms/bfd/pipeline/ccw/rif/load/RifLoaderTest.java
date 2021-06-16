@@ -26,15 +26,11 @@ public final class RifLoaderTest {
         RifLoaderTestUtils.getLoadOptions(DatabaseTestHelper.getTestDatabase());
     options =
         new LoadAppOptions(
+            options.getDatabaseOptions(),
             1000,
             "nottherealpepper".getBytes(StandardCharsets.UTF_8),
-            options.getDatabaseUrl(),
-            options.getDatabaseUsername(),
-            options.getDatabasePassword(),
             options.getLoaderThreads(),
-            options.isIdempotencyRequired(),
-            options.isFixupsEnabled(),
-            options.getFixupThreads());
+            options.isIdempotencyRequired());
     LOGGER.info(
         "salt/pepper: {}", Arrays.toString("nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     LOGGER.info("hash iterations: {}", 1000);
@@ -62,15 +58,11 @@ public final class RifLoaderTest {
         RifLoaderTestUtils.getLoadOptions(DatabaseTestHelper.getTestDatabase());
     options =
         new LoadAppOptions(
+            options.getDatabaseOptions(),
             1000,
             "nottherealpepper".getBytes(StandardCharsets.UTF_8),
-            options.getDatabaseUrl(),
-            options.getDatabaseUsername(),
-            options.getDatabasePassword(),
             options.getLoaderThreads(),
-            options.isIdempotencyRequired(),
-            options.isFixupsEnabled(),
-            options.getFixupThreads());
+            options.isIdempotencyRequired());
     LOGGER.info(
         "salt/pepper: {}", Arrays.toString("nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     LOGGER.info("hash iterations: {}", 1000);
