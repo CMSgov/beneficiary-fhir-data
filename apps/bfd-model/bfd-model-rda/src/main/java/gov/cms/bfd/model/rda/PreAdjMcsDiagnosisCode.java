@@ -1,8 +1,6 @@
 package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,43 +14,36 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the FissProcCodes table */
 @Entity
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjFissProcCode.PK.class)
-@Table(name = "`FissProcCodes`", schema = "`pre_adj`")
-public class PreAdjFissProcCode {
+@IdClass(PreAdjMcsDiagnosisCode.PK.class)
+@Table(name = "`McsDiagnosisCodes`", schema = "`pre_adj`")
+public class PreAdjMcsDiagnosisCode {
   @Id
-  @Column(name = "`dcn`", length = 23, nullable = false)
+  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
   @EqualsAndHashCode.Include
-  private String dcn;
+  private String idrClmHdIcn;
 
   @Id
   @Column(name = "`priority`", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`procCode`", length = 10, nullable = false)
-  private String procCode;
+  @Column(name = "`diagIcdType`", length = 1)
+  private String diagIcdType;
 
-  @Column(name = "`procFlag`", length = 4)
-  private String procFlag;
-
-  @Column(name = "`procDate`")
-  private LocalDate procDate;
-
-  @Column(name = "`lastUpdated`")
-  private Instant lastUpdated;
+  @Column(name = "`diagCode`", length = 7)
+  private String diagCode;
 
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the FissProcCodes table */
+  /* PK class for the McsDiagnosisCodes table */
   public static class PK implements Serializable {
-    private String dcn;
+    private String idrClmHdIcn;
     private short priority;
   }
 }

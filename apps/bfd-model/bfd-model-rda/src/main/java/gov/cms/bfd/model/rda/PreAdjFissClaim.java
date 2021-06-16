@@ -23,9 +23,8 @@ import lombok.experimental.FieldNameConstants;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`FissClaims`", schema = "pre_adj")
+@Table(name = "`FissClaims`", schema = "`pre_adj`")
 public class PreAdjFissClaim {
-
   @Id
   @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
@@ -46,7 +45,7 @@ public class PreAdjFissClaim {
   @Column(name = "`medaProvId`", length = 13)
   private String medaProvId;
 
-  @Column(name = "`totalChargeAmount`")
+  @Column(name = "`totalChargeAmount`", columnDefinition = "decimal(11,2)")
   private BigDecimal totalChargeAmount;
 
   @Column(name = "`receivedDate`")
@@ -76,10 +75,32 @@ public class PreAdjFissClaim {
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
+  @Column(name = "`pracLocAddr1`")
+  private String pracLocAddr1;
+
+  @Column(name = "`pracLocAddr2`")
+  private String pracLocAddr2;
+
+  @Column(name = "`pracLocCity`")
+  private String pracLocCity;
+
+  @Column(name = "`pracLocState`", length = 2)
+  private String pracLocState;
+
+  @Column(name = "`pracLocZip`", length = 15)
+  private String pracLocZip;
+
   @OneToMany(
       mappedBy = "dcn",
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
+
+  @OneToMany(
+      mappedBy = "dcn",
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
 }
