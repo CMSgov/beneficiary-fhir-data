@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import java.io.Serializable;
 
 /** Models the user-configurable application options. */
@@ -20,7 +19,6 @@ public final class LoadAppOptions implements Serializable {
   public static final int DEFAULT_LOADER_THREADS =
       Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
 
-  private final DatabaseOptions databaseOptions;
   private final int hicnHashIterations;
   private final byte[] hicnHashPepper;
   private final int loaderThreads;
@@ -31,30 +29,20 @@ public final class LoadAppOptions implements Serializable {
    *
    * @param hicnHashIterations the value to use for {@link #getHicnHashIterations()}
    * @param hicnHashPepper the value to use for {@link #getHicnHashPepper()}
-   * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
    * @param loaderThreads the value to use for {@link #getLoaderThreads()}
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
    */
   public LoadAppOptions(
-      DatabaseOptions databaseOptions,
       int hicnHashIterations,
       byte[] hicnHashPepper,
       int loaderThreads,
       boolean idempotencyRequired) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
 
-    this.databaseOptions = databaseOptions;
     this.hicnHashIterations = hicnHashIterations;
     this.hicnHashPepper = hicnHashPepper;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
-  }
-
-  /**
-   * @return the {@link DatabaseOptions} that detail how to connect to the application's database
-   */
-  public DatabaseOptions getDatabaseOptions() {
-    return databaseOptions;
   }
 
   /**
@@ -101,8 +89,6 @@ public final class LoadAppOptions implements Serializable {
     builder.append(hicnHashIterations);
     builder.append(", hicnHashPepper=");
     builder.append("***");
-    builder.append(", databaseOptions=");
-    builder.append(databaseOptions);
     builder.append(", loaderThreads=");
     builder.append(loaderThreads);
     builder.append(", idempotencyRequired=");

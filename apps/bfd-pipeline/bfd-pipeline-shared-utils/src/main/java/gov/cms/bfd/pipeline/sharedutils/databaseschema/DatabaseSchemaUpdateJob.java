@@ -1,13 +1,13 @@
 package gov.cms.bfd.pipeline.sharedutils.databaseschema;
 
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobType;
 import java.util.Optional;
+import javax.sql.DataSource;
 
 /**
  * This {@link PipelineJob} is responsible for creating/updating the BFD database schema, via {@link
@@ -16,15 +16,15 @@ import java.util.Optional;
 public final class DatabaseSchemaUpdateJob implements PipelineJob<NullPipelineJobArguments> {
   public static final PipelineJobType<NullPipelineJobArguments> JOB_TYPE =
       new PipelineJobType<NullPipelineJobArguments>(DatabaseSchemaUpdateJob.class);
-  private final DatabaseOptions databaseOptions;
+  private final DataSource dataSource;
 
   /**
    * Constructs a new {@link DatabaseSchemaUpdateJob} instance.
    *
-   * @param databaseOptions the application's {@link DatabaseOptions}
+   * @param dataSource the application's {@link DataSource}
    */
-  public DatabaseSchemaUpdateJob(DatabaseOptions databaseOptions) {
-    this.databaseOptions = databaseOptions;
+  public DatabaseSchemaUpdateJob(DataSource dataSource) {
+    this.dataSource = dataSource;
   }
 
   /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#getSchedule() */
@@ -46,7 +46,7 @@ public final class DatabaseSchemaUpdateJob implements PipelineJob<NullPipelineJo
   /** @see gov.cms.bfd.pipeline.sharedutils.PipelineJob#call() */
   @Override
   public PipelineJobOutcome call() throws Exception {
-    DatabaseSchemaManager.createOrUpdateSchema(databaseOptions.getDatabaseDataSource());
+    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
 
     /*
      * DatabaseSchemaManager doesn't report back on whether or not it had any work to do, so we just
