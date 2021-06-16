@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<hapi-fhir.version>4.1.0</hapi-fhir.version>
+		<hapi-fhir.version>5.4.0</hapi-fhir.version>
 	</properties>
 
 	<modules>

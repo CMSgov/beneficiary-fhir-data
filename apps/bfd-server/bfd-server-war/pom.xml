@@ -91,7 +91,7 @@
 				 https://github.com/flipkart-incubator/zjsonpatch for details. -->
 			<groupId>com.flipkart.zjsonpatch</groupId>
 			<artifactId>zjsonpatch</artifactId>
-			<version>0.4.6</version>
+			<version>0.4.10</version>
 		</dependency>
 
 		<dependency>
