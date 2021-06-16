@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,10 +75,10 @@ public final class PipelineApplicationIT {
   }
 
   /**
-   * Verifies that {@link PipelineApplication} exits as expected when asked to run against an S3
+   * Verifies that {@link PipelineApplication} works as expected when asked to run against an S3
    * bucket that doesn't exist. This test case isn't so much needed to test that one specific
-   * failure case, but to instead verify that the application dies as expected when something goes
-   * sideways.
+   * failure case, but to instead verify that the application logs and keeps running as expected
+   * when a job fails.
    *
    * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
@@ -96,15 +97,15 @@ public final class PipelineApplicationIT {
       Thread appRunConsumerThread = new Thread(appRunConsumer);
       appRunConsumerThread.start();
 
-      // Wait for it to exit with an error.
+      // Wait for it to start scanning.
+      Awaitility.await()
+          .atMost(Duration.ONE_MINUTE)
+          .until(() -> hasCcwRifLoadJobFailed(appRunConsumer));
+
+      // Stop the application.
+      sendSigterm(appProcess);
       appProcess.waitFor(1, TimeUnit.MINUTES);
       appRunConsumerThread.join();
-
-      // Verify that the application exited as expected.
-      Assert.assertEquals(
-          String.format("Wrong exit code. Output [\n%s]\n", appRunConsumer.getStdoutContents()),
-          PipelineApplication.EXIT_CODE_MONITOR_ERROR,
-          appProcess.exitValue());
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
     }
@@ -258,6 +259,17 @@ public final class PipelineApplicationIT {
         .getStdoutContents()
         .toString()
         .contains(PipelineManager.LOG_MESSAGE_STARTING_WORKER);
+  }
+
+  /**
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that the {@link CcwRifLoadJob}
+   *     failed, <code>false</code> if not
+   */
+  private static boolean hasCcwRifLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
+    String stdout = appRunConsumer.getStdoutContents().toString();
+    return stdout.contains(PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED)
+        && stdout.contains(CcwRifLoadJob.class.getSimpleName());
   }
 
   /**
