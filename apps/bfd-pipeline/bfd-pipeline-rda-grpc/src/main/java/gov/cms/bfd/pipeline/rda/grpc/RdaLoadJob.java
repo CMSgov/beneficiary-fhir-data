@@ -5,11 +5,15 @@ import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
+import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
@@ -26,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * will do any work. The other threads will all immediately return with an indication that they have
  * no work to do.
  */
-public final class RdaLoadJob<TResponse> implements PipelineJob {
+public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobArguments> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaLoadJob.class);
   public static final String CALLS_METER_NAME =
       MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "calls");
@@ -100,6 +104,24 @@ public final class RdaLoadJob<TResponse> implements PipelineJob {
     } finally {
       runningSemaphore.release();
     }
+  }
+
+  /**
+   * This job will tend to run for a long time during each execution but has a schedule so that it
+   * can be automatically restarted if it exits for any reason. The job detects when it's already
+   * running so periodic execution is safe.
+   *
+   * @return the run interval as a PipelineJobSchedule.
+   */
+  @Override
+  public Optional<PipelineJobSchedule> getSchedule() {
+    return Optional.of(
+        new PipelineJobSchedule(config.getRunInterval().toMillis(), ChronoUnit.MILLIS));
+  }
+
+  @Override
+  public boolean isInterruptible() {
+    return true;
   }
 
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */

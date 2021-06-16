@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.Serializable;
 import java.util.Objects;
@@ -39,7 +40,7 @@ public class RdaLoadOptions implements Serializable {
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
    */
-  public PipelineJob createFissClaimsLoadJob(MetricRegistry appMetrics) {
+  public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(MetricRegistry appMetrics) {
     return new RdaLoadJob<>(
         jobConfig,
         () -> new GrpcRdaSource<>(grpcConfig, new FissClaimStreamCaller(), appMetrics),
