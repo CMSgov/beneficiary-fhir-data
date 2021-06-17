@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.rda;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -84,8 +85,20 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrBillProvLoc`", length = 2)
   private String idrBillProvLoc;
 
+  @Column(name = "`idrTotAllowed`", columnDefinition = "decimal(7,2)")
+  private BigDecimal idrTotAllowed;
+
+  @Column(name = "`idrCoinsurance`", columnDefinition = "decimal(7,2)")
+  private BigDecimal idrCoinsurance;
+
+  @Column(name = "`idrDeductible`", columnDefinition = "decimal(7,2)")
+  private BigDecimal idrDeductible;
+
   @Column(name = "`idrBillProvStatusCd`", length = 1)
   private String idrBillProvStatusCd;
+
+  @Column(name = "`idrTotBilledAmt`", columnDefinition = "decimal(7,2)")
+  private BigDecimal idrTotBilledAmt;
 
   @Column(name = "`idrClaimReceiptDate`")
   private LocalDate idrClaimReceiptDate;
