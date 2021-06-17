@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/mcs/mcs_detail_status.proto";
+import "rda/v1/mcs/mcs_diagnosis_icd_type.proto";
+
+message McsDetail {
+  optional McsDetailStatus idr_dtl_status = 16;
+  optional string idr_dtl_from_date = 17; // DATE
+  optional string idr_dtl_to_date = 18; // DATE
+  optional string idr_proc_code = 19;
+  optional string idr_mod_one = 20;
+  optional string idr_mod_two = 21;
+  optional string idr_mod_three = 22;
+  optional string idr_mod_four = 23;
+  optional McsDiagnosisIcdType idr_dtl_diag_icd_type = 24;
+  optional string idr_dtl_primary_diag_code = 25;
+  optional string idr_k_pos_lname_org = 26;
+  optional string idr_k_pos_fname = 27;
+  optional string idr_k_pos_mname = 28;
+  optional string idr_k_pos_addr1 = 29;
+  optional string idr_k_pos_addr2_1st = 30;
+  optional string idr_k_pos_addr2_2nd = 31;
+  optional string idr_k_pos_city = 32;
+  optional string idr_k_pos_state = 33;
+  optional string idr_k_pos_zip = 34;
+}
