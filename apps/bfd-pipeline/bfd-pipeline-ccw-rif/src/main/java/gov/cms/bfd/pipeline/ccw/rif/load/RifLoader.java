@@ -22,7 +22,6 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.File;
@@ -100,7 +99,6 @@ public final class RifLoader implements AutoCloseable {
   private final HikariDataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
   private final SecretKeyFactory secretKeyFactory;
-  private final RifLoaderIdleTasks idleTasks;
 
   /**
    * Constructs a new {@link RifLoader} instance.
@@ -108,27 +106,21 @@ public final class RifLoader implements AutoCloseable {
    * @param appMetrics the {@link MetricRegistry} being used for the overall application (as opposed
    *     to a specific data set)
    * @param options the {@link LoadAppOptions} to use
+   * @param dataSource the {@link DataSource} to use that will be converted to a {@link
+   *     HikariDataSource}
    */
-  public RifLoader(MetricRegistry appMetrics, LoadAppOptions options) {
+  public RifLoader(MetricRegistry appMetrics, LoadAppOptions options, DataSource dataSource) {
     this.appMetrics = appMetrics;
     this.options = options;
 
-    this.dataSource = createDataSource(options, appMetrics);
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
+    /*
+     * FIXME The pool size needs to be double the number of loader threads when idempotent loads are
+     * being used. Apparently, the queries need a separate Connection?
+     */
+    this.dataSource = createDataSource(dataSource, options.getLoaderThreads(), appMetrics);
     this.entityManagerFactory = createEntityManagerFactory(dataSource);
 
     this.secretKeyFactory = createSecretKeyFactory();
-    this.idleTasks =
-        new RifLoaderIdleTasks(options, appMetrics, entityManagerFactory, secretKeyFactory);
-  }
-
-  /**
-   * Get the IdleTask manager associated with this loader. Useful for testing.
-   *
-   * @return the RifLoaderIdleTasks associated with this
-   */
-  public RifLoaderIdleTasks getIdleTasks() {
-    return idleTasks;
   }
 
   /**
@@ -136,28 +128,16 @@ public final class RifLoader implements AutoCloseable {
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
-  static HikariDataSource createDataSource(LoadAppOptions options, MetricRegistry metrics) {
-    HikariDataSource dataSource = new HikariDataSource();
+  static HikariDataSource createDataSource(
+      DataSource dataSource, int maxPoolSize, MetricRegistry metrics) {
+    HikariDataSource hikariDataSource = new HikariDataSource();
 
-    /*
-     * FIXME The pool size needs to be double the number of loader threads
-     * when idempotent loads are being used. Apparently, the queries need a
-     * separate Connection?
-     */
-    dataSource.setMaximumPoolSize(options.getLoaderThreads());
+    hikariDataSource.setMaximumPoolSize(maxPoolSize);
+    hikariDataSource.setDataSource(dataSource);
+    hikariDataSource.setRegisterMbeans(true);
+    hikariDataSource.setMetricRegistry(metrics);
 
-    if (options.getDatabaseDataSource() != null) {
-      dataSource.setDataSource(options.getDatabaseDataSource());
-    } else {
-      dataSource.setJdbcUrl(options.getDatabaseUrl());
-      dataSource.setUsername(options.getDatabaseUsername());
-      dataSource.setPassword(String.valueOf(options.getDatabasePassword()));
-    }
-
-    dataSource.setRegisterMbeans(true);
-    dataSource.setMetricRegistry(metrics);
-
-    return dataSource;
+    return hikariDataSource;
   }
 
   /**
@@ -262,11 +242,6 @@ public final class RifLoader implements AutoCloseable {
     }
 
     return result.get();
-  }
-
-  /** Do the idle tasks on the database. */
-  public void doIdleTask() {
-    idleTasks.doIdleTask();
   }
 
   /**

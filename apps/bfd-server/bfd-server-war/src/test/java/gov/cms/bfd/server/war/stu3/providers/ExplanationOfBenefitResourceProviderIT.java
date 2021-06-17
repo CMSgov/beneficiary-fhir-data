@@ -22,7 +22,6 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
@@ -40,6 +39,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hibernate.internal.SessionFactoryRegistry;
@@ -1310,11 +1310,11 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
 
-    LoadAppOptions loadAppOptions = ServerTestUtils.createRifLoaderOptions();
+    DataSource dataSource = ServerTestUtils.createDataSource();
     EntityManagerFactory entityManagerFactory = null;
     EntityManager entityManager = null;
     try {
-      entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(loadAppOptions);
+      entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(dataSource);
       entityManager = entityManagerFactory.createEntityManager();
 
       entityManager.getTransaction().begin();
