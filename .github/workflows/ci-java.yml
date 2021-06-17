@@ -2,7 +2,7 @@ name: 'CI - Java'
 on: pull_request
 jobs:
   mvn-job:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix: 
         mvn_command: ['verify', 'com.coveo:fmt-maven-plugin:check']
