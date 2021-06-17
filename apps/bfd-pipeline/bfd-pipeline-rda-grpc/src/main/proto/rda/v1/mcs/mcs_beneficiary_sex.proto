@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+enum McsBeneficiarySex {
+  BENEFICIARY_SEX_UNSET = 0;
+
+  // ASCII M
+  BENEFICIARY_SEX_MALE = 77;
+
+  // ASCII F
+  BENEFICIARY_SEX_FEMALE = 70;
+}
