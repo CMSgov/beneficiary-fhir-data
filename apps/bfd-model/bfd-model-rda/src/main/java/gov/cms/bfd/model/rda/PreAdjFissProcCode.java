@@ -23,7 +23,7 @@ import lombok.experimental.FieldNameConstants;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @IdClass(PreAdjFissProcCode.PK.class)
-@Table(name = "`FissProcCodes`", schema = "pre_adj")
+@Table(name = "`FissProcCodes`", schema = "`pre_adj`")
 public class PreAdjFissProcCode {
 
   @Id
