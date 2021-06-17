@@ -58,8 +58,8 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrStatusDate`")
   private LocalDate idrStatusDate;
 
-  @Column(name = "`idrBillProvNp_1_6`", length = 10)
-  private String idrBillProvNp_1_6;
+  @Column(name = "`idrBillProvNpi`", length = 10)
+  private String idrBillProvNpi;
 
   @Column(name = "`idrBillProvNum`", length = 10)
   private String idrBillProvNum;
@@ -73,8 +73,8 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrBillProvSpec`", length = 2)
   private String idrBillProvSpec;
 
-  @Column(name = "`idrBillProvGroup_ind`", length = 1)
-  private String idrBillProvGroup_ind;
+  @Column(name = "`idrBillProvGroupInd`", length = 1)
+  private String idrBillProvGroupInd;
 
   @Column(name = "`idrBillProvPriceSpec`", length = 2)
   private String idrBillProvPriceSpec;
