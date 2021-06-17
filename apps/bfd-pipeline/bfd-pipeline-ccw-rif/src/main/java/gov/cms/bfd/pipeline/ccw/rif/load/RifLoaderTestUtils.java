@@ -35,9 +35,6 @@ public final class RifLoaderTestUtils {
   /** The value to use for {@link LoadAppOptions#isIdempotencyRequired()}. */
   public static final boolean IDEMPOTENCY_REQUIRED = true;
 
-  /** The value to use for {@link LoadAppOptions#isFixupsEnabled()} */
-  public static final boolean FIXUPS_ENABLED = true;
-
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderTestUtils.class);
 
@@ -118,23 +115,19 @@ public final class RifLoaderTestUtils {
     return new LoadAppOptions(
         HICN_HASH_ITERATIONS,
         HICN_HASH_PEPPER,
-        dataSource,
         LoadAppOptions.DEFAULT_LOADER_THREADS,
-        IDEMPOTENCY_REQUIRED,
-        FIXUPS_ENABLED,
-        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
+        IDEMPOTENCY_REQUIRED);
   }
 
   /**
-   * @param options the {@link LoadAppOptions} specifying the DB to use
+   * @param dataSource the {@link DataSource} specifying the DB to use
    * @return a JPA {@link EntityManagerFactory} for the database server used in tests
    */
-  public static EntityManagerFactory createEntityManagerFactory(LoadAppOptions options) {
-    if (options.getDatabaseDataSource() == null) {
+  public static EntityManagerFactory createEntityManagerFactory(DataSource dataSource) {
+    if (dataSource == null) {
       throw new IllegalStateException("DB DataSource (not URLs) must be used in tests.");
     }
 
-    DataSource dataSource = options.getDatabaseDataSource();
     return RifLoader.createEntityManagerFactory(dataSource);
   }
 
