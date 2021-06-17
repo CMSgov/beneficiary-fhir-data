@@ -51,56 +51,56 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getHicnHashIterations()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getHicnHashIterations()} value.
    */
   public static final String ENV_VAR_KEY_HICN_HASH_ITERATIONS = "HICN_HASH_ITERATIONS";
 
   /**
    * The name of the environment variable that should be used to provide a hex encoded
-   * representation of the {@link #getLoadOptions()} {@link LoadAppOptions#getHicnHashPepper()}
-   * value.
+   * representation of the {@link #getCcwRifLoadOptions()} {@link
+   * LoadAppOptions#getHicnHashPepper()} value.
    */
   public static final String ENV_VAR_KEY_HICN_HASH_PEPPER = "HICN_HASH_PEPPER";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getDatabaseUrl()} value.
+   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUrl()} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_URL = "DATABASE_URL";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getDatabaseUsername()} value.
+   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUsername()} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_USERNAME = "DATABASE_USERNAME";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getDatabasePassword()} value.
+   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabasePassword()} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_PASSWORD = "DATABASE_PASSWORD";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
    */
   public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#isIdempotencyRequired()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#isIdempotencyRequired()} value.
    */
   public static final String ENV_VAR_KEY_IDEMPOTENCY_REQUIRED = "IDEMPOTENCY_REQUIRED";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#isFixupsEnabled()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#isFixupsEnabled()} value.
    */
   public static final String ENV_VAR_KEY_FIXUPS_ENABLED = "FIXUPS_ENABLED";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getFixupThreads()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getFixupThreads()} value.
    */
   public static final String ENV_VAR_KEY_FIXUP_THREADS = "FIXUP_THREADS";
 
@@ -193,7 +193,7 @@ public final class AppConfiguration implements Serializable {
    * Constructs a new {@link AppConfiguration} instance.
    *
    * @param metricOptions the value to use for {@link #getMetricOptions()}
-   * @param databaseOptions the value to use for {@link #getDatabaseOptions()
+   * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
    */
@@ -418,11 +418,10 @@ public final class AppConfiguration implements Serializable {
             newRelicMetricPeriod,
             hostname);
     DatabaseOptions databaseOptions =
-        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword.toCharArray());
+        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword);
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     LoadAppOptions loadOptions =
         new LoadAppOptions(
-            databaseOptions,
             new IdHasher.Config(hicnHashIterations, hicnHashPepper),
             loaderThreads,
             idempotencyRequired.get().booleanValue());

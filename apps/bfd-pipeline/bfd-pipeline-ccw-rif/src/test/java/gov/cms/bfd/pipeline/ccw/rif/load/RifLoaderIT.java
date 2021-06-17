@@ -174,9 +174,8 @@ public final class RifLoaderIT {
     /*
      * Verify that the updates worked as expected by manually checking some fields.
      */
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(options);
+        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -273,9 +272,8 @@ public final class RifLoaderIT {
     /*
      * Verify that the updates worked as expected by manually checking some fields.
      */
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(options);
+        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -323,9 +321,8 @@ public final class RifLoaderIT {
     // Loads sample A Data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(options);
+        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -352,9 +349,8 @@ public final class RifLoaderIT {
     // Loads second year of data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(options);
+        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -383,9 +379,8 @@ public final class RifLoaderIT {
         dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(options);
+        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -412,9 +407,8 @@ public final class RifLoaderIT {
         dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(options);
+        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -446,8 +440,7 @@ public final class RifLoaderIT {
         dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS.getResources()));
 
-    options = RifLoaderTestUtils.getLoadOptions(dataSource);
-    entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(options);
+    entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -546,8 +539,8 @@ public final class RifLoaderIT {
     // Create the processors that will handle each stage of the pipeline.
     MetricRegistry appMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
-    RifLoader loader = new RifLoader(appMetrics, options);
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
+    RifLoader loader = new RifLoader(appMetrics, options, dataSource);
 
     // Link up the pipeline and run it.
     LOGGER.info("Loading RIF records...");
@@ -581,7 +574,7 @@ public final class RifLoaderIT {
      * be found in the database.
      */
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(options);
+        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     for (StaticRifResource rifResource : sampleResources) {
       /*
        * This is too slow to run against larger data sets: for instance,

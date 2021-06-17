@@ -6,7 +6,6 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.InputStream;
@@ -114,24 +113,22 @@ public final class RifLoaderTestUtils {
    * @return the {@link LoadAppOptions} that should be used in tests, which specifies how to connect
    *     to the database server that tests should be run against
    */
-  public static LoadAppOptions getLoadOptions(DataSource dataSource) {
+  public static LoadAppOptions getLoadOptions() {
     return new LoadAppOptions(
-        new DatabaseOptions(dataSource),
         new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED);
   }
 
   /**
-   * @param options the {@link LoadAppOptions} specifying the DB to use
+   * @param dataSource the {@link DataSource} specifying the DB to use
    * @return a JPA {@link EntityManagerFactory} for the database server used in tests
    */
-  public static EntityManagerFactory createEntityManagerFactory(LoadAppOptions options) {
-    if (options.getDatabaseOptions().getDatabaseDataSource() == null) {
+  public static EntityManagerFactory createEntityManagerFactory(DataSource dataSource) {
+    if (dataSource == null) {
       throw new IllegalStateException("DB DataSource (not URLs) must be used in tests.");
     }
 
-    DataSource dataSource = options.getDatabaseOptions().getDatabaseDataSource();
     return DatabaseUtils.createEntityManagerFactory(dataSource);
   }
 

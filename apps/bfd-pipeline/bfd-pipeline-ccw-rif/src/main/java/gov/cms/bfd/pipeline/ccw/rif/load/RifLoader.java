@@ -61,6 +61,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.sql.DataSource;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.hibernate.Session;
@@ -100,8 +101,10 @@ public final class RifLoader implements AutoCloseable {
    * @param appMetrics the {@link MetricRegistry} being used for the overall application (as opposed
    *     to a specific data set)
    * @param options the {@link LoadAppOptions} to use
+   * @param dataSource the {@link DataSource} to use that will be converted to a {@link
+   *     HikariDataSource}
    */
-  public RifLoader(MetricRegistry appMetrics, LoadAppOptions options) {
+  public RifLoader(MetricRegistry appMetrics, LoadAppOptions options, DataSource dataSource) {
     this.appMetrics = appMetrics;
     this.options = options;
 
@@ -111,8 +114,7 @@ public final class RifLoader implements AutoCloseable {
      * separate Connection?
      */
     this.dataSource =
-        DatabaseUtils.createDataSource(
-            options.getDatabaseOptions(), appMetrics, 2 * options.getLoaderThreads());
+        DatabaseUtils.createDataSource(dataSource, appMetrics, 2 * options.getLoaderThreads());
     this.entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
 
     /*

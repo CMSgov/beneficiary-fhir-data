@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -23,11 +22,9 @@ public final class RifLoaderTest {
    */
   @Test
   public void computeHicnHash() {
-    LoadAppOptions options =
-        RifLoaderTestUtils.getLoadOptions(DatabaseTestHelper.getTestDatabase());
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
     options =
         new LoadAppOptions(
-            options.getDatabaseOptions(),
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
             options.getLoaderThreads(),
             options.isIdempotencyRequired());
@@ -53,11 +50,9 @@ public final class RifLoaderTest {
    */
   @Test
   public void computeMbiHash() {
-    LoadAppOptions options =
-        RifLoaderTestUtils.getLoadOptions(DatabaseTestHelper.getTestDatabase());
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
     options =
         new LoadAppOptions(
-            options.getDatabaseOptions(),
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
             options.getLoaderThreads(),
             options.isIdempotencyRequired());

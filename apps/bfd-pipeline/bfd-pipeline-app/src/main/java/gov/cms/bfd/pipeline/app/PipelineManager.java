@@ -49,13 +49,12 @@ public final class PipelineManager {
 
   /**
    * The number of jobs that can be run at one time. Because the {@link VolunteerJob} and {@link
-   * SchedulerJob} will always be running, this number must be >=3, in order for any actual jobs to
-   * get run. The current value allows the {@link gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob} and
-   * {@link gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob} to run at the same time.
+   * SchedulerJob} will always be running, this number must be greater than or equal to 3, in order
+   * for any actual jobs to get run.
    *
    * @see #jobExecutor
    */
-  public static final int JOB_EXECUTOR_THREADS = 4;
+  public static final int JOB_EXECUTOR_THREADS = 3;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManager.class);
 
@@ -448,9 +447,8 @@ public final class PipelineManager {
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
         jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
-        LOGGER.warn(String.format("Job failed: jobRecord='%s'", jobRecord), e);
 
-        // Wrap and re-thrown the failure.
+        // Wrap and re-throw the failure.
         throw new Exception("Re-throwing job failure.", e);
       } finally {
         synchronized (jobsEnqueuedHandles) {
