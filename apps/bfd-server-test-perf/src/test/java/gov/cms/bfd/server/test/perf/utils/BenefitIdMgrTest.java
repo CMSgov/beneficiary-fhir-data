@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 public class BenefitIdMgrTest {
-  @Ignore
   @Test
   public void testSetCurrIndex() {
     BenefitIdMgr bim = new BenefitIdMgr(40, 20, 60, "test", "%02d");
@@ -19,7 +18,6 @@ public class BenefitIdMgrTest {
   }
 
   @Test
-  @Ignore
   public void testNextId() {
     BenefitIdMgr bim = new BenefitIdMgr(0, 20, 60, "test", "%02d");
     assertEquals("test20", bim.nextId());

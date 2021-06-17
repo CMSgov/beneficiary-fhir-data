@@ -59,11 +59,11 @@
 					<groupId>commons-pool2</groupId>
 					<artifactId>commons-pool2</artifactId>
 				</exclusion>
-				<!-- Exclude SLF4J bindings that are causing conflicts for the logger -->
+				<!-- Exclude SLF4J bindings that are causing conflicts for the logger
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-nop</artifactId>
-				</exclusion>
+				</exclusion> -->
 			</exclusions>
 		</dependency>
 
