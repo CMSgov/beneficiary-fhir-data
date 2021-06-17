@@ -1,21 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Year;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.persistence.criteria.CriteriaBuilder;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -31,8 +15,28 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Year;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Root;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
 public final class PatientResourceProviderIT {
@@ -1600,50 +1604,71 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that
-   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
-   * works as expected.
+   * Verifies that {@link
+   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
+   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
+   * as expected.
    */
   @Test
   public void searchByPartDContract() {
-    List<Object> loadedRecords = ServerTestUtils.loadData(Arrays.asList(
-        StaticRifResource.SAMPLE_A_BENES,
-        StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-        StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(
+            Arrays.asList(
+                StaticRifResource.SAMPLE_A_BENES,
+                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
+                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
 
     // Should return a single match
-    Bundle searchResults = fhirClient.search().forResource(Patient.class)
-        .where(new TokenClientParam("_has:Coverage.extension").exactly().systemAndIdentifier(
-            TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
-            "S4607"))
-        .where(new TokenClientParam("_has:Coverage.rfrncyr").exactly().systemAndIdentifier(
-            TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR), "2018"))
-        .returnBundle(Bundle.class).execute();
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(Patient.class)
+            .where(
+                new TokenClientParam("_has:Coverage.extension")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.PTDCNTRCT01),
+                        "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
+            .returnBundle(Bundle.class)
+            .execute();
 
     // Verify that it found the expected bene.
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getEntry().size());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
-    Assert.assertEquals(expectedBene.getBeneficiaryId(),
-        patientFromSearchResult.getIdElement().getIdPart());
+    Assert.assertEquals(
+        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
 
     /*
      * Verify that the unhashed MBIs are present, as expected. Note that checking for more than just
      * one MBI and verifying that they're all unique is a regression test for BFD-525.
      */
-    Assert.assertEquals(3, patientFromSearchResult.getIdentifier().stream()
-        .filter(i -> i.getSystem()
-            .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
-        .collect(Collectors.toSet()).size());
+    Assert.assertEquals(
+        3,
+        patientFromSearchResult.getIdentifier().stream()
+            .filter(
+                i ->
+                    i.getSystem()
+                        .equals(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED))
+            .collect(Collectors.toSet())
+            .size());
   }
 
   /**
-   * Verifies that
-   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
-   * works as expected, when no year is specified (hopefully causing it to substitute the current
-   * year).
+   * Verifies that {@link
+   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
+   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
+   * as expected, when no year is specified (hopefully causing it to substitute the current year).
    */
   @Test
   public void searchByPartDContractWithoutYear() {
@@ -1654,19 +1679,34 @@ public final class PatientResourceProviderIT {
 
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
 
     // First, adjust the bene's reference year in the DB.
     ServerTestUtils.doTransaction(
-        (em) -> {
-          // FIXME need to change this to a query, and for every result, update just the year.
+        (entityManager) -> {
+          CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
-          CriteriaBuilder cb = em.getCriteriaBuilder();
-          CriteriaUpdate<BeneficiaryMonthly> update = cb.createCriteriaUpdate(BeneficiaryMonthly.class);
-          Root<BeneficiaryMonthly> e = update.from(BeneficiaryMonthly.class);
-          update.set(BeneficiaryMonthly_.yearMonth, LocalDate.now().getYear());
-   
-          em.createQuery(update).executeUpdate();
+          CriteriaQuery<BeneficiaryMonthly> select = builder.createQuery(BeneficiaryMonthly.class);
+          select.from(BeneficiaryMonthly.class);
+          List<BeneficiaryMonthly> beneMonthlys = entityManager.createQuery(select).getResultList();
+
+          for (BeneficiaryMonthly beneMonthly : beneMonthlys) {
+            LocalDate yearMonth = beneMonthly.getYearMonth();
+            CriteriaUpdate<BeneficiaryMonthly> update =
+                builder.createCriteriaUpdate(BeneficiaryMonthly.class);
+            Root<BeneficiaryMonthly> beneMonthlyRoot = update.from(BeneficiaryMonthly.class);
+            update.set(
+                BeneficiaryMonthly_.yearMonth,
+                LocalDate.of(
+                    Year.now().getValue(), yearMonth.getMonthValue(), yearMonth.getDayOfMonth()));
+            update.where(
+                builder.equal(
+                    beneMonthlyRoot.get(BeneficiaryMonthly_.parentBeneficiary),
+                    beneMonthly.getParentBeneficiary()),
+                builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth));
+
+            entityManager.createQuery(update).executeUpdate();
+          }
         });
 
     // Should return a single match
@@ -1689,22 +1729,20 @@ public final class PatientResourceProviderIT {
     Assert.assertEquals(1, searchResults.getEntry().size());
     Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
     Beneficiary expectedBene = (Beneficiary) loadedRecords.get(0);
-    Assert.assertEquals(expectedBene.getBeneficiaryId(),
-        patientFromSearchResult.getIdElement().getIdPart());
+    Assert.assertEquals(
+        expectedBene.getBeneficiaryId(), patientFromSearchResult.getIdElement().getIdPart());
   }
 
   /**
-   * Verifies that
-   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
-   * works as expected, when paging is requested.
+   * Verifies that {@link
+   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
+   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
+   * as expected, when paging is requested.
    */
   @Test
-  public void
-      searchByPartDContractWithPaging() {
-    ServerTestUtils.loadData(
-        Arrays.asList(
-            StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("mbi", "true");
+  public void searchByPartDContractWithPaging() {
+    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
 
     // Should return a single match
     Bundle searchResults =
@@ -1719,38 +1757,32 @@ public final class PatientResourceProviderIT {
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
             .where(
-                new TokenClientParam("_has:Coverage.rfrncyr").exactly()
-                    .systemAndIdentifier(TransformerUtils
-                        .calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR), "2018"))
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtils.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
             .count(1)
             .returnBundle(Bundle.class)
             .execute();
 
-    // Verify that the bene wasn't duplicated.
+    // Verify that it found the expected bene and no extra pages.
     Assert.assertNotNull(searchResults);
     Assert.assertEquals(1, searchResults.getEntry().size());
-
-    // Double-check that the bene has multiple identifiers.
-    Patient patientFromSearchResult = (Patient) searchResults.getEntry().get(0).getResource();
-    Assert.assertEquals(
-        3,
-        patientFromSearchResult.getIdentifier().stream()
-            .filter(
-                i ->
-                    TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED.equals(
-                        i.getSystem()))
-            .count());
+    Assert.assertNull(searchResults.getLink(Constants.LINK_NEXT));
   }
 
   /**
-   * Verifies that
-   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
-   * works as expected, when searching for a contract-year-month with no benes.
+   * Verifies that {@link
+   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
+   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
+   * as expected, when searching for a contract-year-month with no benes.
    */
   @Test
   public void searchByPartDContractForEmptyContract() {
     ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
 
     // Should return a single match
     Bundle searchResults =
@@ -1779,22 +1811,33 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Verifies that
-   * {@link PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam, ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)}
-   * works as expected, when an invalid year is specfied.
+   * Verifies that {@link
+   * PatientResourceProvider#searchByCoverageContract(ca.uhn.fhir.rest.param.TokenParam,
+   * ca.uhn.fhir.rest.param.TokenParam, String, ca.uhn.fhir.rest.api.server.RequestDetails)} works
+   * as expected, when an invalid year is specified.
    */
   @Test(expected = InvalidRequestException.class)
   public void searchByPartDContractWithInvalidYear() {
     ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
 
-    fhirClient.search().forResource(Patient.class)
-        .where(new TokenClientParam("_has:Coverage.extension").exactly().systemAndIdentifier(
-            TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
-            "S4607"))
-        .where(new TokenClientParam("_has:Coverage.rfrncyr").exactly().systemAndIdentifier(
-            TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR), "ABC"))
-        .returnBundle(Bundle.class).execute();
+    fhirClient
+        .search()
+        .forResource(Patient.class)
+        .where(
+            new TokenClientParam("_has:Coverage.extension")
+                .exactly()
+                .systemAndIdentifier(
+                    TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.PTDCNTRCT01),
+                    "S4607"))
+        .where(
+            new TokenClientParam("_has:Coverage.rfrncyr")
+                .exactly()
+                .systemAndIdentifier(
+                    TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.RFRNC_YR),
+                    "ABC"))
+        .returnBundle(Bundle.class)
+        .execute();
   }
 
   @Test
@@ -1888,6 +1931,17 @@ public final class PatientResourceProviderIT {
    */
   public static IGenericClient createFhirClient() {
     return createFhirClient(null);
+  }
+
+  /**
+   * @return a FHIR {@link IGenericClient} where the {@link
+   *     CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} is set to <code>"true"</code>
+   */
+  public static IGenericClient createFhirClientWithIncludeIdentifiers() {
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, "true");
+    return createFhirClient(requestHeader);
   }
 
   /**
