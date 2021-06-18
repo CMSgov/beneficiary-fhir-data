@@ -42,6 +42,7 @@ jobs:
         working-directory: ./apps
       - name: 'Upload test artifacts'
         uses: actions/upload-artifact@v2
+        if: always()
         with:
           path: |
             **/target/surefire-reports/*
