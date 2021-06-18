@@ -155,19 +155,11 @@
 					of the build. -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<environmentVariables>
-								<TZ>UTC</TZ>
-							</environmentVariables>
-						</configuration>
-					</execution>
-				</executions>
+				<configuration>
+					<environmentVariables>
+						<TZ>UTC</TZ>
+					</environmentVariables>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
