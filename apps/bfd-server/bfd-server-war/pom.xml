@@ -426,16 +426,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- This is to run the integration tests -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<environmentVariables>
-						<TZ>UTC</TZ>
-					</environmentVariables>
-				</configuration>
-			</plugin>
-			<plugin>
 				<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction
 						process. -->
 				<groupId>org.codehaus.mojo</groupId>

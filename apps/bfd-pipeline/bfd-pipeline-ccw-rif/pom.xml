@@ -150,17 +150,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<plugin>
-				<!-- Will run the `*IT.java` integration tests in this project, as part 
-					of the build. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<environmentVariables>
-						<TZ>UTC</TZ>
-					</environmentVariables>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 

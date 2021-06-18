@@ -383,6 +383,11 @@ checkJavaFormat
 							<its.db.username>${its.db.username}</its.db.username>
 							<its.db.password>${its.db.password}</its.db.password>
 						</systemPropertyVariables>
+						
+						<!-- Needed to avoid test failures when comparing ETL timestamps. -->
+						<environmentVariables>
+							<TZ>UTC</TZ>
+						</environmentVariables>
 					</configuration>
 				</plugin>
 				<plugin>
