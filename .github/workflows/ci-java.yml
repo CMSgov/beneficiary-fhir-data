@@ -40,3 +40,11 @@ jobs:
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
         run: mvn ${{ matrix.mvn_command }}
         working-directory: ./apps
+      - name: 'Upload test artifacts'
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+            **/target/surefire-reports/*
+            **/target/failsafe-reports/*
+            bfd-server/bfd-server-war/target/server-work/access.*
+            bfd-server/bfd-server-war/target/server-work/server-console.log
