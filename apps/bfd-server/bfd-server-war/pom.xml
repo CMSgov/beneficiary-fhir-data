@@ -430,21 +430,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<environmentVariables>
+						<TZ>UTC</TZ>
+					</environmentVariables>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-                                                <configuration>
-                                                        <environmentVariables>
-                                                                <TZ>UTC</TZ>
-                                                        </environmentVariables>
-                                                </configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<!-- Configure the plugin's 'java' goal to run the FDA Drug (NDC) Code extraction

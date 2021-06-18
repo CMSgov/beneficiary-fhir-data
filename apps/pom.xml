@@ -363,6 +363,7 @@ checkJavaFormat
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
 						<trimStackTrace>false</trimStackTrace>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -376,6 +377,7 @@ checkJavaFormat
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
 						<trimStackTrace>false</trimStackTrace>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<systemPropertyVariables>
 							<its.db.url>${its.db.url}</its.db.url>
 							<its.db.username>${its.db.username}</its.db.username>
