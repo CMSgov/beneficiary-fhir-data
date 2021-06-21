@@ -8,18 +8,18 @@ locals {
 
 data "aws_caller_identity" "current" {}
 
-# Build a S3 bucket
-#   - Encryption using a Customer Managed Key
-#   - No versioning
+
+## S3 Bucket
+#   - encryption using a Customer Managed Key
+#   - no versioning
 #   - deletition protection in prod environments
 #   - postfix with the account id to prevent global name conflicts
-#
 resource "aws_s3_bucket" "main" {
   bucket = "bfd-${var.env_config.env}-${var.role}-${data.aws_caller_identity.current.account_id}"
   acl    = var.acl
   tags   = local.tags
 
-  # Always apply encryption, Customer CMK or AWS AES256
+  # always apply encryption, Customer CMK or AWS AES256
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
@@ -29,7 +29,7 @@ resource "aws_s3_bucket" "main" {
     }
   }
 
-  # Add logging if specified
+  # add logging if specified
   dynamic "logging" {
     for_each = var.log_bucket == "" ? [] : [var.log_bucket]
     content {
@@ -41,8 +41,7 @@ resource "aws_s3_bucket" "main" {
   # TODO add retention policy
 }
 
-# For safety, block public access to the bucket
-#
+# block public access to the bucket
 resource "aws_s3_bucket_public_access_block" "main" {
   bucket = aws_s3_bucket.main.id
 

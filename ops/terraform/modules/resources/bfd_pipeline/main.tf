@@ -24,19 +24,16 @@ locals {
 }
 
 # Locate the S3 bucket that stores the RIF data to be processed by the BFD Pipeline application.
-#
 data "aws_s3_bucket" "rif" {
   bucket = "bfd-${var.env_config.env}-etl-${var.launch_config.account_id}"
 }
 
 # Locate the customer master key for this environment.
-#
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
 # CloudWatch metric filters
-#
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
   name           = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/error"
   pattern        = "[date, time, java_thread, level = \"ERROR\", java_class, message]"
@@ -64,7 +61,6 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-cou
 }
 
 # CloudWatch metric alarms
-#
 resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
   alarm_name          = "bfd-${var.env_config.env}-pipeline-messages-error"
   comparison_operator = "GreaterThanThreshold"
@@ -104,7 +100,6 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-datasetfailed" {
 }
 
 # Security group for application-specific (i.e. non-management) traffic.
-#
 resource "aws_security_group" "app" {
   name        = "bfd-${var.env_config.env}-etl-app"
   description = "Access specific to the BFD Pipeline application."
@@ -122,7 +117,6 @@ resource "aws_security_group" "app" {
 }
 
 # App access to the database
-#
 resource "aws_security_group_rule" "allow_db_primary_access" {
   type        = "ingress"
   from_port   = 5432
@@ -170,7 +164,6 @@ resource "aws_network_acl_rule" "rda_default" {
 }
 
 # IAM policy and role to allow the BFD Pipeline read-write access to ETL bucket.
-#
 resource "aws_iam_policy" "bfd_pipeline_rif" {
   name        = "bfd-${var.env_config.env}-pipeline-rw-s3-rif"
   description = "Allow the BFD Pipeline application to read-write the S3 bucket with the RIF in it."
@@ -227,7 +220,6 @@ resource "aws_iam_role_policy_attachment" "bfd_pipeline_rif" {
 }
 
 # Give the BFD Pipeline app read access to the Ansible Vault PW.
-#
 data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   arn = "arn:aws:iam::${var.launch_config.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
 }
@@ -271,7 +263,6 @@ resource "aws_iam_role_policy_attachment" "aws_cli" {
 }
 
 # EC2 Instance to run the BFD Pipeline app.
-#
 module "ec2_instance" {
   source = "../ec2"
 
