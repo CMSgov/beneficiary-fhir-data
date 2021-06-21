@@ -38,14 +38,14 @@ public class DirectRdaLoadApp {
     job.call();
   }
 
-  static DatabaseOptions readDatabaseOptions(Properties props) {
+  private static DatabaseOptions readDatabaseOptions(Properties props) {
     return new DatabaseOptions(
         props.getProperty("database.url"),
         props.getProperty("database.user"),
         props.getProperty("database.password"));
   }
 
-  static RdaLoadOptions readRdaLoadOptionsFromProperties(Properties props) {
+  private static RdaLoadOptions readRdaLoadOptionsFromProperties(Properties props) {
     final IdHasher.Config idHasherConfig =
         new IdHasher.Config(
             getIntOrDefault(props, "hash.iterations", 100),
@@ -60,7 +60,7 @@ public class DirectRdaLoadApp {
     return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
   }
 
-  static int getIntOrDefault(Properties props, String key, int defaultValue) {
+  private static int getIntOrDefault(Properties props, String key, int defaultValue) {
     String strValue = props.getProperty(key);
     return strValue != null ? Integer.parseInt(strValue) : defaultValue;
   }
