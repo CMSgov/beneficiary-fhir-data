@@ -7,10 +7,7 @@ resource "aws_iam_instance_profile" "instance" {
   role = aws_iam_role.instance.name
 }
 
-# Create roles for our EC2 instances
-#
-# Allow access to passed in S3 buckets and the standard EC2 role things
-#
+# EC2 instance role
 resource "aws_iam_role" "instance" {
   name = "bfd-${var.env_config.env}-${var.name}-role"
   path = "/"
@@ -32,13 +29,7 @@ resource "aws_iam_role" "instance" {
   EOF
 }
 
-# Attach AWS managed CloudWatchAgentServerPolicy to all EC2 instances
-#
-resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
-  role       = aws_iam_role.instance.id
-  policy_arn = data.aws_iam_policy.cloudwatch_agent_policy.arn
-}
-
+# policy to allow full s3 privs
 resource "aws_iam_role_policy" "s3_policy" {
   count = length(var.s3_bucket_arns) > 0 ? 1 : 0
   name  = "bfd-${var.env_config.env}-${var.name}-s3-policy"
@@ -58,4 +49,10 @@ resource "aws_iam_role_policy" "s3_policy" {
     ]
   }
   EOF
+}
+
+# attach AWS managed CloudWatchAgentServerPolicy to all EC2 instances
+resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy_attachment" {
+  role       = aws_iam_role.instance.id
+  policy_arn = data.aws_iam_policy.cloudwatch_agent_policy.arn
 }

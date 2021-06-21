@@ -1,8 +1,5 @@
 ##
-#
-# NOTE: This module is for defining EFS CloudWatch alarms
-#
-##
+# EFS CloudWatch alarms
 
 resource "aws_cloudwatch_metric_alarm" "burst_credit_balance_too_low" {
   alarm_name          = "${var.app}-${var.env}-efs-check-burst-credit-balance-too-low"
@@ -72,4 +69,3 @@ resource "aws_cloudwatch_metric_alarm" "client_connections" {
   alarm_actions = [var.cloudwatch_notification_arn]
   ok_actions    = [var.cloudwatch_notification_arn]
 }
-

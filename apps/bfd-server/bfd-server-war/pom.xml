@@ -399,6 +399,10 @@
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
+
+                                                        <environmentVariables>
+                                                                <TZ>UTC</TZ>
+                                                        </environmentVariables>
 						</configuration>
 					</execution>
 					<execution>
@@ -434,6 +438,11 @@
 							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
+                                                <configuration>
+                                                        <environmentVariables>
+                                                                <TZ>UTC</TZ>
+                                                        </environmentVariables>
+                                                </configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -476,6 +485,9 @@
 									<value>${http.nonProxyHosts}</value>
 								</systemProperty>
 							</systemProperties>
+                                                        <environmentVariables>
+                                                                <TZ>UTC</TZ>
+                                                        </environmentVariables>
 						</configuration>
 					</execution>
 				</executions>

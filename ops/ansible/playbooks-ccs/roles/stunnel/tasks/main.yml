@@ -1,0 +1,63 @@
+---
+
+# Manually builds a recent stunnel from source because rhel7's stunnel is too old for
+# fips
+- name: Install requirements
+  become: yes
+  yum:
+    name:
+      - wget
+      - gcc
+      - openssl-devel
+      - tcp_wrappers-devel
+    state: present
+    lock_timeout: 180
+
+- name: Create working directories
+  file:
+    path: /tmp/stunnel
+    state: directory
+    mode: '0755'
+
+# the source url for stunnel may break if there is an updated version available (to fix vulnerabilities most likely)
+# so, if this step fails, visit https://www.stunnel.org/downloads.html and update ../defaults/main.yml with the
+# appropriate version number and checksum from https://www.stunnel.org/downloads/stunnel{{ stunnel_version }}.tar.gz.sha256
+- name: Download source
+  get_url: 
+    url: https://www.stunnel.org/downloads/stunnel-{{ stunnel_version }}.tar.gz
+    dest: /tmp/stunnel/stunnel-{{ stunnel_version }}.tar.gz
+    checksum: sha256:137776df6be8f1701f1cd590b7779932e123479fb91e5192171c16798815ce9f
+
+- name: Build fips enabled stunnel
+  become: yes
+  shell: |
+    tar -xvzf stunnel-{{ stunnel_version }}.tar.gz
+    cd stunnel-{{ stunnel_version }}
+    # remove previous stunnel bin if it's still there
+    if [[ -f /bin/stunnel ]]; then
+        mv /bin/stunnel /bin/stunnel.bak
+    fi
+    # remove previous stunnel config if it's still there
+    if [[ -f /etc/stunnel/stunnel.conf ]]; then
+        mv /etc/stunnel/stunnel.conf /etc/stunnel/stunnel.conf.bak
+    fi
+    # build and install stunnel with fips (installs to /usr/local/* by default)
+    ./configure --enable-fips
+    make
+    make install
+    # link to /bin in case /usr/local/bin is not in the path
+    ln -sf /usr/local/bin/stunnel /bin/stunnel
+    # copy our configs
+    mkdir -p /etc/stunnel
+    cp /usr/local/etc/stunnel/stunnel.conf-sample /usr/local/etc/stunnel/stunnel.conf
+    ln -sf /usr/local/etc/stunnel/stunnel.conf /etc/stunnel/stunnel.conf
+    # make sure stunnel is in fips mode
+    sed -i '/^;fips.*/s/^;//' /usr/local/etc/stunnel/stunnel.conf
+  args:
+    chdir: /tmp/stunnel
+    warn: false
+
+- name: Cleanup
+  file:
+    path: /tmp/stunnel
+    state: absent

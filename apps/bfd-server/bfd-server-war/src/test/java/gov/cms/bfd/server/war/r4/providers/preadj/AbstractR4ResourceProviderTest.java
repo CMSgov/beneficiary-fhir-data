@@ -83,7 +83,7 @@ public class AbstractR4ResourceProviderTest {
 
     providerSpy.init();
 
-    verify(providerSpy, times(1)).init();
+    verify(providerSpy, times(1)).setResourceType();
   }
 
   @Test
