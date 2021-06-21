@@ -487,7 +487,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
-    beneRoot.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.LEFT);
+    beneRoot.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.INNER);
     beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
