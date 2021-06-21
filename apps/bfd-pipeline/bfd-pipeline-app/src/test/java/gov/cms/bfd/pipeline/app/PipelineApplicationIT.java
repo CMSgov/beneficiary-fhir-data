@@ -24,11 +24,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.AssumptionViolatedException;
@@ -140,9 +142,16 @@ public final class PipelineApplicationIT {
       appRunConsumerThread.start();
 
       // Wait for it to start scanning.
-      Awaitility.await()
-          .atMost(Duration.ONE_MINUTE)
-          .until(() -> hasScanningStarted(appRunConsumer));
+      try {
+        Awaitility.await()
+            .atMost(Duration.ONE_MINUTE)
+            .until(() -> hasCcwRifLoadJobCompleted(appRunConsumer));
+      } catch (ConditionTimeoutException e) {
+        throw new RuntimeException(
+            "Pipeline application failed to start scanning within timeout, STDOUT:\n"
+                + appRunConsumer.getStdoutContents(),
+            e);
+      }
 
       // Stop the application.
       sendSigterm(appProcess);
@@ -245,8 +254,10 @@ public final class PipelineApplicationIT {
      * requests, and handles them gracefully.
      */
 
+    ;
     Assume.assumeTrue(
-        "Unsupported OS for this test case.", "Linux".equals(System.getProperty("os.name")));
+        "Unsupported OS for this test case.",
+        Arrays.asList("Linux", "Mac OS X").contains(System.getProperty("os.name")));
   }
 
   /**
@@ -254,11 +265,10 @@ public final class PipelineApplicationIT {
    * @return <code>true</code> if the application output indicates that data set scanning has
    *     started, <code>false</code> if not
    */
-  private static boolean hasScanningStarted(ProcessOutputConsumer appRunConsumer) {
-    return appRunConsumer
-        .getStdoutContents()
-        .toString()
-        .contains(PipelineManager.LOG_MESSAGE_STARTING_WORKER);
+  private static boolean hasCcwRifLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
+    String stdout = appRunConsumer.getStdoutContents().toString();
+    return stdout.contains(PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_COMPLETED)
+        && stdout.contains(CcwRifLoadJob.class.getSimpleName());
   }
 
   /**

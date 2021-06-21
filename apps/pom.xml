@@ -362,6 +362,7 @@ checkJavaFormat
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
+						<trimStackTrace>false</trimStackTrace>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -374,6 +375,7 @@ checkJavaFormat
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
+						<trimStackTrace>false</trimStackTrace>
 						<systemPropertyVariables>
 							<its.db.url>${its.db.url}</its.db.url>
 							<its.db.username>${its.db.username}</its.db.username>
