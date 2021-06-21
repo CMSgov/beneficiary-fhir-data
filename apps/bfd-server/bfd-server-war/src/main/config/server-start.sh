@@ -160,6 +160,9 @@ else
 	visualVmArgs=""
 fi
 
+# To enable JVM debugging, uncomment and add this line to the server start command below.
+#	-Dcapsule.jvm.args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
+
 # Launch the server in the background.
 BFD_PORT="${serverPortHttps}" \
 	BFD_KEYSTORE="${keyStore}" \
@@ -167,7 +170,6 @@ BFD_PORT="${serverPortHttps}" \
 	BFD_WAR="${warArtifact}" \
 	"${javaHome}/bin/java" \
 	"${maxHeapArg}" \
-	-Dcapsule.jvm.args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \
