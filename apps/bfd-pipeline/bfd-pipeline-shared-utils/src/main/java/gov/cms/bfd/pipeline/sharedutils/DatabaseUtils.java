@@ -25,6 +25,25 @@ public final class DatabaseUtils {
   public static final int JDBC_BATCH_SIZE = 10;
 
   /**
+   * @param options the {@link LoadAppOptions} to use
+   * @param metrics the {@link MetricRegistry} to use
+   * @return a {@link HikariDataSource} for the BFD database
+   */
+  public static HikariDataSource createDataSource(
+      DataSource dataSource, MetricRegistry metrics, int maxPoolSize) {
+    HikariDataSource hikariDataSource = new HikariDataSource();
+
+    hikariDataSource.setMaximumPoolSize(maxPoolSize);
+
+    hikariDataSource.setDataSource(dataSource);
+
+    hikariDataSource.setRegisterMbeans(true);
+    hikariDataSource.setMetricRegistry(metrics);
+
+    return hikariDataSource;
+  }
+
+  /**
    * Create a new DataSource.
    *
    * @param options the {@link DatabaseOptions} to use
@@ -37,7 +56,10 @@ public final class DatabaseUtils {
     HikariDataSource dataSource = new HikariDataSource();
 
     dataSource.setMaximumPoolSize(maximumPoolSize);
-    options.initializeHikariDataSource(dataSource);
+
+    dataSource.setJdbcUrl(options.getDatabaseUrl());
+    dataSource.setUsername(options.getDatabaseUsername());
+    dataSource.setPassword(options.getDatabasePassword());
 
     dataSource.setRegisterMbeans(true);
     dataSource.setMetricRegistry(metrics);

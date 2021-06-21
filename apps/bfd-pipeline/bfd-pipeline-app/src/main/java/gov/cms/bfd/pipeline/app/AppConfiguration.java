@@ -3,10 +3,10 @@ package gov.cms.bfd.pipeline.app;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import gov.cms.bfd.model.rif.RifFileType;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
@@ -51,56 +51,56 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getHicnHashIterations()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getHicnHashIterations()} value.
    */
   public static final String ENV_VAR_KEY_HICN_HASH_ITERATIONS = "HICN_HASH_ITERATIONS";
 
   /**
    * The name of the environment variable that should be used to provide a hex encoded
-   * representation of the {@link #getLoadOptions()} {@link LoadAppOptions#getHicnHashPepper()}
-   * value.
+   * representation of the {@link #getCcwRifLoadOptions()} {@link
+   * LoadAppOptions#getHicnHashPepper()} value.
    */
   public static final String ENV_VAR_KEY_HICN_HASH_PEPPER = "HICN_HASH_PEPPER";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getDatabaseUrl()} value.
+   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUrl()} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_URL = "DATABASE_URL";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getDatabaseUsername()} value.
+   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUsername()} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_USERNAME = "DATABASE_USERNAME";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getDatabasePassword()} value.
+   * #getDatabaseOptions()} {@link DatabaseOptions#getDatabasePassword()} value.
    */
   public static final String ENV_VAR_KEY_DATABASE_PASSWORD = "DATABASE_PASSWORD";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
    */
   public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#isIdempotencyRequired()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#isIdempotencyRequired()} value.
    */
   public static final String ENV_VAR_KEY_IDEMPOTENCY_REQUIRED = "IDEMPOTENCY_REQUIRED";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#isFixupsEnabled()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#isFixupsEnabled()} value.
    */
   public static final String ENV_VAR_KEY_FIXUPS_ENABLED = "FIXUPS_ENABLED";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getLoadOptions()} {@link LoadAppOptions#getFixupThreads()} value.
+   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getFixupThreads()} value.
    */
   public static final String ENV_VAR_KEY_FIXUP_THREADS = "FIXUP_THREADS";
 
@@ -185,29 +185,26 @@ public final class AppConfiguration implements Serializable {
 
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
-  private final ExtractionOptions extractionOptions;
-  private final LoadAppOptions loadOptions;
+  private final CcwRifLoadOptions ccwRifLoadOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
   @Nullable private final RdaLoadOptions rdaLoadOptions;
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
-   * @param databaseOptions the value to use for {@link #getDatabaseOptions()
-   * @param extractionOptions the value to use for {@link #getExtractionOptions()}
-   * @param loadOptions the value to use for {@link #getLoadOptions()}
    * @param metricOptions the value to use for {@link #getMetricOptions()}
+   * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
+   * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
+   * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
    */
   public AppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
-      ExtractionOptions extractionOptions,
-      LoadAppOptions loadOptions,
+      CcwRifLoadOptions ccwRifLoadOptions,
       RdaLoadOptions rdaLoadOptions) {
     this.metricOptions = metricOptions;
     this.databaseOptions = databaseOptions;
-    this.extractionOptions = extractionOptions;
-    this.loadOptions = loadOptions;
+    this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
   }
 
@@ -221,14 +218,9 @@ public final class AppConfiguration implements Serializable {
     return databaseOptions;
   }
 
-  /** @return the {@link ExtractionOptions} that the application will use */
-  public ExtractionOptions getExtractionOptions() {
-    return extractionOptions;
-  }
-
-  /** @return the {@link LoadAppOptions} that the application will use */
-  public LoadAppOptions getLoadOptions() {
-    return loadOptions;
+  /** @return the {@link CcwRifLoadOptions} that the application will use */
+  public CcwRifLoadOptions getCcwRifLoadOptions() {
+    return ccwRifLoadOptions;
   }
 
   /** @return the {@link RdaLoadOptions} that the application will use */
@@ -240,14 +232,14 @@ public final class AppConfiguration implements Serializable {
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
-    builder.append("AppConfiguration [extractionOptions=");
-    builder.append(extractionOptions);
+    builder.append("AppConfiguration [metricOptions=");
+    builder.append(metricOptions);
     builder.append(", databaseOptions=");
     builder.append(databaseOptions);
-    builder.append(", loadOptions=");
-    builder.append(loadOptions);
-    builder.append(", metricOptions=");
-    builder.append(metricOptions);
+    builder.append(", ccwRifLoadOptions=");
+    builder.append(ccwRifLoadOptions);
+    builder.append(", rdaLoadOptions=");
+    builder.append(rdaLoadOptions);
     builder.append("]");
     return builder.toString();
   }
@@ -377,18 +369,6 @@ public final class AppConfiguration implements Serializable {
               "Invalid value for configuration environment variable '%s'.",
               ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
 
-    String fixupsEnabledText = System.getenv(ENV_VAR_KEY_FIXUPS_ENABLED);
-    boolean fixupsEnabled = false;
-    if (fixupsEnabledText != null && !fixupsEnabledText.isEmpty()) {
-      fixupsEnabled = Boolean.parseBoolean(fixupsEnabledText);
-    }
-
-    String fixupThreadsText = System.getenv(ENV_VAR_KEY_FIXUP_THREADS);
-    int fixupThreads = RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT;
-    if (fixupThreadsText != null && !fixupThreadsText.isEmpty()) {
-      fixupThreads = Integer.parseInt(fixupThreadsText);
-    }
-
     /*
      * Just for convenience: make sure DefaultAWSCredentialsProviderChain
      * has whatever it needs.
@@ -442,17 +422,14 @@ public final class AppConfiguration implements Serializable {
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     LoadAppOptions loadOptions =
         new LoadAppOptions(
-            databaseOptions,
             new IdHasher.Config(hicnHashIterations, hicnHashPepper),
             loaderThreads,
-            idempotencyRequired.get().booleanValue(),
-            fixupsEnabled,
-            fixupThreads);
+            idempotencyRequired.get().booleanValue());
+    CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
 
     RdaLoadOptions rdaLoadOptions =
         readRdaLoadOptionsFromEnvironmentVariables(loadOptions.getIdHasherConfig());
-    return new AppConfiguration(
-        metricOptions, databaseOptions, extractionOptions, loadOptions, rdaLoadOptions);
+    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
   }
 
   /**

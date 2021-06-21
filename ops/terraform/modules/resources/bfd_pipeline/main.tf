@@ -24,19 +24,16 @@ locals {
 }
 
 # Locate the S3 bucket that stores the RIF data to be processed by the BFD Pipeline application.
-#
 data "aws_s3_bucket" "rif" {
   bucket = "bfd-${var.env_config.env}-etl-${var.launch_config.account_id}"
 }
 
 # Locate the customer master key for this environment.
-#
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
 # CloudWatch metric filters
-#
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
   name           = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/error"
   pattern        = "[date, time, java_thread, level = \"ERROR\", java_class, message]"
@@ -64,7 +61,6 @@ resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-datasetfailed-cou
 }
 
 # CloudWatch metric alarms
-#
 resource "aws_cloudwatch_metric_alarm" "pipeline-messages-error" {
   alarm_name          = "bfd-${var.env_config.env}-pipeline-messages-error"
   comparison_operator = "GreaterThanThreshold"
@@ -104,7 +100,6 @@ resource "aws_cloudwatch_metric_alarm" "pipeline-messages-datasetfailed" {
 }
 
 # Security group for application-specific (i.e. non-management) traffic.
-#
 resource "aws_security_group" "app" {
   name        = "bfd-${var.env_config.env}-etl-app"
   description = "Access specific to the BFD Pipeline application."
@@ -122,7 +117,6 @@ resource "aws_security_group" "app" {
 }
 
 # App access to the database
-#
 resource "aws_security_group_rule" "allow_db_primary_access" {
   type        = "ingress"
   from_port   = 5432
@@ -134,8 +128,42 @@ resource "aws_security_group_rule" "allow_db_primary_access" {
   source_security_group_id = aws_security_group.app.id # The EC2 instance for the BFD Pipeline app.
 }
 
+# NACL to manage communication between the BFD and RDA environments.
+# The NACL rules will open communication over the known ports and close
+# everything else.  This is done by creating a "lower" rule that explicitly
+# allows communication and defining a "upper" rule that defaults to denying
+resource "aws_network_acl" "rda" {
+  # only create the NACL if the CIDR block has been defined
+  count = var.mpm_rda_cidr_block != null ? 1 : 0
+
+  vpc_id      = var.env_config.vpc_id
+  tags        = merge({ Name = "bfd-${var.env_config.env}-etl-app" }, var.env_config.tags)
+}
+
+resource "aws_network_acl_rule" "rda_known" {
+  count = var.mpm_rda_cidr_block != null ? 1 : 0
+
+  network_acl_id = aws_network_acl.rda[0].id
+  rule_number    = 100
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = var.mpm_rda_cidr_block
+  from_port      = 443
+  to_port        = 443
+}
+resource "aws_network_acl_rule" "rda_default" {
+  count = var.mpm_rda_cidr_block != null ? 1 : 0
+
+  network_acl_id = aws_network_acl.rda[0].id
+  rule_number    = 110
+  protocol       = -1
+  rule_action    = "deny"
+  cidr_block     = var.mpm_rda_cidr_block
+  from_port      = 0
+  to_port        = 0
+}
+
 # IAM policy and role to allow the BFD Pipeline read-write access to ETL bucket.
-#
 resource "aws_iam_policy" "bfd_pipeline_rif" {
   name        = "bfd-${var.env_config.env}-pipeline-rw-s3-rif"
   description = "Allow the BFD Pipeline application to read-write the S3 bucket with the RIF in it."
@@ -192,7 +220,6 @@ resource "aws_iam_role_policy_attachment" "bfd_pipeline_rif" {
 }
 
 # Give the BFD Pipeline app read access to the Ansible Vault PW.
-#
 data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   arn = "arn:aws:iam::${var.launch_config.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
 }
@@ -236,7 +263,6 @@ resource "aws_iam_role_policy_attachment" "aws_cli" {
 }
 
 # EC2 Instance to run the BFD Pipeline app.
-#
 module "ec2_instance" {
   source = "../ec2"
 
