@@ -23,6 +23,8 @@ public class ClaimDao {
 
   // (9999-01-01) Postgres doesn't seem to like dates that are too big, this should be adequate
   private static final long EFFECTIVE_END_OF_TIME_EPOCH = 253370765800000L;
+  // (1965-07-30) CMS's Birthday
+  private static final long EFFECTIVE_START_OF_TIME_EPOCH = -139622400000L;
 
   private static final String CLAIM_BY_MBI_METRIC_QUERY = "claim_by_mbi";
   private static final String CLAIM_BY_MBI_METRIC_NAME =
@@ -129,7 +131,8 @@ public class ClaimDao {
   Predicate createDateRangePredicate(
       Path<Instant> datePath, DateRangeParam dateRange, CriteriaBuilder builder) {
     Instant from =
-        ObjectUtils.defaultIfNull(dateRange.getLowerBoundAsInstant(), new Date(Long.MIN_VALUE))
+        ObjectUtils.defaultIfNull(
+                dateRange.getLowerBoundAsInstant(), new Date(EFFECTIVE_START_OF_TIME_EPOCH))
             .toInstant();
     Instant to =
         ObjectUtils.defaultIfNull(

@@ -357,9 +357,9 @@ public class ClaimDaoTest {
 
   @Test
   public void shouldCreateDateRangePredicateIfNoDateRange() {
-    // The ClaimDao class considers this the maximum upper bound
+    // The ClaimDao class considers these the maximum bounds
     long toEpoch = 253370765800000L;
-    long fromEpoch = Long.MIN_VALUE;
+    long fromEpoch = -139622400000L;
 
     EntityManager mockEntityManager = mock(EntityManager.class);
     MetricRegistry metricRegistry = new MetricRegistry();
