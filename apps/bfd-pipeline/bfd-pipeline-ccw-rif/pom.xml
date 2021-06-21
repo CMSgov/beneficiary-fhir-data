@@ -103,12 +103,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides useful annotations like Nullable, Nonnull, etc -->
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-		</dependency>
-
-		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
