@@ -604,10 +604,6 @@ public final class RifLoader implements AutoCloseable {
        * record/PK in same RIF file allowed. Otherwise, we're running the risk of data race bugs and
        * out-of-order application due to the asynchronous nature of this processing.
        */
-      oldBeneficiaryRecord =
-          Optional.ofNullable(
-              entityManager.find(Beneficiary.class, newBeneficiaryRecord.getBeneficiaryId()));
-
       CriteriaBuilder builder = entityManager.getCriteriaBuilder();
       CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
       Root<Beneficiary> root = criteria.from(Beneficiary.class);
