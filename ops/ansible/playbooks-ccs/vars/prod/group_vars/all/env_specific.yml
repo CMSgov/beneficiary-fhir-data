@@ -15,6 +15,9 @@ data_pipeline_idempotency_required: false
 # Whether to enable BFD API V2
 data_server_v2_enabled: false
 
+# Whether to enable BFD PreAdj Resources
+pre_adj_resources_enabled: false
+
 # New Relic Metric API
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_server_new_relic_metric_path: '/metric/v1'
