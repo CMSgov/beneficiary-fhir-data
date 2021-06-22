@@ -26,9 +26,12 @@ import org.slf4j.LoggerFactory;
  */
 public final class PipelineJobRecordStore {
   /**
-   * The {@link Logger} message that will be recorded if/when the {@link PipelineManager} starts
-   * scanning for data sets.
+   * The {@link Logger} message that will be recorded if/when a {@link PipelineJob} completes
+   * successfully.
    */
+  public static final String LOG_MESSAGE_PREFIX_JOB_COMPLETED = "Job completed";
+
+  /** The {@link Logger} message that will be recorded if/when a {@link PipelineJob} fails. */
   public static final String LOG_MESSAGE_PREFIX_JOB_FAILED = "Job failed";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineJobRecordStore.class);
@@ -232,6 +235,9 @@ public final class PipelineJobRecordStore {
                 PipelineJob.class.getSimpleName(), "startedToCompleted", "succeeded"))
         .update(
             Duration.between(jobRecord.getStartedTime().get(), jobRecord.getCompletedTime().get()));
+
+    // Log the completion at a high level, so that monitoring tools can pick it up.
+    LOGGER.info("{}: jobRecord='{}'", LOG_MESSAGE_PREFIX_JOB_COMPLETED, jobRecord);
 
     LOGGER.trace("recordJobCompletion(...) called: jobRecord='{}'", jobRecord);
   }

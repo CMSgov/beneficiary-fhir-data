@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+enum McsDetailStatus {
+  DETAIL_STATUS_UNSET = 0;
+
+  // ASCII P
+  DETAIL_STATUS_PENDING = 80;
+
+  // ASCII F
+  DETAIL_STATUS_FINAL = 70;
+
+  // ASCII S
+  DETAIL_STATUS_SENT = 83;
+
+  // ASCII D
+  DETAIL_STATUS_DELETED = 68;
+
+  // ASCII R
+  DETAIL_STATUS_REJECTED = 82;
+}
