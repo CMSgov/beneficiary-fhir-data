@@ -48,7 +48,6 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -2801,6 +2800,9 @@ public final class TransformerUtils {
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NPI code data.", e);
     }
+    // Merge Synthea generated NPIs if present. This block is commented out pending discussions
+    // on how to proceed with synthetic vs real NPIs.
+    /*
     try {
       URL syntheaNPIFile =
           gov.cms.bfd.model.rif.samples.StaticRifResource.SYNTHEA_NPIS.getResourceUrl();
@@ -2812,6 +2814,7 @@ public final class TransformerUtils {
       // Ignore, Synthea may not be used here
       LOGGER.info("SYNTHEA NPI codes were not loaded");
     }
+    */
     return npiCodeMap;
   }
 

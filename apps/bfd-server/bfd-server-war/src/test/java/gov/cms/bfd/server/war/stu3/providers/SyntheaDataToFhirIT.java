@@ -146,6 +146,9 @@ public final class SyntheaDataToFhirIT {
         eobs.stream()
             .flatMap(eob -> eob.getItem().stream())
             .anyMatch(item -> item.getService() != null));
+    // These tests are commented out pending discussions on how to proceed with synthetic vs
+    // real NPIs.
+    /*
     Assert.assertTrue(
         "No organization display values found.",
         eobs.stream().anyMatch(eob -> eob.getOrganization().getDisplay() != null));
@@ -154,6 +157,7 @@ public final class SyntheaDataToFhirIT {
         eobs.stream()
             .flatMap(eob -> eob.getCareTeam().stream())
             .anyMatch(careTeam -> careTeam.getProvider().getDisplay() != null));
+    */
   }
 
   /**
