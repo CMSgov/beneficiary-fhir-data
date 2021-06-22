@@ -103,6 +103,12 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrClaimReceiptDate`")
   private LocalDate idrClaimReceiptDate;
 
+  @Column(name = "`idrClaimMbi`", length = 13)
+  private String idrClaimMbi;
+
+  @Column(name = "`idrClaimMbiHash`", length = 64)
+  private String idrClaimMbiHash;
+
   @OneToMany(
       mappedBy = "idrClmHdIcn",
       fetch = FetchType.EAGER,

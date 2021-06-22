@@ -65,6 +65,8 @@ create table "pre_adj"."McsClaims" (
     "idrBillProvStatusCd"  varchar(1),
     "idrTotBilledAmt"      decimal(7, 2),
     "idrClaimReceiptDate"  date,
+    "idrClaimMbi"          varchar(13),
+    "idrClaimMbiHash"      varchar(64),
     constraint "McsClaims_pkey" primary key ("idrClmHdIcn")
 );
 
