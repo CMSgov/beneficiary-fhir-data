@@ -317,11 +317,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    // This endpoint only supports returning unhashed MBIs, so verify that was requested.
-    if (!requestHeader.isMBIinIncludeIdentifiers()) {
+    // This endpoint only supports returning unhashed MBIs (and not HICNs), so verify that was
+    // requested.
+    if (!requestHeader.isMBIinIncludeIdentifiers() || requestHeader.isHICNinIncludeIdentifiers()) {
       throw new InvalidRequestException(
           String.format(
-              "This endpoint requires the '%s: true' header.",
+              "This endpoint requires the '%s: mbi' header.",
               CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS));
     }
 
@@ -492,8 +493,8 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
+    // TODO: why does the transformer need this and can we "fix" that?
     beneRoot.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.INNER);
-    beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
