@@ -39,14 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Orchestrates and manages the execution of {@link PipelineJob}s. */
-public final class PipelineManager {
-  /**
-   * The {@link Logger} message that will be recorded if/when the {@link PipelineManager} starts
-   * scanning for data sets.
-   */
-  public static final String LOG_MESSAGE_STARTING_WORKER =
-      "Starting data set monitor: watching for data sets to process...";
-
+public final class PipelineManager implements AutoCloseable {
   /**
    * The number of jobs that can be run at one time. Because the {@link VolunteerJob} and {@link
    * SchedulerJob} will always be running, this number must be greater than or equal to 3, in order
@@ -343,6 +336,12 @@ public final class PipelineManager {
     }
     LOGGER.info("Stopped PipelineManager.");
     timerStop.stop();
+  }
+
+  /** @see java.lang.AutoCloseable#close() */
+  @Override
+  public void close() throws Exception {
+    stop();
   }
 
   /**

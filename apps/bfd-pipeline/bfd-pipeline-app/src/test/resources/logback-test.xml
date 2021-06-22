@@ -11,11 +11,9 @@
 	
 	<!-- Set these to 'trace' to track jobs' lifecycle, e.g. if you're trying to figure out
 	     how/why/when jobs are running, stopping, etc. -->
-	<!--
 	<logger name="gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore" level="trace" />
 	<logger name="gov.cms.bfd.pipeline.app.PipelineManager" level="trace" />
 	<logger name="gov.cms.bfd.pipeline.app.volunteer.VolunteerJob" level="trace" />
-	-->
 
 	<!-- Configure the root logger to filter to 'info' and more severe, and 
 		send all events to 'STDOUT'. -->

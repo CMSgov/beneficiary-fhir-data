@@ -23,7 +23,7 @@ import lombok.experimental.FieldNameConstants;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`FissClaims`", schema = "pre_adj")
+@Table(name = "`FissClaims`", schema = "`pre_adj`")
 public class PreAdjFissClaim {
 
   @Id
@@ -46,7 +46,7 @@ public class PreAdjFissClaim {
   @Column(name = "`medaProvId`", length = 13)
   private String medaProvId;
 
-  @Column(name = "`totalChargeAmount`")
+  @Column(name = "`totalChargeAmount`", columnDefinition = "decimal(11,2)")
   private BigDecimal totalChargeAmount;
 
   @Column(name = "`receivedDate`")
