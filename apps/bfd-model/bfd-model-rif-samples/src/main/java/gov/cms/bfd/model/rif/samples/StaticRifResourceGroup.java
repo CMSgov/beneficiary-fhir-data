@@ -98,7 +98,27 @@ public enum StaticRifResourceGroup {
    * href="https://synthetichealth.github.io/synthea/">Synthea</a> to generate realistic-looking
    * synthetic data for BFD.
    */
-  SYNTHEA(StaticRifResource.SYNTHEA_BENES, StaticRifResource.SYNTHEA_INPATIENT);
+  SYNTHEA(
+      StaticRifResource.SYNTHEA_BENES_2011,
+      StaticRifResource.SYNTHEA_BENES_2012,
+      StaticRifResource.SYNTHEA_BENES_2013,
+      StaticRifResource.SYNTHEA_BENES_2014,
+      StaticRifResource.SYNTHEA_BENES_2015,
+      StaticRifResource.SYNTHEA_BENES_2016,
+      StaticRifResource.SYNTHEA_BENES_2017,
+      StaticRifResource.SYNTHEA_BENES_2018,
+      StaticRifResource.SYNTHEA_BENES_2019,
+      StaticRifResource.SYNTHEA_BENES_2020,
+      StaticRifResource.SYNTHEA_BENES_2021,
+      StaticRifResource.SYNTHEA_INPATIENT,
+      StaticRifResource.SYNTHEA_OUTPATIENT,
+      StaticRifResource.SYNTHEA_PDE,
+      StaticRifResource.SYNTHEA_CARRIER,
+      StaticRifResource.SYNTHEA_DME,
+      StaticRifResource.SYNTHEA_HHA,
+      StaticRifResource.SYNTHEA_HOSPICE,
+      StaticRifResource.SYNTHEA_SNF,
+      StaticRifResource.SYNTHEA_BENE_HISTORY);
 
   private final StaticRifResource[] resources;
 

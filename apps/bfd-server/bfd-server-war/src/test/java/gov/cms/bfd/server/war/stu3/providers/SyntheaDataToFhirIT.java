@@ -138,22 +138,26 @@ public final class SyntheaDataToFhirIT {
      * there 100% of the time.
      */
     Assert.assertTrue(
-        "No diagnoses found.", eobs.stream().anyMatch(eob -> !eob.getDiagnosis().isEmpty()));
-    Assert.assertTrue(
-        "No procedures found.", eobs.stream().anyMatch(eob -> !eob.getProcedure().isEmpty()));
+        "No diagnoses or procedures found.",
+        eobs.stream()
+            .anyMatch(eob -> !(eob.getDiagnosis().isEmpty() && eob.getProcedure().isEmpty())));
     Assert.assertTrue(
         "No line item services found.",
         eobs.stream()
             .flatMap(eob -> eob.getItem().stream())
             .anyMatch(item -> item.getService() != null));
+    // These tests are commented out pending discussions on how to proceed with synthetic vs
+    // real NPIs.
+    /*
     Assert.assertTrue(
-        "No diagnosis display values found.",
+        "No organization display values found.",
         eobs.stream().anyMatch(eob -> eob.getOrganization().getDisplay() != null));
     Assert.assertTrue(
         "No provider display values found.",
         eobs.stream()
             .flatMap(eob -> eob.getCareTeam().stream())
             .anyMatch(careTeam -> careTeam.getProvider().getDisplay() != null));
+    */
   }
 
   /**

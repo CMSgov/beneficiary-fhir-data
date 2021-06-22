@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
@@ -380,8 +381,48 @@ public enum StaticRifResource {
    * should <em>roughly</em> (but not exactly, due to inclusion of extra deceased patients) match
    * the population size that Synthea is told to produce.
    */
-  SYNTHEA_BENES(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary.csv")),
+  SYNTHEA_BENES_2011(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2011.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2012(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2012.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2013(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2013.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2014(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2014.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2015(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2015.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2016(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2016.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2017(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2017.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2018(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2018.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2019(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2019.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2020(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2020.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENES_2021(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2021.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
 
@@ -392,10 +433,94 @@ public enum StaticRifResource {
   SYNTHEA_INPATIENT(
       syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/inpatient.csv")),
       RifFileType.INPATIENT,
+      Optional.empty()),
+
+  /**
+   * The {@link OutpatientClaim} records produced by {@link #generateSyntheaData()}, the amount of
+   * which will vary across Synthea versions.
+   */
+  SYNTHEA_OUTPATIENT(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/outpatient.csv")),
+      RifFileType.OUTPATIENT,
+      Optional.empty()),
+
+  /**
+   * The {@link PrescriptionClaim} records produced by {@link #generateSyntheaData()}, the amount of
+   * which will vary across Synthea versions.
+   */
+  SYNTHEA_PDE(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/prescription.csv")),
+      RifFileType.PDE,
+      Optional.empty()),
+
+  /**
+   * The {@link Carrier} records produced by {@link #generateSyntheaData()}, the amount of which
+   * will vary across Synthea versions.
+   */
+  SYNTHEA_CARRIER(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/carrier.csv")),
+      RifFileType.CARRIER,
+      Optional.empty()),
+
+  /**
+   * The {@link DME} records produced by {@link #generateSyntheaData()}, the amount of which will
+   * vary across Synthea versions.
+   */
+  SYNTHEA_DME(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/dme.csv")),
+      RifFileType.DME,
+      Optional.empty()),
+
+  /**
+   * The {@link HHA} records produced by {@link #generateSyntheaData()}, the amount of which will
+   * vary across Synthea versions.
+   */
+  SYNTHEA_HHA(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/home.csv")),
+      RifFileType.HHA,
+      Optional.empty()),
+
+  /**
+   * The {@link HOSPICE} records produced by {@link #generateSyntheaData()}, the amount of which
+   * will vary across Synthea versions.
+   */
+  SYNTHEA_HOSPICE(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/hospice.csv")),
+      RifFileType.HOSPICE,
+      Optional.empty()),
+
+  /**
+   * The {@link SNF} records produced by {@link #generateSyntheaData()}, the amount of which will
+   * vary across Synthea versions.
+   */
+  SYNTHEA_SNF(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/snf.csv")),
+      RifFileType.SNF,
+      Optional.empty()),
+
+  /**
+   * The {@link Beneficiary History} records produced by {@link #generateSyntheaData()}, the amount
+   * of which will vary across Synthea versions.
+   */
+  SYNTHEA_BENE_HISTORY(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_history.csv")),
+      RifFileType.BENEFICIARY_HISTORY,
+      Optional.empty()),
+
+  /**
+   * The NPIs produced by {@link #generateSyntheaData()}, the amount of which will vary across
+   * Synthea runs.
+   */
+  SYNTHEA_NPIS(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/npi.tsv")),
+      null,
       Optional.empty());
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StaticRifResource.class);
-  private static Path SYNTHEA_OUTPUT_DIR;
+  private static Path SYNTHEA_OUTPUT_DIR =
+      System.getenv("SYNTHEA_OUTPUT_DIR") != null
+          ? Paths.get(System.getenv("SYNTHEA_OUTPUT_DIR"))
+          : null;
 
   private final Supplier<URL> resourceUrlSupplier;
   private final RifFileType rifFileType;
@@ -413,6 +538,26 @@ public enum StaticRifResource {
    */
   private StaticRifResource(
       Supplier<URL> resourceUrlSupplier, RifFileType rifFileType, Optional<Integer> recordCount) {
+    this.resourceUrlSupplier = resourceUrlSupplier;
+    this.rifFileType = rifFileType;
+
+    this.resourceUrl = Optional.empty();
+    this.recordCount = recordCount;
+  }
+
+  /**
+   * Enum constant constructor.
+   *
+   * @param resourceUrlSupplier the value to use for {@link #getResourceSupplier()}
+   * @param rifFileType the value to use for {@link #getRifFileType()}
+   * @param recordCount the value to use for {@link #getRecordCount()}, or {@link Optional#empty()}
+   *     if that count is not known in advance
+   */
+  private StaticRifResource(
+      Supplier<URL> resourceUrlSupplier,
+      RifFileType rifFileType,
+      Optional<Integer> recordCount,
+      boolean multiFile) {
     this.resourceUrlSupplier = resourceUrlSupplier;
     this.rifFileType = rifFileType;
 
@@ -451,7 +596,7 @@ public enum StaticRifResource {
       Set<String> uniqueIds = new HashSet<String>();
       csvParser.forEach(
           csvRecord -> {
-            String id = csvRecord.get(idColumn);
+            String id = idColumn == null ? UUID.randomUUID().toString() : csvRecord.get(idColumn);
             uniqueIds.add(id);
           });
 
@@ -730,10 +875,15 @@ public enum StaticRifResource {
                     "-cs",
                     "0",
                     "-r",
-                    "20200101",
+                    "20210520",
                     "-p",
-                    "100",
-                    "--exporter.bfd.export=true")
+                    "366",
+                    "--exporter.fhir.export=false",
+                    "--exporter.bfd.export=true",
+                    "--exporter.years_of_history=10",
+                    "--generate.only_alive_patients=true",
+                    "-a",
+                    "70-80")
                 .directory(syntheaGitDir.toFile())
                 .readOutput(true)
                 .timeout(5, TimeUnit.MINUTES)
