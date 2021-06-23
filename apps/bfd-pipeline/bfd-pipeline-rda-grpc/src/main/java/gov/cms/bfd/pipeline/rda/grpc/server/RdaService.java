@@ -10,6 +10,10 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Implementation of RDAServiceImplBase that services FissClaims using a FissClaimSource object. A
+ * Supplier is used to create a new FissClaimSource object for each client call to getFissClaims.
+ */
 public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaService.class);
   private final Supplier<FissClaimSource> sourceFactory;
