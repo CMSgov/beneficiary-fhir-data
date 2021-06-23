@@ -122,7 +122,7 @@ stop_service_if_failing() {
     STARTUP_TESTING_CHECK_V2_EOB=$(check_endpoint "https://localhost:7443/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
     STARTUP_TESTING_CHECK_V2_EOB_EXIT=$?
 
-    if [[ $STARTUP_TESTING_CHECK_V1_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_EOB_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_V2_CHECK_EOB_EXIT == 0 ]]; then
+    if [[ $STARTUP_TESTING_CHECK_V1_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_EOB_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_EOB_EXIT == 0 ]]; then
       log "Server started properly"
       return 0
     elif [[ $I -lt $STARTUP_TESTING_RETRIES ]]; then
