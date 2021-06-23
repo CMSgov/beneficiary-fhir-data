@@ -7,8 +7,11 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
+  private static final Logger LOGGER = LoggerFactory.getLogger(RdaService.class);
   private final Supplier<FissClaimSource> sourceFactory;
 
   public RdaService(Supplier<FissClaimSource> sourceFactory) {
@@ -17,9 +20,11 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
 
   @Override
   public void getFissClaims(Empty request, StreamObserver<FissClaim> responseObserver) {
+    LOGGER.info("start getFissClaims call");
     FissClaimSource generator = sourceFactory.get();
     FissClaimResponder responder = new FissClaimResponder(responseObserver, generator);
     responder.sendResponses();
+    LOGGER.info("end getFissClaims call");
   }
 
   private static class FissClaimResponder {
@@ -47,14 +52,16 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
             running.set(false);
             responseObserver.onCompleted();
             generator.close();
+            LOGGER.info("getFissClaims call cancelled by client");
           } else if (!generator.hasNext()) {
             running.set(false);
             responseObserver.onCompleted();
             generator.close();
+            LOGGER.info("getFissClaims call complete");
           }
         } catch (Exception ex) {
           running.set(false);
-          ex.printStackTrace(System.out);
+          LOGGER.error("getFissClaims caught exception: {}", ex.getMessage(), ex);
           responseObserver.onError(ex);
         }
       }

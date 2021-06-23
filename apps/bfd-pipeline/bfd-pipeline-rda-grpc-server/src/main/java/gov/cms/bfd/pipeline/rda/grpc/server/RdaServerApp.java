@@ -4,6 +4,8 @@ import io.grpc.Server;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A stand-alone mock RDA API (version 0.2 MVP) server implementation. The server is intended for
@@ -12,14 +14,17 @@ import java.util.function.Supplier;
  * 5003.
  */
 public class RdaServerApp {
+  private static final Logger LOGGER = LoggerFactory.getLogger(RdaServerApp.class);
+  private static final int MAX_TO_SEND = 5_000;
+
   public static void main(String[] args) throws Exception {
     String arg = args.length < 1 ? "random" : args[0];
     Supplier<FissClaimSource> sourceFactory = createSourceFactoryForCode(arg);
 
-    System.out.println("Starting server.");
+    LOGGER.info("Starting server.");
     Server server = RdaServer.startLocal(5003, sourceFactory);
     server.awaitTermination();
-    System.out.println("server stopping.");
+    LOGGER.info("server stopping.");
   }
 
   /**
@@ -40,11 +45,28 @@ public class RdaServerApp {
       throws IOException {
     Supplier<FissClaimSource> sourceFactory;
     if (arg.startsWith("seed:")) {
-      sourceFactory = () -> new RandomFissClaimSource(Long.parseLong(arg.substring(5)), 10_000);
+      final long seed = Long.parseLong(arg.substring(5));
+      sourceFactory =
+          () -> {
+            LOGGER.info("serving data using RandomFissClaimSource with seed {}", seed);
+            return new RandomFissClaimSource(seed, MAX_TO_SEND);
+          };
     } else if (arg.equals("random")) {
-      sourceFactory = () -> new RandomFissClaimSource(System.currentTimeMillis(), 10_000);
+      final long seed = System.currentTimeMillis();
+      sourceFactory =
+          () -> {
+            LOGGER.info("serving data using RandomFissClaimSource with seed {}", seed);
+            return new RandomFissClaimSource(seed, MAX_TO_SEND);
+          };
     } else if (arg.startsWith("file:")) {
-      sourceFactory = () -> new JsonFissClaimSource(new File(arg.substring(5)));
+      final File file = new File(arg.substring(5));
+      sourceFactory =
+          () -> {
+            LOGGER.info(
+                "serving data using JsonFissClaimSource with data from file {}",
+                file.getAbsolutePath());
+            return new JsonFissClaimSource(file);
+          };
     } else {
       throw new IOException("invalid argument: " + arg);
     }

@@ -67,17 +67,34 @@
         </dependency>
 
         <dependency>
-            <!-- Delegates all JCL logging (typically from dependencies) to SLF4J. -->
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-
-        <dependency>
             <!-- Provides a sane facade for the giant mess of incompatible logging
                     frameworks in Java. -->
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <dependency>
+            <!-- Delegates all JCL logging (typically from dependencies) to SLF4J. -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <!-- An implementation of the Log4J API that routes everything through
+                    to SLF4J, instead. -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Provides a JUL handler, SLF4JBridgeHandler, that routes everything
+                    to SLF4J, instead. -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Used as a logging backed/target for SLF4J. -->
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
         <dependency>
             <!-- Used to monitor performance and other statistics at runtime. -->
             <groupId>io.dropwizard.metrics</groupId>
@@ -118,12 +135,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <dependency>
             <!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -142,13 +153,6 @@
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>2.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <!-- Logback is used as the logging target/backend for SLF4J during tests:
-                    all logging events will be sent to it. -->
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
