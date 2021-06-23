@@ -99,30 +99,30 @@ stop_service_if_failing() {
 
   for I in $(seq $STARTUP_TESTING_RETRIES); do
     log "Checking V1 metadata endpoint"
-    STARTUP_TESTING_CHECK_METADATA=$(check_endpoint "https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
-    STARTUP_TESTING_CHECK_METADATA_EXIT=$?
+    STARTUP_TESTING_CHECK_V1_METADATA=$(check_endpoint "https://localhost:7443/v1/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
+    STARTUP_TESTING_CHECK_V1_METADATA_EXIT=$?
 
     log "Checking V2 metadata endpoint"
-    STARTUP_TESTING_CHECK_METADATA=$(check_endpoint "https://localhost:7443/v2/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
-    STARTUP_TESTING_CHECK_METADATA_EXIT=$?
+    STARTUP_TESTING_CHECK_V2_METADATA=$(check_endpoint "https://localhost:7443/v2/fhir/metadata?_format=application%2Fjson%2Bfhir" "status")
+    STARTUP_TESTING_CHECK_V2_METADATA_EXIT=$?
 
     log "Checking V1 Coverage resource endpoint for bene $STARTUP_TESTING_BENE_ID"
-    STARTUP_TESTING_CHECK_COVERAGE=$(check_endpoint "https://localhost:7443/v1/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
-    STARTUP_TESTING_CHECK_COVERAGE_EXIT=$?
+    STARTUP_TESTING_CHECK_V1_COVERAGE=$(check_endpoint "https://localhost:7443/v1/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
+    STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT=$?
 
     log "Checking V2 Coverage resource endpoint for bene $STARTUP_TESTING_BENE_ID"
-    STARTUP_TESTING_CHECK_COVERAGE=$(check_endpoint "https://localhost:7443/v2/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
-    STARTUP_TESTING_CHECK_COVERAGE_EXIT=$?
+    STARTUP_TESTING_CHECK_V2_COVERAGE=$(check_endpoint "https://localhost:7443/v2/fhir/Coverage?beneficiary=$STARTUP_TESTING_BENE_ID&_format=application%2Fjson%2Bfhir" "id")
+    STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT=$?
 
     log "Checking V1 EOB resource endpoint for bene $STARTUP_TESTING_BENE_ID"
-    STARTUP_TESTING_CHECK_EOB=$(check_endpoint "https://localhost:7443/v1/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
-    STARTUP_TESTING_CHECK_EOB_EXIT=$?
+    STARTUP_TESTING_CHECK_V1_EOB=$(check_endpoint "https://localhost:7443/v1/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
+    STARTUP_TESTING_CHECK_V1_EOB_EXIT=$?
 
     log "Checking V2 EOB resource endpoint for bene $STARTUP_TESTING_BENE_ID"
-    STARTUP_TESTING_CHECK_EOB=$(check_endpoint "https://localhost:7443/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
-    STARTUP_TESTING_CHECK_EOB_EXIT=$?
+    STARTUP_TESTING_CHECK_V2_EOB=$(check_endpoint "https://localhost:7443/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=$STARTUP_TESTING_BENE_ID" "id")
+    STARTUP_TESTING_CHECK_V2_EOB_EXIT=$?
 
-    if [[ $STARTUP_TESTING_CHECK_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_DATABASE_EXIT == 0 ]]; then
+    if [[ $STARTUP_TESTING_CHECK_V1_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V1_EOB_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_METADATA_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_COVERAGE_EXIT == 0 ]] && [[ $STARTUP_TESTING_CHECK_V2_EOB_EXIT == 0 ]]; then
       log "Server started properly"
       return 0
     elif [[ $I -lt $STARTUP_TESTING_RETRIES ]]; then
