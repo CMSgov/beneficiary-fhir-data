@@ -194,6 +194,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
   }
 
   @Search
+  @Trace
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -308,6 +309,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     return bundle;
   }
 
+  @Trace
   private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -315,11 +317,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
-    // This endpoint only supports returning unhashed MBIs, so verify that was requested.
-    if (!requestHeader.isMBIinIncludeIdentifiers()) {
+    // This endpoint only supports returning unhashed MBIs (and not HICNs), so verify that was
+    // requested.
+    if (!requestHeader.isMBIinIncludeIdentifiers() || requestHeader.isHICNinIncludeIdentifiers()) {
       throw new InvalidRequestException(
           String.format(
-              "This endpoint requires the '%s: true' header.",
+              "This endpoint requires the '%s: mbi' header.",
               CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS));
     }
 
@@ -393,6 +396,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    * @return the {@link Beneficiary}s that match the specified PartD contract ID for the specified
    *     year and month
    */
+  @Trace
   private List<Beneficiary> fetchBeneficiariesByContractAndYearMonth(
       TokenParam coverageId, LocalDate yearMonth, PatientLinkBuilder paging) {
     String contractCode = coverageId.getValueNotNull();
@@ -423,6 +427,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    * @param paging the {@link PatientLinkBuilder} being used for paging
    * @return the {@link List} of matching {@link Beneficiary#getBeneficiaryId()} values
    */
+  @Trace
   private List<String> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId, PatientLinkBuilder paging) {
     // Create the query to run.
@@ -482,13 +487,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
    * @param ids the {@link Beneficiary#getBeneficiaryId()} values to match against
    * @return the matching {@link Beneficiary}s
    */
+  @Trace
   private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<String> ids) {
     // Create the query to run.
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
     Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
-    beneRoot.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.INNER);
-    beneRoot.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
     beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
     beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
