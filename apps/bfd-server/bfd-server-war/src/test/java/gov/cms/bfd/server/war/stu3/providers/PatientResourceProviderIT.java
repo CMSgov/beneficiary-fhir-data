@@ -1617,7 +1617,7 @@ public final class PatientResourceProviderIT {
                 StaticRifResource.SAMPLE_A_BENES,
                 StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
                 StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
-    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -1679,7 +1679,7 @@ public final class PatientResourceProviderIT {
 
     List<Object> loadedRecords =
         ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // First, adjust the bene's reference year in the DB.
     ServerTestUtils.doTransaction(
@@ -1742,7 +1742,7 @@ public final class PatientResourceProviderIT {
   @Test
   public void searchByPartDContractWithPaging() {
     ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -1782,7 +1782,7 @@ public final class PatientResourceProviderIT {
   @Test
   public void searchByPartDContractForEmptyContract() {
     ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -1819,7 +1819,7 @@ public final class PatientResourceProviderIT {
   @Test(expected = InvalidRequestException.class)
   public void searchByPartDContractWithInvalidYear() {
     ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiers();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     fhirClient
         .search()
@@ -1937,10 +1937,10 @@ public final class PatientResourceProviderIT {
    * @return a FHIR {@link IGenericClient} where the {@link
    *     CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} is set to <code>"true"</code>
    */
-  public static IGenericClient createFhirClientWithIncludeIdentifiers() {
+  public static IGenericClient createFhirClientWithIncludeIdentifiersMbi() {
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(
-            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, "true");
+            PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, "mbi");
     return createFhirClient(requestHeader);
   }
 
