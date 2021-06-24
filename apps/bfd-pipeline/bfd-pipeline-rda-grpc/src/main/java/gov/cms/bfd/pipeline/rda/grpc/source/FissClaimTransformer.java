@@ -14,9 +14,9 @@ import java.time.Clock;
 import java.util.List;
 
 /**
- * Transforms a gRPC FissClaim object into a Hibernate PreAdjClaim object. Note that the gRPC data
- * objects are not proper java beans since their optional field getters should only be called if
- * their corresponding &quot;has&quot; methods return true. Optional fields are ignored when not
+ * Transforms a gRPC FissClaim object into a Hibernate PreAdjFissClaim object. Note that the gRPC
+ * data objects are not proper java beans since their optional field getters should only be called
+ * if their corresponding &quot;has&quot; methods return true. Optional fields are ignored when not
  * present. All other fields are validated and copied into a new PreAdjFissClaim object. A
  * lastUpdated time stamp is set using a Clock (for easier testing) and the MBI is hashed using an
  * IdHasher.
@@ -32,6 +32,21 @@ public class FissClaimTransformer {
 
   public PreAdjFissClaim transformClaim(FissClaim from) {
     final DataTransformer transformer = new DataTransformer();
+    final PreAdjFissClaim to = transformClaim(from, transformer);
+
+    transformProcCodes(from, transformer, to);
+    transformDiagCodes(from, transformer, to);
+    List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
+    if (errors.size() > 0) {
+      String message =
+          String.format(
+              "failed with %d errors: dcn=%s errors=%s", errors.size(), from.getDcn(), errors);
+      throw new DataTransformer.TransformationException(message, errors);
+    }
+    return to;
+  }
+
+  private PreAdjFissClaim transformClaim(FissClaim from, DataTransformer transformer) {
     final PreAdjFissClaim to = new PreAdjFissClaim();
     transformer
         .copyString(PreAdjFissClaim.Fields.dcn, false, 1, 23, from.getDcn(), to::setDcn)
@@ -148,76 +163,95 @@ public class FissClaimTransformer {
         from::getFedTaxNb,
         to::setFedTaxNumber);
     to.setLastUpdated(clock.instant());
+    return to;
+  }
 
+  private void transformProcCodes(FissClaim from, DataTransformer transformer, PreAdjFissClaim to) {
     short priority = 0;
     for (FissProcedureCode fromCode : from.getFissProcCodesList()) {
       String fieldPrefix = "procCode-" + priority + "-";
-      PreAdjFissProcCode toCode = new PreAdjFissProcCode();
-      toCode.setDcn(to.getDcn());
-      toCode.setPriority(priority);
-      transformer
-          .copyString(
-              fieldPrefix + PreAdjFissProcCode.Fields.procCode,
-              false,
-              1,
-              10,
-              fromCode.getProcCd(),
-              toCode::setProcCode)
-          .copyOptionalString(
-              fieldPrefix + PreAdjFissProcCode.Fields.procFlag,
-              1,
-              4,
-              fromCode::hasProcFlag,
-              fromCode::getProcFlag,
-              toCode::setProcFlag)
-          .copyOptionalDate(
-              fieldPrefix + PreAdjFissProcCode.Fields.procDate,
-              fromCode::hasProcDt,
-              fromCode::getProcDt,
-              toCode::setProcDate);
-      toCode.setLastUpdated(to.getLastUpdated());
+      PreAdjFissProcCode toCode =
+          transformProcCode(transformer, to, priority, fromCode, fieldPrefix);
       to.getProcCodes().add(toCode);
       priority += 1;
     }
-    priority = 0;
+  }
+
+  private void transformDiagCodes(FissClaim from, DataTransformer transformer, PreAdjFissClaim to) {
+    short priority = 0;
     for (FissDiagnosisCode fromCode : from.getFissDiagCodesList()) {
       String fieldPrefix = "diagCode-" + priority + "-";
-      PreAdjFissDiagnosisCode toCode = new PreAdjFissDiagnosisCode();
-      toCode.setDcn(to.getDcn());
-      toCode.setPriority(priority);
-      transformer
-          .copyString(
-              fieldPrefix + PreAdjFissDiagnosisCode.Fields.diagCd2,
-              false,
-              1,
-              7,
-              fromCode.getDiagCd2(),
-              toCode::setDiagCd2)
-          .copyEnumAsAsciiCharacterString(
-              fieldPrefix + PreAdjFissDiagnosisCode.Fields.diagPoaInd,
-              fromCode.getDiagPoaInd(),
-              FissDiagnosisPresentOnAdmissionIndicator
-                  .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_UNSET,
-              FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED,
-              toCode::setDiagPoaInd)
-          .copyOptionalString(
-              fieldPrefix + PreAdjFissDiagnosisCode.Fields.bitFlags,
-              1,
-              4,
-              fromCode::hasBitFlags,
-              fromCode::getBitFlags,
-              toCode::setBitFlags);
-      toCode.setLastUpdated(to.getLastUpdated());
+      PreAdjFissDiagnosisCode toCode =
+          transformDiagCode(transformer, to, priority, fromCode, fieldPrefix);
       to.getDiagCodes().add(toCode);
       priority += 1;
     }
-    List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
-    if (errors.size() > 0) {
-      String message =
-          String.format(
-              "failed with %d errors: dcn=%s errors=%s", errors.size(), from.getDcn(), errors);
-      throw new DataTransformer.TransformationException(message, errors);
-    }
-    return to;
+  }
+
+  private PreAdjFissProcCode transformProcCode(
+      DataTransformer transformer,
+      PreAdjFissClaim to,
+      short priority,
+      FissProcedureCode fromCode,
+      String fieldPrefix) {
+    PreAdjFissProcCode toCode = new PreAdjFissProcCode();
+    toCode.setDcn(to.getDcn());
+    toCode.setPriority(priority);
+    transformer
+        .copyString(
+            fieldPrefix + PreAdjFissProcCode.Fields.procCode,
+            false,
+            1,
+            10,
+            fromCode.getProcCd(),
+            toCode::setProcCode)
+        .copyOptionalString(
+            fieldPrefix + PreAdjFissProcCode.Fields.procFlag,
+            1,
+            4,
+            fromCode::hasProcFlag,
+            fromCode::getProcFlag,
+            toCode::setProcFlag)
+        .copyOptionalDate(
+            fieldPrefix + PreAdjFissProcCode.Fields.procDate,
+            fromCode::hasProcDt,
+            fromCode::getProcDt,
+            toCode::setProcDate);
+    toCode.setLastUpdated(to.getLastUpdated());
+    return toCode;
+  }
+
+  private PreAdjFissDiagnosisCode transformDiagCode(
+      DataTransformer transformer,
+      PreAdjFissClaim to,
+      short priority,
+      FissDiagnosisCode fromCode,
+      String fieldPrefix) {
+    PreAdjFissDiagnosisCode toCode = new PreAdjFissDiagnosisCode();
+    toCode.setDcn(to.getDcn());
+    toCode.setPriority(priority);
+    transformer
+        .copyString(
+            fieldPrefix + PreAdjFissDiagnosisCode.Fields.diagCd2,
+            false,
+            1,
+            7,
+            fromCode.getDiagCd2(),
+            toCode::setDiagCd2)
+        .copyEnumAsAsciiCharacterString(
+            fieldPrefix + PreAdjFissDiagnosisCode.Fields.diagPoaInd,
+            fromCode.getDiagPoaInd(),
+            FissDiagnosisPresentOnAdmissionIndicator.DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_UNSET,
+            FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED,
+            toCode::setDiagPoaInd)
+        .copyOptionalString(
+            fieldPrefix + PreAdjFissDiagnosisCode.Fields.bitFlags,
+            1,
+            4,
+            fromCode::hasBitFlags,
+            fromCode::getBitFlags,
+            toCode::setBitFlags);
+    toCode.setLastUpdated(to.getLastUpdated());
+    return toCode;
   }
 }
