@@ -26,11 +26,12 @@ alter table "pre_adj"."FissClaims"
  */
 
 create table "pre_adj"."FissDiagnosisCodes" (
-    "dcn"        varchar(23) not null,
-    "priority"   smallint    not null,
-    "diagCd2"    varchar(7)  not null,
-    "diagPoaInd" varchar(1)  not null,
-    "bitFlags"   varchar(4),
+    "dcn"         varchar(23) not null,
+    "priority"    smallint    not null,
+    "diagCd2"     varchar(7)  not null,
+    "diagPoaInd"  varchar(1)  not null,
+    "bitFlags"    varchar(4),
+    "lastUpdated" timestamp with time zone,
     constraint "FissDiagnosisCodes_pkey" primary key ("dcn", "priority"),
     constraint "FissDiagnosisCodes_claim" foreign key ("dcn") references "pre_adj"."FissClaims"("dcn")
 );
@@ -67,8 +68,18 @@ create table "pre_adj"."McsClaims" (
     "idrClaimReceiptDate"  date,
     "idrClaimMbi"          varchar(13),
     "idrClaimMbiHash"      varchar(64),
+    "lastUpdated"          timestamp with time zone,
     constraint "McsClaims_pkey" primary key ("idrClmHdIcn")
 );
+
+/*
+ * Index the MedicareBeneficiaryIdentifier (MBI) hash column for mbi searches.
+ * The search is used by partners to find claims for specific beneficiaries.
+ * Since this is a frequent operation, the hash is indexed.
+ */
+
+create index "McsClaims_mbi_hash_idx"
+    on "pre_adj"."McsClaims" ("idrClaimMbiHash");
 
 /*
  * The priority column is used to sort the detail records and is populated using array index in RDA
@@ -79,6 +90,7 @@ create table "pre_adj"."McsDiagnosisCodes" (
     "priority"    smallint    not null,
     "diagIcdType" varchar(1),
     "diagCode"    varchar(7),
+    "lastUpdated" timestamp with time zone,
     constraint "McsDiagnosisCodes_pkey" primary key ("idrClmHdIcn", "priority"),
     constraint "McsDiagnosisCodes_claim" foreign key ("idrClmHdIcn") references "pre_adj"."McsClaims"("idrClmHdIcn")
 );
@@ -109,6 +121,7 @@ create table "pre_adj"."McsDetails" (
     "idrKPosCity"           varchar(30),
     "idrKPosState"          varchar(2),
     "idrKPosZip"            varchar(15),
+    "lastUpdated"           timestamp with time zone,
     constraint "McsDetails_pkey" primary key ("idrClmHdIcn", "priority"),
     constraint "McsDetails_claim" foreign key ("idrClmHdIcn") references "pre_adj"."McsClaims"("idrClmHdIcn")
 );

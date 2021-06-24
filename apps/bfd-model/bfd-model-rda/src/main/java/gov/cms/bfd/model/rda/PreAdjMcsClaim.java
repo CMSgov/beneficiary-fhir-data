@@ -1,6 +1,7 @@
 package gov.cms.bfd.model.rda;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -108,6 +109,9 @@ public class PreAdjMcsClaim {
 
   @Column(name = "`idrClaimMbiHash`", length = 64)
   private String idrClaimMbiHash;
+
+  @Column(name = "`lastUpdated`")
+  private Instant lastUpdated;
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",

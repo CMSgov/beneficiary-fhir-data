@@ -1,6 +1,7 @@
 package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
+import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -37,6 +38,9 @@ public class PreAdjMcsDiagnosisCode {
 
   @Column(name = "`diagCode`", length = 7)
   private String diagCode;
+
+  @Column(name = "`lastUpdated`")
+  private Instant lastUpdated;
 
   @Data
   @NoArgsConstructor

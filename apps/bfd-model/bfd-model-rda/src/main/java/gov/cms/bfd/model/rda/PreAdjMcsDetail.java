@@ -1,6 +1,7 @@
 package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -89,6 +90,9 @@ public class PreAdjMcsDetail {
 
   @Column(name = "`idrKPosZip`", length = 15)
   private String idrKPosZip;
+
+  @Column(name = "`lastUpdated`")
+  private Instant lastUpdated;
 
   @Data
   @NoArgsConstructor
