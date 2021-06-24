@@ -44,6 +44,7 @@ jobs:
         uses: actions/upload-artifact@v2
         if: always()
         with:
+          name: mvn-build-logs
           path: |
             **/target/surefire-reports/*
             **/target/failsafe-reports/*
