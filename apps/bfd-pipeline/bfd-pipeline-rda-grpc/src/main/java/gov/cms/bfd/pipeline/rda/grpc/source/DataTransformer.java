@@ -141,6 +141,26 @@ public class DataTransformer {
   }
 
   /**
+   * Same as copyEnumAsAsciiCharacter() but accepts a Consumer&lt;String&gt; as its copier.
+   *
+   * <p>RDA API 0.2 MVP has some enums that have numeric values matching the ASCII character from
+   * the upstream source record. Check the integer value and copy it if it represents an ASCII
+   * character or add an error otherwise.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param enumValue value of the enum
+   * @param unsetValue enum instance for unset values
+   * @param unrecognizedValue enum instance for unrecognized values
+   * @param copier Consumer to receive the character value as a String
+   * @return this
+   */
+  public <E extends ProtocolMessageEnum> DataTransformer copyEnumAsAsciiCharacterString(
+      String fieldName, E enumValue, E unsetValue, E unrecognizedValue, Consumer<String> copier) {
+    return copyEnumAsAsciiCharacter(
+        fieldName, enumValue, unsetValue, unrecognizedValue, c -> copier.accept(String.valueOf(c)));
+  }
+
+  /**
    * Extract the first character of the string and deliver it to the Consumer. The string MUST not
    * be null and MUST have length one to be valid.
    *

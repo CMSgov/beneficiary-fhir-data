@@ -5,10 +5,13 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.Assert.*;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
+import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
 import java.math.BigDecimal;
@@ -18,6 +21,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -139,7 +147,69 @@ public class FissClaimTransformerTest {
     code.setLastUpdated(claim.getLastUpdated());
     claim.getProcCodes().add(code);
     PreAdjFissClaim transformed = transformer.transformClaim(builder.build());
+    assertListContentsHaveSamePropertyValues(
+        claim.getProcCodes(), transformed.getProcCodes(), PreAdjFissProcCode::getPriority);
+  }
+
+  @Test
+  public void diagCodes() {
+    builder
+        .setDcn("dcn")
+        .setHicNo("hicn")
+        .setCurrStatus(FissClaimStatus.CLAIM_STATUS_MOVE)
+        .setCurrLoc1(FissProcessingType.PROCESSING_TYPE_MANUAL)
+        .setCurrLoc2("2")
+        .addFissDiagCodes(
+            FissDiagnosisCode.newBuilder()
+                .setDiagCd2("code-1")
+                .setDiagPoaInd(
+                    FissDiagnosisPresentOnAdmissionIndicator
+                        .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_CLINICALLY_UNDETERMINED)
+                .setBitFlags("1234")
+                .build())
+        .addFissDiagCodes(
+            FissDiagnosisCode.newBuilder()
+                .setDiagCd2("code-2")
+                .setDiagPoaInd(
+                    FissDiagnosisPresentOnAdmissionIndicator
+                        .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_NO)
+                .setBitFlags("4321")
+                .build());
+    claim.setDcn("dcn");
+    claim.setHicNo("hicn");
+    claim.setCurrStatus('M');
+    claim.setCurrLoc1('M');
+    claim.setCurrLoc2("2");
+    claim.setLastUpdated(clock.instant());
+    PreAdjFissDiagnosisCode code = new PreAdjFissDiagnosisCode();
+    code.setDcn("dcn");
+    code.setPriority((short) 0);
+    code.setDiagCd2("code-1");
+    code.setDiagPoaInd(
+        String.valueOf(
+            (char)
+                FissDiagnosisPresentOnAdmissionIndicator
+                    .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_CLINICALLY_UNDETERMINED
+                    .getNumber()));
+    code.setBitFlags("1234");
+    code.setLastUpdated(claim.getLastUpdated());
+    claim.getDiagCodes().add(code);
+    code = new PreAdjFissDiagnosisCode();
+    code.setDcn("dcn");
+    code.setPriority((short) 1);
+    code.setDiagCd2("code-2");
+    code.setDiagPoaInd(
+        String.valueOf(
+            (char)
+                FissDiagnosisPresentOnAdmissionIndicator.DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_NO
+                    .getNumber()));
+    code.setBitFlags("4321");
+    code.setLastUpdated(claim.getLastUpdated());
+    claim.getDiagCodes().add(code);
+    PreAdjFissClaim transformed = transformer.transformClaim(builder.build());
     assertThat(transformed, samePropertyValuesAs(claim));
+    assertListContentsHaveSamePropertyValues(
+        claim.getDiagCodes(), transformed.getDiagCodes(), PreAdjFissDiagnosisCode::getPriority);
   }
 
   @Test
@@ -231,6 +301,18 @@ public class FissClaimTransformerTest {
                   "procCode-0-procFlag", "invalid length: expected=[1,4] actual=5"),
               new DataTransformer.ErrorMessage("procCode-0-procDate", "invalid date")),
           ex.getErrors());
+    }
+  }
+
+  private <T> void assertListContentsHaveSamePropertyValues(
+      Set<T> expectedSet, Set<T> actualSet, ToIntFunction<T> priority) {
+    List<T> expected =
+        expectedSet.stream().sorted(Comparator.comparingInt(priority)).collect(Collectors.toList());
+    List<T> actual =
+        actualSet.stream().sorted(Comparator.comparingInt(priority)).collect(Collectors.toList());
+    assertEquals(expected.size(), actual.size());
+    for (int i = 0; i < expected.size(); ++i) {
+      assertThat(actual.get(i), samePropertyValuesAs(expected.get(i)));
     }
   }
 }

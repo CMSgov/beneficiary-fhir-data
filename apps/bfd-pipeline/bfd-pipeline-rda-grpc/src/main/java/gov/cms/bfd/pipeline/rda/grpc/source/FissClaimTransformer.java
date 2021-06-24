@@ -1,10 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
+import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
 import java.time.Clock;
@@ -174,6 +177,38 @@ public class FissClaimTransformer {
               toCode::setProcDate);
       toCode.setLastUpdated(to.getLastUpdated());
       to.getProcCodes().add(toCode);
+      priority += 1;
+    }
+    priority = 0;
+    for (FissDiagnosisCode fromCode : from.getFissDiagCodesList()) {
+      String fieldPrefix = "diagCode-" + priority + "-";
+      PreAdjFissDiagnosisCode toCode = new PreAdjFissDiagnosisCode();
+      toCode.setDcn(to.getDcn());
+      toCode.setPriority(priority);
+      transformer
+          .copyString(
+              fieldPrefix + PreAdjFissDiagnosisCode.Fields.diagCd2,
+              false,
+              1,
+              7,
+              fromCode.getDiagCd2(),
+              toCode::setDiagCd2)
+          .copyEnumAsAsciiCharacterString(
+              fieldPrefix + PreAdjFissDiagnosisCode.Fields.diagPoaInd,
+              fromCode.getDiagPoaInd(),
+              FissDiagnosisPresentOnAdmissionIndicator
+                  .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_UNSET,
+              FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED,
+              toCode::setDiagPoaInd)
+          .copyOptionalString(
+              fieldPrefix + PreAdjFissDiagnosisCode.Fields.bitFlags,
+              1,
+              4,
+              fromCode::hasBitFlags,
+              fromCode::getBitFlags,
+              toCode::setBitFlags);
+      toCode.setLastUpdated(to.getLastUpdated());
+      to.getDiagCodes().add(toCode);
       priority += 1;
     }
     List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
