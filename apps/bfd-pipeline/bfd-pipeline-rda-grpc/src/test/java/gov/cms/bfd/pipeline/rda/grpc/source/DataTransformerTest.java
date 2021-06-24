@@ -22,12 +22,12 @@ public class DataTransformerTest {
   @Test
   public void copyString() {
     transformer
-        .copyString("length-one-ok", "1", false, 1, 5, copied::add)
-        .copyString("length-five-ok", "12345", false, 1, 5, copied::add)
-        .copyString("length-below-min", "1", false, 2, 5, copied::add)
-        .copyString("length-above-max", "123456", false, 1, 5, copied::add)
-        .copyString("null-ok", null, true, 1, 5, copied::add)
-        .copyString("null-bad", null, false, 1, 5, copied::add);
+        .copyString("length-one-ok", false, 1, 5, "1", copied::add)
+        .copyString("length-five-ok", false, 1, 5, "12345", copied::add)
+        .copyString("length-below-min", false, 2, 5, "1", copied::add)
+        .copyString("length-above-max", false, 1, 5, "123456", copied::add)
+        .copyString("null-ok", true, 1, 5, null, copied::add)
+        .copyString("null-bad", false, 1, 5, null, copied::add);
 
     Assert.assertEquals(Arrays.asList("1", "12345"), copied);
     Assert.assertEquals(
@@ -60,12 +60,12 @@ public class DataTransformerTest {
   @Test
   public void copyDate() {
     transformer
-        .copyDate("valid-1", "2021-03-01", false, copied::add)
-        .copyDate("invalid-1", "2021/03/01", true, copied::add)
-        .copyDate("invalid-2", "2021-06-19T18:24:30", true, copied::add)
-        .copyDate("valid-2", "2021-10-21", true, copied::add)
-        .copyDate("null-ok", null, true, copied::add)
-        .copyDate("null-bad", null, false, copied::add);
+        .copyDate("2021-03-01", false, "valid-1", copied::add)
+        .copyDate("2021/03/01", true, "invalid-1", copied::add)
+        .copyDate("2021-06-19T18:24:30", true, "invalid-2", copied::add)
+        .copyDate("2021-10-21", true, "valid-2", copied::add)
+        .copyDate(null, true, "null-ok", copied::add)
+        .copyDate(null, false, "null-bad", copied::add);
     Assert.assertEquals(
         Arrays.asList(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 10, 21)), copied);
     Assert.assertEquals(
@@ -79,13 +79,13 @@ public class DataTransformerTest {
   @Test
   public void copyAmount() {
     transformer
-        .copyAmount("valid-1", "123.05", false, copied::add)
-        .copyAmount("invalid-1", "not a number", true, copied::add)
-        .copyAmount("invalid-2", "123a.00", true, copied::add)
-        .copyAmount("valid-2", "-456.98", true, copied::add)
-        .copyAmount("valid-3", "16", true, copied::add)
-        .copyAmount("null-ok", null, true, copied::add)
-        .copyAmount("null-bad", null, false, copied::add);
+        .copyAmount("valid-1", false, "123.05", copied::add)
+        .copyAmount("invalid-1", true, "not a number", copied::add)
+        .copyAmount("invalid-2", true, "123a.00", copied::add)
+        .copyAmount("valid-2", true, "-456.98", copied::add)
+        .copyAmount("valid-3", true, "16", copied::add)
+        .copyAmount("null-ok", true, null, copied::add)
+        .copyAmount("null-bad", false, null, copied::add);
     Assert.assertEquals(
         Arrays.asList(new BigDecimal("123.05"), new BigDecimal("-456.98"), new BigDecimal("16")),
         copied);

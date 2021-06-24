@@ -31,8 +31,8 @@ public class FissClaimTransformer {
     final DataTransformer transformer = new DataTransformer();
     final PreAdjFissClaim to = new PreAdjFissClaim();
     transformer
-        .copyString(PreAdjFissClaim.Fields.dcn, from.getDcn(), false, 1, 23, to::setDcn)
-        .copyString(PreAdjFissClaim.Fields.hicNo, from.getHicNo(), false, 1, 12, to::setHicNo)
+        .copyString(PreAdjFissClaim.Fields.dcn, false, 1, 23, from.getDcn(), to::setDcn)
+        .copyString(PreAdjFissClaim.Fields.hicNo, false, 1, 12, from.getHicNo(), to::setHicNo)
         .copyEnumAsAsciiCharacter(
             PreAdjFissClaim.Fields.currStatus,
             from.getCurrStatus(),
@@ -46,69 +46,69 @@ public class FissClaimTransformer {
             FissProcessingType.UNRECOGNIZED,
             to::setCurrLoc1)
         .copyString(
-            PreAdjFissClaim.Fields.currLoc2, from.getCurrLoc2(), false, 1, 5, to::setCurrLoc2);
-    if (from.hasMedaProvId()) {
-      transformer.copyString(
-          PreAdjFissClaim.Fields.medaProvId, from.getMedaProvId(), true, 1, 13, to::setMedaProvId);
-    }
-    if (from.hasTotalChargeAmount()) {
-      transformer.copyAmount(
-          PreAdjFissClaim.Fields.totalChargeAmount,
-          from.getTotalChargeAmount(),
-          true,
-          to::setTotalChargeAmount);
-    }
-    if (from.hasRecdDt()) {
-      transformer.copyDate(
-          PreAdjFissClaim.Fields.receivedDate, from.getRecdDt(), true, to::setReceivedDate);
-    }
-    if (from.hasCurrTranDate()) {
-      transformer.copyDate(
-          PreAdjFissClaim.Fields.currTranDate, from.getCurrTranDate(), true, to::setCurrTranDate);
-    }
-    if (from.hasAdmDiagCode()) {
-      transformer.copyString(
-          PreAdjFissClaim.Fields.admitDiagCode,
-          from.getAdmDiagCode(),
-          true,
-          1,
-          7,
-          to::setAdmitDiagCode);
-    }
-    if (from.hasPrincipleDiag()) {
-      transformer.copyString(
-          PreAdjFissClaim.Fields.principleDiag,
-          from.getPrincipleDiag(),
-          true,
-          1,
-          7,
-          to::setPrincipleDiag);
-    }
-    if (from.hasNpiNumber()) {
-      transformer.copyString(
-          PreAdjFissClaim.Fields.npiNumber, from.getNpiNumber(), true, 1, 10, to::setNpiNumber);
-    }
+            PreAdjFissClaim.Fields.currLoc2, false, 1, 5, from.getCurrLoc2(), to::setCurrLoc2)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.medaProvId,
+            1,
+            13,
+            from::hasMedaProvId,
+            from::getMedaProvId,
+            to::setMedaProvId)
+        .copyOptionalAmount(
+            PreAdjFissClaim.Fields.totalChargeAmount,
+            from::hasTotalChargeAmount,
+            from::getTotalChargeAmount,
+            to::setTotalChargeAmount)
+        .copyOptionalDate(
+            PreAdjFissClaim.Fields.receivedDate,
+            from::hasRecdDt,
+            from::getRecdDt,
+            to::setReceivedDate)
+        .copyOptionalDate(
+            PreAdjFissClaim.Fields.currTranDate,
+            from::hasCurrTranDate,
+            from::getCurrTranDate,
+            to::setCurrTranDate)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.admitDiagCode,
+            1,
+            7,
+            from::hasAdmDiagCode,
+            from::getAdmDiagCode,
+            to::setAdmitDiagCode)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.principleDiag,
+            1,
+            7,
+            from::hasPrincipleDiag,
+            from::getPrincipleDiag,
+            to::setPrincipleDiag)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.npiNumber,
+            1,
+            10,
+            from::hasNpiNumber,
+            from::getNpiNumber,
+            to::setNpiNumber);
     if (from.hasMbi()) {
       final String mbi = from.getMbi();
       transformer
-          .copyString(PreAdjFissClaim.Fields.mbi, mbi, true, 1, 13, to::setMbi)
+          .copyString(PreAdjFissClaim.Fields.mbi, true, 1, 13, mbi, to::setMbi)
           .copyString(
               PreAdjFissClaim.Fields.mbiHash,
-              idHasher.computeIdentifierHash(mbi),
               true,
               64,
               64,
+              idHasher.computeIdentifierHash(mbi),
               to::setMbiHash);
     }
-    if (from.hasFedTaxNb()) {
-      transformer.copyString(
-          PreAdjFissClaim.Fields.fedTaxNumber,
-          from.getFedTaxNb(),
-          true,
-          1,
-          10,
-          to::setFedTaxNumber);
-    }
+    transformer.copyOptionalString(
+        PreAdjFissClaim.Fields.fedTaxNumber,
+        1,
+        10,
+        from::hasFedTaxNb,
+        from::getFedTaxNb,
+        to::setFedTaxNumber);
     to.setLastUpdated(clock.instant());
 
     short priority = 0;
@@ -117,29 +117,26 @@ public class FissClaimTransformer {
       PreAdjFissProcCode toCode = new PreAdjFissProcCode();
       toCode.setDcn(to.getDcn());
       toCode.setPriority(priority);
-      transformer.copyString(
-          fieldPrefix + PreAdjFissProcCode.Fields.procCode,
-          fromCode.getProcCd(),
-          false,
-          1,
-          10,
-          toCode::setProcCode);
-      if (fromCode.hasProcFlag()) {
-        transformer.copyString(
-            fieldPrefix + PreAdjFissProcCode.Fields.procFlag,
-            fromCode.getProcFlag(),
-            true,
-            1,
-            4,
-            toCode::setProcFlag);
-      }
-      if (fromCode.hasProcDt()) {
-        transformer.copyDate(
-            fieldPrefix + PreAdjFissProcCode.Fields.procDate,
-            fromCode.getProcDt(),
-            true,
-            toCode::setProcDate);
-      }
+      transformer
+          .copyString(
+              fieldPrefix + PreAdjFissProcCode.Fields.procCode,
+              false,
+              1,
+              10,
+              fromCode.getProcCd(),
+              toCode::setProcCode)
+          .copyOptionalString(
+              fieldPrefix + PreAdjFissProcCode.Fields.procFlag,
+              1,
+              4,
+              fromCode::hasProcFlag,
+              fromCode::getProcFlag,
+              toCode::setProcFlag)
+          .copyOptionalDate(
+              fieldPrefix + PreAdjFissProcCode.Fields.procDate,
+              fromCode::hasProcDt,
+              fromCode::getProcDt,
+              toCode::setProcDate);
       toCode.setLastUpdated(to.getLastUpdated());
       to.getProcCodes().add(toCode);
       priority += 1;

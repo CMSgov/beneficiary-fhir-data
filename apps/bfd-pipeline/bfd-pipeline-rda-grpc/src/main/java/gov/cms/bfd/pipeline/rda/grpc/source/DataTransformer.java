@@ -9,7 +9,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Stateful, mutable, non-thread safe object to facilitate transformation of data from incoming RDA
@@ -56,22 +58,51 @@ public class DataTransformer {
    * checks are successful. Valid null values are silently accepted without calling the Consumer.
    *
    * @param fieldName name of the field from which the value originates
-   * @param value value to copy
    * @param nullable true if null is a valid value
    * @param minLength minimum allowed length for non-null value
    * @param maxLength maximum allowed length for non-null value
+   * @param value value to copy
    * @param copier Consumer to receive the value
    * @return this
    */
   public DataTransformer copyString(
       String fieldName,
-      String value,
       boolean nullable,
       int minLength,
       int maxLength,
+      String value,
       Consumer<String> copier) {
     if (nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength)) {
       copier.accept(value);
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Checks the nullability and length of a string and then delivers it to the Consumer if the
+   * checks are successful. Valid null values are silently accepted without calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the value
+   * @return this
+   */
+  public DataTransformer copyOptionalString(
+      String fieldName,
+      int minLength,
+      int maxLength,
+      BooleanSupplier exists,
+      Supplier<String> value,
+      Consumer<String> copier) {
+    if (exists.getAsBoolean()) {
+      return copyString(fieldName, false, minLength, maxLength, value.get(), copier);
     }
     return this;
   }
@@ -130,14 +161,14 @@ public class DataTransformer {
    * ISO-8601 format (YYYY-MM-DD). Valid null values are silently accepted without calling the
    * Consumer.
    *
-   * @param fieldName name of the field from which the value originates
    * @param value date string in ISO-8601 format
    * @param nullable true if null is a valid value
+   * @param fieldName name of the field from which the value originates
    * @param copier Consumer to receive the date
    * @return this
    */
   public DataTransformer copyDate(
-      String fieldName, String value, boolean nullable, Consumer<LocalDate> copier) {
+      String value, boolean nullable, String fieldName, Consumer<LocalDate> copier) {
     if (nonNull(fieldName, value, nullable)) {
       try {
         LocalDate date = LocalDate.parse(value);
@@ -150,18 +181,44 @@ public class DataTransformer {
   }
 
   /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Parses the string into a LocalDate and delivers it to the Consumer. The string value must be
+   * in ISO-8601 format (YYYY-MM-DD). Valid null values are silently accepted without calling the
+   * Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the date
+   * @return this
+   */
+  public DataTransformer copyOptionalDate(
+      String fieldName,
+      BooleanSupplier exists,
+      Supplier<String> value,
+      Consumer<LocalDate> copier) {
+    if (exists.getAsBoolean()) {
+      return copyDate(value.get(), false, fieldName, copier);
+    }
+    return this;
+  }
+
+  /**
    * Parses the string into a BigDecimal and delivers it to the Consumer. The string value must be a
    * valid positive or negative numeric format. Valid null values are silently accepted without
    * calling the Consumer.
    *
    * @param fieldName name of the field from which the value originates
-   * @param value string containing valid real number
    * @param nullable true if null is a valid value
+   * @param value string containing valid real number
    * @param copier Consumer to receive the BigDecimal
    * @return this
    */
   public DataTransformer copyAmount(
-      String fieldName, String value, boolean nullable, Consumer<BigDecimal> copier) {
+      String fieldName, boolean nullable, String value, Consumer<BigDecimal> copier) {
     if (nonNull(fieldName, value, nullable)) {
       try {
         BigDecimal amount = new BigDecimal(value);
@@ -169,6 +226,32 @@ public class DataTransformer {
       } catch (NumberFormatException ex) {
         addError(fieldName, "invalid amount");
       }
+    }
+    return this;
+  }
+
+  /**
+   * Copies an optional field only if its value exists. Uses lambda expressions for the existence
+   * test as well as the value extraction. Optional fields must be nullable at the database level
+   * but must return non-null values when the supplier is called.
+   *
+   * <p>Parses the string into a BigDecimal and delivers it to the Consumer. The string value must
+   * be a valid positive or negative numeric format. Valid null values are silently accepted without
+   * calling the Consumer.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param exists returns true if the value exists
+   * @param value returns the value to copy
+   * @param copier Consumer to receive the BigDecimal
+   * @return this
+   */
+  public DataTransformer copyOptionalAmount(
+      String fieldName,
+      BooleanSupplier exists,
+      Supplier<String> value,
+      Consumer<BigDecimal> copier) {
+    if (exists.getAsBoolean()) {
+      return copyAmount(fieldName, false, value.get(), copier);
     }
     return this;
   }
