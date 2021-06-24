@@ -23,6 +23,13 @@
 		</dependency>
 
 		<dependency>
+			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+                    for details. -->
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+		</dependency>
+
+		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>

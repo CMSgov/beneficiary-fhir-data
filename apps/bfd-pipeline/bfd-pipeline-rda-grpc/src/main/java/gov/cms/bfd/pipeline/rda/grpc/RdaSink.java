@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import java.util.Collection;
 import java.util.Collections;
 
 /**
@@ -43,7 +44,7 @@ public interface RdaSink<T> extends AutoCloseable {
    * @return number of objects successfully processed
    * @throws ProcessingException if the operation fails
    */
-  default int writeBatch(Iterable<T> objects) throws ProcessingException {
+  default int writeBatch(Collection<T> objects) throws ProcessingException {
     int processedCount = 0;
     for (T object : objects) {
       try {

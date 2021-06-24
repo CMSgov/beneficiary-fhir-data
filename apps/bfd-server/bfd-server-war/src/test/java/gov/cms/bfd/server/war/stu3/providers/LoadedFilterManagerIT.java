@@ -204,7 +204,7 @@ public final class LoadedFilterManagerIT {
 
   /** @param sampleResources the sample RIF resources to load */
   private static void loadData(DataSource dataSource, List<StaticRifResource> sampleResources) {
-    LoadAppOptions loadOptions = RifLoaderTestUtils.getLoadOptions(dataSource);
+    LoadAppOptions loadOptions = RifLoaderTestUtils.getLoadOptions();
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
