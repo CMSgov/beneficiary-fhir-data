@@ -72,6 +72,11 @@ public class FissClaimTransformerTest {
     claim.setMbi("1234567890123");
     claim.setMbiHash("d51b083f91c62eff93b6245bc8203bafa566f41b3553314d049059b8e55eea0d");
     claim.setFedTaxNumber("1234567890");
+    claim.setPracLocAddr1("loc-address-1");
+    claim.setPracLocAddr2("loc-address-2");
+    claim.setPracLocCity("loc-city");
+    claim.setPracLocState("ls");
+    claim.setPracLocZip("123456789012345");
     claim.setLastUpdated(clock.instant());
     builder
         .setDcn("dcn")
@@ -87,7 +92,12 @@ public class FissClaimTransformerTest {
         .setPrincipleDiag("7654321")
         .setNpiNumber("npi-123456")
         .setMbi("1234567890123")
-        .setFedTaxNb("1234567890");
+        .setFedTaxNb("1234567890")
+        .setPracLocAddr1("loc-address-1")
+        .setPracLocAddr2("loc-address-2")
+        .setPracLocCity("loc-city")
+        .setPracLocState("ls")
+        .setPracLocZip("123456789012345");
     assertThat(transformer.transformClaim(builder.build()), samePropertyValuesAs(claim));
   }
 
@@ -168,6 +178,11 @@ public class FissClaimTransformerTest {
           .setNpiNumber("12345678901")
           .setMbi("12345678901234")
           .setFedTaxNb("12345678901")
+          .setPracLocAddr1("")
+          .setPracLocAddr2("")
+          .setPracLocCity("")
+          .setPracLocState("123")
+          .setPracLocZip("1234567890123456")
           .addFissProcCodes(
               FissProcedureCode.newBuilder()
                   .setProcCd("12345678901")
@@ -197,6 +212,16 @@ public class FissClaimTransformerTest {
                   "principleDiag", "invalid length: expected=[1,7] actual=8"),
               new DataTransformer.ErrorMessage(
                   "npiNumber", "invalid length: expected=[1,10] actual=11"),
+              new DataTransformer.ErrorMessage(
+                  "pracLocAddr1", "invalid length: expected=[1,2147483647] actual=0"),
+              new DataTransformer.ErrorMessage(
+                  "pracLocAddr2", "invalid length: expected=[1,2147483647] actual=0"),
+              new DataTransformer.ErrorMessage(
+                  "pracLocCity", "invalid length: expected=[1,2147483647] actual=0"),
+              new DataTransformer.ErrorMessage(
+                  "pracLocState", "invalid length: expected=[1,2] actual=3"),
+              new DataTransformer.ErrorMessage(
+                  "pracLocZip", "invalid length: expected=[1,15] actual=16"),
               new DataTransformer.ErrorMessage("mbi", "invalid length: expected=[1,13] actual=14"),
               new DataTransformer.ErrorMessage(
                   "fedTaxNumber", "invalid length: expected=[1,10] actual=11"),

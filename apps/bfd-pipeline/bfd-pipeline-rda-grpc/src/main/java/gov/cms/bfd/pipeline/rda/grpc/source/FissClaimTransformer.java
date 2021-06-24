@@ -89,7 +89,42 @@ public class FissClaimTransformer {
             10,
             from::hasNpiNumber,
             from::getNpiNumber,
-            to::setNpiNumber);
+            to::setNpiNumber)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.pracLocAddr1,
+            1,
+            Integer.MAX_VALUE,
+            from::hasPracLocAddr1,
+            from::getPracLocAddr1,
+            to::setPracLocAddr1)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.pracLocAddr2,
+            1,
+            Integer.MAX_VALUE,
+            from::hasPracLocAddr2,
+            from::getPracLocAddr2,
+            to::setPracLocAddr2)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.pracLocCity,
+            1,
+            Integer.MAX_VALUE,
+            from::hasPracLocCity,
+            from::getPracLocCity,
+            to::setPracLocCity)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.pracLocState,
+            1,
+            2,
+            from::hasPracLocState,
+            from::getPracLocState,
+            to::setPracLocState)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.pracLocZip,
+            1,
+            15,
+            from::hasPracLocZip,
+            from::getPracLocZip,
+            to::setPracLocZip);
     if (from.hasMbi()) {
       final String mbi = from.getMbi();
       transformer
