@@ -162,10 +162,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
           @Description(shortDefinition = "The patient identifier to search for")
           ReferenceParam mbi,
       @RequiredParam(name = "type")
-          @Description(shortDefinition = "A list of claim types to include")
+          @Description(shortDefinition = "The source type to use for fetching claim data")
           String type,
       @OptionalParam(name = "isHashed")
-          @Description(shortDefinition = "A list of claim types to include")
+          @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
           String hashed,
       @OptionalParam(name = "_lastUpdated")
           @Description(shortDefinition = "Include resources last updated in the given range")
