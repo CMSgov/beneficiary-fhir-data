@@ -3,7 +3,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.Instant;
-import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,9 +13,9 @@ public class QueryUtilsTest {
      * Dev Note: There might be a bug in DateRangeParam and DateParam where it rounds a value that
      * is set a millisecond up or down. It makes it hard to test at the edges of a range.
      */
-    Date lowerDate = new Date();
-    Date middleDate = Date.from(Instant.now().plusSeconds(500));
-    Date upperDate = Date.from(Instant.now().plusSeconds(1000));
+    Instant lowerDate = Instant.now();
+    Instant middleDate = Instant.now().plusSeconds(500);
+    Instant upperDate = Instant.now().plusSeconds(1000);
 
     Assert.assertTrue(
         QueryUtils.isInRange(upperDate, new DateRangeParam().setLowerBoundExclusive(middleDate)));
@@ -34,8 +33,8 @@ public class QueryUtilsTest {
 
   @Test
   public void testInRangeWithNullLastUpdate() {
-    Date lowerDate = new Date();
-    Date upperDate = Date.from(Instant.now().plusSeconds(1000));
+    Instant lowerDate = Instant.now();
+    Instant upperDate = Instant.now().plusSeconds(1000);
 
     Assert.assertFalse(
         QueryUtils.isInRange(null, new DateRangeParam().setLowerBoundExclusive(lowerDate)));

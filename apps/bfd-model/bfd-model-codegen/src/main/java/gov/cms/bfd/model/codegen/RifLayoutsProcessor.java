@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1123,7 +1122,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     // Add a lastUpdated field.
     final FieldSpec lastUpdatedField =
-        FieldSpec.builder(Date.class, "lastUpdated", Modifier.PRIVATE)
+        FieldSpec.builder(Instant.class, "lastUpdated", Modifier.PRIVATE)
             .addAnnotation(
                 AnnotationSpec.builder(Temporal.class)
                     .addMember("value", "$T.TIMESTAMP", TemporalType.class)
@@ -1136,7 +1135,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         MethodSpec.methodBuilder("getLastUpdated")
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return Optional.ofNullable(lastUpdated)")
-            .returns(ParameterizedTypeName.get(Optional.class, Date.class))
+            .returns(ParameterizedTypeName.get(Optional.class, Instant.class))
             .build();
     headerEntityClass.addMethod(lastUpdatedGetter);
 
@@ -1144,7 +1143,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     final MethodSpec lastUpdatedSetter =
         MethodSpec.methodBuilder("setLastUpdated")
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterSpec.builder(Date.class, "lastUpdated").build())
+            .addParameter(ParameterSpec.builder(Instant.class, "lastUpdated").build())
             .addStatement("this.lastUpdated = lastUpdated")
             .returns(TypeName.VOID)
             .build();

@@ -39,7 +39,6 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -967,7 +966,7 @@ public final class RifLoader implements AutoCloseable {
       EntityManager entityManager,
       Beneficiary newBeneficiaryRecord,
       Optional<Beneficiary> oldBeneficiaryRecord,
-      Date batchTimestamp) {
+      Instant batchTimestamp) {
     if (oldBeneficiaryRecord.isPresent()
         && !isBeneficiaryHistoryEqual(newBeneficiaryRecord, oldBeneficiaryRecord.get())) {
       BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
@@ -1085,7 +1084,7 @@ public final class RifLoader implements AutoCloseable {
 
     final LoadedFile loadedFile = new LoadedFile();
     loadedFile.setRifType(fileEvent.getFile().getFileType().toString());
-    loadedFile.setCreated(new Date());
+    loadedFile.setCreated(Instant.now());
 
     try {
       EntityManager em = entityManagerFactory.createEntityManager();
@@ -1129,7 +1128,7 @@ public final class RifLoader implements AutoCloseable {
       try {
         txn = em.getTransaction();
         txn.begin();
-        final Date oldDate = Date.from(Instant.now().minus(MAX_FILE_AGE_DAYS));
+        final Instant oldDate = Instant.now().minus(MAX_FILE_AGE_DAYS);
 
         em.clear(); // Must be done before JPQL statements
         em.flush();

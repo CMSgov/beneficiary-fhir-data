@@ -5,14 +5,12 @@ import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.server.war.commons.LoadedFileFilter;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -201,21 +199,23 @@ public final class LoadedFilterManagerTest {
 
   @Test
   public void testDateComparisonAssumptions() throws ParseException {
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss.SSS");
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     // Root cause of BFD-713.
     // Adding this here in case a new version of Java changes behavior.  The Date objects used in
     // LoadedFilterManager are actually java.sql.Timestamps, which split milliseconds from the
     // seconds
-    Date lastBatchCreated = new Timestamp(formatter.parse("2021-03-27 21:14:52.316").getTime());
-    Date currentLastBatchCreated =
-        new Timestamp(formatter.parse("2021-03-27 21:14:52.557").getTime());
+    Instant lastBatchCreated =
+        (LocalDateTime.parse("2021-03-27 21:14:52.316", formatter))
+            .atZone(ZoneId.of("UTC"))
+            .toInstant();
+    Instant currentLastBatchCreated =
+        (LocalDateTime.parse("2021-03-27 21:14:52.557", formatter))
+            .atZone(ZoneId.of("UTC"))
+            .toInstant();
 
     // You would expect this to be true, but Timestamp splits the ms from the seconds, and this is
     // only comparing the seconds which are equal
-    Assert.assertFalse(lastBatchCreated.before(currentLastBatchCreated));
-
-    // If we convert to instants, it will work in either case:
-    Assert.assertTrue(lastBatchCreated.toInstant().isBefore(currentLastBatchCreated.toInstant()));
+    Assert.assertFalse(lastBatchCreated.isBefore(currentLastBatchCreated));
   }
 
   @Test
