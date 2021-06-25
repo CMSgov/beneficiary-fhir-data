@@ -176,6 +176,6 @@ public class FissClaimRdaSinkTest {
   private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
     PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn(dcn);
-    return new RdaChange<>(RdaChange.Type.UPDATE, claim);
+    return new RdaChange<>(RdaChange.Type.INSERT, claim);
   }
 }

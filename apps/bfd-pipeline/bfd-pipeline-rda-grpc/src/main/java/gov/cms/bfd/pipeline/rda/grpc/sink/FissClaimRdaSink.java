@@ -120,7 +120,17 @@ public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
     try {
       entityManager.getTransaction().begin();
       for (RdaChange<PreAdjFissClaim> change : changes) {
-        entityManager.persist(change.getClaim());
+        switch (change.getType()) {
+          case INSERT:
+            entityManager.persist(change.getClaim());
+            break;
+          case UPDATE:
+            entityManager.merge(change.getClaim());
+            break;
+          case DELETE:
+            throw new IllegalArgumentException(
+                "RDA API DELETE changes are not currently supported");
+        }
       }
       commit = true;
     } finally {
@@ -137,7 +147,11 @@ public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
     try {
       entityManager.getTransaction().begin();
       for (RdaChange<PreAdjFissClaim> change : changes) {
-        entityManager.merge(change.getClaim());
+        if (change.getType() != RdaChange.Type.DELETE) {
+          entityManager.merge(change.getClaim());
+        } else {
+          throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
+        }
       }
       commit = true;
     } finally {
