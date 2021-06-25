@@ -7,9 +7,12 @@ import static org.junit.Assert.*;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
@@ -37,12 +40,14 @@ public class FissClaimTransformerTest {
           clock,
           new IdHasher(
               new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8))));
-  private FissClaim.Builder builder;
+  private ClaimChange.Builder changeBuilder;
+  private FissClaim.Builder claimBuilder;
   private PreAdjFissClaim claim;
 
   @Before
-  public void setUp() throws Exception {
-    builder = FissClaim.newBuilder();
+  public void setUp() {
+    changeBuilder = ClaimChange.newBuilder();
+    claimBuilder = FissClaim.newBuilder();
     claim = new PreAdjFissClaim();
   }
 
@@ -52,15 +57,24 @@ public class FissClaimTransformerTest {
     claim.setHicNo("hicn");
     claim.setCurrStatus('T');
     claim.setCurrLoc1('M');
-    claim.setCurrLoc2("two");
+    claim.setCurrLoc2("9000");
     claim.setLastUpdated(clock.instant());
-    builder
+    claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setCurrStatus(FissClaimStatus.CLAIM_STATUS_RTP)
-        .setCurrLoc1(FissProcessingType.PROCESSING_TYPE_MANUAL)
-        .setCurrLoc2("two");
-    assertThat(transformer.transformClaim(builder.build()), samePropertyValuesAs(claim));
+        .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
+        .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
+        .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
+    changeBuilder
+        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
+        .setFissClaim(claimBuilder.build());
+    assertChangeMatches(RdaChange.Type.INSERT);
+  }
+
+  private void assertChangeMatches(RdaChange.Type changeType) {
+    RdaChange<PreAdjFissClaim> changed = transformer.transformClaim(changeBuilder.build());
+    assertEquals(changeType, changed.getType());
+    assertThat(changed.getClaim(), samePropertyValuesAs(claim));
   }
 
   @Test
@@ -69,7 +83,7 @@ public class FissClaimTransformerTest {
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
-    claim.setCurrLoc2("two");
+    claim.setCurrLoc2("9000");
     claim.setMedaProvId("mpi");
     claim.setTotalChargeAmount(new BigDecimal("1002.54"));
     claim.setReceivedDate(LocalDate.of(2020, 1, 2));
@@ -86,16 +100,16 @@ public class FissClaimTransformerTest {
     claim.setPracLocState("ls");
     claim.setPracLocZip("123456789012345");
     claim.setLastUpdated(clock.instant());
-    builder
+    claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setCurrStatus(FissClaimStatus.CLAIM_STATUS_MOVE)
-        .setCurrLoc1(FissProcessingType.PROCESSING_TYPE_MANUAL)
-        .setCurrLoc2("two")
+        .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
+        .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
+        .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE)
         .setMedaProvId("mpi")
         .setTotalChargeAmount("1002.54")
-        .setRecdDt("2020-01-02")
-        .setCurrTranDate("2021-03-04")
+        .setRecdDtCymd("2020-01-02")
+        .setCurrTranDtCymd("2021-03-04")
         .setAdmDiagCode("1234567")
         .setPrincipleDiag("7654321")
         .setNpiNumber("npi-123456")
@@ -106,17 +120,20 @@ public class FissClaimTransformerTest {
         .setPracLocCity("loc-city")
         .setPracLocState("ls")
         .setPracLocZip("123456789012345");
-    assertThat(transformer.transformClaim(builder.build()), samePropertyValuesAs(claim));
+    changeBuilder
+        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+        .setFissClaim(claimBuilder.build());
+    assertChangeMatches(RdaChange.Type.UPDATE);
   }
 
   @Test
   public void procCodes() {
-    builder
+    claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setCurrStatus(FissClaimStatus.CLAIM_STATUS_MOVE)
-        .setCurrLoc1(FissProcessingType.PROCESSING_TYPE_MANUAL)
-        .setCurrLoc2("2")
+        .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
+        .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
+        .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
         .addFissProcCodes(
             FissProcedureCode.newBuilder().setProcCd("code-1").setProcFlag("fl-1").build())
         .addFissProcCodes(
@@ -146,23 +163,26 @@ public class FissClaimTransformerTest {
     code.setProcDate(LocalDate.of(2021, 7, 6));
     code.setLastUpdated(claim.getLastUpdated());
     claim.getProcCodes().add(code);
-    PreAdjFissClaim transformed = transformer.transformClaim(builder.build());
+    changeBuilder
+        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+        .setFissClaim(claimBuilder.build());
+    PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertListContentsHaveSamePropertyValues(
         claim.getProcCodes(), transformed.getProcCodes(), PreAdjFissProcCode::getPriority);
   }
 
   @Test
   public void diagCodes() {
-    builder
+    claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
-        .setCurrStatus(FissClaimStatus.CLAIM_STATUS_MOVE)
-        .setCurrLoc1(FissProcessingType.PROCESSING_TYPE_MANUAL)
-        .setCurrLoc2("2")
+        .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_MOVE)
+        .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
+        .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_FINAL)
         .addFissDiagCodes(
             FissDiagnosisCode.newBuilder()
                 .setDiagCd2("code-1")
-                .setDiagPoaInd(
+                .setDiagPoaIndEnum(
                     FissDiagnosisPresentOnAdmissionIndicator
                         .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_CLINICALLY_UNDETERMINED)
                 .setBitFlags("1234")
@@ -170,7 +190,7 @@ public class FissClaimTransformerTest {
         .addFissDiagCodes(
             FissDiagnosisCode.newBuilder()
                 .setDiagCd2("code-2")
-                .setDiagPoaInd(
+                .setDiagPoaIndEnum(
                     FissDiagnosisPresentOnAdmissionIndicator
                         .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_NO)
                 .setBitFlags("4321")
@@ -179,18 +199,13 @@ public class FissClaimTransformerTest {
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
-    claim.setCurrLoc2("2");
+    claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     PreAdjFissDiagnosisCode code = new PreAdjFissDiagnosisCode();
     code.setDcn("dcn");
     code.setPriority((short) 0);
     code.setDiagCd2("code-1");
-    code.setDiagPoaInd(
-        String.valueOf(
-            (char)
-                FissDiagnosisPresentOnAdmissionIndicator
-                    .DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_CLINICALLY_UNDETERMINED
-                    .getNumber()));
+    code.setDiagPoaInd("W");
     code.setBitFlags("1234");
     code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
@@ -198,15 +213,14 @@ public class FissClaimTransformerTest {
     code.setDcn("dcn");
     code.setPriority((short) 1);
     code.setDiagCd2("code-2");
-    code.setDiagPoaInd(
-        String.valueOf(
-            (char)
-                FissDiagnosisPresentOnAdmissionIndicator.DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_NO
-                    .getNumber()));
+    code.setDiagPoaInd("N");
     code.setBitFlags("4321");
     code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
-    PreAdjFissClaim transformed = transformer.transformClaim(builder.build());
+    changeBuilder
+        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+        .setFissClaim(claimBuilder.build());
+    PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     assertListContentsHaveSamePropertyValues(
         claim.getDiagCodes(), transformed.getDiagCodes(), PreAdjFissDiagnosisCode::getPriority);
@@ -215,7 +229,10 @@ public class FissClaimTransformerTest {
   @Test
   public void requiredFieldsMissing() {
     try {
-      transformer.transformClaim(builder.build());
+      changeBuilder
+          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+          .setFissClaim(claimBuilder.build());
+      transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
       assertEquals(
@@ -224,8 +241,7 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage("hicNo", "invalid length: expected=[1,12] actual=0"),
               new DataTransformer.ErrorMessage("currStatus", "no value set"),
               new DataTransformer.ErrorMessage("currLoc1", "no value set"),
-              new DataTransformer.ErrorMessage(
-                  "currLoc2", "invalid length: expected=[1,5] actual=0")),
+              new DataTransformer.ErrorMessage("currLoc2", "no value set")),
           ex.getErrors());
     }
   }
@@ -233,16 +249,16 @@ public class FissClaimTransformerTest {
   @Test
   public void allBadFields() {
     try {
-      builder
+      claimBuilder
           .setDcn("123456789012345678901234")
           .setHicNo("1234567890123")
-          .setCurrStatusValue(-1)
-          .setCurrLoc1Value(-1)
-          .setCurrLoc2("123456")
+          .setCurrStatusEnumValue(-1)
+          .setCurrLoc1EnumValue(-1)
+          .setCurrLoc2Unrecognized("123456")
           .setMedaProvId("12345678901234")
           .setTotalChargeAmount("not-a-number")
-          .setRecdDt("not-a-date")
-          .setCurrTranDate("not-a-date")
+          .setRecdDtCymd("not-a-date")
+          .setCurrTranDtCymd("not-a-date")
           .setAdmDiagCode("12345678")
           .setPrincipleDiag("12345678")
           .setNpiNumber("12345678901")
@@ -259,7 +275,10 @@ public class FissClaimTransformerTest {
                   .setProcFlag("12345")
                   .setProcDt("not-a-date")
                   .build());
-      transformer.transformClaim(builder.build());
+      changeBuilder
+          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+          .setFissClaim(claimBuilder.build());
+      transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
       assertEquals(

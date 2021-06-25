@@ -1,8 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ProtocolMessageEnum;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -119,33 +117,13 @@ public class DataTransformer {
    * @param copier Consumer to receive the character value
    * @return this
    */
-  public <E extends ProtocolMessageEnum> DataTransformer copyEnumAsAsciiCharacter(
-      String fieldName,
-      E enumValue,
-      E unsetValue,
-      E unrecognizedValue,
-      Consumer<Character> copier) {
-    if (enumValue == null || enumValue.equals(unsetValue)) {
-      addError(fieldName, "no value set");
-    } else if (enumValue.equals(unrecognizedValue)) {
-      addError(fieldName, "unrecognized enum value");
-    } else {
-      char charValue = (char) enumValue.getNumber();
-      if (CharMatcher.ascii().matches(charValue)) {
-        copier.accept(charValue);
-      } else {
-        addError(fieldName, "enum value is not ascii (%d)", enumValue.getNumber());
-      }
-    }
-    return this;
+  public DataTransformer copyEnumAsCharacter(
+      String fieldName, EnumStringExtractor.Result enumResult, Consumer<Character> copier) {
+    return copyEnumAsString(fieldName, false, 1, 1, enumResult, s -> copier.accept(s.charAt(0)));
   }
 
   /**
-   * Same as copyEnumAsAsciiCharacter() but accepts a Consumer&lt;String&gt; as its copier.
-   *
-   * <p>RDA API 0.2 MVP has some enums that have numeric values matching the ASCII character from
-   * the upstream source record. Check the integer value and copy it if it represents an ASCII
-   * character or add an error otherwise.
+   * Same as copyString() but with a EnumStringExtractor.Result.
    *
    * @param fieldName name of the field from which the value originates
    * @param enumValue value of the enum
@@ -154,10 +132,23 @@ public class DataTransformer {
    * @param copier Consumer to receive the character value as a String
    * @return this
    */
-  public <E extends ProtocolMessageEnum> DataTransformer copyEnumAsAsciiCharacterString(
-      String fieldName, E enumValue, E unsetValue, E unrecognizedValue, Consumer<String> copier) {
-    return copyEnumAsAsciiCharacter(
-        fieldName, enumValue, unsetValue, unrecognizedValue, c -> copier.accept(String.valueOf(c)));
+  public DataTransformer copyEnumAsString(
+      String fieldName,
+      boolean nullable,
+      int minLength,
+      int maxLength,
+      EnumStringExtractor.Result enumResult,
+      Consumer<String> copier) {
+    final EnumStringExtractor.Status status = enumResult.getStatus();
+    if (status == EnumStringExtractor.Status.NoValue) {
+      addError(fieldName, "no value set");
+    } else if (status == EnumStringExtractor.Status.InvalidValue) {
+      addError(fieldName, "unrecognized enum value");
+    } else {
+      final String value = enumResult.getValue();
+      copyString(fieldName, nullable, minLength, maxLength, value, copier);
+    }
+    return this;
   }
 
   /**

@@ -4,17 +4,16 @@ package gov.cms.mpsm.rda.v1.fiss;
 
 option java_multiple_files = true;
 
+import "rda/v1/enum_options.proto";
+
 // Processing Type Enum that maps Processing Types to ASCII values
 enum FissProcessingType {
-  // Processing Type was not set
-  PROCESSING_TYPE_UNSET = 0;
-
   // ASCII B
-  PROCESSING_TYPE_BATCH = 66;
+  PROCESSING_TYPE_BATCH = 0   [(string_value) = "B"];
 
   // ASCII M
-  PROCESSING_TYPE_MANUAL = 77;
+  PROCESSING_TYPE_MANUAL = 1  [(string_value) = "M"];
 
   // ASCII O
-  PROCESSING_TYPE_OFFLINE = 79;
+  PROCESSING_TYPE_OFFLINE = 2 [(string_value) = "O"];
 }

@@ -3,9 +3,12 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
@@ -22,6 +25,37 @@ import java.util.List;
  * IdHasher.
  */
 public class FissClaimTransformer {
+  private static final EnumStringExtractor<FissClaim, FissClaimStatus> currStatus =
+      new EnumStringExtractor<>(
+          FissClaim::hasCurrStatusEnum,
+          FissClaim::getCurrStatusEnum,
+          FissClaim::hasCurrStatusUnrecognized,
+          FissClaim::getCurrStatusUnrecognized,
+          FissClaimStatus.UNRECOGNIZED);
+  private static final EnumStringExtractor<FissClaim, FissProcessingType> currLoc1 =
+      new EnumStringExtractor<>(
+          FissClaim::hasCurrLoc1Enum,
+          FissClaim::getCurrLoc1Enum,
+          FissClaim::hasCurrLoc1Unrecognized,
+          FissClaim::getCurrLoc1Unrecognized,
+          FissProcessingType.UNRECOGNIZED);
+  private static final EnumStringExtractor<FissClaim, FissCurrentLocation2> currLoc2 =
+      new EnumStringExtractor<>(
+          FissClaim::hasCurrLoc2Enum,
+          FissClaim::getCurrLoc2Enum,
+          FissClaim::hasCurrLoc2Unrecognized,
+          FissClaim::getCurrLoc2Unrecognized,
+          FissCurrentLocation2.UNRECOGNIZED);
+  private static final EnumStringExtractor<
+          FissDiagnosisCode, FissDiagnosisPresentOnAdmissionIndicator>
+      diagPoaInd =
+          new EnumStringExtractor<>(
+              FissDiagnosisCode::hasDiagPoaIndEnum,
+              FissDiagnosisCode::getDiagPoaIndEnum,
+              FissDiagnosisCode::hasDiagPoaIndUnrecognized,
+              FissDiagnosisCode::getDiagPoaIndUnrecognized,
+              FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED);
+
   private final Clock clock;
   private final IdHasher idHasher;
 
@@ -30,7 +64,8 @@ public class FissClaimTransformer {
     this.idHasher = idHasher;
   }
 
-  public PreAdjFissClaim transformClaim(FissClaim from) {
+  public RdaChange<PreAdjFissClaim> transformClaim(ClaimChange change) {
+    FissClaim from = change.getFissClaim();
     final DataTransformer transformer = new DataTransformer();
     final PreAdjFissClaim to = transformClaim(from, transformer);
 
@@ -43,7 +78,7 @@ public class FissClaimTransformer {
               "failed with %d errors: dcn=%s errors=%s", errors.size(), from.getDcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
-    return to;
+    return new RdaChange<>(RdaApiUtils.mapApiChangeType(change.getChangeType()), to);
   }
 
   private PreAdjFissClaim transformClaim(FissClaim from, DataTransformer transformer) {
@@ -51,20 +86,17 @@ public class FissClaimTransformer {
     transformer
         .copyString(PreAdjFissClaim.Fields.dcn, false, 1, 23, from.getDcn(), to::setDcn)
         .copyString(PreAdjFissClaim.Fields.hicNo, false, 1, 12, from.getHicNo(), to::setHicNo)
-        .copyEnumAsAsciiCharacter(
-            PreAdjFissClaim.Fields.currStatus,
-            from.getCurrStatus(),
-            FissClaimStatus.CLAIM_STATUS_UNSET,
-            FissClaimStatus.UNRECOGNIZED,
-            to::setCurrStatus)
-        .copyEnumAsAsciiCharacter(
-            PreAdjFissClaim.Fields.currLoc1,
-            from.getCurrLoc1(),
-            FissProcessingType.PROCESSING_TYPE_UNSET,
-            FissProcessingType.UNRECOGNIZED,
-            to::setCurrLoc1)
-        .copyString(
-            PreAdjFissClaim.Fields.currLoc2, false, 1, 5, from.getCurrLoc2(), to::setCurrLoc2)
+        .copyEnumAsCharacter(
+            PreAdjFissClaim.Fields.currStatus, currStatus.getEnumString(from), to::setCurrStatus)
+        .copyEnumAsCharacter(
+            PreAdjFissClaim.Fields.currLoc1, currLoc1.getEnumString(from), to::setCurrLoc1)
+        .copyEnumAsString(
+            PreAdjFissClaim.Fields.currLoc2,
+            false,
+            1,
+            5,
+            currLoc2.getEnumString(from),
+            to::setCurrLoc2)
         .copyOptionalString(
             PreAdjFissClaim.Fields.medaProvId,
             1,
@@ -79,13 +111,13 @@ public class FissClaimTransformer {
             to::setTotalChargeAmount)
         .copyOptionalDate(
             PreAdjFissClaim.Fields.receivedDate,
-            from::hasRecdDt,
-            from::getRecdDt,
+            from::hasRecdDtCymd,
+            from::getRecdDtCymd,
             to::setReceivedDate)
         .copyOptionalDate(
             PreAdjFissClaim.Fields.currTranDate,
-            from::hasCurrTranDate,
-            from::getCurrTranDate,
+            from::hasCurrTranDtCymd,
+            from::getCurrTranDtCymd,
             to::setCurrTranDate)
         .copyOptionalString(
             PreAdjFissClaim.Fields.admitDiagCode,
@@ -238,11 +270,12 @@ public class FissClaimTransformer {
             7,
             fromCode.getDiagCd2(),
             toCode::setDiagCd2)
-        .copyEnumAsAsciiCharacterString(
+        .copyEnumAsString(
             fieldPrefix + PreAdjFissDiagnosisCode.Fields.diagPoaInd,
-            fromCode.getDiagPoaInd(),
-            FissDiagnosisPresentOnAdmissionIndicator.DIAGNOSIS_PRESENT_ON_ADMISSION_INDICATOR_UNSET,
-            FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED,
+            false,
+            1,
+            1,
+            diagPoaInd.getEnumString(fromCode),
             toCode::setDiagPoaInd)
         .copyOptionalString(
             fieldPrefix + PreAdjFissDiagnosisCode.Fields.bitFlags,

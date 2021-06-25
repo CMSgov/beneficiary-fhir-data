@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import java.io.IOException;
 import java.util.List;
 import javax.persistence.EntityExistsException;
@@ -42,14 +43,14 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void persistSuccessful() throws Exception {
-    final List<PreAdjFissClaim> batch =
+    final List<RdaChange<PreAdjFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
 
     final int count = sink.writeBatch(batch);
     assertEquals(3, count);
 
-    for (PreAdjFissClaim claim : batch) {
-      verify(entityManager).persist(claim);
+    for (RdaChange<PreAdjFissClaim> change : batch) {
+      verify(entityManager).persist(change.getClaim());
     }
     verify(entityManager, times(0))
         .merge(any()); // no calls made to merge since all the persist succeeded
@@ -64,18 +65,19 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void mergeSuccessful() throws Exception {
-    final List<PreAdjFissClaim> batch =
+    final List<RdaChange<PreAdjFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
-    doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(1));
+    doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(1).getClaim());
 
     final int count = sink.writeBatch(batch);
     assertEquals(3, count);
 
-    verify(entityManager).persist(batch.get(0));
-    verify(entityManager).persist(batch.get(1));
-    verify(entityManager, times(0)).persist(batch.get(2)); // not called once a persist fails
-    for (PreAdjFissClaim claim : batch) {
-      verify(entityManager).merge(claim);
+    verify(entityManager).persist(batch.get(0).getClaim());
+    verify(entityManager).persist(batch.get(1).getClaim());
+    verify(entityManager, times(0))
+        .persist(batch.get(2).getClaim()); // not called once a persist fails
+    for (RdaChange<PreAdjFissClaim> change : batch) {
+      verify(entityManager).merge(change.getClaim());
     }
     // the persist transaction will be rolled back
     verify(transaction).rollback();
@@ -91,10 +93,10 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void persistAndMergeFail() {
-    final List<PreAdjFissClaim> batch =
+    final List<RdaChange<PreAdjFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
-    doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(0));
-    doThrow(new EntityNotFoundException()).when(entityManager).merge(batch.get(1));
+    doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(0).getClaim());
+    doThrow(new EntityNotFoundException()).when(entityManager).merge(batch.get(1).getClaim());
 
     try {
       sink.writeBatch(batch);
@@ -104,12 +106,15 @@ public class FissClaimRdaSinkTest {
       assertThat(error.getCause(), CoreMatchers.instanceOf(EntityNotFoundException.class));
     }
 
-    verify(entityManager).persist(batch.get(0));
-    verify(entityManager, times(0)).persist(batch.get(1)); // not called once a persist fails
-    verify(entityManager, times(0)).persist(batch.get(2)); // not called once a persist fails
-    verify(entityManager).merge(batch.get(0));
-    verify(entityManager).merge(batch.get(1));
-    verify(entityManager, times(0)).persist(batch.get(2)); // not called once a merge fails
+    verify(entityManager).persist(batch.get(0).getClaim());
+    verify(entityManager, times(0))
+        .persist(batch.get(1).getClaim()); // not called once a persist fails
+    verify(entityManager, times(0))
+        .persist(batch.get(2).getClaim()); // not called once a persist fails
+    verify(entityManager).merge(batch.get(0).getClaim());
+    verify(entityManager).merge(batch.get(1).getClaim());
+    verify(entityManager, times(0))
+        .persist(batch.get(2).getClaim()); // not called once a merge fails
     verify(transaction, times(2)).rollback(); // both persist and merge transactions are rolled back
 
     assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
@@ -121,9 +126,9 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void persistFatalError() {
-    final List<PreAdjFissClaim> batch =
+    final List<RdaChange<PreAdjFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
-    doThrow(new RuntimeException("oops")).when(entityManager).persist(batch.get(1));
+    doThrow(new RuntimeException("oops")).when(entityManager).persist(batch.get(1).getClaim());
 
     try {
       sink.writeBatch(batch);
@@ -133,9 +138,10 @@ public class FissClaimRdaSinkTest {
       assertThat(error.getCause(), CoreMatchers.instanceOf(RuntimeException.class));
     }
 
-    verify(entityManager).persist(batch.get(0));
-    verify(entityManager).persist(batch.get(1));
-    verify(entityManager, times(0)).persist(batch.get(2)); // not called once a persist fails
+    verify(entityManager).persist(batch.get(0).getClaim());
+    verify(entityManager).persist(batch.get(1).getClaim());
+    verify(entityManager, times(0))
+        .persist(batch.get(2).getClaim()); // not called once a persist fails
     verify(entityManager, times(0))
         .merge(any()); // non-duplicate key error prevents any calls to merge
     verify(transaction).rollback();
@@ -167,9 +173,9 @@ public class FissClaimRdaSinkTest {
     assertEquals("Meter " + meterName, expected, actual);
   }
 
-  private PreAdjFissClaim createClaim(String dcn) {
+  private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
     PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn(dcn);
-    return claim;
+    return new RdaChange<>(RdaChange.Type.UPDATE, claim);
   }
 }

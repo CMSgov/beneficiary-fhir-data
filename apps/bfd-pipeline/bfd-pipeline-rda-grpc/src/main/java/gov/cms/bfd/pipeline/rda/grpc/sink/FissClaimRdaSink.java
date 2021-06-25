@@ -6,6 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
@@ -17,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** RdaSink implementation that writes PreAdjFissClaim objects to the database in batches. */
-public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
+public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
   private static final Logger LOGGER = LoggerFactory.getLogger(FissClaimRdaSink.class);
   /** Counts the number of times that writeBatch() is called. */
   static final String CALLS_METER_NAME =
@@ -86,7 +87,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
    * @throws ProcessingException wrapped exception if an error takes place
    */
   @Override
-  public int writeBatch(Collection<PreAdjFissClaim> claims) throws ProcessingException {
+  public int writeBatch(Collection<RdaChange<PreAdjFissClaim>> claims) throws ProcessingException {
     try {
       callsMeter.mark();
       try {
@@ -114,12 +115,12 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
     return claims.size();
   }
 
-  private void persistBatch(Iterable<PreAdjFissClaim> claims) {
+  private void persistBatch(Iterable<RdaChange<PreAdjFissClaim>> changes) {
     boolean commit = false;
     try {
       entityManager.getTransaction().begin();
-      for (PreAdjFissClaim claim : claims) {
-        entityManager.persist(claim);
+      for (RdaChange<PreAdjFissClaim> change : changes) {
+        entityManager.persist(change.getClaim());
       }
       commit = true;
     } finally {
@@ -131,12 +132,12 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
     }
   }
 
-  private void mergeBatch(Iterable<PreAdjFissClaim> claims) {
+  private void mergeBatch(Iterable<RdaChange<PreAdjFissClaim>> changes) {
     boolean commit = false;
     try {
       entityManager.getTransaction().begin();
-      for (PreAdjFissClaim claim : claims) {
-        entityManager.merge(claim);
+      for (RdaChange<PreAdjFissClaim> change : changes) {
+        entityManager.merge(change.getClaim());
       }
       commit = true;
     } finally {
