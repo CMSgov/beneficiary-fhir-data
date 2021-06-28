@@ -167,7 +167,7 @@ public class SchemaMigrationIT {
     claim.getDetails().remove(detail1);
     detail2.setIdrDtlStatus("S");
     claim.getDiagCodes().remove(diag2);
-    diag0.setDiagIcdType("W");
+    diag0.setIdrDiagIcdType("W");
 
     entityManager.getTransaction().begin();
     entityManager.persist(claim);
@@ -196,7 +196,7 @@ public class SchemaMigrationIT {
     final PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
     diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
     diagCode.setPriority((short) priority);
-    diagCode.setDiagIcdType(icdType);
+    diagCode.setIdrDiagIcdType(icdType);
     return diagCode;
   }
 
@@ -221,7 +221,7 @@ public class SchemaMigrationIT {
   private String summarizeMcsDiagCodes(PreAdjMcsClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
-        d -> format("%d:%s", d.getPriority(), d.getDiagIcdType()));
+        d -> format("%d:%s", d.getPriority(), d.getIdrDiagIcdType()));
   }
 
   private <T> String summarizeObjects(Stream<T> objects, Function<T, String> mapping) {

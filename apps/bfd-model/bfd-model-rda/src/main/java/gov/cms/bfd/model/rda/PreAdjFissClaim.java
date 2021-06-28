@@ -45,6 +45,9 @@ public class PreAdjFissClaim {
   @Column(name = "`medaProvId`", length = 13)
   private String medaProvId;
 
+  @Column(name = "`medaProv_6`", length = 13)
+  private String medaProv_6;
+
   @Column(name = "`totalChargeAmount`", columnDefinition = "decimal(11,2)")
   private BigDecimal totalChargeAmount;
 
@@ -89,6 +92,12 @@ public class PreAdjFissClaim {
 
   @Column(name = "`pracLocZip`", length = 15)
   private String pracLocZip;
+
+  @Column(name = "`stmtCovFromDate`")
+  private LocalDate stmtCovFromDate;
+
+  @Column(name = "`stmtCovToDate`")
+  private LocalDate stmtCovToDate;
 
   @OneToMany(
       mappedBy = "dcn",

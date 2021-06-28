@@ -18,6 +18,12 @@ alter table "pre_adj"."FissClaims"
     add "pracLocState" varchar(2);
 alter table "pre_adj"."FissClaims"
     add "pracLocZip" varchar(15);
+alter table "pre_adj"."FissClaims"
+    add "medaProv_6" varchar(6);
+alter table "pre_adj"."FissClaims"
+    add "stmtCovFromDate" date;
+alter table "pre_adj"."FissClaims"
+    add "stmtCovToDate" date;
 
 /*
  * Add new FISS Claim diagnosis code table from RDA API 0.2 release.
@@ -42,7 +48,7 @@ create table "pre_adj"."FissDiagnosisCodes" (
 create table "pre_adj"."McsClaims" (
     "idrClmHdIcn"          varchar(15) not null,
     "idrContrId"           varchar(5)  not null,
-    "idrHic"               varchar(12) not null,
+    "idrHic"               varchar(12),
     "idrClaimType"         varchar(1)  not null,
     "idrDtlCnt"            smallint,
     "idrBeneLast_1_6"      varchar(6),
@@ -68,6 +74,8 @@ create table "pre_adj"."McsClaims" (
     "idrClaimReceiptDate"  date,
     "idrClaimMbi"          varchar(13),
     "idrClaimMbiHash"      varchar(64),
+    "idrHdrFromDateOfSvc"  date,
+    "idrHdrToDateOfSvc"    date,
     "lastUpdated"          timestamp with time zone,
     constraint "McsClaims_pkey" primary key ("idrClmHdIcn")
 );
@@ -78,7 +86,8 @@ create table "pre_adj"."McsClaims" (
  * Since this is a frequent operation, the hash is indexed.
  */
 
-create index "McsClaims_mbi_hash_idx"
+create
+index "McsClaims_mbi_hash_idx"
     on "pre_adj"."McsClaims" ("idrClaimMbiHash");
 
 /*
@@ -86,11 +95,11 @@ create index "McsClaims_mbi_hash_idx"
  * API response array.
  */
 create table "pre_adj"."McsDiagnosisCodes" (
-    "idrClmHdIcn" varchar(15) not null,
-    "priority"    smallint    not null,
-    "diagIcdType" varchar(1),
-    "diagCode"    varchar(7),
-    "lastUpdated" timestamp with time zone,
+    "idrClmHdIcn"    varchar(15) not null,
+    "priority"       smallint    not null,
+    "idrDiagIcdType" varchar(1),
+    "idrDiagCode"    varchar(7),
+    "lastUpdated"    timestamp with time zone,
     constraint "McsDiagnosisCodes_pkey" primary key ("idrClmHdIcn", "priority"),
     constraint "McsDiagnosisCodes_claim" foreign key ("idrClmHdIcn") references "pre_adj"."McsClaims"("idrClmHdIcn")
 );
