@@ -12,6 +12,17 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+	<!-- Limit exposure to request flooding, whether malicious, or as a result of a misconfigured client.
+		See http://www.eclipse.org/jetty/javadoc/jetty-9/org/eclipse/jetty/servlets/DoSFilter.html for details. -->
+  <filter>
+    <filter-name>DoSFilter</filter-name>
+    <filter-class>org.eclipse.jetty.servlets.DoSFilter</filter-class>
+    <init-param>
+      <param-name>maxRequestsPerSec</param-name>
+      <param-value>2</param-value>
+    </init-param>
+  </filter>
+
 	<!-- Ensures that metrics on status codes, active requests, and request 
 		duration are collected. See http://metrics.dropwizard.io/2.2.0/manual/webapps/. -->
 	<filter>
