@@ -50,7 +50,7 @@ create table "pre_adj"."McsClaims" (
     "idrContrId"           varchar(5)  not null,
     "idrHic"               varchar(12),
     "idrClaimType"         varchar(1)  not null,
-    "idrDtlCnt"            smallint,
+    "idrDtlCnt"            int,
     "idrBeneLast_1_6"      varchar(6),
     "idrBeneFirstInit"     varchar(1),
     "idrBeneMidInit"       varchar(1),

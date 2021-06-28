@@ -39,7 +39,7 @@ public class PreAdjMcsClaim {
   private String idrClaimType;
 
   @Column(name = "`idrDtlCnt`")
-  private Short idrDtlCnt;
+  private Integer idrDtlCnt;
 
   @Column(name = "`idrBeneLast_1_6`", length = 6)
   private String idrBeneLast_1_6;
