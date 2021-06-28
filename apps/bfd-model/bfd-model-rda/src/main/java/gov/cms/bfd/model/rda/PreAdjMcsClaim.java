@@ -32,7 +32,7 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrContrId`", length = 5, nullable = false)
   private String idrContrId;
 
-  @Column(name = "`idrHic`", length = 12, nullable = false)
+  @Column(name = "`idrHic`", length = 12)
   private String idrHic;
 
   @Column(name = "`idrClaimType`", length = 1, nullable = false)
@@ -109,6 +109,12 @@ public class PreAdjMcsClaim {
 
   @Column(name = "`idrClaimMbiHash`", length = 64)
   private String idrClaimMbiHash;
+
+  @Column(name = "`idrHdrFromDateOfSvc`")
+  private LocalDate idrHdrFromDateOfSvc;
+
+  @Column(name = "`idrHdrToDateOfSvc`")
+  private LocalDate idrHdrToDateOfSvc;
 
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;

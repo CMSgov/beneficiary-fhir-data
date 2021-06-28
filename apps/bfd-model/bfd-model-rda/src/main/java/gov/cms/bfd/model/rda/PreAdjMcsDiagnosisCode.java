@@ -33,11 +33,11 @@ public class PreAdjMcsDiagnosisCode {
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`diagIcdType`", length = 1)
-  private String diagIcdType;
+  @Column(name = "`idrDiagIcdType`", length = 1)
+  private String idrDiagIcdType;
 
-  @Column(name = "`diagCode`", length = 7)
-  private String diagCode;
+  @Column(name = "`idrDiagCode`", length = 7)
+  private String idrDiagCode;
 
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
