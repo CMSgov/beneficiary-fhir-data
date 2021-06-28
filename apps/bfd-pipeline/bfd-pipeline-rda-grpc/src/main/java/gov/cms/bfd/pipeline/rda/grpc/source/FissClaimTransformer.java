@@ -104,6 +104,13 @@ public class FissClaimTransformer {
             from::hasMedaProvId,
             from::getMedaProvId,
             to::setMedaProvId)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.medaProv_6,
+            1,
+            6,
+            from::hasMedaProv6,
+            from::getMedaProv6,
+            to::setMedaProv_6)
         .copyOptionalAmount(
             PreAdjFissClaim.Fields.totalChargeAmount,
             from::hasTotalChargeAmount,
@@ -187,13 +194,24 @@ public class FissClaimTransformer {
               idHasher.computeIdentifierHash(mbi),
               to::setMbiHash);
     }
-    transformer.copyOptionalString(
-        PreAdjFissClaim.Fields.fedTaxNumber,
-        1,
-        10,
-        from::hasFedTaxNb,
-        from::getFedTaxNb,
-        to::setFedTaxNumber);
+    transformer
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.fedTaxNumber,
+            1,
+            10,
+            from::hasFedTaxNb,
+            from::getFedTaxNb,
+            to::setFedTaxNumber)
+        .copyOptionalDate(
+            PreAdjFissClaim.Fields.stmtCovFromDate,
+            from::hasStmtCovFromCymd,
+            from::getStmtCovFromCymd,
+            to::setStmtCovFromDate)
+        .copyOptionalDate(
+            PreAdjFissClaim.Fields.stmtCovToDate,
+            from::hasStmtCovToCymd,
+            from::getStmtCovToCymd,
+            to::setStmtCovToDate);
     to.setLastUpdated(clock.instant());
     return to;
   }

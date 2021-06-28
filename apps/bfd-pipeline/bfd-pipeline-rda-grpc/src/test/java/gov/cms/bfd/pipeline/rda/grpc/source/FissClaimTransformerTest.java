@@ -85,6 +85,7 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc1('M');
     claim.setCurrLoc2("9000");
     claim.setMedaProvId("mpi");
+    claim.setMedaProv_6("mp_6");
     claim.setTotalChargeAmount(new BigDecimal("1002.54"));
     claim.setReceivedDate(LocalDate.of(2020, 1, 2));
     claim.setCurrTranDate(LocalDate.of(2021, 3, 4));
@@ -99,6 +100,8 @@ public class FissClaimTransformerTest {
     claim.setPracLocCity("loc-city");
     claim.setPracLocState("ls");
     claim.setPracLocZip("123456789012345");
+    claim.setStmtCovFromDate(LocalDate.of(2020, 2, 3));
+    claim.setStmtCovToDate(LocalDate.of(2021, 4, 5));
     claim.setLastUpdated(clock.instant());
     claimBuilder
         .setDcn("dcn")
@@ -107,6 +110,7 @@ public class FissClaimTransformerTest {
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE)
         .setMedaProvId("mpi")
+        .setMedaProv6("mp_6")
         .setTotalChargeAmount("1002.54")
         .setRecdDtCymd("2020-01-02")
         .setCurrTranDtCymd("2021-03-04")
@@ -119,7 +123,9 @@ public class FissClaimTransformerTest {
         .setPracLocAddr2("loc-address-2")
         .setPracLocCity("loc-city")
         .setPracLocState("ls")
-        .setPracLocZip("123456789012345");
+        .setPracLocZip("123456789012345")
+        .setStmtCovFromCymd("2020-02-03")
+        .setStmtCovToCymd("2021-04-05");
     changeBuilder
         .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
         .setFissClaim(claimBuilder.build());
@@ -256,6 +262,7 @@ public class FissClaimTransformerTest {
           .setCurrLoc1EnumValue(-1)
           .setCurrLoc2Unrecognized("123456")
           .setMedaProvId("12345678901234")
+          .setMedaProv6("1234567")
           .setTotalChargeAmount("not-a-number")
           .setRecdDtCymd("not-a-date")
           .setCurrTranDtCymd("not-a-date")
@@ -269,6 +276,8 @@ public class FissClaimTransformerTest {
           .setPracLocCity("")
           .setPracLocState("123")
           .setPracLocZip("1234567890123456")
+          .setStmtCovFromCymd("not-a-date")
+          .setStmtCovToCymd("not-a-date")
           .addFissProcCodes(
               FissProcedureCode.newBuilder()
                   .setProcCd("12345678901")
@@ -292,6 +301,8 @@ public class FissClaimTransformerTest {
                   "currLoc2", "invalid length: expected=[1,5] actual=6"),
               new DataTransformer.ErrorMessage(
                   "medaProvId", "invalid length: expected=[1,13] actual=14"),
+              new DataTransformer.ErrorMessage(
+                  "medaProv_6", "invalid length: expected=[1,6] actual=7"),
               new DataTransformer.ErrorMessage("totalChargeAmount", "invalid amount"),
               new DataTransformer.ErrorMessage("receivedDate", "invalid date"),
               new DataTransformer.ErrorMessage("currTranDate", "invalid date"),
@@ -314,6 +325,8 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage("mbi", "invalid length: expected=[1,13] actual=14"),
               new DataTransformer.ErrorMessage(
                   "fedTaxNumber", "invalid length: expected=[1,10] actual=11"),
+              new DataTransformer.ErrorMessage("stmtCovFromDate", "invalid date"),
+              new DataTransformer.ErrorMessage("stmtCovToDate", "invalid date"),
               new DataTransformer.ErrorMessage(
                   "procCode-0-procCode", "invalid length: expected=[1,10] actual=11"),
               new DataTransformer.ErrorMessage(
