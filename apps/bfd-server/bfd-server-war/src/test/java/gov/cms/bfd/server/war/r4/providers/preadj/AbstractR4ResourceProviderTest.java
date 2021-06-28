@@ -2,8 +2,11 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -28,8 +31,10 @@ import gov.cms.bfd.server.war.utils.ReflectionTestUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,7 +42,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class AbstractR4ResourceProviderTest {
@@ -322,36 +326,8 @@ public class AbstractR4ResourceProviderTest {
   }
 
   @Test
-  public void shouldThrowResourceNotFoundIfInvalidType() {
-    ReferenceParam mockParam = mock(ReferenceParam.class);
-    String type = "-";
-    String hashed = null;
-    DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
-    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
-    RequestDetails mockRequestDetails = mock(RequestDetails.class);
-
-    String mbi = "12345";
-
-    AbstractR4ResourceProvider<?> providerSpy = spy(new MockR4ResourceProvider());
-
-    doReturn(mbi).when(mockParam).getIdPart();
-
-    doReturn(null).when(providerSpy).parseClaimType(anyString());
-
-    doReturn(Optional.empty()).when(providerSpy).parseClaimType(type);
-
-    Exception expected = new ResourceNotFoundException(new IdType(mbi));
-    Exception actual =
-        AssertUtils.catchExceptions(
-            () ->
-                providerSpy.findByPatient(
-                    mockParam, type, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails));
-
-    AssertUtils.assertThrowEquals(expected, actual);
-  }
-
-  @Test
-  public void shouldReturnBundleForMbi() throws NoSuchFieldException, IllegalAccessException {
+  public void shouldCreateBundleOfSpecificType()
+      throws NoSuchFieldException, IllegalAccessException {
     ReferenceParam mockParam = mock(ReferenceParam.class);
     String type = "f";
     String hashed = "false";
@@ -363,16 +339,18 @@ public class AbstractR4ResourceProviderTest {
 
     MetricRegistry mockRegistry = mock(MetricRegistry.class);
 
-    ClaimDao daoSpy = mock(ClaimDao.class);
+    ClaimDao mockDao = mock(ClaimDao.class);
 
-    AbstractR4ResourceProvider<?> providerSpy = spy(new MockR4ResourceProvider());
+    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
 
     ReflectionTestUtils.setField(providerSpy, "metricRegistry", mockRegistry);
-    ReflectionTestUtils.setField(providerSpy, "claimDao", daoSpy);
+    ReflectionTestUtils.setField(providerSpy, "claimDao", mockDao);
 
     doReturn(mbi).when(mockParam).getIdPart();
 
-    ResourceTypeV2<?> mockResourceType = mock(ResourceTypeV2.class);
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTypeV2<Claim> mockResourceType = mock(ResourceTypeV2.class);
 
     Class<Object> claimType = Object.class;
 
@@ -382,6 +360,94 @@ public class AbstractR4ResourceProviderTest {
 
     doReturn(Optional.of(mockResourceType)).when(providerSpy).parseClaimType(type);
 
+    Bundle expected = mock(Bundle.class);
+
+    doReturn(null)
+        .when(providerSpy)
+        .createBundleFor(anySet(), anyString(), anyBoolean(), any(DateRangeParam.class));
+
+    doReturn(expected)
+        .when(providerSpy)
+        .createBundleFor(Collections.singleton(mockResourceType), mbi, false, mockLastUpdated);
+
+    Bundle actual =
+        providerSpy.findByPatient(
+            mockParam, type, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
+
+    assertSame(expected, actual);
+  }
+
+  @Test
+  public void shouldCreateBundleOfUnspecificType()
+      throws NoSuchFieldException, IllegalAccessException {
+    ReferenceParam mockParam = mock(ReferenceParam.class);
+    String type = null;
+    String hashed = "false";
+    DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
+    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
+    RequestDetails mockRequestDetails = mock(RequestDetails.class);
+
+    String mbi = "mbimbimbi";
+
+    MetricRegistry mockRegistry = mock(MetricRegistry.class);
+
+    ClaimDao mockDao = mock(ClaimDao.class);
+
+    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
+
+    ReflectionTestUtils.setField(providerSpy, "metricRegistry", mockRegistry);
+    ReflectionTestUtils.setField(providerSpy, "claimDao", mockDao);
+
+    doReturn(mbi).when(mockParam).getIdPart();
+
+    doReturn(null).when(providerSpy).parseClaimType(anyString());
+
+    doReturn(Optional.empty()).when(providerSpy).parseClaimType(type);
+
+    Bundle expected = mock(Bundle.class);
+
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    Set<ResourceTypeV2<Claim>> mockTypesList = mock(Set.class);
+
+    doReturn(mockTypesList).when(providerSpy).getResourceTypes();
+
+    doReturn(null)
+        .when(providerSpy)
+        .createBundleFor(anySet(), anyString(), anyBoolean(), any(DateRangeParam.class));
+
+    doReturn(expected)
+        .when(providerSpy)
+        .createBundleFor(mockTypesList, mbi, false, mockLastUpdated);
+
+    Bundle actual =
+        providerSpy.findByPatient(
+            mockParam, type, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
+
+    assertSame(expected, actual);
+  }
+
+  @Test
+  public void shouldReturnBundleForMbi() throws NoSuchFieldException, IllegalAccessException {
+    String mbi = "mbimbimbi";
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTypeV2<Claim> mockResourceType = mock(ResourceTypeV2.class);
+    Set<ResourceTypeV2<Claim>> types = Collections.singleton(mockResourceType);
+    boolean isHashed = false;
+    DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
+
+    MetricRegistry mockRegistry = mock(MetricRegistry.class);
+
+    ClaimDao mockDao = mock(ClaimDao.class);
+
+    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
+
+    ReflectionTestUtils.setField(providerSpy, "metricRegistry", mockRegistry);
+    ReflectionTestUtils.setField(providerSpy, "claimDao", mockDao);
+
+    Class<Object> claimType = Object.class;
+
     Object object1 = "thing1";
     Object object2 = "thing2";
     List<Object> entities = Arrays.asList(object1, object2);
@@ -389,10 +455,12 @@ public class AbstractR4ResourceProviderTest {
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
     doReturn(null)
-        .when(daoSpy)
+        .when(mockDao)
         .findAllByMbiHash(any(Class.class), anyString(), any(DateRangeParam.class));
 
-    doReturn(entities).when(daoSpy).findAllByMbi(claimType, mbi, mockLastUpdated);
+    doReturn(claimType).when(mockResourceType).getEntityClass();
+
+    doReturn(entities).when(mockDao).findAllByMbi(claimType, mbi, mockLastUpdated);
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -411,56 +479,45 @@ public class AbstractR4ResourceProviderTest {
     expected.addEntry().setResource(resource1);
     expected.addEntry().setResource(resource2);
 
-    Bundle actual =
-        providerSpy.findByPatient(
-            mockParam, type, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
+    Bundle actual = providerSpy.createBundleFor(types, mbi, isHashed, mockLastUpdated);
 
     assertTrue(actual.equalsDeep(expected));
   }
 
   @Test
   public void shouldReturnBundleForMbiHash() throws NoSuchFieldException, IllegalAccessException {
-    ReferenceParam mockParam = mock(ReferenceParam.class);
-    String type = "f";
-    String hashed = null;
+    String mbi = "mbimbimbi";
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTypeV2<Claim> mockResourceType = mock(ResourceTypeV2.class);
+    Set<ResourceTypeV2<Claim>> types = Collections.singleton(mockResourceType);
+    boolean isHashed = true;
     DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
-    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
-    RequestDetails mockRequestDetails = mock(RequestDetails.class);
-
-    String mbiHash = "mbimbimbihashhashhash";
 
     MetricRegistry mockRegistry = mock(MetricRegistry.class);
 
-    ClaimDao daoSpy = mock(ClaimDao.class);
+    ClaimDao mockDao = mock(ClaimDao.class);
 
-    AbstractR4ResourceProvider<?> providerSpy = spy(new MockR4ResourceProvider());
+    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
 
     ReflectionTestUtils.setField(providerSpy, "metricRegistry", mockRegistry);
-    ReflectionTestUtils.setField(providerSpy, "claimDao", daoSpy);
-
-    doReturn(mbiHash).when(mockParam).getIdPart();
-
-    ResourceTypeV2<?> mockResourceType = mock(ResourceTypeV2.class);
+    ReflectionTestUtils.setField(providerSpy, "claimDao", mockDao);
 
     Class<Object> claimType = Object.class;
-
-    doReturn(null).when(providerSpy).parseClaimType(anyString());
-
-    doReturn(claimType).when(mockResourceType).getEntityClass();
-
-    doReturn(Optional.of(mockResourceType)).when(providerSpy).parseClaimType(type);
 
     Object object1 = "thing1";
     Object object2 = "thing2";
     List<Object> entities = Arrays.asList(object1, object2);
 
-    doReturn(entities).when(daoSpy).findAllByMbiHash(claimType, mbiHash, mockLastUpdated);
-
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
     doReturn(null)
-        .when(daoSpy)
+        .when(mockDao)
         .findAllByMbi(any(Class.class), anyString(), any(DateRangeParam.class));
+
+    doReturn(claimType).when(mockResourceType).getEntityClass();
+
+    doReturn(entities).when(mockDao).findAllByMbiHash(claimType, mbi, mockLastUpdated);
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -479,53 +536,9 @@ public class AbstractR4ResourceProviderTest {
     expected.addEntry().setResource(resource1);
     expected.addEntry().setResource(resource2);
 
-    Bundle actual =
-        providerSpy.findByPatient(
-            mockParam, type, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
+    Bundle actual = providerSpy.createBundleFor(types, mbi, isHashed, mockLastUpdated);
 
     assertTrue(actual.equalsDeep(expected));
-  }
-
-  @Ignore("Ignoring until we have MCS claims")
-  @Test
-  public void shouldReturnClaimObjectForMcsClaim()
-      throws NoSuchFieldException, IllegalAccessException {
-    IdType id = new IdType(null, null, "m-123", null);
-
-    MetricRegistry registry = new MetricRegistry();
-    EntityManager mockEntityManager = mock(EntityManager.class);
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
-    PreAdjFissClaim mockClaim = mock(PreAdjFissClaim.class);
-
-    ResourceTypeV2<?> mockClaimType = mock(ResourceTypeV2.class);
-
-    doReturn(null).when(daoSpy).getEntityById(any(ClaimTypeV2.class), anyString());
-
-    doReturn(mockClaim).when(daoSpy).getEntityById(mockClaimType, "123");
-
-    MockR4ResourceProvider providerSpy = spy(new MockR4ResourceProvider());
-
-    doReturn(null).when(providerSpy).parseClaimType(anyString());
-
-    ResourceTransformer<?> mockTransformer = mock(ResourceTransformer.class);
-
-    Claim expected = new Claim();
-    expected.setId("Expected claim");
-
-    doReturn(expected).when(mockTransformer).transform(registry, mockClaim);
-
-    doReturn(mockTransformer).when(mockClaimType).getTransformer();
-
-    doReturn(Optional.of(mockClaimType)).when(providerSpy).parseClaimType("m");
-
-    providerSpy.setMetricRegistry(registry);
-
-    ReflectionTestUtils.setField(providerSpy, "preAdjClaimDao", daoSpy);
-
-    Claim actual = providerSpy.read(id, null);
-
-    assertTrue(expected.equalsShallow(actual));
   }
 
   private static class MockR4ResourceProvider extends AbstractR4ResourceProvider<Claim> {
@@ -533,6 +546,11 @@ public class AbstractR4ResourceProviderTest {
     @Override
     Optional<ResourceTypeV2<Claim>> parseClaimType(String typeText) {
       return Optional.empty();
+    }
+
+    @Override
+    Set<ResourceTypeV2<Claim>> getResourceTypes() {
+      return Collections.emptySet();
     }
   }
 }

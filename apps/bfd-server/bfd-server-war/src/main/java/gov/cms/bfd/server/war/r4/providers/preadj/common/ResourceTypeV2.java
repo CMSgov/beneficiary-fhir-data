@@ -7,7 +7,11 @@ import javax.persistence.Id;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ClaimResponse;
 
-/** Interface to allow for more generic logic in {@link AbstractR4ResourceProvider}. */
+/**
+ * Interface to allow for more generic logic in {@link AbstractR4ResourceProvider}.
+ *
+ * @param <T> The base resource that the given type configuration is for.
+ */
 public interface ResourceTypeV2<T extends IBaseResource> {
 
   /**

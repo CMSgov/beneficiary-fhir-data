@@ -7,7 +7,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import java.time.Instant;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.EntityManager;
@@ -16,15 +16,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.apache.commons.lang3.ObjectUtils;
 
 /** Provides common logic for performing DB interactions */
 public class ClaimDao {
-
-  // (9999-01-01) Postgres doesn't seem to like dates that are too big, this should be adequate
-  private static final long EFFECTIVE_END_OF_TIME_EPOCH = 253370765800000L;
-  // (1965-07-30) CMS's Birthday
-  private static final long EFFECTIVE_START_OF_TIME_EPOCH = -139622400000L;
 
   private static final String CLAIM_BY_MBI_METRIC_QUERY = "claim_by_mbi";
   private static final String CLAIM_BY_MBI_METRIC_NAME =
@@ -130,27 +124,27 @@ public class ClaimDao {
   @VisibleForTesting
   Predicate createDateRangePredicate(
       Path<Instant> datePath, DateRangeParam dateRange, CriteriaBuilder builder) {
-    Instant from =
-        ObjectUtils.defaultIfNull(
-                dateRange.getLowerBoundAsInstant(), new Date(EFFECTIVE_START_OF_TIME_EPOCH))
-            .toInstant();
-    Instant to =
-        ObjectUtils.defaultIfNull(
-                dateRange.getUpperBoundAsInstant(), new Date(EFFECTIVE_END_OF_TIME_EPOCH))
-            .toInstant();
+    List<Predicate> predicates = new ArrayList<>();
 
-    Predicate fromPredicate =
-        dateRange.getLowerBound() != null
-                && ParamPrefixEnum.GREATERTHAN.equals(dateRange.getLowerBound().getPrefix())
-            ? builder.greaterThan(datePath, from)
-            : builder.greaterThanOrEqualTo(datePath, from);
-    Predicate toPredicate =
-        dateRange.getUpperBound() != null
-                && ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(dateRange.getUpperBound().getPrefix())
-            ? builder.lessThanOrEqualTo(datePath, to)
-            : builder.lessThan(datePath, to);
+    if (dateRange.getLowerBound() != null) {
+      Instant from = dateRange.getLowerBoundAsInstant().toInstant();
 
-    return builder.and(fromPredicate, toPredicate);
+      predicates.add(
+          ParamPrefixEnum.GREATERTHAN.equals(dateRange.getLowerBound().getPrefix())
+              ? builder.greaterThan(datePath, from)
+              : builder.greaterThanOrEqualTo(datePath, from));
+    }
+
+    if (dateRange.getUpperBound() != null) {
+      Instant to = dateRange.getUpperBoundAsInstant().toInstant();
+
+      predicates.add(
+          ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(dateRange.getUpperBound().getPrefix())
+              ? builder.lessThanOrEqualTo(datePath, to)
+              : builder.lessThan(datePath, to));
+    }
+
+    return builder.and(predicates.toArray(new Predicate[0]));
   }
 
   @Override

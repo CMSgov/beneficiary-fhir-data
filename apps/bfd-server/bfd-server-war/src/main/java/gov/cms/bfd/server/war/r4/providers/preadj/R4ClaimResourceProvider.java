@@ -2,8 +2,10 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.util.Optional;
+import java.util.Set;
 import org.hl7.fhir.r4.model.Claim;
 import org.springframework.stereotype.Component;
 
@@ -20,5 +22,15 @@ public class R4ClaimResourceProvider extends AbstractR4ResourceProvider<Claim> {
   @VisibleForTesting
   Optional<ResourceTypeV2<Claim>> parseClaimType(String typeText) {
     return ClaimTypeV2.parse(typeText);
+  }
+
+  /**
+   * Returns a set of all supported resource types.
+   *
+   * @return Set of all supported resource types.
+   */
+  @VisibleForTesting
+  Set<ResourceTypeV2<Claim>> getResourceTypes() {
+    return Sets.newHashSet(ClaimTypeV2.values());
   }
 }

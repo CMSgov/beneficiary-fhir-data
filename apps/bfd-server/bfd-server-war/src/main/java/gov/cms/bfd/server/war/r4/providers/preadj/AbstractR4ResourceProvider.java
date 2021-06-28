@@ -19,8 +19,11 @@ import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -155,13 +158,21 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @VisibleForTesting
   abstract Optional<ResourceTypeV2<T>> parseClaimType(String typeText);
 
+  /**
+   * Returns a set of all supported resource types.
+   *
+   * @return Set of all supported resource types.
+   */
+  @VisibleForTesting
+  abstract Set<ResourceTypeV2<T>> getResourceTypes();
+
   @Search
   @Trace
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
           @Description(shortDefinition = "The patient identifier to search for")
           ReferenceParam mbi,
-      @RequiredParam(name = "type")
+      @OptionalParam(name = "type")
           @Description(shortDefinition = "The source type to use for fetching claim data")
           String type,
       @OptionalParam(name = "isHashed")
@@ -177,40 +188,66 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     if (mbi != null && !StringUtils.isBlank(mbi.getIdPart())) {
       String mbiString = mbi.getIdPart();
 
-      Bundle bundleResource = new Bundle();
+      Bundle bundleResource;
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
 
       Optional<ResourceTypeV2<T>> optional = parseClaimType(type);
       if (optional.isPresent()) {
-        ResourceTypeV2<T> claimType = optional.get();
-
-        List<?> entities;
-
-        // TODO: [DCGEO-117] Impliment additional search by service date range
-        if (isHashed) {
-          entities = claimDao.findAllByMbiHash(claimType.getEntityClass(), mbiString, lastUpdated);
-        } else {
-          entities = claimDao.findAllByMbi(claimType.getEntityClass(), mbiString, lastUpdated);
-        }
-
-        List<IBaseResource> claims =
-            entities.stream()
-                .map(e -> claimType.getTransformer().transform(metricRegistry, e))
-                .collect(Collectors.toList());
-
-        claims.forEach(
-            c -> {
-              Bundle.BundleEntryComponent entry = bundleResource.addEntry();
-              entry.setResource((Resource) c);
-            });
-
-        return bundleResource;
+        bundleResource =
+            createBundleFor(
+                Collections.singleton(optional.get()), mbiString, isHashed, lastUpdated);
       } else {
-        throw new ResourceNotFoundException(new IdType(mbiString));
+        bundleResource = createBundleFor(getResourceTypes(), mbiString, isHashed, lastUpdated);
       }
+
+      return bundleResource;
     } else {
       throw new IllegalArgumentException("mbi can't be null/blank");
     }
+  }
+
+  /**
+   * Creates a Bundle of resources for the given data using the given {@link ResourceTypeV2}.
+   *
+   * @param resourceTypes The {@link ResourceTypeV2} data to retrieve.
+   * @param mbi The mbi to look up associated data for.
+   * @param isHashed Denotes if the given mbi is hashed.
+   * @param lastUpdated Date range of desired lastUpdate values to retrieve data for.
+   * @return A Bundle with data found using the provided parameters.
+   */
+  @VisibleForTesting
+  Bundle createBundleFor(
+      Set<ResourceTypeV2<T>> resourceTypes,
+      String mbi,
+      boolean isHashed,
+      DateRangeParam lastUpdated) {
+    List<T> resources = new ArrayList<>();
+
+    for (ResourceTypeV2<T> type : resourceTypes) {
+      List<?> entities;
+
+      // TODO: [DCGEO-117] Implement additional search by service date range
+      if (isHashed) {
+        entities = claimDao.findAllByMbiHash(type.getEntityClass(), mbi, lastUpdated);
+      } else {
+        entities = claimDao.findAllByMbi(type.getEntityClass(), mbi, lastUpdated);
+      }
+
+      resources.addAll(
+          entities.stream()
+              .map(e -> type.getTransformer().transform(metricRegistry, e))
+              .collect(Collectors.toList()));
+    }
+
+    Bundle bundle = new Bundle();
+
+    resources.forEach(
+        c -> {
+          Bundle.BundleEntryComponent entry = bundle.addEntry();
+          entry.setResource((Resource) c);
+        });
+
+    return bundle;
   }
 }
