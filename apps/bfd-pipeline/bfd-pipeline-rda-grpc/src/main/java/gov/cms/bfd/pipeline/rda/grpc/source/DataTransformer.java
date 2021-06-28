@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -101,6 +103,45 @@ public class DataTransformer {
       Consumer<String> copier) {
     if (exists.getAsBoolean()) {
       return copyString(fieldName, false, minLength, maxLength, value.get(), copier);
+    }
+    return this;
+  }
+
+  /**
+   * Checks the nullability and length of a string and then delivers it to the Consumer if the
+   * checks are successful. Valid null values are silently accepted without calling the Consumer.
+   * Ensures that the actual value exactly matches an expected value. This is used to ensure an
+   * invariant is being followed in the source data.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value
+   * @param expectedValue value to compare actualValue to
+   * @param actualValue value to copy
+   * @param copier Consumer to receive the value
+   * @return this
+   */
+  public DataTransformer copyStringWithExpectedValue(
+      String fieldName,
+      boolean nullable,
+      int minLength,
+      int maxLength,
+      String expectedValue,
+      String actualValue,
+      Consumer<String> copier) {
+    if (nonNull(fieldName, actualValue, nullable)
+        && lengthOk(fieldName, actualValue, minLength, maxLength)
+        && valueMatches(fieldName, expectedValue, actualValue)) {
+      copier.accept(actualValue);
+    }
+    return this;
+  }
+
+  public DataTransformer copyOptionalInt(
+      BooleanSupplier exists, IntSupplier value, IntConsumer copier) {
+    if (exists.getAsBoolean()) {
+      copier.accept(value.getAsInt());
     }
     return this;
   }
@@ -303,6 +344,16 @@ public class DataTransformer {
       return false;
     }
     return true;
+  }
+
+  private boolean valueMatches(String fieldName, String expectedValue, String actualValue) {
+    final boolean matches =
+        (expectedValue == null && actualValue == null)
+            || (expectedValue != null && expectedValue.equals(actualValue));
+    if (!matches) {
+      addError(fieldName, "value mismatch: expected=%s actual=%s", expectedValue, actualValue);
+    }
+    return matches;
   }
 
   public void addError(String fieldName, String errorFormat, Object... args) {
