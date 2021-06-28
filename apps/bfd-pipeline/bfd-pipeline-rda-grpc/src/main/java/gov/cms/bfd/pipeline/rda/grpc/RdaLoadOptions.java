@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
-import gov.cms.bfd.pipeline.rda.grpc.sink.FissClaimRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.JpaClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
@@ -61,7 +61,7 @@ public class RdaLoadOptions implements Serializable {
                 new FissClaimStreamCaller(
                     new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
                 appMetrics),
-        () -> new FissClaimRdaSink(databaseOptions, appMetrics),
+        () -> new JpaClaimRdaSink<>(databaseOptions, appMetrics),
         appMetrics);
   }
 

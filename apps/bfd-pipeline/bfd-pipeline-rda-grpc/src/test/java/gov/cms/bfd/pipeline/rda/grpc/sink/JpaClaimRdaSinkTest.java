@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
-import static gov.cms.bfd.pipeline.rda.grpc.sink.FissClaimRdaSink.isDuplicateKeyException;
+import static gov.cms.bfd.pipeline.rda.grpc.sink.JpaClaimRdaSink.isDuplicateKeyException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -26,18 +26,18 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FissClaimRdaSinkTest {
+public class JpaClaimRdaSinkTest {
   @Mock private HikariDataSource dataSource;
   @Mock private EntityManagerFactory entityManagerFactory;
   @Mock private EntityManager entityManager;
   @Mock private EntityTransaction transaction;
   private MetricRegistry appMetrics;
-  private FissClaimRdaSink sink;
+  private JpaClaimRdaSink<PreAdjFissClaim> sink;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     appMetrics = new MetricRegistry();
-    sink = new FissClaimRdaSink(dataSource, entityManagerFactory, entityManager, appMetrics);
+    sink = new JpaClaimRdaSink<>(dataSource, entityManagerFactory, entityManager, appMetrics);
     doReturn(transaction).when(entityManager).getTransaction();
   }
 
@@ -56,11 +56,11 @@ public class FissClaimRdaSinkTest {
         .merge(any()); // no calls made to merge since all the persist succeeded
     verify(transaction).commit();
 
-    assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(3, FissClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.OBJECTS_MERGED_METER_NAME);
-    assertMeterReading(3, FissClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.FAILURES_METER_NAME);
+    assertMeterReading(1, JpaClaimRdaSink.CALLS_METER_NAME);
+    assertMeterReading(3, JpaClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_MERGED_METER_NAME);
+    assertMeterReading(3, JpaClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.FAILURES_METER_NAME);
   }
 
   @Test
@@ -84,11 +84,11 @@ public class FissClaimRdaSinkTest {
     // the merge transaction will be committed
     verify(transaction).commit();
 
-    assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
-    assertMeterReading(3, FissClaimRdaSink.OBJECTS_MERGED_METER_NAME);
-    assertMeterReading(3, FissClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.FAILURES_METER_NAME);
+    assertMeterReading(1, JpaClaimRdaSink.CALLS_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
+    assertMeterReading(3, JpaClaimRdaSink.OBJECTS_MERGED_METER_NAME);
+    assertMeterReading(3, JpaClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.FAILURES_METER_NAME);
   }
 
   @Test
@@ -117,11 +117,11 @@ public class FissClaimRdaSinkTest {
         .persist(batch.get(2).getClaim()); // not called once a merge fails
     verify(transaction, times(2)).rollback(); // both persist and merge transactions are rolled back
 
-    assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.OBJECTS_MERGED_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
-    assertMeterReading(1, FissClaimRdaSink.FAILURES_METER_NAME);
+    assertMeterReading(1, JpaClaimRdaSink.CALLS_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_MERGED_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
+    assertMeterReading(1, JpaClaimRdaSink.FAILURES_METER_NAME);
   }
 
   @Test
@@ -146,11 +146,11 @@ public class FissClaimRdaSinkTest {
         .merge(any()); // non-duplicate key error prevents any calls to merge
     verify(transaction).rollback();
 
-    assertMeterReading(1, FissClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.OBJECTS_MERGED_METER_NAME);
-    assertMeterReading(0, FissClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
-    assertMeterReading(1, FissClaimRdaSink.FAILURES_METER_NAME);
+    assertMeterReading(1, JpaClaimRdaSink.CALLS_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_MERGED_METER_NAME);
+    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
+    assertMeterReading(1, JpaClaimRdaSink.FAILURES_METER_NAME);
   }
 
   @Test

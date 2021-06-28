@@ -4,7 +4,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
@@ -17,24 +16,28 @@ import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** RdaSink implementation that writes PreAdjFissClaim objects to the database in batches. */
-public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FissClaimRdaSink.class);
+/**
+ * RdaSink implementation that writes TClaim objects to the database in batches.
+ *
+ * @param <TClaim> type of entity objects written to the database
+ */
+public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(JpaClaimRdaSink.class);
   /** Counts the number of times that writeBatch() is called. */
   static final String CALLS_METER_NAME =
-      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "calls");
+      MetricRegistry.name(JpaClaimRdaSink.class.getSimpleName(), "calls");
   /** Counts the number of times that writeBatch() is called and fails. */
   static final String FAILURES_METER_NAME =
-      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "failures");
+      MetricRegistry.name(JpaClaimRdaSink.class.getSimpleName(), "failures");
   /** Counts the number of objects successfully written to the database. */
   static final String OBJECTS_WRITTEN_METER_NAME =
-      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "writes", "total");
+      MetricRegistry.name(JpaClaimRdaSink.class.getSimpleName(), "writes", "total");
   /** Counts the number of objects written to the database using persist(). */
   static final String OBJECTS_PERSISTED_METER_NAME =
-      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "writes", "persisted");
+      MetricRegistry.name(JpaClaimRdaSink.class.getSimpleName(), "writes", "persisted");
   /** Counts the number of objects written to the database using merge(). */
   static final String OBJECTS_MERGED_METER_NAME =
-      MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "writes", "merged");
+      MetricRegistry.name(JpaClaimRdaSink.class.getSimpleName(), "writes", "merged");
 
   private final HikariDataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
@@ -45,7 +48,7 @@ public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
   private final Meter objectsPersistedMeter;
   private final Meter objectsMergedMeter;
 
-  public FissClaimRdaSink(DatabaseOptions databaseOptions, MetricRegistry metricRegistry) {
+  public JpaClaimRdaSink(DatabaseOptions databaseOptions, MetricRegistry metricRegistry) {
     dataSource = DatabaseUtils.createDataSource(databaseOptions, metricRegistry, 10);
     entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
     entityManager = entityManagerFactory.createEntityManager();
@@ -57,7 +60,7 @@ public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
   }
 
   @VisibleForTesting
-  FissClaimRdaSink(
+  JpaClaimRdaSink(
       HikariDataSource dataSource,
       EntityManagerFactory entityManagerFactory,
       EntityManager entityManager,
@@ -87,7 +90,7 @@ public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
    * @throws ProcessingException wrapped exception if an error takes place
    */
   @Override
-  public int writeBatch(Collection<RdaChange<PreAdjFissClaim>> claims) throws ProcessingException {
+  public int writeBatch(Collection<RdaChange<TClaim>> claims) throws ProcessingException {
     try {
       callsMeter.mark();
       try {
@@ -115,11 +118,11 @@ public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
     return claims.size();
   }
 
-  private void persistBatch(Iterable<RdaChange<PreAdjFissClaim>> changes) {
+  private void persistBatch(Iterable<RdaChange<TClaim>> changes) {
     boolean commit = false;
     try {
       entityManager.getTransaction().begin();
-      for (RdaChange<PreAdjFissClaim> change : changes) {
+      for (RdaChange<TClaim> change : changes) {
         switch (change.getType()) {
           case INSERT:
             entityManager.persist(change.getClaim());
@@ -142,11 +145,11 @@ public class FissClaimRdaSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
     }
   }
 
-  private void mergeBatch(Iterable<RdaChange<PreAdjFissClaim>> changes) {
+  private void mergeBatch(Iterable<RdaChange<TClaim>> changes) {
     boolean commit = false;
     try {
       entityManager.getTransaction().begin();
-      for (RdaChange<PreAdjFissClaim> change : changes) {
+      for (RdaChange<TClaim> change : changes) {
         if (change.getType() != RdaChange.Type.DELETE) {
           entityManager.merge(change.getClaim());
         } else {
