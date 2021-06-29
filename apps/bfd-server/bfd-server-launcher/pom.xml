@@ -38,6 +38,12 @@
 			<artifactId>jetty-annotations</artifactId>
 			<version>${jetty.version}</version>
 		</dependency>
+		<dependency>
+			<!-- Jetty is the embedded web server that this project uses to run WARs. -->
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlets</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
 
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging
