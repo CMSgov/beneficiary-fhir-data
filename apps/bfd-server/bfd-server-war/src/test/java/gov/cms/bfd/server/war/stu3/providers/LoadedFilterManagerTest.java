@@ -65,7 +65,8 @@ public final class LoadedFilterManagerTest {
     Assert.assertEquals(1, filters.size());
 
     // Test the filter
-    final DateRangeParam during1 = new DateRangeParam(preDates[1], preDates[2]);
+    final DateRangeParam during1 =
+        new DateRangeParam(Date.from(preDates[1]), Date.from(preDates[2]));
     Assert.assertTrue(filters.get(0).matchesDateRange(during1));
     Assert.assertEquals(1, filters.get(0).getBatchesCount());
     Assert.assertTrue(filters.get(0).mightContain(SAMPLE_BENE));
@@ -131,21 +132,24 @@ public final class LoadedFilterManagerTest {
     // Setup the manager and test a few lastUpdated ranges
     final LoadedFilterManager filterManagerA = new LoadedFilterManager();
     filterManagerA.set(aFilters, preDates[1], preBatches[2].getCreated());
-    final DateRangeParam beforeRange = new DateRangeParam(preDates[0], preDates[1]);
+    final DateRangeParam beforeRange =
+        new DateRangeParam(Date.from(preDates[0]), Date.from(preDates[1]));
     Assert.assertFalse(filterManagerA.isInBounds(beforeRange));
     Assert.assertFalse(filterManagerA.isResultSetEmpty(SAMPLE_BENE, beforeRange));
-    final DateRangeParam duringRange1 = new DateRangeParam(preDates[2], preDates[3]);
+    final DateRangeParam duringRange1 =
+        new DateRangeParam(Date.from(preDates[2]), Date.from(preDates[3]));
     Assert.assertTrue(filterManagerA.isInBounds(duringRange1));
     Assert.assertFalse(filterManagerA.isResultSetEmpty(SAMPLE_BENE, duringRange1));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(INVALID_BENE, duringRange1));
     final DateRangeParam duringRange2 =
         new DateRangeParam()
-            .setLowerBoundExclusive(preDates[9])
-            .setUpperBoundExclusive(preDates[10]);
+            .setLowerBoundExclusive(Date.from(preDates[9]))
+            .setUpperBoundExclusive(Date.from(preDates[10]));
     Assert.assertTrue(filterManagerA.isInBounds(duringRange2));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(SAMPLE_BENE, duringRange2));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(INVALID_BENE, duringRange2));
-    final DateRangeParam afterRange = new DateRangeParam(preDates[20], preDates[21]);
+    final DateRangeParam afterRange =
+        new DateRangeParam(Date.from(preDates[20]), Date.from(preDates[21]));
     Assert.assertTrue(filterManagerA.isInBounds(afterRange));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(SAMPLE_BENE, afterRange));
   }
@@ -254,7 +258,7 @@ public final class LoadedFilterManagerTest {
       return this;
     }
 
-    MockDb insert(long loadedFileId, Date firstUpdated) {
+    MockDb insert(long loadedFileId, Instant firstUpdated) {
       files.add(new LoadedFile(loadedFileId, "BENEFICIARY", firstUpdated));
       return this;
     }
