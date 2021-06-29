@@ -2,11 +2,16 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
+import gov.cms.bfd.pipeline.rda.grpc.sink.FissClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
+import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.Serializable;
+import java.time.Clock;
 import java.util.Objects;
 
 /**
@@ -18,10 +23,16 @@ public class RdaLoadOptions implements Serializable {
 
   private final RdaLoadJob.Config jobConfig;
   private final GrpcRdaSource.Config grpcConfig;
+  private final IdHasher.Config idHasherConfig;
 
-  public RdaLoadOptions(RdaLoadJob.Config jobConfig, GrpcRdaSource.Config grpcConfig) {
+  public RdaLoadOptions(
+      RdaLoadJob.Config jobConfig,
+      GrpcRdaSource.Config grpcConfig,
+      IdHasher.Config idHasherConfig) {
     this.jobConfig = Preconditions.checkNotNull(jobConfig, "jobConfig is a required parameter");
     this.grpcConfig = Preconditions.checkNotNull(grpcConfig, "grpcConfig is a required parameter");
+    this.idHasherConfig =
+        Preconditions.checkNotNull(idHasherConfig, "idHasherConfig is a required parameter");
   }
 
   /** @return settings for the overall job. */
@@ -40,11 +51,17 @@ public class RdaLoadOptions implements Serializable {
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
    */
-  public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(MetricRegistry appMetrics) {
+  public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(
+      DatabaseOptions databaseOptions, MetricRegistry appMetrics) {
     return new RdaLoadJob<>(
         jobConfig,
-        () -> new GrpcRdaSource<>(grpcConfig, new FissClaimStreamCaller(), appMetrics),
-        () -> new SkeletonRdaSink<>(appMetrics),
+        () ->
+            new GrpcRdaSource<>(
+                grpcConfig,
+                new FissClaimStreamCaller(
+                    new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
+                appMetrics),
+        () -> new FissClaimRdaSink(databaseOptions, appMetrics),
         appMetrics);
   }
 

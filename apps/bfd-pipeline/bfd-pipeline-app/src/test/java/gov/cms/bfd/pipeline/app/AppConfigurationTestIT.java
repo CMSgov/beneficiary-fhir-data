@@ -94,14 +94,18 @@ public final class AppConfigurationTestIT {
     Assert.assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS)),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getHicnHashIterations());
+        testAppConfig
+            .getCcwRifLoadOptions()
+            .getLoadOptions()
+            .getIdHasherConfig()
+            .getHashIterations());
     Assert.assertArrayEquals(
         Hex.decodeHex(
             testAppBuilder
                 .environment()
                 .get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER)
                 .toCharArray()),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getHicnHashPepper());
+        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getIdHasherConfig().getHashPepper());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL),
         testAppConfig.getDatabaseOptions().getDatabaseUrl());

@@ -17,6 +17,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
@@ -538,7 +539,7 @@ public final class RifLoaderIT {
     // Create the processors that will handle each stage of the pipeline.
     MetricRegistry appMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions(dataSource);
+    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
     RifLoader loader = new RifLoader(appMetrics, options, dataSource);
 
     // Link up the pipeline and run it.
@@ -632,13 +633,12 @@ public final class RifLoaderIT {
           BeneficiaryHistory beneficiaryHistoryToFind = (BeneficiaryHistory) record;
           beneficiaryHistoryToFind.setHicn(
               RifLoader.computeHicnHash(
-                  options, RifLoader.createSecretKeyFactory(), beneficiaryHistoryToFind.getHicn()));
+                  new IdHasher(options.getIdHasherConfig()), beneficiaryHistoryToFind.getHicn()));
           beneficiaryHistoryToFind.setMbiHash(
               beneficiaryHistoryToFind.getMedicareBeneficiaryId().isPresent()
                   ? Optional.of(
                       RifLoader.computeMbiHash(
-                          options,
-                          RifLoader.createSecretKeyFactory(),
+                          new IdHasher(options.getIdHasherConfig()),
                           beneficiaryHistoryToFind.getMedicareBeneficiaryId().get()))
                   : Optional.empty());
 

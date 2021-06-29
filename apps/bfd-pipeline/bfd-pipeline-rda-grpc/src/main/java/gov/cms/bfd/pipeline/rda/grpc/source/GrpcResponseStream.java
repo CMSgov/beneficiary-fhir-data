@@ -14,7 +14,7 @@ import java.util.Iterator;
  * @param <TResponse> the type of objects returned by the RPC
  */
 public class GrpcResponseStream<TResponse> {
-  private final ClientCall<?, TResponse> clientCall;
+  private final ClientCall<?, ?> clientCall;
   private final Iterator<TResponse> resultsIterator;
 
   /**
@@ -26,8 +26,7 @@ public class GrpcResponseStream<TResponse> {
    * @param clientCall the ClientCall used to invoke the RPC associated with the iterator
    * @param resultsIterator an Iterator over the response stream
    */
-  public GrpcResponseStream(
-      ClientCall<?, TResponse> clientCall, Iterator<TResponse> resultsIterator) {
+  public GrpcResponseStream(ClientCall<?, ?> clientCall, Iterator<TResponse> resultsIterator) {
     this.clientCall = clientCall;
     this.resultsIterator = resultsIterator;
   }
