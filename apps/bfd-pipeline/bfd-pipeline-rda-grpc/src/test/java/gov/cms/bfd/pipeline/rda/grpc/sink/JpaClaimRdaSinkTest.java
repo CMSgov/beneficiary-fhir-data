@@ -39,6 +39,9 @@ public class JpaClaimRdaSinkTest {
     appMetrics = new MetricRegistry();
     sink = new JpaClaimRdaSink<>(dataSource, entityManagerFactory, entityManager, appMetrics);
     doReturn(transaction).when(entityManager).getTransaction();
+    doReturn(true).when(entityManagerFactory).isOpen();
+    doReturn(true).when(entityManager).isOpen();
+    doReturn(false).when(dataSource).isClosed();
   }
 
   @Test

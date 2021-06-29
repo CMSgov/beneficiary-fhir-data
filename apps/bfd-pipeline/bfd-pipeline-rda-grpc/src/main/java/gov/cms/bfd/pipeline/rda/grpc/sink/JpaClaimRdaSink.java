@@ -77,9 +77,15 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
 
   @Override
   public void close() throws Exception {
-    entityManager.close();
-    entityManagerFactory.close();
-    dataSource.close();
+    if (entityManager != null && entityManager.isOpen()) {
+      entityManager.close();
+    }
+    if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+      entityManagerFactory.close();
+    }
+    if (dataSource != null && !dataSource.isClosed()) {
+      dataSource.close();
+    }
   }
 
   /**
