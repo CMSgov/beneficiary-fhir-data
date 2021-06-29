@@ -83,14 +83,6 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<configuration>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-					</configuration>
-				</plugin>
-				<plugin>
 					<!-- Used to build executable JARs, with all dependencies included in 
 						them. -->
 					<groupId>com.github.chrischristo</groupId>
