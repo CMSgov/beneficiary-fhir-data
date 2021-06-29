@@ -6,6 +6,8 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -48,7 +50,7 @@ public final class RifLoaderTestUtils {
     final DataSource jdbcDataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
     DatabaseSchemaManager.createOrUpdateSchema(jdbcDataSource);
     final EntityManagerFactory entityManagerFactory =
-        RifLoader.createEntityManagerFactory(jdbcDataSource);
+        DatabaseUtils.createEntityManagerFactory(jdbcDataSource);
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -111,10 +113,9 @@ public final class RifLoaderTestUtils {
    * @return the {@link LoadAppOptions} that should be used in tests, which specifies how to connect
    *     to the database server that tests should be run against
    */
-  public static LoadAppOptions getLoadOptions(DataSource dataSource) {
+  public static LoadAppOptions getLoadOptions() {
     return new LoadAppOptions(
-        HICN_HASH_ITERATIONS,
-        HICN_HASH_PEPPER,
+        new IdHasher.Config(HICN_HASH_ITERATIONS, HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         IDEMPOTENCY_REQUIRED);
   }
@@ -128,7 +129,7 @@ public final class RifLoaderTestUtils {
       throw new IllegalStateException("DB DataSource (not URLs) must be used in tests.");
     }
 
-    return RifLoader.createEntityManagerFactory(dataSource);
+    return DatabaseUtils.createEntityManagerFactory(dataSource);
   }
 
   /**

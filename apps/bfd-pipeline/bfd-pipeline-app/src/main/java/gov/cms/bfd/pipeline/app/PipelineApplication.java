@@ -16,7 +16,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
@@ -103,10 +103,10 @@ public final class PipelineApplication {
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
     HikariDataSource dataSource =
-        createDataSource(
+        DatabaseUtils.createDataSource(
             appConfig.getDatabaseOptions(),
-            appConfig.getCcwRifLoadOptions().getLoadOptions().getLoaderThreads(),
-            appMetrics);
+            appMetrics,
+            2 * appConfig.getCcwRifLoadOptions().getLoadOptions().getLoaderThreads());
 
     /*
      * Create the PipelineManager that will be responsible for running and managing the various
@@ -135,6 +135,14 @@ public final class PipelineApplication {
      */
     pipelineManager.registerJob(createCcwRifLoadJob(appMetrics, appConfig, dataSource));
 
+    if (appConfig.getRdaLoadOptions().isPresent()) {
+      pipelineManager.registerJob(
+          appConfig
+              .getRdaLoadOptions()
+              .get()
+              .createFissClaimsLoadJob(appConfig.getDatabaseOptions(), appMetrics));
+    }
+
     /*
      * At this point, we're done here with the main thread. From now on, the PipelineManager's
      * executor service should be the only non-daemon thread running (and whatever it kicks off).
@@ -142,31 +150,6 @@ public final class PipelineApplication {
      * for the PipelineManager to stop running jobs, and then check to see if we should exit
      * normally with 0 or abnormally with a non-0 because a job failed.
      */
-  }
-
-  /**
-   * @param options the {@link DatabaseOptions} to use
-   * @param maxPoolSize the database max pool size
-   * @param metrics the {@link MetricRegistry} to use
-   * @return a {@link HikariDataSource} for the BFD database
-   */
-  static HikariDataSource createDataSource(
-      DatabaseOptions options, int maxPoolSize, MetricRegistry metrics) {
-    HikariDataSource dataSource = new HikariDataSource();
-
-    /*
-     * FIXME The pool size needs to be double the number of loader threads when
-     * idempotent loads are being used. Apparently, the queries need a separate
-     * Connection?
-     */
-    dataSource.setMaximumPoolSize(maxPoolSize);
-    dataSource.setJdbcUrl(options.getDatabaseUrl());
-    dataSource.setUsername(options.getDatabaseUsername());
-    dataSource.setPassword(options.getDatabasePassword());
-    dataSource.setRegisterMbeans(true);
-    dataSource.setMetricRegistry(metrics);
-
-    return dataSource;
   }
 
   /**

@@ -12,7 +12,7 @@
 	<packaging>jar</packaging>
 
 	<description>
-		An application that pulls CCW RIF data via S3, transforms it, and pushes it to 
+		An application that pulls CCW RIF data via S3, transforms it, and pushes it to
 		the Blue Button API backend database server.
 	</description>
 
@@ -24,20 +24,32 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging 
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-rda-grpc</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-pipeline-shared-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<!-- Provides a sane facade for the giant mess of incompatible logging
 				frameworks in Java. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Logback is used as the logging target/backend for SLF4J during runtime: 
+			<!-- Logback is used as the logging target/backend for SLF4J during runtime:
 				all logging events will be sent to it. -->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 
 		<dependency>
-			<!-- Used to monitor the JVM's memory usage, garbage collection, etc. 
+			<!-- Used to monitor the JVM's memory usage, garbage collection, etc.
 				at runtime. -->
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-jvm</artifactId>
@@ -62,7 +74,7 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<!-- HSQL is used in this project's integration tests, which means it 
+			<!-- HSQL is used in this project's integration tests, which means it
 				needs to be baked into the JAR. -->
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -76,7 +88,7 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Used in tests to help with managing asynchronous behavior. Reference: 
+			<!-- Used in tests to help with managing asynchronous behavior. Reference:
 				https://github.com/awaitility/awaitility -->
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
@@ -94,15 +106,15 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<!-- Used to build executable JARs, with all dependencies included in 
+					<!-- Used to build executable JARs, with all dependencies included in
 						them. -->
 					<groupId>com.github.chrischristo</groupId>
 					<artifactId>capsule-maven-plugin</artifactId>
 					<configuration>
 						<appClass>gov.cms.bfd.pipeline.app.PipelineApplication</appClass>
 
-						<!-- Building the "really executable" .x files is tempting, but ultimately 
-							not very useful, as there's no way to pass JVM args into such launchers, 
+						<!-- Building the "really executable" .x files is tempting, but ultimately
+							not very useful, as there's no way to pass JVM args into such launchers,
 							which prevents customizing the heap size at runtime. -->
 						<chmod>false</chmod>
 
@@ -123,7 +135,7 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<!-- Used to build executable JARs, with all dependencies included in 
+				<!-- Used to build executable JARs, with all dependencies included in
 					them. -->
 				<groupId>com.github.chrischristo</groupId>
 				<artifactId>capsule-maven-plugin</artifactId>
@@ -131,6 +143,20 @@
 					<execution>
 						<goals>
 							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Will run the `*IT.java` integration tests in this project, as part
+					of the build. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
 						</goals>
 					</execution>
 				</executions>

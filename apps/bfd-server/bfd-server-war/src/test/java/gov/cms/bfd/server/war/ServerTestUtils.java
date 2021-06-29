@@ -15,6 +15,8 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.FileReader;
@@ -405,14 +407,14 @@ public final class ServerTestUtils {
   /** @return an {@link EntityManagerFactory} for the test DB */
   private static EntityManagerFactory createEntityManagerFactory() {
     DataSource dataSource = createDataSource();
-    return RifLoader.createEntityManagerFactory(dataSource);
+    return DatabaseUtils.createEntityManagerFactory(dataSource);
   }
 
   /** @return the {@link LoadAppOptions} to use with {@link RifLoader} in integration tests */
   public static LoadAppOptions createRifLoaderOptions() {
     return new LoadAppOptions(
-        RifLoaderTestUtils.HICN_HASH_ITERATIONS,
-        RifLoaderTestUtils.HICN_HASH_PEPPER,
+        new IdHasher.Config(
+            RifLoaderTestUtils.HICN_HASH_ITERATIONS, RifLoaderTestUtils.HICN_HASH_PEPPER),
         LoadAppOptions.DEFAULT_LOADER_THREADS,
         RifLoaderTestUtils.IDEMPOTENCY_REQUIRED);
   }

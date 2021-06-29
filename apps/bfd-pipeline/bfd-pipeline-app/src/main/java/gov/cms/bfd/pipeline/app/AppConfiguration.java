@@ -7,11 +7,17 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
+import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob;
+import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
@@ -127,9 +133,61 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_NEW_RELIC_METRIC_PERIOD = "NEW_RELIC_METRIC_PERIOD";
 
+  /**
+   * The name of the environment variable that should be used to indicate whether or not to
+   * configure the RDA GPC data load job. Defaults to false to mean not to load the job.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_ENABLED = "RDA_JOB_ENABLED";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link RdaLoadJob.Config#getRunInterval()} value. This variable's value
+   * should be the frequency at which this job runs in seconds.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS = "RDA_JOB_INTERVAL_SECONDS";
+
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
+  public static final int DEFAULT_RDA_JOB_INTERVAL_SECONDS = 300;
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link RdaLoadJob.Config#getBatchSize()} value.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_BATCH_SIZE = "RDA_JOB_BATCH_SIZE";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_BATCH_SIZE}. */
+  public static final int DEFAULT_RDA_JOB_BATCH_SIZE = 1;
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getHost()} ()} value.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_HOST = "RDA_GRPC_HOST";
+
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_HOST}. */
+  public static final String DEFAULT_RDA_GRPC_HOST = "localhost";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getPort()} ()} value.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "RDA_GRPC_PORT";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_PORT}. */
+  public static final int DEFAULT_RDA_GRPC_PORT = 443;
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMaxIdle()} ()} value. This variable value
+   * should be in seconds.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "RDA_GRPC_MAX_IDLE_SECONDS";
+
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
+  public static final int DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS = Integer.MAX_VALUE;
+
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
   private final CcwRifLoadOptions ccwRifLoadOptions;
+  // this can be null if the RDA job is not configured, Optional is not Serializable
+  @Nullable private final RdaLoadOptions rdaLoadOptions;
 
   /**
    * Constructs a new {@link AppConfiguration} instance.
@@ -137,14 +195,17 @@ public final class AppConfiguration implements Serializable {
    * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
+   * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
    */
   public AppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
-      CcwRifLoadOptions ccwRifLoadOptions) {
+      CcwRifLoadOptions ccwRifLoadOptions,
+      RdaLoadOptions rdaLoadOptions) {
     this.metricOptions = metricOptions;
     this.databaseOptions = databaseOptions;
     this.ccwRifLoadOptions = ccwRifLoadOptions;
+    this.rdaLoadOptions = rdaLoadOptions;
   }
 
   /** @return the {@link MetricOptions} that the application will use */
@@ -162,6 +223,11 @@ public final class AppConfiguration implements Serializable {
     return ccwRifLoadOptions;
   }
 
+  /** @return the {@link RdaLoadOptions} that the application will use */
+  public Optional<RdaLoadOptions> getRdaLoadOptions() {
+    return Optional.ofNullable(rdaLoadOptions);
+  }
+
   /** @see java.lang.Object#toString() */
   @Override
   public String toString() {
@@ -172,6 +238,8 @@ public final class AppConfiguration implements Serializable {
     builder.append(databaseOptions);
     builder.append(", ccwRifLoadOptions=");
     builder.append(ccwRifLoadOptions);
+    builder.append(", rdaLoadOptions=");
+    builder.append(rdaLoadOptions);
     builder.append("]");
     return builder.toString();
   }
@@ -354,13 +422,43 @@ public final class AppConfiguration implements Serializable {
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     LoadAppOptions loadOptions =
         new LoadAppOptions(
-            hicnHashIterations,
-            hicnHashPepper,
+            new IdHasher.Config(hicnHashIterations, hicnHashPepper),
             loaderThreads,
             idempotencyRequired.get().booleanValue());
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
 
-    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions);
+    RdaLoadOptions rdaLoadOptions =
+        readRdaLoadOptionsFromEnvironmentVariables(loadOptions.getIdHasherConfig());
+    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+  }
+
+  /**
+   * Loads the configuration settings related to the RDA gRPC API data load jobs. Ths job and most
+   * of its settings are optional. Because the API may exist in some environments but not others a
+   * separate environment variable indicates whether or not the settings should be loaded.
+   *
+   * @return a valid RdaLoadOptions if job is configured, otherwise null
+   */
+  @Nullable
+  static RdaLoadOptions readRdaLoadOptionsFromEnvironmentVariables(IdHasher.Config idHasherConfig) {
+    final boolean enabled = parseBoolean(ENV_VAR_KEY_RDA_JOB_ENABLED).orElse(false);
+    if (!enabled) {
+      return null;
+    }
+    final RdaLoadJob.Config jobConfig =
+        new RdaLoadJob.Config(
+            Duration.ofSeconds(
+                getIntOrDefault(
+                    ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, DEFAULT_RDA_JOB_INTERVAL_SECONDS)),
+            getIntOrDefault(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, DEFAULT_RDA_JOB_BATCH_SIZE));
+    final GrpcRdaSource.Config grpcConfig =
+        new GrpcRdaSource.Config(
+            getStringOrDefault(ENV_VAR_KEY_RDA_GRPC_HOST, DEFAULT_RDA_GRPC_HOST),
+            getIntOrDefault(ENV_VAR_KEY_RDA_GRPC_PORT, DEFAULT_RDA_GRPC_PORT),
+            Duration.ofSeconds(
+                getIntOrDefault(
+                    ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
+    return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
   }
 
   /**
@@ -374,5 +472,41 @@ public final class AppConfiguration implements Serializable {
     if ("true".equalsIgnoreCase(booleanText)) return Optional.of(true);
     else if ("false".equalsIgnoreCase(booleanText)) return Optional.of(false);
     else return Optional.empty();
+  }
+
+  /**
+   * Retrieve configuration value with the given name. Returns the specified default value when
+   * there is no configuration value matching the key. Empty string is considered a valid value so
+   * it does not trigger return of the default.
+   *
+   * @param key key that identifies the particular configuration value.
+   * @param defaultValue default value if there is no configuration value matching the key
+   * @return either the configuration value or the default if the value was null
+   */
+  static String getStringOrDefault(String key, String defaultValue) {
+    String value = System.getenv(key);
+    return value != null ? value : defaultValue;
+  }
+
+  /**
+   * Retrieve integer configuration value with the given name. Returns the specified default value
+   * when there is no configuration value matching the key.
+   *
+   * @param key key that identifies the particular configuration value.
+   * @param defaultValue default value if there is no configuration value matching the key
+   * @return either the configuration value or the default
+   * @throws AppConfigurationException if the value is not an integer
+   */
+  static int getIntOrDefault(String key, int defaultValue) {
+    try {
+      String strValue = System.getenv(key);
+      return strValue != null ? Integer.parseInt(strValue) : defaultValue;
+    } catch (NumberFormatException ex) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid environment variable value, expected a valid integer: envvar=%s error='%s'",
+              key, ex.getMessage()),
+          ex);
+    }
   }
 }
