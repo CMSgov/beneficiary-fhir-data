@@ -1510,7 +1510,10 @@ public final class TransformerUtilsV2 {
             .orElse(transactionTime);
     bundle
         .getMeta()
-        .setLastUpdated(transactionTime.isAfter(maxBundleDate) ? Date.from(transactionTime) : Date.from(maxBundleDate));
+        .setLastUpdated(
+            transactionTime.isAfter(maxBundleDate)
+                ? Date.from(transactionTime)
+                : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
     return bundle;
   }
@@ -1547,7 +1550,10 @@ public final class TransformerUtilsV2 {
             .orElse(transactionTime);
     bundle
         .getMeta()
-        .setLastUpdated(transactionTime.isAfter(maxBundleDate) ? Date.from(transactionTime) : Date.from(maxBundleDate));
+        .setLastUpdated(
+            transactionTime.isAfter(maxBundleDate)
+                ? Date.from(transactionTime)
+                : Date.from(maxBundleDate));
     return bundle;
   }
 

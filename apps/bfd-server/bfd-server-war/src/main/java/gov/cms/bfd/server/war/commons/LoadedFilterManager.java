@@ -167,7 +167,9 @@ public class LoadedFilterManager {
         if (filter.mightContain(beneficiaryId)) {
           return false;
         }
-      } else if (filter.getLastUpdated().isBefore(lastUpdatedRange.getLowerBoundAsInstant().toInstant())) {
+      } else if (filter
+          .getLastUpdated()
+          .isBefore(lastUpdatedRange.getLowerBoundAsInstant().toInstant())) {
         // filters are sorted in descending by lastUpdated time, so we can exit early from this
         // loop
         return true;

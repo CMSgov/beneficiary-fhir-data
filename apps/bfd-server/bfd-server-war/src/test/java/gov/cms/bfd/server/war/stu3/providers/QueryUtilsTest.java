@@ -22,17 +22,24 @@ public class QueryUtilsTest {
     Date upperDate = Date.from(Instant.now().plusSeconds(1000));
 
     Assert.assertTrue(
-        QueryUtils.isInRange(upperInstant, new DateRangeParam().setLowerBoundExclusive(middleDate)));
+        QueryUtils.isInRange(
+            upperInstant, new DateRangeParam().setLowerBoundExclusive(middleDate)));
     Assert.assertFalse(
-        QueryUtils.isInRange(lowerInstant, new DateRangeParam().setLowerBoundInclusive(middleDate)));
+        QueryUtils.isInRange(
+            lowerInstant, new DateRangeParam().setLowerBoundInclusive(middleDate)));
     Assert.assertTrue(
-        QueryUtils.isInRange(lowerInstant, new DateRangeParam().setUpperBoundExclusive(middleDate)));
+        QueryUtils.isInRange(
+            lowerInstant, new DateRangeParam().setUpperBoundExclusive(middleDate)));
     Assert.assertFalse(
-        QueryUtils.isInRange(upperInstant, new DateRangeParam().setUpperBoundInclusive(middleDate)));
+        QueryUtils.isInRange(
+            upperInstant, new DateRangeParam().setUpperBoundInclusive(middleDate)));
 
-    Assert.assertTrue(QueryUtils.isInRange(middleInstant, new DateRangeParam(lowerDate, upperDate)));
-    Assert.assertFalse(QueryUtils.isInRange(lowerInstant, new DateRangeParam(middleDate, upperDate)));
-    Assert.assertFalse(QueryUtils.isInRange(upperInstant, new DateRangeParam(lowerDate, middleDate)));
+    Assert.assertTrue(
+        QueryUtils.isInRange(middleInstant, new DateRangeParam(lowerDate, upperDate)));
+    Assert.assertFalse(
+        QueryUtils.isInRange(lowerInstant, new DateRangeParam(middleDate, upperDate)));
+    Assert.assertFalse(
+        QueryUtils.isInRange(upperInstant, new DateRangeParam(lowerDate, middleDate)));
   }
 
   @Test

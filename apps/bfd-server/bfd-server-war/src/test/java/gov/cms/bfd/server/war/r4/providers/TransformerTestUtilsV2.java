@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -325,8 +324,7 @@ public final class TransformerTestUtilsV2 {
    * @param actual the actual {@link BaseDateTimeType} to verify
    */
   static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
-    Assert.assertEquals(
-      TransformerUtilsV2.convertToDate(expected), actual.getValue());
+    Assert.assertEquals(TransformerUtilsV2.convertToDate(expected), actual.getValue());
     Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
   }
 

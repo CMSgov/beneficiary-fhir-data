@@ -87,11 +87,13 @@ public final class LoadedFilterManagerIT {
 
           // Should have many filters
           final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
-          Assert.assertTrue(filterManager.getFirstBatchCreated().getEpochSecond() <= afterLoad.getTime());
+          Assert.assertTrue(
+              filterManager.getFirstBatchCreated().getEpochSecond() <= afterLoad.getTime());
           Assert.assertTrue(
               filterManager.getLastBatchCreated().getEpochSecond() <= afterRefresh.getTime());
           Assert.assertTrue(
-              filterManager.getTransactionTime().getEpochSecond() > initialTransactionTime.getEpochSecond());
+              filterManager.getTransactionTime().getEpochSecond()
+                  > initialTransactionTime.getEpochSecond());
           Assert.assertTrue(afterFilters.size() > 1);
         });
   }

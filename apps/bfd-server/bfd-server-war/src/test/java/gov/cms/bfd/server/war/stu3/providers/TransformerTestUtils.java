@@ -400,8 +400,7 @@ final class TransformerTestUtils {
    * @param actual the actual {@link BaseDateTimeType} to verify
    */
   static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
-    Assert.assertEquals(
-      TransformerUtils.convertToDate(expected), actual.getValue());
+    Assert.assertEquals(TransformerUtils.convertToDate(expected), actual.getValue());
     Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
   }
 
