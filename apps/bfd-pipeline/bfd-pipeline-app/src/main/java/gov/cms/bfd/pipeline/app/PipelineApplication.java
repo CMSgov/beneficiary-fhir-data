@@ -16,8 +16,11 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
@@ -102,9 +105,10 @@ public final class PipelineApplication {
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
+    final DatabaseOptions databaseOptions = appConfig.getDatabaseOptions();
     HikariDataSource dataSource =
         DatabaseUtils.createDataSource(
-            appConfig.getDatabaseOptions(),
+            databaseOptions,
             appMetrics,
             2 * appConfig.getCcwRifLoadOptions().getLoadOptions().getLoaderThreads());
 
@@ -136,11 +140,13 @@ public final class PipelineApplication {
     pipelineManager.registerJob(createCcwRifLoadJob(appMetrics, appConfig, dataSource));
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
-      pipelineManager.registerJob(
-          appConfig
-              .getRdaLoadOptions()
-              .get()
-              .createFissClaimsLoadJob(appConfig.getDatabaseOptions(), appMetrics));
+      final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
+      final PipelineJob<NullPipelineJobArguments> fissLoadJob =
+          rdaLoadOptions.createFissClaimsLoadJob(databaseOptions, appMetrics);
+      final PipelineJob<NullPipelineJobArguments> mcsLoadJob =
+          rdaLoadOptions.createMcsClaimsLoadJob(databaseOptions, appMetrics);
+      pipelineManager.registerJob(fissLoadJob);
+      pipelineManager.registerJob(mcsLoadJob);
     }
 
     /*
