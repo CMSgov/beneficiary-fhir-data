@@ -8,9 +8,12 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,7 +32,7 @@ public final class LoadedFilterManagerTest {
   private static final String SAMPLE_BENE = "567834";
   private static final String INVALID_BENE = "1";
   private static final LoadedBatch[] preBatches = new LoadedBatch[8];
-  private static final Date[] preDates = new Date[preBatches.length * 5];
+  private static final Instant[] preDates = new Instant[preBatches.length * 5];
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
@@ -38,7 +41,7 @@ public final class LoadedFilterManagerTest {
     // Create a few time stamps to play with
     Instant now = Instant.now().truncatedTo(ChronoUnit.DAYS);
     for (int i = 0; i < preDates.length; i++) {
-      preDates[i] = Date.from(now.plusSeconds(i));
+      preDates[i] = (now.plusSeconds(i));
     }
     List<String> beneficiaries = Collections.singletonList(SAMPLE_BENE);
     for (int i = 0; i < preBatches.length; i++) {
@@ -273,11 +276,11 @@ public final class LoadedFilterManagerTest {
       ArrayList<LoadedFilterManager.LoadedTuple> tuples = new ArrayList<>();
       files.forEach(
           file -> {
-            Optional<Date> lastUpdated =
+            Optional<Instant> lastUpdated =
                 batches.stream()
                     .filter(b -> b.getLoadedFileId() == file.getLoadedFileId())
                     .map(LoadedBatch::getCreated)
-                    .reduce((a, b) -> a.after(b) ? a : b);
+                    .reduce((a, b) -> a.isAfter(b) ? a : b);
             lastUpdated.ifPresent(
                 updated ->
                     tuples.add(

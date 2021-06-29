@@ -43,7 +43,7 @@ public final class LoadedFilterManagerIT {
           // After init manager should have an empty filter list but a valid transaction time
           Assert.assertTrue(
               "Expect transactionTime be before now",
-              filterManager.getTransactionTime().before(new Date()));
+              filterManager.getTransactionTime().isBefore(Instant.now()));
           final List<LoadedFileFilter> beforeFilters = filterManager.getFilters();
           Assert.assertEquals(0, beforeFilters.size());
           final DateRangeParam testBound =
@@ -57,7 +57,7 @@ public final class LoadedFilterManagerIT {
           // Should have zero filters
           Assert.assertTrue(
               "Expect transactionTime be before now",
-              filterManager.getTransactionTime().before(new Date()));
+              filterManager.getTransactionTime().isBefore(Instant.now()));
           final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
           Assert.assertEquals(0, afterFilters.size());
           Assert.assertFalse(filterManager.isInBounds(testBound));
@@ -72,8 +72,8 @@ public final class LoadedFilterManagerIT {
           final LoadedFilterManager filterManager = new LoadedFilterManager();
           filterManager.setEntityManager(entityManager);
           filterManager.init();
-          final Date initialTransactionTime = filterManager.getTransactionTime();
-          Assert.assertTrue(initialTransactionTime.before(Date.from(Instant.now().plusMillis(1))));
+          final Instant initialTransactionTime = filterManager.getTransactionTime();
+          Assert.assertTrue(initialTransactionTime.isBefore((Instant.now().plusMillis(1))));
           loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
           Date afterLoad = new Date();
 
@@ -87,11 +87,11 @@ public final class LoadedFilterManagerIT {
 
           // Should have many filters
           final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
-          Assert.assertTrue(filterManager.getFirstBatchCreated().getTime() <= afterLoad.getTime());
+          Assert.assertTrue(filterManager.getFirstBatchCreated().getEpochSecond() <= afterLoad.getTime());
           Assert.assertTrue(
-              filterManager.getLastBatchCreated().getTime() <= afterRefresh.getTime());
+              filterManager.getLastBatchCreated().getEpochSecond() <= afterRefresh.getTime());
           Assert.assertTrue(
-              filterManager.getTransactionTime().getTime() > initialTransactionTime.getTime());
+              filterManager.getTransactionTime().getEpochSecond() > initialTransactionTime.getEpochSecond());
           Assert.assertTrue(afterFilters.size() > 1);
         });
   }

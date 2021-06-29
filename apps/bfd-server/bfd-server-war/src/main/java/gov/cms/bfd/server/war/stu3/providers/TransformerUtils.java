@@ -59,6 +59,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -672,13 +673,13 @@ public final class TransformerUtils {
    * @param localDate the {@link LocalDate} to convert
    * @return a {@link Date} version of the specified {@link LocalDate}
    */
-  static Instant convertToDate(LocalDate localDate) {
+  static Date convertToDate(LocalDate localDate) {
     /*
      * We use the system TZ here to ensure that the date doesn't shift at all, as FHIR will just use
      * this as an unzoned Date (I think, and if not, it's almost certainly using the same TZ as this
      * system).
      */
-    return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+    return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
   }
 
   /**
@@ -860,8 +861,8 @@ public final class TransformerUtils {
     Extension extension = null;
     try {
       String stringDate = dateYear.get().toString() + "-01-01";
-      Instant date1 = DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(stringDate);
-      DateType dateYearValue = new DateType(date1, TemporalPrecisionEnum.YEAR);
+      String date1 = DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(stringDate).toString();
+      DateType dateYearValue = new DateType(date1);
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
 
@@ -1300,7 +1301,7 @@ public final class TransformerUtils {
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
   static void setPeriodEnd(Period period, LocalDate date) {
-    period.setEnd(date.atStartOfDay(ZoneId.systemDefault()).toInstant(), TemporalPrecisionEnum.DAY);
+    period.setEnd(convertToDate(date), TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -1308,8 +1309,7 @@ public final class TransformerUtils {
    * @param date the {@link LocalDate} to set the {@link Period#getStart()} value with/to
    */
   static void setPeriodStart(Period period, LocalDate date) {
-    period.setStart(
-        date.atStartOfDay(ZoneId.systemDefault()).toInstant(), TemporalPrecisionEnum.DAY);
+    period.setStart(convertToDate(date), TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -3167,13 +3167,13 @@ public final class TransformerUtils {
      */
     Instant maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
+            .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
             .max(Instant::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
-        .setLastUpdated(transactionTime.isAfter(maxBundleDate) ? transactionTime : maxBundleDate);
+        .setLastUpdated(transactionTime.isAfter(maxBundleDate) ? Date.from(transactionTime) : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
     return bundle;
   }
@@ -3204,13 +3204,13 @@ public final class TransformerUtils {
      */
     Instant maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
+            .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
             .max(Instant::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
-        .setLastUpdated(transactionTime.isAfter(maxBundleDate) ? transactionTime : maxBundleDate);
+        .setLastUpdated(transactionTime.isAfter(maxBundleDate) ? Date.from(transactionTime) : Date.from(maxBundleDate));
     return bundle;
   }
 
@@ -3278,7 +3278,7 @@ public final class TransformerUtils {
   public static void setLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     resource
         .getMeta()
-        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
+        .setLastUpdated(Date.from(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED)));
   }
 
   /**
@@ -3291,9 +3291,9 @@ public final class TransformerUtils {
   public static void updateMaxLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     lastUpdated.ifPresent(
         newDate -> {
-          Instant currentDate = resource.getMeta().getLastUpdated();
+          Instant currentDate = resource.getMeta().getLastUpdated().toInstant();
           if (currentDate != null && newDate.isAfter(currentDate)) {
-            resource.getMeta().setLastUpdated(newDate);
+            resource.getMeta().setLastUpdated(Date.from(newDate));
           }
         });
   }

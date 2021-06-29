@@ -197,8 +197,7 @@ public final class OutpatientClaimTransformerTest {
           claim.getProcedure1Code().get(),
           eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
       Assert.assertEquals(
-          Date.from(
-              claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+        claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant(),
           eob.getProcedure().get(0).getDate());
     }
 

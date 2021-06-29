@@ -20,8 +20,8 @@ public class QueryUtils {
   public static Predicate createLastUpdatedPredicate(
       CriteriaBuilder cb, Root<?> root, DateRangeParam range) {
     final Path<Instant> lastUpdatedPath = root.get("lastUpdated");
-    final Instant lowerBound = range.getLowerBoundAsInstant();
-    final Instant upperBound = range.getUpperBoundAsInstant();
+    final Instant lowerBound = range.getLowerBoundAsInstant().toInstant();
+    final Instant upperBound = range.getUpperBoundAsInstant().toInstant();
     Predicate lowerBoundPredicate;
     Predicate upperBoundPredicate;
 
@@ -81,7 +81,7 @@ public class QueryUtils {
     final long lastUpdatedMillis = lastUpdated == null ? 0L : lastUpdated.toEpochMilli();
 
     if (range.getLowerBound() != null) {
-      final long lowerBoundMillis = range.getLowerBoundAsInstant().toEpochMilli();
+      final long lowerBoundMillis = range.getLowerBoundAsInstant().toInstant().toEpochMilli();
       switch (range.getLowerBound().getPrefix()) {
         case GREATERTHAN:
           if (lastUpdatedMillis <= lowerBoundMillis) {

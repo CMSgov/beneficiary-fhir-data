@@ -21,8 +21,8 @@ public final class LoadedFilterTest {
         new LoadedFileFilter(
             1,
             0,
-            Date.from(Instant.now().minusSeconds(10)),
-            Date.from(Instant.now().minusSeconds(5)),
+            Instant.now().minusSeconds(10),
+            Instant.now().minusSeconds(5),
             emptyFilter);
 
     Assert.assertTrue(
@@ -93,8 +93,8 @@ public final class LoadedFilterTest {
         new LoadedFileFilter(
             1,
             1,
-            Date.from(Instant.now().minusSeconds(10)),
-            Date.from(Instant.now().minusSeconds(5)),
+            Instant.now().minusSeconds(10),
+            Instant.now().minusSeconds(5),
             smallFilter);
 
     Assert.assertTrue("Expected to contain this", filter1.mightContain("1"));

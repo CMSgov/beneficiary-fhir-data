@@ -11,6 +11,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -61,7 +62,7 @@ public final class HospiceClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
     createEOB(Optional.of(false));
   }
 

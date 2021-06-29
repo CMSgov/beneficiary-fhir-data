@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.Instant;
+import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,28 +14,31 @@ public class QueryUtilsTest {
      * Dev Note: There might be a bug in DateRangeParam and DateParam where it rounds a value that
      * is set a millisecond up or down. It makes it hard to test at the edges of a range.
      */
-    Instant lowerDate = Instant.now();
-    Instant middleDate = Instant.now().plusSeconds(500);
-    Instant upperDate = Instant.now().plusSeconds(1000);
+    Instant lowerInstant = Instant.now();
+    Date lowerDate = new Date();
+    Instant middleInstant = Instant.now().plusSeconds(500);
+    Date middleDate = Date.from(Instant.now().plusSeconds(500));
+    Instant upperInstant = Instant.now().plusSeconds(1000);
+    Date upperDate = Date.from(Instant.now().plusSeconds(1000));
 
     Assert.assertTrue(
-        QueryUtils.isInRange(upperDate, new DateRangeParam().setLowerBoundExclusive(middleDate)));
+        QueryUtils.isInRange(upperInstant, new DateRangeParam().setLowerBoundExclusive(middleDate)));
     Assert.assertFalse(
-        QueryUtils.isInRange(lowerDate, new DateRangeParam().setLowerBoundInclusive(middleDate)));
+        QueryUtils.isInRange(lowerInstant, new DateRangeParam().setLowerBoundInclusive(middleDate)));
     Assert.assertTrue(
-        QueryUtils.isInRange(lowerDate, new DateRangeParam().setUpperBoundExclusive(middleDate)));
+        QueryUtils.isInRange(lowerInstant, new DateRangeParam().setUpperBoundExclusive(middleDate)));
     Assert.assertFalse(
-        QueryUtils.isInRange(upperDate, new DateRangeParam().setUpperBoundInclusive(middleDate)));
+        QueryUtils.isInRange(upperInstant, new DateRangeParam().setUpperBoundInclusive(middleDate)));
 
-    Assert.assertTrue(QueryUtils.isInRange(middleDate, new DateRangeParam(lowerDate, upperDate)));
-    Assert.assertFalse(QueryUtils.isInRange(lowerDate, new DateRangeParam(middleDate, upperDate)));
-    Assert.assertFalse(QueryUtils.isInRange(upperDate, new DateRangeParam(lowerDate, middleDate)));
+    Assert.assertTrue(QueryUtils.isInRange(middleInstant, new DateRangeParam(lowerDate, upperDate)));
+    Assert.assertFalse(QueryUtils.isInRange(lowerInstant, new DateRangeParam(middleDate, upperDate)));
+    Assert.assertFalse(QueryUtils.isInRange(upperInstant, new DateRangeParam(lowerDate, middleDate)));
   }
 
   @Test
   public void testInRangeWithNullLastUpdate() {
-    Instant lowerDate = Instant.now();
-    Instant upperDate = Instant.now().plusSeconds(1000);
+    Date lowerDate = new Date();
+    Date upperDate = Date.from(Instant.now().plusSeconds(1000));
 
     Assert.assertFalse(
         QueryUtils.isInRange(null, new DateRangeParam().setLowerBoundExclusive(lowerDate)));

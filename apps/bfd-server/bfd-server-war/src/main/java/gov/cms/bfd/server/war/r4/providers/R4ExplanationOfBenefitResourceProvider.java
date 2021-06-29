@@ -427,8 +427,8 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     }
 
     if (claimEntities != null && serviceDate != null && !serviceDate.isEmpty()) {
-      final Instant lowerBound = serviceDate.getLowerBoundAsInstant();
-      final Instant upperBound = serviceDate.getUpperBoundAsInstant();
+      final Instant lowerBound = serviceDate.getLowerBoundAsInstant().toInstant();
+      final Instant upperBound = serviceDate.getUpperBoundAsInstant().toInstant();
       final java.util.function.Predicate<LocalDate> lowerBoundCheck =
           lowerBound == null
               ? (date) -> true

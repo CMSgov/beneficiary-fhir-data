@@ -326,7 +326,7 @@ public final class TransformerTestUtilsV2 {
    */
   static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
     Assert.assertEquals(
-        Date.from(expected.atStartOfDay(ZoneId.systemDefault()).toInstant()), actual.getValue());
+      TransformerUtilsV2.convertToDate(expected), actual.getValue());
     Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
   }
 
@@ -935,7 +935,7 @@ public final class TransformerTestUtilsV2 {
    * @param actualResource that is being created by the transform
    */
   static void assertLastUpdatedEquals(
-      Optional<Date> expectedDateTime, IAnyResource actualResource) {
+      Optional<Instant> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
       /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
        * use one instance of an IT DB with the same resources for most tests.
@@ -943,7 +943,7 @@ public final class TransformerTestUtilsV2 {
        * because another test over wrote the same resource.
        * To handle this case, dates that are within a second of each other match.
        */
-      final Instant expectedLastUpdated = expectedDateTime.get().toInstant();
+      final Instant expectedLastUpdated = expectedDateTime.get();
       final Instant actualLastUpdated = actualResource.getMeta().getLastUpdated().toInstant();
       final Duration diff = Duration.between(expectedLastUpdated, actualLastUpdated);
       Assert.assertTrue(
