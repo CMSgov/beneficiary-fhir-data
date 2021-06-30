@@ -143,11 +143,11 @@ public final class PipelineApplicationState implements AutoCloseable {
   /** @see java.lang.AutoCloseable#close() */
   @Override
   public void close() throws Exception {
-    if (!pooledDataSource.isClosed()) {
-      pooledDataSource.close();
-    }
     if (entityManagerFactory.isOpen()) {
       entityManagerFactory.close();
+    }
+    if (!pooledDataSource.isClosed()) {
+      pooledDataSource.close();
     }
   }
 }
