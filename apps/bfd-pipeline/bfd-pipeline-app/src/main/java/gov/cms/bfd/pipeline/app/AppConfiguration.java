@@ -344,6 +344,24 @@ public final class AppConfiguration implements Serializable {
               "Missing value for configuration environment variable '%s'.",
               ENV_VAR_KEY_DATABASE_PASSWORD));
 
+    String loaderThreadsText = System.getenv(ENV_VAR_KEY_LOADER_THREADS);
+    if (loaderThreadsText == null || loaderThreadsText.isEmpty())
+      throw new AppConfigurationException(
+          String.format(
+              "Missing value for configuration environment variable '%s'.",
+              ENV_VAR_KEY_LOADER_THREADS));
+    int loaderThreads;
+    try {
+      loaderThreads = Integer.parseInt(loaderThreadsText);
+    } catch (NumberFormatException e) {
+      loaderThreads = -1;
+    }
+    if (loaderThreads < 1)
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              ENV_VAR_KEY_LOADER_THREADS, loaderThreadsText));
+
     String databaseMaxPoolSizeText = System.getenv(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
     Optional<Integer> databaseMaxPoolSizeOption;
     if (databaseMaxPoolSizeText == null || databaseMaxPoolSizeText.isEmpty()) {
@@ -366,24 +384,6 @@ public final class AppConfiguration implements Serializable {
      * when idempotent loads are being used. Apparently, the queries need a separate Connection?
      */
     Integer maxPoolSize = databaseMaxPoolSizeOption.orElse(loaderThreads * 2);
-
-    String loaderThreadsText = System.getenv(ENV_VAR_KEY_LOADER_THREADS);
-    if (loaderThreadsText == null || loaderThreadsText.isEmpty())
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_LOADER_THREADS));
-    int loaderThreads;
-    try {
-      loaderThreads = Integer.parseInt(loaderThreadsText);
-    } catch (NumberFormatException e) {
-      loaderThreads = -1;
-    }
-    if (loaderThreads < 1)
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              ENV_VAR_KEY_LOADER_THREADS, loaderThreadsText));
 
     String idempotencyRequiredText = System.getenv(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
     if (idempotencyRequiredText == null || idempotencyRequiredText.isEmpty())
