@@ -10,11 +10,13 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
+import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
@@ -42,6 +44,7 @@ public final class PipelineApplication {
    * This {@link System#exit(int)} value should be used when the application exits due to an
    * unhandled exception.
    */
+  // TODO rename this to EXIT_CODE_JOB_FAILED
   static final int EXIT_CODE_MONITOR_ERROR = PipelineManager.EXIT_CODE_MONITOR_ERROR;
 
   /**
@@ -99,6 +102,12 @@ public final class PipelineApplication {
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
+    HikariDataSource dataSource =
+        DatabaseUtils.createDataSource(
+            appConfig.getDatabaseOptions(),
+            appMetrics,
+            2 * appConfig.getCcwRifLoadOptions().getLoadOptions().getLoaderThreads());
+
     /*
      * Create the PipelineManager that will be responsible for running and managing the various
      * jobs.
@@ -112,7 +121,7 @@ public final class PipelineApplication {
      * Register and wait for the database schema job to run, so that we don't have to worry about
      * declaring it as a dependency (since it is for pretty much everything right now).
      */
-    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(appConfig.getDatabaseOptions()));
+    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(dataSource));
     PipelineJobRecord<NullPipelineJobArguments> dbSchemaJobRecord =
         jobRecordStore.submitPendingJob(DatabaseSchemaUpdateJob.JOB_TYPE, null);
     try {
@@ -124,14 +133,22 @@ public final class PipelineApplication {
     /*
      * Create and register the other jobs.
      */
-    pipelineManager.registerJob(createCcwRifLoadJob(appMetrics, appConfig));
+    pipelineManager.registerJob(createCcwRifLoadJob(appMetrics, appConfig, dataSource));
+
+    if (appConfig.getRdaLoadOptions().isPresent()) {
+      pipelineManager.registerJob(
+          appConfig
+              .getRdaLoadOptions()
+              .get()
+              .createFissClaimsLoadJob(appConfig.getDatabaseOptions(), appMetrics));
+    }
 
     /*
-     * At this point, we're done here with the main thread. From now on, the
-     * PipelineManager's executor service should be the only non-daemon
-     * thread running (and whatever it kicks off). Once/if that thread
-     * stops, the application will run all registered shutdown hooks and
-     * exit.
+     * At this point, we're done here with the main thread. From now on, the PipelineManager's
+     * executor service should be the only non-daemon thread running (and whatever it kicks off).
+     * Once/if that thread stops, the application will run all registered shutdown hooks and Wait
+     * for the PipelineManager to stop running jobs, and then check to see if we should exit
+     * normally with 0 or abnormally with a non-0 because a job failed.
      */
   }
 
@@ -141,7 +158,7 @@ public final class PipelineApplication {
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private static CcwRifLoadJob createCcwRifLoadJob(
-      MetricRegistry appMetrics, AppConfiguration appConfig) {
+      MetricRegistry appMetrics, AppConfiguration appConfig, HikariDataSource dataSource) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
@@ -150,7 +167,7 @@ public final class PipelineApplication {
         new S3TaskManager(appMetrics, appConfig.getCcwRifLoadOptions().getExtractionOptions());
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader =
-        new RifLoader(appMetrics, appConfig.getCcwRifLoadOptions().getLoadOptions());
+        new RifLoader(appMetrics, appConfig.getCcwRifLoadOptions().getLoadOptions(), dataSource);
 
     /*
      * Create the DataSetMonitorListener that will glue those stages together and run them all for

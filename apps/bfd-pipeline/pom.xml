@@ -47,6 +47,12 @@
 				<artifactId>bfd-model-rif-samples</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+        <!-- Just useful. -->
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+       <version>24.1.1-jre</version>
+   </dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -73,14 +79,6 @@
 					<configuration>
 						<overWriteReleases>false</overWriteReleases>
 						<overWriteSnapshots>true</overWriteSnapshots>
-					</configuration>
-				</plugin>
-				<plugin>
-					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<configuration>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					</configuration>
 				</plugin>
 				<plugin>

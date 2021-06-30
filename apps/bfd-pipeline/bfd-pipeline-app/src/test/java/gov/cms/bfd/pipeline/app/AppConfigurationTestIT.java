@@ -94,38 +94,27 @@ public final class AppConfigurationTestIT {
     Assert.assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS)),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getHicnHashIterations());
+        testAppConfig
+            .getCcwRifLoadOptions()
+            .getLoadOptions()
+            .getIdHasherConfig()
+            .getHashIterations());
     Assert.assertArrayEquals(
         Hex.decodeHex(
             testAppBuilder
                 .environment()
                 .get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER)
                 .toCharArray()),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getHicnHashPepper());
+        testAppConfig.getCcwRifLoadOptions().getLoadOptions().getIdHasherConfig().getHashPepper());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_URL),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabaseUrl());
+        testAppConfig.getDatabaseOptions().getDatabaseUrl());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_USERNAME),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabaseUsername());
-    Assert.assertArrayEquals(
-        testAppBuilder
-            .environment()
-            .get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD)
-            .toCharArray(),
-        testAppConfig
-            .getCcwRifLoadOptions()
-            .getLoadOptions()
-            .getDatabaseOptions()
-            .getDatabasePassword());
+        testAppConfig.getDatabaseOptions().getDatabaseUsername());
+    Assert.assertEquals(
+        testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_DATABASE_PASSWORD),
+        testAppConfig.getDatabaseOptions().getDatabasePassword());
     Assert.assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),

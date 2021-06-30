@@ -132,7 +132,7 @@
 				<!-- Used as a logging backed/target for SLF4J. -->
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.1.3</version>
+				<version>1.2.3</version>
 			</dependency>
 
 			<dependency>
@@ -362,6 +362,8 @@ checkJavaFormat
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
+						<trimStackTrace>false</trimStackTrace>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -374,11 +376,18 @@ checkJavaFormat
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
+						<trimStackTrace>false</trimStackTrace>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<systemPropertyVariables>
 							<its.db.url>${its.db.url}</its.db.url>
 							<its.db.username>${its.db.username}</its.db.username>
 							<its.db.password>${its.db.password}</its.db.password>
 						</systemPropertyVariables>
+						
+						<!-- Needed to avoid test failures when comparing ETL timestamps. -->
+						<environmentVariables>
+							<TZ>UTC</TZ>
+						</environmentVariables>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -563,6 +572,20 @@ checkJavaFormat
 						<configuration>
 							<failOnError>false</failOnError>
             			</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Will run the `*IT.java` integration tests in the modules, as part
+					of the build. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>

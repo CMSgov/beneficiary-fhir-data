@@ -39,18 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Orchestrates and manages the execution of {@link PipelineJob}s. */
-public final class PipelineManager {
-  /**
-   * The {@link Logger} message that will be recorded if/when the {@link PipelineManager} starts
-   * scanning for data sets.
-   */
-  public static final String LOG_MESSAGE_STARTING_WORKER =
-      "Starting data set monitor: watching for data sets to process...";
-
+public final class PipelineManager implements AutoCloseable {
   /**
    * The number of jobs that can be run at one time. Because the {@link VolunteerJob} and {@link
-   * SchedulerJob} will always be running, this number must be >=3, in order for any actual jobs to
-   * get run.
+   * SchedulerJob} will always be running, this number must be greater than or equal to 3, in order
+   * for any actual jobs to get run.
    *
    * @see #jobExecutor
    */
@@ -345,6 +338,12 @@ public final class PipelineManager {
     timerStop.stop();
   }
 
+  /** @see java.lang.AutoCloseable#close() */
+  @Override
+  public void close() throws Exception {
+    stop();
+  }
+
   /**
    * A handle for a {@link PipelineJob} execution, which is used to allow the application to cancel
    * job executions.
@@ -447,9 +446,8 @@ public final class PipelineManager {
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
         jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
-        LOGGER.warn(String.format("Job failed: jobRecord='%s'", jobRecord), e);
 
-        // Wrap and re-thrown the failure.
+        // Wrap and re-throw the failure.
         throw new Exception("Re-throwing job failure.", e);
       } finally {
         synchronized (jobsEnqueuedHandles) {

@@ -206,7 +206,7 @@ public final class LoadedFilterManagerIT {
 
   /** @param sampleResources the sample RIF resources to load */
   private static void loadData(DataSource dataSource, List<StaticRifResource> sampleResources) {
-    LoadAppOptions loadOptions = RifLoaderTestUtils.getLoadOptions(dataSource);
+    LoadAppOptions loadOptions = RifLoaderTestUtils.getLoadOptions();
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
@@ -217,7 +217,7 @@ public final class LoadedFilterManagerIT {
     // Create the processors that will handle each stage of the pipeline.
     MetricRegistry loadAppMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
-    try (final RifLoader loader = new RifLoader(loadAppMetrics, loadOptions)) {
+    try (final RifLoader loader = new RifLoader(loadAppMetrics, loadOptions, dataSource)) {
       // Link up the pipeline and run it.
       for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
         RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
