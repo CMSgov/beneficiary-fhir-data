@@ -345,21 +345,27 @@ public final class AppConfiguration implements Serializable {
               ENV_VAR_KEY_DATABASE_PASSWORD));
 
     String databaseMaxPoolSizeText = System.getenv(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
-    Optional<Integer> databaseMaxPoolSize;
+    Optional<Integer> databaseMaxPoolSizeOption;
     if (databaseMaxPoolSizeText == null || databaseMaxPoolSizeText.isEmpty()) {
-      databaseMaxPoolSize = Optional.empty();
+      databaseMaxPoolSizeOption = Optional.empty();
     } else {
       try {
-        databaseMaxPoolSize = Optional.of(Integer.parseInt(databaseMaxPoolSizeText));
+        databaseMaxPoolSizeOption = Optional.of(Integer.parseInt(databaseMaxPoolSizeText));
       } catch (NumberFormatException e) {
-        databaseMaxPoolSize = Optional.of(-1);
+        databaseMaxPoolSizeOption = Optional.of(-1);
       }
-      if (databaseMaxPoolSize.get() < 1)
+      if (databaseMaxPoolSizeOption.get() < 1)
         throw new AppConfigurationException(
             String.format(
                 "Invalid value for configuration environment variable '%s': '%s'",
                 ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, databaseMaxPoolSizeText));
     }
+
+    /*
+     * Note: For CcwRifLoadJob, databaseMaxPoolSize needs to be double the number of loader threads
+     * when idempotent loads are being used. Apparently, the queries need a separate Connection?
+     */
+    Integer maxPoolSize = databaseMaxPoolSizeOption.orElse(loaderThreads * 2);
 
     String loaderThreadsText = System.getenv(ENV_VAR_KEY_LOADER_THREADS);
     if (loaderThreadsText == null || loaderThreadsText.isEmpty())
@@ -440,16 +446,8 @@ public final class AppConfiguration implements Serializable {
             newRelicMetricPath,
             newRelicMetricPeriod,
             hostname);
-    /*
-     * Note: For CcwRifLoadJob, databaseMaxPoolSize needs to be double the number of loader threads
-     * when idempotent loads are being used. Apparently, the queries need a separate Connection?
-     */
     DatabaseOptions databaseOptions =
-        new DatabaseOptions(
-            databaseUrl,
-            databaseUsername,
-            databasePassword,
-            databaseMaxPoolSize.orElse(loaderThreads * 2));
+        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword, maxPoolSize);
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     LoadAppOptions loadOptions =
         new LoadAppOptions(
