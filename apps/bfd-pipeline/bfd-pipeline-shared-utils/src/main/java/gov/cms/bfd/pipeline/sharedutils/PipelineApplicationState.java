@@ -63,10 +63,8 @@ public final class PipelineApplicationState implements AutoCloseable {
   }
 
   /**
-   * This is marked <code>public</code> only for use in tests; non-test code that needs a {@link
-   * DataSource} should get it from the {@link PipelineApplicationState}.
-   *
-   * @param dbOptions the {@link DatabaseOptions} to use
+   * @param dbOptions the {@link DatabaseOptions} to use for the application's DB (which this will
+   *     use to create {@link #getPooledDataSource()})
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
@@ -85,20 +83,17 @@ public final class PipelineApplicationState implements AutoCloseable {
   }
 
   /**
-   * This is marked <code>public</code> only for use in tests; non-test code that needs a {@link
-   * DataSource} should get it from the {@link PipelineApplicationState}.
-   *
-   * @param dataSource a non-pooled {@link DataSource} for the application's DB (which this will use
-   *     to create {@link #getPooledDataSource()})
+   * @param unpooledDataSource a non-pooled {@link DataSource} for the application's DB (which this
+   *     will use to create {@link #getPooledDataSource()})
    * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
   private static HikariDataSource createPooledDataSource(
-      DataSource dataSource, int maxPoolSize, MetricRegistry metrics) {
+      DataSource unpooledDataSource, int maxPoolSize, MetricRegistry metrics) {
     HikariDataSource pooledDataSource = new HikariDataSource();
 
-    pooledDataSource.setDataSource(dataSource);
+    pooledDataSource.setDataSource(unpooledDataSource);
     pooledDataSource.setMaximumPoolSize(maxPoolSize);
     pooledDataSource.setRegisterMbeans(true);
     pooledDataSource.setMetricRegistry(metrics);
@@ -107,13 +102,10 @@ public final class PipelineApplicationState implements AutoCloseable {
   }
 
   /**
-   * This is marked <code>public</code> only for use in tests; non-test code that needs a {@link
-   * EntityManagerFactory} should get it from the {@link PipelineApplicationState}.
-   *
    * @param pooledDataSource the JDBC {@link DataSource} for the application's database
    * @return a JPA {@link EntityManagerFactory} for the application's database
    */
-  private static EntityManagerFactory createEntityManagerFactory(DataSource dataSource) {
+  private static EntityManagerFactory createEntityManagerFactory(DataSource pooledDataSource) {
     /*
      * The number of JDBC statements that will be queued/batched within a single transaction. Most
      * recommendations suggest this should be 5-30. Paradoxically, setting it higher seems to
@@ -123,7 +115,7 @@ public final class PipelineApplicationState implements AutoCloseable {
     final int jdbcBatchSize = 10;
 
     Map<String, Object> hibernateProperties = new HashMap<>();
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
+    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, pooledDataSource);
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
     hibernateProperties.put(
         org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
