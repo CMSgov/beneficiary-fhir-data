@@ -31,7 +31,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -53,7 +52,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.crypto.SecretKeyFactory;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -93,7 +91,6 @@ public final class RifLoader {
   private final LoadAppOptions options;
   private final IdHasher idHasher;
   private final PipelineApplicationState appState;
-  private final SecretKeyFactory secretKeyFactory;
 
   /**
    * Constructs a new {@link RifLoader} instance.
@@ -109,7 +106,6 @@ public final class RifLoader {
      * We are re-using the same hash configuration for HICNs and MBIs so we only need one idHasher.
      */
     this.idHasher = new IdHasher(options.getIdHasherConfig());
-    this.secretKeyFactory = createSecretKeyFactory();
   }
 
   /**
@@ -1293,15 +1289,6 @@ public final class RifLoader {
             });
 
     timerHashing.stop();
-  }
-
-  /** @return a new {@link SecretKeyFactory} for the <code>PBKDF2WithHmacSHA256</code> algorithm */
-  static SecretKeyFactory createSecretKeyFactory() {
-    try {
-      return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   /**
