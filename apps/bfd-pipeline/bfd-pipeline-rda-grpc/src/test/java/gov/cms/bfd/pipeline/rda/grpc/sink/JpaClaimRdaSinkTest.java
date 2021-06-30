@@ -12,6 +12,8 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -37,11 +39,24 @@ public class JpaClaimRdaSinkTest {
   @Before
   public void setUp() {
     appMetrics = new MetricRegistry();
-    sink = new JpaClaimRdaSink<>(dataSource, entityManagerFactory, entityManager, appMetrics);
+    sink =
+        new JpaClaimRdaSink<>("fiss", dataSource, entityManagerFactory, entityManager, appMetrics);
     doReturn(transaction).when(entityManager).getTransaction();
     doReturn(true).when(entityManagerFactory).isOpen();
     doReturn(true).when(entityManager).isOpen();
     doReturn(false).when(dataSource).isClosed();
+  }
+
+  @Test
+  public void metricNames() {
+    assertEquals(
+        Arrays.asList(
+            "JpaClaimRdaSink.fiss.calls",
+            "JpaClaimRdaSink.fiss.failures",
+            "JpaClaimRdaSink.fiss.writes.merged",
+            "JpaClaimRdaSink.fiss.writes.persisted",
+            "JpaClaimRdaSink.fiss.writes.total"),
+        new ArrayList<>(appMetrics.getNames()));
   }
 
   @Test
@@ -59,11 +74,12 @@ public class JpaClaimRdaSinkTest {
         .merge(any()); // no calls made to merge since all the persist succeeded
     verify(transaction).commit();
 
-    assertMeterReading(1, JpaClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(3, JpaClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_MERGED_METER_NAME);
-    assertMeterReading(3, JpaClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.FAILURES_METER_NAME);
+    final JpaClaimRdaSink.Metrics metrics = sink.getMetrics();
+    assertMeterReading("calls", 1, metrics.getCalls().getCount());
+    assertMeterReading("persists", 3, metrics.getObjectsPersisted().getCount());
+    assertMeterReading("merges", 0, metrics.getObjectsMerged().getCount());
+    assertMeterReading("writes", 3, metrics.getObjectsWritten().getCount());
+    assertMeterReading("failures", 0, metrics.getFailures().getCount());
   }
 
   @Test
@@ -87,11 +103,12 @@ public class JpaClaimRdaSinkTest {
     // the merge transaction will be committed
     verify(transaction).commit();
 
-    assertMeterReading(1, JpaClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
-    assertMeterReading(3, JpaClaimRdaSink.OBJECTS_MERGED_METER_NAME);
-    assertMeterReading(3, JpaClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.FAILURES_METER_NAME);
+    final JpaClaimRdaSink.Metrics metrics = sink.getMetrics();
+    assertMeterReading("calls", 1, metrics.getCalls().getCount());
+    assertMeterReading("persists", 0, metrics.getObjectsPersisted().getCount());
+    assertMeterReading("merges", 3, metrics.getObjectsMerged().getCount());
+    assertMeterReading("writes", 3, metrics.getObjectsWritten().getCount());
+    assertMeterReading("failures", 0, metrics.getFailures().getCount());
   }
 
   @Test
@@ -120,11 +137,12 @@ public class JpaClaimRdaSinkTest {
         .persist(batch.get(2).getClaim()); // not called once a merge fails
     verify(transaction, times(2)).rollback(); // both persist and merge transactions are rolled back
 
-    assertMeterReading(1, JpaClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_MERGED_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
-    assertMeterReading(1, JpaClaimRdaSink.FAILURES_METER_NAME);
+    final JpaClaimRdaSink.Metrics metrics = sink.getMetrics();
+    assertMeterReading("calls", 1, metrics.getCalls().getCount());
+    assertMeterReading("persists", 0, metrics.getObjectsPersisted().getCount());
+    assertMeterReading("merges", 0, metrics.getObjectsMerged().getCount());
+    assertMeterReading("writes", 0, metrics.getObjectsWritten().getCount());
+    assertMeterReading("failures", 1, metrics.getFailures().getCount());
   }
 
   @Test
@@ -149,11 +167,12 @@ public class JpaClaimRdaSinkTest {
         .merge(any()); // non-duplicate key error prevents any calls to merge
     verify(transaction).rollback();
 
-    assertMeterReading(1, JpaClaimRdaSink.CALLS_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_PERSISTED_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_MERGED_METER_NAME);
-    assertMeterReading(0, JpaClaimRdaSink.OBJECTS_WRITTEN_METER_NAME);
-    assertMeterReading(1, JpaClaimRdaSink.FAILURES_METER_NAME);
+    final JpaClaimRdaSink.Metrics metrics = sink.getMetrics();
+    assertMeterReading("calls", 1, metrics.getCalls().getCount());
+    assertMeterReading("persists", 0, metrics.getObjectsPersisted().getCount());
+    assertMeterReading("merges", 0, metrics.getObjectsMerged().getCount());
+    assertMeterReading("writes", 0, metrics.getObjectsWritten().getCount());
+    assertMeterReading("failures", 1, metrics.getFailures().getCount());
   }
 
   @Test
@@ -171,8 +190,7 @@ public class JpaClaimRdaSinkTest {
     assertEquals(false, isDuplicateKeyException(new IOException("nothing to see here")));
   }
 
-  private void assertMeterReading(long expected, String meterName) {
-    long actual = appMetrics.meter(meterName).getCount();
+  private void assertMeterReading(String meterName, long expected, long actual) {
     assertEquals("Meter " + meterName, expected, actual);
   }
 

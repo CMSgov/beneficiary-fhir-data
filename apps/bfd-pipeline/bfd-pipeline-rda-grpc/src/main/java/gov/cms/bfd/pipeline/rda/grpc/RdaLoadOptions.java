@@ -64,7 +64,7 @@ public class RdaLoadOptions implements Serializable {
                 new FissClaimStreamCaller(
                     new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
                 appMetrics),
-        () -> new JpaClaimRdaSink<>(databaseOptions, appMetrics),
+        () -> new JpaClaimRdaSink<>("fiss", databaseOptions, appMetrics),
         appMetrics);
   }
 
@@ -85,7 +85,7 @@ public class RdaLoadOptions implements Serializable {
                 new McsClaimStreamCaller(
                     new McsClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
                 appMetrics),
-        () -> new JpaClaimRdaSink<>(databaseOptions, appMetrics),
+        () -> new JpaClaimRdaSink<>("mcs", databaseOptions, appMetrics),
         appMetrics);
   }
 

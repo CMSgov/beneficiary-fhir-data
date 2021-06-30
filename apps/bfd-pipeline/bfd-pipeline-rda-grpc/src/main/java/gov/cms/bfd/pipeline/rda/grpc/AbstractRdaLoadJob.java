@@ -123,7 +123,7 @@ public abstract class AbstractRdaLoadJob<TResponse>
   }
 
   protected String metricName(String detail) {
-    return getClass().getSimpleName() + "." + detail;
+    return MetricRegistry.name(getClass().getSimpleName(), detail);
   }
 
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */

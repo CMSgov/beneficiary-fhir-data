@@ -56,7 +56,7 @@ public class JpaClaimRdaSinkIT {
   public void fissClaim() throws Exception {
     final JpaClaimRdaSink<PreAdjFissClaim> sink =
         new JpaClaimRdaSink<>(
-            dataSource, entityManagerFactory, entityManager, new MetricRegistry());
+            "fiss", dataSource, entityManagerFactory, entityManager, new MetricRegistry());
 
     final PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn("1");
@@ -101,7 +101,7 @@ public class JpaClaimRdaSinkIT {
   public void mcsClaim() throws Exception {
     final JpaClaimRdaSink<PreAdjMcsClaim> sink =
         new JpaClaimRdaSink<>(
-            dataSource, entityManagerFactory, entityManager, new MetricRegistry());
+            "fiss", dataSource, entityManagerFactory, entityManager, new MetricRegistry());
 
     final PreAdjMcsClaim claim = new PreAdjMcsClaim();
     claim.setIdrClmHdIcn("3");
