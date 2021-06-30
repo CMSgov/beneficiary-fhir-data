@@ -120,7 +120,7 @@ public final class PipelineApplicationState implements AutoCloseable {
      * actually slow things down. Presumably, it's delaying work that could be done earlier in a
      * batch, and that starts to cost more than the extra network roundtrips.
      */
-    int jdbcBatchSize = 10;
+    final int jdbcBatchSize = 10;
 
     Map<String, Object> hibernateProperties = new HashMap<>();
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
