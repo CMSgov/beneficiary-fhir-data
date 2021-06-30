@@ -14,6 +14,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -157,7 +158,8 @@ public final class CcwRifLoadJobIT {
        * two data sets.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName(), null, 1);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
@@ -255,7 +257,8 @@ public final class CcwRifLoadJobIT {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName(), RifFileType.PDE);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket.getName(), Optional.of(RifFileType.PDE));
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),

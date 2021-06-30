@@ -77,27 +77,28 @@ public final class PipelineApplication {
         Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
 
     MetricOptions metricOptions = appConfig.getMetricOptions();
-    if (metricOptions.getNewRelicMetricKey() != null) {
+    if (metricOptions.getNewRelicMetricKey().isPresent()) {
       SenderConfiguration configuration =
           SenderConfiguration.builder(
-                  metricOptions.getNewRelicMetricHost(), metricOptions.getNewRelicMetricPath())
+                  metricOptions.getNewRelicMetricHost().orElse(null),
+                  metricOptions.getNewRelicMetricPath().orElse(null))
               .httpPoster(new OkHttpPoster())
-              .apiKey(metricOptions.getNewRelicMetricKey())
+              .apiKey(metricOptions.getNewRelicMetricKey().orElse(null))
               .build();
 
       MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
 
       Attributes commonAttributes =
           new Attributes()
-              .put("host", metricOptions.getHostname())
-              .put("appName", metricOptions.getNewRelicAppName());
+              .put("host", metricOptions.getHostname().orElse("unknown"))
+              .put("appName", metricOptions.getNewRelicAppName().orElse(null));
 
       NewRelicReporter newRelicReporter =
           NewRelicReporter.build(appMetrics, metricBatchSender)
               .commonAttributes(commonAttributes)
               .build();
 
-      newRelicReporter.start(metricOptions.getNewRelicMetricPeriod(), TimeUnit.SECONDS);
+      newRelicReporter.start(metricOptions.getNewRelicMetricPeriod().orElse(15), TimeUnit.SECONDS);
     }
 
     appMetricsReporter.start(1, TimeUnit.HOURS);

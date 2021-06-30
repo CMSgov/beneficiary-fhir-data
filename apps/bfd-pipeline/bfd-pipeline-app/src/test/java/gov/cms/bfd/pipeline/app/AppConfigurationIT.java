@@ -25,7 +25,7 @@ import org.junit.Test;
  * <p>Since Java apps can't modify their environment variables at runtime, this class has a {@link
  * #main(String[])} method that the test cases will launch as an application in a separate process.
  */
-public final class AppConfigurationTestIT {
+public final class AppConfigurationIT {
   /**
    * Verifies that {@link
    * gov.cms.bfd.pipeline.app.AppConfiguration#readConfigFromEnvironmentVariables()} works as
@@ -90,7 +90,12 @@ public final class AppConfigurationTestIT {
         testAppConfig.getCcwRifLoadOptions().getExtractionOptions().getS3BucketName());
     Assert.assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_ALLOWED_RIF_TYPE),
-        testAppConfig.getCcwRifLoadOptions().getExtractionOptions().getAllowedRifFileType().name());
+        testAppConfig
+            .getCcwRifLoadOptions()
+            .getExtractionOptions()
+            .getAllowedRifFileType()
+            .get()
+            .name());
     Assert.assertEquals(
         Integer.parseInt(
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS)),
@@ -120,10 +125,8 @@ public final class AppConfigurationTestIT {
             testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_LOADER_THREADS)),
         testAppConfig.getCcwRifLoadOptions().getLoadOptions().getLoaderThreads());
     Assert.assertEquals(
-        AppConfiguration.parseBoolean(
-                testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED))
-            .get(),
-        testAppConfig.getCcwRifLoadOptions().getLoadOptions().isIdempotencyRequired());
+        testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED),
+        "" + testAppConfig.getCcwRifLoadOptions().getLoadOptions().isIdempotencyRequired());
   }
 
   /**
@@ -160,7 +163,7 @@ public final class AppConfigurationTestIT {
             java.toAbsolutePath().toString(),
             "-classpath",
             classpath,
-            AppConfigurationTestIT.class.getName());
+            AppConfigurationIT.class.getName());
     return testAppBuilder;
   }
 
