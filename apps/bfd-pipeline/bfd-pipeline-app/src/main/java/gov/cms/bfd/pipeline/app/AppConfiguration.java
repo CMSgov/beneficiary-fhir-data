@@ -82,6 +82,12 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
+   * #getDatabaseOptions()} {@link DatabaseOptions#getMaxPoolSize()} value.
+   */
+  public static final String ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE = "DATABASE_MAX_POOL_SIZE";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
    * #getCcwRifLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
    */
   public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
@@ -338,6 +344,23 @@ public final class AppConfiguration implements Serializable {
               "Missing value for configuration environment variable '%s'.",
               ENV_VAR_KEY_DATABASE_PASSWORD));
 
+    String databaseMaxPoolSizeText = System.getenv(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
+    Optional<Integer> databaseMaxPoolSize;
+    if (databaseMaxPoolSizeText == null || databaseMaxPoolSizeText.isEmpty()) {
+      databaseMaxPoolSize = Optional.empty();
+    } else {
+      try {
+        databaseMaxPoolSize = Optional.of(Integer.parseInt(databaseMaxPoolSizeText));
+      } catch (NumberFormatException e) {
+        databaseMaxPoolSize = Optional.of(-1);
+      }
+      if (databaseMaxPoolSize.get() < 1)
+        throw new AppConfigurationException(
+            String.format(
+                "Invalid value for configuration environment variable '%s': '%s'",
+                ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, databaseMaxPoolSizeText));
+    }
+
     String loaderThreadsText = System.getenv(ENV_VAR_KEY_LOADER_THREADS);
     if (loaderThreadsText == null || loaderThreadsText.isEmpty())
       throw new AppConfigurationException(
@@ -417,8 +440,16 @@ public final class AppConfiguration implements Serializable {
             newRelicMetricPath,
             newRelicMetricPeriod,
             hostname);
+    /*
+     * Note: For CcwRifLoadJob, databaseMaxPoolSize needs to be double the number of loader threads
+     * when idempotent loads are being used. Apparently, the queries need a separate Connection?
+     */
     DatabaseOptions databaseOptions =
-        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword);
+        new DatabaseOptions(
+            databaseUrl,
+            databaseUsername,
+            databasePassword,
+            databaseMaxPoolSize.orElse(loaderThreads * 2));
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     LoadAppOptions loadOptions =
         new LoadAppOptions(

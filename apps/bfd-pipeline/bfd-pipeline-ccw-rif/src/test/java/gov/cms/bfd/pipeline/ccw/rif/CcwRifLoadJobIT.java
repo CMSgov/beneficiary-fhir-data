@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -12,6 +11,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import org.junit.Assert;
@@ -43,9 +43,15 @@ public final class CcwRifLoadJobIT {
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
-          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3TaskManager,
+              listener);
       ccwJob.call();
 
       // Verify that no data sets were generated.
@@ -99,9 +105,15 @@ public final class CcwRifLoadJobIT {
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
-          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3TaskManager,
+              listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -187,9 +199,15 @@ public final class CcwRifLoadJobIT {
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
-          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3TaskManager,
+              listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -264,9 +282,15 @@ public final class CcwRifLoadJobIT {
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
-          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3TaskManager,
+              listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.

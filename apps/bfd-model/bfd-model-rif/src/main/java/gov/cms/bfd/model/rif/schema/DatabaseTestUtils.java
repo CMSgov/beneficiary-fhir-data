@@ -2,13 +2,21 @@ package gov.cms.bfd.model.rif.schema;
 
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.net.Inet4Address;
 import java.net.ServerSocket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.Properties;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -24,12 +32,12 @@ import org.slf4j.LoggerFactory;
  * <p>Note: This is placed in <code>src/main/java</code> (rather than <code>src/test/java</code>)
  * for convenience: test dependencies aren't transitive, which tends to eff things up.
  */
-public final class DatabaseTestHelper {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseTestHelper.class);
+public final class DatabaseTestUtils {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseTestUtils.class);
 
   /**
    * This fake JDBC URL prefix is used for custom database setups only used in integration tests,
-   * e.g. {@link #createDataSourceForHsqlEmbeddedWithServer(String)}.
+   * e.g. {@link #initUnpooledDataSourceForHsqlEmbeddedWithServer(String)}.
    */
   public static final String JDBC_URL_PREFIX_BLUEBUTTON_TEST = "jdbc:bfd-test:";
 
@@ -43,42 +51,107 @@ public final class DatabaseTestHelper {
   private static final String HSQL_SERVER_USERNAME = "test";
   private static final String HSQL_SERVER_PASSWORD = "test";
 
-  /** @return the JDBC URL for the test DB to use */
-  private static String getTestDatabaseUrl() {
-    // Build a default DB URL that uses HSQL, just as it's configured in the parent POM.
-    String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
+  /** The singleton {@link DatabaseTestUtils} instance to use everywhere. */
+  private static DatabaseTestUtils SINGLETON;
 
-    // Pull the DB URL from the system properties.
-    String url = System.getProperty("its.db.url", urlDefault);
+  /**
+   * The {@link DataSource} for the database to test against, as created by {@link
+   * #initUnpooledDataSource()}.
+   */
+  private final DataSource unpooledDataSource;
 
-    return url;
+  /**
+   * Constructs a new {@link DatabaseTestUtils} instance. Marked <code>private</code>; use {@link
+   * #get()}, instead.
+   */
+  private DatabaseTestUtils() {
+    this.unpooledDataSource = initUnpooledDataSource();
   }
 
-  /** @return the username for the test DB to use */
-  private static String getTestDatabaseUsername() {
-    // Pull the DB URL from the system properties.
-    String username = System.getProperty("its.db.username", null);
-    if (username != null && username.trim().isEmpty()) username = null;
-    return username;
-  }
+  /** @return the singleton {@link DatabaseTestUtils} instance to use everywhere */
+  public static synchronized DatabaseTestUtils get() {
+    /*
+     * Why are we using a singleton and caching all of these fields? Because creating some of the
+     * fields here is expensive, so we don't want to have to re-create it for every test.
+     */
 
-  /** @return the password for the test DB to use */
-  private static String getTestDatabasePassword() {
-    // Pull the DB URL from the system properties.
-    String password = System.getProperty("its.db.password", null);
-    if (password != null && password.trim().isEmpty()) password = null;
-    return password;
+    if (SINGLETON == null) {
+      SINGLETON = new DatabaseTestUtils();
+    }
+
+    return SINGLETON;
   }
 
   /**
-   * @return a {@link DataSource} for the test DB, which will <strong>not</strong> be cleaned or
-   *     schema-fied first
+   * @return the {@link DataSource} for the database to test against (as specified by the <code>
+   *     its.db.*</code> system properties, see {@link #initUnpooledDataSource() for details})
    */
-  public static DataSource getTestDatabase() {
-    String url = getTestDatabaseUrl();
-    String username = getTestDatabaseUsername();
-    String password = getTestDatabasePassword();
-    return getTestDatabase(url, username, password);
+  private static DataSource initUnpooledDataSource() {
+    /*
+     * This is pretty hacky, but when this class is being used as part of the BFD Server tests, we
+     * have to check for the DB connection properties that the BFD Server may have written out when
+     * it was launched for the ITs run. If we DON'T use those properties, we'll end up connected to
+     * a different database than the one that the application server instance being tested is using,
+     * which is definitely not going to do what we wanted.
+     */
+    Optional<Properties> bfdServerTestDatabaseProperties = readTestDatabaseProperties();
+
+    String url, username, password;
+    if (bfdServerTestDatabaseProperties.isPresent()) {
+      url = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.url");
+      username = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.username");
+      password = bfdServerTestDatabaseProperties.get().getProperty("bfdServer.db.password");
+    } else {
+      /*
+       * Build default DB connection properties that use HSQL, just as they're configured in the
+       * parent POM.
+       */
+      String urlDefault = String.format("%shsqldb:mem", JDBC_URL_PREFIX_BLUEBUTTON_TEST);
+      String usernameDefault = null;
+      String passwordDefault = null;
+
+      // Build the actual DB connection properties to use.
+      url = System.getProperty("its.db.url", urlDefault);
+      username = System.getProperty("its.db.username", usernameDefault);
+      if (username != null && username.trim().isEmpty()) username = usernameDefault;
+      password = System.getProperty("its.db.password", passwordDefault);
+      if (password != null && password.trim().isEmpty()) password = passwordDefault;
+    }
+
+    return initUnpooledDataSource(url, username, password);
+  }
+
+  /**
+   * @return the {@link Properties} file that contains the test DB connection properties (as created
+   *     by <code>gov.cms.bfd.server.war.SpringConfiguration#findTestDatabaseProperties()</code>, or
+   *     {@link Optional#empty()} if it's not present (indicating that just a regular DB connection
+   *     is being used)
+   */
+  private static Optional<Properties> readTestDatabaseProperties() {
+    Path testDatabasePropertiesPath = findTestDatabaseProperties();
+    if (!Files.isRegularFile(testDatabasePropertiesPath)) return Optional.empty();
+
+    try {
+      Properties testDbProps = new Properties();
+      testDbProps.load(new FileReader(testDatabasePropertiesPath.toFile()));
+      return Optional.of(testDbProps);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  /**
+   * @return the {@link Path} to the {@link Properties} file in <code>
+   *     bfd-server-war/target/server-work</code> that the test DB connection properties will be
+   *     written out to
+   */
+  public static Path findTestDatabaseProperties() {
+    Path serverRunDir = Paths.get("target", "server-work");
+    if (!Files.isDirectory(serverRunDir))
+      serverRunDir = Paths.get("bfd-server-war", "target", "server-work");
+
+    Path testDbPropertiesPath = serverRunDir.resolve("server-test-db.properties");
+    return testDbPropertiesPath;
   }
 
   /**
@@ -88,52 +161,17 @@ public final class DatabaseTestHelper {
    * @return a {@link DataSource} for the test DB, which will <strong>not</strong> be cleaned or
    *     schema-fied first
    */
-  public static DataSource getTestDatabase(String url, String username, String password) {
+  private static DataSource initUnpooledDataSource(String url, String username, String password) {
     DataSource dataSource;
     if (url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST + "hsqldb:mem")) {
-      dataSource = createDataSourceForHsqlEmbeddedWithServer(url);
+      dataSource = initUnpooledDataSourceForHsqlEmbeddedWithServer(url);
     } else if (url.startsWith("jdbc:hsqldb:hsql://localhost")) {
-      dataSource = createDataSourceForHsqlServer(url, username, password);
+      dataSource = initUnpooledDataSourceForHsqlServer(url, username, password);
     } else if (url.startsWith("jdbc:postgresql:")) {
-      dataSource = createDataSourceForPostgresql(url, username, password);
+      dataSource = initUnpooledDataSourceForPostgresql(url, username, password);
     } else {
       throw new BadCodeMonkeyException("Unsupported test DB URL: " + url);
     }
-
-    return dataSource;
-  }
-
-  /** @return a {@link DataSource} for the test DB, which will be cleaned (i.e. wiped) first */
-  public static DataSource getTestDatabaseAfterClean() {
-    DataSource dataSource = getTestDatabase();
-
-    // Try to prevent career-limiting moves.
-    String url = getTestDatabaseUrl();
-    if (!url.contains("localhost") && !url.contains("127.0.0.1") && !url.contains("hsqldb:mem")) {
-      throw new BadCodeMonkeyException("Our builds can only be run against local test DBs.");
-    }
-
-    // Clean the DB so that it's fresh and ready for a new test case.
-    Flyway flyway =
-        Flyway.configure()
-            .dataSource(dataSource)
-            .schemas(FLYWAY_CLEAN_SCHEMAS.toArray(new String[0]))
-            .connectRetries(5)
-            .load();
-    LOGGER.warn("Cleaning schemas: {}", Arrays.asList(flyway.getConfiguration().getSchemas()));
-    flyway.clean();
-    return dataSource;
-  }
-
-  /**
-   * @return a {@link DataSource} for the test DB, which will be cleaned (i.e. wiped) and then have
-   *     the BFD schema applied to it, first
-   */
-  public static DataSource getTestDatabaseAfterCleanAndSchema() {
-    DataSource dataSource = getTestDatabaseAfterClean();
-
-    // Schema-ify it so it's ready to go.
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
 
     return dataSource;
   }
@@ -145,7 +183,7 @@ public final class DatabaseTestHelper {
    * @param url the JDBC URL that the application was configured to use
    * @return a HSQL {@link DataSource} for the test DB
    */
-  private static DataSource createDataSourceForHsqlEmbeddedWithServer(String url) {
+  private static DataSource initUnpooledDataSourceForHsqlEmbeddedWithServer(String url) {
     if (!url.startsWith(JDBC_URL_PREFIX_BLUEBUTTON_TEST + "hsqldb:mem")) {
       throw new IllegalArgumentException();
     }
@@ -179,30 +217,10 @@ public final class DatabaseTestHelper {
 
     // Create the DataSource to connect to that shiny new DB.
     DataSource dataSource =
-        createDataSourceForHsqlServer(
+        initUnpooledDataSourceForHsqlServer(
             String.format("jdbc:hsqldb:hsql://localhost:%d/test-embedded", hsqldbPort),
             HSQL_SERVER_USERNAME,
             HSQL_SERVER_PASSWORD);
-    return dataSource;
-  }
-
-  /**
-   * @param url the JDBC URL that the application was configured to use
-   * @param username the username for the test database to connect to
-   * @param password the password for the test database to connect to
-   * @return a HSQL {@link DataSource} for the test DB
-   */
-  private static DataSource createDataSourceForHsqlServer(
-      String url, String username, String password) {
-    if (!url.startsWith("jdbc:hsqldb:hsql://localhost")) {
-      throw new IllegalArgumentException();
-    }
-
-    JDBCDataSource dataSource = new JDBCDataSource();
-    dataSource.setUrl(url);
-    if (username != null) dataSource.setUser(username);
-    if (password != null) dataSource.setPassword(password);
-
     return dataSource;
   }
 
@@ -223,18 +241,81 @@ public final class DatabaseTestHelper {
   }
 
   /**
+   * @param url the JDBC URL that the application was configured to use
+   * @param username the username for the test database to connect to
+   * @param password the password for the test database to connect to
+   * @return a HSQL {@link DataSource} for the test DB
+   */
+  private static DataSource initUnpooledDataSourceForHsqlServer(
+      String url, String username, String password) {
+    if (!url.startsWith("jdbc:hsqldb:hsql://localhost")) {
+      throw new IllegalArgumentException();
+    }
+
+    JDBCDataSource dataSource = new JDBCDataSource();
+    dataSource.setUrl(url);
+    if (username != null) dataSource.setUser(username);
+    if (password != null) dataSource.setPassword(password);
+
+    return dataSource;
+  }
+
+  /**
    * @param url the PostgreSQL JDBC URL to use
    * @param username the username for the test database to connect to
    * @param password the password for the test database to connect to
    * @return a PostgreSQL {@link DataSource} for the test DB
    */
-  private static DataSource createDataSourceForPostgresql(
+  private static DataSource initUnpooledDataSourceForPostgresql(
       String url, String username, String password) {
     PGSimpleDataSource dataSource = new PGSimpleDataSource();
     dataSource.setUrl(url);
     if (username != null) dataSource.setUser(username);
     if (password != null) dataSource.setPassword(password);
     return dataSource;
+  }
+
+  /**
+   * @return the cached and shared unpooled {@link DataSource} for the database to test against (as
+   *     specified by the <code>its.db.*</code> system properties, see {@link
+   *     #initUnpooledDataSource() for details})
+   */
+  public DataSource getUnpooledDataSource() {
+    return unpooledDataSource;
+  }
+
+  /** Creates/updates the application schema into the {@link #getUnpooledDataSource()} database */
+  public void createOrUpdateSchemaForDataSource() {
+    DatabaseSchemaManager.createOrUpdateSchema(unpooledDataSource);
+  }
+
+  /**
+   * Drops all schemas in the {@link #getUnpooledDataSource()} database. Please note that this
+   * operation appears to not be transactional for HSQL DB: unless <strong>all</strong> connections
+   * are closed and re-opened, they may end up with an inconsistent view of the database after this
+   * operation.
+   */
+  public void dropSchemaForDataSource() {
+    // Try to prevent career-limiting moves.
+    String url;
+    try (Connection connection = getUnpooledDataSource().getConnection(); ) {
+      url = connection.getMetaData().getURL();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    if (!url.contains("localhost") && !url.contains("127.0.0.1") && !url.contains("hsqldb:mem")) {
+      throw new BadCodeMonkeyException("Our builds can only be run against local test DBs.");
+    }
+
+    // Clean the DB so that it's fresh and ready for a new test case.
+    Flyway flyway =
+        Flyway.configure()
+            .dataSource(unpooledDataSource)
+            .schemas(FLYWAY_CLEAN_SCHEMAS.toArray(new String[0]))
+            .connectRetries(5)
+            .load();
+    LOGGER.warn("Cleaning schemas: {}", Arrays.asList(flyway.getConfiguration().getSchemas()));
+    flyway.clean();
   }
 
   /**

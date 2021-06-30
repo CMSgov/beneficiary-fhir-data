@@ -10,14 +10,14 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
@@ -53,10 +53,10 @@ public final class PipelineApplication {
    *
    * @param args (should be empty, as this application accepts configuration via environment
    *     variables)
-   * @throws InterruptedException Any {@link InterruptedException}s encountered on this thread will
-   *     be bubbled up.
+   * @throws Exception any unhandled checked {@link Exception}s that are encountered will cause the
+   *     application to halt
    */
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String[] args) throws Exception {
     LOGGER.info("Application starting up!");
     configureUnexpectedExceptionHandlers();
 
@@ -102,11 +102,9 @@ public final class PipelineApplication {
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
-    HikariDataSource dataSource =
-        DatabaseUtils.createDataSource(
-            appConfig.getDatabaseOptions(),
-            appMetrics,
-            2 * appConfig.getCcwRifLoadOptions().getLoadOptions().getLoaderThreads());
+    // Create the application state.
+    PipelineApplicationState appState =
+        new PipelineApplicationState(appMetrics, appConfig.getDatabaseOptions());
 
     /*
      * Create the PipelineManager that will be responsible for running and managing the various
@@ -121,26 +119,27 @@ public final class PipelineApplication {
      * Register and wait for the database schema job to run, so that we don't have to worry about
      * declaring it as a dependency (since it is for pretty much everything right now).
      */
-    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(dataSource));
+    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(appState.getPooledDataSource()));
     PipelineJobRecord<NullPipelineJobArguments> dbSchemaJobRecord =
         jobRecordStore.submitPendingJob(DatabaseSchemaUpdateJob.JOB_TYPE, null);
     try {
       jobRecordStore.waitForJobs(dbSchemaJobRecord);
     } catch (InterruptedException e) {
+      appState.close();
       throw new InterruptedException();
     }
 
     /*
      * Create and register the other jobs.
      */
-    pipelineManager.registerJob(createCcwRifLoadJob(appMetrics, appConfig, dataSource));
+    pipelineManager.registerJob(createCcwRifLoadJob(appConfig, appState));
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
       pipelineManager.registerJob(
           appConfig
               .getRdaLoadOptions()
               .get()
-              .createFissClaimsLoadJob(appConfig.getDatabaseOptions(), appMetrics));
+              .createFissClaimsLoadJob(appConfig.getDatabaseOptions(), appState));
     }
 
     /*
@@ -153,21 +152,22 @@ public final class PipelineApplication {
   }
 
   /**
-   * @param appMetrics the application's {@link MetricRegistry}
-   * @param appConfig the {@link AppConfiguration}
+   * @param appConfig the {@link AppConfiguration} to use
+   * @param appState the {@link PipelineApplicationState} to use
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
-  private static CcwRifLoadJob createCcwRifLoadJob(
-      MetricRegistry appMetrics, AppConfiguration appConfig, HikariDataSource dataSource) {
+  private static PipelineJob<?> createCcwRifLoadJob(
+      AppConfiguration appConfig, PipelineApplicationState appState) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
      */
     S3TaskManager s3TaskManager =
-        new S3TaskManager(appMetrics, appConfig.getCcwRifLoadOptions().getExtractionOptions());
+        new S3TaskManager(
+            appState.getMetrics(), appConfig.getCcwRifLoadOptions().getExtractionOptions());
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
     RifLoader rifLoader =
-        new RifLoader(appMetrics, appConfig.getCcwRifLoadOptions().getLoadOptions(), dataSource);
+        new RifLoader(appConfig.getCcwRifLoadOptions().getLoadOptions(), appState);
 
     /*
      * Create the DataSetMonitorListener that will glue those stages together and run them all for
@@ -175,10 +175,13 @@ public final class PipelineApplication {
      */
     DataSetMonitorListener dataSetMonitorListener =
         new DefaultDataSetMonitorListener(
-            appMetrics, PipelineApplication::handleUncaughtException, rifProcessor, rifLoader);
+            appState.getMetrics(),
+            PipelineApplication::handleUncaughtException,
+            rifProcessor,
+            rifLoader);
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
-            appMetrics,
+            appState.getMetrics(),
             appConfig.getCcwRifLoadOptions().getExtractionOptions(),
             s3TaskManager,
             dataSetMonitorListener);

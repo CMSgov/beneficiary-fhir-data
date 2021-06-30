@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.app;
 
 import gov.cms.bfd.model.rif.RifFileType;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
+import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,7 +41,7 @@ public final class AppConfigurationTestIT {
   public void normalUsage()
       throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException,
           DecoderException {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabase();
+    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
@@ -53,12 +53,12 @@ public final class AppConfigurationTestIT {
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
-            String.valueOf(RifLoaderTestUtils.HICN_HASH_ITERATIONS));
+            String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
     testAppBuilder
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
-            Hex.encodeHexString(RifLoaderTestUtils.HICN_HASH_PEPPER));
+            Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
     testAppBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
