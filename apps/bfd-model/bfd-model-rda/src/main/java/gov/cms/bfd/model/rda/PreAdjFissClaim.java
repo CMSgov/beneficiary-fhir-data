@@ -12,8 +12,11 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
@@ -21,6 +24,9 @@ import lombok.experimental.FieldNameConstants;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @Table(name = "`FissClaims`", schema = "`pre_adj`")
@@ -104,6 +110,7 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @Builder.Default
   private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
 
   @OneToMany(
@@ -111,5 +118,6 @@ public class PreAdjFissClaim {
       fetch = FetchType.EAGER,
       orphanRemoval = true,
       cascade = CascadeType.ALL)
+  @Builder.Default
   private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
 }

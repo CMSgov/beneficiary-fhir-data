@@ -82,6 +82,12 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
+   * #getDatabaseOptions()} {@link DatabaseOptions#getMaxPoolSize()} value.
+   */
+  public static final String ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE = "DATABASE_MAX_POOL_SIZE";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
    * #getCcwRifLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
    */
   public static final String ENV_VAR_KEY_LOADER_THREADS = "LOADER_THREADS";
@@ -259,17 +265,37 @@ public final class AppConfiguration implements Serializable {
    *     configuration passed to the application are incomplete or incorrect.
    */
   static AppConfiguration readConfigFromEnvironmentVariables() {
-    String s3BucketName = System.getenv(ENV_VAR_KEY_BUCKET);
-    if (s3BucketName == null || s3BucketName.isEmpty())
+    String s3BucketName = readEnvStringRequired(ENV_VAR_KEY_BUCKET);
+    int hicnHashIterations = readEnvIntPositiveRequired(ENV_VAR_KEY_HICN_HASH_ITERATIONS);
+    byte[] hicnHashPepper = readEnvBytesRequired(ENV_VAR_KEY_HICN_HASH_PEPPER);
+    String databaseUrl = readEnvStringRequired(ENV_VAR_KEY_DATABASE_URL);
+    String databaseUsername = readEnvStringRequired(ENV_VAR_KEY_DATABASE_USERNAME);
+    String databasePassword = readEnvStringRequired(ENV_VAR_KEY_DATABASE_PASSWORD);
+    int loaderThreads = readEnvIntPositiveRequired(ENV_VAR_KEY_LOADER_THREADS);
+    boolean idempotencyRequired = readEnvBooleanRequired(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
+    Optional<String> newRelicMetricKey = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_KEY);
+    Optional<String> newRelicAppName = readEnvStringOptional(ENV_VAR_NEW_RELIC_APP_NAME);
+    Optional<String> newRelicMetricHost = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_HOST);
+    Optional<String> newRelicMetricPath = readEnvStringOptional(ENV_VAR_NEW_RELIC_METRIC_PATH);
+    Optional<Integer> newRelicMetricPeriod = readEnvIntOptional(ENV_VAR_NEW_RELIC_METRIC_PERIOD);
+
+    /*
+     * Note: For CcwRifLoadJob, databaseMaxPoolSize needs to be double the number of loader threads
+     * when idempotent loads are being used. Apparently, the queries need a separate Connection?
+     */
+    Optional<Integer> databaseMaxPoolSize = readEnvIntOptional(ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE);
+    if (databaseMaxPoolSize.isPresent() && databaseMaxPoolSize.get() < 1)
       throw new AppConfigurationException(
           String.format(
-              "Missing value for configuration environment variable '%s'.", ENV_VAR_KEY_BUCKET));
+              "Invalid value for configuration environment variable '%s': '%s'",
+              ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, databaseMaxPoolSize));
+    if (!databaseMaxPoolSize.isPresent()) databaseMaxPoolSize = Optional.of(loaderThreads * 2);
 
-    String rifFilterText = System.getenv(ENV_VAR_KEY_ALLOWED_RIF_TYPE);
-    RifFileType allowedRifFileType;
-    if (rifFilterText != null && !rifFilterText.isEmpty()) {
+    Optional<String> rifFilterText = readEnvStringOptional(ENV_VAR_KEY_ALLOWED_RIF_TYPE);
+    Optional<RifFileType> allowedRifFileType;
+    if (rifFilterText.isPresent()) {
       try {
-        allowedRifFileType = RifFileType.valueOf(rifFilterText);
+        allowedRifFileType = Optional.of(RifFileType.valueOf(rifFilterText.get()));
       } catch (IllegalArgumentException e) {
         throw new AppConfigurationException(
             String.format(
@@ -278,96 +304,8 @@ public final class AppConfiguration implements Serializable {
             e);
       }
     } else {
-      allowedRifFileType = null;
+      allowedRifFileType = Optional.empty();
     }
-
-    String hicnHashIterationsText = System.getenv(ENV_VAR_KEY_HICN_HASH_ITERATIONS);
-    if (hicnHashIterationsText == null || hicnHashIterationsText.isEmpty())
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_HICN_HASH_ITERATIONS));
-    int hicnHashIterations;
-    try {
-      hicnHashIterations = Integer.parseInt(hicnHashIterationsText);
-    } catch (NumberFormatException e) {
-      hicnHashIterations = -1;
-    }
-    if (hicnHashIterations < 1)
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              ENV_VAR_KEY_HICN_HASH_ITERATIONS, hicnHashIterationsText));
-
-    String hicnHashPepperText = System.getenv(ENV_VAR_KEY_HICN_HASH_PEPPER);
-    if (hicnHashPepperText == null || hicnHashPepperText.isEmpty())
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_HICN_HASH_PEPPER));
-    byte[] hicnHashPepper;
-    try {
-      hicnHashPepper = Hex.decodeHex(hicnHashPepperText.toCharArray());
-    } catch (DecoderException e) {
-      hicnHashPepper = new byte[] {};
-    }
-    if (hicnHashPepperText.length() < 1)
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              ENV_VAR_KEY_HICN_HASH_PEPPER, hicnHashPepperText));
-
-    String databaseUrl = System.getenv(ENV_VAR_KEY_DATABASE_URL);
-    if (databaseUrl == null || databaseUrl.isEmpty())
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_DATABASE_URL));
-
-    String databaseUsername = System.getenv(ENV_VAR_KEY_DATABASE_USERNAME);
-    if (databaseUsername == null)
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_DATABASE_USERNAME));
-
-    String databasePassword = System.getenv(ENV_VAR_KEY_DATABASE_PASSWORD);
-    if (databasePassword == null)
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_DATABASE_PASSWORD));
-
-    String loaderThreadsText = System.getenv(ENV_VAR_KEY_LOADER_THREADS);
-    if (loaderThreadsText == null || loaderThreadsText.isEmpty())
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_LOADER_THREADS));
-    int loaderThreads;
-    try {
-      loaderThreads = Integer.parseInt(loaderThreadsText);
-    } catch (NumberFormatException e) {
-      loaderThreads = -1;
-    }
-    if (loaderThreads < 1)
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              ENV_VAR_KEY_LOADER_THREADS, loaderThreadsText));
-
-    String idempotencyRequiredText = System.getenv(ENV_VAR_KEY_IDEMPOTENCY_REQUIRED);
-    if (idempotencyRequiredText == null || idempotencyRequiredText.isEmpty())
-      throw new AppConfigurationException(
-          String.format(
-              "Missing value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
-    Optional<Boolean> idempotencyRequired = parseBoolean(idempotencyRequiredText);
-    if (!idempotencyRequired.isPresent())
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s'.",
-              ENV_VAR_KEY_IDEMPOTENCY_REQUIRED));
 
     /*
      * Just for convenience: make sure DefaultAWSCredentialsProviderChain
@@ -389,24 +327,11 @@ public final class AppConfiguration implements Serializable {
           e);
     }
 
-    // New Relic Metrics
-    String newRelicMetricKey = System.getenv(ENV_VAR_NEW_RELIC_METRIC_KEY);
-    String newRelicAppName = System.getenv(ENV_VAR_NEW_RELIC_APP_NAME);
-    String newRelicMetricHost = System.getenv(ENV_VAR_NEW_RELIC_METRIC_HOST);
-    String newRelicMetricPath = System.getenv(ENV_VAR_NEW_RELIC_METRIC_PATH);
-    String rawNewRelicMetricPeriod = System.getenv(ENV_VAR_NEW_RELIC_METRIC_PERIOD);
-    int newRelicMetricPeriod;
+    Optional<String> hostname;
     try {
-      newRelicMetricPeriod = Integer.parseInt(rawNewRelicMetricPeriod);
-    } catch (NumberFormatException ex) {
-      newRelicMetricPeriod = 15;
-    }
-
-    String hostname;
-    try {
-      hostname = InetAddress.getLocalHost().getHostName();
+      hostname = Optional.of(InetAddress.getLocalHost().getHostName());
     } catch (UnknownHostException e) {
-      hostname = "unknown";
+      hostname = Optional.empty();
     }
 
     MetricOptions metricOptions =
@@ -418,13 +343,14 @@ public final class AppConfiguration implements Serializable {
             newRelicMetricPeriod,
             hostname);
     DatabaseOptions databaseOptions =
-        new DatabaseOptions(databaseUrl, databaseUsername, databasePassword);
+        new DatabaseOptions(
+            databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.get());
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
     LoadAppOptions loadOptions =
         new LoadAppOptions(
             new IdHasher.Config(hicnHashIterations, hicnHashPepper),
             loaderThreads,
-            idempotencyRequired.get().booleanValue());
+            idempotencyRequired);
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
 
     RdaLoadOptions rdaLoadOptions =
@@ -441,72 +367,175 @@ public final class AppConfiguration implements Serializable {
    */
   @Nullable
   static RdaLoadOptions readRdaLoadOptionsFromEnvironmentVariables(IdHasher.Config idHasherConfig) {
-    final boolean enabled = parseBoolean(ENV_VAR_KEY_RDA_JOB_ENABLED).orElse(false);
+    final boolean enabled = readEnvBooleanOptional(ENV_VAR_KEY_RDA_JOB_ENABLED).orElse(false);
     if (!enabled) {
       return null;
     }
     final AbstractRdaLoadJob.Config jobConfig =
         new AbstractRdaLoadJob.Config(
             Duration.ofSeconds(
-                getIntOrDefault(
-                    ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, DEFAULT_RDA_JOB_INTERVAL_SECONDS)),
-            getIntOrDefault(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, DEFAULT_RDA_JOB_BATCH_SIZE));
+                readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)
+                    .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)),
+            readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE).orElse(DEFAULT_RDA_JOB_BATCH_SIZE));
     final GrpcRdaSource.Config grpcConfig =
         new GrpcRdaSource.Config(
-            getStringOrDefault(ENV_VAR_KEY_RDA_GRPC_HOST, DEFAULT_RDA_GRPC_HOST),
-            getIntOrDefault(ENV_VAR_KEY_RDA_GRPC_PORT, DEFAULT_RDA_GRPC_PORT),
+            readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST).orElse(DEFAULT_RDA_GRPC_HOST),
+            readEnvIntOptional(ENV_VAR_KEY_RDA_GRPC_PORT).orElse(DEFAULT_RDA_GRPC_PORT),
             Duration.ofSeconds(
-                getIntOrDefault(
-                    ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
+                readEnvIntOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS)
+                    .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
     return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
   }
 
   /**
-   * Design note: want better parsing than what {@link Boolean#parseBoolean(String)} provides.
-   *
-   * @param booleanText the text to try and parse a <code>boolean</code> from
-   * @return the parsed <code>boolean</code>, or {@link Optional#empty()} if nothing valid could be
-   *     parsed
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
+   *     not set
    */
-  static Optional<Boolean> parseBoolean(String booleanText) {
-    if ("true".equalsIgnoreCase(booleanText)) return Optional.of(true);
-    else if ("false".equalsIgnoreCase(booleanText)) return Optional.of(false);
-    else return Optional.empty();
+  static Optional<String> readEnvStringOptional(String environmentVariableName) {
+    Optional<String> environmentVariableValue =
+        Optional.ofNullable(System.getenv(environmentVariableName));
+    return environmentVariableValue;
   }
 
   /**
-   * Retrieve configuration value with the given name. Returns the specified default value when
-   * there is no configuration value matching the key. Empty string is considered a valid value so
-   * it does not trigger return of the default.
-   *
-   * @param key key that identifies the particular configuration value.
-   * @param defaultValue default value if there is no configuration value matching the key
-   * @return either the configuration value or the default if the value was null
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value is missing.
    */
-  static String getStringOrDefault(String key, String defaultValue) {
-    String value = System.getenv(key);
-    return value != null ? value : defaultValue;
-  }
-
-  /**
-   * Retrieve integer configuration value with the given name. Returns the specified default value
-   * when there is no configuration value matching the key.
-   *
-   * @param key key that identifies the particular configuration value.
-   * @param defaultValue default value if there is no configuration value matching the key
-   * @return either the configuration value or the default
-   * @throws AppConfigurationException if the value is not an integer
-   */
-  static int getIntOrDefault(String key, int defaultValue) {
-    try {
-      String strValue = System.getenv(key);
-      return strValue != null ? Integer.parseInt(strValue) : defaultValue;
-    } catch (NumberFormatException ex) {
+  static String readEnvStringRequired(String environmentVariableName) {
+    Optional<String> environmentVariableValue =
+        Optional.ofNullable(System.getenv(environmentVariableName));
+    if (!environmentVariableValue.isPresent()) {
       throw new AppConfigurationException(
           String.format(
-              "Invalid environment variable value, expected a valid integer: envvar=%s error='%s'",
-              key, ex.getMessage()),
-          ex);
+              "Missing value for configuration environment variable '%s'.",
+              environmentVariableName));
+    } else if (environmentVariableValue.get().isEmpty()) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              environmentVariableName, environmentVariableValue.get()));
+    }
+
+    return environmentVariableValue.get();
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
+   *     not set
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value cannot be parsed.
+   */
+  static Optional<Integer> readEnvIntOptional(String environmentVariableName) {
+    Optional<String> environmentVariableValueText =
+        Optional.ofNullable(System.getenv(environmentVariableName));
+    if (!environmentVariableValueText.isPresent()) {
+      return Optional.empty();
+    }
+
+    try {
+      return Optional.of(Integer.valueOf(environmentVariableValueText.get()));
+    } catch (NumberFormatException e) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              environmentVariableName, environmentVariableValueText.get()));
+    }
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value cannot be parsed or is not positive.
+   */
+  static int readEnvIntPositiveRequired(String environmentVariableName) {
+    Optional<Integer> environmentVariableValue = readEnvIntOptional(environmentVariableName);
+    if (!environmentVariableValue.isPresent()) {
+      throw new AppConfigurationException(
+          String.format(
+              "Missing value for configuration environment variable '%s'.",
+              environmentVariableName));
+    } else if (environmentVariableValue.get() < 1) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              environmentVariableName, environmentVariableValue.get()));
+    }
+
+    return environmentVariableValue.get();
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
+   *     not set
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value cannot be parsed.
+   */
+  static Optional<Boolean> readEnvBooleanOptional(String environmentVariableName) {
+    Optional<String> environmentVariableValueText =
+        Optional.ofNullable(System.getenv(environmentVariableName));
+    if (!environmentVariableValueText.isPresent()) {
+      return Optional.empty();
+    }
+
+    if ("true".equalsIgnoreCase(environmentVariableValueText.get())) return Optional.of(true);
+    else if ("false".equalsIgnoreCase(environmentVariableValueText.get()))
+      return Optional.of(false);
+    else
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              environmentVariableName, environmentVariableValueText.get()));
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value cannot be parsed.
+   */
+  static boolean readEnvBooleanRequired(String environmentVariableName) {
+    Optional<Boolean> environmentVariableValue = readEnvBooleanOptional(environmentVariableName);
+    if (!environmentVariableValue.isPresent()) {
+      throw new AppConfigurationException(
+          String.format(
+              "Missing value for configuration environment variable '%s'.",
+              environmentVariableName));
+    }
+
+    return environmentVariableValue.get();
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value cannot be parsed.
+   */
+  static byte[] readEnvBytesRequired(String environmentVariableName) {
+    Optional<String> environmentVariableValueText =
+        Optional.ofNullable(System.getenv(environmentVariableName));
+    if (!environmentVariableValueText.isPresent()) {
+      throw new AppConfigurationException(
+          String.format(
+              "Missing value for configuration environment variable '%s'.",
+              environmentVariableName));
+    }
+
+    try {
+      byte[] environmentVariableValue =
+          Hex.decodeHex(environmentVariableValueText.get().toCharArray());
+      return environmentVariableValue;
+    } catch (DecoderException e) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              environmentVariableName, environmentVariableValueText.get()));
     }
   }
 }

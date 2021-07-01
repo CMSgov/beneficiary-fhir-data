@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.sink.JpaClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
@@ -11,6 +10,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.Serializable;
 import java.time.Clock;
@@ -50,12 +50,12 @@ public class RdaLoadOptions implements Serializable {
   /**
    * Factory method to construct a new job instance using standard parameters.
    *
-   * @param databaseOptions connection options for SQL database
-   * @param appMetrics MetricRegistry used to track operational metrics
+   * @param databaseOptions the shared application {@link DatabaseOptions}
+   * @param appState the shared {@link PipelineApplicationState}
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
   public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(
-      DatabaseOptions databaseOptions, MetricRegistry appMetrics) {
+      PipelineApplicationState appState) {
     return new RdaFissClaimLoadJob(
         jobConfig,
         () ->
@@ -63,9 +63,9 @@ public class RdaLoadOptions implements Serializable {
                 grpcConfig,
                 new FissClaimStreamCaller(
                     new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
-                appMetrics),
-        () -> new JpaClaimRdaSink<>("fiss", databaseOptions, appMetrics),
-        appMetrics);
+                appState.getMetrics()),
+        () -> new JpaClaimRdaSink<>("fiss", appState),
+        appState.getMetrics());
   }
 
   /**
@@ -76,7 +76,7 @@ public class RdaLoadOptions implements Serializable {
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
   public PipelineJob<NullPipelineJobArguments> createMcsClaimsLoadJob(
-      DatabaseOptions databaseOptions, MetricRegistry appMetrics) {
+      PipelineApplicationState appState) {
     return new RdaMcsClaimLoadJob(
         jobConfig,
         () ->
@@ -84,9 +84,9 @@ public class RdaLoadOptions implements Serializable {
                 grpcConfig,
                 new McsClaimStreamCaller(
                     new McsClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
-                appMetrics),
-        () -> new JpaClaimRdaSink<>("mcs", databaseOptions, appMetrics),
-        appMetrics);
+                appState.getMetrics()),
+        () -> new JpaClaimRdaSink<>("mcs", appState),
+        appState.getMetrics());
   }
 
   @Override

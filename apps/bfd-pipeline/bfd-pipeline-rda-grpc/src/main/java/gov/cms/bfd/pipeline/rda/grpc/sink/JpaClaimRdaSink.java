@@ -3,16 +3,14 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import com.zaxxer.hikari.HikariDataSource;
+import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.util.Collection;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,30 +23,12 @@ import org.slf4j.LoggerFactory;
 public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
   private static final Logger LOGGER = LoggerFactory.getLogger(JpaClaimRdaSink.class);
 
-  private final HikariDataSource dataSource;
-  private final EntityManagerFactory entityManagerFactory;
   private final EntityManager entityManager;
   private final Metrics metrics;
 
-  public JpaClaimRdaSink(
-      String claimType, DatabaseOptions databaseOptions, MetricRegistry metricRegistry) {
-    dataSource = DatabaseUtils.createDataSource(databaseOptions, metricRegistry, 10);
-    entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
-    entityManager = entityManagerFactory.createEntityManager();
-    metrics = new Metrics(metricRegistry, claimType);
-  }
-
-  @VisibleForTesting
-  JpaClaimRdaSink(
-      String claimType,
-      HikariDataSource dataSource,
-      EntityManagerFactory entityManagerFactory,
-      EntityManager entityManager,
-      MetricRegistry metricRegistry) {
-    this.dataSource = dataSource;
-    this.entityManagerFactory = entityManagerFactory;
-    this.entityManager = entityManager;
-    metrics = new Metrics(metricRegistry, claimType);
+  public JpaClaimRdaSink(String claimType, PipelineApplicationState appState) {
+    entityManager = appState.getEntityManagerFactory().createEntityManager();
+    metrics = new Metrics(appState.getMetrics(), claimType);
   }
 
   @Override
@@ -56,22 +36,8 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
     if (entityManager != null && entityManager.isOpen()) {
       entityManager.close();
     }
-    if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
-      entityManagerFactory.close();
-    }
-    if (dataSource != null && !dataSource.isClosed()) {
-      dataSource.close();
-    }
   }
 
-  /**
-   * Writes the entire batch to the database in a single transaction.
-   *
-   * @param claims batch of claims to be written to the database
-   * @return the number of claims successfully written to the database
-   * @throws ProcessingException wrapped exception if an error takes place
-   */
-  @Override
   public int writeBatch(Collection<RdaChange<TClaim>> claims) throws ProcessingException {
     try {
       metrics.calls.mark();
@@ -161,7 +127,7 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
       if (error instanceof EntityExistsException) {
         return true;
       }
-      final String errorMessage = error.getMessage().toLowerCase();
+      final String errorMessage = Strings.nullToEmpty(error.getMessage()).toLowerCase();
       if (errorMessage.contains("already exists") || errorMessage.contains("duplicate key")) {
         return true;
       }

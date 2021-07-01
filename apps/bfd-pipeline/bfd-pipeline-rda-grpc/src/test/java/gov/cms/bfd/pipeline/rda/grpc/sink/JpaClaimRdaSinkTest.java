@@ -11,6 +11,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,12 +40,12 @@ public class JpaClaimRdaSinkTest {
   @Before
   public void setUp() {
     appMetrics = new MetricRegistry();
-    sink =
-        new JpaClaimRdaSink<>("fiss", dataSource, entityManagerFactory, entityManager, appMetrics);
+    doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
-    doReturn(true).when(entityManagerFactory).isOpen();
     doReturn(true).when(entityManager).isOpen();
-    doReturn(false).when(dataSource).isClosed();
+    PipelineApplicationState appState =
+        new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory);
+    sink = new JpaClaimRdaSink<>("fiss", appState);
   }
 
   @Test
@@ -178,9 +179,7 @@ public class JpaClaimRdaSinkTest {
   @Test
   public void closeMethodsAreCalled() throws Exception {
     sink.close();
-    verify(dataSource).close();
     verify(entityManager).close();
-    verify(entityManagerFactory).close();
   }
 
   @Test

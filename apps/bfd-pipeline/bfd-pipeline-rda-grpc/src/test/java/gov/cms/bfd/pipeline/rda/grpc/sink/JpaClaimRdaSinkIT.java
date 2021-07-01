@@ -3,7 +3,6 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import static org.junit.Assert.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
-import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
@@ -12,51 +11,47 @@ import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class JpaClaimRdaSinkIT {
-  private HikariDataSource dataSource;
-  private EntityManagerFactory entityManagerFactory;
+  public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
+
+  private PipelineApplicationState appState;
   private EntityManager entityManager;
-  private JpaClaimRdaSink<PreAdjFissClaim> sink;
 
   @Before
   public void setUp() {
-    //      sink = new JpaClaimRdaSink<>(dataSource, entityManagerFactory, entityManager, new
-    // MetricRegistry());
-    JDBCDataSource dataSource1 = new JDBCDataSource();
-    dataSource1.setUrl("jdbc:hsqldb:mem:unit-tests");
-    final HikariDataSource dataSource =
-        DatabaseUtils.createDataSource(dataSource1, new MetricRegistry(), 10);
+    JDBCDataSource dataSource = new JDBCDataSource();
+    dataSource.setUrl("jdbc:hsqldb:mem:unit-tests");
     DatabaseSchemaManager.createOrUpdateSchema(dataSource);
-    entityManagerFactory =
-        DatabaseUtils.createEntityManagerFactory(
-            dataSource, DatabaseUtils.RDA_PERSISTENCE_UNIT_NAME);
-    entityManager = entityManagerFactory.createEntityManager();
+    appState =
+        new PipelineApplicationState(new MetricRegistry(), dataSource, 10, PERSISTENCE_UNIT_NAME);
+    entityManager = appState.getEntityManagerFactory().createEntityManager();
   }
 
   @After
-  public void tearDown() {
-    if (entityManager != null && entityManager.isOpen()) {
+  public void tearDown() throws Exception {
+    if (entityManager != null) {
       entityManager.close();
+      entityManager = null;
     }
-    entityManager = null;
+    if (appState != null) {
+      appState.close();
+      appState = null;
+    }
   }
 
   @Test
   public void fissClaim() throws Exception {
-    final JpaClaimRdaSink<PreAdjFissClaim> sink =
-        new JpaClaimRdaSink<>(
-            "fiss", dataSource, entityManagerFactory, entityManager, new MetricRegistry());
+    final JpaClaimRdaSink<PreAdjFissClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
 
     final PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn("1");
@@ -99,9 +94,7 @@ public class JpaClaimRdaSinkIT {
 
   @Test
   public void mcsClaim() throws Exception {
-    final JpaClaimRdaSink<PreAdjMcsClaim> sink =
-        new JpaClaimRdaSink<>(
-            "fiss", dataSource, entityManagerFactory, entityManager, new MetricRegistry());
+    final JpaClaimRdaSink<PreAdjMcsClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
 
     final PreAdjMcsClaim claim = new PreAdjMcsClaim();
     claim.setIdrClmHdIcn("3");
