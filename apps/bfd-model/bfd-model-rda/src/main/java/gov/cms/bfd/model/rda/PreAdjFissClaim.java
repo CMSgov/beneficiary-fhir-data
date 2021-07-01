@@ -45,7 +45,7 @@ public class PreAdjFissClaim {
   @Column(name = "`medaProvId`", length = 13)
   private String medaProvId;
 
-  @Column(name = "`medaProv_6`", length = 13)
+  @Column(name = "`medaProv_6`", length = 6)
   private String medaProv_6;
 
   @Column(name = "`totalChargeAmount`", columnDefinition = "decimal(11,2)")
