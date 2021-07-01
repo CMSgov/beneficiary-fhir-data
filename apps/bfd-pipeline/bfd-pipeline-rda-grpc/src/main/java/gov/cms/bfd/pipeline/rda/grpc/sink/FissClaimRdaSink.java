@@ -3,16 +3,14 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import com.zaxxer.hikari.HikariDataSource;
+import com.google.common.base.Strings;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.util.Collection;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +33,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   static final String OBJECTS_MERGED_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "writes", "merged");
 
-  private final HikariDataSource dataSource;
-  private final EntityManagerFactory entityManagerFactory;
+  private final PipelineApplicationState appState;
   private final EntityManager entityManager;
   private final Meter callsMeter;
   private final Meter failuresMeter;
@@ -44,38 +41,20 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   private final Meter objectsPersistedMeter;
   private final Meter objectsMergedMeter;
 
-  public FissClaimRdaSink(DatabaseOptions databaseOptions, MetricRegistry metricRegistry) {
-    dataSource = DatabaseUtils.createDataSource(databaseOptions, metricRegistry, 10);
-    entityManagerFactory = DatabaseUtils.createEntityManagerFactory(dataSource);
-    entityManager = entityManagerFactory.createEntityManager();
-    callsMeter = metricRegistry.meter(CALLS_METER_NAME);
-    failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);
-    objectsWrittenMeter = metricRegistry.meter(OBJECTS_WRITTEN_METER_NAME);
-    objectsPersistedMeter = metricRegistry.meter(OBJECTS_PERSISTED_METER_NAME);
-    objectsMergedMeter = metricRegistry.meter(OBJECTS_MERGED_METER_NAME);
-  }
+  public FissClaimRdaSink(PipelineApplicationState appState) {
+    this.appState = appState;
 
-  @VisibleForTesting
-  FissClaimRdaSink(
-      HikariDataSource dataSource,
-      EntityManagerFactory entityManagerFactory,
-      EntityManager entityManager,
-      MetricRegistry metricRegistry) {
-    this.dataSource = dataSource;
-    this.entityManagerFactory = entityManagerFactory;
-    this.entityManager = entityManager;
-    callsMeter = metricRegistry.meter(CALLS_METER_NAME);
-    objectsWrittenMeter = metricRegistry.meter(OBJECTS_WRITTEN_METER_NAME);
-    failuresMeter = metricRegistry.meter(FAILURES_METER_NAME);
-    objectsPersistedMeter = metricRegistry.meter(OBJECTS_PERSISTED_METER_NAME);
-    objectsMergedMeter = metricRegistry.meter(OBJECTS_MERGED_METER_NAME);
+    entityManager = appState.getEntityManagerFactory().createEntityManager();
+    callsMeter = appState.getMetrics().meter(CALLS_METER_NAME);
+    failuresMeter = appState.getMetrics().meter(FAILURES_METER_NAME);
+    objectsWrittenMeter = appState.getMetrics().meter(OBJECTS_WRITTEN_METER_NAME);
+    objectsPersistedMeter = appState.getMetrics().meter(OBJECTS_PERSISTED_METER_NAME);
+    objectsMergedMeter = appState.getMetrics().meter(OBJECTS_MERGED_METER_NAME);
   }
 
   @Override
   public void close() throws Exception {
     entityManager.close();
-    entityManagerFactory.close();
-    dataSource.close();
   }
 
   /**
@@ -154,7 +133,7 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
       if (error instanceof EntityExistsException) {
         return true;
       }
-      final String errorMessage = error.getMessage().toLowerCase();
+      final String errorMessage = Strings.nullToEmpty(error.getMessage()).toLowerCase();
       if (errorMessage.contains("already exists") || errorMessage.contains("duplicate key")) {
         return true;
       }
