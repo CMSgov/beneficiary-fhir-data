@@ -47,43 +47,42 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   }
 
   private void addRandomFieldValues(FissClaim.Builder claim) {
-    claim.setDcn(randomString(DIGIT, 5, 8)).setHicNo(randomString(DIGIT, 12, 12));
+    claim.setDcn(randomDigit(5, 8)).setHicNo(randomDigit(12, 12));
     either(
         () -> claim.setCurrStatusEnum(randomEnum(CLAIM_STATUSES)),
-        () -> claim.setCurrStatusUnrecognized(randomString(ALPHA, 1, 1)));
+        () -> claim.setCurrStatusUnrecognized(randomLetter(1, 1)));
     either(
         () -> claim.setCurrLoc1Enum(randomEnum(PROCESSING_TYPES)),
-        () -> claim.setCurrLoc1Unrecognized(randomString(ALPHA, 1, 1)));
+        () -> claim.setCurrLoc1Unrecognized(randomLetter(1, 1)));
     either(
         () -> claim.setCurrLoc2Enum(randomEnum(CURR_LOC2S)),
-        () -> claim.setCurrStatusUnrecognized(randomString(ALPHA, 1, 5)));
-    optional(() -> claim.setMedaProvId(randomString(ALNUM, 13, 13)));
+        () -> claim.setCurrStatusUnrecognized(randomLetter(1, 5)));
+    optional(() -> claim.setMedaProvId(randomAlphaNumeric(13, 13)));
     optional(() -> claim.setTotalChargeAmount(randomAmount()));
     optional(() -> claim.setRecdDtCymd(randomDate()));
     optional(() -> claim.setCurrTranDtCymd(randomDate()));
-    optional(() -> claim.setAdmDiagCode(randomString(ALPHA, 1, 7)));
-    optional(() -> claim.setNpiNumber(randomString(DIGIT, 10, 10)));
-    optional(() -> claim.setMbi(randomString(ALNUM, 13, 13)));
-    optional(() -> claim.setFedTaxNb(randomString(DIGIT, 10, 10)));
-    optional(() -> claim.setPracLocAddr1(randomString(ALNUM, 1, 100)));
-    optional(() -> claim.setPracLocAddr2(randomString(ALNUM, 1, 100)));
-    optional(() -> claim.setPracLocCity(randomString(ALNUM, 1, 100)));
-    optional(() -> claim.setPracLocState(randomString(ALPHA, 2, 2)));
-    optional(() -> claim.setPracLocZip(randomString(DIGIT, 1, 15)));
+    optional(() -> claim.setAdmDiagCode(randomLetter(1, 7)));
+    optional(() -> claim.setNpiNumber(randomDigit(10, 10)));
+    optional(() -> claim.setMbi(randomAlphaNumeric(13, 13)));
+    optional(() -> claim.setFedTaxNb(randomDigit(10, 10)));
+    optional(() -> claim.setPracLocAddr1(randomAlphaNumeric(1, 100)));
+    optional(() -> claim.setPracLocAddr2(randomAlphaNumeric(1, 100)));
+    optional(() -> claim.setPracLocCity(randomAlphaNumeric(1, 100)));
+    optional(() -> claim.setPracLocState(randomLetter(2, 2)));
+    optional(() -> claim.setPracLocZip(randomDigit(1, 15)));
     optional(() -> claim.setStmtCovFromCymd(randomDate()));
     optional(() -> claim.setStmtCovToCymd(randomDate()));
   }
 
   private void addRandomProcCodes(FissClaim.Builder claim) {
-    final int count = randomCount(MAX_PROC_CODES);
+    final int count = randomInt(MAX_PROC_CODES);
     if (count > 0) {
-      final String primaryCode = randomString(ALPHA, 1, 7);
+      final String primaryCode = randomLetter(1, 7);
       claim.setPrincipleDiag(primaryCode);
       for (int i = 1; i <= count; ++i) {
         FissProcedureCode.Builder procCode =
-            FissProcedureCode.newBuilder()
-                .setProcCd(i == 1 ? primaryCode : randomString(ALPHA, 1, 7));
-        optional(() -> procCode.setProcFlag(randomString(ALPHA, 1, 4)));
+            FissProcedureCode.newBuilder().setProcCd(i == 1 ? primaryCode : randomLetter(1, 7));
+        optional(() -> procCode.setProcFlag(randomLetter(1, 4)));
         optional(() -> procCode.setProcDt(randomDate()));
         claim.addFissProcCodes(procCode);
       }
@@ -91,14 +90,14 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   }
 
   private void addRandomDiagnosisCodes(FissClaim.Builder claim) {
-    final int count = randomCount(MAX_DIAG_CODES);
+    final int count = randomInt(MAX_DIAG_CODES);
     for (int i = 1; i <= count; ++i) {
       FissDiagnosisCode.Builder diagCode =
-          FissDiagnosisCode.newBuilder().setDiagCd2(randomString(ALPHA, 1, 7));
+          FissDiagnosisCode.newBuilder().setDiagCd2(randomLetter(1, 7));
       either(
           () -> diagCode.setDiagPoaIndEnum(randomEnum(INDICATORS)),
-          () -> diagCode.setDiagPoaIndUnrecognized(randomString(ALPHA, 1, 1)));
-      optional(() -> diagCode.setBitFlags(randomString(ALPHA, 1, 4)));
+          () -> diagCode.setDiagPoaIndUnrecognized(randomLetter(1, 1)));
+      optional(() -> diagCode.setBitFlags(randomLetter(1, 4)));
       claim.addFissDiagCodes(diagCode);
     }
   }

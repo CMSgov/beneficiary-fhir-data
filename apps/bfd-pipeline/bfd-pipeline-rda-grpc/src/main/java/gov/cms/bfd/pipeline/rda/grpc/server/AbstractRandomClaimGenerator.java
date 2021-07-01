@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Random;
 
 abstract class AbstractRandomClaimGenerator {
-  protected static final String ALPHA = "bcdfghjkmnpqrstvwxz";
-  protected static final String DIGIT = "1234567890";
-  protected static final String ALNUM = ALPHA + DIGIT;
-  protected static final int MAX_DAYS_AGO = 180;
+  private static final String ALPHA = "bcdfghjkmnpqrstvwxz";
+  private static final String DIGIT = "1234567890";
+  private static final String ALNUM = ALPHA + DIGIT;
+  private static final int MAX_DAYS_AGO = 180;
+
   private final Random random;
   private final boolean optionalTrue;
 
@@ -25,21 +26,20 @@ abstract class AbstractRandomClaimGenerator {
         .collect(ImmutableList.toImmutableList());
   }
 
-  protected int randomCount(int maxValue) {
+  protected int randomInt(int maxValue) {
     return random.nextInt(maxValue);
   }
 
-  protected char randomChar(String characters) {
-    return characters.charAt(random.nextInt(characters.length()));
+  protected String randomDigit(int minLength, int maxLength) {
+    return randomString(DIGIT, minLength, maxLength);
   }
 
-  protected String randomString(String characters, int minLength, int maxLength) {
-    final StringBuilder sb = new StringBuilder();
-    final int len = minLength + random.nextInt(maxLength - minLength + 1);
-    while (sb.length() < len) {
-      sb.append(randomChar(characters));
-    }
-    return sb.toString();
+  protected String randomLetter(int minLength, int maxLength) {
+    return randomString(ALPHA, minLength, maxLength);
+  }
+
+  protected String randomAlphaNumeric(int minLength, int maxLength) {
+    return randomString(ALNUM, minLength, maxLength);
   }
 
   protected String randomDate() {
@@ -73,5 +73,18 @@ abstract class AbstractRandomClaimGenerator {
     } else {
       action2.run();
     }
+  }
+
+  private char randomChar(String characters) {
+    return characters.charAt(random.nextInt(characters.length()));
+  }
+
+  private String randomString(String characters, int minLength, int maxLength) {
+    final StringBuilder sb = new StringBuilder();
+    final int len = minLength + random.nextInt(maxLength - minLength + 1);
+    while (sb.length() < len) {
+      sb.append(randomChar(characters));
+    }
+    return sb.toString();
   }
 }
