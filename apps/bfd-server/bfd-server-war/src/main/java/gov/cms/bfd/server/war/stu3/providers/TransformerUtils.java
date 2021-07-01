@@ -52,11 +52,11 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -861,12 +861,13 @@ public final class TransformerUtils {
     Extension extension = null;
     try {
       String stringDate = dateYear.get().toString() + "-01-01";
+      DateTimeFormatter.ofPattern("yyyy-MM-dd");
       String date1 = DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(stringDate).toString();
       DateType dateYearValue = new DateType(date1);
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
 
-    } catch (ParseException e) {
+    } catch (DateTimeParseException e) {
       throw new InvalidRifValueException(
           String.format("Unable to parse reference year: '%s'.", dateYear.get()), e);
     }
