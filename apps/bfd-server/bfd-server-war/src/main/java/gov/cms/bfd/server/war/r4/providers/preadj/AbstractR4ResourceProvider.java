@@ -10,6 +10,8 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
@@ -20,13 +22,15 @@ import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -150,13 +154,30 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   }
 
   /**
-   * Helper method to make mocking easier in tests.
+   * Implementation specific claim type parsing
    *
    * @param typeText String to parse representing the claim type.
    * @return The parsed {@link ClaimResponseTypeV2} type.
    */
   @VisibleForTesting
   abstract Optional<ResourceTypeV2<T>> parseClaimType(String typeText);
+
+  /**
+   * Creates a Set of {@link ResourceTypeV2} for the given claim types.
+   *
+   * @param types The types of claims to include
+   * @return A Set of {@link ResourceTypeV2} claim types.
+   */
+  @VisibleForTesting
+  @Nonnull
+  Set<ResourceTypeV2<T>> parseClaimTypes(@Nonnull TokenAndListParam types) {
+    return types.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().stream()
+        .map(TokenParam::getValue)
+        .map(String::toLowerCase)
+        .map(getResourceTypeMap()::get)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+  }
 
   /**
    * Returns a set of all supported resource types.
@@ -166,6 +187,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @VisibleForTesting
   abstract Set<ResourceTypeV2<T>> getResourceTypes();
 
+  /**
+   * Returns implementation specific {@link ResourceTypeV2} map.
+   *
+   * @return The implementation specific {@link ResourceTypeV2} map.
+   */
+  @VisibleForTesting
+  abstract Map<String, ResourceTypeV2<T>> getResourceTypeMap();
+
   @Search
   @Trace
   public Bundle findByPatient(
@@ -173,8 +202,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
           @Description(shortDefinition = "The patient identifier to search for")
           ReferenceParam mbi,
       @OptionalParam(name = "type")
-          @Description(shortDefinition = "The source type to use for fetching claim data")
-          String type,
+          @Description(shortDefinition = "A list of claim types to include")
+          TokenAndListParam types,
       @OptionalParam(name = "isHashed")
           @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
           String hashed,
@@ -192,11 +221,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
 
-      Optional<ResourceTypeV2<T>> optional = parseClaimType(type);
-      if (optional.isPresent()) {
-        bundleResource =
-            createBundleFor(
-                Collections.singleton(optional.get()), mbiString, isHashed, lastUpdated);
+      if (types != null) {
+        bundleResource = createBundleFor(parseClaimTypes(types), mbiString, isHashed, lastUpdated);
       } else {
         bundleResource = createBundleFor(getResourceTypes(), mbiString, isHashed, lastUpdated);
       }

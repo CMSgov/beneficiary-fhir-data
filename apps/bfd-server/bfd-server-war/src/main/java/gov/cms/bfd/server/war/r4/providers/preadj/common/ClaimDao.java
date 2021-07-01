@@ -1,19 +1,16 @@
 package gov.cms.bfd.server.war.r4.providers.preadj.common;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -105,7 +102,7 @@ public class ClaimDao {
             builder.equal(root.get(attributeName), attributeValue),
             lastUpdated == null
                 ? builder.and()
-                : createDateRangePredicate(root.get("lastUpdated"), lastUpdated, builder)));
+                : createDateRangePredicate(root, lastUpdated, builder)));
 
     Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_MBI_METRIC_NAME).time();
     try {
@@ -123,28 +120,8 @@ public class ClaimDao {
 
   @VisibleForTesting
   Predicate createDateRangePredicate(
-      Path<Instant> datePath, DateRangeParam dateRange, CriteriaBuilder builder) {
-    List<Predicate> predicates = new ArrayList<>();
-
-    if (dateRange.getLowerBound() != null) {
-      Instant from = dateRange.getLowerBoundAsInstant().toInstant();
-
-      predicates.add(
-          ParamPrefixEnum.GREATERTHAN.equals(dateRange.getLowerBound().getPrefix())
-              ? builder.greaterThan(datePath, from)
-              : builder.greaterThanOrEqualTo(datePath, from));
-    }
-
-    if (dateRange.getUpperBound() != null) {
-      Instant to = dateRange.getUpperBoundAsInstant().toInstant();
-
-      predicates.add(
-          ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(dateRange.getUpperBound().getPrefix())
-              ? builder.lessThanOrEqualTo(datePath, to)
-              : builder.lessThan(datePath, to));
-    }
-
-    return builder.and(predicates.toArray(new Predicate[0]));
+      Root<?> root, DateRangeParam dateRange, CriteriaBuilder builder) {
+    return QueryUtils.createLastUpdatedPredicateInstant(builder, root, dateRange);
   }
 
   @Override

@@ -9,13 +9,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.codahale.metrics.MetricRegistry;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -181,13 +178,6 @@ public class ClaimDaoTest {
 
     doReturn(mockEqualsPredicate).when(mockBuilder).equal(mockPath, attributeValue);
 
-    // unchecked - Creating mocks, this is ok.
-    //noinspection unchecked
-    doReturn(null)
-        .when(daoSpy)
-        .createDateRangePredicate(
-            any(Path.class), any(DateRangeParam.class), any(CriteriaBuilder.class));
-
     doReturn(null).when(mockBuilder).and(mockEqualsPredicate, null);
 
     doReturn(mockAndPredicate).when(mockBuilder).and(mockEqualsPredicate, mockEmptyAndPredicate);
@@ -252,16 +242,14 @@ public class ClaimDaoTest {
     //noinspection unchecked
     Path<Instant> mockLastUpdatedPath = mock(Path.class);
 
-    // unchecked - Creating mocks, this is ok.
-    //noinspection unchecked
     doReturn(null)
         .when(daoSpy)
         .createDateRangePredicate(
-            any(Path.class), any(DateRangeParam.class), any(CriteriaBuilder.class));
+            any(Root.class), any(DateRangeParam.class), any(CriteriaBuilder.class));
 
     doReturn(mockDateRangePredicate)
         .when(daoSpy)
-        .createDateRangePredicate(mockLastUpdatedPath, mockDateRangeParam, mockBuilder);
+        .createDateRangePredicate(mockRoot, mockDateRangeParam, mockBuilder);
 
     doReturn(mockLastUpdatedPath).when(mockRoot).get("lastUpdated");
 
@@ -292,156 +280,6 @@ public class ClaimDaoTest {
 
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockAndPredicate);
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void shouldCreateDateRangePredicateIfValidDateRangeExclusive() {
-    long toEpoch = 5L;
-    long fromEpoch = 2L;
-
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    MetricRegistry metricRegistry = new MetricRegistry();
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry));
-
-    // unchecked - Creating mocks, this is ok.
-    //noinspection unchecked
-    Path<Instant> mockPath = mock(Path.class);
-    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
-    CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
-
-    Instant to = Instant.ofEpochMilli(toEpoch);
-    Instant from = Instant.ofEpochMilli(fromEpoch);
-
-    Date mockUpperBound = mock(Date.class);
-    Date mockLowerBound = mock(Date.class);
-
-    doReturn(to).when(mockUpperBound).toInstant();
-
-    doReturn(from).when(mockLowerBound).toInstant();
-
-    doReturn(mockUpperBound).when(mockDateRangeParam).getUpperBoundAsInstant();
-
-    doReturn(mockLowerBound).when(mockDateRangeParam).getLowerBoundAsInstant();
-
-    Predicate mockFromPredicate = mock(Predicate.class);
-    Predicate mockToPredicate = mock(Predicate.class);
-
-    DateParam mockLowerDateParam = mock(DateParam.class);
-    DateParam mockUpperDateParam = mock(DateParam.class);
-
-    ParamPrefixEnum lowerPrefix = ParamPrefixEnum.GREATERTHAN;
-    ParamPrefixEnum upperPrefix = ParamPrefixEnum.LESSTHAN;
-
-    doReturn(lowerPrefix).when(mockLowerDateParam).getPrefix();
-
-    doReturn(upperPrefix).when(mockUpperDateParam).getPrefix();
-
-    doReturn(mockLowerDateParam).when(mockDateRangeParam).getLowerBound();
-
-    doReturn(mockUpperDateParam).when(mockDateRangeParam).getUpperBound();
-
-    doReturn(mockFromPredicate).when(mockBuilder).greaterThan(mockPath, from);
-
-    doReturn(mockToPredicate).when(mockBuilder).lessThan(mockPath, to);
-
-    Predicate expected = mock(Predicate.class);
-
-    doReturn(expected).when(mockBuilder).and(new Predicate[] {mockFromPredicate, mockToPredicate});
-
-    Predicate actual = daoSpy.createDateRangePredicate(mockPath, mockDateRangeParam, mockBuilder);
-
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void shouldCreateDateRangePredicateIfValidDateRangeInclusive() {
-    long toEpoch = 5L;
-    long fromEpoch = 2L;
-
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    MetricRegistry metricRegistry = new MetricRegistry();
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry));
-
-    // unchecked - Creating mocks, this is ok.
-    //noinspection unchecked
-    Path<Instant> mockPath = mock(Path.class);
-    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
-    CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
-
-    Instant to = Instant.ofEpochMilli(toEpoch);
-    Instant from = Instant.ofEpochMilli(fromEpoch);
-
-    Date mockUpperBound = mock(Date.class);
-    Date mockLowerBound = mock(Date.class);
-
-    doReturn(to).when(mockUpperBound).toInstant();
-
-    doReturn(from).when(mockLowerBound).toInstant();
-
-    doReturn(mockUpperBound).when(mockDateRangeParam).getUpperBoundAsInstant();
-
-    doReturn(mockLowerBound).when(mockDateRangeParam).getLowerBoundAsInstant();
-
-    Predicate mockFromPredicate = mock(Predicate.class);
-    Predicate mockToPredicate = mock(Predicate.class);
-
-    DateParam mockLowerDateParam = mock(DateParam.class);
-    DateParam mockUpperDateParam = mock(DateParam.class);
-
-    ParamPrefixEnum lowerPrefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
-    ParamPrefixEnum upperPrefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
-
-    doReturn(lowerPrefix).when(mockLowerDateParam).getPrefix();
-
-    doReturn(upperPrefix).when(mockUpperDateParam).getPrefix();
-
-    doReturn(mockLowerDateParam).when(mockDateRangeParam).getLowerBound();
-
-    doReturn(mockUpperDateParam).when(mockDateRangeParam).getUpperBound();
-
-    doReturn(mockFromPredicate).when(mockBuilder).greaterThanOrEqualTo(mockPath, from);
-
-    doReturn(mockToPredicate).when(mockBuilder).lessThanOrEqualTo(mockPath, to);
-
-    Predicate expected = mock(Predicate.class);
-
-    doReturn(expected).when(mockBuilder).and(new Predicate[] {mockFromPredicate, mockToPredicate});
-
-    Predicate actual = daoSpy.createDateRangePredicate(mockPath, mockDateRangeParam, mockBuilder);
-
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void shouldCreateDateRangePredicateIfNoDateRange() {
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    MetricRegistry metricRegistry = new MetricRegistry();
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry));
-
-    // unchecked - Creating mocks, this is ok.
-    //noinspection unchecked
-    Path<Instant> mockPath = mock(Path.class);
-    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
-    CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
-
-    doReturn(null).when(mockDateRangeParam).getUpperBoundAsInstant();
-
-    doReturn(null).when(mockDateRangeParam).getLowerBoundAsInstant();
-
-    doReturn(null).when(mockDateRangeParam).getLowerBound();
-
-    doReturn(null).when(mockDateRangeParam).getUpperBound();
-
-    Predicate expected = mock(Predicate.class);
-
-    doReturn(expected).when(mockBuilder).and();
-
-    Predicate actual = daoSpy.createDateRangePredicate(mockPath, mockDateRangeParam, mockBuilder);
-
     assertEquals(expected, actual);
   }
 

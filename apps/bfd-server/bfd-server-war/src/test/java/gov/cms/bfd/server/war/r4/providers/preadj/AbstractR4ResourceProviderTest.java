@@ -20,8 +20,13 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTransformer;
@@ -33,6 +38,7 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.PostConstruct;
@@ -274,9 +280,40 @@ public class AbstractR4ResourceProviderTest {
   }
 
   @Test
+  public void shouldReturnSetOfClaimTypes() {
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTypeV2<Claim> mockTypeA = mock(ResourceTypeV2.class);
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTypeV2<Claim> mockTypeB = mock(ResourceTypeV2.class);
+
+    TokenAndListParam types =
+        new TokenAndListParam()
+            .addAnd(new TokenParam(null, "typeA"), new TokenParam(null, "typeB"));
+
+    Map<String, ResourceTypeV2<Claim>> typeMap =
+        ImmutableMap.of(
+            "typea", mockTypeA,
+            "typeb", mockTypeB);
+
+    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
+
+    doReturn(typeMap).when(providerSpy).getResourceTypeMap();
+
+    // unchecked - This should be fine.
+    //noinspection unchecked
+    Set<ResourceTypeV2<Claim>> expected = Sets.newHashSet(mockTypeA, mockTypeB);
+    Set<ResourceTypeV2<Claim>> actual = providerSpy.parseClaimTypes(types);
+
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void shouldThrowIllegalArgumentExceptionIfMbiNull() {
     ReferenceParam mockParam = null;
-    String type = "f";
+    TokenAndListParam types =
+        new TokenAndListParam().addAnd(new TokenOrListParam().add(null, "fiss"));
     String hashed = null;
     DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
     DateRangeParam mockServiceDate = mock(DateRangeParam.class);
@@ -289,7 +326,7 @@ public class AbstractR4ResourceProviderTest {
                 new MockR4ResourceProvider()
                     .findByPatient(
                         mockParam,
-                        type,
+                        types,
                         hashed,
                         mockLastUpdated,
                         mockServiceDate,
@@ -301,7 +338,8 @@ public class AbstractR4ResourceProviderTest {
   @Test
   public void shouldThrowIllegalArgumentExceptionIfMbiEmpty() {
     ReferenceParam mockParam = mock(ReferenceParam.class);
-    String type = "f";
+    TokenAndListParam types =
+        new TokenAndListParam().addAnd(new TokenOrListParam().add(null, "fiss"));
     String hashed = null;
     DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
     DateRangeParam mockServiceDate = mock(DateRangeParam.class);
@@ -316,7 +354,7 @@ public class AbstractR4ResourceProviderTest {
                 new MockR4ResourceProvider()
                     .findByPatient(
                         mockParam,
-                        type,
+                        types,
                         hashed,
                         mockLastUpdated,
                         mockServiceDate,
@@ -329,7 +367,8 @@ public class AbstractR4ResourceProviderTest {
   public void shouldCreateBundleOfSpecificType()
       throws NoSuchFieldException, IllegalAccessException {
     ReferenceParam mockParam = mock(ReferenceParam.class);
-    String type = "f";
+    TokenAndListParam types =
+        new TokenAndListParam().addAnd(new TokenOrListParam().add(null, "fiss"));
     String hashed = "false";
     DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
     DateRangeParam mockServiceDate = mock(DateRangeParam.class);
@@ -358,7 +397,7 @@ public class AbstractR4ResourceProviderTest {
 
     doReturn(claimType).when(mockResourceType).getEntityClass();
 
-    doReturn(Optional.of(mockResourceType)).when(providerSpy).parseClaimType(type);
+    doReturn(Collections.singleton(mockResourceType)).when(providerSpy).parseClaimTypes(types);
 
     Bundle expected = mock(Bundle.class);
 
@@ -372,7 +411,7 @@ public class AbstractR4ResourceProviderTest {
 
     Bundle actual =
         providerSpy.findByPatient(
-            mockParam, type, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
+            mockParam, types, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
 
     assertSame(expected, actual);
   }
@@ -381,7 +420,7 @@ public class AbstractR4ResourceProviderTest {
   public void shouldCreateBundleOfUnspecificType()
       throws NoSuchFieldException, IllegalAccessException {
     ReferenceParam mockParam = mock(ReferenceParam.class);
-    String type = null;
+    TokenAndListParam types = null;
     String hashed = "false";
     DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
     DateRangeParam mockServiceDate = mock(DateRangeParam.class);
@@ -402,8 +441,6 @@ public class AbstractR4ResourceProviderTest {
 
     doReturn(null).when(providerSpy).parseClaimType(anyString());
 
-    doReturn(Optional.empty()).when(providerSpy).parseClaimType(type);
-
     Bundle expected = mock(Bundle.class);
 
     // unchecked - This is fine for creating a mock.
@@ -422,7 +459,7 @@ public class AbstractR4ResourceProviderTest {
 
     Bundle actual =
         providerSpy.findByPatient(
-            mockParam, type, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
+            mockParam, types, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
 
     assertSame(expected, actual);
   }
@@ -551,6 +588,11 @@ public class AbstractR4ResourceProviderTest {
     @Override
     Set<ResourceTypeV2<Claim>> getResourceTypes() {
       return Collections.emptySet();
+    }
+
+    @Override
+    Map<String, ResourceTypeV2<Claim>> getResourceTypeMap() {
+      return null;
     }
   }
 }
