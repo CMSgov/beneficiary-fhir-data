@@ -8,6 +8,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
+import java.time.Clock;
 import java.util.List;
 
 /**
@@ -29,13 +30,25 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   private static final List<FissDiagnosisPresentOnAdmissionIndicator> INDICATORS =
       enumValues(FissDiagnosisPresentOnAdmissionIndicator.values());
 
+  /**
+   * Creates an instance with the specified seed.
+   *
+   * @param seed seed for the PRNG
+   */
   public RandomFissClaimGenerator(long seed) {
-    super(seed, false);
+    super(seed, false, Clock.systemUTC());
   }
 
+  /**
+   * Creates an instance for use in unit tests. Setting optionalTrue to true causes all optional
+   * fields to be added to the claim. This is useful in some tests.
+   *
+   * @param seed seed for the PRNG
+   * @param optionalTrue true if all optional fields should be populated
+   */
   @VisibleForTesting
-  RandomFissClaimGenerator(long seed, boolean optionalTrue) {
-    super(seed, optionalTrue);
+  RandomFissClaimGenerator(long seed, boolean optionalTrue, Clock clock) {
+    super(seed, optionalTrue, clock);
   }
 
   public FissClaim randomClaim() {

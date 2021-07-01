@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -14,10 +15,12 @@ abstract class AbstractRandomClaimGenerator {
 
   private final Random random;
   private final boolean optionalTrue;
+  private final Clock clock;
 
-  AbstractRandomClaimGenerator(long seed, boolean optionalTrue) {
+  AbstractRandomClaimGenerator(long seed, boolean optionalTrue, Clock clock) {
     this.random = new Random(seed);
     this.optionalTrue = optionalTrue;
+    this.clock = clock;
   }
 
   protected static <T extends Enum<T>> List<T> enumValues(T[] values) {
@@ -27,7 +30,7 @@ abstract class AbstractRandomClaimGenerator {
   }
 
   protected int randomInt(int maxValue) {
-    return random.nextInt(maxValue);
+    return maxValue == 0 ? 0 : random.nextInt(maxValue);
   }
 
   protected String randomDigit(int minLength, int maxLength) {
@@ -43,7 +46,7 @@ abstract class AbstractRandomClaimGenerator {
   }
 
   protected String randomDate() {
-    final LocalDate date = LocalDate.now().minusDays(random.nextInt(MAX_DAYS_AGO));
+    final LocalDate date = LocalDate.now(clock).minusDays(random.nextInt(MAX_DAYS_AGO));
     return date.toString();
   }
 

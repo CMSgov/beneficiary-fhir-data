@@ -5,12 +5,16 @@ import static junit.framework.TestCase.assertEquals;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import org.junit.Test;
 
 public class RandomFissClaimGeneratorTest {
   @Test
   public void randomClaim() throws InvalidProtocolBufferException {
-    final RandomFissClaimGenerator generator = new RandomFissClaimGenerator(1, true);
+    final Clock july1 = Clock.fixed(Instant.ofEpochMilli(1625172944844L), ZoneOffset.UTC);
+    final RandomFissClaimGenerator generator = new RandomFissClaimGenerator(1, true, july1);
     final FissClaim claim = generator.randomClaim();
     final String json = JsonFormat.printer().print(claim);
     assertEquals(
