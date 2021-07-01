@@ -141,6 +141,7 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
         if (change.getType() != RdaChange.Type.DELETE) {
           entityManager.merge(change.getClaim());
         } else {
+          // TODO: [DCGEO-131] accept DELETE changes from RDA API
           throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
         }
       }
