@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob;
+import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
@@ -53,8 +53,9 @@ public class DirectRdaLoadApp {
         new IdHasher.Config(
             getIntOrDefault(props, "hash.iterations", 100),
             props.getProperty("hash.pepper", "notarealpepper"));
-    final RdaLoadJob.Config jobConfig =
-        new RdaLoadJob.Config(Duration.ofDays(1), getIntOrDefault(props, "job.batchSize", 1));
+    final AbstractRdaLoadJob.Config jobConfig =
+        new AbstractRdaLoadJob.Config(
+            Duration.ofDays(1), getIntOrDefault(props, "job.batchSize", 1));
     final GrpcRdaSource.Config grpcConfig =
         new GrpcRdaSource.Config(
             props.getProperty("api.host", "localhost"),

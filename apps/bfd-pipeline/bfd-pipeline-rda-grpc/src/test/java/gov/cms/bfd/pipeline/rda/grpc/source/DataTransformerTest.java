@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,16 +22,16 @@ public class DataTransformerTest {
   @Test
   public void copyString() {
     transformer
-        .copyString("length-one-ok", "1", false, 1, 5, copied::add)
-        .copyString("length-five-ok", "12345", false, 1, 5, copied::add)
-        .copyString("length-below-min", "1", false, 2, 5, copied::add)
-        .copyString("length-above-max", "123456", false, 1, 5, copied::add)
-        .copyString("null-ok", null, true, 1, 5, copied::add)
-        .copyString("null-bad", null, false, 1, 5, copied::add);
+        .copyString("length-one-ok", false, 1, 5, "1", copied::add)
+        .copyString("length-five-ok", false, 1, 5, "12345", copied::add)
+        .copyString("length-below-min", false, 2, 5, "1", copied::add)
+        .copyString("length-above-max", false, 1, 5, "123456", copied::add)
+        .copyString("null-ok", true, 1, 5, null, copied::add)
+        .copyString("null-bad", false, 1, 5, null, copied::add);
 
-    Assert.assertEquals(Arrays.asList("1", "12345"), copied);
+    Assert.assertEquals(ImmutableList.of("1", "12345"), copied);
     Assert.assertEquals(
-        Arrays.asList(
+        ImmutableList.of(
             new DataTransformer.ErrorMessage(
                 "length-below-min", "invalid length: expected=[2,5] actual=1"),
             new DataTransformer.ErrorMessage(
@@ -47,9 +47,9 @@ public class DataTransformerTest {
         .copyCharacter("length-below-min", "", copied::add)
         .copyCharacter("length-above-max", "12", copied::add)
         .copyCharacter("length-one-ok", "A", copied::add);
-    Assert.assertEquals(Arrays.asList('1', 'A'), copied);
+    Assert.assertEquals(ImmutableList.of('1', 'A'), copied);
     Assert.assertEquals(
-        Arrays.asList(
+        ImmutableList.of(
             new DataTransformer.ErrorMessage(
                 "length-below-min", "invalid length: expected=[1,1] actual=0"),
             new DataTransformer.ErrorMessage(
@@ -60,16 +60,16 @@ public class DataTransformerTest {
   @Test
   public void copyDate() {
     transformer
-        .copyDate("valid-1", "2021-03-01", false, copied::add)
-        .copyDate("invalid-1", "2021/03/01", true, copied::add)
-        .copyDate("invalid-2", "2021-06-19T18:24:30", true, copied::add)
-        .copyDate("valid-2", "2021-10-21", true, copied::add)
-        .copyDate("null-ok", null, true, copied::add)
-        .copyDate("null-bad", null, false, copied::add);
+        .copyDate("2021-03-01", false, "valid-1", copied::add)
+        .copyDate("2021/03/01", true, "invalid-1", copied::add)
+        .copyDate("2021-06-19T18:24:30", true, "invalid-2", copied::add)
+        .copyDate("2021-10-21", true, "valid-2", copied::add)
+        .copyDate(null, true, "null-ok", copied::add)
+        .copyDate(null, false, "null-bad", copied::add);
     Assert.assertEquals(
-        Arrays.asList(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 10, 21)), copied);
+        ImmutableList.of(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 10, 21)), copied);
     Assert.assertEquals(
-        Arrays.asList(
+        ImmutableList.of(
             new DataTransformer.ErrorMessage("invalid-1", "invalid date"),
             new DataTransformer.ErrorMessage("invalid-2", "invalid date"),
             new DataTransformer.ErrorMessage("null-bad", "is null")),
@@ -79,21 +79,92 @@ public class DataTransformerTest {
   @Test
   public void copyAmount() {
     transformer
-        .copyAmount("valid-1", "123.05", false, copied::add)
-        .copyAmount("invalid-1", "not a number", true, copied::add)
-        .copyAmount("invalid-2", "123a.00", true, copied::add)
-        .copyAmount("valid-2", "-456.98", true, copied::add)
-        .copyAmount("valid-3", "16", true, copied::add)
-        .copyAmount("null-ok", null, true, copied::add)
-        .copyAmount("null-bad", null, false, copied::add);
+        .copyAmount("valid-1", false, "123.05", copied::add)
+        .copyAmount("invalid-1", true, "not a number", copied::add)
+        .copyAmount("invalid-2", true, "123a.00", copied::add)
+        .copyAmount("valid-2", true, "-456.98", copied::add)
+        .copyAmount("valid-3", true, "16", copied::add)
+        .copyAmount("null-ok", true, null, copied::add)
+        .copyAmount("null-bad", false, null, copied::add);
     Assert.assertEquals(
-        Arrays.asList(new BigDecimal("123.05"), new BigDecimal("-456.98"), new BigDecimal("16")),
+        ImmutableList.of(new BigDecimal("123.05"), new BigDecimal("-456.98"), new BigDecimal("16")),
         copied);
     Assert.assertEquals(
-        Arrays.asList(
+        ImmutableList.of(
             new DataTransformer.ErrorMessage("invalid-1", "invalid amount"),
             new DataTransformer.ErrorMessage("invalid-2", "invalid amount"),
             new DataTransformer.ErrorMessage("null-bad", "is null")),
+        transformer.getErrors());
+  }
+
+  @Test
+  public void copyEnumAsCharacter() {
+    transformer
+        .copyEnumAsCharacter(
+            "no-value",
+            new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
+            copied::add)
+        .copyEnumAsCharacter(
+            "invalid-value",
+            new EnumStringExtractor.Result(EnumStringExtractor.Status.InvalidValue),
+            copied::add)
+        .copyEnumAsCharacter(
+            "null-value", new EnumStringExtractor.Result((String) null), copied::add)
+        .copyEnumAsCharacter("empty-string", new EnumStringExtractor.Result(""), copied::add)
+        .copyEnumAsCharacter("long-string", new EnumStringExtractor.Result("boo!"), copied::add)
+        .copyEnumAsCharacter("good-value", new EnumStringExtractor.Result("Z"), copied::add);
+    Assert.assertEquals(ImmutableList.of('Z'), copied);
+    Assert.assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage("no-value", "no value set"),
+            new DataTransformer.ErrorMessage("invalid-value", "unrecognized enum value"),
+            new DataTransformer.ErrorMessage("null-value", "is null"),
+            new DataTransformer.ErrorMessage(
+                "empty-string", "invalid length: expected=[1,1] actual=0"),
+            new DataTransformer.ErrorMessage(
+                "long-string", "invalid length: expected=[1,1] actual=4")),
+        transformer.getErrors());
+  }
+
+  @Test
+  public void copyEnumAsString() {
+    transformer
+        .copyEnumAsString(
+            "no-value",
+            true,
+            0,
+            10,
+            new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
+            copied::add)
+        .copyEnumAsString(
+            "invalid-value",
+            true,
+            0,
+            10,
+            new EnumStringExtractor.Result(EnumStringExtractor.Status.InvalidValue),
+            copied::add)
+        .copyEnumAsString(
+            "null-value-ok",
+            true,
+            0,
+            10,
+            new EnumStringExtractor.Result((String) null),
+            copied::add)
+        .copyEnumAsString(
+            "null-value-bad",
+            false,
+            0,
+            10,
+            new EnumStringExtractor.Result((String) null),
+            copied::add)
+        .copyEnumAsString(
+            "good-value", false, 0, 10, new EnumStringExtractor.Result("boo!"), copied::add);
+    Assert.assertEquals(ImmutableList.of("boo!"), copied);
+    Assert.assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage("no-value", "no value set"),
+            new DataTransformer.ErrorMessage("invalid-value", "unrecognized enum value"),
+            new DataTransformer.ErrorMessage("null-value-bad", "is null")),
         transformer.getErrors());
   }
 }

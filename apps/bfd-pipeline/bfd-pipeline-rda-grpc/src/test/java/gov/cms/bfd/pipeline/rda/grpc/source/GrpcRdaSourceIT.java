@@ -11,6 +11,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -31,11 +32,11 @@ public class GrpcRdaSourceIT {
       "{"
           + "  \"dcn\": \"63843470\","
           + "  \"hicNo\": \"916689703543\","
-          + "  \"currStatus\": \"CLAIM_STATUS_PAID\","
-          + "  \"currLoc1\": \"PROCESSING_TYPE_MANUAL\","
-          + "  \"currLoc2\": \"uma\","
+          + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
+          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
+          + "  \"currLoc2Unrecognized\": \"uma\","
           + "  \"totalChargeAmount\": \"3.75\","
-          + "  \"currTranDate\": \"2021-03-20\","
+          + "  \"currTranDtCymd\": \"2021-03-20\","
           + "  \"principleDiag\": \"uec\","
           + "  \"mbi\": \"c1ihk7q0g3i57\","
           + "  \"fissProcCodes\": ["
@@ -63,12 +64,12 @@ public class GrpcRdaSourceIT {
       "{"
           + "  \"dcn\": \"2643602\","
           + "  \"hicNo\": \"640930211775\","
-          + "  \"currStatus\": \"CLAIM_STATUS_REJECT\","
-          + "  \"currLoc1\": \"PROCESSING_TYPE_OFFLINE\","
-          + "  \"currLoc2\": \"p6s\","
+          + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
+          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","
+          + "  \"currLoc2Unrecognized\": \"p6s\","
           + "  \"totalChargeAmount\": \"55.91\","
-          + "  \"recdDt\": \"2021-05-14\","
-          + "  \"currTranDate\": \"2020-12-21\","
+          + "  \"recdDtCymd\": \"2021-05-14\","
+          + "  \"currTranDtCymd\": \"2020-12-21\","
           + "  \"principleDiag\": \"egnj\","
           + "  \"npiNumber\": \"5764657700\","
           + "  \"mbi\": \"0vtc7u321x0se\","
@@ -108,7 +109,7 @@ public class GrpcRdaSourceIT {
       int count;
       FissClaimStreamCaller streamCaller =
           new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
-      try (GrpcRdaSource<PreAdjFissClaim> source =
+      try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source =
           new GrpcRdaSource<>(channel, streamCaller, appMetrics)) {
         count = source.retrieveAndProcessObjects(3, sink);
       }
@@ -153,7 +154,8 @@ public class GrpcRdaSourceIT {
               + "    \"procCode\" : \"uec\",\n"
               + "    \"procFlag\" : \"nli\",\n"
               + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  } ]\n"
+              + "  } ],\n"
+              + "  \"diagCodes\" : [ ]\n"
               + "}",
           sink.getValues().get(0));
       assertEquals(
@@ -190,7 +192,8 @@ public class GrpcRdaSourceIT {
               + "    \"procCode\" : \"egnj\",\n"
               + "    \"procDate\" : \"2021-05-13\",\n"
               + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  } ]\n"
+              + "  } ],\n"
+              + "  \"diagCodes\" : [ ]\n"
               + "}",
           sink.getValues().get(1));
     } finally {
@@ -201,7 +204,7 @@ public class GrpcRdaSourceIT {
     }
   }
 
-  private static class JsonCaptureSink implements RdaSink<PreAdjFissClaim> {
+  private static class JsonCaptureSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
     private final List<String> values = new ArrayList<>();
     private final ObjectMapper mapper;
 
@@ -216,9 +219,10 @@ public class GrpcRdaSourceIT {
     }
 
     @Override
-    public synchronized int writeObject(PreAdjFissClaim object) throws ProcessingException {
+    public synchronized int writeObject(RdaChange<PreAdjFissClaim> change)
+        throws ProcessingException {
       try {
-        values.add(mapper.writeValueAsString(object));
+        values.add(mapper.writeValueAsString(change.getClaim()));
         return 1;
       } catch (Exception ex) {
         throw new ProcessingException(ex, 0);

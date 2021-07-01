@@ -1,8 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.protobuf.Empty;
+import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
-import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +23,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   }
 
   @Override
-  public void getFissClaims(Empty request, StreamObserver<FissClaim> responseObserver) {
+  public void getFissClaims(Empty request, StreamObserver<ClaimChange> responseObserver) {
     LOGGER.info("start getFissClaims call");
     FissClaimSource generator = sourceFactory.get();
     FissClaimResponder responder = new FissClaimResponder(responseObserver, generator);
@@ -32,15 +32,15 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   }
 
   private static class FissClaimResponder {
-    private final ServerCallStreamObserver<FissClaim> responseObserver;
+    private final ServerCallStreamObserver<ClaimChange> responseObserver;
     private final FissClaimSource generator;
     private final AtomicBoolean running;
 
     private FissClaimResponder(
-        StreamObserver<FissClaim> responseObserver, FissClaimSource generator) {
+        StreamObserver<ClaimChange> responseObserver, FissClaimSource generator) {
       this.generator = generator;
       this.running = new AtomicBoolean(true);
-      this.responseObserver = (ServerCallStreamObserver<FissClaim>) responseObserver;
+      this.responseObserver = (ServerCallStreamObserver<ClaimChange>) responseObserver;
       this.responseObserver.setOnReadyHandler(this::sendResponses);
     }
 
@@ -50,7 +50,11 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
           while (responseObserver.isReady()
               && !responseObserver.isCancelled()
               && generator.hasNext()) {
-            responseObserver.onNext(generator.next());
+            responseObserver.onNext(
+                ClaimChange.newBuilder()
+                    .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+                    .setFissClaim(generator.next())
+                    .build());
           }
           if (responseObserver.isCancelled()) {
             running.set(false);

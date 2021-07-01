@@ -1,18 +1,15 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static java.util.stream.Collectors.toList;
-
 import com.google.common.collect.ImmutableList;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
+import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * Objects of this class create populated FissClaim objects using random data. The purpose is simply
@@ -23,25 +20,24 @@ import java.util.stream.Collectors;
  * (including zero).
  */
 public class RandomFissClaimGenerator {
-  private static final EnumSet<FissClaimStatus> SKIPPED_CLAIM_STATUS_SET =
-      EnumSet.of(FissClaimStatus.UNRECOGNIZED, FissClaimStatus.CLAIM_STATUS_UNSET);
-  private static final EnumSet<FissProcessingType> SKIPPED_PROC_TYPE_SET =
-      EnumSet.of(FissProcessingType.UNRECOGNIZED, FissProcessingType.PROCESSING_TYPE_UNSET);
   private static final String ALPHA = "bcdfghjkmnpqrstvwxz";
   private static final String DIGIT = "1234567890";
   private static final String ALNUM = ALPHA + DIGIT;
   private static final int MAX_DAYS_AGO = 180;
   private static final int MAX_PROC_CODES = 7;
-  private static final List<FissClaimStatus> CLAIM_STATUSES =
-      Arrays.stream(FissClaimStatus.values())
-          .filter(x -> !SKIPPED_CLAIM_STATUS_SET.contains(x))
-          .collect(Collectors.collectingAndThen(toList(), ImmutableList::copyOf));
+  private static final List<FissClaimStatus> CLAIM_STATUSES = valuesOf(FissClaimStatus.values());
   private static final List<FissProcessingType> PROCESSING_TYPES =
-      Arrays.stream(FissProcessingType.values())
-          .filter(x -> !SKIPPED_PROC_TYPE_SET.contains(x))
-          .collect(Collectors.collectingAndThen(toList(), ImmutableList::copyOf));
+      valuesOf(FissProcessingType.values());
+  private static final List<FissCurrentLocation2> CURR_LOC2S =
+      valuesOf(FissCurrentLocation2.values());
 
   private final Random random;
+
+  private static <T extends Enum<T>> List<T> valuesOf(T[] values) {
+    return Arrays.stream(values)
+        .filter(v -> !v.name().equals("UNRECOGNIZED"))
+        .collect(ImmutableList.toImmutableList());
+  }
 
   public RandomFissClaimGenerator(long seed) {
     this.random = new Random(seed);
@@ -49,16 +45,20 @@ public class RandomFissClaimGenerator {
 
   public FissClaim randomClaim() {
     FissClaim.Builder claim = FissClaim.newBuilder();
-    claim
-        .setDcn(randomString(DIGIT, 5, 8))
-        .setHicNo(randomString(DIGIT, 12, 12))
-        .setCurrStatus(randomEnum(CLAIM_STATUSES))
-        .setCurrLoc1(randomEnum(PROCESSING_TYPES))
-        .setCurrLoc2(randomString(ALNUM, 1, 5));
+    claim.setDcn(randomString(DIGIT, 5, 8)).setHicNo(randomString(DIGIT, 12, 12));
+    either(
+        () -> claim.setCurrStatusEnum(randomEnum(CLAIM_STATUSES)),
+        () -> claim.setCurrStatusUnrecognized(randomString(ALPHA, 1, 1)));
+    either(
+        () -> claim.setCurrLoc1Enum(randomEnum(PROCESSING_TYPES)),
+        () -> claim.setCurrLoc1Unrecognized(randomString(ALPHA, 1, 1)));
+    either(
+        () -> claim.setCurrLoc2Enum(randomEnum(CURR_LOC2S)),
+        () -> claim.setCurrStatusUnrecognized(randomString(ALPHA, 1, 5)));
     optional(() -> claim.setMedaProvId(randomString(ALNUM, 13, 13)));
     optional(() -> claim.setTotalChargeAmount(randomAmount()));
-    optional(() -> claim.setRecdDt(randomDate()));
-    optional(() -> claim.setCurrTranDate(randomDate()));
+    optional(() -> claim.setRecdDtCymd(randomDate()));
+    optional(() -> claim.setCurrTranDtCymd(randomDate()));
     optional(() -> claim.setAdmDiagCode(randomString(ALPHA, 1, 7)));
     optional(() -> claim.setNpiNumber(randomString(DIGIT, 10, 10)));
     optional(() -> claim.setMbi(randomString(ALNUM, 13, 13)));
@@ -114,6 +114,14 @@ public class RandomFissClaimGenerator {
   private void optional(Runnable action) {
     if (random.nextBoolean()) {
       action.run();
+    }
+  }
+
+  private void either(Runnable action1, Runnable action2) {
+    if (random.nextBoolean()) {
+      action1.run();
+    } else {
+      action2.run();
     }
   }
 }
