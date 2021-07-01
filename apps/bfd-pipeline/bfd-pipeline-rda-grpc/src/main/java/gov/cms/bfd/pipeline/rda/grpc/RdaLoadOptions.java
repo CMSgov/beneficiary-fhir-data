@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.sink.FissClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
@@ -9,6 +8,7 @@ import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.Serializable;
 import java.time.Clock;
@@ -48,11 +48,12 @@ public class RdaLoadOptions implements Serializable {
   /**
    * Factory method to construct a new job instance using standard parameters.
    *
-   * @param appMetrics MetricRegistry used to track operational metrics
+   * @param databaseOptions the shared application {@link DatabaseOptions}
+   * @param appState the shared {@link PipelineApplicationState}
    * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
    */
   public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(
-      DatabaseOptions databaseOptions, MetricRegistry appMetrics) {
+      DatabaseOptions databaseOptions, PipelineApplicationState appState) {
     return new RdaLoadJob<>(
         jobConfig,
         () ->
@@ -60,9 +61,9 @@ public class RdaLoadOptions implements Serializable {
                 grpcConfig,
                 new FissClaimStreamCaller(
                     new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
-                appMetrics),
-        () -> new FissClaimRdaSink(databaseOptions, appMetrics),
-        appMetrics);
+                appState.getMetrics()),
+        () -> new FissClaimRdaSink(appState),
+        appState.getMetrics());
   }
 
   @Override
