@@ -64,8 +64,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -1122,12 +1120,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     // Add a lastUpdated field.
     final FieldSpec lastUpdatedField =
-        FieldSpec.builder(Instant.class, "lastUpdated", Modifier.PRIVATE)
-            .addAnnotation(
-                AnnotationSpec.builder(Temporal.class)
-                    .addMember("value", "$T.TIMESTAMP", TemporalType.class)
-                    .build())
-            .build();
+        FieldSpec.builder(Instant.class, "lastUpdated", Modifier.PRIVATE).build();
     headerEntityClass.addField(lastUpdatedField);
 
     // Getter method

@@ -21,7 +21,6 @@ public class LoadedFile {
   private String rifType;
 
   @Column(name = "`created`", nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
   private Instant created;
 
   @OneToMany(

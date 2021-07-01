@@ -29,7 +29,6 @@ public class LoadedBatch {
   private String beneficiaries;
 
   @Column(name = "`created`", nullable = false)
-  // @Temporal(TemporalType.TIMESTAMP)
   private java.sql.Timestamp created;
 
   /** default constructor */
