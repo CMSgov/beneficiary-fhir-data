@@ -160,6 +160,9 @@ else
 	visualVmArgs=""
 fi
 
+# To enable JVM debugging, uncomment and add this line to the server start command below.
+#	-Dcapsule.jvm.args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
+
 # Launch the server in the background.
 BFD_PORT="${serverPortHttps}" \
 	BFD_KEYSTORE="${keyStore}" \

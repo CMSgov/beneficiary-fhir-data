@@ -17,9 +17,19 @@
 
 	<dependencies>
 		<dependency>
-			<!-- TODO remove/change this once the DatabaseSchemaManager is relocated -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rif</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rda</artifactId>
+		</dependency>
+
+		<dependency>
+			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+                    for details. -->
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
 		</dependency>
 
 		<dependency>
@@ -43,6 +53,19 @@
 		</dependency>
 
 		<dependency>
+			<!-- Hibernate's JPA implementation is used to load data into the BFD applications'
+				database. -->
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+		<dependency>
+			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
+				for details. -->
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+		</dependency>
+
+		<dependency>
 			<!-- Used to run our unit and integration tests. -->
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -56,20 +79,6 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<plugin>
-				<!-- Will run the `*IT.java` integration tests in this project, as part
-					of the build. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 

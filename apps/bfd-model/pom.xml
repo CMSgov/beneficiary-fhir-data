@@ -66,14 +66,6 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<configuration>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-					</configuration>
-				</plugin>
-				<plugin>
 					<artifactId>maven-scm-plugin</artifactId>
 					<configuration>
 						<!-- This default config is used in the Jenkinsfile CI build. -->
