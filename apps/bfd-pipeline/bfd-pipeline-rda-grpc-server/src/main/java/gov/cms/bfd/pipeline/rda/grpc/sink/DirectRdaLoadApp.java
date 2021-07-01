@@ -23,20 +23,25 @@ public class DirectRdaLoadApp {
   private static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   public static void main(String[] args) throws Exception {
-    if (args.length != 1) {
-      System.err.printf("usage: %s configfile%n", DirectRdaLoadApp.class.getSimpleName());
+    if (args.length != 2) {
+      System.err.printf("usage: %s configfile claimType%n", DirectRdaLoadApp.class.getSimpleName());
       System.exit(1);
     }
     Properties props = new Properties();
     try (Reader in = new BufferedReader(new FileReader(args[0]))) {
       props.load(in);
     }
+    final String claimType = args[1];
+
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(props);
     final DatabaseOptions databaseConfig = readDatabaseOptions(props);
     final PipelineApplicationState appState =
         new PipelineApplicationState(
             new MetricRegistry(), databaseConfig, RDA_PERSISTENCE_UNIT_NAME);
-    final PipelineJob job = jobConfig.createFissClaimsLoadJob(appState);
+    final PipelineJob<?> job =
+        claimType.equals("fiss")
+            ? jobConfig.createFissClaimsLoadJob(appState)
+            : jobConfig.createMcsClaimsLoadJob(appState);
     job.call();
   }
 
