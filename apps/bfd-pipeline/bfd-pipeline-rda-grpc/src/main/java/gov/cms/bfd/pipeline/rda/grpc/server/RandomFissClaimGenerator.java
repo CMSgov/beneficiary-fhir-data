@@ -1,15 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import com.google.common.collect.ImmutableList;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
+import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
+import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Objects of this class create populated FissClaim objects using random data. The purpose is simply
@@ -19,32 +17,30 @@ import java.util.Random;
  * 50% chance of being present in each claim. Arrays have randomly assigned variable length
  * (including zero).
  */
-public class RandomFissClaimGenerator {
-  private static final String ALPHA = "bcdfghjkmnpqrstvwxz";
-  private static final String DIGIT = "1234567890";
-  private static final String ALNUM = ALPHA + DIGIT;
-  private static final int MAX_DAYS_AGO = 180;
+public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   private static final int MAX_PROC_CODES = 7;
-  private static final List<FissClaimStatus> CLAIM_STATUSES = valuesOf(FissClaimStatus.values());
+  private static final int MAX_DIAG_CODES = 7;
+  private static final List<FissClaimStatus> CLAIM_STATUSES = enumValues(FissClaimStatus.values());
   private static final List<FissProcessingType> PROCESSING_TYPES =
-      valuesOf(FissProcessingType.values());
+      enumValues(FissProcessingType.values());
   private static final List<FissCurrentLocation2> CURR_LOC2S =
-      valuesOf(FissCurrentLocation2.values());
-
-  private final Random random;
-
-  private static <T extends Enum<T>> List<T> valuesOf(T[] values) {
-    return Arrays.stream(values)
-        .filter(v -> !v.name().equals("UNRECOGNIZED"))
-        .collect(ImmutableList.toImmutableList());
-  }
+      enumValues(FissCurrentLocation2.values());
+  private static final List<FissDiagnosisPresentOnAdmissionIndicator> INDICATORS =
+      enumValues(FissDiagnosisPresentOnAdmissionIndicator.values());
 
   public RandomFissClaimGenerator(long seed) {
-    this.random = new Random(seed);
+    super(seed);
   }
 
   public FissClaim randomClaim() {
     FissClaim.Builder claim = FissClaim.newBuilder();
+    addRandomFieldValues(claim);
+    addRandomProcCodes(claim);
+    addRandomDiagnosisCodes(claim);
+    return claim.build();
+  }
+
+  private void addRandomFieldValues(FissClaim.Builder claim) {
     claim.setDcn(randomString(DIGIT, 5, 8)).setHicNo(randomString(DIGIT, 12, 12));
     either(
         () -> claim.setCurrStatusEnum(randomEnum(CLAIM_STATUSES)),
@@ -63,11 +59,14 @@ public class RandomFissClaimGenerator {
     optional(() -> claim.setNpiNumber(randomString(DIGIT, 10, 10)));
     optional(() -> claim.setMbi(randomString(ALNUM, 13, 13)));
     optional(() -> claim.setFedTaxNb(randomString(DIGIT, 10, 10)));
-    final int procCodeCount = random.nextInt(MAX_PROC_CODES);
-    if (procCodeCount > 0) {
+  }
+
+  private void addRandomProcCodes(FissClaim.Builder claim) {
+    final int count = random.nextInt(MAX_PROC_CODES);
+    if (count > 0) {
       final String primaryCode = randomString(ALPHA, 1, 7);
       claim.setPrincipleDiag(primaryCode);
-      for (int i = 1; i <= procCodeCount; ++i) {
+      for (int i = 1; i <= count; ++i) {
         FissProcedureCode.Builder procCode =
             FissProcedureCode.newBuilder()
                 .setProcCd(i == 1 ? primaryCode : randomString(ALPHA, 1, 7));
@@ -76,52 +75,18 @@ public class RandomFissClaimGenerator {
         claim.addFissProcCodes(procCode);
       }
     }
-    return claim.build();
   }
 
-  private char randomChar(String characters) {
-    return characters.charAt(random.nextInt(characters.length()));
-  }
-
-  private String randomString(String characters, int minLength, int maxLength) {
-    final StringBuilder sb = new StringBuilder();
-    final int len = minLength + random.nextInt(maxLength - minLength + 1);
-    while (sb.length() < len) {
-      sb.append(randomChar(characters));
-    }
-    return sb.toString();
-  }
-
-  private String randomDate() {
-    final LocalDate date = LocalDate.now().minusDays(random.nextInt(MAX_DAYS_AGO));
-    return date.toString();
-  }
-
-  private String randomAmount() {
-    final int dollarDigits = 1 + random.nextInt(5);
-    final StringBuilder amount = new StringBuilder(randomString(DIGIT, dollarDigits, dollarDigits));
-    while (amount.length() > 1 && amount.charAt(0) == '0') {
-      amount.setCharAt(0, randomChar(DIGIT));
-    }
-    amount.append(".").append(randomString(DIGIT, 2, 2));
-    return amount.toString();
-  }
-
-  private <T> T randomEnum(List<T> values) {
-    return values.get(random.nextInt(values.size()));
-  }
-
-  private void optional(Runnable action) {
-    if (random.nextBoolean()) {
-      action.run();
-    }
-  }
-
-  private void either(Runnable action1, Runnable action2) {
-    if (random.nextBoolean()) {
-      action1.run();
-    } else {
-      action2.run();
+  private void addRandomDiagnosisCodes(FissClaim.Builder claim) {
+    final int count = random.nextInt(MAX_DIAG_CODES);
+    for (int i = 1; i <= count; ++i) {
+      FissDiagnosisCode.Builder diagCode =
+          FissDiagnosisCode.newBuilder().setDiagCd2(randomString(ALPHA, 1, 7));
+      either(
+          () -> diagCode.setDiagPoaIndEnum(randomEnum(INDICATORS)),
+          () -> diagCode.setDiagPoaIndUnrecognized(randomString(ALPHA, 1, 1)));
+      optional(() -> diagCode.setBitFlags(randomString(ALPHA, 1, 4)));
+      claim.addFissDiagCodes(diagCode);
     }
   }
 }
