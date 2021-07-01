@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
-import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
@@ -15,9 +14,9 @@ import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
@@ -37,8 +36,12 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,128 +49,157 @@ import org.slf4j.LoggerFactory;
 public final class RifLoaderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderIT.class);
 
+  @Rule
+  public TestWatcher testCaseEntryExitLogger =
+      new TestWatcher() {
+        /** @see org.junit.rules.TestWatcher#starting(org.junit.runner.Description) */
+        @Override
+        protected void starting(Description description) {
+          LOGGER.info("{}: starting.", description.getDisplayName());
+        }
+
+        /** @see org.junit.rules.TestWatcher#finished(org.junit.runner.Description) */
+        @Override
+        protected void finished(Description description) {
+          LOGGER.info("{}: finished.", description.getDisplayName());
+        };
+      };
+
+  /** Ensures that each test case here starts with a clean/empty database, with the right schema. */
+  @Before
+  public void prepareTestDatabase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
   @Test
   public void loadSampleA() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-  }
-
-  @Ignore
-  @Test
-  public void loadSampleAWithoutClean() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabase();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
   }
 
   @Test
   public void singleFileLoad() {
-    RifLoaderTestUtils.doTestWithDb(
-        (dataSource, entityManager) -> {
-          // Verify that LoadedFile entity
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-          final List<LoadedFile> loadedFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
-          Assert.assertTrue(
-              "Expected to have many loaded files in SAMPLE A", loadedFiles.size() > 1);
-          final LoadedFile loadedFile = loadedFiles.get(0);
-          Assert.assertNotNull(loadedFile.getCreated());
+    PipelineTestUtils.get()
+        .doTestWithDb(
+            (dataSource, entityManager) -> {
+              // Verify that LoadedFile entity
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              final List<LoadedFile> loadedFiles =
+                  PipelineTestUtils.get().findLoadedFiles(entityManager);
+              Assert.assertTrue(
+                  "Expected to have many loaded files in SAMPLE A", loadedFiles.size() > 1);
+              final LoadedFile loadedFile = loadedFiles.get(0);
+              Assert.assertNotNull(loadedFile.getCreated());
 
-          // Verify that beneficiaries table was loaded
-          final List<LoadedBatch> batches =
-              loadBatches(entityManager, loadedFile.getLoadedFileId());
-          final LoadedBatch allBatches = batches.stream().reduce(null, LoadedBatch::combine);
-          Assert.assertTrue("Expected to have at least one beneficiary loaded", batches.size() > 0);
-          Assert.assertEquals(
-              "Expected to match the sample-a beneficiary",
-              "567834",
-              allBatches.getBeneficiariesAsList().get(0));
-        });
+              // Verify that beneficiaries table was loaded
+              final List<LoadedBatch> batches =
+                  loadBatches(entityManager, loadedFile.getLoadedFileId());
+              final LoadedBatch allBatches = batches.stream().reduce(null, LoadedBatch::combine);
+              Assert.assertTrue(
+                  "Expected to have at least one beneficiary loaded", batches.size() > 0);
+              Assert.assertEquals(
+                  "Expected to match the sample-a beneficiary",
+                  "567834",
+                  allBatches.getBeneficiariesAsList().get(0));
+            });
   }
 
   @Test
+  @Ignore
   public void multipleFileLoads() {
-    RifLoaderTestUtils.doTestWithDb(
-        (dataSource, entityManager) -> {
-          // Verify that a loaded files exsits
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-          final List<LoadedFile> beforeLoadedFiles =
-              RifLoaderTestUtils.findLoadedFiles(entityManager);
-          Assert.assertTrue("Expected to have at least one file", beforeLoadedFiles.size() > 0);
-          LoadedFile beforeLoadedFile = beforeLoadedFiles.get(0);
-          LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
+    PipelineTestUtils.get()
+        .doTestWithDb(
+            (dataSource, entityManager) -> {
+              // Verify that a loaded files exsits
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              final List<LoadedFile> beforeLoadedFiles =
+                  PipelineTestUtils.get().findLoadedFiles(entityManager);
+              Assert.assertTrue("Expected to have at least one file", beforeLoadedFiles.size() > 0);
+              LoadedFile beforeLoadedFile = beforeLoadedFiles.get(0);
+              LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
 
-          RifLoaderTestUtils.pauseMillis(10);
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              PipelineTestUtils.get().pauseMillis(10);
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
-          // Verify that the loaded list was updated properly
-          final List<LoadedFile> afterLoadedFiles =
-              RifLoaderTestUtils.findLoadedFiles(entityManager);
-          Assert.assertTrue(
-              "Expected to have more loaded files",
-              beforeLoadedFiles.size() < afterLoadedFiles.size());
-          final LoadedFile afterLoadedFile = afterLoadedFiles.get(0);
-          final LoadedFile afterOldestFile = afterLoadedFiles.get(afterLoadedFiles.size() - 1);
-          Assert.assertEquals(
-              "Expected same oldest file",
-              beforeOldestFile.getLoadedFileId(),
-              afterOldestFile.getLoadedFileId());
-          Assert.assertTrue(
-              "Expected range to expand",
-              beforeLoadedFile.getCreated().before(afterLoadedFile.getCreated()));
-        });
+              // Verify that the loaded list was updated properly
+              final List<LoadedFile> afterLoadedFiles =
+                  PipelineTestUtils.get().findLoadedFiles(entityManager);
+              Assert.assertTrue(
+                  "Expected to have more loaded files",
+                  beforeLoadedFiles.size() < afterLoadedFiles.size());
+              final LoadedFile afterLoadedFile = afterLoadedFiles.get(0);
+              final LoadedFile afterOldestFile = afterLoadedFiles.get(afterLoadedFiles.size() - 1);
+              Assert.assertEquals(
+                  "Expected same oldest file",
+                  beforeOldestFile.getLoadedFileId(),
+                  afterOldestFile.getLoadedFileId());
+              Assert.assertTrue(
+                  "Expected range to expand",
+                  beforeLoadedFile.getCreated().before(afterLoadedFile.getCreated()));
+            });
   }
 
   @Test
   public void trimLoadedFiles() {
-    RifLoaderTestUtils.doTestWithDb(
-        (dataSource, entityManager) -> {
-          // Setup a loaded file with an old date
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-          final List<LoadedFile> loadedFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
-          final EntityTransaction txn = entityManager.getTransaction();
-          txn.begin();
-          LoadedFile oldFile = loadedFiles.get(loadedFiles.size() - 1);
-          oldFile.setCreated(Date.from(Instant.now().minus(101, ChronoUnit.DAYS)));
-          txn.commit();
+    PipelineTestUtils.get()
+        .doTestWithDb(
+            (dataSource, entityManager) -> {
+              // Setup a loaded file with an old date
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              final List<LoadedFile> loadedFiles =
+                  PipelineTestUtils.get().findLoadedFiles(entityManager);
+              final EntityTransaction txn = entityManager.getTransaction();
+              txn.begin();
+              LoadedFile oldFile = loadedFiles.get(loadedFiles.size() - 1);
+              oldFile.setCreated(Date.from(Instant.now().minus(101, ChronoUnit.DAYS)));
+              txn.commit();
 
-          // Look at the files now
-          final List<LoadedFile> beforeFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
-          final Date oldDate = Date.from(Instant.now().minus(99, ChronoUnit.DAYS));
-          Assert.assertTrue(
-              "Expect to have old files",
-              beforeFiles.stream().anyMatch(file -> file.getCreated().before(oldDate)));
+              // Look at the files now
+              final List<LoadedFile> beforeFiles =
+                  PipelineTestUtils.get().findLoadedFiles(entityManager);
+              final Date oldDate = Date.from(Instant.now().minus(99, ChronoUnit.DAYS));
+              Assert.assertTrue(
+                  "Expect to have old files",
+                  beforeFiles.stream().anyMatch(file -> file.getCreated().before(oldDate)));
 
-          // Load another set that will cause the old file to be trimmed
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              // Load another set that will cause the old file to be trimmed
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
-          // Verify that old file was trimmed
-          final List<LoadedFile> afterFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
-          Assert.assertFalse(
-              "Expect to not have old files",
-              afterFiles.stream().anyMatch(file -> file.getCreated().before(oldDate)));
-        });
+              // Verify that old file was trimmed
+              final List<LoadedFile> afterFiles =
+                  PipelineTestUtils.get().findLoadedFiles(entityManager);
+              Assert.assertFalse(
+                  "Expect to not have old files",
+                  afterFiles.stream().anyMatch(file -> file.getCreated().before(oldDate)));
+            });
   }
 
   @Ignore
   @Test
   public void buildSyntheticLoadedFiles() {
-    RifLoaderTestUtils.doTestWithDb(
-        (dataSource, entityManager) -> {
-          loadSample(
-              dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
-          // Verify that a loaded files exsits
-          final List<LoadedFile> loadedFiles = RifLoaderTestUtils.findLoadedFiles(entityManager);
-          Assert.assertTrue("Expected to have at least one file", loadedFiles.size() > 0);
-          final LoadedFile file = loadedFiles.get(0);
-          final List<LoadedBatch> batches = loadBatches(entityManager, file.getLoadedFileId());
-          Assert.assertTrue(batches.size() > 0);
-        });
+    PipelineTestUtils.get()
+        .doTestWithDb(
+            (dataSource, entityManager) -> {
+              loadSample(
+                  dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
+              // Verify that a loaded files exsits
+              final List<LoadedFile> loadedFiles =
+                  PipelineTestUtils.get().findLoadedFiles(entityManager);
+              Assert.assertTrue("Expected to have at least one file", loadedFiles.size() > 0);
+              final LoadedFile file = loadedFiles.get(0);
+              final List<LoadedBatch> batches = loadBatches(entityManager, file.getLoadedFileId());
+              Assert.assertTrue(batches.size() > 0);
+            });
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
   @Test
+  @Ignore
   public void loadSampleU() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
@@ -175,7 +207,7 @@ public final class RifLoaderIT {
      * Verify that the updates worked as expected by manually checking some fields.
      */
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -256,7 +288,8 @@ public final class RifLoaderIT {
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
   @Test
   public void loadSampleUUnchanged() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // this should insert a new beneficiary history record
     /*
@@ -273,7 +306,7 @@ public final class RifLoaderIT {
      * Verify that the updates worked as expected by manually checking some fields.
      */
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -317,12 +350,19 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount12() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads sample A Data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -343,14 +383,15 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount24() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads first year of data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -369,7 +410,8 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount20SinceThereIsAUpdateOf8Months() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Loads first year of data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Loads second year of data
@@ -380,7 +422,7 @@ public final class RifLoaderIT {
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -399,7 +441,8 @@ public final class RifLoaderIT {
    */
   @Test
   public void loadInitialEnrollmentShouldCount21SinceThereIsAUpdateOf8MonthsAndAUpdateOf9Months() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     // Load first year of data
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     // Load 8 months of data in year two
@@ -408,7 +451,7 @@ public final class RifLoaderIT {
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS.getResources()));
 
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -440,7 +483,6 @@ public final class RifLoaderIT {
         dataSource,
         Arrays.asList(StaticRifResourceGroup.SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS.getResources()));
 
-    entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(dataSource);
     entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
@@ -488,7 +530,8 @@ public final class RifLoaderIT {
   @Ignore
   @Test
   public void loadSampleB() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_B.getResources()));
   }
 
@@ -505,14 +548,16 @@ public final class RifLoaderIT {
         "Not enough memory for this test (%s bytes max). Run with '-Xmx5g' or more.",
         Runtime.getRuntime().maxMemory()),
     Runtime.getRuntime().maxMemory() >= 4500000000L); */
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_MCT} data. */
   @Test
   public void loadSampleMctData() {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT.getResources()));
     loadSample(
         dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1.getResources()));
@@ -537,10 +582,10 @@ public final class RifLoaderIT {
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 
     // Create the processors that will handle each stage of the pipeline.
-    MetricRegistry appMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
-    RifLoader loader = new RifLoader(appMetrics, options, dataSource);
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
+    RifLoader loader =
+        new RifLoader(options, PipelineTestUtils.get().getPipelineApplicationState());
 
     // Link up the pipeline and run it.
     LOGGER.info("Loading RIF records...");
@@ -560,7 +605,10 @@ public final class RifLoaderIT {
       Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build().report();
     }
     LOGGER.info("Loaded RIF records: '{}'.", loadCount.get());
-    Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build().report();
+    Slf4jReporter.forRegistry(PipelineTestUtils.get().getPipelineApplicationState().getMetrics())
+        .outputTo(LOGGER)
+        .build()
+        .report();
 
     // Verify that the expected number of records were run successfully.
     Assert.assertEquals(0, failureCount.get());
@@ -574,7 +622,7 @@ public final class RifLoaderIT {
      * be found in the database.
      */
     EntityManagerFactory entityManagerFactory =
-        RifLoaderTestUtils.createEntityManagerFactory(dataSource);
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     for (StaticRifResource rifResource : sampleResources) {
       /*
        * This is too slow to run against larger data sets: for instance,
@@ -594,7 +642,6 @@ public final class RifLoaderIT {
           options, entityManagerFactory, rifFileRecordsCopy.getRecords().map(r -> r.getRecord()));
     }
     LOGGER.info("All records found in DB.");
-    loader.close();
   }
 
   /**

@@ -42,6 +42,13 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<!-- Provides the JPA entities that are used to store the incoming RDA
+					data, in the BFD database. -->
+				<groupId>gov.cms.bfd</groupId>
+				<artifactId>bfd-model-rda</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
 				<!-- Provides sample RIF data that mimics what will be received from
 					the CCW. -->
 				<groupId>gov.cms.bfd</groupId>

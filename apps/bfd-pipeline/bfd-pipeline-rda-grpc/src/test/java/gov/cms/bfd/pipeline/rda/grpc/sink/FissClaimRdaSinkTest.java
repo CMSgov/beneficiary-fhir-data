@@ -2,14 +2,20 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import static gov.cms.bfd.pipeline.rda.grpc.sink.FissClaimRdaSink.isDuplicateKeyException;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.IOException;
 import java.util.List;
 import javax.persistence.EntityExistsException;
@@ -30,14 +36,16 @@ public class FissClaimRdaSinkTest {
   @Mock private EntityManagerFactory entityManagerFactory;
   @Mock private EntityManager entityManager;
   @Mock private EntityTransaction transaction;
-  private MetricRegistry appMetrics;
+  private PipelineApplicationState appState;
   private FissClaimRdaSink sink;
 
   @Before
   public void setUp() throws Exception {
-    appMetrics = new MetricRegistry();
-    sink = new FissClaimRdaSink(dataSource, entityManagerFactory, entityManager, appMetrics);
+    this.appState =
+        new PipelineApplicationState(new MetricRegistry(), dataSource, entityManagerFactory);
+    doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
+    sink = new FissClaimRdaSink(appState);
   }
 
   @Test
@@ -150,9 +158,7 @@ public class FissClaimRdaSinkTest {
   @Test
   public void closeMethodsAreCalled() throws Exception {
     sink.close();
-    verify(dataSource).close();
     verify(entityManager).close();
-    verify(entityManagerFactory).close();
   }
 
   @Test
@@ -163,7 +169,7 @@ public class FissClaimRdaSinkTest {
   }
 
   private void assertMeterReading(long expected, String meterName) {
-    long actual = appMetrics.meter(meterName).getCount();
+    long actual = appState.getMetrics().meter(meterName).getCount();
     assertEquals("Meter " + meterName, expected, actual);
   }
 

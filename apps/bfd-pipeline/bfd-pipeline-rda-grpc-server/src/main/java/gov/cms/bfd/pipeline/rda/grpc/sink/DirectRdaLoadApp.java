@@ -5,8 +5,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseUtils;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -20,6 +20,7 @@ import java.util.Properties;
  * production environment.
  */
 public class DirectRdaLoadApp {
+  private static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   public static void main(String[] args) throws Exception {
     if (args.length != 1) {
@@ -32,9 +33,10 @@ public class DirectRdaLoadApp {
     }
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(props);
     final DatabaseOptions databaseConfig = readDatabaseOptions(props);
-    final PipelineJob job =
-        jobConfig.createFissClaimsLoadJob(
-            databaseConfig, DatabaseUtils.RDA_PERSISTENCE_UNIT_NAME, new MetricRegistry());
+    final PipelineApplicationState appState =
+        new PipelineApplicationState(
+            new MetricRegistry(), databaseConfig, RDA_PERSISTENCE_UNIT_NAME);
+    final PipelineJob job = jobConfig.createFissClaimsLoadJob(appState);
     job.call();
   }
 
@@ -42,7 +44,8 @@ public class DirectRdaLoadApp {
     return new DatabaseOptions(
         props.getProperty("database.url"),
         props.getProperty("database.user"),
-        props.getProperty("database.password"));
+        props.getProperty("database.password"),
+        10);
   }
 
   private static RdaLoadOptions readRdaLoadOptionsFromProperties(Properties props) {

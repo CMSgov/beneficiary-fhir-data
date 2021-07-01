@@ -4,15 +4,15 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -365,7 +365,7 @@ public final class PipelineApplicationIT {
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
 
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
@@ -373,12 +373,12 @@ public final class PipelineApplicationIT {
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
-            String.valueOf(RifLoaderTestUtils.HICN_HASH_ITERATIONS));
+            String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
     appRunBuilder
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
-            Hex.encodeHexString(RifLoaderTestUtils.HICN_HASH_PEPPER));
+            Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
@@ -397,7 +397,7 @@ public final class PipelineApplicationIT {
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
-            String.valueOf(RifLoaderTestUtils.IDEMPOTENCY_REQUIRED));
+            String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
     /*
      * Note: Not explicitly providing AWS credentials here, as the child
      * process will inherit any that are present in this build/test process.

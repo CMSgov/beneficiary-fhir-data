@@ -9,6 +9,7 @@ public final class DatabaseOptions implements Serializable {
   private final String databaseUrl;
   private final String databaseUsername;
   private final String databasePassword;
+  private final int maxPoolSize;
 
   /**
    * Constructs a new {@link DatabaseOptions} instance.
@@ -16,11 +17,14 @@ public final class DatabaseOptions implements Serializable {
    * @param databaseUrl the value to use for {@link #getDatabaseUrl()}
    * @param databaseUsername the value to use for {@link #getDatabaseUsername()}
    * @param databasePassword the value to use for {@link #getDatabasePassword()}
+   * @param maxPoolSize the value to use for {@link #getMaxPoolSize()}
    */
-  public DatabaseOptions(String databaseUrl, String databaseUsername, String databasePassword) {
+  public DatabaseOptions(
+      String databaseUrl, String databaseUsername, String databasePassword, int maxPoolSize) {
     this.databaseUrl = databaseUrl;
     this.databaseUsername = databaseUsername;
     this.databasePassword = databasePassword;
+    this.maxPoolSize = maxPoolSize;
   }
 
   /** @return the JDBC URL of the database to load into */
@@ -38,6 +42,11 @@ public final class DatabaseOptions implements Serializable {
     return databasePassword;
   }
 
+  /** @return the maximum size of the DB connection pool that the application will create */
+  public int getMaxPoolSize() {
+    return maxPoolSize;
+  }
+
   /** @see java.lang.Object#toString() */
   @Override
   public String toString() {
@@ -48,6 +57,8 @@ public final class DatabaseOptions implements Serializable {
     builder.append("***");
     builder.append(", databasePassword=");
     builder.append("***");
+    builder.append(", maxPoolSize=");
+    builder.append(maxPoolSize);
     builder.append("]");
     return builder.toString();
   }
