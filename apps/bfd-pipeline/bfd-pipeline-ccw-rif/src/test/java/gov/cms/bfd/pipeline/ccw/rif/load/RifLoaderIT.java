@@ -108,36 +108,36 @@ public final class RifLoaderIT {
   @Test
   @Ignore
   public void multipleFileLoads() {
-  PipelineTestUtils.get()
+    PipelineTestUtils.get()
         .doTestWithDb(
             (dataSource, entityManager) -> {
               // Verify that a loaded files exsits
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-               final List<LoadedFile> beforeLoadedFiles =
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              final List<LoadedFile> beforeLoadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-          Assert.assertTrue("Expected to have at least one file", beforeLoadedFiles.size() > 0);
-          LoadedFile beforeLoadedFile = beforeLoadedFiles.get(0);
-          LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
+              Assert.assertTrue("Expected to have at least one file", beforeLoadedFiles.size() > 0);
+              LoadedFile beforeLoadedFile = beforeLoadedFiles.get(0);
+              LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
 
-           PipelineTestUtils.get().pauseMillis(10);
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              PipelineTestUtils.get().pauseMillis(10);
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
 
-                // Verify that the loaded list was updated properly
+              // Verify that the loaded list was updated properly
               final List<LoadedFile> afterLoadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-          Assert.assertTrue(
-              "Expected to have more loaded files",
-              beforeLoadedFiles.size() < afterLoadedFiles.size());
-          final LoadedFile afterLoadedFile = afterLoadedFiles.get(0);
-          final LoadedFile afterOldestFile = afterLoadedFiles.get(afterLoadedFiles.size() - 1);
-          Assert.assertEquals(
-              "Expected same oldest file",
-              beforeOldestFile.getLoadedFileId(),
-              afterOldestFile.getLoadedFileId());
-          Assert.assertTrue(
-              "Expected range to expand",
-              beforeLoadedFile.getCreated().isBefore(afterLoadedFile.getCreated()));
-        });
+              Assert.assertTrue(
+                  "Expected to have more loaded files",
+                  beforeLoadedFiles.size() < afterLoadedFiles.size());
+              final LoadedFile afterLoadedFile = afterLoadedFiles.get(0);
+              final LoadedFile afterOldestFile = afterLoadedFiles.get(afterLoadedFiles.size() - 1);
+              Assert.assertEquals(
+                  "Expected same oldest file",
+                  beforeOldestFile.getLoadedFileId(),
+                  afterOldestFile.getLoadedFileId());
+              Assert.assertTrue(
+                  "Expected range to expand",
+                  beforeLoadedFile.getCreated().isBefore(afterLoadedFile.getCreated()));
+            });
   }
 
   @Test
@@ -146,32 +146,32 @@ public final class RifLoaderIT {
         .doTestWithDb(
             (dataSource, entityManager) -> {
               // Setup a loaded file with an old date
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-          final EntityTransaction txn = entityManager.getTransaction();
-          txn.begin();
-          LoadedFile oldFile = loadedFiles.get(loadedFiles.size() - 1);
-          oldFile.setCreated(Instant.now().minus(101, ChronoUnit.DAYS));
-          txn.commit();
+              final EntityTransaction txn = entityManager.getTransaction();
+              txn.begin();
+              LoadedFile oldFile = loadedFiles.get(loadedFiles.size() - 1);
+              oldFile.setCreated(Instant.now().minus(101, ChronoUnit.DAYS));
+              txn.commit();
 
               // Look at the files now
               final List<LoadedFile> beforeFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-          final Instant oldDate = Instant.now().minus(99, ChronoUnit.DAYS);
-          Assert.assertTrue(
-              "Expect to have old files",
-              beforeFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)));
+              final Instant oldDate = Instant.now().minus(99, ChronoUnit.DAYS);
+              Assert.assertTrue(
+                  "Expect to have old files",
+                  beforeFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)));
 
-          // Load another set that will cause the old file to be trimmed
-          loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+              // Load another set that will cause the old file to be trimmed
+              loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
               // Verify that old file was trimmed
               final List<LoadedFile> afterFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-          Assert.assertFalse(
-              "Expect to not have old files",
-              afterFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)));
-        });
+              Assert.assertFalse(
+                  "Expect to not have old files",
+                  afterFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)));
+            });
   }
 
   @Ignore
