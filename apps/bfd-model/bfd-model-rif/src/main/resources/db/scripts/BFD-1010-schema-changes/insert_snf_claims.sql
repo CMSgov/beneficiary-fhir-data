@@ -1,6 +1,7 @@
 insert into cmac.snf_claims (
 	clm_id,
 	bene_id,
+	clm_grp_id,
 	clm_ip_admsn_type_cd,
 	at_physn_npi,
 	at_physn_upin,
@@ -10,7 +11,6 @@ insert into cmac.snf_claims (
 	clm_admsn_dt,
 	clm_fac_type_cd,
 	clm_freq_cd,
-	clm_grp_id,
 	clm_mdcr_non_pmt_rsn_cd,
 	clm_pps_cptl_dsprprtnt_shr_amt,
 	clm_pps_cptl_excptn_amt,
@@ -221,6 +221,7 @@ insert into cmac.snf_claims (
 select
 	cast("claimId" as bigint),
 	cast("beneficiaryId" as bigint),
+	cast("claimGroupId" as bigint),
 	"admissionTypeCd",
 	"attendingPhysicianNpi",
 	"attendingPhysicianUpin",
@@ -230,7 +231,6 @@ select
 	"claimAdmissionDate",
 	"claimFacilityTypeCode",
 	"claimFrequencyCode",
-	cast("claimGroupId" as bigint),
 	"claimNonPaymentReasonCode",
 	"claimPPSCapitalDisproportionateShareAmt",
 	"claimPPSCapitalExceptionAmount",

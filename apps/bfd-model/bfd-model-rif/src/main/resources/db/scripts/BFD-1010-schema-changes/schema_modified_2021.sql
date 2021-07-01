@@ -25,10 +25,9 @@
  * [1]: https://www.postgresql.org/docs/10/datatype-character.html
  * [2]: https://www.postgresql.org/docs/10/datatype-numeric.html
  */
--- TODO: Right now, this is just a dump of the current BFD schema in prod, less all of the objects that I'm pretty sure we don't want to touch. 
 --
 --
-create table cmac.beneficiaries (
+create table public.beneficiaries (
     bene_id                                  bigint not null,                          -- beneficiaryId
     bene_birth_dt                            date not null,                            -- birthDate
     bene_county_cd                           character varying(10) not null,           -- countyCode
@@ -49,7 +48,7 @@ create table cmac.beneficiaries (
     hicn_unhashed                            character varying(11),                    -- hicnUnhashed
     mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
     death_dt                                 date,                                     -- beneficiaryDateOfDeath
-    rfrnc_yr                                 numeric(4,0),                             -- beneEnrollmentReferenceYear
+    rfrnc_yr                                 smallint,                                 -- beneEnrollmentReferenceYear
     a_mo_cnt                                 smallint,                                 -- partAMonthsCount
     b_mo_cnt                                 smallint,                                 -- partBMonthsCount
     buyin_mo_cnt                             smallint,                                 -- stateBuyInCoverageCount
@@ -238,7 +237,7 @@ create table cmac.beneficiaries (
 );
 --
 --
-create table cmac.beneficiaries_history (
+create table public.beneficiaries_history (
     beneficiary_history_id                   bigint not null,                          -- beneficiaryHistoryId
     bene_id                                  bigint not null,                          -- beneficiaryId
     bene_birth_dt                            date not null,                            -- birthDate
@@ -253,7 +252,7 @@ create table cmac.beneficiaries_history (
 );
 --
 --
-create table cmac.beneficiaries_history_invalid_beneficiaries (
+create table public.beneficiaries_history_invalid_beneficiaries (
     beneficiary_history_id                   bigint not null,                          -- beneficiaryHistoryId
     bene_id                                  bigint,                                   -- beneficiaryId
     bene_birth_dt                            date not null,                            -- birthDate
@@ -264,7 +263,7 @@ create table cmac.beneficiaries_history_invalid_beneficiaries (
 );
 --
 --
-create table cmac.beneficiary_monthly (
+create table public.beneficiary_monthly (
     parent_beneficiary                       bigint not null,                          -- parentBeneficiary
     year_month                               date not null,                            -- yearMonth
     partd_contract_number_id                 character varying(5),                     -- partDContractNumberId
@@ -283,7 +282,7 @@ create table cmac.beneficiary_monthly (
 );
 --
 --
-create table cmac.carrier_claim_lines (
+create table public.carrier_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
@@ -333,16 +332,16 @@ create table cmac.carrier_claim_lines (
 );
 --
 --
-create table cmac.carrier_claims (
+create table public.carrier_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    clm_grp_id                               bigint not null,                          -- claimGroupId
     line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
     line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
     line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
     carr_num                                 character varying(5) not null,            -- carrierNumber
     clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
     carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
-    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
     clm_clncl_tril_num                       character varying(8),                     -- clinicalTrialNumber
     clm_from_dt                              date not null,                            -- dateFrom
@@ -391,7 +390,7 @@ create table cmac.carrier_claims (
 );
 --
 --
-create table cmac.dme_claim_lines (
+create table public.dme_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
@@ -438,16 +437,16 @@ create table cmac.dme_claim_lines (
 );
 --
 --
-create table cmac.dme_claims (
+create table public.dme_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    clm_grp_id                               bigint not null,                          -- claimGroupId
     line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
     line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
     line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
     carr_num                                 character varying(5) not null,            -- carrierNumber
     clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
     carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
-    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
     clm_clncl_tril_num                       character varying(8),                     -- clinicalTrialNumber
     clm_from_dt                              date not null,                            -- dateFrom
@@ -495,16 +494,16 @@ create table cmac.dme_claims (
 );
 --
 --
-create table cmac.hha_claim_lines (
-    parent_claim                             bigint not null,                           -- parentClaim
-    clm_line_num                             smallint not null,                         -- lineNumber
+create table public.hha_claim_lines (
+    parent_claim                             bigint not null,                          -- parentClaim
+    clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_apc_hipps_cd                    character varying(5),                     -- apcOrHippsCode
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         numeric,                                  -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
     clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
     rev_cntr_pmt_mthd_ind_cd                 character varying(2),                     -- paymentMethodCode
@@ -520,15 +519,15 @@ create table cmac.hha_claim_lines (
 );
 --
 --
-create table cmac.hha_claims (
+create table public.hha_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    clm_grp_id                               bigint not null,                          -- claimGroupId
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
     clm_admsn_dt                             date,                                     -- careStartDate
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_hha_lupa_ind_cd                      character(1),                             -- claimLUPACode
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
     nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
@@ -626,7 +625,7 @@ create table cmac.hha_claims (
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
-    clm_hha_tot_visit_cnt                    numeric(4,0) not null,                    -- totalVisitCount
+    clm_hha_tot_visit_cnt                    smallint not null,                        -- totalVisitCount
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
     fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
@@ -635,7 +634,7 @@ create table cmac.hha_claims (
 );
 --
 --
-create table cmac.hospice_claim_lines (
+create table public.hospice_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_bene_pmt_amt                    numeric(10,2) not null,                   -- benficiaryPaymentAmount
@@ -644,7 +643,7 @@ create table cmac.hospice_claim_lines (
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         numeric,                                  -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2),                            -- nonCoveredChargeAmount
     clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
     rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
@@ -658,15 +657,15 @@ create table cmac.hospice_claim_lines (
 );
 --
 --
-create table cmac.hospice_claims (
+create table public.hospice_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    clm_grp_id                               bigint not null,                          -- claimGroupId
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
     nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_hospc_start_dt_id                    date,                                     -- claimHospiceStartDate
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
     nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
@@ -773,13 +772,13 @@ create table cmac.hospice_claims (
 );
 --
 --
-create table cmac.inpatient_claim_lines (
+create table public.inpatient_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         numeric,                                  -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
     rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
     rev_cntr                                 character varying(4) not null,            -- revenueCenter
@@ -790,9 +789,10 @@ create table cmac.inpatient_claim_lines (
 );
 --
 --
-create table cmac.inpatient_claims (
+create table public.inpatient_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    clm_grp_id                               bigint not null,                          -- claimGroupId
     clm_ip_admsn_type_cd                     character(1) not null,                    -- admissionTypeCd
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
@@ -802,7 +802,6 @@ create table cmac.inpatient_claims (
     clm_admsn_dt                             date,                                     -- claimAdmissionDate
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
     clm_pps_cptl_dsprprtnt_shr_amt           numeric(10,2),                            -- claimPPSCapitalDisproportionateShareAmt
     clm_pps_cptl_drg_wt_num                  numeric(7,4),                             -- claimPPSCapitalDrgWeightNumber
@@ -946,11 +945,11 @@ create table cmac.inpatient_claims (
     fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
     fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
     ime_op_clm_val_amt                       numeric(10,2),                            -- indirectMedicalEducationAmount
-    bene_lrd_used_cnt                        numeric,                                  -- lifetimeReservedDaysUsedCount
+    bene_lrd_used_cnt                        smallint,                                 -- lifetimeReservedDaysUsedCount
     clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
     nch_bene_mdcr_bnfts_exhtd_dt_i           date,                                     -- medicareBenefitsExhaustedDate
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    clm_non_utlztn_days_cnt                  smallint not null,                         -- nonUtilizationDayCount
+    clm_non_utlztn_days_cnt                  smallint not null,                        -- nonUtilizationDayCount
     nch_ip_ncvrd_chrg_amt                    numeric(10,2) not null,                   -- noncoveredCharge
     nch_vrfd_ncvrd_stay_from_dt              date,                                     -- noncoveredStayFromDate
     nch_vrfd_ncvrd_stay_thru_dt              date,                                     -- noncoveredStayThroughDate
@@ -1057,7 +1056,7 @@ create table cmac.inpatient_claims (
 );
 --
 --
-create table cmac.loaded_batches (
+create table public.loaded_batches (
     loaded_batch_id                          bigint not null,                          -- loadedBatchId
     loaded_file_id                           bigint not null,                          -- loadedFileId
     beneficiaries                            character varying(20000) not null,        -- beneficiaries
@@ -1065,14 +1064,14 @@ create table cmac.loaded_batches (
 );
 --
 --
-create table cmac.loaded_files (
+create table public.loaded_files (
     loaded_file_id                           bigint not null,                          -- loadedFileId
     rif_type                                 character varying(48) not null,           -- rifType
     created                                  timestamp with time zone not null         -- created
 );
 --
 --
-create table cmac.medicare_beneficiaryid_history (
+create table public.medicare_beneficiaryid_history (
     medicare_beneficiaryid_key               bigint not null,                          -- medicareBeneficiaryIdKey
     bene_id                                  bigint,                                   -- beneficiaryId
     bene_mbi_id                              character varying(11) not null,           -- medicareBeneficiaryIdKey
@@ -1089,12 +1088,12 @@ create table cmac.medicare_beneficiaryid_history (
     creat_ts                                 timestamp without time zone,              -- mbiAddDate
     updt_user_id                             character varying(30),                    -- mbiUpdateUser
     updt_ts                                  timestamp without time zone,              -- mbiUpdateDate
-    bene_crnt_rec_ind_id                     numeric,                                  -- mbiCrntRecIndId
+    bene_crnt_rec_ind_id                     smallint,                                 -- mbiCrntRecIndId
     last_updated                             timestamp with time zone                  -- lastupdated
 );
 --
 --
-create table cmac.medicare_beneficiaryid_history_invalid_beneficiaries (
+create table public.medicare_beneficiaryid_history_invalid_beneficiaries (
     medicare_beneficiaryid_key               bigint not null,                          -- medicareBeneficiaryIdKey
     bene_id                                  bigint,                                   -- beneficiaryId
     bene_clm_acnt_num                        character varying(9),                     -- claimAccountNumber
@@ -1110,11 +1109,11 @@ create table cmac.medicare_beneficiaryid_history_invalid_beneficiaries (
     creat_ts                                 timestamp without time zone,              -- mbiAddDate
     updt_user_id                             character varying(30),                    -- mbiUpdateUser
     updt_ts                                  timestamp without time zone,              -- mbiUpdateDate
-    bene_crnt_rec_ind_id                     numeric                                   -- mbiCrntRecIndId
+    bene_crnt_rec_ind_id                     smallint                                  -- mbiCrntRecIndId
 );
 --
 --
-create table cmac.outpatient_claim_lines (
+create table public.outpatient_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_apc_hipps_cd                    character varying(5),                     -- apcOrHippsCode
@@ -1128,7 +1127,7 @@ create table cmac.outpatient_claim_lines (
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     line_ndc_cd                              character varying(24),                    -- nationalDrugCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         numeric,                                  -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
     rev_cntr_otaf_pmt_cd                     character(1),                             -- obligationToAcceptAsFullPaymentCode
     rev_cntr_packg_ind_cd                    character(1),                             -- packagingCode
@@ -1154,16 +1153,16 @@ create table cmac.outpatient_claim_lines (
 );
 --
 --
-create table cmac.outpatient_claims (
+create table public.outpatient_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    clm_grp_id                               bigint not null,                          -- claimGroupId
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
     line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
     nch_bene_blood_ddctbl_lblty_am           numeric(10,2) not null,                   -- bloodDeductibleLiabilityAmount
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
     nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
     claim_query_code                         character(1) not null,                    -- claimQueryCode
@@ -1357,13 +1356,13 @@ create table cmac.outpatient_claims (
 );
 --
 --
-create table cmac.partd_events (
+create table public.partd_events (
     clm_id                                   bigint not null,                          -- eventId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    clm_grp_id                               bigint not null,                          -- claimGroupId
     adjstmt_dltn_cd                          character(1),                             -- adjustmentDeletionCode
     brnd_gnrc_cd                             character(1),                             -- brandGenericCode
     ctstrphc_cvrg_cd                         character(1),                             -- catastrophicCoverageCode
-    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     cmpnd_cd                                 integer not null,                         -- compoundCode
     days_suply_num                           smallint not null,                        -- daysSupply
     daw_prod_slctn_cd                        character(1) not null,                    -- dispenseAsWrittenProductSelectionCode
@@ -1390,7 +1389,7 @@ create table cmac.partd_events (
     prscrbr_id_qlfyr_cd                      character varying(2) not null,            -- prescriberIdQualifierCode
     srvc_dt                                  date not null,                            -- prescriptionFillDate
     rx_orgn_cd                               character(1),                             -- prescriptionOriginationCode
-    rx_srvc_rfrnc_num                        numeric(12,0) not null,                   -- prescriptionReferenceNumber
+    rx_srvc_rfrnc_num                        bigint not null,                          -- prescriptionReferenceNumber
     prcng_excptn_cd                          character(1),                             -- pricingExceptionCode
     qty_dspnsd_num                           numeric(10,3) not null,                   -- quantityDispensed
     srvc_prvdr_id                            character varying(15) not null,           -- serviceProviderId
@@ -1402,26 +1401,27 @@ create table cmac.partd_events (
 );
 --
 --
-create table cmac.snf_claim_lines (
+create table public.snf_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         numeric,                                  -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
     rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
     rev_cntr                                 character varying(4) not null,            -- revenueCenter
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
     rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
-    rev_cntr_unit_cnt                        integer not null                          -- unitCount
+    rev_cntr_unit_cnt                        smallint not null                         -- unitCount
 );
 --
 --
-create table cmac.snf_claims (
+create table public.snf_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    clm_grp_id                               bigint not null,                          -- claimGroupId
     clm_ip_admsn_type_cd                     character(1) not null,                    -- admissionTypeCd
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
@@ -1431,7 +1431,6 @@ create table cmac.snf_claims (
     clm_admsn_dt                             date,                                     -- claimAdmissionDate
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
     clm_pps_cptl_dsprprtnt_shr_amt           numeric(10,2),                            -- claimPPSCapitalDisproportionateShareAmt
     clm_pps_cptl_excptn_amt                  numeric(10,2),                            -- claimPPSCapitalExceptionAmount
@@ -1535,7 +1534,7 @@ create table cmac.snf_claims (
     clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
     nch_bene_mdcr_bnfts_exhtd_dt_i           date,                                     -- medicareBenefitsExhaustedDate
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    clm_non_utlztn_days_cnt                  smallint not null,                         -- nonUtilizationDayCount
+    clm_non_utlztn_days_cnt                  smallint not null,                        -- nonUtilizationDayCount
     nch_ip_ncvrd_chrg_amt                    numeric(10,2) not null,                   -- noncoveredCharge
     nch_vrfd_ncvrd_stay_from_dt              date,                                     -- noncoveredStayFromDate
     nch_vrfd_ncvrd_stay_thru_dt              date,                                     -- noncoveredStayThroughDate
@@ -1640,95 +1639,71 @@ create table cmac.snf_claims (
     last_updated                             timestamp with time zone                  -- lastupdated
 );
 --
---
-alter table only cmac.beneficiaries_history_invalid_beneficiaries
-add constraint beneficiaries_history_invalid_beneficiaries_pkey primary key (beneficiary_history_id);
---
---
-alter table only cmac.beneficiaries_history
-add constraint beneficiaries_history_pkey primary key (beneficiary_history_id);
---
---
-alter table only cmac.beneficiaries
+alter table only public.beneficiaries
 add constraint beneficiaries_pkey primary key (bene_id);
 --
+alter table only public.beneficiaries_history
+add constraint beneficiaries_history_pkey primary key (beneficiary_history_id);
 --
-alter table only cmac. beneficiary_monthly
+alter table only public.beneficiaries_history_invalid_beneficiaries
+add constraint beneficiaries_history_invalid_beneficiaries_pkey primary key (beneficiary_history_id);
+--
+alter table only public.beneficiary_monthly
 add constraint beneficiary_monthly_pkey primary key (parent_beneficiary, year_month);
 --
---
-alter table only cmac.carrier_claim_lines
+alter table only public.carrier_claim_lines
 add constraint carrier_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
+alter table only public.carrier_claims
+add constraint carrier_claims_pkey primary key (clm_id);
 --
-alter table only cmac.carrier_claims
-add constraint carrier_claims_pkey primary key (clm_id);    
---
---
-alter table only cmac.dme_claim_lines
+alter table only public.dme_claim_lines
 add constraint dme_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
---
-alter table only cmac.dme_claims
+alter table only public.dme_claims
 add constraint dme_claims_pkey primary key (clm_id);
 --
---
-alter table only cmac.hha_claim_lines
+alter table only public.hha_claim_lines
 add constraint hha_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
---
-alter table only cmac.hha_claims
+alter table only public.hha_claims
 add constraint hha_claims_pkey primary key (clm_id);
 --
---
-alter table only cmac.hospice_claim_lines
+alter table only public.hospice_claim_lines
 add constraint hospice_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
---
-alter table only cmac.hospice_claims
+alter table only public.hospice_claims
 add constraint hospice_claims_pkey primary key (clm_id);
 --
---
-alter table only cmac.inpatient_claim_lines
+alter table only public.inpatient_claim_lines
 add constraint inpatient_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
---
-alter table only cmac.inpatient_claims
+alter table only public.inpatient_claims
 add constraint inpatient_claims_pkey primary key (clm_id);
 --
---
-alter table only cmac.loaded_batches
+alter table only public.loaded_batches
 add constraint loaded_batches_pkey primary key (loaded_batch_id);
 --
---
-alter table only cmac.loaded_files
+alter table only public.loaded_files
 add constraint loaded_files_pkey primary key (loaded_file_id);
 --
---
-alter table only cmac.medicare_beneficiaryid_history_invalid_beneficiaries
-add constraint medicare_beneficiaryid_history_invalid_beneficiaries_pkey primary key (medicare_beneficiaryid_key);
---
---
-alter table only cmac.medicare_beneficiaryid_history
+alter table only public.medicare_beneficiaryid_history
 add constraint medicare_beneficiaryid_history_pkey primary key (medicare_beneficiaryid_key);
 --
+alter table only public.medicare_beneficiaryid_history_invalid_beneficiaries
+add constraint medicare_beneficiaryid_history_invalid_beneficiaries_pkey primary key (medicare_beneficiaryid_key);
 --
-alter table only cmac.outpatient_claim_lines
+alter table only public.outpatient_claim_lines
 add constraint outpatient_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
---
-alter table only cmac.outpatient_claims
+alter table only public.outpatient_claims
 add constraint outpatient_claims_pkey primary key (clm_id);
 --
---
-alter table only cmac.partd_events
+alter table only public.partd_events
 add constraint partd_events_pkey primary key (clm_id);
 --
---
-alter table only cmac.snf_claim_lines
+alter table only public.snf_claim_lines
 add constraint snf_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
---
-alter table only cmac.snf_claims
+alter table only public.snf_claims
 add constraint snf_claims_pkey primary key (clm_id);
-

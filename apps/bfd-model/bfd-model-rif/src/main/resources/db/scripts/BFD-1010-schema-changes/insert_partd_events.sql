@@ -1,10 +1,10 @@
 insert into cmac.partd_events (
 	clm_id,
 	bene_id,
+	clm_grp_id,
 	adjstmt_dltn_cd,
 	brnd_gnrc_cd,
 	ctstrphc_cvrg_cd,
-	clm_grp_id,
 	cmpnd_cd,
 	days_suply_num,
 	daw_prod_slctn_cd,
@@ -44,10 +44,10 @@ insert into cmac.partd_events (
 select
 	cast("eventId" as bigint),
 	cast("beneficiaryId" as bigint),
+	cast("claimGroupId" as bigint),
 	"adjustmentDeletionCode",
 	"brandGenericCode",
 	"catastrophicCoverageCode",
-	cast("claimGroupId" as bigint),
 	"compoundCode",
 	"daysSupply",
 	"dispenseAsWrittenProductSelectionCode",
