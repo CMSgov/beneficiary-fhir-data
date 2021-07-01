@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
@@ -29,7 +30,12 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
       enumValues(FissDiagnosisPresentOnAdmissionIndicator.values());
 
   public RandomFissClaimGenerator(long seed) {
-    super(seed);
+    super(seed, false);
+  }
+
+  @VisibleForTesting
+  RandomFissClaimGenerator(long seed, boolean optionalTrue) {
+    super(seed, optionalTrue);
   }
 
   public FissClaim randomClaim() {
@@ -59,10 +65,17 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setNpiNumber(randomString(DIGIT, 10, 10)));
     optional(() -> claim.setMbi(randomString(ALNUM, 13, 13)));
     optional(() -> claim.setFedTaxNb(randomString(DIGIT, 10, 10)));
+    optional(() -> claim.setPracLocAddr1(randomString(ALNUM, 1, 100)));
+    optional(() -> claim.setPracLocAddr2(randomString(ALNUM, 1, 100)));
+    optional(() -> claim.setPracLocCity(randomString(ALNUM, 1, 100)));
+    optional(() -> claim.setPracLocState(randomString(ALPHA, 2, 2)));
+    optional(() -> claim.setPracLocZip(randomString(DIGIT, 1, 15)));
+    optional(() -> claim.setStmtCovFromCymd(randomDate()));
+    optional(() -> claim.setStmtCovToCymd(randomDate()));
   }
 
   private void addRandomProcCodes(FissClaim.Builder claim) {
-    final int count = random.nextInt(MAX_PROC_CODES);
+    final int count = randomCount(MAX_PROC_CODES);
     if (count > 0) {
       final String primaryCode = randomString(ALPHA, 1, 7);
       claim.setPrincipleDiag(primaryCode);
@@ -78,7 +91,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   }
 
   private void addRandomDiagnosisCodes(FissClaim.Builder claim) {
-    final int count = random.nextInt(MAX_DIAG_CODES);
+    final int count = randomCount(MAX_DIAG_CODES);
     for (int i = 1; i <= count; ++i) {
       FissDiagnosisCode.Builder diagCode =
           FissDiagnosisCode.newBuilder().setDiagCd2(randomString(ALPHA, 1, 7));

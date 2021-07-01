@@ -11,16 +11,22 @@ abstract class AbstractRandomClaimGenerator {
   protected static final String DIGIT = "1234567890";
   protected static final String ALNUM = ALPHA + DIGIT;
   protected static final int MAX_DAYS_AGO = 180;
-  protected final Random random;
+  private final Random random;
+  private final boolean optionalTrue;
 
-  AbstractRandomClaimGenerator(long seed) {
+  AbstractRandomClaimGenerator(long seed, boolean optionalTrue) {
     this.random = new Random(seed);
+    this.optionalTrue = optionalTrue;
   }
 
   protected static <T extends Enum<T>> List<T> enumValues(T[] values) {
     return Arrays.stream(values)
         .filter(v -> !v.name().equals("UNRECOGNIZED"))
         .collect(ImmutableList.toImmutableList());
+  }
+
+  protected int randomCount(int maxValue) {
+    return random.nextInt(maxValue);
   }
 
   protected char randomChar(String characters) {
@@ -56,7 +62,7 @@ abstract class AbstractRandomClaimGenerator {
   }
 
   protected void optional(Runnable action) {
-    if (random.nextBoolean()) {
+    if (optionalTrue || random.nextBoolean()) {
       action.run();
     }
   }
