@@ -22,7 +22,7 @@ public final class RifLoaderTest {
    */
   @Test
   public void computeHicnHash() {
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
     options =
         new LoadAppOptions(
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),
@@ -50,7 +50,7 @@ public final class RifLoaderTest {
    */
   @Test
   public void computeMbiHash() {
-    LoadAppOptions options = RifLoaderTestUtils.getLoadOptions();
+    LoadAppOptions options = CcwRifLoadTestUtils.getLoadOptions();
     options =
         new LoadAppOptions(
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)),

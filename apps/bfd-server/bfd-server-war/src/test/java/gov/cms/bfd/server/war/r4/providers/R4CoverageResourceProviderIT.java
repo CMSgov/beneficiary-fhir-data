@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -36,8 +37,9 @@ public final class R4CoverageResourceProviderIT {
   @Test
   public void readCoveragesForExistingBeneficiary() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -79,7 +81,7 @@ public final class R4CoverageResourceProviderIT {
    */
   @Test
   public void readCoveragesForMissingBeneficiary() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so these should return nothing.
     ResourceNotFoundException exception;
@@ -130,7 +132,7 @@ public final class R4CoverageResourceProviderIT {
    */
   @Test
   public void readCoveragesForInvalidIdParam() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Parameter is invalid, should throw exception
     InvalidRequestException exception;
@@ -158,8 +160,9 @@ public final class R4CoverageResourceProviderIT {
   @Test
   public void searchByExistingBeneficiary() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -192,54 +195,48 @@ public final class R4CoverageResourceProviderIT {
      */
 
     Coverage partACoverageFromSearchResult =
-        (Coverage)
-            searchResults.getEntry().stream()
-                .filter(e -> e.getResource() instanceof Coverage)
-                .map(e -> (Coverage) e.getResource())
-                .filter(
-                    c ->
-                        c.getClass_().stream()
-                            .filter(
-                                cl ->
-                                    TransformerConstants.COVERAGE_PLAN_PART_A.equals(cl.getValue()))
-                            .findAny()
-                            .isPresent())
-                .findFirst()
-                .get();
+        searchResults.getEntry().stream()
+            .filter(e -> e.getResource() instanceof Coverage)
+            .map(e -> (Coverage) e.getResource())
+            .filter(
+                c ->
+                    c.getClass_().stream()
+                        .filter(
+                            cl -> TransformerConstants.COVERAGE_PLAN_PART_A.equals(cl.getValue()))
+                        .findAny()
+                        .isPresent())
+            .findFirst()
+            .get();
     CoverageTransformerV2Test.assertPartAMatches(beneficiary, partACoverageFromSearchResult);
 
     Coverage partBCoverageFromSearchResult =
-        (Coverage)
-            searchResults.getEntry().stream()
-                .filter(e -> e.getResource() instanceof Coverage)
-                .map(e -> (Coverage) e.getResource())
-                .filter(
-                    c ->
-                        c.getClass_().stream()
-                            .filter(
-                                cl ->
-                                    TransformerConstants.COVERAGE_PLAN_PART_B.equals(cl.getValue()))
-                            .findAny()
-                            .isPresent())
-                .findFirst()
-                .get();
+        searchResults.getEntry().stream()
+            .filter(e -> e.getResource() instanceof Coverage)
+            .map(e -> (Coverage) e.getResource())
+            .filter(
+                c ->
+                    c.getClass_().stream()
+                        .filter(
+                            cl -> TransformerConstants.COVERAGE_PLAN_PART_B.equals(cl.getValue()))
+                        .findAny()
+                        .isPresent())
+            .findFirst()
+            .get();
     CoverageTransformerV2Test.assertPartBMatches(beneficiary, partBCoverageFromSearchResult);
 
     Coverage partDCoverageFromSearchResult =
-        (Coverage)
-            searchResults.getEntry().stream()
-                .filter(e -> e.getResource() instanceof Coverage)
-                .map(e -> (Coverage) e.getResource())
-                .filter(
-                    c ->
-                        c.getClass_().stream()
-                            .filter(
-                                cl ->
-                                    TransformerConstants.COVERAGE_PLAN_PART_D.equals(cl.getValue()))
-                            .findAny()
-                            .isPresent())
-                .findFirst()
-                .get();
+        searchResults.getEntry().stream()
+            .filter(e -> e.getResource() instanceof Coverage)
+            .map(e -> (Coverage) e.getResource())
+            .filter(
+                c ->
+                    c.getClass_().stream()
+                        .filter(
+                            cl -> TransformerConstants.COVERAGE_PLAN_PART_D.equals(cl.getValue()))
+                        .findAny()
+                        .isPresent())
+            .findFirst()
+            .get();
     CoverageTransformerV2Test.assertPartDMatches(beneficiary, partDCoverageFromSearchResult);
   }
 
@@ -253,8 +250,9 @@ public final class R4CoverageResourceProviderIT {
   @Test
   public void searchByExistingBeneficiaryWithPaging() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -290,54 +288,48 @@ public final class R4CoverageResourceProviderIT {
      */
 
     Coverage partACoverageFromSearchResult =
-        (Coverage)
-            searchResults.getEntry().stream()
-                .filter(e -> e.getResource() instanceof Coverage)
-                .map(e -> (Coverage) e.getResource())
-                .filter(
-                    c ->
-                        c.getClass_().stream()
-                            .filter(
-                                cl ->
-                                    TransformerConstants.COVERAGE_PLAN_PART_A.equals(cl.getValue()))
-                            .findAny()
-                            .isPresent())
-                .findFirst()
-                .get();
+        searchResults.getEntry().stream()
+            .filter(e -> e.getResource() instanceof Coverage)
+            .map(e -> (Coverage) e.getResource())
+            .filter(
+                c ->
+                    c.getClass_().stream()
+                        .filter(
+                            cl -> TransformerConstants.COVERAGE_PLAN_PART_A.equals(cl.getValue()))
+                        .findAny()
+                        .isPresent())
+            .findFirst()
+            .get();
     CoverageTransformerV2Test.assertPartAMatches(beneficiary, partACoverageFromSearchResult);
 
     Coverage partBCoverageFromSearchResult =
-        (Coverage)
-            searchResults.getEntry().stream()
-                .filter(e -> e.getResource() instanceof Coverage)
-                .map(e -> (Coverage) e.getResource())
-                .filter(
-                    c ->
-                        c.getClass_().stream()
-                            .filter(
-                                cl ->
-                                    TransformerConstants.COVERAGE_PLAN_PART_B.equals(cl.getValue()))
-                            .findAny()
-                            .isPresent())
-                .findFirst()
-                .get();
+        searchResults.getEntry().stream()
+            .filter(e -> e.getResource() instanceof Coverage)
+            .map(e -> (Coverage) e.getResource())
+            .filter(
+                c ->
+                    c.getClass_().stream()
+                        .filter(
+                            cl -> TransformerConstants.COVERAGE_PLAN_PART_B.equals(cl.getValue()))
+                        .findAny()
+                        .isPresent())
+            .findFirst()
+            .get();
     CoverageTransformerV2Test.assertPartBMatches(beneficiary, partBCoverageFromSearchResult);
 
     Coverage partDCoverageFromSearchResult =
-        (Coverage)
-            searchResults.getEntry().stream()
-                .filter(e -> e.getResource() instanceof Coverage)
-                .map(e -> (Coverage) e.getResource())
-                .filter(
-                    c ->
-                        c.getClass_().stream()
-                            .filter(
-                                cl ->
-                                    TransformerConstants.COVERAGE_PLAN_PART_D.equals(cl.getValue()))
-                            .findAny()
-                            .isPresent())
-                .findFirst()
-                .get();
+        searchResults.getEntry().stream()
+            .filter(e -> e.getResource() instanceof Coverage)
+            .map(e -> (Coverage) e.getResource())
+            .filter(
+                c ->
+                    c.getClass_().stream()
+                        .filter(
+                            cl -> TransformerConstants.COVERAGE_PLAN_PART_D.equals(cl.getValue()))
+                        .findAny()
+                        .isPresent())
+            .findFirst()
+            .get();
     CoverageTransformerV2Test.assertPartDMatches(beneficiary, partDCoverageFromSearchResult);
   }
 
@@ -348,7 +340,7 @@ public final class R4CoverageResourceProviderIT {
    */
   @Test
   public void searchByMissingBeneficiary() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -371,8 +363,9 @@ public final class R4CoverageResourceProviderIT {
   @Test
   public void searchWithLastUpdated() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -426,9 +419,12 @@ public final class R4CoverageResourceProviderIT {
     Assert.assertEquals(0, searchOutOfBoundsResult.getTotal());
   }
 
-  /** Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after each test case. */
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
   @After
   public void cleanDatabaseServerAfterEachTestCase() {
-    ServerTestUtils.cleanDatabaseServer();
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 }
