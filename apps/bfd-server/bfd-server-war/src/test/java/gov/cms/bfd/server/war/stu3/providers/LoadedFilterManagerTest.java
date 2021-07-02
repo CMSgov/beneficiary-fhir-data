@@ -220,9 +220,7 @@ public final class LoadedFilterManagerTest {
             .atZone(ZoneId.of("UTC"))
             .toInstant();
 
-    // You would expect this to be true, but Timestamp splits the ms from the seconds, and this is
-    // only comparing the seconds which are equal
-    Assert.assertFalse(lastBatchCreated.isBefore(currentLastBatchCreated));
+    Assert.assertTrue(lastBatchCreated.isBefore(currentLastBatchCreated));
   }
 
   @Test
