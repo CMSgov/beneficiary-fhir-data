@@ -2067,7 +2067,7 @@ final class TransformerTestUtils {
       Assert.assertEquals(
           "Expect lastUpdated to be the fallback value",
           TransformerConstants.FALLBACK_LAST_UPDATED,
-          actualResource.getMeta().getLastUpdated());
+          actualResource.getMeta().getLastUpdated().toInstant());
     }
   }
 }
