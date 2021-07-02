@@ -59,6 +59,7 @@
 
 	<modules>
 		<module>bfd-shared-utils</module>
+		<module>bfd-model-metadata</module>
 		<module>bfd-model</module>
 		<module>bfd-pipeline</module>
 		<module>bfd-server</module>

@@ -1,0 +1,24 @@
+---
+# TODO: YAML is a very poor fit here; this should be mostly declarative code, instead. That would allow for constants, autocomplete, compile checking, etc.
+# TODO: Think about how this could work with HAPI, if at all.
+id: fhir_patient_v2
+name: 'FHIR Patient (v2)'
+
+source:
+  # TODO This is incorrect; the source should be the BFD database.
+  id: rif_beneficiaries
+dest:
+  type: fhir_r4_patient
+  fhir_profile: TODO
+
+fields:
+  - id:
+      source: BENE_ID
+  - identifiers:
+    - name: identifiers_bene_id
+      source: BENE_ID
+      transform:
+        id: extension_identifier
+        params:
+          extension_system: TODO
+          identifier_system: TODO
