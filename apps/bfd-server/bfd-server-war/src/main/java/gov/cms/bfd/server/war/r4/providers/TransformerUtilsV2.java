@@ -43,9 +43,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -408,14 +407,16 @@ public final class TransformerUtilsV2 {
 
     Extension extension = null;
     try {
-      String stringDate = dateYear.get().toString() + "-01-01";
-      DateTimeFormatter.ofPattern("yyyy-MM-dd");
-      String date1 = DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(stringDate).toString();
+      String stringDate = dateYear.get().toString();
+      Calendar date1 = Calendar.getInstance();
+      date1.set(Calendar.YEAR, Integer.parseInt(stringDate));
+
       DateType dateYearValue = new DateType(date1);
+
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
 
-    } catch (DateTimeParseException e) {
+    } catch (NumberFormatException e) {
       throw new InvalidRifValueException(
           String.format("Unable to parse reference year: '%s'.", dateYear.get()), e);
     }
