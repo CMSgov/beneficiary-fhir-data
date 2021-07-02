@@ -285,14 +285,14 @@ create table public.beneficiary_monthly (
 create table public.carrier_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
+    line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
     carr_line_ansthsa_unit_cnt               smallint not null,                        -- anesthesiaUnitCount
-    line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
-    line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
+    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
+    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
     betos_cd                                 character varying(3),                     -- betosCode
     carr_line_clia_lab_num                   character varying(10),                    -- cliaLabNumber
     line_cms_type_srvc_cd                    character(1) not null,                    -- cmsServiceTypeCode
-    line_coinsrnc_amt                        numeric(10,2) not null,                   -- coinsuranceAmount
+    line_coinsrnc_amt                        money not null,                           -- coinsuranceAmount
     line_icd_dgns_cd                         character varying(7),                     -- diagnosisCode
     line_icd_dgns_vrsn_cd                    character(1),                             -- diagnosisCodeVersion
     line_1st_expns_dt                        date,                                     -- firstExpenseDate
@@ -308,17 +308,17 @@ create table public.carrier_claim_lines (
     dmerc_line_mtus_cnt                      smallint not null,                        -- mtusCount
     line_ndc_cd                              character varying(11),                    -- nationalDrugCode
     org_npi_num                              character varying(10),                    -- organizationNpi
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
     line_pmt_80_100_cd                       character(1),                             -- paymentCode
     prf_physn_npi                            character varying(12),                    -- performingPhysicianNpi
     prf_physn_upin                           character varying(12),                    -- performingPhysicianUpin
     carr_prfrng_pin_num                      character varying(15) not null,           -- performingProviderIdNumber
     line_place_of_srvc_cd                    character varying(2) not null,            -- placeOfServiceCode
     line_bene_prmry_pyr_cd                   character(1),                             -- primaryPayerCode
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     line_prcsg_ind_cd                        character varying(2),                     -- processingIndicatorCode
     prtcptng_ind_cd                          character(1),                             -- providerParticipatingIndCode
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     prvdr_spclty                             character varying(3),                     -- providerSpecialityCode
     prvdr_state_cd                           character varying(2),                     -- providerStateCode
     tax_num                                  character varying(10) not null,           -- providerTaxNumber
@@ -328,7 +328,7 @@ create table public.carrier_claim_lines (
     carr_line_rx_num                         character varying(30),                    -- rxNumber
     line_srvc_cnt                            smallint not null,                        -- serviceCount
     line_service_deductible                  character(1),                             -- serviceDeductibleCode
-    line_sbmtd_chrg_amt                      numeric(10,2) not null                    -- submittedChargeAmount
+    line_sbmtd_chrg_amt                      money not null                            -- submittedChargeAmount
 );
 --
 --
@@ -336,9 +336,9 @@ create table public.carrier_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
-    line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
-    line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
-    line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
+    line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
+    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
+    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
     carr_num                                 character varying(5) not null,            -- carrierNumber
     clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
     carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
@@ -374,15 +374,15 @@ create table public.carrier_claims (
     prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
     carr_clm_hcpcs_yr_cd                     character(1),                             -- hcpcsYearCode
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
     carr_clm_pmt_dnl_cd                      character varying(2) not null,            -- paymentDenialCode
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     carr_clm_prvdr_asgnmt_ind_sw             character(1),                             -- providerAssignmentIndicator
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     rfr_physn_npi                            character varying(12),                    -- referringPhysicianNpi
     rfr_physn_upin                           character varying(12),                    -- referringPhysicianUpin
     carr_clm_rfrng_pin_num                   character varying(14) not null,           -- referringProviderIdNumber
-    line_sbmtd_chrg_amt                      numeric(10,2) not null,                   -- submittedChargeAmount
+    line_sbmtd_chrg_amt                      money not null,                           -- submittedChargeAmount
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
     carr_clm_cntl_num                        character varying(23),                    -- claimCarrierControlNumber
@@ -393,12 +393,12 @@ create table public.carrier_claims (
 create table public.dme_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
-    line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
-    line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
+    line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
+    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
+    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
     betos_cd                                 character varying(3),                     -- betosCode
     line_cms_type_srvc_cd                    character(1) not null,                    -- cmsServiceTypeCode
-    line_coinsrnc_amt                        numeric(10,2) not null,                   -- coinsuranceAmount
+    line_coinsrnc_amt                        money not null,                           -- coinsuranceAmount
     line_icd_dgns_cd                         character varying(7),                     -- diagnosisCode
     line_icd_dgns_vrsn_cd                    character(1),                             -- diagnosisCodeVersion
     line_1st_expns_dt                        date,                                     -- firstExpenseDate
@@ -413,26 +413,26 @@ create table public.dme_claim_lines (
     dmerc_line_mtus_cd                       character(1),                             -- mtusCode
     dmerc_line_mtus_cnt                      smallint not null,                        -- mtusCount
     line_ndc_cd                              character varying(11),                    -- nationalDrugCode
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
     line_pmt_80_100_cd                       character(1),                             -- paymentCode
     line_place_of_srvc_cd                    character varying(2) not null,            -- placeOfServiceCode
     dmerc_line_prcng_state_cd                character varying(2),                     -- pricingStateCode
-    line_prmry_alowd_chrg_amt                numeric(10,2) not null,                   -- primaryPayerAllowedChargeAmount
+    line_prmry_alowd_chrg_amt                money not null,                           -- primaryPayerAllowedChargeAmount
     line_bene_prmry_pyr_cd                   character(1),                             -- primaryPayerCode
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     line_prcsg_ind_cd                        character varying(2),                     -- processingIndicatorCode
     prvdr_num                                character varying(10),                    -- providerBillingNumber
     prvdr_npi                                character varying(12),                    -- providerNPI
     prtcptng_ind_cd                          character(1),                             -- providerParticipatingIndCode
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     prvdr_spclty                             character varying(3),                     -- providerSpecialityCode
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     tax_num                                  character varying(10) not null,           -- providerTaxNumber
-    line_dme_prchs_price_amt                 numeric(10,2) not null,                   -- purchasePriceAmount
-    dmerc_line_scrn_svgs_amt                 numeric(10,2),                            -- screenSavingsAmount
+    line_dme_prchs_price_amt                 money not null,                           -- purchasePriceAmount
+    dmerc_line_scrn_svgs_amt                 money,                                    -- screenSavingsAmount
     line_srvc_cnt                            smallint not null,                        -- serviceCount
     line_service_deductible                  character(1),                             -- serviceDeductibleCode
-    line_sbmtd_chrg_amt                      numeric(10,2) not null,                   -- submittedChargeAmount
+    line_sbmtd_chrg_amt                      money not null,                           -- submittedChargeAmount
     dmerc_line_supplr_type_cd                character(1)                              -- supplierTypeCode
 );
 --
@@ -441,9 +441,9 @@ create table public.dme_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
-    line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
-    line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
-    line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
+    line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
+    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
+    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
     carr_num                                 character varying(5) not null,            -- carrierNumber
     clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
     carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
@@ -479,14 +479,14 @@ create table public.dme_claims (
     prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
     carr_clm_hcpcs_yr_cd                     character(1),                             -- hcpcsYearCode
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
     carr_clm_pmt_dnl_cd                      character varying(2) not null,            -- paymentDenialCode
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     carr_clm_prvdr_asgnmt_ind_sw             character(1) not null,                    -- providerAssignmentIndicator
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     rfr_physn_npi                            character varying(12),                    -- referringPhysicianNpi
     rfr_physn_upin                           character varying(12),                    -- referringPhysicianUpin
-    line_sbmtd_chrg_amt                      numeric(10,2) not null,                   -- submittedChargeAmount
+    line_sbmtd_chrg_amt                      money not null,                           -- submittedChargeAmount
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
     carr_clm_cntl_num                        character varying(23),                    -- claimCarrierControlNumber
@@ -504,17 +504,17 @@ create table public.hha_claim_lines (
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
-    rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    rev_cntr_ncvrd_chrg_amt                  money not null,                           -- nonCoveredChargeAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
     rev_cntr_pmt_mthd_ind_cd                 character varying(2),                     -- paymentMethodCode
-    rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
+    rev_cntr_rate_amt                        money not null,                           -- rateAmount
     rev_cntr_1st_ansi_cd                     character varying(5),                     -- revCntr1stAnsiCd
     rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
     rev_cntr_dt                              date,                                     -- revenueCenterDate
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
     rev_cntr_stus_ind_cd                     character varying(2),                     -- statusCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null                         -- unitCount
 );
 --
@@ -619,12 +619,12 @@ create table public.hha_claims (
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
     org_npi_num                              character varying(10),                    -- organizationNpi
     ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     clm_pps_ind_cd                           character(1) not null,                    -- prospectivePaymentCode
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     clm_hha_tot_visit_cnt                    smallint not null,                        -- totalVisitCount
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
@@ -637,22 +637,22 @@ create table public.hha_claims (
 create table public.hospice_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    rev_cntr_bene_pmt_amt                    numeric(10,2) not null,                   -- benficiaryPaymentAmount
+    rev_cntr_bene_pmt_amt                    money not null,                           -- benficiaryPaymentAmount
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
-    rev_cntr_ncvrd_chrg_amt                  numeric(10,2),                            -- nonCoveredChargeAmount
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
-    rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
+    rev_cntr_ncvrd_chrg_amt                  money,                                    -- nonCoveredChargeAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
+    rev_cntr_rate_amt                        money not null,                           -- rateAmount
     rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
     rev_cntr_dt                              date,                                     -- revenueCenterDate
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null                         -- unitCount
 );
 --
@@ -758,11 +758,11 @@ create table public.hospice_claims (
     org_npi_num                              character varying(10),                    -- organizationNpi
     ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
     nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
@@ -779,12 +779,12 @@ create table public.inpatient_claim_lines (
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
-    rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
-    rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
+    rev_cntr_ncvrd_chrg_amt                  money not null,                           -- nonCoveredChargeAmount
+    rev_cntr_rate_amt                        money not null,                           -- rateAmount
     rev_cntr                                 character varying(4) not null,            -- revenueCenter
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null                         -- unitCount
 );
 --
@@ -797,29 +797,29 @@ create table public.inpatient_claims (
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
     nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
-    nch_bene_blood_ddctbl_lblty_am           numeric(10,2) not null,                   -- bloodDeductibleLiabilityAmount
+    nch_bene_blood_ddctbl_lblty_am           money not null,                           -- bloodDeductibleLiabilityAmount
     nch_blood_pnts_frnshd_qty                smallint not null,                        -- bloodPintsFurnishedQty
     clm_admsn_dt                             date,                                     -- claimAdmissionDate
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
-    clm_pps_cptl_dsprprtnt_shr_amt           numeric(10,2),                            -- claimPPSCapitalDisproportionateShareAmt
+    clm_pps_cptl_dsprprtnt_shr_amt           money,                                    -- claimPPSCapitalDisproportionateShareAmt
     clm_pps_cptl_drg_wt_num                  numeric(7,4),                             -- claimPPSCapitalDrgWeightNumber
-    clm_pps_cptl_excptn_amt                  numeric(10,2),                            -- claimPPSCapitalExceptionAmount
-    clm_pps_cptl_fsp_amt                     numeric(10,2),                            -- claimPPSCapitalFSPAmount
-    clm_pps_cptl_ime_amt                     numeric(10,2),                            -- claimPPSCapitalIMEAmount
-    clm_pps_cptl_outlier_amt                 numeric(10,2),                            -- claimPPSCapitalOutlierAmount
-    clm_pps_old_cptl_hld_hrmls_amt           numeric(10,2),                            -- claimPPSOldCapitalHoldHarmlessAmount
+    clm_pps_cptl_excptn_amt                  money,                                    -- claimPPSCapitalExceptionAmount
+    clm_pps_cptl_fsp_amt                     money,                                    -- claimPPSCapitalFSPAmount
+    clm_pps_cptl_ime_amt                     money,                                    -- claimPPSCapitalIMEAmount
+    clm_pps_cptl_outlier_amt                 money,                                    -- claimPPSCapitalOutlierAmount
+    clm_pps_old_cptl_hld_hrmls_amt           money,                                    -- claimPPSOldCapitalHoldHarmlessAmount
     nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
     claim_query_code                         character(1) not null,                    -- claimQueryCode
     clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
-    clm_tot_pps_cptl_amt                     numeric(10,2),                            -- claimTotalPPSCapitalAmount
+    clm_tot_pps_cptl_amt                     money,                                    -- claimTotalPPSCapitalAmount
     nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
     bene_tot_coinsrnc_days_cnt               smallint not null,                        -- coinsuranceDayCount
     nch_actv_or_cvrd_lvl_care_thru           date,                                     -- coveredCareThoughDate
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
-    nch_bene_ip_ddctbl_amt                   numeric(10,2) not null,                   -- deductibleAmount
+    nch_bene_ip_ddctbl_amt                   money not null,                           -- deductibleAmount
     icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
     icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
     clm_poa_ind_sw10                         character(1),                             -- diagnosis10PresentOnAdmissionCode
@@ -939,18 +939,18 @@ create table public.inpatient_claims (
     prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
     clm_drg_cd                               character varying(3),                     -- diagnosisRelatedGroupCd
     clm_drg_outlier_stay_cd                  character(1) not null,                    -- diagnosisRelatedGroupOutlierStayCd
-    dsh_op_clm_val_amt                       numeric(10,2),                            -- disproportionateShareAmount
-    nch_drg_outlier_aprvd_pmt_amt            numeric(10,2),                            -- drgOutlierApprovedPaymentAmount
+    dsh_op_clm_val_amt                       money,                                    -- disproportionateShareAmount
+    nch_drg_outlier_aprvd_pmt_amt            money,                                    -- drgOutlierApprovedPaymentAmount
     fi_clm_actn_cd                           character(1),                             -- fiscalIntermediaryClaimActionCode
     fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
     fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
-    ime_op_clm_val_amt                       numeric(10,2),                            -- indirectMedicalEducationAmount
+    ime_op_clm_val_amt                       money,                                    -- indirectMedicalEducationAmount
     bene_lrd_used_cnt                        smallint,                                 -- lifetimeReservedDaysUsedCount
     clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
     nch_bene_mdcr_bnfts_exhtd_dt_i           date,                                     -- medicareBenefitsExhaustedDate
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
     clm_non_utlztn_days_cnt                  smallint not null,                        -- nonUtilizationDayCount
-    nch_ip_ncvrd_chrg_amt                    numeric(10,2) not null,                   -- noncoveredCharge
+    nch_ip_ncvrd_chrg_amt                    money not null,                           -- noncoveredCharge
     nch_vrfd_ncvrd_stay_from_dt              date,                                     -- noncoveredStayFromDate
     nch_vrfd_ncvrd_stay_thru_dt              date,                                     -- noncoveredStayThroughDate
     op_physn_npi                             character varying(10),                    -- operatingPhysicianNpi
@@ -958,12 +958,12 @@ create table public.inpatient_claims (
     org_npi_num                              character varying(10),                    -- organizationNpi
     ot_physn_npi                             character varying(10),                    -- otherPhysicianNpi
     ot_physn_upin                            character varying(9),                     -- otherPhysicianUpin
-    nch_bene_pta_coinsrnc_lblty_am           numeric(10,2) not null,                   -- partACoinsuranceLiabilityAmount
-    clm_pass_thru_per_diem_amt               numeric(10,2) not null,                   -- passThruPerDiemAmount
+    nch_bene_pta_coinsrnc_lblty_am           money not null,                           -- partACoinsuranceLiabilityAmount
+    clm_pass_thru_per_diem_amt               money not null,                           -- passThruPerDiemAmount
     ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
     nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
     icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
     prcdr_dt10                               date,                                     -- procedure10Date
@@ -1039,13 +1039,13 @@ create table public.inpatient_claims (
     icd_prcdr_cd9                            character varying(7),                     -- procedure9Code
     icd_prcdr_vrsn_cd9                       character(1),                             -- procedure9CodeVersion
     prcdr_dt9                                date,                                     -- procedure9Date
-    nch_profnl_cmpnt_chrg_amt                numeric(10,2) not null,                   -- professionalComponentCharge
+    nch_profnl_cmpnt_chrg_amt                money not null,                           -- professionalComponentCharge
     clm_pps_ind_cd                           character(1),                             -- prospectivePaymentCode
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     clm_src_ip_admsn_cd                      character(1),                             -- sourceAdmissionCd
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
-    nch_ip_tot_ddctn_amt                     numeric(10,2) not null,                   -- totalDeductionAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
+    nch_ip_tot_ddctn_amt                     money not null,                           -- totalDeductionAmount
     clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
@@ -1117,26 +1117,26 @@ create table public.outpatient_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_apc_hipps_cd                    character varying(5),                     -- apcOrHippsCode
-    rev_cntr_bene_pmt_amt                    numeric(10,2) not null,                   -- benficiaryPaymentAmount
-    rev_cntr_blood_ddctbl_amt                numeric(10,2) not null,                   -- bloodDeductibleAmount
-    rev_cntr_cash_ddctbl_amt                 numeric(10,2) not null,                   -- cashDeductibleAmount
+    rev_cntr_bene_pmt_amt                    money not null,                           -- benficiaryPaymentAmount
+    rev_cntr_blood_ddctbl_amt                money not null,                           -- bloodDeductibleAmount
+    rev_cntr_cash_ddctbl_amt                 money not null,                           -- cashDeductibleAmount
     rev_cntr_dscnt_ind_cd                    character(1),                             -- discountCode
-    rev_cntr_1st_msp_pd_amt                  numeric(10,2) not null,                   -- firstMspPaidAmount
+    rev_cntr_1st_msp_pd_amt                  money not null,                           -- firstMspPaidAmount
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     line_ndc_cd                              character varying(24),                    -- nationalDrugCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
-    rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
+    rev_cntr_ncvrd_chrg_amt                  money not null,                           -- nonCoveredChargeAmount
     rev_cntr_otaf_pmt_cd                     character(1),                             -- obligationToAcceptAsFullPaymentCode
     rev_cntr_packg_ind_cd                    character(1),                             -- packagingCode
-    rev_cntr_ptnt_rspnsblty_pmt              numeric(10,2) not null,                   -- patientResponsibilityAmount
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    rev_cntr_ptnt_rspnsblty_pmt              money not null,                           -- patientResponsibilityAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
     rev_cntr_pmt_mthd_ind_cd                 character varying(2),                     -- paymentMethodCode
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
-    rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
-    rev_cntr_rdcd_coinsrnc_amt               numeric(10,2) not null,                   -- reducedCoinsuranceAmount
+    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
+    rev_cntr_rate_amt                        money not null,                           -- rateAmount
+    rev_cntr_rdcd_coinsrnc_amt               money not null,                           -- reducedCoinsuranceAmount
     rev_cntr_1st_ansi_cd                     character varying(5),                     -- revCntr1stAnsiCd
     rev_cntr_2nd_ansi_cd                     character varying(5),                     -- revCntr2ndAnsiCd
     rev_cntr_3rd_ansi_cd                     character varying(5),                     -- revCntr3rdAnsiCd
@@ -1145,11 +1145,11 @@ create table public.outpatient_claim_lines (
     rev_cntr_dt                              date,                                     -- revenueCenterDate
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
-    rev_cntr_2nd_msp_pd_amt                  numeric(10,2) not null,                   -- secondMspPaidAmount
+    rev_cntr_2nd_msp_pd_amt                  money not null,                           -- secondMspPaidAmount
     rev_cntr_stus_ind_cd                     character varying(2),                     -- statusCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null,                        -- unitCount
-    rev_cntr_coinsrnc_wge_adjstd_c           numeric(10,2) not null                    -- wageAdjustedCoinsuranceAmount
+    rev_cntr_coinsrnc_wge_adjstd_c           money not null                            -- wageAdjustedCoinsuranceAmount
 );
 --
 --
@@ -1159,8 +1159,8 @@ create table public.outpatient_claims (
     clm_grp_id                               bigint not null,                          -- claimGroupId
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
-    line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
-    nch_bene_blood_ddctbl_lblty_am           numeric(10,2) not null,                   -- bloodDeductibleLiabilityAmount
+    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
+    nch_bene_blood_ddctbl_lblty_am           money not null,                           -- bloodDeductibleLiabilityAmount
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
@@ -1168,10 +1168,10 @@ create table public.outpatient_claims (
     claim_query_code                         character(1) not null,                    -- claimQueryCode
     clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
     nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
-    line_coinsrnc_amt                        numeric(10,2) not null,                   -- coinsuranceAmount
+    line_coinsrnc_amt                        money not null,                           -- coinsuranceAmount
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
-    nch_bene_ip_ddctbl_amt                   numeric(10,2) not null,                   -- deductibleAmount
+    nch_bene_ip_ddctbl_amt                   money not null,                           -- deductibleAmount
     icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
     icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
     icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
@@ -1266,8 +1266,8 @@ create table public.outpatient_claims (
     ot_physn_npi                             character varying(10),                    -- otherPhysicianNpi
     ot_physn_upin                            character varying(9),                     -- otherPhysicianUpin
     ptnt_dschrg_stus_cd                      character varying(2),                     -- patientDischargeStatusCode
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
     icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
     prcdr_dt10                               date,                                     -- procedure10Date
@@ -1343,11 +1343,11 @@ create table public.outpatient_claims (
     icd_prcdr_cd9                            character varying(7),                     -- procedure9Code
     icd_prcdr_vrsn_cd9                       character(1),                             -- procedure9CodeVersion
     prcdr_dt9                                date,                                     -- procedure9Date
-    nch_profnl_cmpnt_chrg_amt                numeric(10,2) not null,                   -- professionalComponentCharge
+    nch_profnl_cmpnt_chrg_amt                money not null,                           -- professionalComponentCharge
     prvdr_num                                character varying(9) not null,            -- providerNumber
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
     fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
@@ -1369,17 +1369,17 @@ create table public.partd_events (
     dspnsng_stus_cd                          character(1),                             -- dispensingStatusCode
     drug_cvrg_stus_cd                        character(1) not null,                    -- drugCoverageStatusCode
     fill_num                                 smallint not null,                        -- fillNumber
-    rptd_gap_dscnt_num                       numeric(10,2) not null,                   -- gapDiscountAmount
-    gdc_abv_oopt_amt                         numeric(10,2) not null,                   -- grossCostAboveOutOfPocketThreshold
-    gdc_blw_oopt_amt                         numeric(10,2) not null,                   -- grossCostBelowOutOfPocketThreshold
-    lics_amt                                 numeric(10,2) not null,                   -- lowIncomeSubsidyPaidAmount
+    rptd_gap_dscnt_num                       money not null,                           -- gapDiscountAmount
+    gdc_abv_oopt_amt                         money not null,                           -- grossCostAboveOutOfPocketThreshold
+    gdc_blw_oopt_amt                         money not null,                           -- grossCostBelowOutOfPocketThreshold
+    lics_amt                                 money not null,                           -- lowIncomeSubsidyPaidAmount
     line_ndc_cd                              character varying(19) not null,           -- nationalDrugCode
     nstd_frmt_cd                             character(1),                             -- nonstandardFormatCode
-    othr_troop_amt                           numeric(10,2) not null,                   -- otherTrueOutOfPocketPaidAmount
-    cvrd_d_plan_pd_amt                       numeric(10,2) not null,                   -- partDPlanCoveredPaidAmount
-    ncvrd_plan_pd_amt                        numeric(10,2) not null,                   -- partDPlanNonCoveredPaidAmount
-    plro_amt                                 numeric(10,2) not null,                   -- patientLiabilityReductionOtherPaidAmount
-    ptnt_pay_amt                             numeric(10,2) not null,                   -- patientPaidAmount
+    othr_troop_amt                           money not null,                           -- otherTrueOutOfPocketPaidAmount
+    cvrd_d_plan_pd_amt                       money not null,                           -- partDPlanCoveredPaidAmount
+    ncvrd_plan_pd_amt                        money not null,                           -- partDPlanNonCoveredPaidAmount
+    plro_amt                                 money not null,                           -- patientLiabilityReductionOtherPaidAmount
+    ptnt_pay_amt                             money not null,                           -- patientPaidAmount
     ptnt_rsdnc_cd                            character varying(2) not null,            -- patientResidenceCode
     pd_dt                                    date,                                     -- paymentDate
     phrmcy_srvc_type_cd                      character varying(2) not null,            -- pharmacyTypeCode
@@ -1395,7 +1395,7 @@ create table public.partd_events (
     srvc_prvdr_id                            character varying(15) not null,           -- serviceProviderId
     srvc_prvdr_id_qlfyr_cd                   character varying(2) not null,            -- serviceProviderIdQualiferCode
     submsn_clr_cd                            character varying(2),                     -- submissionClarificationCode
-    tot_rx_cst_amt                           numeric(10,2) not null,                   -- totalPrescriptionCost
+    tot_rx_cst_amt                           money not null,                           -- totalPrescriptionCost
     final_action                             character(1) not null,                    -- finalAction
     last_updated                             timestamp with time zone                  -- lastupdated
 );
@@ -1408,12 +1408,12 @@ create table public.snf_claim_lines (
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
-    rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
-    rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
+    rev_cntr_ncvrd_chrg_amt                  money not null,                           -- nonCoveredChargeAmount
+    rev_cntr_rate_amt                        money not null,                           -- rateAmount
     rev_cntr                                 character varying(4) not null,            -- revenueCenter
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null                         -- unitCount
 );
 --
@@ -1426,18 +1426,18 @@ create table public.snf_claims (
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
     nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
-    nch_bene_blood_ddctbl_lblty_am           numeric(10,2) not null,                   -- bloodDeductibleLiabilityAmount
-    nch_blood_pnts_frnshd_qty                smallint not null,                         -- bloodPintsFurnishedQty
+    nch_bene_blood_ddctbl_lblty_am           money not null,                           -- bloodDeductibleLiabilityAmount
+    nch_blood_pnts_frnshd_qty                smallint not null,                        -- bloodPintsFurnishedQty
     clm_admsn_dt                             date,                                     -- claimAdmissionDate
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
-    clm_pps_cptl_dsprprtnt_shr_amt           numeric(10,2),                            -- claimPPSCapitalDisproportionateShareAmt
-    clm_pps_cptl_excptn_amt                  numeric(10,2),                            -- claimPPSCapitalExceptionAmount
-    clm_pps_cptl_fsp_amt                     numeric(10,2),                            -- claimPPSCapitalFSPAmount
-    clm_pps_cptl_ime_amt                     numeric(10,2),                            -- claimPPSCapitalIMEAmount
-    clm_pps_cptl_outlier_amt                 numeric(10,2),                            -- claimPPSCapitalOutlierAmount
-    clm_pps_old_cptl_hld_hrmls_amt           numeric(10,2),                            -- claimPPSOldCapitalHoldHarmlessAmount
+    clm_pps_cptl_dsprprtnt_shr_amt           money,                                    -- claimPPSCapitalDisproportionateShareAmt
+    clm_pps_cptl_excptn_amt                  money,                                    -- claimPPSCapitalExceptionAmount
+    clm_pps_cptl_fsp_amt                     money,                                    -- claimPPSCapitalFSPAmount
+    clm_pps_cptl_ime_amt                     money,                                    -- claimPPSCapitalIMEAmount
+    clm_pps_cptl_outlier_amt                 money,                                    -- claimPPSCapitalOutlierAmount
+    clm_pps_old_cptl_hld_hrmls_amt           money,                                    -- claimPPSOldCapitalHoldHarmlessAmount
     nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
     claim_query_code                         character(1) not null,                    -- claimQueryCode
     clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
@@ -1446,7 +1446,7 @@ create table public.snf_claims (
     nch_actv_or_cvrd_lvl_care_thru           date,                                     -- coveredCareThroughDate
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
-    nch_bene_ip_ddctbl_amt                   numeric(10,2) not null,                   -- deductibleAmount
+    nch_bene_ip_ddctbl_amt                   money not null,                           -- deductibleAmount
     icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
     icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
     icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
@@ -1535,7 +1535,7 @@ create table public.snf_claims (
     nch_bene_mdcr_bnfts_exhtd_dt_i           date,                                     -- medicareBenefitsExhaustedDate
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
     clm_non_utlztn_days_cnt                  smallint not null,                        -- nonUtilizationDayCount
-    nch_ip_ncvrd_chrg_amt                    numeric(10,2) not null,                   -- noncoveredCharge
+    nch_ip_ncvrd_chrg_amt                    money not null,                           -- noncoveredCharge
     nch_vrfd_ncvrd_stay_from_dt              date,                                     -- noncoveredStayFromDate
     nch_vrfd_ncvrd_stay_thru_dt              date,                                     -- noncoveredStayThroughDate
     op_physn_npi                             character varying(10),                    -- operatingPhysicianNpi
@@ -1543,11 +1543,11 @@ create table public.snf_claims (
     org_npi_num                              character varying(10),                    -- organizationNpi
     ot_physn_npi                             character varying(10),                    -- otherPhysicianNpi
     ot_physn_upin                            character varying(9),                     -- otherPhysicianUpin
-    nch_bene_pta_coinsrnc_lblty_am           numeric(10,2) not null,                   -- partACoinsuranceLiabilityAmount
+    nch_bene_pta_coinsrnc_lblty_am           money not null,                           -- partACoinsuranceLiabilityAmount
     ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
     nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
     icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
     prcdr_dt10                               date,                                     -- procedure10Date
@@ -1629,8 +1629,8 @@ create table public.snf_claims (
     nch_qlfyd_stay_from_dt                   date,                                     -- qualifiedStayFromDate
     nch_qlfyd_stay_thru_dt                   date,                                     -- qualifiedStayThroughDate
     clm_src_ip_admsn_cd                      character(1),                             -- sourceAdmissionCd
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
-    nch_ip_tot_ddctn_amt                     numeric(10,2) not null,                   -- totalDeductionAmount
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
+    nch_ip_tot_ddctn_amt                     money not null,                           -- totalDeductionAmount
     clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
