@@ -198,7 +198,7 @@ public final class OutpatientClaimTransformerTest {
           eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
       Assert.assertEquals(
           claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant(),
-          eob.getProcedure().get(0).getDate());
+          eob.getProcedure().get(0).getDate().toInstant());
     }
 
     Assert.assertTrue("Expect actual item count is above 0", 1 <= eob.getItem().size());
