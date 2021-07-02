@@ -33,7 +33,6 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   static final String OBJECTS_MERGED_METER_NAME =
       MetricRegistry.name(FissClaimRdaSink.class.getSimpleName(), "writes", "merged");
 
-  private final PipelineApplicationState appState;
   private final EntityManager entityManager;
   private final Meter callsMeter;
   private final Meter failuresMeter;
@@ -42,8 +41,6 @@ public class FissClaimRdaSink implements RdaSink<PreAdjFissClaim> {
   private final Meter objectsMergedMeter;
 
   public FissClaimRdaSink(PipelineApplicationState appState) {
-    this.appState = appState;
-
     entityManager = appState.getEntityManagerFactory().createEntityManager();
     callsMeter = appState.getMetrics().meter(CALLS_METER_NAME);
     failuresMeter = appState.getMetrics().meter(FAILURES_METER_NAME);
