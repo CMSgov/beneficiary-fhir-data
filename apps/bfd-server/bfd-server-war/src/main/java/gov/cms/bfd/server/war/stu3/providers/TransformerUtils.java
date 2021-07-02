@@ -57,7 +57,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -860,15 +859,12 @@ public final class TransformerUtils {
     Extension extension = null;
     try {
       String stringDate = dateYear.get().toString();
-      Calendar date1 = Calendar.getInstance();
-      date1.set(Calendar.YEAR, Integer.parseInt(stringDate));
-
-      DateType dateYearValue = new DateType(date1);
+      DateType dateYearValue = new DateType(stringDate);
 
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
 
-    } catch (NumberFormatException e) {
+    } catch (Exception e) {
       throw new InvalidRifValueException(
           String.format("Unable to parse reference year: '%s'.", dateYear.get()), e);
     }
