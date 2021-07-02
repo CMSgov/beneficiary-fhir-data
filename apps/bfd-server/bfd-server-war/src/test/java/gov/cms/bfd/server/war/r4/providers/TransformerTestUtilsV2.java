@@ -1008,21 +1008,6 @@ public final class TransformerTestUtilsV2 {
 
     assertExtensionCodingEquals(CcwCodebookVariable.CARR_CLM_PMT_DNL_CD, paymentDenialCode, eob);
 
-    /*
-        ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-        Assert.assertEquals(
-            TransformerUtilsV2.referencePatient(beneficiaryId).getReference(),
-            referral.getSubject().getReference());
-        assertReferenceIdentifierEquals(
-            TransformerConstants.CODING_NPI_US,
-            referringPhysicianNpi.get(),
-            referral.getRequester().getAgent());
-        Assert.assertEquals(1, referral.getRecipient().size());
-        assertReferenceIdentifierEquals(
-            TransformerConstants.CODING_NPI_US,
-            referringPhysicianNpi.get(),
-            referral.getRecipientFirstRep());
-    */
     assertExtensionCodingEquals(CcwCodebookVariable.ASGMNTCD, providerAssignmentIndicator, eob);
 
     assertExtensionIdentifierEquals(CcwCodebookVariable.CARR_NUM, carrierNumber, eob);
@@ -1154,6 +1139,20 @@ public final class TransformerTestUtilsV2 {
                         "npi",
                         "National Provider Identifier")))
         .setRole(new CodeableConcept().setCoding(Arrays.asList(new Coding(system, code, display))));
+  }
+
+  /**
+   * Helper that creates a {@link CareTeamComponent} to be used in unit tests
+   *
+   * @param sequence The sequence to set
+   * @param npi The NPI for the member
+   * @param system System defining the type of member
+   * @param code Code defining the type of member
+   * @param display Display for the type of member
+   * @return {@link CareTeamComponent}
+   */
+  static CareTeamComponent createCareTeamMember(int sequence, Resource resource) {
+    return new CareTeamComponent().setSequence(sequence).setProvider(new Reference(resource));
   }
 
   /**

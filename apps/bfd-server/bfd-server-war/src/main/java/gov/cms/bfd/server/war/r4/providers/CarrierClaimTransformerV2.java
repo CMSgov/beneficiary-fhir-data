@@ -175,48 +175,33 @@ public class CarrierClaimTransformerV2 {
       // LINE_NUM => ExplanationOfBenefit.item.sequence
       item.setSequence(line.getLineNumber().intValue());
 
-      // PRF_PHYSN_NPI => ExplanationOfBenefit.careTeam.provider
-      Optional<CareTeamComponent> performing =
-          TransformerUtilsV2.addCareTeamMember(
+      CareTeamComponent performing =
+          TransformerUtilsV2.addCareTeamPerforming(
               eob,
               item,
-              C4BBPractitionerIdentifierType.NPI,
               C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-              line.getPerformingPhysicianNpi());
+              line.getPerformingPhysicianNpi(),
+              line.getPerformingPhysicianUpin(),
+              Optional.of(line.getPerformingProviderIdNumber()),
+              includeTaxNumbers,
+              line.getProviderTaxNumber());
 
-      // Fall back to UPIN if NPI not present
-      if (!line.getPerformingPhysicianNpi().isPresent()) {
-        performing =
-            TransformerUtilsV2.addCareTeamMember(
-                eob,
-                item,
-                C4BBPractitionerIdentifierType.UPIN,
-                C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-                line.getPerformingPhysicianUpin());
-      }
+      performing.setResponsible(true);
 
-      // Update the responsible flag
-      performing.ifPresent(
-          p -> {
-            p.setResponsible(true);
+      // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+      performing.setQualification(
+          TransformerUtilsV2.createCodeableConcept(
+              eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-            p.setQualification(
-                TransformerUtilsV2.createCodeableConcept(
-                    eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+      // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
+      performing.addExtension(
+          TransformerUtilsV2.createExtensionCoding(
+              eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode()));
 
-            // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode()));
-
-            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.PRTCPTNG_IND_CD,
-                    line.getProviderParticipatingIndCode()));
-          });
+      // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+      performing.addExtension(
+          TransformerUtilsV2.createExtensionCoding(
+              eob, CcwCodebookVariable.PRTCPTNG_IND_CD, line.getProviderParticipatingIndCode()));
 
       // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
@@ -244,13 +229,6 @@ public class CarrierClaimTransformerV2 {
           line.getHcpcsCode(),
           claimGroup.getHcpcsYearCode(),
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
-
-      // tax num should be as a extension
-      if (includeTaxNumbers.orElse(false)) {
-        item.addExtension(
-            TransformerUtilsV2.createExtensionCoding(
-                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
-      }
 
       // CARR_LINE_ANSTHSA_UNIT_CNT => ExplanationOfBenefit.item.extension
       if (line.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {
@@ -299,7 +277,6 @@ public class CarrierClaimTransformerV2 {
       TransformerUtilsV2.mapEobCommonItemCarrierDME(
           item,
           eob,
-          includeTaxNumbers,
           claimGroup.getClaimId(),
           item.getSequence(),
           line.getServiceCount(),
@@ -322,8 +299,7 @@ public class CarrierClaimTransformerV2 {
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
-          line.getNationalDrugCode(),
-          line.getProviderTaxNumber());
+          line.getNationalDrugCode());
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence

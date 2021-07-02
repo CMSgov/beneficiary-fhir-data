@@ -19,6 +19,19 @@
     "valueQuantity" : {
       "value" : 44.4
     }
+  }, {
+    "resourceType" : "Practitioner",
+    "id" : "1",
+    "identifier" : [ {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+          "code" : "npi",
+          "display" : "National Provider Identifier"
+        } ]
+      },
+      "value" : "1244444444"
+    } ]
   } ],
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -165,16 +178,7 @@
     } ],
     "sequence" : 2,
     "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1244444444"
-      }
+      "reference" : "#1"
     },
     "responsible" : true,
     "role" : {

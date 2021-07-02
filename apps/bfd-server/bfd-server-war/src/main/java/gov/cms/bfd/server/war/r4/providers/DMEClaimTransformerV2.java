@@ -12,7 +12,6 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
-import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -182,31 +181,29 @@ final class DMEClaimTransformerV2 {
                           CcwCodebookVariable.SUPLRNUM, line.getProviderBillingNumber())));
 
       // PRVDR_NPI => ExplanationOfBenefit.careTeam.provider
-      Optional<CareTeamComponent> performing =
-          TransformerUtilsV2.addCareTeamMember(
+      CareTeamComponent performing =
+          TransformerUtilsV2.addCareTeamPerforming(
               eob,
               item,
-              C4BBPractitionerIdentifierType.NPI,
               C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-              line.getProviderNPI());
+              line.getProviderNPI(),
+              Optional.empty(),
+              Optional.empty(),
+              includeTaxNumbers,
+              line.getProviderTaxNumber());
 
       // Update the responsible flag
-      performing.ifPresent(
-          p -> {
-            p.setResponsible(true);
+      performing.setResponsible(true);
 
-            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-            p.setQualification(
-                TransformerUtilsV2.createCodeableConcept(
-                    eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+      // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+      performing.setQualification(
+          TransformerUtilsV2.createCodeableConcept(
+              eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-            p.addExtension(
-                TransformerUtilsV2.createExtensionCoding(
-                    eob,
-                    CcwCodebookVariable.PRTCPTNG_IND_CD,
-                    line.getProviderParticipatingIndCode()));
-          });
+      // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+      performing.addExtension(
+          TransformerUtilsV2.createExtensionCoding(
+              eob, CcwCodebookVariable.PRTCPTNG_IND_CD, line.getProviderParticipatingIndCode()));
 
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
       if (item.getLocation() != null) {
@@ -330,7 +327,6 @@ final class DMEClaimTransformerV2 {
       TransformerUtilsV2.mapEobCommonItemCarrierDME(
           item,
           eob,
-          includeTaxNumbers,
           claimGroup.getClaimId(),
           item.getSequence(),
           line.getServiceCount(),
@@ -353,8 +349,7 @@ final class DMEClaimTransformerV2 {
           line.getHctHgbTestTypeCode(),
           line.getHctHgbTestResult(),
           line.getCmsServiceTypeCode(),
-          line.getNationalDrugCode(),
-          line.getProviderTaxNumber());
+          line.getNationalDrugCode());
 
       // LINE_ICD_DGNS_CD      => ExplanationOfBenefit.item.diagnosisSequence
       // LINE_ICD_DGNS_VRSN_CD => ExplanationOfBenefit.item.diagnosisSequence
