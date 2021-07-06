@@ -451,7 +451,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Long> beneCountCriteria = builder.createQuery(Long.class);
     Root<BeneficiaryMonthly> beneMonthlyRoot = beneCountCriteria.from(BeneficiaryMonthly.class);
-    beneCountCriteria.select(builder.countDistinct(beneMonthlyRoot));
+    beneCountCriteria.select(builder.count(beneMonthlyRoot));
     beneCountCriteria.where(
         builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth),
         builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.partDContractNumberId), contractId));
