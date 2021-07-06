@@ -91,6 +91,7 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
@@ -1938,53 +1939,70 @@ public final class TransformerUtilsV2 {
       Optional<String> upinValue,
       Optional<String> pinValue,
       Optional<Boolean> includeTaxNumbers,
+      String practionerIdNumber,
       String taxValue) {
 
+    CareTeamComponent careTeamComponent = null;
     List<Identifier> identifiers = new ArrayList<Identifier>();
 
-    if (npiValue.isPresent()) {
-      identifiers.add(
-          TransformerUtilsV2.createC4BBPractionerIdentifier(
-              C4BBPractitionerIdentifierType.NPI, npiValue.get()));
+    if (npiValue.isPresent()
+        || upinValue.isPresent()
+        || pinValue.isPresent()
+        || includeTaxNumbers.orElse(false)) {
+      if (npiValue.isPresent()) {
+        identifiers.add(
+            TransformerUtilsV2.createC4BBPractionerIdentifier(
+                C4BBPractitionerIdentifierType.NPI, npiValue.get()));
+      }
+
+      if (upinValue.isPresent()) {
+        identifiers.add(
+            TransformerUtilsV2.createC4BBPractionerIdentifier(
+                C4BBPractitionerIdentifierType.UPIN, upinValue.get()));
+      }
+
+      if (pinValue.isPresent()) {
+        identifiers.add(
+            TransformerUtilsV2.createC4BBPractionerIdentifier(
+                C4BBPractitionerIdentifierType.PIN, pinValue.get()));
+      }
+
+      if (includeTaxNumbers.orElse(false)) {
+        identifiers.add(
+            TransformerUtilsV2.createC4BBPractionerIdentifier(
+                C4BBPractitionerIdentifierType.TAX, taxValue));
+      }
+
+      careTeamComponent =
+          addCareTeamPractitionerForPerforming(eob, eobItem, role, identifiers, practionerIdNumber);
     }
 
-    if (upinValue.isPresent()) {
-      identifiers.add(
-          TransformerUtilsV2.createC4BBPractionerIdentifier(
-              C4BBPractitionerIdentifierType.UPIN, upinValue.get()));
-    }
-
-    if (pinValue.isPresent()) {
-      identifiers.add(
-          TransformerUtilsV2.createC4BBPractionerIdentifier(
-              C4BBPractitionerIdentifierType.PIN, pinValue.get()));
-    }
-
-    if (includeTaxNumbers.orElse(false)) {
-      identifiers.add(
-          TransformerUtilsV2.createC4BBPractionerIdentifier(
-              C4BBPractitionerIdentifierType.TAX, taxValue));
-    }
-
-    return addCareTeamPractitionerForPerforming(eob, eobItem, role, identifiers);
+    return careTeamComponent;
   }
 
   public static CareTeamComponent addCareTeamPractitionerForPerforming(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
-      List<Identifier> identifiers) {
+      List<Identifier> identifiers,
+      String practionerIdNumber) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry = eob.addCareTeam();
     // addItem adds and returns, so we want size() not size() + 1 here
     careTeamEntry.setSequence(eob.getCareTeam().size());
 
+    String practionerId = "#practitioner-" + practionerIdNumber;
+
     Practitioner practioner = new Practitioner();
     practioner.setIdentifier(identifiers);
+    practioner.setId(practionerId);
 
     Reference ref = new Reference(practioner);
+
+    ref.setId(practionerId);
+    StringType referenceElement = new StringType(practionerId);
+    ref.setReferenceElement(referenceElement);
     careTeamEntry.setProvider(ref);
-    careTeamEntry.setProviderTarget(practioner);
 
     CodeableConcept careTeamRoleConcept = createCodeableConcept(role.getSystem(), role.toCode());
     careTeamRoleConcept.getCodingFirstRep().setDisplay(role.getDisplay());

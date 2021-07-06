@@ -184,24 +184,27 @@ public class CarrierClaimTransformerV2 {
               line.getPerformingPhysicianUpin(),
               Optional.of(line.getPerformingProviderIdNumber()),
               includeTaxNumbers,
+              claimGroup.getClaimId() + item.getSequence(),
               line.getProviderTaxNumber());
 
-      performing.setResponsible(true);
+      if (performing != null) {
+        performing.setResponsible(true);
 
-      // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-      performing.setQualification(
-          TransformerUtilsV2.createCodeableConcept(
-              eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        performing.setQualification(
+            TransformerUtilsV2.createCodeableConcept(
+                eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-      // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
-      performing.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode()));
+        // CARR_LINE_PRVDR_TYPE_CD => ExplanationOfBenefit.careTeam.extension
+        performing.addExtension(
+            TransformerUtilsV2.createExtensionCoding(
+                eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, line.getProviderTypeCode()));
 
-      // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-      performing.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              eob, CcwCodebookVariable.PRTCPTNG_IND_CD, line.getProviderParticipatingIndCode()));
+        // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+        performing.addExtension(
+            TransformerUtilsV2.createExtensionCoding(
+                eob, CcwCodebookVariable.PRTCPTNG_IND_CD, line.getProviderParticipatingIndCode()));
+      }
 
       // ORG_NPI_NUM => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

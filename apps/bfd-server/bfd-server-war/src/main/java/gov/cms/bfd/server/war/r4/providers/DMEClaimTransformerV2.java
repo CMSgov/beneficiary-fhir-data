@@ -190,21 +190,23 @@ final class DMEClaimTransformerV2 {
               Optional.empty(),
               Optional.empty(),
               includeTaxNumbers,
+              claimGroup.getClaimId() + item.getSequence(),
               line.getProviderTaxNumber());
 
-      // Update the responsible flag
-      performing.setResponsible(true);
+      if (performing != null) {
+        // Update the responsible flag
+        performing.setResponsible(true);
 
-      // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
-      performing.setQualification(
-          TransformerUtilsV2.createCodeableConcept(
-              eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+        // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+        performing.setQualification(
+            TransformerUtilsV2.createCodeableConcept(
+                eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
 
-      // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
-      performing.addExtension(
-          TransformerUtilsV2.createExtensionCoding(
-              eob, CcwCodebookVariable.PRTCPTNG_IND_CD, line.getProviderParticipatingIndCode()));
-
+        // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+        performing.addExtension(
+            TransformerUtilsV2.createExtensionCoding(
+                eob, CcwCodebookVariable.PRTCPTNG_IND_CD, line.getProviderParticipatingIndCode()));
+      }
       // PRVDR_STATE_CD => ExplanationOfBenefit.item.location.extension
       if (item.getLocation() != null) {
         item.getLocation()

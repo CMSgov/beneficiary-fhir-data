@@ -104,6 +104,7 @@ import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestRequesterComponen
 import org.hl7.fhir.dstu3.model.ReferralRequest.ReferralRequestStatus;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
@@ -2935,41 +2936,55 @@ public final class TransformerUtils {
       Optional<String> npiValue,
       Optional<String> upinValue,
       Optional<Boolean> includeTaxNumbers,
+      String practionerIdNumber,
       String taxValue) {
 
+    CareTeamComponent careTeamComponent = null;
     List<Identifier> identifiers = new ArrayList<Identifier>();
 
-    if (npiValue.isPresent()) {
-      identifiers.add(
-          TransformerUtils.createPractionerIdentifier(IdentifierType.NPI, npiValue.get()));
+    if (npiValue.isPresent() || upinValue.isPresent() || includeTaxNumbers.orElse(false)) {
+
+      if (npiValue.isPresent()) {
+        identifiers.add(
+            TransformerUtils.createPractionerIdentifier(IdentifierType.NPI, npiValue.get()));
+      }
+
+      if (upinValue.isPresent()) {
+        identifiers.add(
+            TransformerUtils.createPractionerIdentifier(IdentifierType.UPIN, upinValue.get()));
+      }
+
+      if (includeTaxNumbers.orElse(false)) {
+        identifiers.add(TransformerUtils.createPractionerIdentifier(IdentifierType.TAX, taxValue));
+      }
+      careTeamComponent =
+          addCareTeamPractitionerForPerforming(eob, eobItem, role, identifiers, practionerIdNumber);
     }
 
-    if (upinValue.isPresent()) {
-      identifiers.add(
-          TransformerUtils.createPractionerIdentifier(IdentifierType.UPIN, upinValue.get()));
-    }
-
-    if (includeTaxNumbers.orElse(false)) {
-      identifiers.add(TransformerUtils.createPractionerIdentifier(IdentifierType.TAX, taxValue));
-    }
-
-    return addCareTeamPractitionerForPerforming(eob, eobItem, role, identifiers);
+    return careTeamComponent;
   }
 
   public static CareTeamComponent addCareTeamPractitionerForPerforming(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
       ClaimCareteamrole role,
-      List<Identifier> identifiers) {
+      List<Identifier> identifiers,
+      String practionerIdNumber) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry = eob.addCareTeam();
     // addItem adds and returns, so we want size() not size() + 1 here
     careTeamEntry.setSequence(eob.getCareTeam().size());
 
+    String practionerId = "#practitioner-" + practionerIdNumber;
+
     Practitioner practioner = new Practitioner();
     practioner.setIdentifier(identifiers);
+    practioner.setId(practionerId);
 
     Reference ref = new Reference(practioner);
+    ref.setId(practionerId);
+    StringType referenceElement = new StringType(practionerId);
+    ref.setReferenceElement(referenceElement);
     careTeamEntry.setProvider(ref);
 
     CodeableConcept careTeamRoleConcept = createCodeableConcept(role.getSystem(), role.toCode());

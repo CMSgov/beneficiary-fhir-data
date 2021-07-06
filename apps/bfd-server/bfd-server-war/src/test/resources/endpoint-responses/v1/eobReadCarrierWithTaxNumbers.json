@@ -27,7 +27,7 @@
     } ]
   }, {
     "resourceType" : "Practitioner",
-    "id" : "2",
+    "id" : "practitioner-99918319996",
     "identifier" : [ {
       "type" : {
         "coding" : [ {
@@ -49,7 +49,7 @@
     } ]
   }, {
     "resourceType" : "Observation",
-    "id" : "3",
+    "id" : "2",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -202,7 +202,8 @@
     } ],
     "sequence" : 1,
     "provider" : {
-      "reference" : "#2"
+      "id" : "#practitioner-99918319996",
+      "reference" : "#practitioner-99918319996"
     },
     "responsible" : true,
     "role" : {
@@ -391,7 +392,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#3"
+        "reference" : "#2"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",

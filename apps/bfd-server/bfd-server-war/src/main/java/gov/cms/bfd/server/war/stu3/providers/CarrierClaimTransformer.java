@@ -124,22 +124,26 @@ final class CarrierClaimTransformer {
               claimLine.getPerformingPhysicianNpi(),
               claimLine.getPerformingPhysicianUpin(),
               includeTaxNumbers,
+              claimGroup.getClaimId() + item.getSequence(),
               claimLine.getProviderTaxNumber());
 
-      performingCareTeam.setResponsible(true);
+      if (performingCareTeam != null) {
 
-      performingCareTeam.setQualification(
-          TransformerUtils.createCodeableConcept(
-              eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
-      performingCareTeam.addExtension(
-          TransformerUtils.createExtensionCoding(
-              eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, claimLine.getProviderTypeCode()));
+        performingCareTeam.setResponsible(true);
 
-      performingCareTeam.addExtension(
-          TransformerUtils.createExtensionCoding(
-              eob,
-              CcwCodebookVariable.PRTCPTNG_IND_CD,
-              claimLine.getProviderParticipatingIndCode()));
+        performingCareTeam.setQualification(
+            TransformerUtils.createCodeableConcept(
+                eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
+        performingCareTeam.addExtension(
+            TransformerUtils.createExtensionCoding(
+                eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, claimLine.getProviderTypeCode()));
+
+        performingCareTeam.addExtension(
+            TransformerUtils.createExtensionCoding(
+                eob,
+                CcwCodebookVariable.PRTCPTNG_IND_CD,
+                claimLine.getProviderParticipatingIndCode()));
+      }
 
       /*
        * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing provider _should_ always
