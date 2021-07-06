@@ -351,7 +351,8 @@ public class DataTransformer {
         (expectedValue == null && actualValue == null)
             || (expectedValue != null && expectedValue.equals(actualValue));
     if (!matches) {
-      addError(fieldName, "value mismatch: expected=%s actual=%s", expectedValue, actualValue);
+      final String masked = maskString(actualValue, expectedValue);
+      addError(fieldName, "value mismatch: masked=%s", masked);
     }
     return matches;
   }
@@ -359,6 +360,37 @@ public class DataTransformer {
   public void addError(String fieldName, String errorFormat, Object... args) {
     final String message = String.format(errorFormat, args);
     errors.add(new ErrorMessage(fieldName, message));
+  }
+
+  /**
+   * Produces a string suitable for logging comparison mis-matches of two potentially sensitive
+   * strings. The resulting string contains '.' to indicate characters that match, '+' to indicate
+   * an extra character at the end of the string, '-' to indicate a missing character at the end of
+   * the string, '#' to indicate a mismatching character.
+   *
+   * @param source String containing some mismatched characters.
+   * @param comparison String containing the expected value.
+   * @return the masked string for logging.
+   */
+  private String maskString(String source, String comparison) {
+    final StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < source.length(); ++i) {
+      if (i >= comparison.length()) {
+        sb.append('+');
+      } else {
+        char sourceChar = source.charAt(i);
+        char comparisonChar = comparison.charAt(i);
+        if (sourceChar == comparisonChar) {
+          sb.append('.');
+        } else {
+          sb.append('#');
+        }
+      }
+    }
+    for (int i = 0; i < comparison.length() - source.length(); ++i) {
+      sb.append('-');
+    }
+    return sb.toString();
   }
 
   public static class ErrorMessage {

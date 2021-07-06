@@ -199,7 +199,7 @@ public class McsClaimTransformer {
         .copyOptionalString(
             PreAdjMcsClaim.Fields.idrBillProvSpec,
             1,
-            1,
+            2,
             from::hasIdrBillProvSpec,
             from::getIdrBillProvSpec,
             to::setIdrBillProvSpec)
@@ -289,7 +289,7 @@ public class McsClaimTransformer {
       transformer
           .copyString(PreAdjMcsClaim.Fields.idrClaimMbi, true, 1, 13, mbi, to::setIdrClaimMbi)
           .copyString(
-              PreAdjMcsClaim.Fields.idrClaimMbi,
+              PreAdjMcsClaim.Fields.idrClaimMbiHash,
               true,
               64,
               64,

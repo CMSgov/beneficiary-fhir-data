@@ -53,19 +53,19 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
 
   public McsClaim randomClaim() {
     final int detailCount = 1 + randomInt(MAX_DETAILS);
-    final String idrHdIcn = randomDigit(1, 12);
+    final String idrClmHdIcn = randomDigit(5, 8);
     McsClaim.Builder claim = McsClaim.newBuilder();
-    addRandomFieldValues(claim, idrHdIcn, detailCount);
-    addDiagnosisCodes(claim, idrHdIcn);
+    addRandomFieldValues(claim, idrClmHdIcn, detailCount);
+    addDiagnosisCodes(claim, idrClmHdIcn);
     addDetails(claim, detailCount);
     adjustServiceDatesFromDetails(claim);
     return claim.build();
   }
 
-  private void addRandomFieldValues(McsClaim.Builder claim, String idrHdIcn, int detailCount) {
-    claim.setIdrClmHdIcn(randomAlphaNumeric(5, 8));
+  private void addRandomFieldValues(McsClaim.Builder claim, String idrClmHdIcn, int detailCount) {
+    claim.setIdrClmHdIcn(idrClmHdIcn);
     claim.setIdrContrId(randomDigit(1, 5));
-    optional(() -> claim.setIdrHic(idrHdIcn));
+    optional(() -> claim.setIdrHic(randomDigit(1, 12)));
     either(
         () -> claim.setIdrClaimTypeEnum(randomEnum(CLAIM_TYPES)),
         () -> claim.setIdrClaimTypeUnrecognized(randomLetter(1, 1)));
@@ -104,11 +104,11 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     // IdrHdrToDos will be set later
   }
 
-  private void addDiagnosisCodes(McsClaim.Builder claim, String idrHdIcn) {
+  private void addDiagnosisCodes(McsClaim.Builder claim, String idrClmHdIcn) {
     final int count = randomInt(MAX_DIAG_CODES);
     for (int i = 1; i <= count; ++i) {
       final McsDiagnosisCode.Builder code = McsDiagnosisCode.newBuilder();
-      code.setIdrClmHdIcn(idrHdIcn);
+      code.setIdrClmHdIcn(idrClmHdIcn);
       either(
           () -> code.setIdrDiagIcdTypeEnum(randomEnum(DIAG_ICD_TYPES)),
           () -> code.setIdrDiagIcdTypeEnumUnrecognized(randomLetter(1, 1)));

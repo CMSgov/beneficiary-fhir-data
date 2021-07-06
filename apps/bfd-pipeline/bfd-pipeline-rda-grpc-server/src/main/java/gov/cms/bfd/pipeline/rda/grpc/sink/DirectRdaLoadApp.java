@@ -18,6 +18,13 @@ import java.util.Properties;
  * Simple application that invokes an RDA API server and writes FISS claims to a database using
  * RdaLoadJob. This program was written for testing purposes and is not planned to be executed in a
  * production environment.
+ *
+ * <p>Two command line options are required when running the program:
+ *
+ * <ol>
+ *   <li>file: path to a properties file containing configuration settings
+ *   <li>claimType: either fiss or mcs to specify type of claims to download
+ * </ol>
  */
 public class DirectRdaLoadApp {
   private static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";

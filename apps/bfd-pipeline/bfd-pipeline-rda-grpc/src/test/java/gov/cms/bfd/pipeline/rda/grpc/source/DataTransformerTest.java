@@ -167,4 +167,36 @@ public class DataTransformerTest {
             new DataTransformer.ErrorMessage("null-value-bad", "is null")),
         transformer.getErrors());
   }
+
+  @Test
+  public void copyExpectedValue() {
+    transformer
+        .copyStringWithExpectedValue("both-null", true, 1, 1, null, null, copied::add)
+        .copyStringWithExpectedValue("both-same", true, 1, 10, "abcdef", "abcdef", copied::add)
+        .copyStringWithExpectedValue("too-short", true, 1, 10, "abcdef", "abc", copied::add)
+        .copyStringWithExpectedValue("too-long", true, 1, 10, "abcdef", "abcdefgh", copied::add)
+        .copyStringWithExpectedValue("start-mismatch", true, 1, 10, "abcdef", "qwcdef", copied::add)
+        .copyStringWithExpectedValue(
+            "middle-mismatch", true, 1, 10, "abcdef", "abqwef", copied::add)
+        .copyStringWithExpectedValue("end-mismatch", true, 1, 10, "abcdef", "abcdqw", copied::add)
+        .copyStringWithExpectedValue(
+            "long-random-mismatches",
+            true,
+            1,
+            30,
+            "abcdefghijklmnopqrstuvwxyz",
+            "a0cd4fg6ijklm4opqr5tuvw9yQ",
+            copied::add);
+    Assert.assertEquals(ImmutableList.of("abcdef"), copied);
+    Assert.assertEquals(
+        ImmutableList.of(
+            new DataTransformer.ErrorMessage("too-short", "value mismatch: masked=...---"),
+            new DataTransformer.ErrorMessage("too-long", "value mismatch: masked=......++"),
+            new DataTransformer.ErrorMessage("start-mismatch", "value mismatch: masked=##...."),
+            new DataTransformer.ErrorMessage("middle-mismatch", "value mismatch: masked=..##.."),
+            new DataTransformer.ErrorMessage("end-mismatch", "value mismatch: masked=....##"),
+            new DataTransformer.ErrorMessage(
+                "long-random-mismatches", "value mismatch: masked=.#..#..#.....#....#....#.#")),
+        transformer.getErrors());
+  }
 }
