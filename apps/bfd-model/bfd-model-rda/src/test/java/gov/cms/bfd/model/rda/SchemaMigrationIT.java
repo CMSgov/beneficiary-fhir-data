@@ -46,47 +46,57 @@ public class SchemaMigrationIT {
    */
   @Test
   public void fissClaimEntities() {
-    final PreAdjFissClaim claim = new PreAdjFissClaim();
-    claim.setDcn("1");
-    claim.setHicNo("h1");
-    claim.setCurrStatus('1');
-    claim.setCurrLoc1('A');
-    claim.setCurrLoc2("1A");
-    claim.setPracLocCity("city name can be very long indeed");
+    final PreAdjFissClaim claim =
+        PreAdjFissClaim.builder()
+            .dcn("1")
+            .hicNo("h1")
+            .currStatus('1')
+            .currLoc1('A')
+            .currLoc2("1A")
+            .pracLocCity("city name can be very long indeed")
+            .build();
 
-    final PreAdjFissProcCode procCode0 = new PreAdjFissProcCode();
-    procCode0.setDcn(claim.getDcn());
-    procCode0.setPriority((short) 0);
-    procCode0.setProcCode("P");
-    procCode0.setProcFlag("F");
-    procCode0.setProcDate(LocalDate.now());
-    procCode0.setLastUpdated(Instant.now());
+    final PreAdjFissProcCode procCode0 =
+        PreAdjFissProcCode.builder()
+            .dcn(claim.getDcn())
+            .priority((short) 0)
+            .procCode("P")
+            .procFlag("F")
+            .procDate(LocalDate.now())
+            .lastUpdated(Instant.now())
+            .build();
     claim.getProcCodes().add(procCode0);
 
-    final PreAdjFissProcCode procCode1 = new PreAdjFissProcCode();
-    procCode1.setDcn(claim.getDcn());
-    procCode1.setPriority((short) 1);
-    procCode1.setProcCode("P");
-    procCode1.setProcFlag("G");
-    procCode1.setProcDate(LocalDate.now());
-    procCode1.setLastUpdated(Instant.now());
+    final PreAdjFissProcCode procCode1 =
+        PreAdjFissProcCode.builder()
+            .dcn(claim.getDcn())
+            .priority((short) 1)
+            .procCode("P")
+            .procFlag("G")
+            .procDate(LocalDate.now())
+            .lastUpdated(Instant.now())
+            .build();
     claim.getProcCodes().add(procCode1);
 
-    final PreAdjFissDiagnosisCode diagCode0 = new PreAdjFissDiagnosisCode();
-    diagCode0.setDcn(claim.getDcn());
-    diagCode0.setPriority((short) 0);
-    diagCode0.setDiagCd2("cd2");
-    diagCode0.setDiagPoaInd("Q");
+    final PreAdjFissDiagnosisCode diagCode0 =
+        PreAdjFissDiagnosisCode.builder()
+            .dcn(claim.getDcn())
+            .priority((short) 0)
+            .diagCd2("cd2")
+            .diagPoaInd("Q")
+            .build();
     claim.getDiagCodes().add(diagCode0);
 
-    final PreAdjFissDiagnosisCode diagCode1 = new PreAdjFissDiagnosisCode();
-    diagCode1.setDcn(claim.getDcn());
-    diagCode1.setPriority((short) 1);
-    diagCode1.setDiagCd2("cd2");
-    diagCode1.setDiagPoaInd("R");
+    final PreAdjFissDiagnosisCode diagCode1 =
+        PreAdjFissDiagnosisCode.builder()
+            .dcn(claim.getDcn())
+            .priority((short) 1)
+            .diagCd2("cd2")
+            .diagPoaInd("R")
+            .build();
     claim.getDiagCodes().add(diagCode1);
 
-    // Insert a record and ready back to verify some columns and that the detail records were
+    // Insert a record and read it back to verify some columns and that the detail records were
     // written
     entityManager.getTransaction().begin();
     entityManager.persist(claim);
@@ -129,11 +139,13 @@ public class SchemaMigrationIT {
    */
   @Test
   public void mcsClaimEntities() {
-    final PreAdjMcsClaim claim = new PreAdjMcsClaim();
-    claim.setIdrClmHdIcn("3");
-    claim.setIdrContrId("c1");
-    claim.setIdrHic("hc");
-    claim.setIdrClaimType("c");
+    final PreAdjMcsClaim claim =
+        PreAdjMcsClaim.builder()
+            .idrClmHdIcn("3")
+            .idrContrId("c1")
+            .idrHic("hc")
+            .idrClaimType("c")
+            .build();
 
     claim.getDetails().add(quickMcsDetail(claim, 0, "P"));
     PreAdjMcsDetail detail1 = quickMcsDetail(claim, 1, "Q");
@@ -147,7 +159,7 @@ public class SchemaMigrationIT {
     PreAdjMcsDiagnosisCode diag2 = quickMcsDiagCode(claim, 2, "V");
     claim.getDiagCodes().add(diag2);
 
-    // Insert a record and ready back to verify some columns and that the detail records were
+    // Insert a record and read it back to verify some columns and that the detail records were
     // written
     entityManager.getTransaction().begin();
     entityManager.persist(claim);
@@ -184,20 +196,20 @@ public class SchemaMigrationIT {
   }
 
   private PreAdjMcsDetail quickMcsDetail(PreAdjMcsClaim claim, int priority, String dtlStatus) {
-    final PreAdjMcsDetail detail = new PreAdjMcsDetail();
-    detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    detail.setPriority((short) priority);
-    detail.setIdrDtlStatus(dtlStatus);
-    return detail;
+    return PreAdjMcsDetail.builder()
+        .idrClmHdIcn(claim.getIdrClmHdIcn())
+        .priority((short) priority)
+        .idrDtlStatus(dtlStatus)
+        .build();
   }
 
   private PreAdjMcsDiagnosisCode quickMcsDiagCode(
       PreAdjMcsClaim claim, int priority, String icdType) {
-    final PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
-    diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    diagCode.setPriority((short) priority);
-    diagCode.setIdrDiagIcdType(icdType);
-    return diagCode;
+    return PreAdjMcsDiagnosisCode.builder()
+        .idrClmHdIcn(claim.getIdrClmHdIcn())
+        .priority((short) priority)
+        .idrDiagIcdType(icdType)
+        .build();
   }
 
   private String summarizeFissProcCodes(PreAdjFissClaim resultClaim) {

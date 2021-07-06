@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.Serializable;
 
 /** Models the user-configurable application options. */
@@ -19,46 +20,29 @@ public final class LoadAppOptions implements Serializable {
   public static final int DEFAULT_LOADER_THREADS =
       Math.max(1, (Runtime.getRuntime().availableProcessors() - 1)) * 2;
 
-  private final int hicnHashIterations;
-  private final byte[] hicnHashPepper;
+  private final IdHasher.Config idHasherConfig;
   private final int loaderThreads;
   private final boolean idempotencyRequired;
 
   /**
    * Constructs a new {@link LoadAppOptions} instance.
    *
-   * @param hicnHashIterations the value to use for {@link #getHicnHashIterations()}
-   * @param hicnHashPepper the value to use for {@link #getHicnHashPepper()}
+   * @param idHasherConfig the value to use for {@link #getIdHasherConfig()}
    * @param loaderThreads the value to use for {@link #getLoaderThreads()}
    * @param idempotencyRequired the value to use for {@link #isIdempotencyRequired()}
    */
   public LoadAppOptions(
-      int hicnHashIterations,
-      byte[] hicnHashPepper,
-      int loaderThreads,
-      boolean idempotencyRequired) {
+      IdHasher.Config idHasherConfig, int loaderThreads, boolean idempotencyRequired) {
     if (loaderThreads < 1) throw new IllegalArgumentException();
 
-    this.hicnHashIterations = hicnHashIterations;
-    this.hicnHashPepper = hicnHashPepper;
+    this.idHasherConfig = idHasherConfig;
     this.loaderThreads = loaderThreads;
     this.idempotencyRequired = idempotencyRequired;
   }
 
-  /**
-   * @return the number of <code>PBKDF2WithHmacSHA256</code> iterations to use when hashing
-   *     beneficiary HICNs
-   */
-  public int getHicnHashIterations() {
-    return hicnHashIterations;
-  }
-
-  /**
-   * @return the shared secret pepper to use (in lieu of a salt) with <code>PBKDF2WithHmacSHA256
-   *     </code> when hashing beneficiary HICNs
-   */
-  public byte[] getHicnHashPepper() {
-    return hicnHashPepper;
+  /** @return the configuration settings used when hashing beneficiary HICNs */
+  public IdHasher.Config getIdHasherConfig() {
+    return idHasherConfig;
   }
 
   /**
@@ -86,7 +70,7 @@ public final class LoadAppOptions implements Serializable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append("LoadAppOptions [hicnHashIterations=");
-    builder.append(hicnHashIterations);
+    builder.append(idHasherConfig.getHashIterations());
     builder.append(", hicnHashPepper=");
     builder.append("***");
     builder.append(", loaderThreads=");

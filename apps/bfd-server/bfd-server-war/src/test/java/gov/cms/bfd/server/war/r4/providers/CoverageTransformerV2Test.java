@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static org.hamcrest.CoreMatchers.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
