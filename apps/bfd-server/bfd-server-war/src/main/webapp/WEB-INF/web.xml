@@ -6,9 +6,26 @@
 	<filter>
 		<filter-name>RequestResponseLoggingFilter</filter-name>
 		<filter-class>gov.cms.bfd.server.war.RequestResponseLoggingFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>RequestResponseLoggingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- Limit exposure to request flooding, whether malicious, or as a result of a misconfigured client.
+		See http://www.eclipse.org/jetty/javadoc/jetty-9/org/eclipse/jetty/servlets/DoSFilter.html for details. -->
+	<filter>
+		<filter-name>UserAwareDoSFilter</filter-name>
+		<filter-class>gov.cms.bfd.server.launcher.UserAwareDoSFilter</filter-class>
+		<async-supported>true</async-supported>
+		<init-param>
+			<param-name>maxRequestsPerSec</param-name>
+			<param-value>2</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>UserAwareDoSFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
