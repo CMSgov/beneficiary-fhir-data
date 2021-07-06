@@ -402,6 +402,22 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     String contractCode = coverageId.getValueNotNull();
 
     /*
+     * Workaround for BFD-1057: The `ORDER BY` required on our "find the bene IDs" query (below)
+     * intermittently causes the PostgreSQL query planner to run a table scan, which takes over an
+     * hour in prod. This _seems_ to be only occurring when the query would return no results. (Yes,
+     * this is odd and we don't entirely trust it.) So, when we're on the first page of results or
+     * not paging at all here, we first pull a count of expected matches here to see if there's any
+     * reason to even run the next query.
+     */
+    if (!paging.isPagingRequested() || paging.isFirstPage()) {
+      long matchingBeneCount =
+          queryBeneCountByPartDContractCodeAndYearMonth(yearMonth, contractCode);
+      if (matchingBeneCount <= 0) {
+        return Collections.emptyList();
+      }
+    }
+
+    /*
      * Fetching with joins is not compatible with setMaxResults as explained in this post:
      * https://stackoverflow.com/questions/53569908/jpa-eager-fetching-and-pagination-best-practices
      * So, because we need to use a join, we query in two steps: first fetch bene-ids with paging
@@ -418,6 +434,48 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
 
     // Fetch the benes using the ids
     return queryBeneficiariesByIdsWithBeneficiaryMonthlys(ids);
+  }
+
+  /**
+   * @param yearMonth the {@link BeneficiaryMonthly#getYearMonth()} value to match against
+   * @param contractId the {@link BeneficiaryMonthly#getPartDContractNumberId()} value to match
+   *     against
+   * @return the count of matching {@link Beneficiary#getBeneficiaryId()} values
+   */
+  @Trace
+  private long queryBeneCountByPartDContractCodeAndYearMonth(
+      LocalDate yearMonth, String contractId) {
+    // Create the query to run.
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Long> beneCountCriteria = builder.createQuery(Long.class);
+    Root<BeneficiaryMonthly> beneMonthlyRoot = beneCountCriteria.from(BeneficiaryMonthly.class);
+    beneCountCriteria.select(builder.count(beneMonthlyRoot));
+    beneCountCriteria.where(
+        builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.yearMonth), yearMonth),
+        builder.equal(beneMonthlyRoot.get(BeneficiaryMonthly_.partDContractNumberId), contractId));
+
+    // Run the query and return the results.
+    Optional<Long> matchingBeneCount = Optional.empty();
+    Long beneHistoryMatchesTimerQueryNanoSeconds = null;
+    Timer.Context matchingBeneCountTimer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(
+                    getClass().getSimpleName(),
+                    "query",
+                    "bene_count_by_year_month_part_d_contract_id"))
+            .time();
+    try {
+      matchingBeneCount =
+          Optional.of(entityManager.createQuery(beneCountCriteria).getSingleResult());
+      return matchingBeneCount.get();
+    } finally {
+      beneHistoryMatchesTimerQueryNanoSeconds = matchingBeneCountTimer.stop();
+      TransformerUtils.recordQueryInMdc(
+          "bene_count_by_year_month_part_d_contract_id",
+          beneHistoryMatchesTimerQueryNanoSeconds,
+          matchingBeneCount.isPresent() ? 1 : 0);
+    }
   }
 
   /**
