@@ -144,6 +144,37 @@ final class DMEClaimTransformer {
                 CcwCodebookVariable.SUPLRNUM, claimLine.getProviderBillingNumber()));
       }
 
+      ExplanationOfBenefit.CareTeamComponent performingCareTeam =
+          TransformerUtils.addCareTeamPerforming(
+              eob,
+              item,
+              ClaimCareteamrole.PRIMARY,
+              claimLine.getProviderNPI(),
+              Optional.empty(),
+              includeTaxNumbers,
+              claimLine.getProviderTaxNumber());
+      performingCareTeam.setResponsible(true);
+
+      /*
+       * The provider's "specialty" and "type" code are equivalent.
+       * However, the "specialty" codes are more granular, and seem to
+       * better match the example FHIR
+       * `http://hl7.org/fhir/ex-providerqualification` code set.
+       * Accordingly, we map the "specialty" codes to the
+       * `qualification` field here, and stick the "type" code into an
+       * extension. TODO: suggest that the spec allows more than one
+       * `qualification` entry.
+       */
+      performingCareTeam.setQualification(
+          TransformerUtils.createCodeableConcept(
+              eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
+
+      performingCareTeam.addExtension(
+          TransformerUtils.createExtensionCoding(
+              eob,
+              CcwCodebookVariable.PRTCPTNG_IND_CD,
+              claimLine.getProviderParticipatingIndCode()));
+
       /*
        * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing provider
        * _should_ always be present. However, we've found some examples in production

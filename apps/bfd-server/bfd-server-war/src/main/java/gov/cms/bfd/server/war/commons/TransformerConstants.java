@@ -194,6 +194,11 @@ public final class TransformerConstants {
       "Unique Physician Identification Number";
 
   /**
+   * The standard {@link Coding#getCode()} for {@link Identifier#getType()} entries where the
+   * identifier is a PIN.
+   */
+  public static final String CODED_IDENTIFIER_TYPE_PIN = "PIN";
+  /**
    * The Code System, as available at <a
    * href="https://terminology.hl7.org/1.0.0/CodeSystem-v2-0203.html">identifierType</a>.
    */

@@ -26,8 +26,21 @@
       }
     } ]
   }, {
-    "resourceType" : "Observation",
+    "resourceType" : "Practitioner",
     "id" : "2",
+    "identifier" : [ {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "code" : "NPI",
+          "display" : "National Provider Identifier"
+        } ]
+      },
+      "value" : "1923124"
+    } ]
+  }, {
+    "resourceType" : "Observation",
+    "id" : "3",
     "status" : "unknown",
     "code" : {
       "coding" : [ {
@@ -177,6 +190,40 @@
         "code" : "1",
         "display" : "Participating"
       }
+    } ],
+    "sequence" : 1,
+    "provider" : {
+      "reference" : "#2"
+    },
+    "responsible" : true,
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/claimcareteamrole",
+        "code" : "primary",
+        "display" : "Primary provider"
+      } ]
+    },
+    "qualification" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+        "code" : "41",
+        "display" : "Optometrist"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+        "code" : "0"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
     }, {
       "url" : "http://hl7.org/fhir/sid/us-npi",
       "valueCoding" : {
@@ -185,7 +232,7 @@
         "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
       }
     } ],
-    "sequence" : 2,
+    "sequence" : 3,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -298,7 +345,7 @@
     }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
       "valueReference" : {
-        "reference" : "#2"
+        "reference" : "#3"
       }
     }, {
       "url" : "http://hl7.org/fhir/sid/ndc",
@@ -308,7 +355,7 @@
       }
     } ],
     "sequence" : 6,
-    "careTeamLinkId" : [ 2 ],
+    "careTeamLinkId" : [ 1, 3 ],
     "diagnosisLinkId" : [ 5 ],
     "category" : {
       "coding" : [ {

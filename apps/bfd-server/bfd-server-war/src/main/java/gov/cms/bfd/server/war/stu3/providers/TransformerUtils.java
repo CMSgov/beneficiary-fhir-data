@@ -786,6 +786,16 @@ public final class TransformerUtils {
 
   /**
    * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   * @return a {@link CodeableConcept} with the specified {@link Coding}
+   */
+  static CodeableConcept createCodeableConcept(
+      String codingSystem, String codingDisplay, String codingCode) {
+    return createCodeableConcept(codingSystem, null, codingDisplay, codingCode);
+  }
+
+  /**
+   * @param codingSystem the {@link Coding#getSystem()} to use
    * @param codingVersion the {@link Coding#getVersion()} to use
    * @param codingDisplay the {@link Coding#getDisplay()} to use
    * @param codingCode the {@link Coding#getCode()} to use
@@ -2916,6 +2926,72 @@ public final class TransformerUtils {
               // Note: Only CARRIER and DME claims have the year/version field.
               concept.getCodingFirstRep().setVersion(hcpcsYear.get().toString());
             });
+  }
+
+  public static CareTeamComponent addCareTeamPerforming(
+      ExplanationOfBenefit eob,
+      ItemComponent eobItem,
+      ClaimCareteamrole role,
+      Optional<String> npiValue,
+      Optional<String> upinValue,
+      Optional<Boolean> includeTaxNumbers,
+      String taxValue) {
+
+    List<Identifier> identifiers = new ArrayList<Identifier>();
+
+    if (npiValue.isPresent()) {
+      identifiers.add(
+          TransformerUtils.createPractionerIdentifier(IdentifierType.NPI, npiValue.get()));
+    }
+
+    if (upinValue.isPresent()) {
+      identifiers.add(
+          TransformerUtils.createPractionerIdentifier(IdentifierType.UPIN, upinValue.get()));
+    }
+
+    if (includeTaxNumbers.orElse(false)) {
+      identifiers.add(TransformerUtils.createPractionerIdentifier(IdentifierType.TAX, taxValue));
+    }
+
+    return addCareTeamPractitionerForPerforming(eob, eobItem, role, identifiers);
+  }
+
+  public static CareTeamComponent addCareTeamPractitionerForPerforming(
+      ExplanationOfBenefit eob,
+      ItemComponent eobItem,
+      ClaimCareteamrole role,
+      List<Identifier> identifiers) {
+    // Try to find a matching pre-existing entry.
+    CareTeamComponent careTeamEntry = eob.addCareTeam();
+    // addItem adds and returns, so we want size() not size() + 1 here
+    careTeamEntry.setSequence(eob.getCareTeam().size());
+
+    Practitioner practioner = new Practitioner();
+    practioner.setIdentifier(identifiers);
+
+    Reference ref = new Reference(practioner);
+    careTeamEntry.setProvider(ref);
+
+    CodeableConcept careTeamRoleConcept = createCodeableConcept(role.getSystem(), role.toCode());
+    careTeamRoleConcept.getCodingFirstRep().setDisplay(role.getDisplay());
+    careTeamEntry.setRole(careTeamRoleConcept);
+
+    // Link the EOB.item to the care team entry (if it isn't already).
+    final int careTeamEntrySequence = careTeamEntry.getSequence();
+    if (eobItem.getCareTeamLinkId().stream()
+        .noneMatch(id -> id.getValue() == careTeamEntrySequence)) {
+      eobItem.addCareTeamLinkId(careTeamEntrySequence);
+    }
+
+    return careTeamEntry;
+  }
+
+  public static Identifier createPractionerIdentifier(IdentifierType type, String value) {
+    Identifier id =
+        new Identifier()
+            .setType(createCodeableConcept(type.getSystem(), type.getDisplay(), type.getCode()))
+            .setValue(value);
+    return id;
   }
 
   /**

@@ -16,7 +16,6 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -101,11 +100,7 @@ public final class DMEClaimTransformerTest {
     TransformerTestUtils.assertExtensionIdentifierEquals(
         CcwCodebookVariable.SUPLRNUM, claimLine1.getProviderBillingNumber(), eobItem0);
 
-    TransformerTestUtils.assertCareTeamEquals(
-        claimLine1.getProviderNPI().get(), ClaimCareteamrole.PRIMARY, eob);
-    CareTeamComponent performingCareTeamEntry =
-        TransformerTestUtils.findCareTeamEntryForProviderNpi(
-            claimLine1.getProviderNPI().get(), eob.getCareTeam());
+    CareTeamComponent performingCareTeamEntry = eob.getCareTeam().get(0);
     TransformerTestUtils.assertHasCoding(
         CcwCodebookVariable.PRVDR_SPCLTY,
         claimLine1.getProviderSpecialityCode(),

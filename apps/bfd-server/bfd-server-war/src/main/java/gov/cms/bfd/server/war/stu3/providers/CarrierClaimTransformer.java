@@ -116,6 +116,30 @@ final class CarrierClaimTransformer {
     for (CarrierClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
       item.setSequence(claimLine.getLineNumber().intValue());
+      ExplanationOfBenefit.CareTeamComponent performingCareTeam =
+          TransformerUtils.addCareTeamPerforming(
+              eob,
+              item,
+              ClaimCareteamrole.PRIMARY,
+              claimLine.getPerformingPhysicianNpi(),
+              claimLine.getPerformingPhysicianUpin(),
+              includeTaxNumbers,
+              claimLine.getProviderTaxNumber());
+
+      performingCareTeam.setResponsible(true);
+
+      performingCareTeam.setQualification(
+          TransformerUtils.createCodeableConcept(
+              eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
+      performingCareTeam.addExtension(
+          TransformerUtils.createExtensionCoding(
+              eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, claimLine.getProviderTypeCode()));
+
+      performingCareTeam.addExtension(
+          TransformerUtils.createExtensionCoding(
+              eob,
+              CcwCodebookVariable.PRTCPTNG_IND_CD,
+              claimLine.getProviderParticipatingIndCode()));
 
       /*
        * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing provider _should_ always
