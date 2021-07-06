@@ -153,7 +153,8 @@ public class GrpcRdaSourceIT {
               + "    \"procCode\" : \"uec\",\n"
               + "    \"procFlag\" : \"nli\",\n"
               + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  } ]\n"
+              + "  } ],\n"
+              + "  \"diagCodes\" : [ ]\n"
               + "}",
           sink.getValues().get(0));
       assertEquals(
@@ -190,7 +191,8 @@ public class GrpcRdaSourceIT {
               + "    \"procCode\" : \"egnj\",\n"
               + "    \"procDate\" : \"2021-05-13\",\n"
               + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  } ]\n"
+              + "  } ],\n"
+              + "  \"diagCodes\" : [ ]\n"
               + "}",
           sink.getValues().get(1));
     } finally {

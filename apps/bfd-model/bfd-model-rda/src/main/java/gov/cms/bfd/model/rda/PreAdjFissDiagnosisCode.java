@@ -2,7 +2,6 @@ package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -17,7 +16,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the FissProcCodes table */
 @Entity
 @Getter
 @Setter
@@ -27,8 +25,8 @@ import lombok.experimental.FieldNameConstants;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @IdClass(PreAdjFissProcCode.PK.class)
-@Table(name = "`FissProcCodes`", schema = "`pre_adj`")
-public class PreAdjFissProcCode {
+@Table(name = "`FissDiagnosisCodes`", schema = "`pre_adj`")
+public class PreAdjFissDiagnosisCode {
   @Id
   @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
@@ -39,14 +37,14 @@ public class PreAdjFissProcCode {
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`procCode`", length = 10, nullable = false)
-  private String procCode;
+  @Column(name = "`diagCd2`", length = 7, nullable = false)
+  private String diagCd2;
 
-  @Column(name = "`procFlag`", length = 4)
-  private String procFlag;
+  @Column(name = "`diagPoaInd`", length = 1, nullable = false)
+  private String diagPoaInd;
 
-  @Column(name = "`procDate`")
-  private LocalDate procDate;
+  @Column(name = "`bitFlags`", length = 4)
+  private String bitFlags;
 
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
@@ -54,7 +52,7 @@ public class PreAdjFissProcCode {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the FissProcCodes table */
+  /* PK class for the FissDiagnosisCodes table */
   public static class PK implements Serializable {
     private String dcn;
     private short priority;
