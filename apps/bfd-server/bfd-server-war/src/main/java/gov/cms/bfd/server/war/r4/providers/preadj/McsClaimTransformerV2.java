@@ -142,10 +142,16 @@ public class McsClaimTransformerV2 {
   }
 
   private static Money getTotal(PreAdjMcsClaim claimGroup) {
-    Money total = new Money();
+    Money total;
 
-    total.setValue(claimGroup.getIdrTotBilledAmt());
-    total.setCurrency("USD");
+    if (claimGroup.getIdrTotBilledAmt() != null) {
+      total = new Money();
+
+      total.setValue(claimGroup.getIdrTotBilledAmt());
+      total.setCurrency("USD");
+    } else {
+      total = null;
+    }
 
     return total;
   }
@@ -213,7 +219,10 @@ public class McsClaimTransformerV2 {
     return new Claim.ProcedureComponent()
         .setSequence(sequence)
         .setDate(
-            Date.from(procCode.getIdrDtlToDate().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+            procCode.getIdrDtlToDate() == null
+                ? null
+                : Date.from(
+                    procCode.getIdrDtlToDate().atStartOfDay(ZoneId.systemDefault()).toInstant()))
         .setProcedure(
             new CodeableConcept()
                 .setCoding(

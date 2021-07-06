@@ -74,7 +74,7 @@ public class McsClaimResponseTransformerV2 {
             .setValue(
                 new Coding(
                     "https://dcgeo.cms.gov/resources/variables/mcs-status",
-                    "" + claimGroup.getIdrStatusCode(),
+                    claimGroup.getIdrStatusCode(),
                     claimGroup.getIdrStatusCode().toLowerCase())));
   }
 
