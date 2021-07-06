@@ -7,6 +7,12 @@ data_pipeline_tmp_dir: /tmp
 data_pipeline_idempotency_required: true
 data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_pipeline_new_relic_metric_path: '/metric/v1'
+data_pipeline_rda_job_enabled: false
+data_pipeline_rda_job_interval_seconds: 300
+data_pipeline_rda_job_batch_size: 20
+data_pipeline_rda_grpc_host: undefined
+data_pipeline_rda_grpc_port: 443
+data_pipeline_rda_grpc_max_idle_seconds: 600
 
 
 ## EFT EFS 
