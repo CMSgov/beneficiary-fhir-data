@@ -1,11 +1,12 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import static org.junit.Assert.*;
+
 import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,8 +30,8 @@ public class DataTransformerTest {
         .copyString("null-ok", true, 1, 5, null, copied::add)
         .copyString("null-bad", false, 1, 5, null, copied::add);
 
-    Assert.assertEquals(ImmutableList.of("1", "12345"), copied);
-    Assert.assertEquals(
+    assertEquals(ImmutableList.of("1", "12345"), copied);
+    assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage(
                 "length-below-min", "invalid length: expected=[2,5] actual=1"),
@@ -47,8 +48,8 @@ public class DataTransformerTest {
         .copyCharacter("length-below-min", "", copied::add)
         .copyCharacter("length-above-max", "12", copied::add)
         .copyCharacter("length-one-ok", "A", copied::add);
-    Assert.assertEquals(ImmutableList.of('1', 'A'), copied);
-    Assert.assertEquals(
+    assertEquals(ImmutableList.of('1', 'A'), copied);
+    assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage(
                 "length-below-min", "invalid length: expected=[1,1] actual=0"),
@@ -60,15 +61,14 @@ public class DataTransformerTest {
   @Test
   public void copyDate() {
     transformer
-        .copyDate("2021-03-01", false, "valid-1", copied::add)
-        .copyDate("2021/03/01", true, "invalid-1", copied::add)
-        .copyDate("2021-06-19T18:24:30", true, "invalid-2", copied::add)
-        .copyDate("2021-10-21", true, "valid-2", copied::add)
-        .copyDate(null, true, "null-ok", copied::add)
-        .copyDate(null, false, "null-bad", copied::add);
-    Assert.assertEquals(
-        ImmutableList.of(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 10, 21)), copied);
-    Assert.assertEquals(
+        .copyDate("valid-1", false, "2021-03-01", copied::add)
+        .copyDate("invalid-1", true, "2021/03/01", copied::add)
+        .copyDate("invalid-2", true, "2021-06-19T18:24:30", copied::add)
+        .copyDate("valid-2", true, "2021-10-21", copied::add)
+        .copyDate("null-ok", true, null, copied::add)
+        .copyDate("null-bad", false, null, copied::add);
+    assertEquals(ImmutableList.of(LocalDate.of(2021, 3, 1), LocalDate.of(2021, 10, 21)), copied);
+    assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage("invalid-1", "invalid date"),
             new DataTransformer.ErrorMessage("invalid-2", "invalid date"),
@@ -86,10 +86,10 @@ public class DataTransformerTest {
         .copyAmount("valid-3", true, "16", copied::add)
         .copyAmount("null-ok", true, null, copied::add)
         .copyAmount("null-bad", false, null, copied::add);
-    Assert.assertEquals(
+    assertEquals(
         ImmutableList.of(new BigDecimal("123.05"), new BigDecimal("-456.98"), new BigDecimal("16")),
         copied);
-    Assert.assertEquals(
+    assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage("invalid-1", "invalid amount"),
             new DataTransformer.ErrorMessage("invalid-2", "invalid amount"),
@@ -113,8 +113,8 @@ public class DataTransformerTest {
         .copyEnumAsCharacter("empty-string", new EnumStringExtractor.Result(""), copied::add)
         .copyEnumAsCharacter("long-string", new EnumStringExtractor.Result("boo!"), copied::add)
         .copyEnumAsCharacter("good-value", new EnumStringExtractor.Result("Z"), copied::add);
-    Assert.assertEquals(ImmutableList.of('Z'), copied);
-    Assert.assertEquals(
+    assertEquals(ImmutableList.of('Z'), copied);
+    assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage("no-value", "no value set"),
             new DataTransformer.ErrorMessage("invalid-value", "unrecognized enum value"),
@@ -159,8 +159,8 @@ public class DataTransformerTest {
             copied::add)
         .copyEnumAsString(
             "good-value", false, 0, 10, new EnumStringExtractor.Result("boo!"), copied::add);
-    Assert.assertEquals(ImmutableList.of("boo!"), copied);
-    Assert.assertEquals(
+    assertEquals(ImmutableList.of("boo!"), copied);
+    assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage("no-value", "no value set"),
             new DataTransformer.ErrorMessage("invalid-value", "unrecognized enum value"),
@@ -187,8 +187,8 @@ public class DataTransformerTest {
             "abcdefghijklmnopqrstuvwxyz",
             "a0cd4fg6ijklm4opqr5tuvw9yQ",
             copied::add);
-    Assert.assertEquals(ImmutableList.of("abcdef"), copied);
-    Assert.assertEquals(
+    assertEquals(ImmutableList.of("abcdef"), copied);
+    assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage("too-short", "value mismatch: masked=...---"),
             new DataTransformer.ErrorMessage("too-long", "value mismatch: masked=......++"),
@@ -198,5 +198,12 @@ public class DataTransformerTest {
             new DataTransformer.ErrorMessage(
                 "long-random-mismatches", "value mismatch: masked=.#..#..#.....#....#....#.#")),
         transformer.getErrors());
+    try {
+      transformer.throwIfErrorsPresent();
+      fail("exception not thrown");
+    } catch (DataTransformer.TransformationException ex) {
+      assertEquals("failed with 6 errors", ex.getMessage());
+      assertEquals(ex.getErrors(), transformer.getErrors());
+    }
   }
 }

@@ -213,14 +213,14 @@ public class DataTransformer {
    * ISO-8601 format (YYYY-MM-DD). Valid null values are silently accepted without calling the
    * Consumer.
    *
-   * @param value date string in ISO-8601 format
-   * @param nullable true if null is a valid value
    * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param value date string in ISO-8601 format
    * @param copier Consumer to receive the date
    * @return this
    */
   public DataTransformer copyDate(
-      String value, boolean nullable, String fieldName, Consumer<LocalDate> copier) {
+      String fieldName, boolean nullable, String value, Consumer<LocalDate> copier) {
     if (nonNull(fieldName, value, nullable)) {
       try {
         LocalDate date = LocalDate.parse(value);
@@ -253,7 +253,7 @@ public class DataTransformer {
       Supplier<String> value,
       Consumer<LocalDate> copier) {
     if (exists.getAsBoolean()) {
-      return copyDate(value.get(), false, fieldName, copier);
+      return copyDate(fieldName, false, value.get(), copier);
     }
     return this;
   }

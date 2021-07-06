@@ -7,6 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The base class provides common functionality used by the FISS and MCS claim generators to create
+ * random claim data.
+ */
 abstract class AbstractRandomClaimGenerator {
   private static final String ALPHA = "bcdfghjkmnpqrstvwxz";
   private static final String DIGIT = "1234567890";
@@ -17,12 +21,29 @@ abstract class AbstractRandomClaimGenerator {
   private final boolean optionalTrue;
   private final Clock clock;
 
+  /**
+   * Constructs an instance.
+   *
+   * @param seed numeric seed value for the PRNG
+   * @param optionalTrue when true optionals will always be generated (used for tests)
+   * @param clock Clock to generate current time/date values (needed for tests)
+   */
   AbstractRandomClaimGenerator(long seed, boolean optionalTrue, Clock clock) {
     this.random = new Random(seed);
     this.optionalTrue = optionalTrue;
     this.clock = clock;
   }
 
+  /**
+   * RDA API enums always define a special value that the protobuf API intends as a special place
+   * holder for garbled/invalid data. This field is named UNRECOGNIZED. This method is used to
+   * accept all of the defined enum values, skip this special value, and return an immutable list of
+   * valid enums to be included when generating a random enum value.
+   *
+   * @param values all possible values for an enum type
+   * @param <T> the actual enum type
+   * @return immutable list of valid enum values
+   */
   protected static <T extends Enum<T>> List<T> enumValues(T[] values) {
     return Arrays.stream(values)
         .filter(v -> !v.name().equals("UNRECOGNIZED"))
@@ -45,11 +66,23 @@ abstract class AbstractRandomClaimGenerator {
     return randomString(ALNUM, minLength, maxLength);
   }
 
+  /**
+   * A random date string in YYYY-MM-DD format for a date no more than 100 days ago and no later
+   * than today.
+   *
+   * @return random YYYY-MM-DD date string.
+   */
   protected String randomDate() {
     final LocalDate date = LocalDate.now(clock).minusDays(random.nextInt(MAX_DAYS_AGO));
     return date.toString();
   }
 
+  /**
+   * Generates a random decimal string in the range 0.00 to 99999.99. The value will always have at
+   * least one digit before the decimal point and exactly two digits after.
+   *
+   * @return random decimal string.
+   */
   protected String randomAmount() {
     final int dollarDigits = 1 + random.nextInt(5);
     final StringBuilder amount = new StringBuilder(randomString(DIGIT, dollarDigits, dollarDigits));
@@ -60,16 +93,35 @@ abstract class AbstractRandomClaimGenerator {
     return amount.toString();
   }
 
+  /**
+   * Selects a random enum value from the list and returns it.
+   *
+   * @param values all possible values
+   * @param <T> the enum type
+   * @return one of the values selected at random
+   */
   protected <T> T randomEnum(List<T> values) {
     return values.get(random.nextInt(values.size()));
   }
 
+  /**
+   * Triggers the action 50% of the time (or always if optionalTrue has been set).
+   *
+   * @param action action to trigger half the time
+   */
   protected void optional(Runnable action) {
     if (optionalTrue || random.nextBoolean()) {
       action.run();
     }
   }
 
+  /**
+   * When one of two possible values should be generated. Usually used for enums. The two
+   * possibilities are triggered with equal probability.
+   *
+   * @param action1 first possible action
+   * @param action2 second possible action
+   */
   protected void either(Runnable action1, Runnable action2) {
     if (random.nextBoolean()) {
       action1.run();
