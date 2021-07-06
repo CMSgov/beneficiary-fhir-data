@@ -15,6 +15,8 @@ import org.hibernate.tool.schema.Action;
  * #getPooledDataSource()}.
  */
 public final class PipelineApplicationState implements AutoCloseable {
+  private static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+
   private final MetricRegistry metrics;
   private final HikariDataSource pooledDataSource;
   private final EntityManagerFactory entityManagerFactory;
@@ -27,9 +29,22 @@ public final class PipelineApplicationState implements AutoCloseable {
    *     create {@link #getPooledDataSource()})
    */
   public PipelineApplicationState(MetricRegistry metrics, DatabaseOptions dbOptions) {
+    this(metrics, dbOptions, PERSISTENCE_UNIT_NAME);
+  }
+
+  /**
+   * Constructs a new {@link PipelineApplicationState} instance.
+   *
+   * @param metrics the value to use for {@link #getMetrics()}
+   * @param dbOptions the {@link DatabaseOptions} for the application's DB (which this will use to
+   *     create {@link #getPooledDataSource()})
+   * @param persistenceUnitName allows for use of an alternative persistence unit in RDA tests
+   */
+  public PipelineApplicationState(
+      MetricRegistry metrics, DatabaseOptions dbOptions, String persistenceUnitName) {
     this.metrics = metrics;
     this.pooledDataSource = createPooledDataSource(dbOptions, metrics);
-    this.entityManagerFactory = createEntityManagerFactory(pooledDataSource);
+    this.entityManagerFactory = createEntityManagerFactory(pooledDataSource, persistenceUnitName);
   }
 
   /**
@@ -41,9 +56,24 @@ public final class PipelineApplicationState implements AutoCloseable {
    * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
    */
   public PipelineApplicationState(MetricRegistry metrics, DataSource dataSource, int maxPoolSize) {
+    this(metrics, dataSource, maxPoolSize, PERSISTENCE_UNIT_NAME);
+  }
+
+  /**
+   * Constructs a new {@link PipelineApplicationState} instance with an alternative persistence unit
+   * name.
+   *
+   * @param metrics the value to use for {@link #getMetrics()}
+   * @param dataSource the {@link DatabaseOptions} for the application's DB (which this will use to
+   *     create {@link #getPooledDataSource()})
+   * @param persistenceUnitName allows for use of an alternative persistence unit in RDA tests
+   * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
+   */
+  public PipelineApplicationState(
+      MetricRegistry metrics, DataSource dataSource, int maxPoolSize, String persistenceUnitName) {
     this.metrics = metrics;
     this.pooledDataSource = createPooledDataSource(dataSource, maxPoolSize, metrics);
-    this.entityManagerFactory = createEntityManagerFactory(pooledDataSource);
+    this.entityManagerFactory = createEntityManagerFactory(pooledDataSource, persistenceUnitName);
   }
 
   /**
@@ -105,7 +135,8 @@ public final class PipelineApplicationState implements AutoCloseable {
    * @param pooledDataSource the JDBC {@link DataSource} for the application's database
    * @return a JPA {@link EntityManagerFactory} for the application's database
    */
-  private static EntityManagerFactory createEntityManagerFactory(DataSource pooledDataSource) {
+  private static EntityManagerFactory createEntityManagerFactory(
+      DataSource pooledDataSource, String persistenceUnitName) {
     /*
      * The number of JDBC statements that will be queued/batched within a single transaction. Most
      * recommendations suggest this should be 5-30. Paradoxically, setting it higher seems to
@@ -121,7 +152,7 @@ public final class PipelineApplicationState implements AutoCloseable {
         org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
 
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("gov.cms.bfd", hibernateProperties);
+        Persistence.createEntityManagerFactory(persistenceUnitName, hibernateProperties);
     return entityManagerFactory;
   }
 
