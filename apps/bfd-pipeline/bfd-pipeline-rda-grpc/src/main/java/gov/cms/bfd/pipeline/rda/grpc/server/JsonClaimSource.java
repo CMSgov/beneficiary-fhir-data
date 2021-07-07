@@ -73,7 +73,7 @@ public class JsonClaimSource<T> implements ClaimSource<T> {
    * This method fits the signature of Parser&lt;McsClaim&gt;
    *
    * @param jsonString JSON to be parsed
-   * @return a FissClaim object
+   * @return a McsClaim object
    * @throws Exception any error caused by invalid JSON
    */
   public static McsClaim parseMcsClaim(String jsonString) throws Exception {

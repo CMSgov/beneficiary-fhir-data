@@ -148,7 +148,7 @@ public abstract class AbstractRdaLoadJob<TResponse>
     public Config(Duration runInterval, int batchSize) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
-      Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "scanInterval less than 1s: %s");
+      Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s");
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
     }
   }
