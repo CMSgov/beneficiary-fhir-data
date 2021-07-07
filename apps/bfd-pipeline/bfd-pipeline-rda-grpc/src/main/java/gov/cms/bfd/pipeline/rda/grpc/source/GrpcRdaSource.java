@@ -61,12 +61,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    */
   public GrpcRdaSource(
       Config config, GrpcStreamCaller<TResponse> caller, MetricRegistry appMetrics) {
-    this(
-        ManagedChannelBuilder.forAddress(config.host, config.port)
-            .idleTimeout(config.maxIdle.toMillis(), TimeUnit.MILLISECONDS)
-            .build(),
-        caller,
-        appMetrics);
+    this(config.createChannel(), caller, appMetrics);
   }
 
   /**
@@ -212,6 +207,16 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
      */
     public Duration getMaxIdle() {
       return maxIdle;
+    }
+
+    private ManagedChannel createChannel() {
+      final ManagedChannelBuilder<?> builder =
+          ManagedChannelBuilder.forAddress(host, port)
+              .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS);
+      if (host.equals("localhost")) {
+        builder.usePlaintext();
+      }
+      return builder.build();
     }
 
     @Override
