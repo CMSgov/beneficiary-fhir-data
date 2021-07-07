@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -175,19 +176,22 @@ public class CarrierClaimTransformerV2 {
       // LINE_NUM => ExplanationOfBenefit.item.sequence
       item.setSequence(line.getLineNumber().intValue());
 
-      CareTeamComponent performing =
-          TransformerUtilsV2.addCareTeamPerforming(
-              eob,
-              item,
-              C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-              line.getPerformingPhysicianNpi(),
-              line.getPerformingPhysicianUpin(),
-              Optional.of(line.getPerformingProviderIdNumber()),
-              includeTaxNumbers,
-              claimGroup.getClaimId() + item.getSequence(),
-              line.getProviderTaxNumber());
+      if (line.getPerformingPhysicianNpi().isPresent()
+          || line.getPerformingPhysicianUpin().isPresent()
+          || !Strings.isNullOrEmpty(line.getPerformingProviderIdNumber())
+          || includeTaxNumbers.orElse(false)) {
+        CareTeamComponent performing =
+            TransformerUtilsV2.addCareTeamPerforming(
+                eob,
+                item,
+                C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
+                line.getPerformingPhysicianNpi(),
+                line.getPerformingPhysicianUpin(),
+                Optional.of(line.getPerformingProviderIdNumber()),
+                includeTaxNumbers,
+                claimGroup.getClaimId() + item.getSequence(),
+                line.getProviderTaxNumber());
 
-      if (performing != null) {
         performing.setResponsible(true);
 
         // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification

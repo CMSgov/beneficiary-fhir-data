@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/mcs/mcs_beneficiary_sex.proto";
+import "rda/v1/mcs/mcs_billing_provider_indicator.proto";
+import "rda/v1/mcs/mcs_billing_provider_status_code.proto";
+import "rda/v1/mcs/mcs_claim_type.proto";
+import "rda/v1/mcs/mcs_detail.proto";
+import "rda/v1/mcs/mcs_diagnosis_code.proto";
+
+message McsClaim {
+  string idr_clm_hd_icn = 1;
+  string idr_contr_id = 2;
+  string idr_hic = 3;
+  McsClaimType idr_claim_type = 4;
+
+  optional int32 idr_dtl_cnt = 16;
+  optional string idr_bene_last_1_6 = 17;
+  optional string idr_bene_first_init = 18;
+  optional string idr_bene_mid_init = 19;
+  optional McsBeneficiarySex idr_bene_sex = 20;
+  optional string idr_status_code = 21;
+  optional string idr_status_date = 22; // DATE
+  optional string idr_bill_prov_npi = 23;
+  optional string idr_bill_prov_num = 24;
+  optional string idr_bill_prov_ein = 25;
+  optional string idr_bill_prov_type = 26;
+  optional string idr_bill_prov_spec = 27;
+  optional McsBillingProviderIndicator idr_bill_prov_group_ind = 28;
+  optional string idr_bill_prov_price_spec = 29;
+  optional string idr_bill_prov_county = 30;
+  optional string idr_bill_prov_loc = 31;
+  optional string idr_tot_allowed = 32; // DECIMAL
+  optional string idr_coinsurance = 33; // DECIMAL
+  optional string idr_deductible = 34; // DECIMAL
+  optional McsBillingProviderStatusCode idr_bill_prov_status_cd = 35;
+  optional string idr_tot_billed_amt = 36; // DECIMAL
+  optional string idr_claim_receipt_date = 37; // DATE
+  optional string idr_claim_mbi = 39;
+
+  repeated McsDiagnosisCode mcs_diagnosis_codes = 40;
+  repeated McsDetail mcs_details = 41;
+}

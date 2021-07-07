@@ -3,12 +3,12 @@ package gov.cms.bfd.pipeline.ccw.rif.load;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryCsvWriter;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.BeneficiaryMonthly;
+import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimCsvWriter;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
@@ -22,16 +22,15 @@ import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.RifRecordEvent;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifRecordLoadResult.LoadAction;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -41,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -54,24 +52,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
 import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.sql.DataSource;
-import org.apache.commons.codec.binary.Hex;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.hibernate.tool.schema.Action;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
@@ -81,7 +74,7 @@ import org.slf4j.LoggerFactory;
  * Pushes CCW beneficiary and claims data from {@link RifRecordEvent}s into the Blue Button API's
  * database.
  */
-public final class RifLoader implements AutoCloseable {
+public final class RifLoader {
   /**
    * The number of {@link RifRecordEvent}s that will be included in each processing batch. Note that
    * larger batch sizes mean that more {@link RifRecordEvent}s will be held in memory
@@ -95,94 +88,24 @@ public final class RifLoader implements AutoCloseable {
   private static final Logger LOGGER_RECORD_COUNTS =
       LoggerFactory.getLogger(RifLoader.class.getName() + ".recordCounts");
 
-  private final MetricRegistry appMetrics;
   private final LoadAppOptions options;
-  private final HikariDataSource dataSource;
-  private final EntityManagerFactory entityManagerFactory;
-  private final SecretKeyFactory secretKeyFactory;
-  private final RifLoaderIdleTasks idleTasks;
+  private final IdHasher idHasher;
+  private final PipelineApplicationState appState;
 
   /**
    * Constructs a new {@link RifLoader} instance.
    *
-   * @param appMetrics the {@link MetricRegistry} being used for the overall application (as opposed
-   *     to a specific data set)
    * @param options the {@link LoadAppOptions} to use
+   * @param appState the {@link PipelineApplicationState} to use
    */
-  public RifLoader(MetricRegistry appMetrics, LoadAppOptions options) {
-    this.appMetrics = appMetrics;
+  public RifLoader(LoadAppOptions options, PipelineApplicationState appState) {
     this.options = options;
-
-    this.dataSource = createDataSource(options, appMetrics);
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
-    this.entityManagerFactory = createEntityManagerFactory(dataSource);
-
-    this.secretKeyFactory = createSecretKeyFactory();
-    this.idleTasks =
-        new RifLoaderIdleTasks(options, appMetrics, entityManagerFactory, secretKeyFactory);
-  }
-
-  /**
-   * Get the IdleTask manager associated with this loader. Useful for testing.
-   *
-   * @return the RifLoaderIdleTasks associated with this
-   */
-  public RifLoaderIdleTasks getIdleTasks() {
-    return idleTasks;
-  }
-
-  /**
-   * @param options the {@link LoadAppOptions} to use
-   * @param metrics the {@link MetricRegistry} to use
-   * @return a {@link HikariDataSource} for the BFD database
-   */
-  static HikariDataSource createDataSource(LoadAppOptions options, MetricRegistry metrics) {
-    HikariDataSource dataSource = new HikariDataSource();
+    this.appState = appState;
 
     /*
-     * FIXME The pool size needs to be double the number of loader threads
-     * when idempotent loads are being used. Apparently, the queries need a
-     * separate Connection?
+     * We are re-using the same hash configuration for HICNs and MBIs so we only need one idHasher.
      */
-    dataSource.setMaximumPoolSize(options.getLoaderThreads());
-
-    if (options.getDatabaseDataSource() != null) {
-      dataSource.setDataSource(options.getDatabaseDataSource());
-    } else {
-      dataSource.setJdbcUrl(options.getDatabaseUrl());
-      dataSource.setUsername(options.getDatabaseUsername());
-      dataSource.setPassword(String.valueOf(options.getDatabasePassword()));
-    }
-
-    dataSource.setRegisterMbeans(true);
-    dataSource.setMetricRegistry(metrics);
-
-    return dataSource;
-  }
-
-  /**
-   * @param jdbcDataSource the JDBC {@link DataSource} for the Blue Button API backend database
-   * @return a JPA {@link EntityManagerFactory} for the Blue Button API backend database
-   */
-  public static EntityManagerFactory createEntityManagerFactory(DataSource jdbcDataSource) {
-    /*
-     * The number of JDBC statements that will be queued/batched within a
-     * single transaction. Most recommendations suggest this should be 5-30.
-     * Paradoxically, setting it higher seems to actually slow things down.
-     * Presumably, it's delaying work that could be done earlier in a batch,
-     * and that starts to cost more than the extra network roundtrips.
-     */
-    int jdbcBatchSize = 10;
-
-    Map<String, Object> hibernateProperties = new HashMap<>();
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, jdbcDataSource);
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
-    hibernateProperties.put(
-        org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
-
-    EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("gov.cms.bfd", hibernateProperties);
-    return entityManagerFactory;
+    this.idHasher = new IdHasher(options.getIdHasherConfig());
   }
 
   /**
@@ -246,7 +169,7 @@ public final class RifLoader implements AutoCloseable {
 
     EntityManager entityManager = null;
     try {
-      entityManager = entityManagerFactory.createEntityManager();
+      entityManager = appState.getEntityManagerFactory().createEntityManager();
       Session session = entityManager.unwrap(Session.class);
       session.doWork(
           new Work() {
@@ -262,11 +185,6 @@ public final class RifLoader implements AutoCloseable {
     }
 
     return result.get();
-  }
-
-  /** Do the idle tasks on the database. */
-  public void doIdleTask() {
-    idleTasks.doIdleTask();
   }
 
   /**
@@ -294,7 +212,8 @@ public final class RifLoader implements AutoCloseable {
 
     MetricRegistry fileEventMetrics = dataToLoad.getSourceEvent().getEventMetrics();
     Timer.Context timerDataSetFile =
-        appMetrics
+        appState
+            .getMetrics()
             .timer(MetricRegistry.name(getClass().getSimpleName(), "dataSet", "file", "processed"))
             .time();
     LOGGER.info("Processing '{}'...", dataToLoad);
@@ -346,7 +265,7 @@ public final class RifLoader implements AutoCloseable {
      */
 
     try (PostgreSqlCopyInserter postgresBatch =
-        new PostgreSqlCopyInserter(entityManagerFactory, fileEventMetrics)) {
+        new PostgreSqlCopyInserter(appState.getEntityManagerFactory(), fileEventMetrics)) {
       // Define the Consumer that will handle each batch.
       Consumer<List<RifRecordEvent<?>>> batchProcessor =
           recordsBatch -> {
@@ -460,7 +379,10 @@ public final class RifLoader implements AutoCloseable {
 
     // Only one of each failure/success Timer.Contexts will be applied.
     Timer.Context timerBatchSuccess =
-        appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches")).time();
+        appState
+            .getMetrics()
+            .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches"))
+            .time();
     Timer.Context timerBatchTypeSuccess =
         fileEventMetrics
             .timer(
@@ -468,7 +390,8 @@ public final class RifLoader implements AutoCloseable {
                     getClass().getSimpleName(), "recordBatches", rifFileType.name()))
             .time();
     Timer.Context timerBundleFailure =
-        appMetrics
+        appState
+            .getMetrics()
             .timer(MetricRegistry.name(getClass().getSimpleName(), "recordBatches", "failed"))
             .time();
 
@@ -477,7 +400,7 @@ public final class RifLoader implements AutoCloseable {
 
     // TODO: refactor the following to be less of an indented mess
     try {
-      entityManager = entityManagerFactory.createEntityManager();
+      entityManager = appState.getEntityManagerFactory().createEntityManager();
       txn = entityManager.getTransaction();
       txn.begin();
       List<RifRecordLoadResult> loadResults = new ArrayList<>(recordsBatch.size());
@@ -509,7 +432,8 @@ public final class RifLoader implements AutoCloseable {
               fileEventMetrics
                   .timer(MetricRegistry.name(getClass().getSimpleName(), "idempotencyQueries"))
                   .time();
-          Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
+          Object recordId =
+              appState.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(record);
           Objects.requireNonNull(recordId);
           Object recordInDb = entityManager.find(record.getClass(), recordId);
           timerIdempotencyQuery.close();
@@ -626,9 +550,17 @@ public final class RifLoader implements AutoCloseable {
        * record/PK in same RIF file allowed. Otherwise, we're running the risk of data race bugs and
        * out-of-order application due to the asynchronous nature of this processing.
        */
+      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
+      Root<Beneficiary> root = criteria.from(Beneficiary.class);
+      root.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.LEFT);
+      criteria.select(root);
+      criteria.where(
+          builder.equal(
+              root.get(Beneficiary_.beneficiaryId), newBeneficiaryRecord.getBeneficiaryId()));
+
       oldBeneficiaryRecord =
-          Optional.ofNullable(
-              entityManager.find(Beneficiary.class, newBeneficiaryRecord.getBeneficiaryId()));
+          Optional.ofNullable(entityManager.createQuery(criteria).getSingleResult());
     }
 
     /*
@@ -1107,7 +1039,7 @@ public final class RifLoader implements AutoCloseable {
     loadedFile.setCreated(new Date());
 
     try {
-      EntityManager em = entityManagerFactory.createEntityManager();
+      EntityManager em = appState.getEntityManagerFactory().createEntityManager();
       EntityTransaction txn = null;
       try {
         // Insert the passed in loaded file
@@ -1143,7 +1075,7 @@ public final class RifLoader implements AutoCloseable {
    */
   private void trimLoadedFiles(Consumer<Throwable> errorHandler) {
     try {
-      EntityManager em = entityManagerFactory.createEntityManager();
+      EntityManager em = appState.getEntityManagerFactory().createEntityManager();
       EntityTransaction txn = null;
       try {
         txn = em.getTransaction();
@@ -1187,10 +1119,13 @@ public final class RifLoader implements AutoCloseable {
     if (!LOGGER_RECORD_COUNTS.isDebugEnabled()) return;
 
     Timer.Context timerCounting =
-        appMetrics.timer(MetricRegistry.name(getClass().getSimpleName(), "recordCounting")).time();
+        appState
+            .getMetrics()
+            .timer(MetricRegistry.name(getClass().getSimpleName(), "recordCounting"))
+            .time();
     LOGGER.debug("Counting records...");
     String entityTypeCounts =
-        entityManagerFactory.getMetamodel().getManagedTypes().stream()
+        appState.getEntityManagerFactory().getMetamodel().getManagedTypes().stream()
             .map(t -> t.getJavaType())
             .sorted(Comparator.comparing(Class::getName))
             .map(
@@ -1211,7 +1146,7 @@ public final class RifLoader implements AutoCloseable {
   private long queryForEntityCount(Class<?> entityType) {
     EntityManager entityManager = null;
     try {
-      entityManager = entityManagerFactory.createEntityManager();
+      entityManager = appState.getEntityManagerFactory().createEntityManager();
 
       CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
       CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -1246,8 +1181,7 @@ public final class RifLoader implements AutoCloseable {
 
     Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
     if (beneficiary.getHicnUnhashed().isPresent()) {
-      String hicnHash =
-          computeHicnHash(options, secretKeyFactory, beneficiary.getHicnUnhashed().get());
+      String hicnHash = computeHicnHash(idHasher, beneficiary.getHicnUnhashed().get());
       beneficiary.setHicn(hicnHash);
     } else {
       beneficiary.setHicn(null);
@@ -1279,8 +1213,7 @@ public final class RifLoader implements AutoCloseable {
 
     Beneficiary beneficiary = (Beneficiary) rifRecordEvent.getRecord();
     if (beneficiary.getMedicareBeneficiaryId().isPresent()) {
-      String mbiHash =
-          computeMbiHash(options, secretKeyFactory, beneficiary.getMedicareBeneficiaryId().get());
+      String mbiHash = computeMbiHash(idHasher, beneficiary.getMedicareBeneficiaryId().get());
       beneficiary.setMbiHash(Optional.of(mbiHash));
     } else {
       beneficiary.setMbiHash(Optional.empty());
@@ -1317,8 +1250,7 @@ public final class RifLoader implements AutoCloseable {
     beneficiaryHistory.setHicnUnhashed(Optional.of(beneficiaryHistory.getHicn()));
 
     // set the hashed Hicn
-    beneficiaryHistory.setHicn(
-        computeHicnHash(options, secretKeyFactory, beneficiaryHistory.getHicn()));
+    beneficiaryHistory.setHicn(computeHicnHash(idHasher, beneficiaryHistory.getHicn()));
 
     timerHashing.stop();
   }
@@ -1352,20 +1284,11 @@ public final class RifLoader implements AutoCloseable {
         .getMedicareBeneficiaryId()
         .ifPresent(
             mbi -> {
-              String mbiHash = computeMbiHash(options, secretKeyFactory, mbi);
+              String mbiHash = computeMbiHash(idHasher, mbi);
               beneficiaryHistory.setMbiHash(Optional.of(mbiHash));
             });
 
     timerHashing.stop();
-  }
-
-  /** @return a new {@link SecretKeyFactory} for the <code>PBKDF2WithHmacSHA256</code> algorithm */
-  static SecretKeyFactory createSecretKeyFactory() {
-    try {
-      return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   /**
@@ -1373,71 +1296,23 @@ public final class RifLoader implements AutoCloseable {
    * means of identifying Medicare beneficiaries between the Blue Button API frontend and backend
    * systems: the HICN is the only unique beneficiary identifier shared between those two systems.
    *
-   * @param options the {@link LoadAppOptions} to use
-   * @param secretKeyFactory the {@link SecretKeyFactory} to use
+   * @param idHasher the {@link IdHasher} to use
    * @param hicn the Medicare beneficiary HICN to be hashed
    * @return a one-way cryptographic hash of the specified HICN value, exactly 64 characters long
    */
-  static String computeHicnHash(
-      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String hicn) {
-    return computeIdentifierHash(options, secretKeyFactory, hicn);
+  static String computeHicnHash(IdHasher idHasher, String hicn) {
+    return idHasher.computeIdentifierHash(hicn);
   }
 
   /**
    * Computes a one-way cryptographic hash of the specified MBI value.
    *
-   * @param options the {@link LoadAppOptions} to use
-   * @param secretKeyFactory the {@link SecretKeyFactory} to use
+   * @param idHasher the {@link IdHasher} to use
    * @param mbi the Medicare beneficiary id to be hashed
    * @return a one-way cryptographic hash of the specified MBI value, exactly 64 characters long
    */
-  static String computeMbiHash(
-      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String mbi) {
-    return computeIdentifierHash(options, secretKeyFactory, mbi);
-  }
-
-  private static String computeIdentifierHash(
-      LoadAppOptions options, SecretKeyFactory secretKeyFactory, String identifier) {
-    try {
-      /*
-       * Our approach here is NOT using a salt, as salts must be randomly
-       * generated for each value to be hashed and then included in
-       * plaintext with the hash results. Random salts would prevent the
-       * Blue Button API frontend systems from being able to produce equal
-       * hashes for the same identifiers. Instead, we use a secret "pepper" that
-       * is shared out-of-band with the frontend. This value MUST be kept
-       * secret.
-       *
-       * We are re-using the same pepper between HICNs and MBIs
-       */
-      byte[] salt = options.getHicnHashPepper();
-
-      /*
-       * Bigger is better here as it reduces chances of collisions, but
-       * the equivalent Python Django hashing functions used by the
-       * frontend default to this value, so we'll go with it.
-       */
-      int derivedKeyLength = 256;
-
-      /* We're reusing the same hicn hash iterations, so the algorithm is exactly the same */
-      PBEKeySpec keySpec =
-          new PBEKeySpec(
-              identifier.toCharArray(), salt, options.getHicnHashIterations(), derivedKeyLength);
-      SecretKey secret = secretKeyFactory.generateSecret(keySpec);
-      String hexEncodedHash = Hex.encodeHexString(secret.getEncoded());
-
-      return hexEncodedHash;
-    } catch (InvalidKeySpecException e) {
-      throw new BadCodeMonkeyException(e);
-    }
-  }
-
-  /** @see java.lang.AutoCloseable#close() */
-  @Override
-  public void close() {
-    if (this.entityManagerFactory != null && this.entityManagerFactory.isOpen())
-      this.entityManagerFactory.close();
-    if (this.dataSource != null && !this.dataSource.isClosed()) this.dataSource.close();
+  static String computeMbiHash(IdHasher idHasher, String mbi) {
+    return idHasher.computeIdentifierHash(mbi);
   }
 
   /**

@@ -181,19 +181,20 @@ final class DMEClaimTransformerV2 {
                           CcwCodebookVariable.SUPLRNUM, line.getProviderBillingNumber())));
 
       // PRVDR_NPI => ExplanationOfBenefit.careTeam.provider
-      CareTeamComponent performing =
-          TransformerUtilsV2.addCareTeamPerforming(
-              eob,
-              item,
-              C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
-              line.getProviderNPI(),
-              Optional.empty(),
-              Optional.empty(),
-              includeTaxNumbers,
-              claimGroup.getClaimId() + item.getSequence(),
-              line.getProviderTaxNumber());
 
-      if (performing != null) {
+      if (line.getProviderNPI().isPresent() || includeTaxNumbers.orElse(false)) {
+        CareTeamComponent performing =
+            TransformerUtilsV2.addCareTeamPerforming(
+                eob,
+                item,
+                C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
+                line.getProviderNPI(),
+                Optional.empty(),
+                Optional.empty(),
+                includeTaxNumbers,
+                claimGroup.getClaimId() + item.getSequence(),
+                line.getProviderTaxNumber());
+
         // Update the responsible flag
         performing.setResponsible(true);
 

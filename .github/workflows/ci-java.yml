@@ -1,11 +1,38 @@
 name: 'CI - Java'
 on: pull_request
 jobs:
-  mvn-job:
+  mvn-fmt-maven-plugin:
     runs-on: macos-latest
-    strategy:
-      matrix: 
-        mvn_command: ['verify', 'com.coveo:fmt-maven-plugin:check']
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v2
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v1
+        with:
+          java-version: '1.8.0.252'
+          # Pinning this version as version 262 causes AuthenticationIT tests to fail
+          # See BFD-332.
+      - name: 'Generate maven toolchain config'
+        run: |
+          cat << EOF > ~/.m2/toolchains.xml
+          <toolchains>
+            <toolchain>
+              <type>jdk</type>
+              <provides>
+                <version>1.8</version>
+                <vendor>OpenJDK</vendor>
+              </provides>
+              <configuration>
+                <jdkHome>$JAVA_HOME</jdkHome>
+              </configuration>
+            </toolchain>
+          </toolchains>
+          EOF
+      - name: 'Run maven ${{ matrix.mvn_commmand }}'
+        run: mvn com.coveo:fmt-maven-plugin:check
+        working-directory: ./apps
+  mvn-verify:
+    runs-on: macos-latest
     steps:
       - name: 'Configure AWS credentials'
         uses: aws-actions/configure-aws-credentials@v1
@@ -38,5 +65,15 @@ jobs:
           </toolchains>
           EOF
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
-        run: mvn ${{ matrix.mvn_command }}
+        run: mvn verify
         working-directory: ./apps
+      - name: 'Upload test artifacts'
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: mvn-verify-build-logs
+          path: |
+            **/target/surefire-reports/*
+            **/target/failsafe-reports/*
+            bfd-server/bfd-server-war/target/server-work/access.*
+            bfd-server/bfd-server-war/target/server-work/server-console.log

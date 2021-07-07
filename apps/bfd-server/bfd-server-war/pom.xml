@@ -58,6 +58,11 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rif</artifactId>
 		</dependency>
+		<dependency>
+			<!-- Provides the JPA entities used to represent the RDA BFD data in the database. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rda</artifactId>
+		</dependency>
 		
 		<dependency>
 			<!-- At least one "structures" JAR must also be included -->
@@ -209,6 +214,21 @@
                 </exclusion>
             </exclusions>
         </dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.10.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Hibernate brings in an older version of byte-buddy which seems
+		to conflict with mockito, which wants version 1.11.0.  Bringing it
+		in as a first class dependency to resolve the issue. -->
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.11.0</version>
+			<scope>test</scope>
+		</dependency>
         <!-- This will get hamcrest-core automatically -->
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -402,27 +422,6 @@
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- This is to run the integration tests -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-                                                <configuration>
-                                                        <environmentVariables>
-                                                                <TZ>UTC</TZ>
-                                                        </environmentVariables>
-                                                </configuration>
 					</execution>
 				</executions>
 			</plugin>

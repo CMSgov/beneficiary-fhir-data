@@ -2939,29 +2939,24 @@ public final class TransformerUtils {
       String practionerIdNumber,
       String taxValue) {
 
-    CareTeamComponent careTeamComponent = null;
     List<Identifier> identifiers = new ArrayList<Identifier>();
 
-    if (npiValue.isPresent() || upinValue.isPresent() || includeTaxNumbers.orElse(false)) {
-
-      if (npiValue.isPresent()) {
-        identifiers.add(
-            TransformerUtils.createPractionerIdentifier(IdentifierType.NPI, npiValue.get()));
-      }
-
-      if (upinValue.isPresent()) {
-        identifiers.add(
-            TransformerUtils.createPractionerIdentifier(IdentifierType.UPIN, upinValue.get()));
-      }
-
-      if (includeTaxNumbers.orElse(false)) {
-        identifiers.add(TransformerUtils.createPractionerIdentifier(IdentifierType.TAX, taxValue));
-      }
-      careTeamComponent =
-          addCareTeamPractitionerForPerforming(eob, eobItem, role, identifiers, practionerIdNumber);
+    if (npiValue.isPresent()) {
+      identifiers.add(
+          TransformerUtils.createPractionerIdentifier(IdentifierType.NPI, npiValue.get()));
     }
 
-    return careTeamComponent;
+    if (upinValue.isPresent()) {
+      identifiers.add(
+          TransformerUtils.createPractionerIdentifier(IdentifierType.UPIN, upinValue.get()));
+    }
+
+    if (includeTaxNumbers.orElse(false)) {
+      identifiers.add(TransformerUtils.createPractionerIdentifier(IdentifierType.TAX, taxValue));
+    }
+
+    return addCareTeamPractitionerForPerforming(
+        eob, eobItem, role, identifiers, practionerIdNumber);
   }
 
   public static CareTeamComponent addCareTeamPractitionerForPerforming(

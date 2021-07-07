@@ -1045,7 +1045,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
           AnnotationSpec.builder(OneToMany.class)
               .addMember("mappedBy", "$S", mappingSpec.getBeneficiaryMonthlyEntityParentField())
               .addMember("orphanRemoval", "$L", true)
-              .addMember("fetch", "$T.EAGER", FetchType.class)
+              .addMember("fetch", "$T.LAZY", FetchType.class)
               .addMember("cascade", "$T.ALL", CascadeType.class)
               .build());
       childField.addAnnotation(

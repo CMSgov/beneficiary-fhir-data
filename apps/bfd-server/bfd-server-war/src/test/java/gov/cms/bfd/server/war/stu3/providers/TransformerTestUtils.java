@@ -2095,7 +2095,7 @@ final class TransformerTestUtils {
       final Duration diff = Duration.between(expectedLastUpdated, actualLastUpdated);
       Assert.assertTrue(
           "Expect the actual lastUpdated to be equal or after the loaded resources",
-          diff.compareTo(Duration.ofSeconds(1)) <= 0);
+          diff.compareTo(Duration.ofSeconds(10)) <= 0);
     } else {
       Assert.assertEquals(
           "Expect lastUpdated to be the fallback value",

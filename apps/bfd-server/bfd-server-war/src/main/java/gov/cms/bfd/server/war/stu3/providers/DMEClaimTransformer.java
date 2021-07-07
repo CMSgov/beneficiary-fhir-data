@@ -144,18 +144,18 @@ final class DMEClaimTransformer {
                 CcwCodebookVariable.SUPLRNUM, claimLine.getProviderBillingNumber()));
       }
 
-      ExplanationOfBenefit.CareTeamComponent performingCareTeam =
-          TransformerUtils.addCareTeamPerforming(
-              eob,
-              item,
-              ClaimCareteamrole.PRIMARY,
-              claimLine.getProviderNPI(),
-              Optional.empty(),
-              includeTaxNumbers,
-              claimGroup.getClaimId() + item.getSequence(),
-              claimLine.getProviderTaxNumber());
+      if (claimLine.getProviderNPI().isPresent() || includeTaxNumbers.orElse(false)) {
+        ExplanationOfBenefit.CareTeamComponent performingCareTeam =
+            TransformerUtils.addCareTeamPerforming(
+                eob,
+                item,
+                ClaimCareteamrole.PRIMARY,
+                claimLine.getProviderNPI(),
+                Optional.empty(),
+                includeTaxNumbers,
+                claimGroup.getClaimId() + item.getSequence(),
+                claimLine.getProviderTaxNumber());
 
-      if (performingCareTeam != null) {
         performingCareTeam.setResponsible(true);
 
         performingCareTeam.setQualification(

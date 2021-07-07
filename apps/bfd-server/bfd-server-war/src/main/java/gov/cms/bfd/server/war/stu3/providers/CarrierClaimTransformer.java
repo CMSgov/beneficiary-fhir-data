@@ -116,18 +116,21 @@ final class CarrierClaimTransformer {
     for (CarrierClaimLine claimLine : claimGroup.getLines()) {
       ItemComponent item = eob.addItem();
       item.setSequence(claimLine.getLineNumber().intValue());
-      ExplanationOfBenefit.CareTeamComponent performingCareTeam =
-          TransformerUtils.addCareTeamPerforming(
-              eob,
-              item,
-              ClaimCareteamrole.PRIMARY,
-              claimLine.getPerformingPhysicianNpi(),
-              claimLine.getPerformingPhysicianUpin(),
-              includeTaxNumbers,
-              claimGroup.getClaimId() + item.getSequence(),
-              claimLine.getProviderTaxNumber());
 
-      if (performingCareTeam != null) {
+      if (claimLine.getPerformingPhysicianNpi().isPresent()
+          || claimLine.getPerformingPhysicianUpin().isPresent()
+          || includeTaxNumbers.orElse(false)) {
+
+        ExplanationOfBenefit.CareTeamComponent performingCareTeam =
+            TransformerUtils.addCareTeamPerforming(
+                eob,
+                item,
+                ClaimCareteamrole.PRIMARY,
+                claimLine.getPerformingPhysicianNpi(),
+                claimLine.getPerformingPhysicianUpin(),
+                includeTaxNumbers,
+                claimGroup.getClaimId() + item.getSequence(),
+                claimLine.getProviderTaxNumber());
 
         performingCareTeam.setResponsible(true);
 

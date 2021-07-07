@@ -1942,42 +1942,34 @@ public final class TransformerUtilsV2 {
       String practionerIdNumber,
       String taxValue) {
 
-    CareTeamComponent careTeamComponent = null;
     List<Identifier> identifiers = new ArrayList<Identifier>();
 
-    if (npiValue.isPresent()
-        || upinValue.isPresent()
-        || pinValue.isPresent()
-        || includeTaxNumbers.orElse(false)) {
-      if (npiValue.isPresent()) {
-        identifiers.add(
-            TransformerUtilsV2.createC4BBPractionerIdentifier(
-                C4BBPractitionerIdentifierType.NPI, npiValue.get()));
-      }
-
-      if (upinValue.isPresent()) {
-        identifiers.add(
-            TransformerUtilsV2.createC4BBPractionerIdentifier(
-                C4BBPractitionerIdentifierType.UPIN, upinValue.get()));
-      }
-
-      if (pinValue.isPresent()) {
-        identifiers.add(
-            TransformerUtilsV2.createC4BBPractionerIdentifier(
-                C4BBPractitionerIdentifierType.PIN, pinValue.get()));
-      }
-
-      if (includeTaxNumbers.orElse(false)) {
-        identifiers.add(
-            TransformerUtilsV2.createC4BBPractionerIdentifier(
-                C4BBPractitionerIdentifierType.TAX, taxValue));
-      }
-
-      careTeamComponent =
-          addCareTeamPractitionerForPerforming(eob, eobItem, role, identifiers, practionerIdNumber);
+    if (npiValue.isPresent()) {
+      identifiers.add(
+          TransformerUtilsV2.createC4BBPractionerIdentifier(
+              C4BBPractitionerIdentifierType.NPI, npiValue.get()));
     }
 
-    return careTeamComponent;
+    if (upinValue.isPresent()) {
+      identifiers.add(
+          TransformerUtilsV2.createC4BBPractionerIdentifier(
+              C4BBPractitionerIdentifierType.UPIN, upinValue.get()));
+    }
+
+    if (pinValue.isPresent()) {
+      identifiers.add(
+          TransformerUtilsV2.createC4BBPractionerIdentifier(
+              C4BBPractitionerIdentifierType.PIN, pinValue.get()));
+    }
+
+    if (includeTaxNumbers.orElse(false)) {
+      identifiers.add(
+          TransformerUtilsV2.createC4BBPractionerIdentifier(
+              C4BBPractitionerIdentifierType.TAX, taxValue));
+    }
+
+    return addCareTeamPractitionerForPerforming(
+        eob, eobItem, role, identifiers, practionerIdNumber);
   }
 
   public static CareTeamComponent addCareTeamPractitionerForPerforming(

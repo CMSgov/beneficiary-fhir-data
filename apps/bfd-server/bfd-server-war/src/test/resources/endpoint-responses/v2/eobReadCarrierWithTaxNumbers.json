@@ -21,7 +21,7 @@
     }
   }, {
     "resourceType" : "Practitioner",
-    "id" : "1",
+    "id" : "practitioner-99918319996",
     "identifier" : [ {
       "type" : {
         "coding" : [ {
@@ -221,7 +221,8 @@
     } ],
     "sequence" : 3,
     "provider" : {
-      "reference" : "#1"
+      "id" : "#practitioner-99918319996",
+      "reference" : "#practitioner-99918319996"
     },
     "responsible" : true,
     "role" : {
