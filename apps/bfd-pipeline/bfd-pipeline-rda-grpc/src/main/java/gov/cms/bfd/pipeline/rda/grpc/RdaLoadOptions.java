@@ -50,10 +50,10 @@ public class RdaLoadOptions implements Serializable {
    *
    * @param databaseOptions the shared application {@link DatabaseOptions}
    * @param appState the shared {@link PipelineApplicationState}
-   * @return a DcGeoRDALoadJob instance suitable for use by PipelineManager.
+   * @return a PipelineJob instance suitable for use by PipelineManager.
    */
   public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(
-      DatabaseOptions databaseOptions, PipelineApplicationState appState) {
+      PipelineApplicationState appState) {
     return new RdaLoadJob<>(
         jobConfig,
         () ->
