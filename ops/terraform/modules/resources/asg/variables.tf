@@ -13,7 +13,7 @@ variable "layer" {
 }
 
 variable "asg_config" {
-  type = object({ min = number, max = number, desired = number, sns_topic_arn = string, instance_warmup = number })
+  type = object({ min = number, max = number, max_warm = number, desired = number, sns_topic_arn = string, instance_warmup = number })
 }
 
 variable "db_config" {
