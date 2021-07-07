@@ -7,11 +7,25 @@ data_pipeline_tmp_dir: /tmp
 data_pipeline_idempotency_required: true
 data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_pipeline_new_relic_metric_path: '/metric/v1'
+
+## RDA API Pipeline
+# Used to download FISS/MCS pre-adjudicated claims data.
+#
+# Set to true to enable the RDA pipeline jobs.
 data_pipeline_rda_job_enabled: false
-data_pipeline_rda_job_interval_seconds: 300
-data_pipeline_rda_job_batch_size: 20
+
+# Communication settings for RDA API server.
+# These are defined in the vault rather than plain text.
 data_pipeline_rda_grpc_host: undefined
 data_pipeline_rda_grpc_port: 443
+
+# Interval at which the PipelineManager should ensure the jobs are running.
+data_pipeline_rda_job_interval_seconds: 300
+
+# How many claims to store per transaction.
+data_pipeline_rda_job_batch_size: 20
+
+# How long to allow the RDA API stream to be idle before closing the connection.
 data_pipeline_rda_grpc_max_idle_seconds: 600
 
 
