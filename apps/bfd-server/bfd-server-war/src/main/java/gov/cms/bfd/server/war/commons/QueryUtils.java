@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import java.util.Date;
+import java.time.Instant;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -19,9 +19,9 @@ public class QueryUtils {
    */
   public static Predicate createLastUpdatedPredicate(
       CriteriaBuilder cb, Root<?> root, DateRangeParam range) {
-    final Path<Date> lastUpdatedPath = root.get("lastUpdated");
-    final Date lowerBound = range.getLowerBoundAsInstant();
-    final Date upperBound = range.getUpperBoundAsInstant();
+    final Path<Instant> lastUpdatedPath = root.get("lastUpdated");
+    final Instant lowerBound = range.getLowerBoundAsInstant().toInstant();
+    final Instant upperBound = range.getUpperBoundAsInstant().toInstant();
     Predicate lowerBoundPredicate;
     Predicate upperBoundPredicate;
 
@@ -73,15 +73,15 @@ public class QueryUtils {
    * @param range to base test against. Maybe null.
    * @return true iff within the range specified
    */
-  public static boolean isInRange(Date lastUpdated, DateRangeParam range) {
+  public static boolean isInRange(Instant lastUpdated, DateRangeParam range) {
     if (range == null || range.isEmpty()) {
       return true;
     }
     // The null lastUpdated is considered to be a very early time for this calculation
-    final long lastUpdatedMillis = lastUpdated == null ? 0L : lastUpdated.getTime();
+    final long lastUpdatedMillis = lastUpdated == null ? 0L : lastUpdated.toEpochMilli();
 
     if (range.getLowerBound() != null) {
-      final long lowerBoundMillis = range.getLowerBoundAsInstant().getTime();
+      final long lowerBoundMillis = range.getLowerBoundAsInstant().toInstant().toEpochMilli();
       switch (range.getLowerBound().getPrefix()) {
         case GREATERTHAN:
           if (lastUpdatedMillis <= lowerBoundMillis) {
