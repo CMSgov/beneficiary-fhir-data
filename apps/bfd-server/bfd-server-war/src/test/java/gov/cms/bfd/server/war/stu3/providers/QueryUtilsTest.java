@@ -16,9 +16,9 @@ public class QueryUtilsTest {
      */
     Instant lowerInstant = Instant.now();
     Date lowerDate = new Date();
-    Instant middleInstant = Instant.now();
+    Instant middleInstant = Instant.now().plusSeconds(500);
     Date middleDate = Date.from(Instant.now().plusSeconds(500));
-    Instant upperInstant = Instant.now();
+    Instant upperInstant = Instant.now().plusSeconds(1000);
     Date upperDate = Date.from(Instant.now().plusSeconds(1000));
 
     Assert.assertTrue(
