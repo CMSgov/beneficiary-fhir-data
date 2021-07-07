@@ -67,54 +67,61 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 ```
 
 ### Native Setup
-1. Install JDK 8. You'll need Java 8 to run BFD. You can install OpenJDK 8 however you prefer. Problems currently arise after the 8.0.252 release. 
+1. Install JDK 8. You'll need Java 8 to run BFD. You can install OpenJDK 8 however you prefer.
 2. Install Maven 3. Project tasks are handled by Apache Maven. Install it however you prefer.
-3. Configure your toolchain. You'll want to configure your `~/.m2/toolchains.xml` file to look like the following:
-```xml
-<?xml version="1.0" encoding="UTF8"?>
-<toolchains>
-  <!-- JDK toolchains -->
-  <toolchain>
-    <type>jdk</type>
-    <provides>
-      <version>1.8</version>
-      <vendor>sun</vendor>
-    </provides>
-    <configuration>
-      <jdkHome>/path/to/your/jdk</jdkHome>
-    </configuration>
-  </toolchain>
-</toolchains>
-```
+3. Configure your toolchain. You'll want to configure your `~/.m2/toolchains.xml` file to look like the following (change the jdkHome appropriately):
+    ```xml
+    <?xml version="1.0" encoding="UTF8"?>
+    <toolchains>
+      <!-- JDK toolchains -->
+      <toolchain>
+        <type>jdk</type>
+        <provides>
+          <version>1.8</version>
+          <vendor>sun</vendor>
+        </provides>
+        <configuration>
+          <jdkHome>/path/to/your/jdk</jdkHome>
+        </configuration>
+      </toolchain>
+    </toolchains>
+    ```
 4. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-
-5. Set up a Postgres 12 database. Change to the `contributing` directory. Make sure there is an active aws cli session, and the following variables are set: `SYNTHETIC_DATA_LOCATION` (A directory in an AWS S3 public bucket with the Synthetic Data RIF files -- Double check for the most recent location) i.e. run `export SYNTHETIC_DATA_LOCATION=https://s3.amazonaws.com/bfd-public-test-data/data-synthetic/2020-11-02-New-Data-Fields`, and `LOCAL_SYNTHETIC_DATA` - run `export LOCAL_SYNTHETIC_DATA=$BFD_PATH/contributing/synthetic-data`. 
-
-Then run `./create-db.sh` to set up a database with the latest synthetic data update. If unable to, the easiest way to set up a local database is with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
-```sh
-docker run \
-  -d \
-  --name 'bfd-db' \
-  -e 'POSTGRES_USER=bfd' \
-  -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
-  -p '5432:5432' \
-  -v 'bfd_pgdata:/var/lib/postgresql/data' \
-  postgres:12
-```
-6. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run `mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify`. This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with `docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT "beneficiaryId" FROM "Beneficiaries" LIMIT 1;'`
-7. Run `export BFD_PORT=6500` and add it to your profile, too. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later.
-8. Now it's time to start the server up. Change to `apps/bfd-server` and run `mvn -X -Dits.db.url="jdbc:postgresql://localhost:5432/bfd?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start`. After it starts up, you can tail the logs with `tail -f bfd-server-war/target/server-work/server-console.log`.
-9. We're finally going to make a request. BFD requires that clients authenticate themselves with a certificate. Those certs live in the `apps/bfd-server/dev/ssl-stores` directory. We can curl the server using a cert with this command `curl --cert $BFD_PATH/apps/bfd-server/dev/ssl-stores/client-unsecured.pem -s https://localhost:$BFD_PORT/v2/fhir/ExplanationOfBenefit/?patient=-20140000001827&_format=json`, where `$BFD_PATH` is that path to the `beneficiary-fhir-data` repo on your system. It may be helpful to have that set in your profile, too. To configure Postman, go to `Settings -> Certificates -> Add certificate` and load in `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` under the PFX File option. The passphrase is `changeit`. Under `Settings -> General` you'll also want to turn off "SSL Certificate Verification."
-10. Total success (probably)!. You have a working call. But you'll probably want more data. Move on to the next section to see how to load 30,000 synthetic beneficiaries. 
-
-### Load Full Synthetic Dataset
-1. Change to the top-level `contributing` directory and run `make synthetic-data/*.rif`. This will fetch RIF files (the raw incoming data) from a public S3 bucket.
-2. Run `export LOCAL_SYNTHETIC_DATA=$BFD_PATH/contributing/synthetic-data`. You may want this one in your profile, too.
-3. Apply the patched files with `git apply contributing/patches/load_local_synthetic_data.patch` from the root of the project. This will change three files: `StaticRifResource.java`, `StaticRifResourceGroup.java` and `RifLoaderIT.java`. The changes effectively create an integration test that point to the local RIF files that you just pulled down.
-4. Change to the `apps` directory and run `mvn clean install -DskipITs` again to recompile with the newly changed files.
-5. Make sure you have an active MFA session with AWS. The integration tests will need to be allowed to create an S3 bucket.
-6. Change to `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run `mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadLocalSyntheticData clean verify`. This could take around an hour to complete.
-7. Verify everything loaded with `docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT COUNT("beneficiaryId") FROM "Beneficiaries";'`. You should see a count of 30,000.
+5. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
+    ```sh
+    docker run \
+      -d \
+      --name 'bfd-db' \
+      -e 'POSTGRES_DB=bfd' \
+      -e 'POSTGRES_USER=bfd' \
+      -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
+      -p '5432:5432' \
+      -v 'bfd_pgdata:/var/lib/postgresql/data' \
+      postgres:12
+    ```
+6. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
+    ```
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify
+    ```
+    This will kick off the integration test `loadSampleA`. After the job completes, you can verify that it ran properly with:
+    ```
+    docker exec bfd-db psql 'postgresql://bfd:InsecureLocalDev@localhost:5432/bfd' -c 'SELECT "beneficiaryId" FROM "Beneficiaries" LIMIT 1;'
+    ```
+7. Run `export BFD_PORT=6500`. The actual port is not important, but without it the `start-server` script will pick a different one each time, which gets annoying later. This can be set in your shell profile but note that when running the integration tests through maven, the BFD_PORT needs to be unset from the environment.
+8. Now it's time to start the server up. Change to `apps/bfd-server` and run:
+    ```
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-start
+    ```
+    After it starts up, you can tail the logs with `tail -f bfd-server-war/target/server-work/server-console.log`
+9. We're finally going to make a request. BFD requires that clients authenticate themselves with a certificate. Those certs live in the `apps/bfd-server/dev/ssl-stores` directory. We can curl the server using a cert with this command:
+    ```
+    curl --silent --insecure --cert $BFD_PATH/apps/bfd-server/dev/ssl-stores/client-unsecured.pem "https://localhost:$BFD_PORT/v2/fhir/ExplanationOfBenefit/?patient=567834&_format=json"
+    ```
+    where `$BFD_PATH` is that path to the `beneficiary-fhir-data` repo on your system. It may be helpful to have that set in your profile, too. To configure Postman, go to `Settings -> Certificates -> Add certificate` and load in `apps/bfd-server/dev/ssl-stores/client-trusted-keystore.pfx` under the PFX File option. The passphrase is `changeit`. Under `Settings -> General` you'll also want to turn off "SSL Certificate Verification."
+10. Total success (probably)!. You have a working call. To stop the server run this from the `apps/bfd-server` directory:
+    ```
+    mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd?user=bfd&password=InsecureLocalDev" --projects bfd-server-war package dependency:copy antrun:run org.codehaus.mojo:exec-maven-plugin:exec@server-stop
+    ```
 
 ### Docker Setup
 
