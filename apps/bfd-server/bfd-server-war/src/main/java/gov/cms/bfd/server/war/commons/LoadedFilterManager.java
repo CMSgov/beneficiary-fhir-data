@@ -5,7 +5,6 @@ import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,8 +31,7 @@ public class LoadedFilterManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManager.class);
 
   // A date before the lastUpdate feature was rolled out
-  private static final Date BEFORE_LAST_UPDATED_FEATURE =
-      Date.from(Instant.parse("2020-01-01T00:00:00Z"));
+  private static final Instant BEFORE_LAST_UPDATED_FEATURE = Instant.parse("2020-01-01T00:00:00Z");
 
   // The size of the beneficiaryId column
   private static final int BENE_ID_SIZE = 15;
@@ -45,13 +43,13 @@ public class LoadedFilterManager {
   private List<LoadedFileFilter> filters;
 
   // The latest transaction time from the LoadedBatch files
-  private Date transactionTime;
+  private Instant transactionTime;
 
   // The last LoadedBatch.created in the filter set
-  private Date lastBatchCreated;
+  private Instant lastBatchCreated;
 
   // The first LoadedBatch.created in the filter set
-  private Date firstBatchCreated;
+  private Instant firstBatchCreated;
 
   /**
    * A tuple of values: LoadedFile.loadedFileid, LoadedFile.created, max(LoadedBatch.created). Used
@@ -59,10 +57,10 @@ public class LoadedFilterManager {
    */
   public static class LoadedTuple {
     private long loadedFileId;
-    private Date firstUpdated;
-    private Date lastUpdated;
+    private Instant firstUpdated;
+    private Instant lastUpdated;
 
-    public LoadedTuple(long loadedFileId, Date firstUpdated, Date lastUpdated) {
+    public LoadedTuple(long loadedFileId, Instant firstUpdated, Instant lastUpdated) {
       this.loadedFileId = loadedFileId;
       this.firstUpdated = firstUpdated;
       this.lastUpdated = lastUpdated;
@@ -72,11 +70,11 @@ public class LoadedFilterManager {
       return loadedFileId;
     }
 
-    public Date getFirstUpdated() {
+    public Instant getFirstUpdated() {
       return firstUpdated;
     }
 
-    public Date getLastUpdated() {
+    public Instant getLastUpdated() {
       return lastUpdated;
     }
   }
@@ -96,7 +94,7 @@ public class LoadedFilterManager {
    *
    * @return the last batch's created timestamp
    */
-  public Date getTransactionTime() {
+  public Instant getTransactionTime() {
     if (transactionTime == null) {
       throw new RuntimeException("LoadedFilterManager has not been initialized.");
     }
@@ -108,7 +106,7 @@ public class LoadedFilterManager {
    *
    * @return the first batch's created timestamp
    */
-  public Date getLastBatchCreated() {
+  public Instant getLastBatchCreated() {
     if (lastBatchCreated == null) {
       throw new RuntimeException("LoadedFilterManager has not been refreshed.");
     }
@@ -120,7 +118,7 @@ public class LoadedFilterManager {
    *
    * @return the first batch's created timestamp
    */
-  public Date getFirstBatchCreated() {
+  public Instant getFirstBatchCreated() {
     if (firstBatchCreated == null) {
       throw new RuntimeException("LoadedFilterManager has not been refreshed.");
     }
@@ -169,8 +167,9 @@ public class LoadedFilterManager {
         if (filter.mightContain(beneficiaryId)) {
           return false;
         }
-      } else if (filter.getLastUpdated().getTime()
-          < lastUpdatedRange.getLowerBoundAsInstant().getTime()) {
+      } else if (filter
+          .getLastUpdated()
+          .isBefore(lastUpdatedRange.getLowerBoundAsInstant().toInstant())) {
         // filters are sorted in descending by lastUpdated time, so we can exit early from this
         // loop
         return true;
@@ -193,8 +192,9 @@ public class LoadedFilterManager {
 
     // The manager has a "known" interval which it has information about. The known range
     // is from the firstFilterUpdate to the future.
-    final Date lowerBound = range.getLowerBoundAsInstant();
-    return lowerBound != null && lowerBound.getTime() >= getFirstBatchCreated().getTime();
+    final Instant lowerBound = range.getLowerBoundAsInstant().toInstant();
+    return lowerBound != null
+        && lowerBound.getEpochSecond() >= getFirstBatchCreated().getEpochSecond();
   }
 
   /**
@@ -216,11 +216,11 @@ public class LoadedFilterManager {
      */
     try {
       // If new batches are present, then build new filters for the affected files
-      final Date currentLastBatchCreated =
+      final Instant currentLastBatchCreated =
           fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
 
       if (this.lastBatchCreated == null
-          || this.lastBatchCreated.toInstant().isBefore(currentLastBatchCreated.toInstant())) {
+          || this.lastBatchCreated.isBefore(currentLastBatchCreated)) {
         LOGGER.info(
             "Refreshing LoadedFile filters with new filters from {} to {}",
             lastBatchCreated,
@@ -231,11 +231,11 @@ public class LoadedFilterManager {
             updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
 
         // If batches been trimmed, then remove filters which are no longer present
-        final Date currentFirstBatchUpdate =
+        final Instant currentFirstBatchUpdate =
             fetchFirstLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
 
         if (this.firstBatchCreated == null
-            || this.firstBatchCreated.before(currentFirstBatchUpdate)) {
+            || this.firstBatchCreated.isBefore(currentFirstBatchUpdate)) {
           LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
           List<LoadedFile> loadedFiles = fetchLoadedFiles();
           newFilters = trimFilters(newFilters, loadedFiles);
@@ -261,7 +261,7 @@ public class LoadedFilterManager {
    * @param lastBatchCreated to use
    */
   public synchronized void set(
-      List<LoadedFileFilter> filters, Date firstBatchCreated, Date lastBatchCreated) {
+      List<LoadedFileFilter> filters, Instant firstBatchCreated, Instant lastBatchCreated) {
     this.filters = filters;
     this.firstBatchCreated = firstBatchCreated;
     this.lastBatchCreated = lastBatchCreated;
@@ -354,7 +354,7 @@ public class LoadedFilterManager {
    * @return a new filter
    */
   public static LoadedFileFilter buildFilter(
-      long fileId, Date firstUpdated, Function<Long, List<LoadedBatch>> fetchById) {
+      long fileId, Instant firstUpdated, Function<Long, List<LoadedBatch>> fetchById) {
     final List<LoadedBatch> loadedBatches = fetchById.apply(fileId);
     final int batchCount = loadedBatches.size();
     if (batchCount == 0) {
@@ -368,12 +368,12 @@ public class LoadedFilterManager {
     final BloomFilter bloomFilter = LoadedFileFilter.createFilter(batchSize * batchCount);
 
     // Loop through all batches, filling the bloom filter and finding the lastUpdated
-    Date lastUpdated = firstUpdated;
+    Instant lastUpdated = firstUpdated;
     for (LoadedBatch batch : loadedBatches) {
       for (String beneficiary : batch.getBeneficiariesAsList()) {
         bloomFilter.putString(beneficiary);
       }
-      if (batch.getCreated().after(lastUpdated)) {
+      if (batch.getCreated().isAfter(lastUpdated)) {
         lastUpdated = batch.getCreated();
       }
     }
@@ -390,10 +390,10 @@ public class LoadedFilterManager {
    *
    * @return the max date
    */
-  private Optional<Date> fetchLastLoadedBatchCreated() {
-    Date maxCreated =
+  private Optional<Instant> fetchLastLoadedBatchCreated() {
+    Instant maxCreated =
         entityManager
-            .createQuery("select max(b.created) from LoadedBatch b", Date.class)
+            .createQuery("select max(b.created) from LoadedBatch b", Instant.class)
             .getSingleResult();
     return Optional.ofNullable(maxCreated);
   }
@@ -403,10 +403,10 @@ public class LoadedFilterManager {
    *
    * @return the min date
    */
-  private Optional<Date> fetchFirstLoadedBatchCreated() {
-    Date minBatchId =
+  private Optional<Instant> fetchFirstLoadedBatchCreated() {
+    Instant minBatchId =
         entityManager
-            .createQuery("select min(b.created) from LoadedBatch b", Date.class)
+            .createQuery("select min(b.created) from LoadedBatch b", Instant.class)
             .getSingleResult();
     return Optional.ofNullable(minBatchId);
   }
@@ -417,7 +417,7 @@ public class LoadedFilterManager {
    * @param after limits the query to include batches created after this timestamp
    * @return tuples that meet the after criteria or an empty list
    */
-  private List<LoadedTuple> fetchLoadedTuples(Date after) {
+  private List<LoadedTuple> fetchLoadedTuples(Instant after) {
     final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
     CriteriaQuery<LoadedTuple> query = cb.createQuery(LoadedTuple.class);
     final Root<LoadedFile> f = query.from(LoadedFile.class);

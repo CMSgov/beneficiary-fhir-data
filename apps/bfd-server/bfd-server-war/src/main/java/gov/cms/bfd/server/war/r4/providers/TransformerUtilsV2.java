@@ -9,7 +9,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
@@ -40,8 +39,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -406,17 +404,10 @@ public final class TransformerUtilsV2 {
       CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
-    try {
-      String stringDate = dateYear.get().toString() + "-01-01";
-      Date date1 = new SimpleDateFormat("yyyy-MM-dd").parse(stringDate);
-      DateType dateYearValue = new DateType(date1, TemporalPrecisionEnum.YEAR);
-      String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
-      extension = new Extension(extensionUrl, dateYearValue);
-
-    } catch (ParseException e) {
-      throw new InvalidRifValueException(
-          String.format("Unable to parse reference year: '%s'.", dateYear.get()), e);
-    }
+    String stringDate = dateYear.get().toString();
+    DateType dateYearValue = new DateType(stringDate);
+    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    extension = new Extension(extensionUrl, dateYearValue);
 
     return extension;
   }
@@ -1155,9 +1146,7 @@ public final class TransformerUtilsV2 {
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
   static void setPeriodEnd(Period period, LocalDate date) {
-    period.setEnd(
-        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-        TemporalPrecisionEnum.DAY);
+    period.setEnd(convertToDate(date), TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -1173,9 +1162,7 @@ public final class TransformerUtilsV2 {
    * @param date the {@link LocalDate} to set the {@link Period#getStart()} value with/to
    */
   static void setPeriodStart(Period period, LocalDate date) {
-    period.setStart(
-        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-        TemporalPrecisionEnum.DAY);
+    period.setStart(convertToDate(date), TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -1482,7 +1469,7 @@ public final class TransformerUtilsV2 {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      OffsetLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
+      OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime) {
     Bundle bundle = new Bundle();
     if (paging.isPagingRequested()) {
       /*
@@ -1504,18 +1491,18 @@ public final class TransformerUtilsV2 {
      * performance reason, the resources of the bundle may be after the filter manager's version of
      * the timestamp.
      */
-    Date maxBundleDate =
+    Instant maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
+            .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
-            .max(Date::compareTo)
+            .max(Instant::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
         .setLastUpdated(
-            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
-                ? transactionTime
-                : maxBundleDate);
+            transactionTime.isAfter(maxBundleDate)
+                ? Date.from(transactionTime)
+                : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
     return bundle;
   }
@@ -1531,7 +1518,7 @@ public final class TransformerUtilsV2 {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      List<IBaseResource> resources, LinkBuilder paging, Date transactionTime) {
+      List<IBaseResource> resources, LinkBuilder paging, Instant transactionTime) {
     Bundle bundle = new Bundle();
     TransformerUtilsV2.addResourcesToBundle(bundle, resources);
     paging.addLinks(bundle);
@@ -1544,18 +1531,18 @@ public final class TransformerUtilsV2 {
      * performance reason, the resources of the bundle may be after the filter manager's version of
      * the timestamp.
      */
-    Date maxBundleDate =
+    Instant maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
+            .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
-            .max(Date::compareTo)
+            .max(Instant::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
         .setLastUpdated(
-            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
-                ? transactionTime
-                : maxBundleDate);
+            transactionTime.isAfter(maxBundleDate)
+                ? Date.from(transactionTime)
+                : Date.from(maxBundleDate));
     return bundle;
   }
 
@@ -1620,10 +1607,10 @@ public final class TransformerUtilsV2 {
    * @param resource is the FHIR resource to set lastUpdate
    * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUpdated.
    */
-  public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+  public static void setLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     resource
         .getMeta()
-        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
+        .setLastUpdated(Date.from(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED)));
   }
 
   /**
@@ -1633,12 +1620,12 @@ public final class TransformerUtilsV2 {
    * @param resource is the FHIR resource to update
    * @param lastUpdated is the lastUpdated value from the entity
    */
-  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     lastUpdated.ifPresent(
         newDate -> {
-          Date currentDate = resource.getMeta().getLastUpdated();
-          if (currentDate != null && newDate.after(currentDate)) {
-            resource.getMeta().setLastUpdated(newDate);
+          Instant currentDate = resource.getMeta().getLastUpdated().toInstant();
+          if (currentDate != null && newDate.isAfter(currentDate)) {
+            resource.getMeta().setLastUpdated(Date.from(newDate));
           }
         });
   }
@@ -2939,7 +2926,7 @@ public final class TransformerUtilsV2 {
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
-      Optional<Date> lastUpdated) {
+      Optional<Instant> lastUpdated) {
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);
@@ -3337,7 +3324,7 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       Optional<String> value,
-      Optional<Date> lastUpdated) {
+      Optional<Instant> lastUpdated) {
     if (value.isPresent()) {
       Resource providerResource = findOrCreateContainedOrg(eob, PROVIDER_ORG_ID);
 
@@ -3376,7 +3363,7 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
-      Optional<Date> lastupdated) {
+      Optional<Instant> lastupdated) {
     addProviderSlice(eob, type, Optional.of(value), lastupdated);
   }
 

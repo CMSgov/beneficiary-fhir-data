@@ -61,12 +61,13 @@ public class LoadedFileFilter {
     if (upperBound != null) {
       switch (upperBound.getPrefix()) {
         case LESSTHAN:
-          if (upperBound.getValue().getTime() <= getFirstUpdated().getTime()) {
+          if (upperBound.getValue().toInstant().toEpochMilli()
+              <= getFirstUpdated().toEpochMilli()) {
             return false;
           }
           break;
         case LESSTHAN_OR_EQUALS:
-          if (upperBound.getValue().getTime() < getFirstUpdated().getTime()) {
+          if (upperBound.getValue().toInstant().toEpochMilli() < getFirstUpdated().toEpochMilli()) {
             return false;
           }
           break;
@@ -79,12 +80,12 @@ public class LoadedFileFilter {
     if (lowerBound != null) {
       switch (lowerBound.getPrefix()) {
         case GREATERTHAN:
-          if (lowerBound.getValue().getTime() >= getLastUpdated().getTime()) {
+          if (lowerBound.getValue().toInstant().toEpochMilli() >= getLastUpdated().toEpochMilli()) {
             return false;
           }
           break;
         case GREATERTHAN_OR_EQUALS:
-          if (lowerBound.getValue().getTime() > getLastUpdated().getTime()) {
+          if (lowerBound.getValue().toInstant().toEpochMilli() > getLastUpdated().toEpochMilli()) {
             return false;
           }
           break;
@@ -112,12 +113,12 @@ public class LoadedFileFilter {
   }
 
   /** @return the firstUpdated */
-  public Date getFirstUpdated() {
+  public Instant getFirstUpdated() {
     return firstUpdated;
   }
 
   /** @return the lastUpdated */
-  public Date getLastUpdated() {
+  public Instant getLastUpdated() {
     return lastUpdated;
   }
 
