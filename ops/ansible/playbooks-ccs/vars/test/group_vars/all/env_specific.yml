@@ -49,4 +49,4 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
 
 # Change this to true to enable RDA API data pipeline
-data_pipeline_rda_job_enabled: false
+data_pipeline_rda_job_enabled: true
