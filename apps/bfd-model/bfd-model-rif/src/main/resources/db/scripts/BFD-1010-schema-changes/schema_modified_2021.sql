@@ -27,14 +27,14 @@
  */
 --
 --
-create table public.beneficiaries (
+create table beneficiaries (
     bene_id                                  bigint not null,                          -- beneficiaryId
     bene_birth_dt                            date not null,                            -- birthDate
     bene_county_cd                           character varying(10) not null,           -- countyCode
     bene_esrd_ind                            character(1),                             -- endStageRenalDiseaseCode
     bene_entlmt_rsn_curr                     character(1),                             -- entitlementCodeCurrent
     bene_entlmt_rsn_orig                     character(1),                             -- entitlementCodeOriginal
-    bene_crnt_hic_num                        character varying(64) not null,           -- hicn
+    bene_crnt_hicn                           character varying(64) not null,           -- hicn
     bene_mdcr_status_cd                      character varying(2),                     -- medicareEnrollmentStatusCode
     bene_gvn_name                            character varying(15) not null,           -- nameGiven
     bene_mdl_name                            character(1),                             -- nameMiddleInitial
@@ -237,11 +237,11 @@ create table public.beneficiaries (
 );
 --
 --
-create table public.beneficiaries_history (
+create table beneficiaries_history (
     beneficiary_history_id                   bigint not null,                          -- beneficiaryHistoryId
     bene_id                                  bigint not null,                          -- beneficiaryId
     bene_birth_dt                            date not null,                            -- birthDate
-    bene_crnt_hic_num                        character varying(64) not null,           -- hicn
+    bene_crnt_hicn                           character varying(64) not null,           -- hicn
     bene_sex_ident_cd                        character(1) not null,                    -- sex
     hicn_unhashed                            character varying(11),                    -- hicnUnhashed
     mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
@@ -252,19 +252,19 @@ create table public.beneficiaries_history (
 );
 --
 --
-create table public.beneficiaries_history_invalid_beneficiaries (
+create table beneficiaries_history_invalid_beneficiaries (
     beneficiary_history_id                   bigint not null,                          -- beneficiaryHistoryId
     bene_id                                  bigint,                                   -- beneficiaryId
     bene_birth_dt                            date not null,                            -- birthDate
-    bene_crnt_hic_num                        character varying(64) not null,           -- hicn
+    bene_crnt_hicn                           character varying(64) not null,           -- hicn
     bene_sex_ident_cd                        character(1) not null,                    -- sex
     hicn_unhashed                            character varying(11),                    -- hicnUnhashed
     mbi_num                                  character varying(11)                     -- medicareBeneficiaryId
 );
 --
 --
-create table public.beneficiary_monthly (
-    parent_beneficiary                       bigint not null,                          -- parentBeneficiary
+create table beneficiary_monthly (
+    bene_id                                  bigint not null,                          -- parentBeneficiary
     year_month                               date not null,                            -- yearMonth
     partd_contract_number_id                 character varying(5),                     -- partDContractNumberId
     partc_contract_number_id                 character varying(5),                     -- partCContractNumberId
@@ -282,145 +282,149 @@ create table public.beneficiary_monthly (
 );
 --
 --
-create table public.carrier_claim_lines (
+create table carrier_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
-    carr_line_ansthsa_unit_cnt               smallint not null,                        -- anesthesiaUnitCount
-    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
-    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
-    betos_cd                                 character varying(3),                     -- betosCode
-    carr_line_clia_lab_num                   character varying(10),                    -- cliaLabNumber
-    line_cms_type_srvc_cd                    character(1) not null,                    -- cmsServiceTypeCode
-    line_coinsrnc_amt                        money not null,                           -- coinsuranceAmount
-    line_icd_dgns_cd                         character varying(7),                     -- diagnosisCode
-    line_icd_dgns_vrsn_cd                    character(1),                             -- diagnosisCodeVersion
-    line_1st_expns_dt                        date,                                     -- firstExpenseDate
-    hcpcs_cd                                 character varying(5),                     -- hcpcsCode
-    hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
-    hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
-    line_hct_hgb_rslt_num                    numeric(4,1) not null,                    -- hctHgbTestResult
-    line_hct_hgb_type_cd                     character varying(2),                     -- hctHgbTestTypeCode
-    hpsa_scrcty_ind_cd                       character(1),                             -- hpsaScarcityCode
-    line_last_expns_dt                       date,                                     -- lastExpenseDate
-    carr_line_prcng_lclty_cd                 character varying(2) not null,            -- linePricingLocalityCode
-    dmerc_line_mtus_cd                       character(1),                             -- mtusCode
-    dmerc_line_mtus_cnt                      smallint not null,                        -- mtusCount
-    line_ndc_cd                              character varying(11),                    -- nationalDrugCode
-    org_npi_num                              character varying(10),                    -- organizationNpi
     clm_pmt_amt                              money not null,                           -- paymentAmount
-    line_pmt_80_100_cd                       character(1),                             -- paymentCode
-    prf_physn_npi                            character varying(12),                    -- performingPhysicianNpi
-    prf_physn_upin                           character varying(12),                    -- performingPhysicianUpin
-    carr_prfrng_pin_num                      character varying(15) not null,           -- performingProviderIdNumber
-    line_place_of_srvc_cd                    character varying(2) not null,            -- placeOfServiceCode
-    line_bene_prmry_pyr_cd                   character(1),                             -- primaryPayerCode
-    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
-    line_prcsg_ind_cd                        character varying(2),                     -- processingIndicatorCode
-    prtcptng_ind_cd                          character(1),                             -- providerParticipatingIndCode
-    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
-    prvdr_spclty                             character varying(3),                     -- providerSpecialityCode
-    prvdr_state_cd                           character varying(2),                     -- providerStateCode
-    tax_num                                  character varying(10) not null,           -- providerTaxNumber
+    dmerc_line_mtus_cd                       character(1),                             -- mtusCode
+    betos_cd                                 character varying(3),                     -- betosCode
+    carr_line_ansthsa_unit_cnt               smallint not null,                        -- anesthesiaUnitCount
+    carr_line_clia_lab_num                   character varying(10),                    -- cliaLabNumber
+    carr_line_prcng_lclty_cd                 character varying(2) not null,            -- linePricingLocalityCode
     carr_line_prvdr_type_cd                  character(1) not null,                    -- providerTypeCode
-    prvdr_zip                                character varying(9),                     -- providerZipCode
     carr_line_rdcd_pmt_phys_astn_c           character(1) not null,                    -- reducedPaymentPhysicianAsstCode
     carr_line_rx_num                         character varying(30),                    -- rxNumber
-    line_srvc_cnt                            smallint not null,                        -- serviceCount
-    line_service_deductible                  character(1),                             -- serviceDeductibleCode
-    line_sbmtd_chrg_amt                      money not null                            -- submittedChargeAmount
-);
---
---
-create table public.carrier_claims (
-    clm_id                                   bigint not null,                          -- claimId
-    bene_id                                  bigint not null,                          -- beneficiaryId
-    clm_grp_id                               bigint not null,                          -- claimGroupId
+    carr_prfrng_pin_num                      character varying(15) not null,           -- performingProviderIdNumber
+    dmerc_line_mtus_cnt                      smallint not null,                        -- mtusCount
+    hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
+    hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
+    hcpcs_cd                                 character varying(5),                     -- hcpcsCode
+    hpsa_scrcty_ind_cd                       character(1),                             -- hpsaScarcityCode
+    line_1st_expns_dt                        date,                                     -- firstExpenseDate
     line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
-    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
     line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
-    carr_num                                 character varying(5) not null,            -- carrierNumber
-    clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
-    carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
-    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
-    clm_clncl_tril_num                       character varying(8),                     -- clinicalTrialNumber
-    clm_from_dt                              date not null,                            -- dateFrom
-    clm_thru_dt                              date not null,                            -- dateThrough
-    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
-    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
-    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
-    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
-    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
-    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
-    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
-    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
-    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
-    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
-    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
-    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
-    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
-    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
-    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
-    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
-    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
-    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
-    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
-    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
-    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
-    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
-    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
-    prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
-    prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
-    carr_clm_hcpcs_yr_cd                     character(1),                             -- hcpcsYearCode
-    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    clm_pmt_amt                              money not null,                           -- paymentAmount
-    carr_clm_pmt_dnl_cd                      character varying(2) not null,            -- paymentDenialCode
+    line_bene_prmry_pyr_cd                   character(1),                             -- primaryPayerCode
+    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
+    line_cms_type_srvc_cd                    character(1) not null,                    -- cmsServiceTypeCode
+    line_coinsrnc_amt                        money not null,                           -- coinsuranceAmount
+    line_hct_hgb_rslt_num                    numeric(4,1) not null,                    -- hctHgbTestResult
+    line_hct_hgb_type_cd                     character varying(2),                     -- hctHgbTestTypeCode
+    line_icd_dgns_cd                         character varying(7),                     -- diagnosisCode
+    line_icd_dgns_vrsn_cd                    character(1),                             -- diagnosisCodeVersion
+    line_last_expns_dt                       date,                                     -- lastExpenseDate
+    line_ndc_cd                              character varying(11),                    -- nationalDrugCode
+    line_place_of_srvc_cd                    character varying(2) not null,            -- placeOfServiceCode
+    line_pmt_80_100_cd                       character(1),                             -- paymentCode
+    line_prcsg_ind_cd                        character varying(2),                     -- processingIndicatorCode
+    line_sbmtd_chrg_amt                      money not null,                            -- submittedChargeAmount
+    line_service_deductible                  character(1),                             -- serviceDeductibleCode
+    line_srvc_cnt                            smallint not null,                        -- serviceCount
     nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
-    carr_clm_prvdr_asgnmt_ind_sw             character(1),                             -- providerAssignmentIndicator
+    org_npi_num                              character varying(10),                    -- organizationNpi
+    prf_physn_npi                            character varying(12),                    -- performingPhysicianNpi
+    prf_physn_upin                           character varying(12),                    -- performingPhysicianUpin
+    prtcptng_ind_cd                          character(1),                             -- providerParticipatingIndCode
+    prvdr_spclty                             character varying(3),                     -- providerSpecialityCode
+    prvdr_state_cd                           character varying(2),                     -- providerStateCode
+    prvdr_zip                                character varying(9),                      -- providerZipCode
     rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
-    rfr_physn_npi                            character varying(12),                    -- referringPhysicianNpi
-    rfr_physn_upin                           character varying(12),                    -- referringPhysicianUpin
-    carr_clm_rfrng_pin_num                   character varying(14) not null,           -- referringProviderIdNumber
-    line_sbmtd_chrg_amt                      money not null,                           -- submittedChargeAmount
-    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
-    final_action                             character(1) not null,                    -- finalAction
-    carr_clm_cntl_num                        character varying(23),                    -- claimCarrierControlNumber
-    last_updated                             timestamp with time zone                  -- lastupdated
+    tax_num                                  character varying(10) not null           -- providerTaxNumber  
 );
 --
 --
-create table public.dme_claim_lines (
+create table carrier_claims (
+    clm_id                                   bigint not null,                          -- claimId
+	bene_id                                  bigint not null,                          -- beneficiaryId
+	clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
+	clm_clncl_tril_num                       character varying(8),                     -- clinicalTrialNumber
+	clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
+	clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+	clm_from_dt                              date not null,                            -- dateFrom
+	clm_thru_dt                              date not null,                            -- dateThrough
+	carr_clm_cntl_num                        character varying(23),                    -- claimCarrierControlNumber
+	carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
+	carr_clm_hcpcs_yr_cd                     character(1),                             -- hcpcsYearCode
+	carr_clm_pmt_dnl_cd                      character varying(2) not null,            -- paymentDenialCode
+	carr_clm_prvdr_asgnmt_ind_sw             character(1),                             -- providerAssignmentIndicator
+	carr_clm_rfrng_pin_num                   character varying(14) not null,           -- referringProviderIdNumber
+	carr_num                                 character varying(5) not null,            -- carrierNumber
+	final_action                             character(1) not null,                    -- finalAction
+	line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
+	line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
+	line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
+	line_sbmtd_chrg_amt                      numeric(10,2) not null,                   -- submittedChargeAmount
+	nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
+	nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
+	nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+	nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
+	prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
+	prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
+	rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+	rfr_physn_npi                            character varying(12),                    -- referringPhysicianNpi
+	rfr_physn_upin                           character varying(12),                    -- referringPhysicianUpin
+	icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
+	icd_dgns_cd2                             character varying(7),                     	-- diagnosis2Code
+	icd_dgns_cd3                             character varying(7),                     	-- diagnosis3Code
+	icd_dgns_cd4                             character varying(7),                     	-- diagnosis4Code
+	icd_dgns_cd5                             character varying(7),                     	-- diagnosis5Code
+	icd_dgns_cd6                             character varying(7),                     	-- diagnosis6Code
+	icd_dgns_cd7                             character varying(7),                     	-- diagnosis7Code
+	icd_dgns_cd8                             character varying(7),                     	-- diagnosis8Code
+	icd_dgns_cd9                             character varying(7),                     	-- diagnosis9Code
+	icd_dgns_cd10                            character varying(7),                     	-- diagnosis10Code
+	icd_dgns_cd11                            character varying(7),                     	-- diagnosis11Code
+	icd_dgns_cd12                            character varying(7),                     	-- diagnosis12Code
+	icd_dgns_vrsn_cd1                        character(1),                            	-- diagnosis1CodeVersion
+	icd_dgns_vrsn_cd2                        character(1),                             	-- diagnosis2CodeVersion
+	icd_dgns_vrsn_cd3                        character(1),                             	-- diagnosis3CodeVersion
+	icd_dgns_vrsn_cd4                        character(1),                             	-- diagnosis4CodeVersion
+	icd_dgns_vrsn_cd5                        character(1),                             	-- diagnosis5CodeVersion
+	icd_dgns_vrsn_cd6                        character(1),                             	-- diagnosis6CodeVersion
+	icd_dgns_vrsn_cd7                        character(1),                             	-- diagnosis7CodeVersion
+	icd_dgns_vrsn_cd8                        character(1),                             	-- diagnosis8CodeVersion
+	icd_dgns_vrsn_cd9                        character(1),                             	-- diagnosis9CodeVersion
+	icd_dgns_vrsn_cd10                       character(1),                             	-- diagnosis10CodeVersion
+	icd_dgns_vrsn_cd11                       character(1),                             	-- diagnosis11CodeVersion
+	icd_dgns_vrsn_cd12                       character(1),                             	-- diagnosis12CodeVersion
+	last_updated                             timestamp with time zone                  -- lastupdated
+);
+--
+--
+create table dme_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    line_sbmtd_chrg_amt                      money not null,                           -- submittedChargeAmount
     line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
     line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
     line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
-    betos_cd                                 character varying(3),                     -- betosCode
+    line_ndc_cd                              character varying(11),                    -- nationalDrugCode
     line_cms_type_srvc_cd                    character(1) not null,                    -- cmsServiceTypeCode
     line_coinsrnc_amt                        money not null,                           -- coinsuranceAmount
     line_icd_dgns_cd                         character varying(7),                     -- diagnosisCode
     line_icd_dgns_vrsn_cd                    character(1),                             -- diagnosisCodeVersion
     line_1st_expns_dt                        date,                                     -- firstExpenseDate
+    line_hct_hgb_rslt_num                    numeric(3,1) not null,                    -- hctHgbTestResult
+    line_hct_hgb_type_cd                     character varying(2),                     -- hctHgbTestTypeCode
+    line_last_expns_dt                       date,                                     -- lastExpenseDate
+    line_pmt_80_100_cd                       character(1),                             -- paymentCode
+    line_place_of_srvc_cd                    character varying(2) not null,            -- placeOfServiceCode
+    line_prmry_alowd_chrg_amt                money not null,                           -- primaryPayerAllowedChargeAmount
+    line_bene_prmry_pyr_cd                   character(1),                             -- primaryPayerCode
+    line_prcsg_ind_cd                        character varying(2),                     -- processingIndicatorCode
+    line_dme_prchs_price_amt                 money not null,                           -- purchasePriceAmount
+    line_srvc_cnt                            smallint not null,                        -- serviceCount
+    line_service_deductible                  character(1),                             -- serviceDeductibleCode
+    betos_cd                                 character varying(3),                     -- betosCode
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     hcpcs_4th_mdfr_cd                        character varying(5),                     -- hcpcsFourthModifierCode
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     hcpcs_3rd_mdfr_cd                        character varying(5),                     -- hcpcsThirdModifierCode
-    line_hct_hgb_rslt_num                    numeric(3,1) not null,                    -- hctHgbTestResult
-    line_hct_hgb_type_cd                     character varying(2),                     -- hctHgbTestTypeCode
-    line_last_expns_dt                       date,                                     -- lastExpenseDate
     dmerc_line_mtus_cd                       character(1),                             -- mtusCode
     dmerc_line_mtus_cnt                      smallint not null,                        -- mtusCount
-    line_ndc_cd                              character varying(11),                    -- nationalDrugCode
-    clm_pmt_amt                              money not null,                           -- paymentAmount
-    line_pmt_80_100_cd                       character(1),                             -- paymentCode
-    line_place_of_srvc_cd                    character varying(2) not null,            -- placeOfServiceCode
     dmerc_line_prcng_state_cd                character varying(2),                     -- pricingStateCode
-    line_prmry_alowd_chrg_amt                money not null,                           -- primaryPayerAllowedChargeAmount
-    line_bene_prmry_pyr_cd                   character(1),                             -- primaryPayerCode
     nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
-    line_prcsg_ind_cd                        character varying(2),                     -- processingIndicatorCode
     prvdr_num                                character varying(10),                    -- providerBillingNumber
     prvdr_npi                                character varying(12),                    -- providerNPI
     prtcptng_ind_cd                          character(1),                             -- providerParticipatingIndCode
@@ -428,635 +432,632 @@ create table public.dme_claim_lines (
     prvdr_spclty                             character varying(3),                     -- providerSpecialityCode
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     tax_num                                  character varying(10) not null,           -- providerTaxNumber
-    line_dme_prchs_price_amt                 money not null,                           -- purchasePriceAmount
     dmerc_line_scrn_svgs_amt                 money,                                    -- screenSavingsAmount
-    line_srvc_cnt                            smallint not null,                        -- serviceCount
-    line_service_deductible                  character(1),                             -- serviceDeductibleCode
-    line_sbmtd_chrg_amt                      money not null,                           -- submittedChargeAmount
     dmerc_line_supplr_type_cd                character(1)                              -- supplierTypeCode
 );
 --
 --
-create table public.dme_claims (
+create table dme_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
-    line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
-    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
-    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
-    carr_num                                 character varying(5) not null,            -- carrierNumber
     clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
-    carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
-    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
+    clm_pmt_amt                              money not null,                           -- paymentAmount
     clm_clncl_tril_num                       character varying(8),                     -- clinicalTrialNumber
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
-    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
-    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
-    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
-    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
-    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
-    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
-    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
-    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
-    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
-    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
-    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
-    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
-    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
-    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
-    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
-    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
-    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
-    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
-    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
-    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
-    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
-    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
-    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
+    carr_num                                 character varying(5) not null,            -- carrierNumber
+    carr_clm_cntl_num                        character varying(23),                    -- claimCarrierControlNumber
+    carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
+    carr_clm_prvdr_asgnmt_ind_sw             character(1) not null,                    -- providerAssignmentIndicator
+    carr_clm_hcpcs_yr_cd                     character(1),                             -- hcpcsYearCode
+    carr_clm_pmt_dnl_cd                      character varying(2) not null,            -- paymentDenialCode
+    line_sbmtd_chrg_amt                      money not null,                           -- submittedChargeAmount
+    line_alowd_chrg_amt                      money not null,                           -- allowedChargeAmount
+    line_bene_ptb_ddctbl_amt                 money not null,                           -- beneficiaryPartBDeductAmount
+    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
+    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
+    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
+    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
+    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
     prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
-    carr_clm_hcpcs_yr_cd                     character(1),                             -- hcpcsYearCode
-    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    clm_pmt_amt                              money not null,                           -- paymentAmount
-    carr_clm_pmt_dnl_cd                      character varying(2) not null,            -- paymentDenialCode
-    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
-    carr_clm_prvdr_asgnmt_ind_sw             character(1) not null,                    -- providerAssignmentIndicator
     rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     rfr_physn_npi                            character varying(12),                    -- referringPhysicianNpi
     rfr_physn_upin                           character varying(12),                    -- referringPhysicianUpin
-    line_sbmtd_chrg_amt                      money not null,                           -- submittedChargeAmount
-    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     final_action                             character(1) not null,                    -- finalAction
-    carr_clm_cntl_num                        character varying(23),                    -- claimCarrierControlNumber
+    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
+    icd_dgns_cd2                             character varying(7),                     	-- diagnosis2Code
+    icd_dgns_cd3                             character varying(7),                     	-- diagnosis3Code
+    icd_dgns_cd4                             character varying(7),                     	-- diagnosis4Code
+    icd_dgns_cd5                             character varying(7),                     	-- diagnosis5Code
+    icd_dgns_cd6                             character varying(7),                     	-- diagnosis6Code
+    icd_dgns_cd7                             character varying(7),                     	-- diagnosis7Code
+    icd_dgns_cd8                             character varying(7),                     	-- diagnosis8Code
+    icd_dgns_cd9                             character varying(7),                     	-- diagnosis9Code
+    icd_dgns_cd10                            character varying(7),                     	-- diagnosis10Code
+    icd_dgns_cd11                            character varying(7),                     	-- diagnosis11Code
+    icd_dgns_cd12                            character varying(7),                     	-- diagnosis12Code
+    icd_dgns_vrsn_cd1                        character(1),                            	-- diagnosis1CodeVersion
+    icd_dgns_vrsn_cd2                        character(1),                             	-- diagnosis2CodeVersion
+    icd_dgns_vrsn_cd3                        character(1),                             	-- diagnosis3CodeVersion
+    icd_dgns_vrsn_cd4                        character(1),                             	-- diagnosis4CodeVersion
+    icd_dgns_vrsn_cd5                        character(1),                             	-- diagnosis5CodeVersion
+    icd_dgns_vrsn_cd6                        character(1),                             	-- diagnosis6CodeVersion
+    icd_dgns_vrsn_cd7                        character(1),                             	-- diagnosis7CodeVersion
+    icd_dgns_vrsn_cd8                        character(1),                             	-- diagnosis8CodeVersion
+    icd_dgns_vrsn_cd9                        character(1),                             	-- diagnosis9CodeVersion
+    icd_dgns_vrsn_cd10                       character(1),                             	-- diagnosis10CodeVersion
+    icd_dgns_vrsn_cd11                       character(1),                             	-- diagnosis11CodeVersion
+    icd_dgns_vrsn_cd12                       character(1),                             	-- diagnosis12CodeVersion
     last_updated                             timestamp with time zone                  -- lastupdated
 );
 --
 --
-create table public.hha_claim_lines (
+create table hha_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    rev_cntr_apc_hipps_cd                    character varying(5),                     -- apcOrHippsCode
-    rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
+    clm_pmt_amt                              money not null,                           -- paymentAmount
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
+    rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
+    rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
+    rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
+    rev_cntr_dt                              date,                                     -- revenueCenterDate
+    rev_cntr_apc_hipps_cd                    character varying(5),                     -- apcOrHippsCode
+    rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  money not null,                           -- nonCoveredChargeAmount
-    clm_pmt_amt                              money not null,                           -- paymentAmount
     rev_cntr_pmt_mthd_ind_cd                 character varying(2),                     -- paymentMethodCode
     rev_cntr_rate_amt                        money not null,                           -- rateAmount
     rev_cntr_1st_ansi_cd                     character varying(5),                     -- revCntr1stAnsiCd
-    rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
-    rev_cntr_dt                              date,                                     -- revenueCenterDate
-    rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
-    rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
     rev_cntr_stus_ind_cd                     character varying(2),                     -- statusCode
     rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null                         -- unitCount
 );
 --
 --
-create table public.hha_claims (
+create table hha_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
-    clm_grp_id                               bigint not null,                          -- claimGroupId
-    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
-    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
+    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
+    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_from_dt                              date not null,                            -- dateFrom
+    clm_thru_dt                              date not null,                            -- dateThrough
     clm_admsn_dt                             date,                                     -- careStartDate
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
     clm_hha_lupa_ind_cd                      character(1),                             -- claimLUPACode
-    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
-    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
     clm_hha_rfrl_cd                          character(1),                             -- claimReferralCode
+    clm_hha_tot_visit_cnt                    numeric(4,0) not null,                    -- totalVisitCount
+    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
+    clm_pps_ind_cd                           character(1) not null,                    -- prospectivePaymentCode
     clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
-    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
-    clm_from_dt                              date not null,                            -- dateFrom
-    clm_thru_dt                              date not null,                            -- dateThrough
-    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
-    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
-    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
-    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
-    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
-    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
-    icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
-    icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
-    icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
-    icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
-    icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
-    icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
-    icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
-    icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
-    icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
-    icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
-    icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
-    icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
-    icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
-    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
-    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
-    icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
-    icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
-    icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
-    icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
-    icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
-    icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
-    icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
-    icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
-    icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
-    icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
-    icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
-    icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
-    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
-    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
-    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
-    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
-    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
-    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
-    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
-    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
-    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
-    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
-    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
-    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
-    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
-    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
-    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
-    icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
-    icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
-    icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
-    icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
-    icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
-    icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
-    icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
-    icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
-    icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
-    icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
-    icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
-    icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
-    icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
-    icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
-    icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
-    icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
-    icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
-    icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
-    icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
-    icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
-    icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
-    icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
-    icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
-    icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
+    fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
+    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
+    fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
+    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
+    final_action                             character(1) not null,                    -- finalAction
     fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
     fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
+    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
+    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
+    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
+    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
+    org_npi_num                              character varying(10),                    -- organizationNpi
     prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
     prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
-    fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
-    fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
-    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    org_npi_num                              character varying(10),                    -- organizationNpi
-    ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    clm_pmt_amt                              money not null,                           -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
-    clm_pps_ind_cd                           character(1) not null,                    -- prospectivePaymentCode
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
-    clm_hha_tot_visit_cnt                    smallint not null,                        -- totalVisitCount
-    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
-    final_action                             character(1) not null,                    -- finalAction
-    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
-    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
-    last_updated                             timestamp with time zone                  -- lastupdated
+    ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
+    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
+    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
+    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
+    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
+    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
+    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
+    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
+    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
+    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
+    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
+    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
+    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
+    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
+    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
+    icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
+    icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
+    icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
+    icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
+    icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
+    icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
+    icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
+    icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
+    icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
+    icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
+    icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
+    icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
+    icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
+    icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
+    icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
+    icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
+    icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
+    icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
+    icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
+    icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
+    icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
+    icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
+    icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
+    icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
+    icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
+    icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
+    icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
+    icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
+    icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
+    icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
+    icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
+    icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
+    icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
+    icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
+    icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
+    icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
+    icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
+    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
+    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
+    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
+    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
+    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
+    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
+    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
+    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
+    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
+    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
+    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
+    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
+    icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
+    icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
+    icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
+    icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
+    icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
+    icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
+    icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
+    icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
+    icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
+    icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
+    icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
+    icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
+    icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
+    last_updated                             timestamp with time zone                 -- lastupdated
 );
 --
 --
-create table public.hospice_claim_lines (
+create table hospice_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
+    rev_cntr_dt                              date,                                     -- revenueCenterDate
+    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
+    rev_cntr_unit_cnt                        smallint not null,                        -- unitCount
     rev_cntr_bene_pmt_amt                    money not null,                           -- benficiaryPaymentAmount
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
-    hcpcs_cd                                 character varying(5),                     -- hcpcsCode
-    hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
-    hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  money,                                    -- nonCoveredChargeAmount
-    clm_pmt_amt                              money not null,                           -- paymentAmount
     rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     rev_cntr_rate_amt                        money not null,                           -- rateAmount
-    rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
-    rev_cntr_dt                              date,                                     -- revenueCenterDate
+    hcpcs_cd                                 character varying(5),                     -- hcpcsCode
+    hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
+    hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
-    rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
-    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
-    rev_cntr_unit_cnt                        smallint not null                         -- unitCount
+    rndrng_physn_upin                        character varying(12)                     -- revenueCenterRenderingPhysicianUPIN
 );
 --
 --
-create table public.hospice_claims (
+create table hospice_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
-    clm_grp_id                               bigint not null,                          -- claimGroupId
-    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
-    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
-    nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
+    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_hospc_start_dt_id                    date,                                     -- claimHospiceStartDate
-    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
-    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
-    clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
-    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
-    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
-    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
-    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
-    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
-    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
-    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
-    icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
-    icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
-    icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
-    icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
-    icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
-    icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
-    icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
-    icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
-    icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
-    icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
-    icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
-    icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
-    icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
-    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
-    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
-    icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
-    icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
-    icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
-    icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
-    icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
-    icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
-    icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
-    icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
-    icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
-    icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
-    icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
-    icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
-    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
-    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
-    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
-    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
-    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
-    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
-    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
-    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
-    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
-    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
-    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
-    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
-    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
-    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
-    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
-    icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
-    icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
-    icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
-    icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
-    icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
-    icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
-    icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
-    icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
-    icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
-    icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
-    icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
-    icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
-    icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
-    icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
-    icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
-    icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
-    icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
-    icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
-    icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
-    icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
-    icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
-    icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
-    icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
-    icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
+    clm_hospc_start_dt_id                    date,                                     -- claimHospiceStartDate
+    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
+    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
+    clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
+    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
+    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
+    bene_hospc_prd_cnt                       smallint,                                 -- hospicePeriodCount
+    fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
+    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
+    fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
+    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
+    final_action                             character(1) not null,                    -- finalAction
     fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
     fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
+    nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
+    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
+    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
+    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
+    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
+    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
+    org_npi_num                              character varying(10),                    -- organizationNpi
     prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
     prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
-    fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
-    fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
-    bene_hospc_prd_cnt                       smallint,                                 -- hospicePeriodCount
-    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    org_npi_num                              character varying(10),                    -- organizationNpi
-    ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
-    clm_pmt_amt                              money not null,                           -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
-    clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
-    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
-    final_action                             character(1) not null,                    -- finalAction
-    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
-    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
+    ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
+    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
+	icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
+	icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
+	icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
+	icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
+	icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
+	icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
+	icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
+	icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
+	icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
+	icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
+	icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
+	icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
+	icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
+	icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
+	icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
+	icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
+	icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
+	icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
+	icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
+	icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
+	icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
+	icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
+	icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
+	icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
+	icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
+	icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
+	icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
+	icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
+	icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
+	icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
+	icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
+	icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
+	icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
+	icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
+	icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
+	icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
+	icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
+	icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
+	icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
+	icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
+	icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
+	icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
+	icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
+	icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
+	icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
+	icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
+	icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
+	icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
+	icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
+	icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
+	icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
+	icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
+	icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
+	icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
+	icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
+	icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
+	icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
+	icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
+	icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
+	icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
+	icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
+	icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
+	icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
+	icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
+	icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
+	icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
+	icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
+	icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
+	icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
+	icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
+	icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
+	icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
+	icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
     last_updated                             timestamp with time zone                  -- lastupdated
 );
 --
 --
-create table public.inpatient_claim_lines (
+create table inpatient_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
-    hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  money not null,                           -- nonCoveredChargeAmount
     rev_cntr_rate_amt                        money not null,                           -- rateAmount
     rev_cntr                                 character varying(4) not null,            -- revenueCenter
-    rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
-    rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
     rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
-    rev_cntr_unit_cnt                        smallint not null                         -- unitCount
+    rev_cntr_unit_cnt                        smallint not null ,                       -- unitCount
+    hcpcs_cd                                 character varying(5),                     -- hcpcsCode
+    rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
+    rndrng_physn_upin                        character varying(12)                     -- revenueCenterRenderingPhysicianUPIN
+
 );
 --
 --
-create table public.inpatient_claims (
-    clm_id                                   bigint not null,                          -- claimId
-    bene_id                                  bigint not null,                          -- beneficiaryId
-    clm_grp_id                               bigint not null,                          -- claimGroupId
-    clm_ip_admsn_type_cd                     character(1) not null,                    -- admissionTypeCd
-    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
-    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
-    nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
-    nch_bene_blood_ddctbl_lblty_am           money not null,                           -- bloodDeductibleLiabilityAmount
-    nch_blood_pnts_frnshd_qty                smallint not null,                        -- bloodPintsFurnishedQty
+create table inpatient_claims (
+	clm_id                                   bigint not null,           -- claimId
+    bene_id                                  bigint not null,           -- beneficiaryId
+    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_admsn_dt                             date,                                     -- claimAdmissionDate
-    clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
-    clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
-    clm_pps_cptl_dsprprtnt_shr_amt           money,                                    -- claimPPSCapitalDisproportionateShareAmt
-    clm_pps_cptl_drg_wt_num                  numeric(7,4),                             -- claimPPSCapitalDrgWeightNumber
-    clm_pps_cptl_excptn_amt                  money,                                    -- claimPPSCapitalExceptionAmount
-    clm_pps_cptl_fsp_amt                     money,                                    -- claimPPSCapitalFSPAmount
-    clm_pps_cptl_ime_amt                     money,                                    -- claimPPSCapitalIMEAmount
-    clm_pps_cptl_outlier_amt                 money,                                    -- claimPPSCapitalOutlierAmount
-    clm_pps_old_cptl_hld_hrmls_amt           money,                                    -- claimPPSOldCapitalHoldHarmlessAmount
-    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
-    claim_query_code                         character(1) not null,                    -- claimQueryCode
-    clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
-    clm_tot_pps_cptl_amt                     money,                                    -- claimTotalPPSCapitalAmount
-    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
-    bene_tot_coinsrnc_days_cnt               smallint not null,                        -- coinsuranceDayCount
-    nch_actv_or_cvrd_lvl_care_thru           date,                                     -- coveredCareThoughDate
-    clm_from_dt                              date not null,                            -- dateFrom
-    clm_thru_dt                              date not null,                            -- dateThrough
-    nch_bene_ip_ddctbl_amt                   money not null,                           -- deductibleAmount
-    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
-    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
-    clm_poa_ind_sw10                         character(1),                             -- diagnosis10PresentOnAdmissionCode
-    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
-    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
-    clm_poa_ind_sw11                         character(1),                             -- diagnosis11PresentOnAdmissionCode
-    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
-    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    clm_poa_ind_sw12                         character(1),                             -- diagnosis12PresentOnAdmissionCode
-    icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
-    icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
-    clm_poa_ind_sw13                         character(1),                             -- diagnosis13PresentOnAdmissionCode
-    icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
-    icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
-    clm_poa_ind_sw14                         character(1),                             -- diagnosis14PresentOnAdmissionCode
-    icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
-    icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
-    clm_poa_ind_sw15                         character(1),                             -- diagnosis15PresentOnAdmissionCode
-    icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
-    icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
-    clm_poa_ind_sw16                         character(1),                             -- diagnosis16PresentOnAdmissionCode
-    icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
-    icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
-    clm_poa_ind_sw17                         character(1),                             -- diagnosis17PresentOnAdmissionCode
-    icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
-    icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
-    clm_poa_ind_sw18                         character(1),                             -- diagnosis18PresentOnAdmissionCode
-    icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
-    icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
-    clm_poa_ind_sw19                         character(1),                             -- diagnosis19PresentOnAdmissionCode
-    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
-    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
-    clm_poa_ind_sw1                          character(1),                             -- diagnosis1PresentOnAdmissionCode
-    icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
-    icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
-    clm_poa_ind_sw20                         character(1),                             -- diagnosis20PresentOnAdmissionCode
-    icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
-    icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
-    clm_poa_ind_sw21                         character(1),                             -- diagnosis21PresentOnAdmissionCode
-    icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
-    icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
-    clm_poa_ind_sw22                         character(1),                             -- diagnosis22PresentOnAdmissionCode
-    icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
-    icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
-    clm_poa_ind_sw23                         character(1),                             -- diagnosis23PresentOnAdmissionCode
-    icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
-    icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
-    clm_poa_ind_sw24                         character(1),                             -- diagnosis24PresentOnAdmissionCode
-    icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
-    icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    clm_poa_ind_sw25                         character(1),                             -- diagnosis25PresentOnAdmissionCode
-    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
-    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
-    clm_poa_ind_sw2                          character(1),                             -- diagnosis2PresentOnAdmissionCode
-    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
-    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
-    clm_poa_ind_sw3                          character(1),                             -- diagnosis3PresentOnAdmissionCode
-    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
-    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
-    clm_poa_ind_sw4                          character(1),                             -- diagnosis4PresentOnAdmissionCode
-    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
-    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
-    clm_poa_ind_sw5                          character(1),                             -- diagnosis5PresentOnAdmissionCode
-    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
-    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
-    clm_poa_ind_sw6                          character(1),                             -- diagnosis6PresentOnAdmissionCode
-    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
-    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
-    clm_poa_ind_sw7                          character(1),                             -- diagnosis7PresentOnAdmissionCode
-    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
-    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
-    clm_poa_ind_sw8                          character(1),                             -- diagnosis8PresentOnAdmissionCode
-    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
-    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
-    clm_poa_ind_sw9                          character(1),                             -- diagnosis9PresentOnAdmissionCode
-    admtg_dgns_cd                            character varying(7),                     -- diagnosisAdmittingCode
-    admtg_dgns_vrsn_cd                       character(1),                             -- diagnosisAdmittingCodeVersion
-    icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
-    icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
-    clm_e_poa_ind_sw10                       character(1),                             -- diagnosisExternal10PresentOnAdmissionCode
-    icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
-    icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
-    clm_e_poa_ind_sw11                       character(1),                             -- diagnosisExternal11PresentOnAdmissionCode
-    icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
-    icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
-    clm_e_poa_ind_sw12                       character(1),                             -- diagnosisExternal12PresentOnAdmissionCode
-    icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
-    icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
-    clm_e_poa_ind_sw1                        character(1),                             -- diagnosisExternal1PresentOnAdmissionCode
-    icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
-    icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
-    clm_e_poa_ind_sw2                        character(1),                             -- diagnosisExternal2PresentOnAdmissionCode
-    icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
-    icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
-    clm_e_poa_ind_sw3                        character(1),                             -- diagnosisExternal3PresentOnAdmissionCode
-    icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
-    icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
-    clm_e_poa_ind_sw4                        character(1),                             -- diagnosisExternal4PresentOnAdmissionCode
-    icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
-    icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
-    clm_e_poa_ind_sw5                        character(1),                             -- diagnosisExternal5PresentOnAdmissionCode
-    icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
-    icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
-    clm_e_poa_ind_sw6                        character(1),                             -- diagnosisExternal6PresentOnAdmissionCode
-    icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
-    icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
-    clm_e_poa_ind_sw7                        character(1),                             -- diagnosisExternal7PresentOnAdmissionCode
-    icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
-    icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
-    clm_e_poa_ind_sw8                        character(1),                             -- diagnosisExternal8PresentOnAdmissionCode
-    icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
-    icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
-    clm_e_poa_ind_sw9                        character(1),                             -- diagnosisExternal9PresentOnAdmissionCode
-    fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
-    fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
-    prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
-    prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
     clm_drg_cd                               character varying(3),                     -- diagnosisRelatedGroupCd
     clm_drg_outlier_stay_cd                  character(1) not null,                    -- diagnosisRelatedGroupOutlierStayCd
-    dsh_op_clm_val_amt                       money,                                    -- disproportionateShareAmount
-    nch_drg_outlier_aprvd_pmt_amt            money,                                    -- drgOutlierApprovedPaymentAmount
+    clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
+    clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
+    clm_from_dt                              date not null,                            -- dateFrom
+	clm_thru_dt                              date not null,                            -- dateThrough
+	clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_ip_admsn_type_cd                     character(1) not null,                    -- admissionTypeCd
+    clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
+    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
+    clm_non_utlztn_days_cnt                  smallint not null,                         -- nonUtilizationDayCount
+    clm_pass_thru_per_diem_amt               numeric(10,2) not null,                   -- passThruPerDiemAmount
+    clm_pps_cptl_drg_wt_num                  numeric(7,4),                             -- claimPPSCapitalDrgWeightNumber
+    clm_pps_cptl_dsprprtnt_shr_amt           numeric(10,2),                            -- claimPPSCapitalDisproportionateShareAmt
+    clm_pps_cptl_excptn_amt                  numeric(10,2),                            -- claimPPSCapitalExceptionAmount
+    clm_pps_cptl_fsp_amt                     numeric(10,2),                            -- claimPPSCapitalFSPAmount
+    clm_pps_cptl_ime_amt                     numeric(10,2),                            -- claimPPSCapitalIMEAmount
+    clm_pps_cptl_outlier_amt                 numeric(10,2),                            -- claimPPSCapitalOutlierAmount
+    clm_pps_ind_cd                           character(1),                             -- prospectivePaymentCode
+    clm_pps_old_cptl_hld_hrmls_amt           numeric(10,2),                            -- claimPPSOldCapitalHoldHarmlessAmount
+    clm_src_ip_admsn_cd                      character(1),                             -- sourceAdmissionCd
+    clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
+    clm_tot_pps_cptl_amt                     numeric(10,2),                            -- claimTotalPPSCapitalAmount
+    clm_uncompd_care_pmt_amt                 numeric(38,2),                            -- claimUncompensatedCareAmount
+    clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
+    admtg_dgns_cd                            character varying(7),                     -- diagnosisAdmittingCode
+    admtg_dgns_vrsn_cd                       character(1),                             -- diagnosisAdmittingCodeVersion
+    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
+    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
+    bene_lrd_used_cnt                        numeric,                                  -- lifetimeReservedDaysUsedCount
+    bene_tot_coinsrnc_days_cnt               smallint not null,                        -- coinsuranceDayCount
+    claim_query_code                         character(1) not null,                    -- claimQueryCode
+    dsh_op_clm_val_amt                       numeric(10,2),                            -- disproportionateShareAmount
     fi_clm_actn_cd                           character(1),                             -- fiscalIntermediaryClaimActionCode
     fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
+    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
     fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
-    ime_op_clm_val_amt                       money,                                    -- indirectMedicalEducationAmount
-    bene_lrd_used_cnt                        smallint,                                 -- lifetimeReservedDaysUsedCount
-    clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
+    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
+    final_action                             character(1) not null,                    -- finalAction
+    fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
+    fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
+    ime_op_clm_val_amt                       numeric(10,2),                            -- indirectMedicalEducationAmount
+    nch_actv_or_cvrd_lvl_care_thru           date,                                     -- coveredCareThoughDate
+    nch_bene_blood_ddctbl_lblty_am           numeric(10,2) not null,                   -- bloodDeductibleLiabilityAmount
+    nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
+    nch_bene_ip_ddctbl_amt                   numeric(10,2) not null,                   -- deductibleAmount
     nch_bene_mdcr_bnfts_exhtd_dt_i           date,                                     -- medicareBenefitsExhaustedDate
+    nch_bene_pta_coinsrnc_lblty_am           numeric(10,2) not null,                   -- partACoinsuranceLiabilityAmount
+    nch_blood_pnts_frnshd_qty                smallint not null,                         -- bloodPintsFurnishedQty
+    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
+    nch_drg_outlier_aprvd_pmt_amt            numeric(10,2),                            -- drgOutlierApprovedPaymentAmount
+    nch_ip_ncvrd_chrg_amt                    numeric(10,2) not null,                   -- noncoveredCharge
+    nch_ip_tot_ddctn_amt                     numeric(10,2) not null,                   -- totalDeductionAmount
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    clm_non_utlztn_days_cnt                  smallint not null,                        -- nonUtilizationDayCount
-    nch_ip_ncvrd_chrg_amt                    money not null,                           -- noncoveredCharge
+    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
+    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_profnl_cmpnt_chrg_amt                numeric(10,2) not null,                   -- professionalComponentCharge
+    nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
     nch_vrfd_ncvrd_stay_from_dt              date,                                     -- noncoveredStayFromDate
     nch_vrfd_ncvrd_stay_thru_dt              date,                                     -- noncoveredStayThroughDate
+    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     op_physn_npi                             character varying(10),                    -- operatingPhysicianNpi
     op_physn_upin                            character varying(9),                     -- operatingPhysicianUpin
     org_npi_num                              character varying(10),                    -- organizationNpi
     ot_physn_npi                             character varying(10),                    -- otherPhysicianNpi
     ot_physn_upin                            character varying(9),                     -- otherPhysicianUpin
-    nch_bene_pta_coinsrnc_lblty_am           money not null,                           -- partACoinsuranceLiabilityAmount
-    clm_pass_thru_per_diem_amt               money not null,                           -- passThruPerDiemAmount
-    ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
-    clm_pmt_amt                              money not null,                           -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
-    icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
-    icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
-    prcdr_dt10                               date,                                     -- procedure10Date
-    icd_prcdr_cd11                           character varying(7),                     -- procedure11Code
-    icd_prcdr_vrsn_cd11                      character(1),                             -- procedure11CodeVersion
-    prcdr_dt11                               date,                                     -- procedure11Date
-    icd_prcdr_cd12                           character varying(7),                     -- procedure12Code
-    icd_prcdr_vrsn_cd12                      character(1),                             -- procedure12CodeVersion
-    prcdr_dt12                               date,                                     -- procedure12Date
-    icd_prcdr_cd13                           character varying(7),                     -- procedure13Code
-    icd_prcdr_vrsn_cd13                      character(1),                             -- procedure13CodeVersion
-    prcdr_dt13                               date,                                     -- procedure13Date
-    icd_prcdr_cd14                           character varying(7),                     -- procedure14Code
-    icd_prcdr_vrsn_cd14                      character(1),                             -- procedure14CodeVersion
-    prcdr_dt14                               date,                                     -- procedure14Date
-    icd_prcdr_cd15                           character varying(7),                     -- procedure15Code
-    icd_prcdr_vrsn_cd15                      character(1),                             -- procedure15CodeVersion
-    prcdr_dt15                               date,                                     -- procedure15Date
-    icd_prcdr_cd16                           character varying(7),                     -- procedure16Code
-    icd_prcdr_vrsn_cd16                      character(1),                             -- procedure16CodeVersion
-    prcdr_dt16                               date,                                     -- procedure16Date
-    icd_prcdr_cd17                           character varying(7),                     -- procedure17Code
-    icd_prcdr_vrsn_cd17                      character(1),                             -- procedure17CodeVersion
-    prcdr_dt17                               date,                                     -- procedure17Date
-    icd_prcdr_cd18                           character varying(7),                     -- procedure18Code
-    icd_prcdr_vrsn_cd18                      character(1),                             -- procedure18CodeVersion
-    prcdr_dt18                               date,                                     -- procedure18Date
-    icd_prcdr_cd19                           character varying(7),                     -- procedure19Code
-    icd_prcdr_vrsn_cd19                      character(1),                             -- procedure19CodeVersion
-    prcdr_dt19                               date,                                     -- procedure19Date
-    icd_prcdr_cd1                            character varying(7),                     -- procedure1Code
-    icd_prcdr_vrsn_cd1                       character(1),                             -- procedure1CodeVersion
-    prcdr_dt1                                date,                                     -- procedure1Date
-    icd_prcdr_cd20                           character varying(7),                     -- procedure20Code
-    icd_prcdr_vrsn_cd20                      character(1),                             -- procedure20CodeVersion
-    prcdr_dt20                               date,                                     -- procedure20Date
-    icd_prcdr_cd21                           character varying(7),                     -- procedure21Code
-    icd_prcdr_vrsn_cd21                      character(1),                             -- procedure21CodeVersion
-    prcdr_dt21                               date,                                     -- procedure21Date
-    icd_prcdr_cd22                           character varying(7),                     -- procedure22Code
-    icd_prcdr_vrsn_cd22                      character(1),                             -- procedure22CodeVersion
-    prcdr_dt22                               date,                                     -- procedure22Date
-    icd_prcdr_cd23                           character varying(7),                     -- procedure23Code
-    icd_prcdr_vrsn_cd23                      character(1),                             -- procedure23CodeVersion
-    prcdr_dt23                               date,                                     -- procedure23Date
-    icd_prcdr_cd24                           character varying(7),                     -- procedure24Code
-    icd_prcdr_vrsn_cd24                      character(1),                             -- procedure24CodeVersion
-    prcdr_dt24                               date,                                     -- procedure24Date
-    icd_prcdr_cd25                           character varying(7),                     -- procedure25Code
-    icd_prcdr_vrsn_cd25                      character(1),                             -- procedure25CodeVersion
-    prcdr_dt25                               date,                                     -- procedure25Date
-    icd_prcdr_cd2                            character varying(7),                     -- procedure2Code
-    icd_prcdr_vrsn_cd2                       character(1),                             -- procedure2CodeVersion
-    prcdr_dt2                                date,                                     -- procedure2Date
-    icd_prcdr_cd3                            character varying(7),                     -- procedure3Code
-    icd_prcdr_vrsn_cd3                       character(1),                             -- procedure3CodeVersion
-    prcdr_dt3                                date,                                     -- procedure3Date
-    icd_prcdr_cd4                            character varying(7),                     -- procedure4Code
-    icd_prcdr_vrsn_cd4                       character(1),                             -- procedure4CodeVersion
-    prcdr_dt4                                date,                                     -- procedure4Date
-    icd_prcdr_cd5                            character varying(7),                     -- procedure5Code
-    icd_prcdr_vrsn_cd5                       character(1),                             -- procedure5CodeVersion
-    prcdr_dt5                                date,                                     -- procedure5Date
-    icd_prcdr_cd6                            character varying(7),                     -- procedure6Code
-    icd_prcdr_vrsn_cd6                       character(1),                             -- procedure6CodeVersion
-    prcdr_dt6                                date,                                     -- procedure6Date
-    icd_prcdr_cd7                            character varying(7),                     -- procedure7Code
-    icd_prcdr_vrsn_cd7                       character(1),                             -- procedure7CodeVersion
-    prcdr_dt7                                date,                                     -- procedure7Date
-    icd_prcdr_cd8                            character varying(7),                     -- procedure8Code
-    icd_prcdr_vrsn_cd8                       character(1),                             -- procedure8CodeVersion
-    prcdr_dt8                                date,                                     -- procedure8Date
-    icd_prcdr_cd9                            character varying(7),                     -- procedure9Code
-    icd_prcdr_vrsn_cd9                       character(1),                             -- procedure9CodeVersion
-    prcdr_dt9                                date,                                     -- procedure9Date
-    nch_profnl_cmpnt_chrg_amt                money not null,                           -- professionalComponentCharge
-    clm_pps_ind_cd                           character(1),                             -- prospectivePaymentCode
+    prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
+    prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    clm_src_ip_admsn_cd                      character(1),                             -- sourceAdmissionCd
-    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
-    nch_ip_tot_ddctn_amt                     money not null,                           -- totalDeductionAmount
-    clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
-    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
-    final_action                             character(1) not null,                    -- finalAction
-    clm_uncompd_care_pmt_amt                 numeric(38,2),                            -- claimUncompensatedCareAmount
-    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
-    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
+    ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
+    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+	clm_e_poa_ind_sw1                        character(1),                             -- diagnosisExternal1PresentOnAdmissionCode
+	clm_e_poa_ind_sw2                        character(1),                             -- diagnosisExternal2PresentOnAdmissionCode
+	clm_e_poa_ind_sw3                        character(1),                             -- diagnosisExternal3PresentOnAdmissionCode
+	clm_e_poa_ind_sw4                        character(1),                             -- diagnosisExternal4PresentOnAdmissionCode
+	clm_e_poa_ind_sw5                        character(1),                             -- diagnosisExternal5PresentOnAdmissionCode
+	clm_e_poa_ind_sw6                        character(1),                             -- diagnosisExternal6PresentOnAdmissionCode
+	clm_e_poa_ind_sw7                        character(1),                             -- diagnosisExternal7PresentOnAdmissionCode
+	clm_e_poa_ind_sw8                        character(1),                             -- diagnosisExternal8PresentOnAdmissionCode
+	clm_e_poa_ind_sw9                        character(1),                             -- diagnosisExternal9PresentOnAdmissionCode     
+	clm_e_poa_ind_sw10                       character(1),                             -- diagnosisExternal10PresentOnAdmissionCode
+	clm_e_poa_ind_sw11                       character(1),                             -- diagnosisExternal11PresentOnAdmissionCode
+	clm_e_poa_ind_sw12                       character(1),                             -- diagnosisExternal12PresentOnAdmissionCode
+	clm_poa_ind_sw1                          character(1),                             -- diagnosis1PresentOnAdmissionCode
+	clm_poa_ind_sw2                          character(1),                             -- diagnosis2PresentOnAdmissionCode
+	clm_poa_ind_sw3                          character(1),                             -- diagnosis3PresentOnAdmissionCode
+	clm_poa_ind_sw4                          character(1),                             -- diagnosis4PresentOnAdmissionCode
+	clm_poa_ind_sw5                          character(1),                             -- diagnosis5PresentOnAdmissionCode
+	clm_poa_ind_sw6                          character(1),                             -- diagnosis6PresentOnAdmissionCode
+	clm_poa_ind_sw7                          character(1),                             -- diagnosis7PresentOnAdmissionCode
+	clm_poa_ind_sw8                          character(1),                             -- diagnosis8PresentOnAdmissionCode
+	clm_poa_ind_sw9                          character(1),                             -- diagnosis9PresentOnAdmissionCode
+	clm_poa_ind_sw10                         character(1),                             -- diagnosis10PresentOnAdmissionCode
+	clm_poa_ind_sw11                         character(1),                             -- diagnosis11PresentOnAdmissionCode
+	clm_poa_ind_sw12                         character(1),                             -- diagnosis12PresentOnAdmissionCode
+	clm_poa_ind_sw13                         character(1),                             -- diagnosis13PresentOnAdmissionCode
+	clm_poa_ind_sw14                         character(1),                             -- diagnosis14PresentOnAdmissionCode
+	clm_poa_ind_sw15                         character(1),                             -- diagnosis15PresentOnAdmissionCode
+	clm_poa_ind_sw16                         character(1),                             -- diagnosis16PresentOnAdmissionCode
+	clm_poa_ind_sw17                         character(1),                             -- diagnosis17PresentOnAdmissionCode
+	clm_poa_ind_sw18                         character(1),                             -- diagnosis18PresentOnAdmissionCode
+	clm_poa_ind_sw19                         character(1),                             -- diagnosis19PresentOnAdmissionCode
+	clm_poa_ind_sw20                         character(1),                             -- diagnosis20PresentOnAdmissionCode
+	clm_poa_ind_sw21                         character(1),                             -- diagnosis21PresentOnAdmissionCode
+	clm_poa_ind_sw22                         character(1),                             -- diagnosis22PresentOnAdmissionCode
+	clm_poa_ind_sw23                         character(1),                             -- diagnosis23PresentOnAdmissionCode
+	clm_poa_ind_sw24                         character(1),                             -- diagnosis24PresentOnAdmissionCode
+	clm_poa_ind_sw25                         character(1),                             -- diagnosis25PresentOnAdmissionCode
+	icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
+	icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
+	icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
+	icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
+	icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
+	icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
+	icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
+	icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
+	icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
+	icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
+	icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
+	icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
+	icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
+	icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
+	icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
+	icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
+	icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
+	icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
+	icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
+	icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
+	icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
+	icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
+	icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
+	icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
+	icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
+	icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
+	icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
+	icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
+	icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
+	icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
+	icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
+	icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
+	icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
+	icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
+	icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
+	icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
+	icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
+	icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
+	icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
+	icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
+	icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
+	icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
+	icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
+	icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
+	icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
+	icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
+	icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
+	icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
+	icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
+	icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
+	icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
+	icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
+	icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
+	icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
+	icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
+	icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
+	icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
+	icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
+	icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
+	icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
+	icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
+	icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
+	icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
+	icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
+	icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
+	icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
+	icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
+	icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
+	icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
+	icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
+	icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
+	icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
+	icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
+	icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
+	icd_prcdr_cd1                            character varying(7),                     -- procedure1Code
+	icd_prcdr_cd2                            character varying(7),                     -- procedure2Code
+	icd_prcdr_cd3                            character varying(7),                     -- procedure3Code
+	icd_prcdr_cd4                            character varying(7),                     -- procedure4Code
+	icd_prcdr_cd5                            character varying(7),                     -- procedure5Code
+	icd_prcdr_cd6                            character varying(7),                     -- procedure6Code
+	icd_prcdr_cd7                            character varying(7),                     -- procedure7Code
+	icd_prcdr_cd8                            character varying(7),                     -- procedure8Code
+	icd_prcdr_cd9                            character varying(7),                     -- procedure9Code
+	icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
+	icd_prcdr_cd11                           character varying(7),                     -- procedure11Code
+	icd_prcdr_cd12                           character varying(7),                     -- procedure12Code
+	icd_prcdr_cd13                           character varying(7),                     -- procedure13Code
+	icd_prcdr_cd14                           character varying(7),                     -- procedure14Code
+	icd_prcdr_cd15                           character varying(7),                     -- procedure15Code
+	icd_prcdr_cd16                           character varying(7),                     -- procedure16Code
+	icd_prcdr_cd17                           character varying(7),                     -- procedure17Code
+	icd_prcdr_cd18                           character varying(7),                     -- procedure18Code
+	icd_prcdr_cd19                           character varying(7),                     -- procedure19Code
+	icd_prcdr_cd20                           character varying(7),                     -- procedure20Code
+	icd_prcdr_cd21                           character varying(7),                     -- procedure21Code
+	icd_prcdr_cd22                           character varying(7),                     -- procedure22Code
+	icd_prcdr_cd23                           character varying(7),                     -- procedure23Code
+	icd_prcdr_cd24                           character varying(7),                     -- procedure24Code
+	icd_prcdr_cd25                           character varying(7),                     -- procedure25Code
+	icd_prcdr_vrsn_cd1                       character(1),                             -- procedure1CodeVersion
+	icd_prcdr_vrsn_cd2                       character(1),                             -- procedure2CodeVersion
+	icd_prcdr_vrsn_cd3                       character(1),                             -- procedure3CodeVersion
+	icd_prcdr_vrsn_cd4                       character(1),                             -- procedure4CodeVersion
+	icd_prcdr_vrsn_cd5                       character(1),                             -- procedure5CodeVersion
+	icd_prcdr_vrsn_cd6                       character(1),                             -- procedure6CodeVersion
+	icd_prcdr_vrsn_cd7                       character(1),                             -- procedure7CodeVersion
+	icd_prcdr_vrsn_cd8                       character(1),                             -- procedure8CodeVersion
+	icd_prcdr_vrsn_cd9                       character(1),                             -- procedure9CodeVersion
+	icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
+	icd_prcdr_vrsn_cd11                      character(1),                             -- procedure11CodeVersion
+	icd_prcdr_vrsn_cd12                      character(1),                             -- procedure12CodeVersion
+	icd_prcdr_vrsn_cd13                      character(1),                             -- procedure13CodeVersion
+	icd_prcdr_vrsn_cd14                      character(1),                             -- procedure14CodeVersion
+	icd_prcdr_vrsn_cd15                      character(1),                             -- procedure15CodeVersion
+	icd_prcdr_vrsn_cd16                      character(1),                             -- procedure16CodeVersion
+	icd_prcdr_vrsn_cd17                      character(1),                             -- procedure17CodeVersion
+	icd_prcdr_vrsn_cd18                      character(1),                             -- procedure18CodeVersion
+	icd_prcdr_vrsn_cd19                      character(1),                             -- procedure19CodeVersion
+	icd_prcdr_vrsn_cd20                      character(1),                             -- procedure20CodeVersion
+	icd_prcdr_vrsn_cd21                      character(1),                             -- procedure21CodeVersion
+	icd_prcdr_vrsn_cd22                      character(1),                             -- procedure22CodeVersion
+	icd_prcdr_vrsn_cd23                      character(1),                             -- procedure23CodeVersion
+	icd_prcdr_vrsn_cd24                      character(1),                             -- procedure24CodeVersion
+	icd_prcdr_vrsn_cd25                      character(1),                             -- procedure25CodeVersion
+	prcdr_dt1                                date,                                     -- procedure1Date
+	prcdr_dt2                                date,                                     -- procedure2Date
+	prcdr_dt3                                date,                                     -- procedure3Date
+	prcdr_dt4                                date,                                     -- procedure4Date
+	prcdr_dt5                                date,                                     -- procedure5Date
+	prcdr_dt6                                date,                                     -- procedure6Date
+	prcdr_dt7                                date,                                     -- procedure7Date
+	prcdr_dt8                                date,                                     -- procedure8Date
+	prcdr_dt9                                date,                                     -- procedure9Date
+	prcdr_dt10                               date,                                     -- procedure10Date
+	prcdr_dt11                               date,                                     -- procedure11Date
+	prcdr_dt12                               date,                                     -- procedure12Date
+	prcdr_dt13                               date,                                     -- procedure13Date
+	prcdr_dt14                               date,                                     -- procedure14Date
+	prcdr_dt15                               date,                                     -- procedure15Date
+	prcdr_dt16                               date,                                     -- procedure16Date
+	prcdr_dt17                               date,                                     -- procedure17Date
+	prcdr_dt18                               date,                                     -- procedure18Date
+	prcdr_dt19                               date,                                     -- procedure19Date
+	prcdr_dt20                               date,                                     -- procedure20Date
+	prcdr_dt21                               date,                                     -- procedure21Date
+	prcdr_dt22                               date,                                     -- procedure22Date
+	prcdr_dt23                               date,                                     -- procedure23Date
+	prcdr_dt24                               date,                                     -- procedure24Date
+	prcdr_dt25                               date,                                     -- procedure25Date
     last_updated                             timestamp with time zone                  -- lastupdated
 );
 --
 --
-create table public.loaded_batches (
+create table loaded_batches (
     loaded_batch_id                          bigint not null,                          -- loadedBatchId
     loaded_file_id                           bigint not null,                          -- loadedFileId
     beneficiaries                            character varying(20000) not null,        -- beneficiaries
@@ -1064,14 +1065,14 @@ create table public.loaded_batches (
 );
 --
 --
-create table public.loaded_files (
+create table loaded_files (
     loaded_file_id                           bigint not null,                          -- loadedFileId
     rif_type                                 character varying(48) not null,           -- rifType
     created                                  timestamp with time zone not null         -- created
 );
 --
 --
-create table public.medicare_beneficiaryid_history (
+create table medicare_beneficiaryid_history (
     medicare_beneficiaryid_key               bigint not null,                          -- medicareBeneficiaryIdKey
     bene_id                                  bigint,                                   -- beneficiaryId
     bene_mbi_id                              character varying(11) not null,           -- medicareBeneficiaryIdKey
@@ -1093,7 +1094,7 @@ create table public.medicare_beneficiaryid_history (
 );
 --
 --
-create table public.medicare_beneficiaryid_history_invalid_beneficiaries (
+create table medicare_beneficiaryid_history_invalid_beneficiaries (
     medicare_beneficiaryid_key               bigint not null,                          -- medicareBeneficiaryIdKey
     bene_id                                  bigint,                                   -- beneficiaryId
     bene_clm_acnt_num                        character varying(9),                     -- claimAccountNumber
@@ -1113,26 +1114,30 @@ create table public.medicare_beneficiaryid_history_invalid_beneficiaries (
 );
 --
 --
-create table public.outpatient_claim_lines (
+create table outpatient_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
+    clm_pmt_amt                              money not null,                           -- paymentAmount
+    hcpcs_cd                                 character varying(5),                     -- hcpcsCode
+    hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
+    hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
+    line_ndc_cd                              character varying(24),                    -- nationalDrugCode
+    rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
+    rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
+    rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
+    rev_cntr_dt                              date,                                     -- revenueCenterDate
     rev_cntr_apc_hipps_cd                    character varying(5),                     -- apcOrHippsCode
     rev_cntr_bene_pmt_amt                    money not null,                           -- benficiaryPaymentAmount
     rev_cntr_blood_ddctbl_amt                money not null,                           -- bloodDeductibleAmount
     rev_cntr_cash_ddctbl_amt                 money not null,                           -- cashDeductibleAmount
     rev_cntr_dscnt_ind_cd                    character(1),                             -- discountCode
     rev_cntr_1st_msp_pd_amt                  money not null,                           -- firstMspPaidAmount
-    hcpcs_cd                                 character varying(5),                     -- hcpcsCode
-    hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
-    hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
-    line_ndc_cd                              character varying(24),                    -- nationalDrugCode
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  money not null,                           -- nonCoveredChargeAmount
     rev_cntr_otaf_pmt_cd                     character(1),                             -- obligationToAcceptAsFullPaymentCode
     rev_cntr_packg_ind_cd                    character(1),                             -- packagingCode
     rev_cntr_ptnt_rspnsblty_pmt              money not null,                           -- patientResponsibilityAmount
-    clm_pmt_amt                              money not null,                           -- paymentAmount
     rev_cntr_pmt_mthd_ind_cd                 character varying(2),                     -- paymentMethodCode
     rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     rev_cntr_rate_amt                        money not null,                           -- rateAmount
@@ -1141,10 +1146,6 @@ create table public.outpatient_claim_lines (
     rev_cntr_2nd_ansi_cd                     character varying(5),                     -- revCntr2ndAnsiCd
     rev_cntr_3rd_ansi_cd                     character varying(5),                     -- revCntr3rdAnsiCd
     rev_cntr_4th_ansi_cd                     character varying(5),                     -- revCntr4thAnsiCd
-    rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
-    rev_cntr_dt                              date,                                     -- revenueCenterDate
-    rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
-    rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
     rev_cntr_2nd_msp_pd_amt                  money not null,                           -- secondMspPaidAmount
     rev_cntr_stus_ind_cd                     character varying(2),                     -- statusCode
     rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
@@ -1153,557 +1154,661 @@ create table public.outpatient_claim_lines (
 );
 --
 --
-create table public.outpatient_claims (
+create table outpatient_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
-    clm_grp_id                               bigint not null,                          -- claimGroupId
-    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
-    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
-    line_bene_pmt_amt                        money not null,                           -- beneficiaryPaymentAmount
-    nch_bene_blood_ddctbl_lblty_am           money not null,                           -- bloodDeductibleLiabilityAmount
+    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
-    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
-    claim_query_code                         character(1) not null,                    -- claimQueryCode
-    clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
-    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
-    line_coinsrnc_amt                        money not null,                           -- coinsuranceAmount
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
-    nch_bene_ip_ddctbl_amt                   money not null,                           -- deductibleAmount
-    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
-    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
-    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
-    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
-    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
-    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
-    icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
-    icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
-    icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
-    icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
-    icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
-    icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
-    icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
-    icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
-    icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
-    icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
-    icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
-    icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
-    icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
-    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
-    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
-    icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
-    icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
-    icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
-    icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
-    icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
-    icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
-    icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
-    icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
-    icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
-    icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
-    icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
-    icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
-    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
-    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
-    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
-    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
-    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
-    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
-    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
-    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
-    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
-    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
-    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
-    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
-    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
-    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
-    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
+    clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
+    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
+    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
+    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
+    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
+    claim_query_code                         character(1) not null,                    -- claimQueryCode
+    fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
+    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
+    fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
+    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
+    final_action                             character(1) not null,                    -- finalAction
+    fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
+    fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
+    line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
+    line_coinsrnc_amt                        numeric(10,2) not null,                   -- coinsuranceAmount
+    nch_bene_blood_ddctbl_lblty_am           numeric(10,2) not null,                   -- bloodDeductibleLiabilityAmount
+    nch_bene_ip_ddctbl_amt                   numeric(10,2) not null,                   -- deductibleAmount
+    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
+    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
+    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
+    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_profnl_cmpnt_chrg_amt                numeric(10,2) not null,                   -- professionalComponentCharge
+    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
+    op_physn_npi                             character varying(10),                    -- operatingPhysicianNpi
+    op_physn_upin                            character varying(9),                     -- operatingPhysicianUpin
+    org_npi_num                              character varying(10),                    -- organizationNpi
+    ot_physn_npi                             character varying(10),                    -- otherPhysicianNpi
+    ot_physn_upin                            character varying(9),                     -- otherPhysicianUpin
+    prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
+    prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
+    prvdr_num                                character varying(9) not null,            -- providerNumber
+    prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
+    ptnt_dschrg_stus_cd                      character varying(2),                     -- patientDischargeStatusCode
+    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
     rsn_visit_cd1                            character varying(7),                     -- diagnosisAdmission1Code
     rsn_visit_vrsn_cd1                       character(1),                             -- diagnosisAdmission1CodeVersion
     rsn_visit_cd2                            character varying(7),                     -- diagnosisAdmission2Code
     rsn_visit_vrsn_cd2                       character(1),                             -- diagnosisAdmission2CodeVersion
     rsn_visit_cd3                            character varying(7),                     -- diagnosisAdmission3Code
     rsn_visit_vrsn_cd3                       character(1),                             -- diagnosisAdmission3CodeVersion
-    icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
-    icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
-    icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
-    icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
-    icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
-    icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
+    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
+    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
+    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
+    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
+    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
+    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
+    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
+    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
+    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
+    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
+    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
+    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
+    icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
+    icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
+    icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
+    icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
+    icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
+    icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
+    icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
+    icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
+    icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
+    icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
+    icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
+    icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
+    icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
     icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
-    icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
     icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
-    icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
     icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
-    icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
     icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
-    icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
     icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
-    icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
     icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
-    icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
     icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
-    icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
     icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
-    icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
     icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
+    icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
+    icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
+    icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
+    icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
+    icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
+    icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
+    icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
+    icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
+    icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
+    icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
+    icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
     icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
-    fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
-    fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
-    prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
-    prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
-    fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
-    fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
-    clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
-    nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    op_physn_npi                             character varying(10),                    -- operatingPhysicianNpi
-    op_physn_upin                            character varying(9),                     -- operatingPhysicianUpin
-    org_npi_num                              character varying(10),                    -- organizationNpi
-    ot_physn_npi                             character varying(10),                    -- otherPhysicianNpi
-    ot_physn_upin                            character varying(9),                     -- otherPhysicianUpin
-    ptnt_dschrg_stus_cd                      character varying(2),                     -- patientDischargeStatusCode
-    clm_pmt_amt                              money not null,                           -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
-    icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
-    icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
-    prcdr_dt10                               date,                                     -- procedure10Date
-    icd_prcdr_cd11                           character varying(7),                     -- procedure11Code
-    icd_prcdr_vrsn_cd11                      character(1),                             -- procedure11CodeVersion
-    prcdr_dt11                               date,                                     -- procedure11Date
-    icd_prcdr_cd12                           character varying(7),                     -- procedure12Code
-    icd_prcdr_vrsn_cd12                      character(1),                             -- procedure12CodeVersion
-    prcdr_dt12                               date,                                     -- procedure12Date
-    icd_prcdr_cd13                           character varying(7),                     -- procedure13Code
-    icd_prcdr_vrsn_cd13                      character(1),                             -- procedure13CodeVersion
-    prcdr_dt13                               date,                                     -- procedure13Date
-    icd_prcdr_cd14                           character varying(7),                     -- procedure14Code
-    icd_prcdr_vrsn_cd14                      character(1),                             -- procedure14CodeVersion
-    prcdr_dt14                               date,                                     -- procedure14Date
-    icd_prcdr_cd15                           character varying(7),                     -- procedure15Code
-    icd_prcdr_vrsn_cd15                      character(1),                             -- procedure15CodeVersion
-    prcdr_dt15                               date,                                     -- procedure15Date
-    icd_prcdr_cd16                           character varying(7),                     -- procedure16Code
-    icd_prcdr_vrsn_cd16                      character(1),                             -- procedure16CodeVersion
-    prcdr_dt16                               date,                                     -- procedure16Date
-    icd_prcdr_cd17                           character varying(7),                     -- procedure17Code
-    icd_prcdr_vrsn_cd17                      character(1),                             -- procedure17CodeVersion
-    prcdr_dt17                               date,                                     -- procedure17Date
-    icd_prcdr_cd18                           character varying(7),                     -- procedure18Code
-    icd_prcdr_vrsn_cd18                      character(1),                             -- procedure18CodeVersion
-    prcdr_dt18                               date,                                     -- procedure18Date
-    icd_prcdr_cd19                           character varying(7),                     -- procedure19Code
-    icd_prcdr_vrsn_cd19                      character(1),                             -- procedure19CodeVersion
-    prcdr_dt19                               date,                                     -- procedure19Date
+    icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
+    icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
+    icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
+    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
+    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
+    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
+    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
+    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
+    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
+    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
+    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
+    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
+    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
+    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
+    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
+    icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
+    icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
+    icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
+    icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
+    icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
+    icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
+    icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
+    icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
+    icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
+    icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
+    icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
+    icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
+    icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
     icd_prcdr_cd1                            character varying(7),                     -- procedure1Code
-    icd_prcdr_vrsn_cd1                       character(1),                             -- procedure1CodeVersion
-    prcdr_dt1                                date,                                     -- procedure1Date
-    icd_prcdr_cd20                           character varying(7),                     -- procedure20Code
-    icd_prcdr_vrsn_cd20                      character(1),                             -- procedure20CodeVersion
-    prcdr_dt20                               date,                                     -- procedure20Date
-    icd_prcdr_cd21                           character varying(7),                     -- procedure21Code
-    icd_prcdr_vrsn_cd21                      character(1),                             -- procedure21CodeVersion
-    prcdr_dt21                               date,                                     -- procedure21Date
-    icd_prcdr_cd22                           character varying(7),                     -- procedure22Code
-    icd_prcdr_vrsn_cd22                      character(1),                             -- procedure22CodeVersion
-    prcdr_dt22                               date,                                     -- procedure22Date
-    icd_prcdr_cd23                           character varying(7),                     -- procedure23Code
-    icd_prcdr_vrsn_cd23                      character(1),                             -- procedure23CodeVersion
-    prcdr_dt23                               date,                                     -- procedure23Date
-    icd_prcdr_cd24                           character varying(7),                     -- procedure24Code
-    icd_prcdr_vrsn_cd24                      character(1),                             -- procedure24CodeVersion
-    prcdr_dt24                               date,                                     -- procedure24Date
-    icd_prcdr_cd25                           character varying(7),                     -- procedure25Code
-    icd_prcdr_vrsn_cd25                      character(1),                             -- procedure25CodeVersion
-    prcdr_dt25                               date,                                     -- procedure25Date
     icd_prcdr_cd2                            character varying(7),                     -- procedure2Code
-    icd_prcdr_vrsn_cd2                       character(1),                             -- procedure2CodeVersion
-    prcdr_dt2                                date,                                     -- procedure2Date
     icd_prcdr_cd3                            character varying(7),                     -- procedure3Code
-    icd_prcdr_vrsn_cd3                       character(1),                             -- procedure3CodeVersion
-    prcdr_dt3                                date,                                     -- procedure3Date
     icd_prcdr_cd4                            character varying(7),                     -- procedure4Code
-    icd_prcdr_vrsn_cd4                       character(1),                             -- procedure4CodeVersion
-    prcdr_dt4                                date,                                     -- procedure4Date
     icd_prcdr_cd5                            character varying(7),                     -- procedure5Code
-    icd_prcdr_vrsn_cd5                       character(1),                             -- procedure5CodeVersion
-    prcdr_dt5                                date,                                     -- procedure5Date
     icd_prcdr_cd6                            character varying(7),                     -- procedure6Code
-    icd_prcdr_vrsn_cd6                       character(1),                             -- procedure6CodeVersion
-    prcdr_dt6                                date,                                     -- procedure6Date
     icd_prcdr_cd7                            character varying(7),                     -- procedure7Code
-    icd_prcdr_vrsn_cd7                       character(1),                             -- procedure7CodeVersion
-    prcdr_dt7                                date,                                     -- procedure7Date
     icd_prcdr_cd8                            character varying(7),                     -- procedure8Code
-    icd_prcdr_vrsn_cd8                       character(1),                             -- procedure8CodeVersion
-    prcdr_dt8                                date,                                     -- procedure8Date
     icd_prcdr_cd9                            character varying(7),                     -- procedure9Code
+    icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
+    icd_prcdr_cd11                           character varying(7),                     -- procedure11Code
+    icd_prcdr_cd12                           character varying(7),                     -- procedure12Code
+    icd_prcdr_cd13                           character varying(7),                     -- procedure13Code
+    icd_prcdr_cd14                           character varying(7),                     -- procedure14Code
+    icd_prcdr_cd15                           character varying(7),                     -- procedure15Code
+    icd_prcdr_cd16                           character varying(7),                     -- procedure16Code
+    icd_prcdr_cd17                           character varying(7),                     -- procedure17Code
+    icd_prcdr_cd18                           character varying(7),                     -- procedure18Code
+    icd_prcdr_cd19                           character varying(7),                     -- procedure19Code
+    icd_prcdr_cd20                           character varying(7),                     -- procedure20Code
+    icd_prcdr_cd21                           character varying(7),                     -- procedure21Code
+    icd_prcdr_cd22                           character varying(7),                     -- procedure22Code
+    icd_prcdr_cd23                           character varying(7),                     -- procedure23Code
+    icd_prcdr_cd24                           character varying(7),                     -- procedure24Code
+    icd_prcdr_cd25                           character varying(7),                     -- procedure25Code
+    icd_prcdr_vrsn_cd1                       character(1),                             -- procedure1CodeVersion
+    icd_prcdr_vrsn_cd2                       character(1),                             -- procedure2CodeVersion
+    icd_prcdr_vrsn_cd3                       character(1),                             -- procedure3CodeVersion
+    icd_prcdr_vrsn_cd4                       character(1),                             -- procedure4CodeVersion
+    icd_prcdr_vrsn_cd5                       character(1),                             -- procedure5CodeVersion
+    icd_prcdr_vrsn_cd6                       character(1),                             -- procedure6CodeVersion
+    icd_prcdr_vrsn_cd7                       character(1),                             -- procedure7CodeVersion
+    icd_prcdr_vrsn_cd8                       character(1),                             -- procedure8CodeVersion
     icd_prcdr_vrsn_cd9                       character(1),                             -- procedure9CodeVersion
+    icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
+    icd_prcdr_vrsn_cd11                      character(1),                             -- procedure11CodeVersion
+    icd_prcdr_vrsn_cd12                      character(1),                             -- procedure12CodeVersion
+    icd_prcdr_vrsn_cd13                      character(1),                             -- procedure13CodeVersion
+    icd_prcdr_vrsn_cd14                      character(1),                             -- procedure14CodeVersion
+    icd_prcdr_vrsn_cd15                      character(1),                             -- procedure15CodeVersion
+    icd_prcdr_vrsn_cd16                      character(1),                             -- procedure16CodeVersion
+    icd_prcdr_vrsn_cd17                      character(1),                             -- procedure17CodeVersion
+    icd_prcdr_vrsn_cd18                      character(1),                             -- procedure18CodeVersion
+    icd_prcdr_vrsn_cd19                      character(1),                             -- procedure19CodeVersion
+    icd_prcdr_vrsn_cd20                      character(1),                             -- procedure20CodeVersion
+    icd_prcdr_vrsn_cd21                      character(1),                             -- procedure21CodeVersion
+    icd_prcdr_vrsn_cd22                      character(1),                             -- procedure22CodeVersion
+    icd_prcdr_vrsn_cd23                      character(1),                             -- procedure23CodeVersion
+    icd_prcdr_vrsn_cd24                      character(1),                             -- procedure24CodeVersion
+    icd_prcdr_vrsn_cd25                      character(1),                             -- procedure25CodeVersion
+    prcdr_dt1                                date,                                     -- procedure1Date
+    prcdr_dt2                                date,                                     -- procedure2Date
+    prcdr_dt3                                date,                                     -- procedure3Date
+    prcdr_dt4                                date,                                     -- procedure4Date
+    prcdr_dt5                                date,                                     -- procedure5Date
+    prcdr_dt6                                date,                                     -- procedure6Date
+    prcdr_dt7                                date,                                     -- procedure7Date
+    prcdr_dt8                                date,                                     -- procedure8Date
     prcdr_dt9                                date,                                     -- procedure9Date
-    nch_profnl_cmpnt_chrg_amt                money not null,                           -- professionalComponentCharge
-    prvdr_num                                character varying(9) not null,            -- providerNumber
-    rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
-    prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
-    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
-    final_action                             character(1) not null,                    -- finalAction
-    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
-    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
-    last_updated                             timestamp with time zone                  -- lastupdated
+    prcdr_dt10                               date,                                     -- procedure10Date
+    prcdr_dt11                               date,                                     -- procedure11Date
+    prcdr_dt12                               date,                                     -- procedure12Date
+    prcdr_dt13                               date,                                     -- procedure13Date
+    prcdr_dt14                               date,                                     -- procedure14Date
+    prcdr_dt15                               date,                                     -- procedure15Date
+    prcdr_dt16                               date,                                     -- procedure16Date
+    prcdr_dt17                               date,                                     -- procedure17Date
+    prcdr_dt18                               date,                                     -- procedure18Date
+    prcdr_dt19                               date,                                     -- procedure19Date
+    prcdr_dt20                               date,                                     -- procedure20Date
+    prcdr_dt21                               date,                                     -- procedure21Date
+    prcdr_dt22                               date,                                     -- procedure22Date
+    prcdr_dt23                               date,                                     -- procedure23Date
+    prcdr_dt24                               date,                                     -- procedure24Date
+    prcdr_dt25                               date,                                     -- procedure25Date    
+    last_updated                             timestamp with time zone                 -- lastupdated
 );
 --
 --
-create table public.partd_events (
+create table partd_events (
     clm_id                                   bigint not null,                          -- eventId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
     adjstmt_dltn_cd                          character(1),                             -- adjustmentDeletionCode
     brnd_gnrc_cd                             character(1),                             -- brandGenericCode
-    ctstrphc_cvrg_cd                         character(1),                             -- catastrophicCoverageCode
     cmpnd_cd                                 integer not null,                         -- compoundCode
-    days_suply_num                           smallint not null,                        -- daysSupply
+    ctstrphc_cvrg_cd                         character(1),                             -- catastrophicCoverageCode
+    cvrd_d_plan_pd_amt                       money not null,                           -- partDPlanCoveredPaidAmount
     daw_prod_slctn_cd                        character(1) not null,                    -- dispenseAsWrittenProductSelectionCode
-    dspnsng_stus_cd                          character(1),                             -- dispensingStatusCode
+    days_suply_num                           smallint not null,                        -- daysSupply
     drug_cvrg_stus_cd                        character(1) not null,                    -- drugCoverageStatusCode
+    dspnsng_stus_cd                          character(1),                             -- dispensingStatusCode
     fill_num                                 smallint not null,                        -- fillNumber
-    rptd_gap_dscnt_num                       money not null,                           -- gapDiscountAmount
+    final_action                             character(1) not null,                    -- finalAction
     gdc_abv_oopt_amt                         money not null,                           -- grossCostAboveOutOfPocketThreshold
     gdc_blw_oopt_amt                         money not null,                           -- grossCostBelowOutOfPocketThreshold
     lics_amt                                 money not null,                           -- lowIncomeSubsidyPaidAmount
     line_ndc_cd                              character varying(19) not null,           -- nationalDrugCode
+    ncvrd_plan_pd_amt                        money not null,                           -- partDPlanNonCoveredPaidAmount
     nstd_frmt_cd                             character(1),                             -- nonstandardFormatCode
     othr_troop_amt                           money not null,                           -- otherTrueOutOfPocketPaidAmount
-    cvrd_d_plan_pd_amt                       money not null,                           -- partDPlanCoveredPaidAmount
-    ncvrd_plan_pd_amt                        money not null,                           -- partDPlanNonCoveredPaidAmount
-    plro_amt                                 money not null,                           -- patientLiabilityReductionOtherPaidAmount
-    ptnt_pay_amt                             money not null,                           -- patientPaidAmount
-    ptnt_rsdnc_cd                            character varying(2) not null,            -- patientResidenceCode
     pd_dt                                    date,                                     -- paymentDate
     phrmcy_srvc_type_cd                      character varying(2) not null,            -- pharmacyTypeCode
-    plan_pbp_rec_num                         character varying(3) not null,            -- planBenefitPackageId
     plan_cntrct_rec_id                       character varying(5) not null,            -- planContractId
+    plan_pbp_rec_num                         character varying(3) not null,            -- planBenefitPackageId
+    plro_amt                                 money not null,                           -- patientLiabilityReductionOtherPaidAmount
+    prcng_excptn_cd                          character(1),                             -- pricingExceptionCode
     prscrbr_id                               character varying(15) not null,           -- prescriberId
     prscrbr_id_qlfyr_cd                      character varying(2) not null,            -- prescriberIdQualifierCode
-    srvc_dt                                  date not null,                            -- prescriptionFillDate
+    ptnt_pay_amt                             money not null,                           -- patientPaidAmount
+    ptnt_rsdnc_cd                            character varying(2) not null,            -- patientResidenceCode
+    qty_dspnsd_num                           numeric(10,3) not null,                   -- quantityDispensed
+    rptd_gap_dscnt_num                       money not null,                           -- gapDiscountAmount
     rx_orgn_cd                               character(1),                             -- prescriptionOriginationCode
     rx_srvc_rfrnc_num                        bigint not null,                          -- prescriptionReferenceNumber
-    prcng_excptn_cd                          character(1),                             -- pricingExceptionCode
-    qty_dspnsd_num                           numeric(10,3) not null,                   -- quantityDispensed
+    srvc_dt                                  date not null,                            -- prescriptionFillDate
     srvc_prvdr_id                            character varying(15) not null,           -- serviceProviderId
     srvc_prvdr_id_qlfyr_cd                   character varying(2) not null,            -- serviceProviderIdQualiferCode
     submsn_clr_cd                            character varying(2),                     -- submissionClarificationCode
     tot_rx_cst_amt                           money not null,                           -- totalPrescriptionCost
-    final_action                             character(1) not null,                    -- finalAction
     last_updated                             timestamp with time zone                  -- lastupdated
 );
 --
 --
-create table public.snf_claim_lines (
+create table snf_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
+    rev_cntr                                 character varying(4) not null,            -- revenueCenter
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  money not null,                           -- nonCoveredChargeAmount
     rev_cntr_rate_amt                        money not null,                           -- rateAmount
-    rev_cntr                                 character varying(4) not null,            -- revenueCenter
-    rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
-    rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
     rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
-    rev_cntr_unit_cnt                        smallint not null                         -- unitCount
+    rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
+    rev_cntr_unit_cnt                        smallint not null ,                       -- unitCount
+    rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
+    rndrng_physn_upin                        character varying(12)                     -- revenueCenterRenderingPhysicianUPIN
 );
 --
 --
-create table public.snf_claims (
+create table snf_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
-    clm_grp_id                               bigint not null,                          -- claimGroupId
-    clm_ip_admsn_type_cd                     character(1) not null,                    -- admissionTypeCd
-    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
-    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
-    nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
-    nch_bene_blood_ddctbl_lblty_am           money not null,                           -- bloodDeductibleLiabilityAmount
-    nch_blood_pnts_frnshd_qty                smallint not null,                        -- bloodPintsFurnishedQty
+    clm_grp_id                               numeric(12,0) not null,                   -- claimGroupId
     clm_admsn_dt                             date,                                     -- claimAdmissionDate
+    clm_drg_cd                               character varying(3),                     -- diagnosisRelatedGroupCd
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
-    clm_pps_cptl_dsprprtnt_shr_amt           money,                                    -- claimPPSCapitalDisproportionateShareAmt
-    clm_pps_cptl_excptn_amt                  money,                                    -- claimPPSCapitalExceptionAmount
-    clm_pps_cptl_fsp_amt                     money,                                    -- claimPPSCapitalFSPAmount
-    clm_pps_cptl_ime_amt                     money,                                    -- claimPPSCapitalIMEAmount
-    clm_pps_cptl_outlier_amt                 money,                                    -- claimPPSCapitalOutlierAmount
-    clm_pps_old_cptl_hld_hrmls_amt           money,                                    -- claimPPSOldCapitalHoldHarmlessAmount
-    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
-    claim_query_code                         character(1) not null,                    -- claimQueryCode
-    clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
-    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
-    bene_tot_coinsrnc_days_cnt               smallint not null,                         -- coinsuranceDayCount
-    nch_actv_or_cvrd_lvl_care_thru           date,                                     -- coveredCareThroughDate
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
-    nch_bene_ip_ddctbl_amt                   money not null,                           -- deductibleAmount
-    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
-    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
-    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
-    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
-    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
-    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
-    icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
-    icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
-    icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
-    icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
-    icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
-    icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
-    icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
-    icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
-    icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
-    icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
-    icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
-    icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
-    icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
-    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
-    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
-    icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
-    icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
-    icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
-    icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
-    icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
-    icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
-    icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
-    icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
-    icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
-    icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
-    icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
-    icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
-    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
-    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
-    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
-    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
-    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
-    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
-    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
-    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
-    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
-    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
-    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
-    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
-    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
-    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
-    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
+    clm_ip_admsn_type_cd                     character(1) not null,                    -- admissionTypeCd
+    clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
+    clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
+    clm_non_utlztn_days_cnt                  smallint not null,                        -- nonUtilizationDayCount
+    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    clm_pps_cptl_dsprprtnt_shr_amt           numeric(10,2),                            -- claimPPSCapitalDisproportionateShareAmt
+    clm_pps_cptl_excptn_amt                  numeric(10,2),                            -- claimPPSCapitalExceptionAmount
+    clm_pps_cptl_fsp_amt                     numeric(10,2),                            -- claimPPSCapitalFSPAmount
+    clm_pps_cptl_ime_amt                     numeric(10,2),                            -- claimPPSCapitalIMEAmount
+    clm_pps_cptl_outlier_amt                 numeric(10,2),                            -- claimPPSCapitalOutlierAmount
+    clm_pps_ind_cd                           character(1),                             -- prospectivePaymentCode
+    clm_pps_old_cptl_hld_hrmls_amt           numeric(10,2),                            -- claimPPSOldCapitalHoldHarmlessAmount
+    clm_src_ip_admsn_cd                      character(1),                             -- sourceAdmissionCd
+    clm_srvc_clsfctn_type_cd                 character(1) not null,                    -- claimServiceClassificationTypeCode
+    clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
     admtg_dgns_cd                            character varying(7),                     -- diagnosisAdmittingCode
     admtg_dgns_vrsn_cd                       character(1),                             -- diagnosisAdmittingCodeVersion
-    icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
-    icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
-    icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
-    icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
-    icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
-    icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
-    icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
-    icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
-    icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
-    icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
-    icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
-    icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
-    icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
-    icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
-    icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
-    icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
-    icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
-    icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
-    icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
-    icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
-    icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
-    icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
-    icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
-    icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
-    fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
-    fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
-    prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
-    prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
-    clm_drg_cd                               character varying(3),                     -- diagnosisRelatedGroupCd
+    at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
+    at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
+    bene_tot_coinsrnc_days_cnt               smallint not null,                        -- coinsuranceDayCount
+    claim_query_code                         character(1) not null,                    -- claimQueryCode
     fi_clm_actn_cd                           character(1),                             -- fiscalIntermediaryClaimActionCode
     fi_clm_proc_dt                           date,                                     -- fiscalIntermediaryClaimProcessDate
+    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
     fi_num                                   character varying(5),                     -- fiscalIntermediaryNumber
-    clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
+    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
+    final_action                             character(1) not null,                    -- finalAction
+    fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
+    fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
+    nch_actv_or_cvrd_lvl_care_thru           date,                                     -- coveredCareThroughDate
+    nch_bene_blood_ddctbl_lblty_am           numeric(10,2) not null,                   -- bloodDeductibleLiabilityAmount
+    nch_bene_dschrg_dt                       date,                                     -- beneficiaryDischargeDate
+    nch_bene_ip_ddctbl_amt                   numeric(10,2) not null,                   -- deductibleAmount
     nch_bene_mdcr_bnfts_exhtd_dt_i           date,                                     -- medicareBenefitsExhaustedDate
+    nch_bene_pta_coinsrnc_lblty_am           numeric(10,2) not null,                   -- partACoinsuranceLiabilityAmount
+    nch_blood_pnts_frnshd_qty                smallint not null,                        -- bloodPintsFurnishedQty
+    nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
+    nch_ip_ncvrd_chrg_amt                    numeric(10,2) not null,                   -- noncoveredCharge
+    nch_ip_tot_ddctn_amt                     numeric(10,2) not null,                   -- totalDeductionAmount
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-    clm_non_utlztn_days_cnt                  smallint not null,                        -- nonUtilizationDayCount
-    nch_ip_ncvrd_chrg_amt                    money not null,                           -- noncoveredCharge
+    nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
+    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
+    nch_qlfyd_stay_from_dt                   date,                                     -- qualifiedStayFromDate
+    nch_qlfyd_stay_thru_dt                   date,                                     -- qualifiedStayThroughDate
     nch_vrfd_ncvrd_stay_from_dt              date,                                     -- noncoveredStayFromDate
     nch_vrfd_ncvrd_stay_thru_dt              date,                                     -- noncoveredStayThroughDate
+    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
     op_physn_npi                             character varying(10),                    -- operatingPhysicianNpi
     op_physn_upin                            character varying(9),                     -- operatingPhysicianUpin
     org_npi_num                              character varying(10),                    -- organizationNpi
     ot_physn_npi                             character varying(10),                    -- otherPhysicianNpi
     ot_physn_upin                            character varying(9),                     -- otherPhysicianUpin
-    nch_bene_pta_coinsrnc_lblty_am           money not null,                           -- partACoinsuranceLiabilityAmount
-    ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    nch_ptnt_status_ind_cd                   character(1),                             -- patientStatusCd
-    clm_pmt_amt                              money not null,                           -- paymentAmount
-    nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
-    icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
-    icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
-    prcdr_dt10                               date,                                     -- procedure10Date
-    icd_prcdr_cd11                           character varying(7),                     -- procedure11Code
-    icd_prcdr_vrsn_cd11                      character(1),                             -- procedure11CodeVersion
-    prcdr_dt11                               date,                                     -- procedure11Date
-    icd_prcdr_cd12                           character varying(7),                     -- procedure12Code
-    icd_prcdr_vrsn_cd12                      character(1),                             -- procedure12CodeVersion
-    prcdr_dt12                               date,                                     -- procedure12Date
-    icd_prcdr_cd13                           character varying(7),                     -- procedure13Code
-    icd_prcdr_vrsn_cd13                      character(1),                             -- procedure13CodeVersion
-    prcdr_dt13                               date,                                     -- procedure13Date
-    icd_prcdr_cd14                           character varying(7),                     -- procedure14Code
-    icd_prcdr_vrsn_cd14                      character(1),                             -- procedure14CodeVersion
-    prcdr_dt14                               date,                                     -- procedure14Date
-    icd_prcdr_cd15                           character varying(7),                     -- procedure15Code
-    icd_prcdr_vrsn_cd15                      character(1),                             -- procedure15CodeVersion
-    prcdr_dt15                               date,                                     -- procedure15Date
-    icd_prcdr_cd16                           character varying(7),                     -- procedure16Code
-    icd_prcdr_vrsn_cd16                      character(1),                             -- procedure16CodeVersion
-    prcdr_dt16                               date,                                     -- procedure16Date
-    icd_prcdr_cd17                           character varying(7),                     -- procedure17Code
-    icd_prcdr_vrsn_cd17                      character(1),                             -- procedure17CodeVersion
-    prcdr_dt17                               date,                                     -- procedure17Date
-    icd_prcdr_cd18                           character varying(7),                     -- procedure18Code
-    icd_prcdr_vrsn_cd18                      character(1),                             -- procedure18CodeVersion
-    prcdr_dt18                               date,                                     -- procedure18Date
-    icd_prcdr_cd19                           character varying(7),                     -- procedure19Code
-    icd_prcdr_vrsn_cd19                      character(1),                             -- procedure19CodeVersion
-    prcdr_dt19                               date,                                     -- procedure19Date
-    icd_prcdr_cd1                            character varying(7),                     -- procedure1Code
-    icd_prcdr_vrsn_cd1                       character(1),                             -- procedure1CodeVersion
-    prcdr_dt1                                date,                                     -- procedure1Date
-    icd_prcdr_cd20                           character varying(7),                     -- procedure20Code
-    icd_prcdr_vrsn_cd20                      character(1),                             -- procedure20CodeVersion
-    prcdr_dt20                               date,                                     -- procedure20Date
-    icd_prcdr_cd21                           character varying(7),                     -- procedure21Code
-    icd_prcdr_vrsn_cd21                      character(1),                             -- procedure21CodeVersion
-    prcdr_dt21                               date,                                     -- procedure21Date
-    icd_prcdr_cd22                           character varying(7),                     -- procedure22Code
-    icd_prcdr_vrsn_cd22                      character(1),                             -- procedure22CodeVersion
-    prcdr_dt22                               date,                                     -- procedure22Date
-    icd_prcdr_cd23                           character varying(7),                     -- procedure23Code
-    icd_prcdr_vrsn_cd23                      character(1),                             -- procedure23CodeVersion
-    prcdr_dt23                               date,                                     -- procedure23Date
-    icd_prcdr_cd24                           character varying(7),                     -- procedure24Code
-    icd_prcdr_vrsn_cd24                      character(1),                             -- procedure24CodeVersion
-    prcdr_dt24                               date,                                     -- procedure24Date
-    icd_prcdr_cd25                           character varying(7),                     -- procedure25Code
-    icd_prcdr_vrsn_cd25                      character(1),                             -- procedure25CodeVersion
-    prcdr_dt25                               date,                                     -- procedure25Date
-    icd_prcdr_cd2                            character varying(7),                     -- procedure2Code
-    icd_prcdr_vrsn_cd2                       character(1),                             -- procedure2CodeVersion
-    prcdr_dt2                                date,                                     -- procedure2Date
-    icd_prcdr_cd3                            character varying(7),                     -- procedure3Code
-    icd_prcdr_vrsn_cd3                       character(1),                             -- procedure3CodeVersion
-    prcdr_dt3                                date,                                     -- procedure3Date
-    icd_prcdr_cd4                            character varying(7),                     -- procedure4Code
-    icd_prcdr_vrsn_cd4                       character(1),                             -- procedure4CodeVersion
-    prcdr_dt4                                date,                                     -- procedure4Date
-    icd_prcdr_cd5                            character varying(7),                     -- procedure5Code
-    icd_prcdr_vrsn_cd5                       character(1),                             -- procedure5CodeVersion
-    prcdr_dt5                                date,                                     -- procedure5Date
-    icd_prcdr_cd6                            character varying(7),                     -- procedure6Code
-    icd_prcdr_vrsn_cd6                       character(1),                             -- procedure6CodeVersion
-    prcdr_dt6                                date,                                     -- procedure6Date
-    icd_prcdr_cd7                            character varying(7),                     -- procedure7Code
-    icd_prcdr_vrsn_cd7                       character(1),                             -- procedure7CodeVersion
-    prcdr_dt7                                date,                                     -- procedure7Date
-    icd_prcdr_cd8                            character varying(7),                     -- procedure8Code
-    icd_prcdr_vrsn_cd8                       character(1),                             -- procedure8CodeVersion
-    prcdr_dt8                                date,                                     -- procedure8Date
-    icd_prcdr_cd9                            character varying(7),                     -- procedure9Code
-    icd_prcdr_vrsn_cd9                       character(1),                             -- procedure9CodeVersion
-    prcdr_dt9                                date,                                     -- procedure9Date
-    clm_pps_ind_cd                           character(1),                             -- prospectivePaymentCode
+    prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
+    prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    nch_qlfyd_stay_from_dt                   date,                                     -- qualifiedStayFromDate
-    nch_qlfyd_stay_thru_dt                   date,                                     -- qualifiedStayThroughDate
-    clm_src_ip_admsn_cd                      character(1),                             -- sourceAdmissionCd
-    rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
-    nch_ip_tot_ddctn_amt                     money not null,                           -- totalDeductionAmount
-    clm_utlztn_day_cnt                       smallint not null,                        -- utilizationDayCount
-    nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
-    final_action                             character(1) not null,                    -- finalAction
-    fi_doc_clm_cntl_num                      character varying(23),                    -- fiDocumentClaimControlNumber
-    fi_orig_clm_cntl_num                     character varying(23),                    -- fiOriginalClaimControlNumber
+    ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
+    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
+    icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
+    icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
+    icd_dgns_cd4                             character varying(7),                     -- diagnosis4Code
+    icd_dgns_cd5                             character varying(7),                     -- diagnosis5Code
+    icd_dgns_cd6                             character varying(7),                     -- diagnosis6Code
+    icd_dgns_cd7                             character varying(7),                     -- diagnosis7Code
+    icd_dgns_cd8                             character varying(7),                     -- diagnosis8Code
+    icd_dgns_cd9                             character varying(7),                     -- diagnosis9Code
+    icd_dgns_cd10                            character varying(7),                     -- diagnosis10Code
+    icd_dgns_cd11                            character varying(7),                     -- diagnosis11Code
+    icd_dgns_cd12                            character varying(7),                     -- diagnosis12Code
+    icd_dgns_cd13                            character varying(7),                     -- diagnosis13Code
+    icd_dgns_cd14                            character varying(7),                     -- diagnosis14Code
+    icd_dgns_cd15                            character varying(7),                     -- diagnosis15Code
+    icd_dgns_cd16                            character varying(7),                     -- diagnosis16Code
+    icd_dgns_cd17                            character varying(7),                     -- diagnosis17Code
+    icd_dgns_cd18                            character varying(7),                     -- diagnosis18Code
+    icd_dgns_cd19                            character varying(7),                     -- diagnosis19Code
+    icd_dgns_cd20                            character varying(7),                     -- diagnosis20Code
+    icd_dgns_cd21                            character varying(7),                     -- diagnosis21Code
+    icd_dgns_cd22                            character varying(7),                     -- diagnosis22Code
+    icd_dgns_cd23                            character varying(7),                     -- diagnosis23Code
+    icd_dgns_cd24                            character varying(7),                     -- diagnosis24Code
+    icd_dgns_cd25                            character varying(7),                     -- diagnosis25Code
+    icd_dgns_e_cd1                           character varying(7),                     -- diagnosisExternal1Code
+    icd_dgns_e_cd2                           character varying(7),                     -- diagnosisExternal2Code
+    icd_dgns_e_cd3                           character varying(7),                     -- diagnosisExternal3Code
+    icd_dgns_e_cd4                           character varying(7),                     -- diagnosisExternal4Code
+    icd_dgns_e_cd5                           character varying(7),                     -- diagnosisExternal5Code
+    icd_dgns_e_cd6                           character varying(7),                     -- diagnosisExternal6Code
+    icd_dgns_e_cd7                           character varying(7),                     -- diagnosisExternal7Code
+    icd_dgns_e_cd8                           character varying(7),                     -- diagnosisExternal8Code
+    icd_dgns_e_cd9                           character varying(7),                     -- diagnosisExternal9Code
+    icd_dgns_e_cd10                          character varying(7),                     -- diagnosisExternal10Code
+    icd_dgns_e_cd11                          character varying(7),                     -- diagnosisExternal11Code
+    icd_dgns_e_cd12                          character varying(7),                     -- diagnosisExternal12Code
+    icd_dgns_e_vrsn_cd1                      character(1),                             -- diagnosisExternal1CodeVersion
+    icd_dgns_e_vrsn_cd2                      character(1),                             -- diagnosisExternal2CodeVersion
+    icd_dgns_e_vrsn_cd3                      character(1),                             -- diagnosisExternal3CodeVersion
+    icd_dgns_e_vrsn_cd4                      character(1),                             -- diagnosisExternal4CodeVersion
+    icd_dgns_e_vrsn_cd5                      character(1),                             -- diagnosisExternal5CodeVersion
+    icd_dgns_e_vrsn_cd6                      character(1),                             -- diagnosisExternal6CodeVersion
+    icd_dgns_e_vrsn_cd7                      character(1),                             -- diagnosisExternal7CodeVersion
+    icd_dgns_e_vrsn_cd8                      character(1),                             -- diagnosisExternal8CodeVersion
+    icd_dgns_e_vrsn_cd9                      character(1),                             -- diagnosisExternal9CodeVersion
+    icd_dgns_e_vrsn_cd10                     character(1),                             -- diagnosisExternal10CodeVersion
+    icd_dgns_e_vrsn_cd11                     character(1),                             -- diagnosisExternal11CodeVersion
+    icd_dgns_e_vrsn_cd12                     character(1),                             -- diagnosisExternal12CodeVersion
+    icd_dgns_vrsn_cd1                        character(1),                             -- diagnosis1CodeVersion
+    icd_dgns_vrsn_cd2                        character(1),                             -- diagnosis2CodeVersion
+    icd_dgns_vrsn_cd3                        character(1),                             -- diagnosis3CodeVersion
+    icd_dgns_vrsn_cd4                        character(1),                             -- diagnosis4CodeVersion
+    icd_dgns_vrsn_cd5                        character(1),                             -- diagnosis5CodeVersion
+    icd_dgns_vrsn_cd6                        character(1),                             -- diagnosis6CodeVersion
+    icd_dgns_vrsn_cd7                        character(1),                             -- diagnosis7CodeVersion
+    icd_dgns_vrsn_cd8                        character(1),                             -- diagnosis8CodeVersion
+    icd_dgns_vrsn_cd9                        character(1),                             -- diagnosis9CodeVersion
+    icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
+    icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
+    icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
+    icd_dgns_vrsn_cd13                       character(1),                             -- diagnosis13CodeVersion
+    icd_dgns_vrsn_cd14                       character(1),                             -- diagnosis14CodeVersion
+    icd_dgns_vrsn_cd15                       character(1),                             -- diagnosis15CodeVersion
+    icd_dgns_vrsn_cd16                       character(1),                             -- diagnosis16CodeVersion
+    icd_dgns_vrsn_cd17                       character(1),                             -- diagnosis17CodeVersion
+    icd_dgns_vrsn_cd18                       character(1),                             -- diagnosis18CodeVersion
+    icd_dgns_vrsn_cd19                       character(1),                             -- diagnosis19CodeVersion
+    icd_dgns_vrsn_cd20                       character(1),                             -- diagnosis20CodeVersion
+    icd_dgns_vrsn_cd21                       character(1),                             -- diagnosis21CodeVersion
+    icd_dgns_vrsn_cd22                       character(1),                             -- diagnosis22CodeVersion
+    icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
+    icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
+    icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
+    icd_prcdr_cd1                            character varying(7),                     -- procedure1Code
+    icd_prcdr_cd2                            character varying(7),                     -- procedure2Code
+    icd_prcdr_cd3                            character varying(7),                     -- procedure3Code
+    icd_prcdr_cd4                            character varying(7),                     -- procedure4Code
+    icd_prcdr_cd5                            character varying(7),                     -- procedure5Code
+    icd_prcdr_cd6                            character varying(7),                     -- procedure6Code
+    icd_prcdr_cd7                            character varying(7),                     -- procedure7Code
+    icd_prcdr_cd8                            character varying(7),                     -- procedure8Code
+    icd_prcdr_cd9                            character varying(7),                     -- procedure9Code
+    icd_prcdr_cd10                           character varying(7),                     -- procedure10Code
+    icd_prcdr_cd11                           character varying(7),                     -- procedure11Code
+    icd_prcdr_cd12                           character varying(7),                     -- procedure12Code
+    icd_prcdr_cd13                           character varying(7),                     -- procedure13Code
+    icd_prcdr_cd14                           character varying(7),                     -- procedure14Code
+    icd_prcdr_cd15                           character varying(7),                     -- procedure15Code
+    icd_prcdr_cd16                           character varying(7),                     -- procedure16Code
+    icd_prcdr_cd17                           character varying(7),                     -- procedure17Code
+    icd_prcdr_cd18                           character varying(7),                     -- procedure18Code
+    icd_prcdr_cd19                           character varying(7),                     -- procedure19Code
+    icd_prcdr_cd20                           character varying(7),                     -- procedure20Code
+    icd_prcdr_cd21                           character varying(7),                     -- procedure21Code
+    icd_prcdr_cd22                           character varying(7),                     -- procedure22Code
+    icd_prcdr_cd23                           character varying(7),                     -- procedure23Code
+    icd_prcdr_cd24                           character varying(7),                     -- procedure24Code
+    icd_prcdr_cd25                           character varying(7),                     -- procedure25Code
+    icd_prcdr_vrsn_cd1                       character(1),                             -- procedure1CodeVersion
+    icd_prcdr_vrsn_cd2                       character(1),                             -- procedure2CodeVersion
+    icd_prcdr_vrsn_cd3                       character(1),                             -- procedure3CodeVersion
+    icd_prcdr_vrsn_cd4                       character(1),                             -- procedure4CodeVersion
+    icd_prcdr_vrsn_cd5                       character(1),                             -- procedure5CodeVersion
+    icd_prcdr_vrsn_cd6                       character(1),                             -- procedure6CodeVersion
+    icd_prcdr_vrsn_cd7                       character(1),                             -- procedure7CodeVersion
+    icd_prcdr_vrsn_cd8                       character(1),                             -- procedure8CodeVersion
+    icd_prcdr_vrsn_cd9                       character(1),                             -- procedure9CodeVersion
+    icd_prcdr_vrsn_cd10                      character(1),                             -- procedure10CodeVersion
+    icd_prcdr_vrsn_cd11                      character(1),                             -- procedure11CodeVersion
+    icd_prcdr_vrsn_cd12                      character(1),                             -- procedure12CodeVersion
+    icd_prcdr_vrsn_cd13                      character(1),                             -- procedure13CodeVersion
+    icd_prcdr_vrsn_cd14                      character(1),                             -- procedure14CodeVersion
+    icd_prcdr_vrsn_cd15                      character(1),                             -- procedure15CodeVersion
+    icd_prcdr_vrsn_cd16                      character(1),                             -- procedure16CodeVersion
+    icd_prcdr_vrsn_cd17                      character(1),                             -- procedure17CodeVersion
+    icd_prcdr_vrsn_cd18                      character(1),                             -- procedure18CodeVersion
+    icd_prcdr_vrsn_cd19                      character(1),                             -- procedure19CodeVersion
+    icd_prcdr_vrsn_cd20                      character(1),                             -- procedure20CodeVersion
+    icd_prcdr_vrsn_cd21                      character(1),                             -- procedure21CodeVersion
+    icd_prcdr_vrsn_cd22                      character(1),                             -- procedure22CodeVersion
+    icd_prcdr_vrsn_cd23                      character(1),                             -- procedure23CodeVersion
+    icd_prcdr_vrsn_cd24                      character(1),                             -- procedure24CodeVersion
+    icd_prcdr_vrsn_cd25                      character(1),                             -- procedure25CodeVersion
+    prcdr_dt1                                date,                                     -- procedure1Date
+    prcdr_dt2                                date,                                     -- procedure2Date
+    prcdr_dt3                                date,                                     -- procedure3Date
+    prcdr_dt4                                date,                                     -- procedure4Date
+    prcdr_dt5                                date,                                     -- procedure5Date
+    prcdr_dt6                                date,                                     -- procedure6Date
+    prcdr_dt7                                date,                                     -- procedure7Date
+    prcdr_dt8                                date,                                     -- procedure8Date
+    prcdr_dt9                                date,                                     -- procedure9Date
+    prcdr_dt10                               date,                                     -- procedure10Date
+    prcdr_dt11                               date,                                     -- procedure11Date
+    prcdr_dt12                               date,                                     -- procedure12Date
+    prcdr_dt13                               date,                                     -- procedure13Date
+    prcdr_dt14                               date,                                     -- procedure14Date
+    prcdr_dt15                               date,                                     -- procedure15Date
+    prcdr_dt16                               date,                                     -- procedure16Date
+    prcdr_dt17                               date,                                     -- procedure17Date
+    prcdr_dt18                               date,                                     -- procedure18Date
+    prcdr_dt19                               date,                                     -- procedure19Date
+    prcdr_dt20                               date,                                     -- procedure20Date
+    prcdr_dt21                               date,                                     -- procedure21Date
+    prcdr_dt22                               date,                                     -- procedure22Date
+    prcdr_dt23                               date,                                     -- procedure23Date
+    prcdr_dt24                               date,                                     -- procedure24Date
+    prcdr_dt25                               date,                                     -- procedure25Date    
     last_updated                             timestamp with time zone                  -- lastupdated
 );
 --
-alter table only public.beneficiaries
-add constraint beneficiaries_pkey primary key (bene_id);
+-- Primary key constraints
 --
-alter table only public.beneficiaries_history
-add constraint beneficiaries_history_pkey primary key (beneficiary_history_id);
+alter  table beneficiaries
+    add constraint beneficiaries_pkey primary key (bene_id);
 --
-alter table only public.beneficiaries_history_invalid_beneficiaries
-add constraint beneficiaries_history_invalid_beneficiaries_pkey primary key (beneficiary_history_id);
+alter  table beneficiaries_history
+    add constraint beneficiaries_history_pkey primary key (beneficiary_history_id);
 --
-alter table only public.beneficiary_monthly
-add constraint beneficiary_monthly_pkey primary key (parent_beneficiary, year_month);
+alter  table beneficiaries_history_invalid_beneficiaries
+    add constraint beneficiaries_history_invalid_beneficiaries_pkey primary key (beneficiary_history_id);
 --
-alter table only public.carrier_claim_lines
-add constraint carrier_claim_lines_pkey primary key (parent_claim, clm_line_num);
+alter  table beneficiary_monthly
+    add constraint beneficiary_monthly_pkey primary key (bene_id, year_month);
 --
-alter table only public.carrier_claims
-add constraint carrier_claims_pkey primary key (clm_id);
+alter  table carrier_claim_lines
+    add constraint carrier_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
-alter table only public.dme_claim_lines
-add constraint dme_claim_lines_pkey primary key (parent_claim, clm_line_num);
+alter  table carrier_claims
+    add constraint carrier_claims_pkey primary key (clm_id);
 --
-alter table only public.dme_claims
-add constraint dme_claims_pkey primary key (clm_id);
+alter  table dme_claim_lines
+    add constraint dme_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
-alter table only public.hha_claim_lines
-add constraint hha_claim_lines_pkey primary key (parent_claim, clm_line_num);
+alter  table dme_claims
+    add constraint dme_claims_pkey primary key (clm_id);
 --
-alter table only public.hha_claims
-add constraint hha_claims_pkey primary key (clm_id);
+alter  table hha_claim_lines
+    add constraint hha_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
-alter table only public.hospice_claim_lines
-add constraint hospice_claim_lines_pkey primary key (parent_claim, clm_line_num);
+alter  table hha_claims
+    add constraint hha_claims_pkey primary key (clm_id);
 --
-alter table only public.hospice_claims
-add constraint hospice_claims_pkey primary key (clm_id);
+alter  table hospice_claim_lines
+    add constraint hospice_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
-alter table only public.inpatient_claim_lines
-add constraint inpatient_claim_lines_pkey primary key (parent_claim, clm_line_num);
+alter  table hospice_claims
+    add constraint hospice_claims_pkey primary key (clm_id);
 --
-alter table only public.inpatient_claims
-add constraint inpatient_claims_pkey primary key (clm_id);
+alter  table inpatient_claim_lines
+    add constraint inpatient_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
-alter table only public.loaded_batches
-add constraint loaded_batches_pkey primary key (loaded_batch_id);
+alter  table inpatient_claims
+    add constraint inpatient_claims_pkey primary key (clm_id);
 --
-alter table only public.loaded_files
-add constraint loaded_files_pkey primary key (loaded_file_id);
+alter  table loaded_batches
+    add constraint loaded_batches_pkey primary key (loaded_batch_id);
 --
-alter table only public.medicare_beneficiaryid_history
-add constraint medicare_beneficiaryid_history_pkey primary key (medicare_beneficiaryid_key);
+alter  table loaded_files
+    add constraint loaded_files_pkey primary key (loaded_file_id);
 --
-alter table only public.medicare_beneficiaryid_history_invalid_beneficiaries
-add constraint medicare_beneficiaryid_history_invalid_beneficiaries_pkey primary key (medicare_beneficiaryid_key);
+alter  table medicare_beneficiaryid_history
+    add constraint medicare_beneficiaryid_history_pkey primary key (medicare_beneficiaryid_key);
 --
-alter table only public.outpatient_claim_lines
-add constraint outpatient_claim_lines_pkey primary key (parent_claim, clm_line_num);
+alter  table medicare_beneficiaryid_history_invalid_beneficiaries
+    add constraint medicare_beneficiaryid_history_invalid_beneficiaries_pkey primary key (medicare_beneficiaryid_key);
 --
-alter table only public.outpatient_claims
-add constraint outpatient_claims_pkey primary key (clm_id);
+alter  table outpatient_claim_lines
+    add constraint outpatient_claim_lines_pkey primary key (parent_claim, clm_line_num);
 --
-alter table only public.partd_events
-add constraint partd_events_pkey primary key (clm_id);
+alter  table outpatient_claims
+    add constraint outpatient_claims_pkey primary key (clm_id);
 --
-alter table only public.snf_claim_lines
-add constraint snf_claim_lines_pkey primary key (parent_claim, clm_line_num);
+alter  table partd_events
+    add constraint partd_events_pkey primary key (clm_id);
 --
-alter table only public.snf_claims
-add constraint snf_claims_pkey primary key (clm_id);
+alter  table snf_claim_lines
+    add constraint snf_claim_lines_pkey primary key (parent_claim, clm_line_num);
+--
+alter  table snf_claims
+    add constraint snf_claims_pkey primary key (clm_id);
+--
+-- Foreign key constraints
+--
+alter table beneficiaries_history
+    add constraint beneficiaries_history_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries(bene_id);
+
+alter table beneficiaries_history_invalid_beneficiaries
+    add constraint beneficiaries_history_invalid_beneficiaries_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries(bene_id);
+
+alter table beneficiary_monthly
+    add constraint beneficiary_monthly_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table medicare_beneficiaryid_history
+    add constraint medicare_beneficiaryid_history_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table medicare_beneficiaryid_history_invalid_beneficiaries
+    add constraint medicare_beneficiaryid_history_invalid_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+    
+alter table carrier_claims
+    add constraint carrier_claims_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table carrier_claim_lines
+   add constraint carrier_claim_lines_to_carrier_claims
+   foreign key (parent_claim)
+   references carrier_claims (clm_id);
+
+alter table dme_claims
+    add constraint dme_claims_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table dme_claim_lines
+   add constraint dme_claim_lines_to_dme_claims
+   foreign key (parent_claim)
+   references dme_claims (clm_id);
+
+alter table hha_claims
+    add constraint hha_claims_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table hha_claim_lines
+   add constraint hha_claim_lines_to_hha_claims
+   foreign key (parent_claim)
+   references hha_claims (clm_id);
+
+alter table hospice_claims
+    add constraint hospice_claims_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table hospice_claim_lines
+   add constraint hospice_claim_lines_to_hospice_claims
+   foreign key (parent_claim)
+   references hospice_claims (clm_id);
+
+alter table inpatient_claims
+    add constraint inpatient_claims_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table inpatient_claim_lines
+   add constraint inpatient_claim_lines_to_inpatient_claims
+   foreign key (parent_claim)
+   references inpatient_claims (clm_id);
+
+alter table outpatient_claims
+    add constraint outpatient_claims_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table outpatient_claim_lines
+   add constraint outpatient_claim_lines_to_outpatient_claims
+   foreign key (parent_claim)
+   references outpatient_claims (clm_id);
+
+alter table snf_claims
+    add constraint snf_claims_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);
+
+alter table snf_claim_lines
+   add constraint snf_claim_lines_to_snf_claims
+   foreign key (parent_claim)
+   references snf_claims;
+
+alter table partd_events
+    add constraint partd_events_to_beneficiaries
+    foreign key (bene_id)
+    references beneficiaries (bene_id);

@@ -1,4 +1,3 @@
-drop table if exists public.beneficiaries;
 drop table if exists public.beneficiaries_history;
 drop table if exists public.beneficiaries_history_invalid_beneficiaries;
 drop table if exists public.beneficiary_monthly;
@@ -21,3 +20,4 @@ drop table if exists public.outpatient_claims;
 drop table if exists public.partd_events;
 drop table if exists public.snf_claim_lines;
 drop table if exists public.snf_claims;
+drop table if exists public.beneficiaries;
