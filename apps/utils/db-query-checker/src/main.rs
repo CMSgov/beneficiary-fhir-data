@@ -11,15 +11,11 @@ use csv_async::AsyncSerializer;
 use dotenv::dotenv;
 use eyre::{Result, WrapErr};
 use futures::{stream::FuturesUnordered, StreamExt};
-use lazy_static::lazy_static;
-use serde::Serialize;
 use sqlx::{
     postgres::{PgPoolOptions, PgRow},
     Executor, Pool, Postgres, Row,
 };
 use std::{
-    collections::HashMap,
-    hash::Hash,
     sync::{atomic::AtomicU32, Arc},
     time::Duration,
 };
@@ -28,48 +24,12 @@ use tracing::{info, warn, Instrument};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
 
+use crate::query::{fetch_all_monitored, DatabaseQuery, DATABASE_QUERY_SQL};
+
+mod csv_log;
 mod query;
 
 const BENES_PAGE_SIZE: u32 = 4000;
-
-/// Used to uniquely identify each DB query.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
-pub enum DatabaseQuery {
-    SelectDistinctPartDContractIds,
-    SelectBeneCountByPartDContractIdAndYearMonth,
-    SelectBeneIdsByPartDContractIdAndYearMonth,
-    SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
-    SelectBeneRecordsByBeneIds,
-}
-
-lazy_static! {
-    /// Stores the SQL queries for each [DatabaseQuery].
-    static ref DATABASE_QUERY_SQL: HashMap<DatabaseQuery, &'static str> = {
-        let mut sql_queries = HashMap::new();
-
-        /*
-         * Moved all the DB queries out to separate files, as some of them are ginormous Also, `cargo fmt`
-         * seems to get a bit goofy if they're in here.
-         */
-         sql_queries.insert(
-            DatabaseQuery::SelectDistinctPartDContractIds,
-            include_str!("./db_queries/select_distinct_part_d_contract_ids.sql"));
-         sql_queries.insert(
-            DatabaseQuery::SelectBeneCountByPartDContractIdAndYearMonth,
-            include_str!("./db_queries/select_bene_count_by_part_d_contract_id_and_year_month.sql"));
-         sql_queries.insert(
-            DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonth,
-            include_str!("./db_queries/select_bene_ids_by_part_d_contract_id_and_year_month.sql"));
-         sql_queries.insert(
-            DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
-            include_str!("./db_queries/select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id.sql"));
-         sql_queries.insert(
-            DatabaseQuery::SelectBeneRecordsByBeneIds,
-            include_str!("./db_queries/select_bene_records_by_bene_ids.sql"));
-
-        sql_queries
-    };
-}
 
 /// This is the application's entry point.
 /// It configures the options, tracing/logging, and DB connection pool.
@@ -192,6 +152,8 @@ async fn main() -> Result<()> {
         "Found '{}' parameter sets to run.",
         (partd_contract_ids.len() * year_months.len())
     );
+
+    // Build a [FuturesUnordered] that contains all async operations to be run.
     let count_success: AtomicU32 = AtomicU32::new(0);
     let count_failure: AtomicU32 = AtomicU32::new(0);
     let search_patients_by_part_d_contract_id_params =
@@ -207,7 +169,10 @@ async fn main() -> Result<()> {
                 )
             })
             .collect();
+
+    // Iterate through the operations to be run, handling/inspecting the result of each.
     while let Some(search_result) = search_patients_by_part_d_contract_id_futures.next().await {
+        // Did the operation succeed? Update counts and log failures.
         let count_success_current = match search_result {
             Ok(_) => Some(count_success.fetch_add(1, std::sync::atomic::Ordering::SeqCst)),
             Err(err) => {
@@ -217,7 +182,7 @@ async fn main() -> Result<()> {
             }
         };
 
-        // Log progress, occassionally.
+        // Log overall progress, periodically.
         if let Some(count_success_current) = count_success_current {
             if count_success_current > 0 && count_success_current % 1000 == 0 {
                 info!(
@@ -229,6 +194,7 @@ async fn main() -> Result<()> {
         }
     }
 
+    // We're all done! Report overall results.
     info!(
         count_success = count_success.load(std::sync::atomic::Ordering::SeqCst),
         count_failure = count_failure.load(std::sync::atomic::Ordering::SeqCst),
@@ -237,64 +203,23 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-/// Represents each data row of the CSV file that this application will output.
-#[derive(Serialize)]
-struct CsvOutputRow {
-    query_id: DatabaseQuery,
-    query_params: String,
-    query_succeeded: bool,
-    query_time_millis: u128,
-    query_result_count: Option<usize>,
-}
-
-/// Writes out a [CsvOutputRow] for the specified parameters.
-#[tracing::instrument(level = "trace", skip(csv_serializer))]
-async fn output_csv_row(
-    csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
-    query_id: DatabaseQuery,
-    query_params: String,
-    query_succeeded: bool,
-    query_time: Duration,
-    query_result_count: Option<usize>,
-) -> Result<()> {
-    let row = CsvOutputRow {
-        query_id,
-        query_params,
-        query_succeeded,
-        query_time_millis: query_time.as_millis(),
-        query_result_count,
-    };
-
-    // TODO: If performance is slow, I could also batch these writes.
-
-    // TODO: does moving this to a `tokio::spawn(...)` block improve performance?
-
-    let mut csv_serializer_lock = csv_serializer.lock().await;
-    csv_serializer_lock
-        .serialize(&row)
-        .await
-        .context("Failed to write out CSV record")?;
-
-    Ok(())
-}
-
 /// Runs all of the DB queries for the BFD Server's "search for Patients by Part D contract and year-month"
 /// endpoint, for the specfied parameters.
 ///
 /// Parameters:
-/// * `pool`: the DB connection pool to use
-/// * `csv_serializer`: the CSV writer to output results to
-/// * `partd_contract_id`: the Part D contract ID to run the DB queries for
-/// * `year_month`: the "YYYY-MM-dd" date to run the DB queries for
-#[tracing::instrument(level = "debug", skip(pool, csv_serializer))]
+/// * `db_pool`: The database connection pool to run the query on.
+/// * `csv_serializer`: The CSV [AsyncSerializer] to output results to.
+/// * `partd_contract_id`: The Part D contract ID to run the DB queries for.
+/// * `year_month`: The "YYYY-MM-dd" date to run the DB queries for.
+#[tracing::instrument(level = "debug", skip(db_pool, csv_serializer))]
 async fn check_contract_year_month(
-    pool: &Pool<Postgres>,
+    db_pool: &Pool<Postgres>,
     csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
     partd_contract_id: String,
     year_month: String,
 ) -> Result<()> {
     let bene_count = select_bene_count_for_part_d_contract_id_and_year_month(
-        pool,
+        db_pool,
         csv_serializer.clone(),
         &partd_contract_id,
         &year_month,
@@ -305,20 +230,20 @@ async fn check_contract_year_month(
     }
 
     let bene_ids_first_page = select_bene_ids_by_part_d_contract_id_and_year_month(
-        pool,
+        db_pool,
         csv_serializer.clone(),
         &partd_contract_id,
         &year_month,
     )
     .await?;
 
-    select_bene_records_by_bene_ids(pool, csv_serializer.clone(), &bene_ids_first_page).await?;
+    select_bene_records_by_bene_ids(db_pool, csv_serializer.clone(), &bene_ids_first_page).await?;
 
     let mut bene_id_max = bene_ids_first_page.last().cloned();
     while let Some(bene_id_max_value) = bene_id_max {
         let bene_ids_next_page =
             select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
-                pool,
+                db_pool,
                 csv_serializer.clone(),
                 &partd_contract_id,
                 &year_month,
@@ -326,7 +251,8 @@ async fn check_contract_year_month(
             )
             .await?;
 
-        select_bene_records_by_bene_ids(pool, csv_serializer.clone(), &bene_ids_next_page).await?;
+        select_bene_records_by_bene_ids(db_pool, csv_serializer.clone(), &bene_ids_next_page)
+            .await?;
 
         bene_id_max = bene_ids_next_page.last().cloned();
     }
@@ -337,13 +263,13 @@ async fn check_contract_year_month(
 /// Selects the count of enrolled benes for the specified Part D Contract ID and year-month.
 ///
 /// Parameters:
-/// * `pool`: the DB connection pool to use
-/// * `csv_serializer`: the CSV writer to output results to
-/// * `partd_contract_id`: the Part D contract ID to query for
-/// * `year_month`: the "YYYY-MM-dd" date to query for
-#[tracing::instrument(level = "trace", skip(pool, csv_serializer))]
+/// * `db_pool`: The database connection pool to run the query on.
+/// * `csv_serializer`: The CSV [AsyncSerializer] to output results to.
+/// * `partd_contract_id`: The Part D contract ID to run the DB queries for.
+/// * `year_month`: The "YYYY-MM-dd" date to run the DB queries for.
+#[tracing::instrument(level = "trace", skip(db_pool, csv_serializer))]
 async fn select_bene_count_for_part_d_contract_id_and_year_month(
-    pool: &Pool<Postgres>,
+    db_pool: &Pool<Postgres>,
     csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
     partd_contract_id: &str,
     year_month: &str,
@@ -358,8 +284,8 @@ async fn select_bene_count_for_part_d_contract_id_and_year_month(
     .bind(&partd_contract_id);
 
     // Run the query.
-    let bene_count_result = query::fetch_all_monitored(
-        pool,
+    let bene_count_result = fetch_all_monitored(
+        db_pool,
         csv_serializer,
         DatabaseQuery::SelectBeneCountByPartDContractIdAndYearMonth,
         format!(
@@ -378,13 +304,13 @@ async fn select_bene_count_for_part_d_contract_id_and_year_month(
 /// Selects a page of enrolled bene IDs for the specified Part D Contract ID and year-month.
 ///
 /// Parameters:
-/// * `pool`: the DB connection pool to use
-/// * `csv_serializer`: the CSV writer to output results to
-/// * `partd_contract_id`: the Part D contract ID to query for
-/// * `year_month`: the "YYYY-MM-dd" date to query for
-#[tracing::instrument(level = "trace", skip(pool, csv_serializer))]
+/// * `db_pool`: The database connection pool to run the query on.
+/// * `csv_serializer`: The CSV [AsyncSerializer] to output results to.
+/// * `partd_contract_id`: The Part D contract ID to run the DB queries for.
+/// * `year_month`: The "YYYY-MM-dd" date to run the DB queries for.
+#[tracing::instrument(level = "trace", skip(db_pool, csv_serializer))]
 async fn select_bene_ids_by_part_d_contract_id_and_year_month(
-    pool: &Pool<Postgres>,
+    db_pool: &Pool<Postgres>,
     csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
     partd_contract_id: &str,
     year_month: &str,
@@ -400,8 +326,8 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month(
     .bind(&BENES_PAGE_SIZE);
 
     // Run the query.
-    let bene_ids_result = query::fetch_all_monitored(
-        pool,
+    let bene_ids_result = fetch_all_monitored(
+        db_pool,
         csv_serializer,
         DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonth,
         format!(
@@ -420,14 +346,14 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month(
 /// Selects a page of enrolled bene IDs for the specified Part D Contract ID and year-month.
 ///
 /// Parameters:
-/// * `pool`: the DB connection pool to use
-/// * `csv_serializer`: the CSV writer to output results to
-/// * `partd_contract_id`: the Part D contract ID to query for
-/// * `year_month`: the "YYYY-MM-dd" date to query for
+/// * `db_pool`: The database connection pool to run the query on.
+/// * `csv_serializer`: The CSV [AsyncSerializer] to output results to.
+/// * `partd_contract_id`: The Part D contract ID to run the DB queries for.
+/// * `year_month`: The "YYYY-MM-dd" date to run the DB queries for.
 /// * `min_bene_id`: the minimum bene ID to query for (sort of -- it's actually a 'greater than' query)
-#[tracing::instrument(level = "trace", skip(pool, csv_serializer))]
+#[tracing::instrument(level = "trace", skip(db_pool, csv_serializer))]
 async fn select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
-    pool: &Pool<Postgres>,
+    db_pool: &Pool<Postgres>,
     csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
     partd_contract_id: &String,
     year_month: &str,
@@ -445,8 +371,8 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
     .bind(&BENES_PAGE_SIZE);
 
     // Run the query.
-    let bene_ids_result = query::fetch_all_monitored(
-        pool,
+    let bene_ids_result = fetch_all_monitored(
+        db_pool,
         csv_serializer,
         DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
         format!(
@@ -465,12 +391,12 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
 /// Selects the bene records for the specified bene IDs.
 ///
 /// Parameters:
-/// * `pool`: the DB connection pool to use
-/// * `csv_serializer`: the CSV writer to output results to
-/// * `bene_ids`: the bene IDs to run the DB query for
-#[tracing::instrument(level = "trace", skip(pool, csv_serializer))]
+/// * `db_pool`: The database connection pool to run the query on.
+/// * `csv_serializer`: The CSV [AsyncSerializer] to output results to.
+/// * `bene_ids`: The bene IDs to run the DB query for.
+#[tracing::instrument(level = "trace", skip(db_pool, csv_serializer))]
 async fn select_bene_records_by_bene_ids(
-    pool: &Pool<Postgres>,
+    db_pool: &Pool<Postgres>,
     csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
     bene_ids: &Vec<String>,
 ) -> Result<Vec<PgRow>> {
@@ -492,8 +418,8 @@ async fn select_bene_records_by_bene_ids(
     .bind(&BENES_PAGE_SIZE);
 
     // Run the query.
-    let benes_result = query::fetch_all_monitored(
-        pool,
+    let benes_result = fetch_all_monitored(
+        db_pool,
         csv_serializer,
         DatabaseQuery::SelectBeneRecordsByBeneIds,
         format!("bene_ids.len='{}'", bene_ids.len()),
