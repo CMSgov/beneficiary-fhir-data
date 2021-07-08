@@ -6,6 +6,7 @@
 //!   (usually because the DB decides that a table scan is the best move).
 //!
 //! See the `README.md` file for further details.
+
 use csv_async::AsyncSerializer;
 use dotenv::dotenv;
 use eyre::{Result, WrapErr};
@@ -22,10 +23,12 @@ use std::{
     sync::{atomic::AtomicU32, Arc},
     time::Duration,
 };
-use tokio::{fs::File, sync::Mutex, time::Instant};
+use tokio::{fs::File, sync::Mutex};
 use tracing::{info, warn, Instrument};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
+
+mod query;
 
 const BENES_PAGE_SIZE: u32 = 4000;
 
@@ -266,8 +269,6 @@ async fn output_csv_row(
 
     // TODO: does moving this to a `tokio::spawn(...)` block improve performance?
 
-    // FIXME the query_time_millis value is currently complete BS, as it includes time spent waiting for a DB connection from the pool
-
     let mut csv_serializer_lock = csv_serializer.lock().await;
     csv_serializer_lock
         .serialize(&row)
@@ -347,48 +348,30 @@ async fn select_bene_count_for_part_d_contract_id_and_year_month(
     partd_contract_id: &str,
     year_month: &str,
 ) -> Result<i64> {
-    // Grab a timestamp, so we can see how long the query takes.
-    let bene_count_before = Instant::now();
-
-    // Run the query.
-    let bene_count_result: Result<PgRow> = sqlx::query(
+    // Create the query.
+    let bene_count_query = sqlx::query(
         DATABASE_QUERY_SQL
             .get(&DatabaseQuery::SelectBeneCountByPartDContractIdAndYearMonth)
             .unwrap(),
     )
     .bind(&year_month)
-    .bind(&partd_contract_id)
-    .fetch_one(pool)
-    .await
-    .wrap_err_with(|| {
-        format!(
-            "Error running '{:?}' query: partd_contract_id='{}', year_month='{}'",
-            DatabaseQuery::SelectBeneCountByPartDContractIdAndYearMonth,
-            partd_contract_id,
-            year_month
-        )
-    });
+    .bind(&partd_contract_id);
 
-    // Write out the CSV row for the query.
-    output_csv_row(
+    // Run the query.
+    let bene_count_result = query::fetch_all_monitored(
+        pool,
         csv_serializer,
         DatabaseQuery::SelectBeneCountByPartDContractIdAndYearMonth,
         format!(
             "partd_contract_id='{}', year_month='{}'",
             partd_contract_id, year_month
         ),
-        bene_count_result.is_ok(),
-        bene_count_before.elapsed(),
-        if bene_count_result.is_ok() {
-            Some(1)
-        } else {
-            None
-        },
+        bene_count_query,
     )
-    .await?;
+    .await;
 
     // Pull the results out of the query.
-    let bene_count = bene_count_result?.get(0);
+    let bene_count = bene_count_result?[0].get(0);
     Ok(bene_count)
 }
 
@@ -406,45 +389,28 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month(
     partd_contract_id: &str,
     year_month: &str,
 ) -> Result<Vec<String>> {
-    // Grab a timestamp, so we can see how long the query takes.
-    let bene_ids_before = Instant::now();
-
-    // Run the query.
-    let bene_ids_result = sqlx::query(
+    // Create the query.
+    let bene_ids_query = sqlx::query(
         DATABASE_QUERY_SQL
             .get(&DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonth)
             .unwrap(),
     )
     .bind(&year_month)
     .bind(&partd_contract_id)
-    .bind(&BENES_PAGE_SIZE)
-    .fetch_all(pool)
-    .await
-    .wrap_err_with(|| {
-        format!(
-            "Error running '{:?}' query: partd_contract_id='{}', year_month='{}'",
-            DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonth,
-            partd_contract_id,
-            year_month
-        )
-    });
+    .bind(&BENES_PAGE_SIZE);
 
-    // Write out the CSV row for the query.
-    output_csv_row(
+    // Run the query.
+    let bene_ids_result = query::fetch_all_monitored(
+        pool,
         csv_serializer,
         DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonth,
         format!(
             "partd_contract_id='{}', year_month='{}'",
             partd_contract_id, year_month
         ),
-        bene_ids_result.is_ok(),
-        bene_ids_before.elapsed(),
-        match bene_ids_result {
-            Ok(ref bene_ids) => Some(bene_ids.len()),
-            Err(_) => None,
-        },
+        bene_ids_query,
     )
-    .await?;
+    .await;
 
     // Pull the results out of the query.
     let bene_ids = bene_ids_result?.into_iter().map(|row| row.get(0)).collect();
@@ -467,11 +433,8 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
     year_month: &str,
     min_bene_id: &str,
 ) -> Result<Vec<String>> {
-    // Grab a timestamp, so we can see how long the query takes.
-    let bene_ids_before = Instant::now();
-
-    // Run the query.
-    let bene_ids_result = sqlx::query(
+    // Create the query.
+    let bene_ids_query = sqlx::query(
         DATABASE_QUERY_SQL
             .get(&DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId)
             .unwrap(),
@@ -479,34 +442,20 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
     .bind(&year_month)
     .bind(&partd_contract_id)
     .bind(&min_bene_id)
-    .bind(&BENES_PAGE_SIZE)
-    .fetch_all(pool)
-    .await
-    .wrap_err_with(|| {
-        format!(
-            "Error running '{:?}' query: partd_contract_id='{}', year_month='{}'",
-            DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
-            partd_contract_id,
-            year_month
-        )
-    });
+    .bind(&BENES_PAGE_SIZE);
 
-    // Write out the CSV row for the query.
-    output_csv_row(
+    // Run the query.
+    let bene_ids_result = query::fetch_all_monitored(
+        pool,
         csv_serializer,
         DatabaseQuery::SelectBeneIdsByPartDContractIdAndYearMonthAndMinBeneId,
         format!(
             "partd_contract_id='{}', year_month='{}', min_bene_id='{}'",
             partd_contract_id, year_month, min_bene_id
         ),
-        bene_ids_result.is_ok(),
-        bene_ids_before.elapsed(),
-        match bene_ids_result {
-            Ok(ref bene_ids) => Some(bene_ids.len()),
-            Err(_) => None,
-        },
+        bene_ids_query,
     )
-    .await?;
+    .await;
 
     // Pull the results out of the query.
     let bene_ids = bene_ids_result?.into_iter().map(|row| row.get(0)).collect();
@@ -525,9 +474,6 @@ async fn select_bene_records_by_bene_ids(
     csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
     bene_ids: &Vec<String>,
 ) -> Result<Vec<PgRow>> {
-    // Grab a timestamp, so we can see how long the query takes.
-    let benes_before = Instant::now();
-
     /*
      * Ridiculous, but SQLx doesn't support binding `IN` parameters.
      *
@@ -536,36 +482,24 @@ async fn select_bene_records_by_bene_ids(
     let bene_ids_param: Vec<String> = bene_ids.into_iter().map(|i| format!("'{}'", i)).collect();
     let bene_ids_param = bene_ids_param.join(",");
 
-    // Run the query.
-    let benes_result = sqlx::query(
+    // Create the query.
+    let benes_query = sqlx::query(
         DATABASE_QUERY_SQL
             .get(&DatabaseQuery::SelectBeneRecordsByBeneIds)
             .unwrap(),
     )
     .bind(bene_ids_param)
-    .bind(&BENES_PAGE_SIZE)
-    .fetch_all(pool)
-    .await
-    .wrap_err_with(|| {
-        format!(
-            "Error running '{:?}' query.",
-            DatabaseQuery::SelectBeneRecordsByBeneIds
-        )
-    });
+    .bind(&BENES_PAGE_SIZE);
 
-    // Write out the CSV row for the query.
-    output_csv_row(
+    // Run the query.
+    let benes_result = query::fetch_all_monitored(
+        pool,
         csv_serializer,
         DatabaseQuery::SelectBeneRecordsByBeneIds,
         format!("bene_ids.len='{}'", bene_ids.len()),
-        benes_result.is_ok(),
-        benes_before.elapsed(),
-        match benes_result {
-            Ok(ref bene_ids) => Some(bene_ids.len()),
-            Err(_) => None,
-        },
+        benes_query,
     )
-    .await?;
+    .await;
 
     // Pull the results out of the query.
     let benes = benes_result?;
