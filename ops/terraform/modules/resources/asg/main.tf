@@ -30,7 +30,7 @@ resource "aws_security_group" "base" {
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-base" }, local.tags)
 
-  # Allow all traffic from CBC
+  # Allow all traffic from CI CIDRs
   ingress {
     from_port   = 0
     protocol    = "-1"
