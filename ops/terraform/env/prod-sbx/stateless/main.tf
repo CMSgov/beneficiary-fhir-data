@@ -23,4 +23,5 @@ module "stateless" {
   is_public       = true
 
   mpm_rda_cidr_block = var.mpm_rda_cidr_block
+  cbc_cidr_block     = var.cbc_cidr_block
 }

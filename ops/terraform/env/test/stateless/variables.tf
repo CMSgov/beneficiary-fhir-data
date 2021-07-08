@@ -28,3 +28,9 @@ variable "mpm_rda_cidr_block" {
   type        = string
   default     = null
 }
+
+variable "cbc_cidr_block" {
+  description = "CIDR block of ITOPS CBC"
+  type        = string
+  default     = null
+}
