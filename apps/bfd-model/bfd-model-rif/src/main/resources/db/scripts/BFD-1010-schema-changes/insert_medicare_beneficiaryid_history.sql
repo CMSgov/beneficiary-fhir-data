@@ -1,9 +1,9 @@
-insert into cmac.medicare_beneficiaryid_history (
+insert into public.medicare_beneficiaryid_history (
 	medicare_beneficiaryid_key,
 	bene_id,
-	bene_mbi_id,
 	bene_clm_acnt_num,
 	bene_ident_cd,
+	bene_crnt_rec_ind_id,
 	mbi_sqnc_num,
 	mbi_num,
 	mbi_efctv_bgn_dt,
@@ -15,14 +15,14 @@ insert into cmac.medicare_beneficiaryid_history (
 	creat_ts,
 	updt_user_id,
 	updt_ts,
-	bene_crnt_rec_ind_id,
-	last_updated)
+	last_updated
+)
 select
 	"medicareBeneficiaryIdKey",
 	cast("beneficiaryId" as bigint),
-	"medicareBeneficiaryIdKey",
 	"claimAccountNumber",
 	"beneficiaryIdCode",
+	"mbiCrntRecIndId",
 	"mbiSequenceNumber",
 	"medicareBeneficiaryId",
 	"mbiEffectiveDate",
@@ -34,6 +34,5 @@ select
 	"mbiAddDate",
 	"mbiUpdateUser",
 	"mbiUpdateDate",
-	"mbiCrntRecIndId",
 	"lastupdated"
 from public."MedicareBeneficiaryIdHistory";

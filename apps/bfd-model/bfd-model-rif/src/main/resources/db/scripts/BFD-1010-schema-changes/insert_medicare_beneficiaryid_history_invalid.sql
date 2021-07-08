@@ -1,8 +1,9 @@
-insert into cmac.medicare_beneficiaryid_history_invalid_beneficiaries (
+insert into public.medicare_beneficiaryid_history_invalid_beneficiaries (
 	medicare_beneficiaryid_key,
 	bene_id,
 	bene_clm_acnt_num,
 	bene_ident_cd,
+	bene_crnt_rec_ind_id,
 	mbi_sqnc_num,
 	mbi_num,
 	mbi_efctv_bgn_dt,
@@ -13,14 +14,14 @@ insert into cmac.medicare_beneficiaryid_history_invalid_beneficiaries (
 	creat_user_id,
 	creat_ts,
 	updt_user_id,
-	updt_ts,
-	bene_crnt_rec_ind_id
+	updt_ts
 )
 select
 	"medicareBeneficiaryIdKey",
 	cast("beneficiaryId" as bigint),
 	"claimAccountNumber",
 	"beneficiaryIdCode",
+	"mbiCrntRecIndId",
 	"mbiSequenceNumber",
 	"medicareBeneficiaryId",
 	"mbiEffectiveDate",
@@ -31,6 +32,5 @@ select
 	"mbiAddUser",
 	"mbiAddDate",
 	"mbiUpdateUser",
-	"mbiUpdateDate",
-	"mbiCrntRecIndId"
+	"mbiUpdateDate"
 from public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries";

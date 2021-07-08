@@ -1,4 +1,4 @@
-insert into cmac.loaded_batches (
+insert into public.loaded_batches (
 	loaded_batch_id,
 	loaded_file_id,
 	beneficiaries,
@@ -11,7 +11,7 @@ select
 	"created"
 from public."LoadedBatches";
 
-insert into cmac.loaded_files (
+insert into public.loaded_files (
     loaded_file_id,
     rif_type,
     created

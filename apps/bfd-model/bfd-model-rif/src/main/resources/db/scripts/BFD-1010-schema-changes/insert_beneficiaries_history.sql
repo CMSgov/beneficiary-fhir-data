@@ -1,8 +1,8 @@
-insert into cmac.beneficiaries_history 
+insert into public.beneficiaries_history 
 	(beneficiary_history_id, 
 	 bene_id, 
 	 bene_birth_dt, 
-	 bene_crnt_hic_num, 
+	 bene_crnt_hicn, 
 	 bene_sex_ident_cd, 
 	 hicn_unhashed, 
 	 mbi_num, 
@@ -21,4 +21,4 @@ select "beneficiaryHistoryId",
        "mbiEffectiveDate", 
        "mbiObsoleteDate", 
        "lastupdated" 
-from   public."beneficiarieshistory"; 
+from   public."BeneficiariesHistory"; 

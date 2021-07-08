@@ -424,6 +424,8 @@ create table dme_claim_lines (
     dmerc_line_mtus_cd                       character(1),                             -- mtusCode
     dmerc_line_mtus_cnt                      smallint not null,                        -- mtusCount
     dmerc_line_prcng_state_cd                character varying(2),                     -- pricingStateCode
+    dmerc_line_scrn_svgs_amt                 money,                                    -- screenSavingsAmount
+    dmerc_line_supplr_type_cd                character(1),                             -- supplierTypeCode
     nch_prmry_pyr_clm_pd_amt                 money not null,                           -- primaryPayerPaidAmount
     prvdr_num                                character varying(10),                    -- providerBillingNumber
     prvdr_npi                                character varying(12),                    -- providerNPI
@@ -431,9 +433,7 @@ create table dme_claim_lines (
     rev_cntr_prvdr_pmt_amt                   money not null,                           -- providerPaymentAmount
     prvdr_spclty                             character varying(3),                     -- providerSpecialityCode
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
-    tax_num                                  character varying(10) not null,           -- providerTaxNumber
-    dmerc_line_scrn_svgs_amt                 money,                                    -- screenSavingsAmount
-    dmerc_line_supplr_type_cd                character(1)                              -- supplierTypeCode
+    tax_num                                  character varying(10) not null            -- providerTaxNumber
 );
 --
 --
@@ -786,7 +786,6 @@ create table inpatient_claim_lines (
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12)                     -- revenueCenterRenderingPhysicianUPIN
-
 );
 --
 --
@@ -1075,9 +1074,9 @@ create table loaded_files (
 create table medicare_beneficiaryid_history (
     medicare_beneficiaryid_key               bigint not null,                          -- medicareBeneficiaryIdKey
     bene_id                                  bigint,                                   -- beneficiaryId
-    bene_mbi_id                              character varying(11) not null,           -- medicareBeneficiaryIdKey
     bene_clm_acnt_num                        character varying(9),                     -- claimAccountNumber
     bene_ident_cd                            character varying(2),                     -- beneficiaryIdCode
+    bene_crnt_rec_ind_id                     integer,                                  -- mbiCrntRecIndId
     mbi_sqnc_num                             smallint,                                 -- mbiSequenceNumber
     mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
     mbi_efctv_bgn_dt                         date,                                     -- mbiEffectiveDate
@@ -1089,7 +1088,6 @@ create table medicare_beneficiaryid_history (
     creat_ts                                 timestamp without time zone,              -- mbiAddDate
     updt_user_id                             character varying(30),                    -- mbiUpdateUser
     updt_ts                                  timestamp without time zone,              -- mbiUpdateDate
-    bene_crnt_rec_ind_id                     smallint,                                 -- mbiCrntRecIndId
     last_updated                             timestamp with time zone                  -- lastupdated
 );
 --
@@ -1099,6 +1097,7 @@ create table medicare_beneficiaryid_history_invalid_beneficiaries (
     bene_id                                  bigint,                                   -- beneficiaryId
     bene_clm_acnt_num                        character varying(9),                     -- claimAccountNumber
     bene_ident_cd                            character varying(2),                     -- beneficiaryIdCode
+    bene_crnt_rec_ind_id                     integer,                                  -- mbiCrntRecIndId
     mbi_sqnc_num                             smallint,                                 -- mbiSequenceNumber
     mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
     mbi_efctv_bgn_dt                         date,                                     -- mbiEffectiveDate
@@ -1109,8 +1108,7 @@ create table medicare_beneficiaryid_history_invalid_beneficiaries (
     creat_user_id                            character varying(30),                    -- mbiAddUser
     creat_ts                                 timestamp without time zone,              -- mbiAddDate
     updt_user_id                             character varying(30),                    -- mbiUpdateUser
-    updt_ts                                  timestamp without time zone,              -- mbiUpdateDate
-    bene_crnt_rec_ind_id                     smallint                                  -- mbiCrntRecIndId
+    updt_ts                                  timestamp without time zone              -- mbiUpdateDate
 );
 --
 --
@@ -1150,7 +1148,7 @@ create table outpatient_claim_lines (
     rev_cntr_stus_ind_cd                     character varying(2),                     -- statusCode
     rev_cntr_tot_chrg_amt                    money not null,                           -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null,                        -- unitCount
-    rev_cntr_coinsrnc_wge_adjstd_c           money not null                            -- wageAdjustedCoinsuranceAmount
+    rev_cntr_coinsrnc_wge_adjstd_amt         numeric(10,2) not null                    -- wageAdjustedCoinsuranceAmount
 );
 --
 --
