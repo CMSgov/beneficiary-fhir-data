@@ -33,7 +33,14 @@ resource "aws_security_group" "base" {
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-base" }, local.tags)
 
-  # Note: If we want to allow Jenkins to SSH into boxes, that would go here.
+  # Allow all traffic from CBC
+  ingress {
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+    cidr_blocks = var.mgmt_config.ci_cidrs
+  }
+
   egress {
     from_port   = 0
     protocol    = "-1"

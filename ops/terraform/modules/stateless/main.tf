@@ -227,7 +227,7 @@ module "fhir_asg" {
     vpn_sg    = data.aws_security_group.vpn.id
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
-    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
+    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block, var.cbc_cidr_block]
   }
 }
 
@@ -398,7 +398,7 @@ module "bfd_pipeline" {
     vpn_sg    = data.aws_security_group.vpn.id
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
-    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
+    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block, var.cbc_cidr_block]
   }
 
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
