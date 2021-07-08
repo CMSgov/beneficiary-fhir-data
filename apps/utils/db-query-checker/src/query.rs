@@ -1,5 +1,7 @@
 //! Contains utilities for wrapping/monitoring SQLx queries.
 
+use std::{collections::HashMap, hash::Hash, sync::Arc};
+
 use csv_async::AsyncSerializer;
 use eyre::{Result, WrapErr};
 use lazy_static::lazy_static;
@@ -9,7 +11,6 @@ use sqlx::{
     query::Query,
     Executor, Pool, Postgres,
 };
-use std::{collections::HashMap, hash::Hash, sync::Arc};
 use tokio::{fs::File, sync::Mutex, time::Instant};
 
 use crate::csv_log::output_csv_row;
@@ -109,4 +110,18 @@ pub async fn fetch_all_monitored<'q>(
 
     // Return the query's results.
     query_result
+}
+
+/// Unit tests for the [crate::query] module.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Verifies that [DATABASE_QUERY_SQL] works as expected.
+    #[test]
+    fn test_query_map() {
+        assert!(DATABASE_QUERY_SQL
+            .get(&DatabaseQuery::SelectBeneRecordsByBeneIds)
+            .is_some());
+    }
 }
