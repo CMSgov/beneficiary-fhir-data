@@ -7,6 +7,11 @@
 //!
 //! See the `README.md` file for further details.
 
+use std::{
+    sync::{atomic::AtomicU32, Arc},
+    time::Duration,
+};
+
 use csv_async::AsyncSerializer;
 use dotenv::dotenv;
 use eyre::{Result, WrapErr};
@@ -14,10 +19,6 @@ use futures::{stream::FuturesUnordered, StreamExt};
 use sqlx::{
     postgres::{PgPoolOptions, PgRow},
     Executor, Pool, Postgres, Row,
-};
-use std::{
-    sync::{atomic::AtomicU32, Arc},
-    time::Duration,
 };
 use tokio::{fs::File, sync::Mutex};
 use tracing::{info, warn, Instrument};
