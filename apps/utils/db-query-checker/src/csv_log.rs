@@ -36,6 +36,36 @@ struct CsvOutputRow {
 
 /// Writes out a [CsvOutputRow] for the specified parameters.
 ///
+/// For example:
+/// ```rust
+/// # // <test setup boilerplate>
+/// # #[tokio::test]
+/// # async fn my_test() {
+/// # use std::{sync::Arc, time::Instant};
+/// # use csv_async::AsyncSerializer;
+/// # use tokio::{io::BufWriter, sync::Mutex};
+/// # use crate::{csv_log::output_csv_row, query::DatabaseQuery};
+/// # let mut buffer = BufWriter::new(Vec::new());
+/// # let csv_serializer = Arc::new(Mutex::new(AsyncSerializer::from_writer(&mut buffer)));
+/// # // </test setup boilerplate>
+/// // Write out a row after a query has completed.
+/// // let csv_serializer = ...
+/// let query_before = Instant::now();
+/// let query_result_fake = Ok(vec![]);
+/// output_csv_row(
+///   csv_serializer,
+///   DatabaseQuery::SelectBeneRecordsByBeneIds,
+///   format!("k1 = v1, k2 = v2"),
+///   query_result_fake.is_ok(),
+///   query_before.elapsed(),
+///   match query_result {
+///     Ok(ref result) => Some(result.len()),
+///     Err(_) => None,
+///   }
+/// ).await;
+/// # }
+/// ```
+///
 /// Parameters:
 /// * `csv_serializer`: The CSV [AsyncSerializer] to output results to.
 /// * `query_id`: The [DatabaseQuery] that identifies the SQL query that was run.
