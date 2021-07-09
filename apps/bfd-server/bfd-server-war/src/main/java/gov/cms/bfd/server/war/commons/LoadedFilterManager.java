@@ -167,9 +167,8 @@ public class LoadedFilterManager {
         if (filter.mightContain(beneficiaryId)) {
           return false;
         }
-      } else if (filter
-          .getLastUpdated()
-          .isBefore(lastUpdatedRange.getLowerBoundAsInstant().toInstant())) {
+      } else if (filter.getLastUpdated().toEpochMilli()
+          < lastUpdatedRange.getLowerBoundAsInstant().toInstant().toEpochMilli()) {
         // filters are sorted in descending by lastUpdated time, so we can exit early from this
         // loop
         return true;
@@ -193,8 +192,7 @@ public class LoadedFilterManager {
     // The manager has a "known" interval which it has information about. The known range
     // is from the firstFilterUpdate to the future.
     final Instant lowerBound = range.getLowerBoundAsInstant().toInstant();
-    return lowerBound != null
-        && lowerBound.getEpochSecond() >= getFirstBatchCreated().getEpochSecond();
+    return lowerBound != null && lowerBound.toEpochMilli() >= getFirstBatchCreated().toEpochMilli();
   }
 
   /**
