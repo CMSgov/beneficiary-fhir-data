@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -21,9 +22,8 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -1880,10 +1880,7 @@ public final class PatientResourceProviderIT {
             .get();
 
     // Build up a list of lastUpdatedURLs that return > all values values
-    DateTimeFormatter dtf =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSx':00'")
-            .withZone(ZoneId.systemDefault());
-    String nowDateTime = dtf.format(Instant.now().plusSeconds(1));
+    String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
     String earlyDateTime = "2019-10-01T00:00:00-04:00";
     List<String> allUrls =
         Arrays.asList(
