@@ -1700,7 +1700,11 @@ public final class ExplanationOfBenefitResourceProviderIT {
     Assert.assertEquals(
         "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
         TransformerConstants.FALLBACK_LAST_UPDATED,
-        filterToClaimType(searchAll, ClaimType.CARRIER).get(0).getMeta().getLastUpdated());
+        filterToClaimType(searchAll, ClaimType.CARRIER)
+            .get(0)
+            .getMeta()
+            .getLastUpdated()
+            .toInstant());
 
     // Find all EOBs with < now()
     Bundle searchWithLessThan =
@@ -1714,7 +1718,11 @@ public final class ExplanationOfBenefitResourceProviderIT {
     Assert.assertEquals(
         "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
         TransformerConstants.FALLBACK_LAST_UPDATED,
-        filterToClaimType(searchWithLessThan, ClaimType.CARRIER).get(0).getMeta().getLastUpdated());
+        filterToClaimType(searchWithLessThan, ClaimType.CARRIER)
+            .get(0)
+            .getMeta()
+            .getLastUpdated()
+            .toInstant());
     Assert.assertEquals(
         "Expected the search for lastUpdated <= now() to include resources with fallback lastUpdated values",
         searchAll.getTotal(),
