@@ -1,30 +1,47 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 
 /**
  * Allows for generic processing of resource using common logic. Claims and ClaimResponses have the
@@ -43,7 +60,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private LoadedFilterManager loadedFilterManager;
 
   private ClaimDao claimDao;
 
@@ -59,12 +75,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
-  }
-
-  /** @param loadedFilterManager the {@link LoadedFilterManager} to use */
-  @Inject
-  public void setLoadedFilterManager(LoadedFilterManager loadedFilterManager) {
-    this.loadedFilterManager = loadedFilterManager;
   }
 
   @PostConstruct
@@ -110,7 +120,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return Returns a resource matching the specified {@link IdDt}, or <code>null</code> if none
    *     exists.
    */
-  @Read(version = false)
+  @Read
   @Trace
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
     if (claimId == null) throw new IllegalArgumentException("Resource ID can not be null");
@@ -143,11 +153,126 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   }
 
   /**
-   * Helper method to make mocking easier in tests.
+   * Implementation specific claim type parsing
    *
    * @param typeText String to parse representing the claim type.
    * @return The parsed {@link ClaimResponseTypeV2} type.
    */
   @VisibleForTesting
   abstract Optional<ResourceTypeV2<T>> parseClaimType(String typeText);
+
+  /**
+   * Creates a Set of {@link ResourceTypeV2} for the given claim types.
+   *
+   * @param types The types of claims to include
+   * @return A Set of {@link ResourceTypeV2} claim types.
+   */
+  @VisibleForTesting
+  @Nonnull
+  Set<ResourceTypeV2<T>> parseClaimTypes(@Nonnull TokenAndListParam types) {
+    return types.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().stream()
+        .map(TokenParam::getValue)
+        .map(String::toLowerCase)
+        .map(getResourceTypeMap()::get)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Returns a set of all supported resource types.
+   *
+   * @return Set of all supported resource types.
+   */
+  @VisibleForTesting
+  abstract Set<ResourceTypeV2<T>> getResourceTypes();
+
+  /**
+   * Returns implementation specific {@link ResourceTypeV2} map.
+   *
+   * @return The implementation specific {@link ResourceTypeV2} map.
+   */
+  @VisibleForTesting
+  abstract Map<String, ResourceTypeV2<T>> getResourceTypeMap();
+
+  @Search
+  @Trace
+  public Bundle findByPatient(
+      @RequiredParam(name = "mbi")
+          @Description(shortDefinition = "The patient identifier to search for")
+          ReferenceParam mbi,
+      @OptionalParam(name = "type")
+          @Description(shortDefinition = "A list of claim types to include")
+          TokenAndListParam types,
+      @OptionalParam(name = "isHashed")
+          @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
+          String hashed,
+      @OptionalParam(name = "_lastUpdated")
+          @Description(shortDefinition = "Include resources last updated in the given range")
+          DateRangeParam lastUpdated,
+      @OptionalParam(name = "service-date")
+          @Description(shortDefinition = "Include resources that completed in the given range")
+          DateRangeParam serviceDate,
+      RequestDetails requestDetails) {
+    if (mbi != null && !StringUtils.isBlank(mbi.getIdPart())) {
+      String mbiString = mbi.getIdPart();
+
+      Bundle bundleResource;
+
+      boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
+
+      if (types != null) {
+        bundleResource = createBundleFor(parseClaimTypes(types), mbiString, isHashed, lastUpdated);
+      } else {
+        bundleResource = createBundleFor(getResourceTypes(), mbiString, isHashed, lastUpdated);
+      }
+
+      return bundleResource;
+    } else {
+      throw new IllegalArgumentException("mbi can't be null/blank");
+    }
+  }
+
+  /**
+   * Creates a Bundle of resources for the given data using the given {@link ResourceTypeV2}.
+   *
+   * @param resourceTypes The {@link ResourceTypeV2} data to retrieve.
+   * @param mbi The mbi to look up associated data for.
+   * @param isHashed Denotes if the given mbi is hashed.
+   * @param lastUpdated Date range of desired lastUpdate values to retrieve data for.
+   * @return A Bundle with data found using the provided parameters.
+   */
+  @VisibleForTesting
+  Bundle createBundleFor(
+      Set<ResourceTypeV2<T>> resourceTypes,
+      String mbi,
+      boolean isHashed,
+      DateRangeParam lastUpdated) {
+    List<T> resources = new ArrayList<>();
+
+    for (ResourceTypeV2<T> type : resourceTypes) {
+      List<?> entities;
+
+      String attributeName =
+          isHashed ? type.getEntityMbiHashAttribute() : type.getEntityMbiAttribute();
+
+      // TODO: [DCGEO-117] Implement additional search by service date range
+      entities =
+          claimDao.findAllByAttribute(type.getEntityClass(), attributeName, mbi, lastUpdated);
+
+      resources.addAll(
+          entities.stream()
+              .map(e -> type.getTransformer().transform(metricRegistry, e))
+              .collect(Collectors.toList()));
+    }
+
+    Bundle bundle = new Bundle();
+
+    resources.forEach(
+        c -> {
+          Bundle.BundleEntryComponent entry = bundle.addEntry();
+          entry.setResource((Resource) c);
+        });
+
+    return bundle;
+  }
 }
