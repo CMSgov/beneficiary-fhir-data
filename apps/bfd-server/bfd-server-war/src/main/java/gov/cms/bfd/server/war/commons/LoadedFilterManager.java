@@ -5,6 +5,7 @@ import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -191,8 +192,8 @@ public class LoadedFilterManager {
 
     // The manager has a "known" interval which it has information about. The known range
     // is from the firstFilterUpdate to the future.
-    final Instant lowerBound = range.getLowerBoundAsInstant().toInstant();
-    return lowerBound != null && lowerBound.toEpochMilli() >= getFirstBatchCreated().toEpochMilli();
+    final Date lowerBound = range.getLowerBoundAsInstant();
+    return lowerBound != null && lowerBound.getTime() >= getFirstBatchCreated().toEpochMilli();
   }
 
   /**
