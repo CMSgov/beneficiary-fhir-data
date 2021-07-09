@@ -1,0 +1,98 @@
+name: 'CI - Rust'
+on: pull_request
+
+jobs:
+
+  lint:
+    strategy:
+      matrix:
+        project:
+          - name: db-query-checker
+            directory: apps/utils/db-query-checker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Note: This only affects `run` steps; not actions.
+        working-directory: ${{ matrix.project.directory }}
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v2
+
+      # Try to use cache from this or ancestor branches.
+      # Also sets a hook that will cache this build after the job is complete.
+      - name: 'Cache cargo registry'
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
+      - name: 'Cache cargo index'
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
+      - name: 'Cache cargo build'
+        uses: actions/cache@v1
+        with:
+          path: ${{ matrix.project.directory }}/target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
+
+      - name: 'Install stable toolchain'
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - name: 'Run `cargo fmt`'
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --manifest-path ${{ matrix.project.directory }}/Cargo.toml --all -- --check
+      - name: '`Run cargo clippy`'
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          # Note workaround for subdir support: <https://github.com/actions-rs/cargo/issues/86#issuecomment-667088617>.
+          args: --manifest-path ${{ matrix.project.directory }}/Cargo.toml -- -D warnings
+
+  check:
+    strategy:
+      matrix:
+        project:
+          - name: db-query-checker
+            directory: apps/utils/db-query-checker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Note: This only affects `run` steps; not actions.
+        working-directory: ${{ matrix.project.directory }}
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v2
+
+      # Try to use cache from this or ancestor branches.
+      # Also sets a hook that will cache this build after the job is complete.
+      - name: 'Cache cargo registry'
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
+      - name: 'Cache cargo index'
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
+      - name: 'Cache cargo build'
+        uses: actions/cache@v1
+        with:
+          path: ${{ matrix.project.directory }}/target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles(format('{0}/**/Cargo.lock', matrix.project.directory)) }}
+
+      - name: 'Install stable toolchain'
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: 'Run `cargo check`'
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          # Note workaround for subdir support: <https://github.com/actions-rs/cargo/issues/86#issuecomment-667088617>.
+          args: --manifest-path ${{ matrix.project.directory }}/Cargo.toml
