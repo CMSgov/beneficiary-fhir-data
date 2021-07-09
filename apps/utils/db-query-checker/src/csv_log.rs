@@ -98,8 +98,6 @@ where
 
     // TODO: If performance is slow, I could also batch these writes.
 
-    // TODO: does moving this to a `tokio::spawn(...)` block improve performance?
-
     let mut csv_serializer_lock = csv_serializer.lock().await;
     csv_serializer_lock
         .serialize(&row)
