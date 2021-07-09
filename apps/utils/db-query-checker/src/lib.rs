@@ -40,12 +40,12 @@ pub async fn run_db_query_checker() -> Result<()> {
     dotenv().ok();
 
     // Pull config from environment variables
-    let output_path =
-        std::env::var("DB_QUERIES_OUTPUT").unwrap_or("results/db_query_checker.csv".into());
+    let output_path = std::env::var("DB_QUERIES_OUTPUT")
+        .unwrap_or_else(|_| "results/db_query_checker.csv".into());
     let db_uri =
         std::env::var("DB_QUERIES_URI").expect("Undefined environment variable: DB_QUERIES_URI");
     let db_connections: u32 = std::env::var("DB_QUERIES_CONNECTIONS")
-        .unwrap_or("5".into())
+        .unwrap_or_else(|_| "5".into())
         .parse()
         .expect("Unable to parse environment variable: DB_QUERIES_CONNECTIONS");
 
@@ -120,7 +120,7 @@ pub async fn run_db_query_checker() -> Result<()> {
     let year_months = {
         let mut year_months = vec![];
         for year in 2020..=2021 {
-            for month in vec![
+            for month in &[
                 "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12",
             ] {
                 year_months.push(format!("{}-{}-01", year, month));
@@ -355,7 +355,7 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month(
 async fn select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
     db_pool: &Pool<Postgres>,
     csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
-    partd_contract_id: &String,
+    partd_contract_id: &str,
     year_month: &str,
     min_bene_id: &str,
 ) -> Result<Vec<String>> {
@@ -398,14 +398,14 @@ async fn select_bene_ids_by_part_d_contract_id_and_year_month_and_min_bene_id(
 async fn select_bene_records_by_bene_ids(
     db_pool: &Pool<Postgres>,
     csv_serializer: Arc<Mutex<AsyncSerializer<File>>>,
-    bene_ids: &Vec<String>,
+    bene_ids: &[String],
 ) -> Result<Vec<PgRow>> {
     /*
      * Ridiculous, but SQLx doesn't support binding `IN` parameters.
      *
      * Reference: <https://www.reddit.com/r/rust/comments/ip4a0q/sql_x_how_do_you_parameterize_an_in_statement_or/>
      */
-    let bene_ids_param: Vec<String> = bene_ids.into_iter().map(|i| format!("'{}'", i)).collect();
+    let bene_ids_param: Vec<String> = bene_ids.iter().map(|i| format!("'{}'", i)).collect();
     let bene_ids_param = bene_ids_param.join(",");
 
     // Create the query.
