@@ -66,7 +66,7 @@ However, if we find future need to expand on this type of check,
 
 Why Rust?
 Because this problem is **perfect** for Rust's `async` model:
-  we need run many iterations of slightly different test scripts,
+  we need to run many iterations of slightly different test scripts,
   which all will spend most of their time waiting around for I/O to complete.
 With Rust, even a single small test client system should be easily able to saturate a DB server.
 (We don't actually _want_ to saturate a DB server,
