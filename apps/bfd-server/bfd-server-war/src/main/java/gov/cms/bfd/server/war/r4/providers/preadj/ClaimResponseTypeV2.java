@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.util.Optional;
@@ -13,12 +14,23 @@ import org.hl7.fhir.r4.model.ClaimResponse;
  * {@link R4ClaimResponseResourceProvider}.
  */
 public enum ClaimResponseTypeV2 implements ResourceTypeV2<ClaimResponse> {
-  F(PreAdjFissClaim.class, PreAdjFissClaim.Fields.dcn, FissClaimResponseTransformerV2::transform);
+  F(
+      PreAdjFissClaim.class,
+      PreAdjFissClaim.Fields.mbi,
+      PreAdjFissClaim.Fields.mbiHash,
+      PreAdjFissClaim.Fields.dcn,
+      FissClaimResponseTransformerV2::transform),
 
-  // TODO: [DCGEO-88, DCGEO-98] Complete null fields when entity available
-  // M(null, null, McsClaimResponseTransformerV2::transform);
+  M(
+      PreAdjMcsClaim.class,
+      PreAdjMcsClaim.Fields.idrClaimMbi,
+      PreAdjMcsClaim.Fields.idrClaimMbiHash,
+      PreAdjMcsClaim.Fields.idrClmHdIcn,
+      McsClaimResponseTransformerV2::transform);
 
   private final Class<?> entityClass;
+  private final String entityMbiAttribute;
+  private final String entityMbiHashAttribute;
   private final String entityIdAttribute;
   private final ResourceTransformer<ClaimResponse> transformer;
 
@@ -26,14 +38,20 @@ public enum ClaimResponseTypeV2 implements ResourceTypeV2<ClaimResponse> {
    * Enum constant constructor.
    *
    * @param entityClass the value to use for {@link #getEntityClass()}
+   * @param entityMbiAttribute the value to use for {@link #getEntityMbiAttribute()}
+   * @param entityMbiHashAttribute the value to use for {@link #getEntityMbiHashAttribute()}
    * @param entityIdAttribute the value to use for {@link #getEntityIdAttribute()}
    * @param transformer the value to use for {@link #getTransformer()}
    */
   ClaimResponseTypeV2(
       Class<?> entityClass,
+      String entityMbiAttribute,
+      String entityMbiHashAttribute,
       String entityIdAttribute,
       ResourceTransformer<ClaimResponse> transformer) {
     this.entityClass = entityClass;
+    this.entityMbiAttribute = entityMbiAttribute;
+    this.entityMbiHashAttribute = entityMbiHashAttribute;
     this.entityIdAttribute = entityIdAttribute;
     this.transformer = transformer;
   }
@@ -49,6 +67,16 @@ public enum ClaimResponseTypeV2 implements ResourceTypeV2<ClaimResponse> {
   /** @return the JPA {@link Entity} field used as the entity's {@link Id} */
   public String getEntityIdAttribute() {
     return entityIdAttribute;
+  }
+
+  /** @return The attribute name for the entity's mbi attribute. */
+  public String getEntityMbiAttribute() {
+    return entityMbiAttribute;
+  }
+
+  /** @return The attribute name for the entity's mbi hash attribute. */
+  public String getEntityMbiHashAttribute() {
+    return entityMbiHashAttribute;
   }
 
   /**

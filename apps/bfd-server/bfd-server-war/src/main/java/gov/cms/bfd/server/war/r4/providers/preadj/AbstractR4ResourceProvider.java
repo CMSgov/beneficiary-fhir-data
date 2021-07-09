@@ -56,8 +56,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * A {@link Pattern} that will match the {@link ClaimResponse#getId()}s used in this application,
    * e.g. <code>f-1234</code> or <code>m--1234</code> (for negative IDs).
    */
-  // TODO: [DCGEO-98] Update to include support for 'm' (MCS) prefix
-  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([f])-(-?\\p{Alnum}+)");
+  private static final Pattern CLAIM_ID_PATTERN = Pattern.compile("([fm])-(-?\\p{Alnum}+)");
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -253,12 +252,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     for (ResourceTypeV2<T> type : resourceTypes) {
       List<?> entities;
 
+      String attributeName =
+          isHashed ? type.getEntityMbiHashAttribute() : type.getEntityMbiAttribute();
+
       // TODO: [DCGEO-117] Implement additional search by service date range
-      if (isHashed) {
-        entities = claimDao.findAllByMbiHash(type.getEntityClass(), mbi, lastUpdated);
-      } else {
-        entities = claimDao.findAllByMbi(type.getEntityClass(), mbi, lastUpdated);
-      }
+      entities =
+          claimDao.findAllByAttribute(type.getEntityClass(), attributeName, mbi, lastUpdated);
 
       resources.addAll(
           entities.stream()
