@@ -79,8 +79,10 @@ public class QueryUtils {
   public static Predicate createLastUpdatedPredicate(
       CriteriaBuilder cb, Root<?> root, DateRangeParam range) {
     final Path<Instant> lastUpdatedPath = root.get("lastUpdated");
-    final Instant lowerBound = range.getLowerBoundAsInstant().toInstant();
-    final Instant upperBound = range.getUpperBoundAsInstant().toInstant();
+    final Instant lowerBound =
+        range.getLowerBoundAsInstant() == null ? null : range.getLowerBoundAsInstant().toInstant();
+    final Instant upperBound =
+        range.getUpperBoundAsInstant() == null ? null : range.getUpperBoundAsInstant().toInstant();
     Predicate lowerBoundPredicate;
     Predicate upperBoundPredicate;
 
