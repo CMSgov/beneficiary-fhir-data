@@ -22,4 +22,5 @@ module "stateless" {
   git_commit_id   = var.git_commit_id
 
   mpm_rda_cidr_block = var.mpm_rda_cidr_block
+  cbc_cidr_block     = var.cbc_cidr_block
 }
