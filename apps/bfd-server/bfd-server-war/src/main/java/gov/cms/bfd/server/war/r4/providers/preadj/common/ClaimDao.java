@@ -1,18 +1,25 @@
 package gov.cms.bfd.server.war.r4.providers.preadj.common;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 /** Provides common logic for performing DB interactions */
 public class ClaimDao {
 
+  private static final String CLAIM_BY_MBI_METRIC_QUERY = "claim_by_mbi";
+  private static final String CLAIM_BY_MBI_METRIC_NAME =
+      MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_BY_MBI_METRIC_QUERY);
   private static final String CLAIM_BY_ID_METRIC_QUERY = "claim_by_id";
   private static final String CLAIM_BY_ID_METRIC_NAME =
       MetricRegistry.name(ClaimDao.class.getSimpleName(), "query", CLAIM_BY_ID_METRIC_QUERY);
@@ -66,6 +73,55 @@ public class ClaimDao {
     }
 
     return claimEntity;
+  }
+
+  public <T> List<T> findAllByMbiHash(
+      Class<T> entityClass, String mbiHash, DateRangeParam lastUpdated) {
+    return findAllByAttribute(entityClass, "mbiHash", mbiHash, lastUpdated);
+  }
+
+  public <T> List<T> findAllByMbi(Class<T> entityClass, String mbi, DateRangeParam lastUpdated) {
+    return findAllByAttribute(entityClass, "mbi", mbi, lastUpdated);
+  }
+
+  @VisibleForTesting
+  <T> List<T> findAllByAttribute(
+      Class<T> entityClass,
+      String attributeName,
+      String attributeValue,
+      DateRangeParam lastUpdated) {
+    List<T> claimEntities = null;
+
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<T> criteria = builder.createQuery(entityClass);
+    Root<T> root = criteria.from(entityClass);
+
+    criteria.select(root);
+    criteria.where(
+        builder.and(
+            builder.equal(root.get(attributeName), attributeValue),
+            lastUpdated == null
+                ? builder.and()
+                : createDateRangePredicate(root, lastUpdated, builder)));
+
+    Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_MBI_METRIC_NAME).time();
+    try {
+      claimEntities = entityManager.createQuery(criteria).getResultList();
+    } finally {
+      long claimByIdQueryNanoSeconds = timerClaimQuery.stop();
+      TransformerUtilsV2.recordQueryInMdc(
+          CLAIM_BY_MBI_METRIC_QUERY,
+          claimByIdQueryNanoSeconds,
+          claimEntities == null || claimEntities.isEmpty() ? 0 : 1);
+    }
+
+    return claimEntities;
+  }
+
+  @VisibleForTesting
+  Predicate createDateRangePredicate(
+      Root<?> root, DateRangeParam dateRange, CriteriaBuilder builder) {
+    return QueryUtils.createLastUpdatedPredicateInstant(builder, root, dateRange);
   }
 
   @Override
