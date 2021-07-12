@@ -1623,7 +1623,10 @@ public final class TransformerUtilsV2 {
   public static void updateMaxLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     lastUpdated.ifPresent(
         newDate -> {
-          Instant currentDate = resource.getMeta().getLastUpdated().toInstant();
+          Instant currentDate =
+              resource.getMeta().getLastUpdated() != null
+                  ? resource.getMeta().getLastUpdated().toInstant()
+                  : null;
           if (currentDate != null && newDate.isAfter(currentDate)) {
             resource.getMeta().setLastUpdated(Date.from(newDate));
           }
