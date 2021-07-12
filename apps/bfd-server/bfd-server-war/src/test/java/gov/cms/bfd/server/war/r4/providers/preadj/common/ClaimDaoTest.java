@@ -9,7 +9,11 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -50,7 +54,7 @@ public class ClaimDaoTest {
   }
 
   @Test
-  public void shouldGetEntity() {
+  public void shouldGetEntityById() {
     String idAttributeName = "someAttribute";
     String claimId = "123";
 
@@ -96,6 +100,186 @@ public class ClaimDaoTest {
     //noinspection unchecked
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockPredicate);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void shouldInvokeFindEntitiesByAttributeForMbi() {
+    EntityManager mockEntityManager = mock(EntityManager.class);
+    MetricRegistry mockRegistry = mock(MetricRegistry.class);
+
+    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
+
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, mockRegistry));
+
+    List<Object> expected = Collections.singletonList(5L);
+
+    doReturn(null)
+        .when(daoSpy)
+        .findAllByAttribute(any(), anyString(), anyString(), any(DateRangeParam.class));
+
+    doReturn(expected)
+        .when(daoSpy)
+        .findAllByAttribute(Object.class, "mbi", "123", mockDateRangeParam);
+
+    List<Object> actual = daoSpy.findAllByMbi(Object.class, "123", mockDateRangeParam);
+
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void shouldInvokeFindEntitiesByAttributeForMbiHash() {
+    EntityManager mockEntityManager = mock(EntityManager.class);
+    MetricRegistry mockRegistry = mock(MetricRegistry.class);
+
+    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
+
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, mockRegistry));
+
+    List<Object> expected = Collections.singletonList(5L);
+
+    doReturn(null)
+        .when(daoSpy)
+        .findAllByAttribute(any(), anyString(), anyString(), any(DateRangeParam.class));
+
+    doReturn(expected)
+        .when(daoSpy)
+        .findAllByAttribute(Object.class, "mbiHash", "123", mockDateRangeParam);
+
+    List<Object> actual = daoSpy.findAllByMbiHash(Object.class, "123", mockDateRangeParam);
+
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void shouldFindEntitiesByAttribute() {
+    Class<Object> entityClass = Object.class;
+    String attributeName = "attr";
+    String attributeValue = "value";
+
+    EntityManager mockEntityManager = mock(EntityManager.class);
+    MetricRegistry metricRegistry = new MetricRegistry();
+
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry));
+
+    CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    CriteriaQuery<Object> mockQuery = mock(CriteriaQuery.class);
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    Root<Object> mockRoot = mock(Root.class);
+
+    Predicate mockEmptyAndPredicate = mock(Predicate.class);
+    Predicate mockAndPredicate = mock(Predicate.class);
+    Predicate mockEqualsPredicate = mock(Predicate.class);
+
+    Path<?> mockPath = mock(Path.class);
+
+    doReturn(mockEqualsPredicate).when(mockBuilder).equal(mockPath, attributeValue);
+
+    doReturn(null).when(mockBuilder).and(mockEqualsPredicate, null);
+
+    doReturn(mockAndPredicate).when(mockBuilder).and(mockEqualsPredicate, mockEmptyAndPredicate);
+
+    doReturn(mockEmptyAndPredicate).when(mockBuilder).and();
+
+    doReturn(mockPath).when(mockRoot).get(attributeName);
+
+    doReturn(mockRoot).when(mockQuery).from(entityClass);
+
+    doReturn(mockQuery).when(mockBuilder).createQuery(entityClass);
+
+    doReturn(mockBuilder).when(mockEntityManager).getCriteriaBuilder();
+
+    List<Object> expected = Collections.singletonList(5L);
+
+    TypedQuery<?> mockTypedQuery = mock(TypedQuery.class);
+
+    doReturn(expected).when(mockTypedQuery).getResultList();
+
+    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
+
+    List<Object> actual =
+        daoSpy.findAllByAttribute(entityClass, attributeName, attributeValue, null);
+
+    verify(mockQuery, times(1)).select(mockRoot);
+    verify(mockQuery, times(1)).where(mockAndPredicate);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void shouldFindEntitiesByAttributeAndLastUpdated() {
+    Class<Object> entityClass = Object.class;
+    String attributeName = "attr";
+    String attributeValue = "value";
+    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
+
+    EntityManager mockEntityManager = mock(EntityManager.class);
+    MetricRegistry metricRegistry = new MetricRegistry();
+
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry));
+
+    CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    CriteriaQuery<Object> mockQuery = mock(CriteriaQuery.class);
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    Root<Object> mockRoot = mock(Root.class);
+
+    Predicate mockEmptyAndPredicate = mock(Predicate.class);
+    Predicate mockAndPredicate = mock(Predicate.class);
+    Predicate mockEqualsPredicate = mock(Predicate.class);
+
+    Path<?> mockPath = mock(Path.class);
+
+    doReturn(mockEqualsPredicate).when(mockBuilder).equal(mockPath, attributeValue);
+
+    Predicate mockDateRangePredicate = mock(Predicate.class);
+
+    // unchecked - Creating mocks, this is ok.
+    //noinspection unchecked
+    Path<Instant> mockLastUpdatedPath = mock(Path.class);
+
+    doReturn(null)
+        .when(daoSpy)
+        .createDateRangePredicate(
+            any(Root.class), any(DateRangeParam.class), any(CriteriaBuilder.class));
+
+    doReturn(mockDateRangePredicate)
+        .when(daoSpy)
+        .createDateRangePredicate(mockRoot, mockDateRangeParam, mockBuilder);
+
+    doReturn(mockLastUpdatedPath).when(mockRoot).get("lastUpdated");
+
+    doReturn(null).when(mockBuilder).and(mockEqualsPredicate, null);
+
+    doReturn(mockAndPredicate).when(mockBuilder).and(mockEqualsPredicate, mockDateRangePredicate);
+
+    doReturn(mockEmptyAndPredicate).when(mockBuilder).and();
+
+    doReturn(mockPath).when(mockRoot).get(attributeName);
+
+    doReturn(mockRoot).when(mockQuery).from(entityClass);
+
+    doReturn(mockQuery).when(mockBuilder).createQuery(entityClass);
+
+    doReturn(mockBuilder).when(mockEntityManager).getCriteriaBuilder();
+
+    List<Object> expected = Collections.singletonList(5L);
+
+    TypedQuery<?> mockTypedQuery = mock(TypedQuery.class);
+
+    doReturn(expected).when(mockTypedQuery).getResultList();
+
+    doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
+
+    List<Object> actual =
+        daoSpy.findAllByAttribute(entityClass, attributeName, attributeValue, mockDateRangeParam);
+
+    verify(mockQuery, times(1)).select(mockRoot);
+    verify(mockQuery, times(1)).where(mockAndPredicate);
     assertEquals(expected, actual);
   }
 
