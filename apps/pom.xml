@@ -309,38 +309,6 @@
 					<artifactId>githook-maven-plugin</artifactId>
 					<version>1.0.4</version>
 					<configuration>
-						<hooks>
-							<pre-commit>
-#!/bin/sh
-set -e
-
-checkJavaFormat() {
-  echo 'Verifying Java source code format...'
-
-  if ! git diff --name-only --cached | grep -q '^apps/.*'; then
-    echo 'Verified Java source code format: no staged changes in app/.'
-    return 0
-  fi
-
-  cd apps
-
-  set +e
-  mvn com.coveo:fmt-maven-plugin:check >/dev/null 2>&amp;1
-  checkResult=$?
-  set -e
-
-  if [ ${checkResult} -eq 0 ]; then
-    echo 'Verified Java source code format: a-okay.'
-  else
-    echo "Verified Java source code format: inconsistencies found. Run 'mvn com.coveo:fmt-maven-plugin:check' for details or 'mvn com.coveo:fmt-maven-plugin:format' to automatically apply the required formatting."
-  fi
-
-  return ${checkResult}
-}
-
-checkJavaFormat
-							</pre-commit>
-						</hooks>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -528,19 +496,6 @@ checkJavaFormat
 								on every build, which will auto-format all of our Java source code. Note
 								that we have a Git pre-commit hook that will also do this. -->
 							<goal>format</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>io.github.phillipuniverse</groupId>
-				<artifactId>githook-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<inherited>false</inherited>
-						<goals>
-							<!-- Verify source code formatting prior to commit. -->
-							<goal>install</goal>
 						</goals>
 					</execution>
 				</executions>
