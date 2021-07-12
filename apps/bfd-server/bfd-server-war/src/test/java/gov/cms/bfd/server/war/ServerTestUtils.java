@@ -317,7 +317,7 @@ public final class ServerTestUtils {
    * @param sampleResources the sample RIF resources to load
    * @return the {@link List} of RIF records that were loaded (e.g. {@link Beneficiary}s, etc.)
    */
-  public List<Object> loadData(List<StaticRifResource> sampleResources) {
+  public static List<Object> loadData(List<StaticRifResource> sampleResources) {
     LoadAppOptions loadOptions = CcwRifLoadTestUtils.getLoadOptions();
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(

@@ -158,10 +158,6 @@ public final class DMEClaimTransformerV2Test {
     // First member
     CareTeamComponent member1 = TransformerTestUtilsV2.findCareTeamBySequence(1, eob.getCareTeam());
     Assert.assertEquals("1306849450", member1.getProvider().getIdentifier().getValue());
-
-    // Second member
-    CareTeamComponent member2 = TransformerTestUtilsV2.findCareTeamBySequence(2, eob.getCareTeam());
-    Assert.assertEquals("1244444444", member2.getProvider().getIdentifier().getValue());
   }
 
   /** SupportingInfo items */

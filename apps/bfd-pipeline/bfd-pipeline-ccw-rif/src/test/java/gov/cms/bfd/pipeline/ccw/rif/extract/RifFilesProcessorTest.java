@@ -1028,7 +1028,7 @@ public final class RifFilesProcessorTest {
     DMEClaimLine claimLine = claimGroup.getLines().get(0);
 
     Assert.assertEquals(new BigDecimal(1), claimLine.getLineNumber());
-    Assert.assertEquals("9994931888", claimLine.getProviderTaxNumber());
+    Assert.assertEquals("999493188", claimLine.getProviderTaxNumber());
     Assert.assertEquals("A5", claimLine.getProviderSpecialityCode().get());
     Assert.assertEquals('1', claimLine.getProviderParticipatingIndCode().get().charValue());
     Assert.assertEquals(new BigDecimal("60"), claimLine.getServiceCount());

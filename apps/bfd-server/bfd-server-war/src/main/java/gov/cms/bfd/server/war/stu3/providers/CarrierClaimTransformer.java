@@ -7,7 +7,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -118,6 +117,37 @@ final class CarrierClaimTransformer {
       ItemComponent item = eob.addItem();
       item.setSequence(claimLine.getLineNumber().intValue());
 
+      if (claimLine.getPerformingPhysicianNpi().isPresent()
+          || claimLine.getPerformingPhysicianUpin().isPresent()
+          || includeTaxNumbers.orElse(false)) {
+
+        ExplanationOfBenefit.CareTeamComponent performingCareTeam =
+            TransformerUtils.addCareTeamPerforming(
+                eob,
+                item,
+                ClaimCareteamrole.PRIMARY,
+                claimLine.getPerformingPhysicianNpi(),
+                claimLine.getPerformingPhysicianUpin(),
+                includeTaxNumbers,
+                claimGroup.getClaimId() + item.getSequence(),
+                claimLine.getProviderTaxNumber());
+
+        performingCareTeam.setResponsible(true);
+
+        performingCareTeam.setQualification(
+            TransformerUtils.createCodeableConcept(
+                eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
+        performingCareTeam.addExtension(
+            TransformerUtils.createExtensionCoding(
+                eob, CcwCodebookVariable.CARR_LINE_PRVDR_TYPE_CD, claimLine.getProviderTypeCode()));
+
+        performingCareTeam.addExtension(
+            TransformerUtils.createExtensionCoding(
+                eob,
+                CcwCodebookVariable.PRTCPTNG_IND_CD,
+                claimLine.getProviderParticipatingIndCode()));
+      }
+
       /*
        * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing provider _should_ always
        * be present. However, we've found some examples in production where it's not for some claim
@@ -167,22 +197,6 @@ final class CarrierClaimTransformer {
         }
       }
 
-      /*
-       * FIXME This value seems to be just a "synonym" for the performing physician NPI and should
-       * probably be mapped as an extra identifier with it (if/when that lands in a contained
-       * Practitioner resource).
-       */
-      if (includeTaxNumbers.orElse(false)) {
-        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-            TransformerUtils.addCareTeamPractitioner(
-                eob,
-                item,
-                IdentifierType.TAX.getSystem(),
-                claimLine.getProviderTaxNumber(),
-                ClaimCareteamrole.OTHER);
-        providerTaxNumber.setResponsible(true);
-      }
-
       item.addAdjudication(
           TransformerUtils.createAdjudicationWithReason(
               eob,
@@ -221,6 +235,7 @@ final class CarrierClaimTransformer {
       TransformerUtils.mapEobCommonItemCarrierDME(
           item,
           eob,
+          includeTaxNumbers,
           claimGroup.getClaimId(),
           claimLine.getServiceCount(),
           claimLine.getPlaceOfServiceCode(),
@@ -244,7 +259,8 @@ final class CarrierClaimTransformer {
           claimLine.getHctHgbTestTypeCode(),
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
-          claimLine.getNationalDrugCode());
+          claimLine.getNationalDrugCode(),
+          claimLine.getProviderTaxNumber());
 
       if (claimLine.getProviderStateCode().isPresent()) {
         item.getLocation()

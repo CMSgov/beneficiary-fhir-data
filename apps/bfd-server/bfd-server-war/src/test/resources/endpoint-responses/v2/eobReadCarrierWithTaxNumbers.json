@@ -19,6 +19,37 @@
     "valueQuantity" : {
       "value" : 42.0
     }
+  }, {
+    "resourceType" : "Practitioner",
+    "id" : "practitioner-99918319996",
+    "identifier" : [ {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+          "code" : "npi",
+          "display" : "National Provider Identifier"
+        } ]
+      },
+      "value" : "1923124"
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "code" : "PIN",
+          "display" : "Premises Identifier Number (US Official)"
+        } ]
+      },
+      "value" : "K25555"
+    }, {
+      "type" : {
+        "coding" : [ {
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "code" : "TAX",
+          "display" : "Tax ID number"
+        } ]
+      },
+      "value" : "204299999"
+    } ]
   } ],
   "extension" : [ {
     "url" : "https://bluebutton.cms.gov/resources/variables/nch_near_line_rec_ident_cd",
@@ -190,16 +221,8 @@
     } ],
     "sequence" : 3,
     "provider" : {
-      "identifier" : {
-        "type" : {
-          "coding" : [ {
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-            "code" : "npi",
-            "display" : "National Provider Identifier"
-          } ]
-        },
-        "value" : "1923124"
-      }
+      "id" : "#practitioner-99918319996",
+      "reference" : "#practitioner-99918319996"
     },
     "responsible" : true,
     "role" : {
@@ -353,12 +376,6 @@
   } ],
   "item" : [ {
     "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/resources/variables/tax_num",
-      "valueCoding" : {
-        "system" : "https://bluebutton.cms.gov/resources/variables/tax_num",
-        "code" : "204299999"
-      }
-    }, {
       "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
       "valueQuantity" : {
         "value" : 1

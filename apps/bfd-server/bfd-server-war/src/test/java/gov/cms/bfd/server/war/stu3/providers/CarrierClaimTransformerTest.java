@@ -17,13 +17,65 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
-import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Assert;
 import org.junit.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer}. */
 public final class CarrierClaimTransformerTest {
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void transformSampleURecordWithTaxNumber() throws FHIRException {
+    transformSampleURecord(true);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void transformSampleURecordWithoutTaxNumber() throws FHIRException {
+    transformSampleURecord(false);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void transformSampleARecordWithoutTaxNumber() throws FHIRException {
+    transformSampleARecord(false);
+  }
+
+  public void transformSampleURecord(Boolean includeTaxNumbers) throws FHIRException {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
+    CarrierClaim claim =
+        parsedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+
+    ExplanationOfBenefit eob =
+        CarrierClaimTransformer.transform(
+            new MetricRegistry(), claim, Optional.of(includeTaxNumbers));
+    assertMatches(claim, eob, Optional.of(includeTaxNumbers));
+  }
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
@@ -31,8 +83,7 @@ public final class CarrierClaimTransformerTest {
    *
    * @throws FHIRException (indicates test failure)
    */
-  @Test
-  public void transformSampleARecord() throws FHIRException {
+  public void transformSampleARecord(Boolean includeTaxNumbers) throws FHIRException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     CarrierClaim claim =
@@ -44,36 +95,15 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(new Date());
     ExplanationOfBenefit eobWithLastUpdated =
-        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
-    assertMatches(claim, eobWithLastUpdated, Optional.of(true));
+        CarrierClaimTransformer.transform(
+            new MetricRegistry(), claim, Optional.of(includeTaxNumbers));
+    assertMatches(claim, eobWithLastUpdated, Optional.of(includeTaxNumbers));
 
     claim.setLastUpdated(null);
     ExplanationOfBenefit eobWithoutLastUpdated =
-        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
-    assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
-  }
-
-  /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
-   *
-   * @throws FHIRException (indicates test failure)
-   */
-  @Test
-  public void transformSampleURecord() throws FHIRException {
-    List<Object> parsedRecords =
-        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
-    CarrierClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof CarrierClaim)
-            .map(r -> (CarrierClaim) r)
-            .findFirst()
-            .get();
-
-    ExplanationOfBenefit eob =
-        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
-    assertMatches(claim, eob, Optional.of(true));
+        CarrierClaimTransformer.transform(
+            new MetricRegistry(), claim, Optional.of(includeTaxNumbers));
+    assertMatches(claim, eobWithoutLastUpdated, Optional.of(includeTaxNumbers));
   }
 
   /**
@@ -130,11 +160,7 @@ public final class CarrierClaimTransformerTest {
     ItemComponent eobItem0 = eob.getItem().get(0);
     Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
-    TransformerTestUtils.assertCareTeamEquals(
-        claimLine1.getPerformingPhysicianNpi().get(), ClaimCareteamrole.PRIMARY, eob);
-    CareTeamComponent performingCareTeamEntry =
-        TransformerTestUtils.findCareTeamEntryForProviderNpi(
-            claimLine1.getPerformingPhysicianNpi().get(), eob.getCareTeam());
+    CareTeamComponent performingCareTeamEntry = eob.getCareTeam().get(0);
     TransformerTestUtils.assertHasCoding(
         CcwCodebookVariable.PRVDR_SPCLTY,
         claimLine1.getProviderSpecialityCode(),
@@ -147,20 +173,11 @@ public final class CarrierClaimTransformerTest {
         CcwCodebookVariable.PRTCPTNG_IND_CD,
         claimLine1.getProviderParticipatingIndCode(),
         performingCareTeamEntry);
-    TransformerTestUtils.assertExtensionCodingEquals(
-        performingCareTeamEntry,
-        TransformerConstants.CODING_NPI_US,
-        TransformerConstants.CODING_NPI_US,
-        "" + claimLine1.getOrganizationNpi().get());
-
-    CareTeamComponent taxNumberCareTeamEntry =
-        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
-            claimLine1.getProviderTaxNumber(), eob.getCareTeam());
-    if (includedTaxNumbers.orElse(false)) {
-      Assert.assertNotNull(taxNumberCareTeamEntry);
-    } else {
-      Assert.assertNull(taxNumberCareTeamEntry);
-    }
+    /*     TransformerTestUtils.assertExtensionCodingEquals(
+    performingCareTeamEntry,
+    TransformerConstants.CODING_NPI_US,
+    TransformerConstants.CODING_NPI_US,
+    "" + claimLine1.getOrganizationNpi().get()); */
 
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.PRVDR_STATE_CD,
@@ -228,6 +245,7 @@ public final class CarrierClaimTransformerTest {
     TransformerTestUtils.assertEobCommonItemCarrierDMEEquals(
         eobItem0,
         eob,
+        includedTaxNumbers,
         claimLine1.getServiceCount(),
         claimLine1.getPlaceOfServiceCode(),
         claimLine1.getFirstExpenseDate(),
@@ -250,7 +268,8 @@ public final class CarrierClaimTransformerTest {
         claimLine1.getHctHgbTestTypeCode(),
         claimLine1.getHctHgbTestResult(),
         claimLine1.getCmsServiceTypeCode(),
-        claimLine1.getNationalDrugCode());
+        claimLine1.getNationalDrugCode(),
+        claimLine1.getProviderTaxNumber());
 
     // Test lastUpdated
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);

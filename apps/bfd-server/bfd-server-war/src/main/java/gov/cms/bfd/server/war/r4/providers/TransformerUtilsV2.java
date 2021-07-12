@@ -44,6 +44,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -85,10 +86,12 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PositiveIntType;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
@@ -180,6 +183,16 @@ public final class TransformerUtilsV2 {
    */
   static CodeableConcept createCodeableConcept(String codingSystem, String codingCode) {
     return createCodeableConcept(codingSystem, null, null, codingCode);
+  }
+
+  /**
+   * @param codingSystem the {@link Coding#getSystem()} to use
+   * @param codingCode the {@link Coding#getCode()} to use
+   * @return a {@link CodeableConcept} with the specified {@link Coding}
+   */
+  static CodeableConcept createCodeableConcept(
+      String codingSystem, String codingDisplay, String codingCode) {
+    return createCodeableConcept(codingSystem, null, codingDisplay, codingCode);
   }
 
   /**
@@ -1866,7 +1879,7 @@ public final class TransformerUtilsV2 {
    *     CareTeamComponent#getRole()}
    * @return the {@link CareTeamComponent} that was created/linked
    */
-  private static CareTeamComponent addCareTeamPractitioner(
+  public static CareTeamComponent addCareTeamPractitioner(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
       C4BBPractitionerIdentifierType type,
@@ -1907,6 +1920,85 @@ public final class TransformerUtilsV2 {
     if (eobItem == null) {
       return careTeamEntry;
     }
+
+    // ExplanationOfBenefit.careTeam.sequence => ExplanationOfBenefit.item.careTeamSequence
+    if (!eobItem.getCareTeamSequence().contains(new PositiveIntType(careTeamEntry.getSequence()))) {
+      eobItem.addCareTeamSequence(careTeamEntry.getSequence());
+    }
+
+    return careTeamEntry;
+  }
+
+  // Chris
+
+  public static CareTeamComponent addCareTeamPerforming(
+      ExplanationOfBenefit eob,
+      ItemComponent eobItem,
+      C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
+      Optional<String> npiValue,
+      Optional<String> upinValue,
+      Optional<String> pinValue,
+      Optional<Boolean> includeTaxNumbers,
+      String practionerIdNumber,
+      String taxValue) {
+
+    List<Identifier> identifiers = new ArrayList<Identifier>();
+
+    if (npiValue.isPresent()) {
+      identifiers.add(
+          TransformerUtilsV2.createC4BBPractionerIdentifier(
+              C4BBPractitionerIdentifierType.NPI, npiValue.get()));
+    }
+
+    if (upinValue.isPresent()) {
+      identifiers.add(
+          TransformerUtilsV2.createC4BBPractionerIdentifier(
+              C4BBPractitionerIdentifierType.UPIN, upinValue.get()));
+    }
+
+    if (pinValue.isPresent()) {
+      identifiers.add(
+          TransformerUtilsV2.createC4BBPractionerIdentifier(
+              C4BBPractitionerIdentifierType.PIN, pinValue.get()));
+    }
+
+    if (includeTaxNumbers.orElse(false)) {
+      identifiers.add(
+          TransformerUtilsV2.createC4BBPractionerIdentifier(
+              C4BBPractitionerIdentifierType.TAX, taxValue));
+    }
+
+    return addCareTeamPractitionerForPerforming(
+        eob, eobItem, role, identifiers, practionerIdNumber);
+  }
+
+  public static CareTeamComponent addCareTeamPractitionerForPerforming(
+      ExplanationOfBenefit eob,
+      ItemComponent eobItem,
+      C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
+      List<Identifier> identifiers,
+      String practionerIdNumber) {
+    // Try to find a matching pre-existing entry.
+    CareTeamComponent careTeamEntry = eob.addCareTeam();
+    // addItem adds and returns, so we want size() not size() + 1 here
+    careTeamEntry.setSequence(eob.getCareTeam().size());
+
+    String practionerId = "#practitioner-" + practionerIdNumber;
+
+    Practitioner practioner = new Practitioner();
+    practioner.setIdentifier(identifiers);
+    practioner.setId(practionerId);
+
+    Reference ref = new Reference(practioner);
+
+    ref.setId(practionerId);
+    StringType referenceElement = new StringType(practionerId);
+    ref.setReferenceElement(referenceElement);
+    careTeamEntry.setProvider(ref);
+
+    CodeableConcept careTeamRoleConcept = createCodeableConcept(role.getSystem(), role.toCode());
+    careTeamRoleConcept.getCodingFirstRep().setDisplay(role.getDisplay());
+    careTeamEntry.setRole(careTeamRoleConcept);
 
     // ExplanationOfBenefit.careTeam.sequence => ExplanationOfBenefit.item.careTeamSequence
     if (!eobItem.getCareTeamSequence().contains(new PositiveIntType(careTeamEntry.getSequence()))) {
@@ -3541,6 +3633,15 @@ public final class TransformerUtilsV2 {
             CcwCodebookVariable.REV_CNTR_PMT_AMT_AMT, C4BBAdjudication.SUBMITTED, paymentAmount));
   }
 
+  public static Identifier createC4BBPractionerIdentifier(
+      C4BBPractitionerIdentifierType type, String value) {
+    Identifier id =
+        new Identifier()
+            .setType(createCodeableConcept(type.getSystem(), type.getDisplay(), type.toCode()))
+            .setValue(value);
+
+    return id;
+  }
   /**
    * Looks up or adds a contained {@link Identifier} object to the current {@link Patient}. This is
    * used to store Identifier slices related to the Patient.

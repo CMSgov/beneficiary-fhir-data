@@ -7,7 +7,6 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.Diagnosis;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -145,6 +144,31 @@ final class DMEClaimTransformer {
                 CcwCodebookVariable.SUPLRNUM, claimLine.getProviderBillingNumber()));
       }
 
+      if (claimLine.getProviderNPI().isPresent() || includeTaxNumbers.orElse(false)) {
+        ExplanationOfBenefit.CareTeamComponent performingCareTeam =
+            TransformerUtils.addCareTeamPerforming(
+                eob,
+                item,
+                ClaimCareteamrole.PRIMARY,
+                claimLine.getProviderNPI(),
+                Optional.empty(),
+                includeTaxNumbers,
+                claimGroup.getClaimId() + item.getSequence(),
+                claimLine.getProviderTaxNumber());
+
+        performingCareTeam.setResponsible(true);
+
+        performingCareTeam.setQualification(
+            TransformerUtils.createCodeableConcept(
+                eob, CcwCodebookVariable.PRVDR_SPCLTY, claimLine.getProviderSpecialityCode()));
+
+        performingCareTeam.addExtension(
+            TransformerUtils.createExtensionCoding(
+                eob,
+                CcwCodebookVariable.PRTCPTNG_IND_CD,
+                claimLine.getProviderParticipatingIndCode()));
+      }
+
       /*
        * Per Michelle at GDIT, and also Tony Dean at OEDA, the performing provider
        * _should_ always be present. However, we've found some examples in production
@@ -195,22 +219,6 @@ final class DMEClaimTransformer {
               claimLine.getHcpcsThirdModifierCode(),
               claimLine.getHcpcsFourthModifierCode()));
 
-      /*
-       * FIXME This value seems to be just a "synonym" for the performing physician NPI and should
-       * probably be mapped as an extra identifier with it (if/when that lands in a contained
-       * Practitioner resource).
-       */
-      if (includeTaxNumbers.orElse(false)) {
-        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-            TransformerUtils.addCareTeamPractitioner(
-                eob,
-                item,
-                IdentifierType.TAX.getSystem(),
-                claimLine.getProviderTaxNumber(),
-                ClaimCareteamrole.OTHER);
-        providerTaxNumber.setResponsible(true);
-      }
-
       item.addAdjudication()
           .setCategory(
               TransformerUtils.createAdjudicationCategory(
@@ -244,6 +252,7 @@ final class DMEClaimTransformer {
       TransformerUtils.mapEobCommonItemCarrierDME(
           item,
           eob,
+          includeTaxNumbers,
           claimGroup.getClaimId(),
           claimLine.getServiceCount(),
           claimLine.getPlaceOfServiceCode(),
@@ -267,7 +276,8 @@ final class DMEClaimTransformer {
           claimLine.getHctHgbTestTypeCode(),
           claimLine.getHctHgbTestResult(),
           claimLine.getCmsServiceTypeCode(),
-          claimLine.getNationalDrugCode());
+          claimLine.getNationalDrugCode(),
+          claimLine.getProviderTaxNumber());
 
       if (!claimLine.getProviderStateCode().isEmpty()) {
         // FIXME Should this be pulled to a common mapping method?

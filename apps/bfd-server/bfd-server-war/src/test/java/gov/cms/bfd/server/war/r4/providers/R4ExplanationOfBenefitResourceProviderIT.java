@@ -90,7 +90,41 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .execute();
 
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.CARRIER, eob, loadedRecords);
+    compareEob(ClaimTypeV2.CARRIER, eob, loadedRecords, false);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
+   * works as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does
+   * exist in the DB.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void readEobForExistingCarrierClaimWithTaxNumber() throws FHIRException {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientWithHeadersV2(requestHeader);
+
+    CarrierClaim claim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof CarrierClaim)
+            .map(r -> (CarrierClaim) r)
+            .findFirst()
+            .get();
+
+    ExplanationOfBenefit eob =
+        fhirClient
+            .read()
+            .resource(ExplanationOfBenefit.class)
+            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.CARRIER, claim.getClaimId()))
+            .execute();
+
+    // Compare result to transformed EOB
+    compareEob(ClaimTypeV2.CARRIER, eob, loadedRecords, true);
   }
 
   /**
@@ -142,7 +176,42 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.DME, eob, loadedRecords);
+    compareEob(ClaimTypeV2.DME, eob, loadedRecords, false);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
+   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist
+   * in the DB.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void readEobForExistingDMEClaimWithTaxNumber() throws FHIRException {
+    List<Object> loadedRecords =
+        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientWithHeadersV2(requestHeader);
+
+    DMEClaim claim =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+
+    ExplanationOfBenefit eob =
+        fhirClient
+            .read()
+            .resource(ExplanationOfBenefit.class)
+            .withId(TransformerUtilsV2.buildEobId(ClaimTypeV2.DME, claim.getClaimId()))
+            .execute();
+
+    Assert.assertNotNull(eob);
+    // Compare result to transformed EOB
+    compareEob(ClaimTypeV2.DME, eob, loadedRecords, true);
   }
 
   /**
@@ -195,7 +264,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     Assert.assertNotNull(eob);
 
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.HHA, eob, loadedRecords);
+    compareEob(ClaimTypeV2.HHA, eob, loadedRecords, false);
   }
 
   /**
@@ -247,7 +316,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.HOSPICE, eob, loadedRecords);
+    compareEob(ClaimTypeV2.HOSPICE, eob, loadedRecords, false);
   }
 
   /**
@@ -299,7 +368,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.INPATIENT, eob, loadedRecords);
+    compareEob(ClaimTypeV2.INPATIENT, eob, loadedRecords, false);
   }
 
   /**
@@ -408,7 +477,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.PDE, eob, loadedRecords);
+    compareEob(ClaimTypeV2.PDE, eob, loadedRecords, false);
   }
 
   /**
@@ -497,7 +566,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertNotNull(eob);
     // Compare result to transformed EOB
-    compareEob(ClaimTypeV2.SNF, eob, loadedRecords);
+    compareEob(ClaimTypeV2.SNF, eob, loadedRecords, false);
   }
 
   /**
@@ -1495,14 +1564,14 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * and looks correct.
    */
   private static void assertEachEob(Bundle searchResults, List<Object> loadedRecords) {
-    compareEob(ClaimTypeV2.CARRIER, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.DME, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.HHA, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.HOSPICE, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.INPATIENT, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.OUTPATIENT, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.PDE, searchResults, loadedRecords);
-    compareEob(ClaimTypeV2.SNF, searchResults, loadedRecords);
+    compareEob(ClaimTypeV2.CARRIER, searchResults, loadedRecords, false);
+    compareEob(ClaimTypeV2.DME, searchResults, loadedRecords, false);
+    compareEob(ClaimTypeV2.HHA, searchResults, loadedRecords, false);
+    compareEob(ClaimTypeV2.HOSPICE, searchResults, loadedRecords, false);
+    compareEob(ClaimTypeV2.INPATIENT, searchResults, loadedRecords, false);
+    compareEob(ClaimTypeV2.OUTPATIENT, searchResults, loadedRecords, false);
+    compareEob(ClaimTypeV2.PDE, searchResults, loadedRecords, false);
+    compareEob(ClaimTypeV2.SNF, searchResults, loadedRecords, false);
   }
 
   /**
@@ -1736,7 +1805,10 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @param loadedRecords
    */
   public static void compareEob(
-      ClaimTypeV2 claimType, ExplanationOfBenefit searchResults, List<Object> loadedRecords) {
+      ClaimTypeV2 claimType,
+      ExplanationOfBenefit searchResults,
+      List<Object> loadedRecords,
+      Boolean includeTaxNumber) {
     Object claim =
         loadedRecords.stream()
             .filter(r -> claimType.getEntityClass().isInstance(r))
@@ -1762,13 +1834,16 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @param loadedRecords
    */
   public static void compareEob(
-      ClaimTypeV2 claimType, Bundle searchResults, List<Object> loadedRecords) {
+      ClaimTypeV2 claimType,
+      Bundle searchResults,
+      List<Object> loadedRecords,
+      Boolean includeTaxNumber) {
     // Find desired claim in the bundle
     List<ExplanationOfBenefit> eobs = filterToClaimType(searchResults, claimType);
 
     Assert.assertEquals(1, eobs.size());
 
-    compareEob(claimType, eobs.get(0), loadedRecords);
+    compareEob(claimType, eobs.get(0), loadedRecords, includeTaxNumber);
   }
 
   private Bundle fetchWithServiceDate(

@@ -25,9 +25,11 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
+import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.IOException;
@@ -635,6 +637,23 @@ final class TransformerTestUtils {
     if (expectedCode.isPresent())
       assertCodingEquals(
           expectedCodingSystem, expectedCode.get(), (Coding) extensionForUrl.get().getValue());
+  }
+
+  /**
+   * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
+   *     Coding} are for
+   * @param expectedCode the expected {@link Coding#getCode()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionCodingNotEquals(
+      CcwCodebookInterface ccwVariable, String expectedCode, IBaseHasExtensions actualElement) {
+    String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+    Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
+        actualElement.getExtension().stream()
+            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
+
+    Assert.assertFalse(extensionForUrl.isPresent());
   }
 
   /**
@@ -1620,6 +1639,7 @@ final class TransformerTestUtils {
   static void assertEobCommonItemCarrierDMEEquals(
       ItemComponent item,
       ExplanationOfBenefit eob,
+      Optional<Boolean> includeTaxNumbers,
       BigDecimal serviceCount,
       String placeOfServiceCode,
       Optional<LocalDate> firstExpenseDate,
@@ -1642,7 +1662,8 @@ final class TransformerTestUtils {
       Optional<String> hctHgbTestTypeCode,
       BigDecimal hctHgbTestResult,
       char cmsServiceTypeCode,
-      Optional<String> nationalDrugCode)
+      Optional<String> nationalDrugCode,
+      String taxNumber)
       throws FHIRException {
 
     Assert.assertEquals(serviceCount, item.getQuantity().getValue());
@@ -1706,6 +1727,15 @@ final class TransformerTestUtils {
         TransformerConstants.CODING_NDC,
         TransformerConstants.CODING_NDC,
         nationalDrugCode.get());
+
+    CareTeamComponent taxNumberCareTeamEntry =
+        TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(taxNumber, eob.getCareTeam());
+
+    if (includeTaxNumbers.orElse(false)) {
+      Assert.assertNotNull(taxNumberCareTeamEntry);
+    } else {
+      Assert.assertNull(taxNumberCareTeamEntry);
+    }
   }
 
   /**
@@ -2072,5 +2102,15 @@ final class TransformerTestUtils {
           TransformerConstants.FALLBACK_LAST_UPDATED,
           actualResource.getMeta().getLastUpdated());
     }
+  }
+
+  /**
+   * test helper
+   *
+   * @param value of all include address fields values
+   * @return RequestHeaders instance derived from value
+   */
+  public static RequestHeaders getRHwithIncldTaxNumFldHdr(String value) {
+    return RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, value);
   }
 }
