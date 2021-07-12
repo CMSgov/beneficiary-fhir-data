@@ -1,8 +1,8 @@
 package gov.cms.bfd.model.rif;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.*;
@@ -29,8 +29,7 @@ public class LoadedBatch {
   private String beneficiaries;
 
   @Column(name = "`created`", nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date created;
+  private Instant created;
 
   /** default constructor */
   public LoadedBatch() {}
@@ -43,7 +42,7 @@ public class LoadedBatch {
    * @param beneficiaries to associate
    * @param created batch creation date
    */
-  public LoadedBatch(long loadedBatchId, long loadedFileId, String beneficiaries, Date created) {
+  public LoadedBatch(long loadedBatchId, long loadedFileId, String beneficiaries, Instant created) {
     this();
     this.loadedBatchId = loadedBatchId;
     this.loadedFileId = loadedFileId;
@@ -60,7 +59,7 @@ public class LoadedBatch {
    * @param created batch creation date
    */
   public LoadedBatch(
-      long loadedBatchId, long loadedFileId, List<String> beneficiaries, Date created) {
+      long loadedBatchId, long loadedFileId, List<String> beneficiaries, Instant created) {
     this();
     this.loadedBatchId = loadedBatchId;
     this.loadedFileId = loadedFileId;
@@ -99,12 +98,12 @@ public class LoadedBatch {
   }
 
   /** @return the creation time stamp */
-  public Date getCreated() {
+  public Instant getCreated() {
     return created;
   }
 
   /** @param created time stamp to set */
-  public void setCreated(Date created) {
+  public void setCreated(Instant created) {
     this.created = created;
   }
 
@@ -145,7 +144,7 @@ public class LoadedBatch {
             : b.beneficiaries.isEmpty()
                 ? a.beneficiaries
                 : a.beneficiaries + SEPARATOR + b.beneficiaries;
-    sum.created = (a.created.after(b.created)) ? a.created : b.created;
+    sum.created = (a.created.isAfter(b.created)) ? a.created : b.created;
     return sum;
   }
 
