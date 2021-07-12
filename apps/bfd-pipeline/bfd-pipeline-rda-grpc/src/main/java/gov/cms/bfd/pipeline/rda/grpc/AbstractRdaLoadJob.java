@@ -12,10 +12,11 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJobSchedule;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,16 +31,13 @@ import org.slf4j.LoggerFactory;
  * will do any work. The other threads will all immediately return with an indication that they have
  * no work to do.
  */
-public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobArguments> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(RdaLoadJob.class);
-  public static final String CALLS_METER_NAME =
-      MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "calls");
-  public static final String FAILURES_METER_NAME =
-      MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "failures");
-  public static final String SUCCESSES_METER_NAME =
-      MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "successes");
-  public static final String PROCESSED_METER_NAME =
-      MetricRegistry.name(RdaLoadJob.class.getSimpleName(), "processed");
+public abstract class AbstractRdaLoadJob<TResponse>
+    implements PipelineJob<NullPipelineJobArguments> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRdaLoadJob.class);
+  public static final String CALLS_METER_NAME = "calls";
+  public static final String FAILURES_METER_NAME = "failures";
+  public static final String SUCCESSES_METER_NAME = "successes";
+  public static final String PROCESSED_METER_NAME = "processed";
 
   private final Config config;
   private final Callable<RdaSource<TResponse>> sourceFactory;
@@ -52,7 +50,7 @@ public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobA
   // time. If multiple threads call the job at the same time only the first will do any work.
   private final Semaphore runningSemaphore;
 
-  public RdaLoadJob(
+  AbstractRdaLoadJob(
       Config config,
       Callable<RdaSource<TResponse>> sourceFactory,
       Callable<RdaSink<TResponse>> sinkFactory,
@@ -60,10 +58,10 @@ public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobA
     this.config = Preconditions.checkNotNull(config);
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
     this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
-    callsMeter = appMetrics.meter(CALLS_METER_NAME);
-    failuresMeter = appMetrics.meter(FAILURES_METER_NAME);
-    successesMeter = appMetrics.meter(SUCCESSES_METER_NAME);
-    processedMeter = appMetrics.meter(PROCESSED_METER_NAME);
+    callsMeter = appMetrics.meter(metricName(CALLS_METER_NAME));
+    failuresMeter = appMetrics.meter(metricName(FAILURES_METER_NAME));
+    successesMeter = appMetrics.meter(metricName(SUCCESSES_METER_NAME));
+    processedMeter = appMetrics.meter(metricName(PROCESSED_METER_NAME));
     runningSemaphore = new Semaphore(1);
   }
 
@@ -124,7 +122,13 @@ public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobA
     return true;
   }
 
+  protected String metricName(String detail) {
+    return MetricRegistry.name(getClass().getSimpleName(), detail);
+  }
+
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
+  @EqualsAndHashCode
+  @Getter
   public static final class Config implements Serializable {
     private static final long serialVersionUID = 1823137784819917L;
 
@@ -144,35 +148,8 @@ public final class RdaLoadJob<TResponse> implements PipelineJob<NullPipelineJobA
     public Config(Duration runInterval, int batchSize) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
-      Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "scanInterval less than 1s: %s");
+      Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s");
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
-    }
-
-    /** @return the expected time between executions of the job by the scheduler */
-    public Duration getRunInterval() {
-      return runInterval;
-    }
-
-    /** @return the number of objects to write to the database per batch/transaction. */
-    public int getBatchSize() {
-      return batchSize;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (!(o instanceof Config)) {
-        return false;
-      }
-      Config config = (Config) o;
-      return batchSize == config.batchSize && Objects.equals(runInterval, config.runInterval);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(runInterval, batchSize);
     }
   }
 }

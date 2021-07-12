@@ -3,7 +3,9 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static org.junit.Assert.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.pipeline.rda.grpc.server.JsonFissClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.server.EmptyClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.JsonClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import io.grpc.ManagedChannel;
@@ -18,11 +20,11 @@ public class FissClaimStreamCallerIT {
       "{"
           + "  \"dcn\": \"63843470\","
           + "  \"hicNo\": \"916689703543\","
-          + "  \"currStatus\": \"CLAIM_STATUS_PAID\","
-          + "  \"currLoc1\": \"PROCESSING_TYPE_MANUAL\","
-          + "  \"currLoc2\": \"uma\","
+          + "  \"currStatusEnum\": \"CLAIM_STATUS_PAID\","
+          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_MANUAL\","
+          + "  \"currLoc2Unrecognized\": \"uma\","
           + "  \"totalChargeAmount\": \"3.75\","
-          + "  \"currTranDate\": \"2021-03-20\","
+          + "  \"currTranDtCymd\": \"2021-03-20\","
           + "  \"principleDiag\": \"uec\","
           + "  \"mbi\": \"c1ihk7q0g3i57\","
           + "  \"fissProcCodes\": [],"
@@ -32,12 +34,12 @@ public class FissClaimStreamCallerIT {
       "{"
           + "  \"dcn\": \"2643602\","
           + "  \"hicNo\": \"640930211775\","
-          + "  \"currStatus\": \"CLAIM_STATUS_REJECT\","
-          + "  \"currLoc1\": \"PROCESSING_TYPE_OFFLINE\","
-          + "  \"currLoc2\": \"p6s\","
+          + "  \"currStatusEnum\": \"CLAIM_STATUS_REJECT\","
+          + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\","
+          + "  \"currLoc2Unrecognized\": \"p6s\","
           + "  \"totalChargeAmount\": \"55.91\","
-          + "  \"recdDt\": \"2021-05-14\","
-          + "  \"currTranDate\": \"2020-12-21\","
+          + "  \"recdDtCymd\": \"2021-05-14\","
+          + "  \"currTranDtCymd\": \"2020-12-21\","
           + "  \"principleDiag\": \"egnj\","
           + "  \"npiNumber\": \"5764657700\","
           + "  \"mbi\": \"0vtc7u321x0se\","
@@ -49,7 +51,11 @@ public class FissClaimStreamCallerIT {
   public void test() throws Exception {
     final Server server =
         RdaServer.startInProcess(
-            "test", () -> new JsonFissClaimSource(CLAIM_1 + System.lineSeparator() + CLAIM_2));
+            "test",
+            () ->
+                new JsonClaimSource<>(
+                    CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonClaimSource::parseFissClaim),
+            EmptyClaimSource::new);
     try {
       final ManagedChannel channel = InProcessChannelBuilder.forName("test").build();
       try {
@@ -57,11 +63,11 @@ public class FissClaimStreamCallerIT {
         final FissClaimTransformer transformer =
             new FissClaimTransformer(Clock.systemUTC(), hasher);
         final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
-        final GrpcResponseStream<PreAdjFissClaim> results = caller.callService(channel);
+        final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results = caller.callService(channel);
         assertEquals(true, results.hasNext());
-        assertEquals("63843470", results.next().getDcn());
+        assertEquals("63843470", results.next().getClaim().getDcn());
         assertEquals(true, results.hasNext());
-        assertEquals("2643602", results.next().getDcn());
+        assertEquals("2643602", results.next().getClaim().getDcn());
         assertEquals(false, results.hasNext());
       } finally {
         channel.shutdown();

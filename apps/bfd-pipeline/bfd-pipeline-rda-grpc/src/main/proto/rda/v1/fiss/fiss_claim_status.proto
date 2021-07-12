@@ -4,33 +4,33 @@ package gov.cms.mpsm.rda.v1.fiss;
 
 option java_multiple_files = true;
 
-enum FissClaimStatus {
-  CLAIM_STATUS_UNSET = 0;
+import "rda/v1/enum_options.proto";
 
+enum FissClaimStatus {
   // ASCII Space
-  CLAIM_STATUS_BLANK = 32;
+  CLAIM_STATUS_BLANK = 0    [(gov.cms.mpsm.rda.v1.string_value) = " "];
 
   // ASCII A
-  CLAIM_STATUS_ROUTING = 65;
+  CLAIM_STATUS_ROUTING = 1  [(gov.cms.mpsm.rda.v1.string_value) = "A"];
 
   //ASCII S
-  CLAIM_STATUS_SUSPEND = 83;
+  CLAIM_STATUS_SUSPEND = 2  [(gov.cms.mpsm.rda.v1.string_value) = "S"];
 
   // ASCII P
-  CLAIM_STATUS_PAID = 80;
+  CLAIM_STATUS_PAID = 3     [(gov.cms.mpsm.rda.v1.string_value) = "P"];
 
   // ASCII D
-  CLAIM_STATUS_DENIED = 68;
+  CLAIM_STATUS_DENIED = 4   [(gov.cms.mpsm.rda.v1.string_value) = "D"];
 
   // ASCII I
-  CLAIM_STATUS_INACTIVE = 73;
+  CLAIM_STATUS_INACTIVE = 5 [(gov.cms.mpsm.rda.v1.string_value) = "I"];
 
   // ASCII R
-  CLAIM_STATUS_REJECT = 82;
+  CLAIM_STATUS_REJECT = 6   [(gov.cms.mpsm.rda.v1.string_value) = "R"];
 
   // ASCII T
-  CLAIM_STATUS_RTP = 84;
+  CLAIM_STATUS_RTP = 7      [(gov.cms.mpsm.rda.v1.string_value) = "T"];
 
   // ASCII M
-  CLAIM_STATUS_MOVE = 77;
+  CLAIM_STATUS_MOVE = 8     [(gov.cms.mpsm.rda.v1.string_value) = "M"];
 }

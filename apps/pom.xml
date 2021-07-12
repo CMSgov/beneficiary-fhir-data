@@ -232,6 +232,14 @@
 				<version>3.3.0</version>
 			</dependency>
 
+			 <dependency>
+				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
+				 <groupId>org.projectlombok</groupId>
+				 <artifactId>lombok</artifactId>
+				 <version>1.18.20</version>
+				 <scope>provided</scope>
+			 </dependency>
+
 			<dependency>
 				<!-- The test framework used for unit and integration tests. -->
 				<groupId>junit</groupId>

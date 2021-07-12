@@ -15,6 +15,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
+import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -136,8 +137,13 @@ public final class PipelineApplication {
     pipelineManager.registerJob(createCcwRifLoadJob(appConfig, appState));
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
-      pipelineManager.registerJob(
-          appConfig.getRdaLoadOptions().get().createFissClaimsLoadJob(appState));
+      final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
+      final PipelineJob<NullPipelineJobArguments> fissLoadJob =
+          rdaLoadOptions.createFissClaimsLoadJob(appState);
+      final PipelineJob<NullPipelineJobArguments> mcsLoadJob =
+          rdaLoadOptions.createMcsClaimsLoadJob(appState);
+      pipelineManager.registerJob(fissLoadJob);
+      pipelineManager.registerJob(mcsLoadJob);
     }
 
     /*

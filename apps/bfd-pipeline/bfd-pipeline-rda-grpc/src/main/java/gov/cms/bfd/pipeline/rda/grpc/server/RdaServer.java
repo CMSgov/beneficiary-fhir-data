@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.mpsm.rda.v1.fiss.FissClaim;
+import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
@@ -13,8 +15,11 @@ public class RdaServer {
    * @param sourceFactory used to create new FissClaimSource object for each request
    * @return a running RDA API Server object
    */
-  public static Server startLocal(Supplier<FissClaimSource> sourceFactory) throws IOException {
-    return startLocal(0, sourceFactory);
+  public static Server startLocal(
+      Supplier<ClaimSource<FissClaim>> fissSourceFactory,
+      Supplier<ClaimSource<McsClaim>> mcsSourceFactory)
+      throws IOException {
+    return startLocal(0, fissSourceFactory, mcsSourceFactory);
   }
 
   /**
@@ -23,9 +28,15 @@ public class RdaServer {
    * @param sourceFactory used to create new FissClaimSource object for each request
    * @return a running RDA API Server object
    */
-  public static Server startLocal(int port, Supplier<FissClaimSource> sourceFactory)
+  public static Server startLocal(
+      int port,
+      Supplier<ClaimSource<FissClaim>> fissSourceFactory,
+      Supplier<ClaimSource<McsClaim>> mcsSourceFactory)
       throws IOException {
-    return ServerBuilder.forPort(port).addService(new RdaService(sourceFactory)).build().start();
+    return ServerBuilder.forPort(port)
+        .addService(new RdaService(fissSourceFactory, mcsSourceFactory))
+        .build()
+        .start();
   }
 
   /**
@@ -35,10 +46,13 @@ public class RdaServer {
    * @param sourceFactory used to create new FissClaimSource object for each request
    * @return a running RDA API Server object
    */
-  public static Server startInProcess(String name, Supplier<FissClaimSource> sourceFactory)
+  public static Server startInProcess(
+      String name,
+      Supplier<ClaimSource<FissClaim>> fissSourceFactory,
+      Supplier<ClaimSource<McsClaim>> mcsSourceFactory)
       throws IOException {
     return InProcessServerBuilder.forName(name)
-        .addService(new RdaService(sourceFactory))
+        .addService(new RdaService(fissSourceFactory, mcsSourceFactory))
         .build()
         .start();
   }

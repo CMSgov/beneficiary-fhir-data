@@ -5,15 +5,14 @@ package gov.cms.mpsm.rda.v1;
 option java_multiple_files = true;
 
 import "google/protobuf/empty.proto";
-import "rda/v1/fiss/fiss_claim.proto";
-import "rda/v1/mcs/mcs_claim.proto";
+import "rda/v1/claim_change.proto";
 
 // RDA API
 service RDAService {
 
   // Gets all the FISS claims data from the database and closes the stream.
-  rpc GetFissClaims(google.protobuf.Empty) returns (stream gov.cms.mpsm.rda.v1.fiss.FissClaim);
+  rpc GetFissClaims(google.protobuf.Empty) returns (stream ClaimChange);
 
   // Gets all MCS claims data from the database, and closes the stream.
-  rpc GetMcsClaims(google.protobuf.Empty) returns (stream gov.cms.mpsm.rda.v1.mcs.McsClaim);
+  rpc GetMcsClaims(google.protobuf.Empty) returns (stream ClaimChange);
 }

@@ -34,17 +34,17 @@ public class RandomFissClaimSourceTest {
 
     assertEquals(true, source.hasNext());
     claim = source.next();
-    assertEquals("27183", claim.getDcn());
+    assertEquals("12793", claim.getDcn());
 
     assertEquals(true, source.hasNext());
     claim = source.next();
-    assertEquals("55390305", claim.getDcn());
+    assertEquals("8099001", claim.getDcn());
 
     assertEquals(false, source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
-  private void assertNextPastEndOfDataThrowsException(FissClaimSource source) throws Exception {
+  private void assertNextPastEndOfDataThrowsException(ClaimSource source) throws Exception {
     try {
       source.next();
       fail("expected exception");

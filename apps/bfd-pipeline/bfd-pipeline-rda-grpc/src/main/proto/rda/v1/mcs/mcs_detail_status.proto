@@ -4,21 +4,21 @@ package gov.cms.mpsm.rda.v1.mcs;
 
 option java_multiple_files = true;
 
-enum McsDetailStatus {
-  DETAIL_STATUS_UNSET = 0;
+import "rda/v1/enum_options.proto";
 
+enum McsDetailStatus {
   // ASCII P
-  DETAIL_STATUS_PENDING = 80;
+  DETAIL_STATUS_PENDING = 0  [(string_value) = "P"];
 
   // ASCII F
-  DETAIL_STATUS_FINAL = 70;
+  DETAIL_STATUS_FINAL = 1    [(string_value) = "F"];
 
   // ASCII S
-  DETAIL_STATUS_SENT = 83;
+  DETAIL_STATUS_SENT = 2     [(string_value) = "S"];
 
   // ASCII D
-  DETAIL_STATUS_DELETED = 68;
+  DETAIL_STATUS_DELETED = 3  [(string_value) = "D"];
 
   // ASCII R
-  DETAIL_STATUS_REJECTED = 82;
+  DETAIL_STATUS_REJECTED = 4 [(string_value) = "R"];
 }

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1;
+
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+import "rda/v1/enum_options.proto";
+import "rda/v1/fiss/fiss_claim.proto";
+import "rda/v1/mcs/mcs_claim.proto";
+
+message ClaimChange {
+  enum ChangeType {
+    CHANGE_TYPE_INSERT = 0 [(string_value) = "INSERT"];
+    CHANGE_TYPE_UPDATE = 1 [(string_value) = "UPDATE"];
+    CHANGE_TYPE_DELETE = 2 [(string_value) = "DELETE"];
+  }
+
+  google.protobuf.Timestamp timestamp = 1;
+  int64 seq = 2;
+  ChangeType change_type = 3;
+
+  oneof claim {
+    gov.cms.mpsm.rda.v1.fiss.FissClaim fiss_claim = 4;
+    gov.cms.mpsm.rda.v1.mcs.McsClaim mcs_claim = 5;
+  };
+}

@@ -7,7 +7,7 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
-import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob;
+import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
@@ -371,8 +371,8 @@ public final class AppConfiguration implements Serializable {
     if (!enabled) {
       return null;
     }
-    final RdaLoadJob.Config jobConfig =
-        new RdaLoadJob.Config(
+    final AbstractRdaLoadJob.Config jobConfig =
+        new AbstractRdaLoadJob.Config(
             Duration.ofSeconds(
                 readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)
                     .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)),

@@ -16,7 +16,7 @@ public class RdaLoadOptionsTest {
   public void configIsSerializable() throws Exception {
     final RdaLoadOptions original =
         new RdaLoadOptions(
-            new RdaLoadJob.Config(Duration.ofDays(12), 9832),
+            new AbstractRdaLoadJob.Config(Duration.ofDays(12), 9832),
             new GrpcRdaSource.Config("localhost", 5432, Duration.ofMinutes(59)),
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
