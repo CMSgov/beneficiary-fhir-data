@@ -31,7 +31,7 @@ public final class ServerCapabilityStatementIT {
    */
   @Test
   public void getCapabilities() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
     CapabilityStatement capabilities =
         fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
