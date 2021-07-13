@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  bfd-server:
+    build:
+      context: .
+      args:
+        - 'mvn_args=-DskipITs'
+      target: development
+    image: bfd-server
+    ports:
+      - '${BFD_PORT:-6500}:6500'
+    env_file: .env
+    volumes:
+      - .:/app
+    command: >
+      java 
+        -Xmx4g 
+        -Dbfd-server-9876 
+        -DbfdServer.logs.dir=$LOGS_DIR 
+        -DbfdServer.db.url=$DB_URL 
+        -DbfdServer.db.username=$DB_USERNAME 
+        -DbfdServer.db.password=$DB_PASSWORD 
+        -DbfdServer.db.connections.max=$DB_CONNECTIONS_MAX 
+        -DbfdServer.v2.enabled=$BFD_V2_ENABLED 
+        -DbfdServer.db.schema.apply=true 
+        -Djava.io.tmpdir=$TMP_DIR 
+        -jar bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT-capsule-fat.jar 
+    networks:
+      - bfd-net
+    depends_on:
+      - bfd-db
+    deploy:
+      restart_policy:
+        condition: on-failure
+  bfd-db:
+    image: postgres:12
+    ports:
+      - 6543:5432
+    environment:
+      - POSTGRES_DB=bfd
+      - POSTGRES_USER=bfd
+      - POSTGRES_PASSWORD=InsecureLocalDev
+    networks:
+      - bfd-net
+    volumes:
+      - bfd-pgdata:/var/lib/postgresql/data
+networks:
+  bfd-net:
+volumes:
+  bfd-pgdata:

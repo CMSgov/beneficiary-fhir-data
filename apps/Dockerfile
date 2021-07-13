@@ -2,6 +2,8 @@ FROM openjdk:8-slim AS development
 
 WORKDIR /app
 
+ARG mvn_args
+
 # installing maven on Debian requires a man directory
 RUN mkdir -p /usr/share/man/man1
 RUN set -eux; \
@@ -11,16 +13,16 @@ RUN set -eux; \
           curl
 
 #COPY .git .git
-COPY apps/containers/toolchains.xml /root/.m2/toolchains.xml
-COPY apps/bfd-server-test-functions bfd-server-test-functions
-COPY apps/bfd-server-test-perf bfd-server-test-perf
-COPY apps/bfd-shared-utils bfd-shared-utils
-COPY apps/bfd-model bfd-model
-COPY apps/bfd-pipeline bfd-pipeline
-COPY apps/bfd-server bfd-server
-COPY apps/pom.xml pom.xml
+COPY containers/toolchains.xml /root/.m2/toolchains.xml
+COPY bfd-server-test-functions bfd-server-test-functions
+COPY bfd-server-test-perf bfd-server-test-perf
+COPY bfd-shared-utils bfd-shared-utils
+COPY bfd-model bfd-model
+COPY bfd-pipeline bfd-pipeline
+COPY bfd-server bfd-server
+COPY pom.xml pom.xml
 
-RUN mvn install -DskipITs
+RUN mvn install $mvn_args
 
 ENV BFD_PORT=6500 \
     BFD_V2_ENABLED=true \
@@ -52,16 +54,17 @@ FROM openjdk:8-slim AS production
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y \
+      curl \
+      unzip
 RUN mkdir -p newrelic/extensions
 RUN cd /tmp \
   && curl -O https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip \
-  && unzip newrelic-java.zip
+  && unzip newrelic-java.zip \
+  && mv /tmp/newrelic/newrelic.jar /app/newrelic/newrelic.jar
 
-ADD /tmp/newrelic/newrelic.jar /app/newrelic/newrelic.jar
-
-COPY apps/containers/newrelic.yml newrelic/newrelic.yml
-COPY apps/containers/newrelic_tracing.xml newrelic/extensions/newrelic_tracing.xml
+COPY containers/newrelic.yml newrelic/newrelic.yml
+COPY containers/newrelic_tracing.xml newrelic/extensions/newrelic_tracing.xml
 
 COPY --from=development /app/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT-capsule-fat.jar bfd-server-launcher.jar
 COPY --from=development /app/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war bfd-server-war.war
