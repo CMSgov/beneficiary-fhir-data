@@ -7,7 +7,8 @@ RUN mkdir -p /usr/share/man/man1
 RUN set -eux; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
-          maven
+          maven \
+          curl
 
 #COPY .git .git
 COPY apps/containers/toolchains.xml /root/.m2/toolchains.xml
@@ -52,7 +53,7 @@ FROM openjdk:8-slim AS production
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y curl
-RUN mkdir newrelic
+RUN mkdir -p newrelic/extensions
 RUN cd /tmp \
   && curl -O https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip \
   && unzip newrelic-java.zip
@@ -60,12 +61,12 @@ RUN cd /tmp \
 ADD /tmp/newrelic/newrelic.jar /app/newrelic/newrelic.jar
 
 COPY apps/containers/newrelic.yml newrelic/newrelic.yml
-COPY apps/containers/newrelic.yml newrelic/newrelic_tracing.xml
+COPY apps/containers/newrelic_tracing.xml newrelic/extensions/newrelic_tracing.xml
 
 COPY --from=development /app/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT-capsule-fat.jar bfd-server-launcher.jar
 COPY --from=development /app/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war bfd-server-war.war
 
-#Require ENV vars for production
+#Required ENV vars for production
 #-------------------------------
 #BFD_PORT
 #BFD_V2_ENABLED
