@@ -23,6 +23,18 @@ public interface ResourceTypeV2<T extends IBaseResource> {
   /** @return the JPA {@link Entity} field used as the entity's {@link Id} */
   String getEntityIdAttribute();
 
+  /** @return The attribute name for the entity's mbi attribute. */
+  String getEntityMbiAttribute();
+
+  /** @return The attribute name for the entity's mbi hash attribute. */
+  String getEntityMbiHashAttribute();
+
+  /** @return The attribute name for the entity's service start date attribute. */
+  String getEntityStartDateAttribute();
+
+  /** @return The attribute name for the entity's service end date attribute. */
+  String getEntityEndDateAttribute();
+
   /**
    * @return the {@link ResourceTransformer} to use to transform the JPA {@link Entity} instances
    *     into FHIR {@link ClaimResponse} instances

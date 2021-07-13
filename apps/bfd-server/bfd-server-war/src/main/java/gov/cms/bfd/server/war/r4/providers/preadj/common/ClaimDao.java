@@ -1,16 +1,22 @@
 package gov.cms.bfd.server.war.r4.providers.preadj.common;
 
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -75,21 +81,25 @@ public class ClaimDao {
     return claimEntity;
   }
 
-  public <T> List<T> findAllByMbiHash(
-      Class<T> entityClass, String mbiHash, DateRangeParam lastUpdated) {
-    return findAllByAttribute(entityClass, "mbiHash", mbiHash, lastUpdated);
-  }
-
-  public <T> List<T> findAllByMbi(Class<T> entityClass, String mbi, DateRangeParam lastUpdated) {
-    return findAllByAttribute(entityClass, "mbi", mbi, lastUpdated);
-  }
-
-  @VisibleForTesting
-  <T> List<T> findAllByAttribute(
+  /**
+   * Find records based on a given attribute name and value with a given last updated range.
+   *
+   * @param entityClass The entity type to retrieve.
+   * @param attributeName The name of the attribute to search on.
+   * @param attributeValue The desired value of the attribute be searched on.
+   * @param lastUpdated The range of lastUpdated values to search on.
+   * @param serviceDate Date range of the desired service date to search on.
+   * @param <T> The entity type being retrieved.
+   * @return A list of entities of type T retrieved matching the given parameters.
+   */
+  public <T> List<T> findAllByAttribute(
       Class<T> entityClass,
       String attributeName,
       String attributeValue,
-      DateRangeParam lastUpdated) {
+      DateRangeParam lastUpdated,
+      DateRangeParam serviceDate,
+      String startDateAttributeName,
+      String endDateAttributeName) {
     List<T> claimEntities = null;
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -102,7 +112,11 @@ public class ClaimDao {
             builder.equal(root.get(attributeName), attributeValue),
             lastUpdated == null
                 ? builder.and()
-                : createDateRangePredicate(root, lastUpdated, builder)));
+                : createDateRangePredicate(root, lastUpdated, builder),
+            serviceDate == null
+                ? builder.and()
+                : serviceDateRangePredicate(
+                    root, serviceDate, builder, startDateAttributeName, endDateAttributeName)));
 
     Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_MBI_METRIC_NAME).time();
     try {
@@ -122,6 +136,49 @@ public class ClaimDao {
   Predicate createDateRangePredicate(
       Root<?> root, DateRangeParam dateRange, CriteriaBuilder builder) {
     return QueryUtils.createLastUpdatedPredicateInstant(builder, root, dateRange);
+  }
+
+  @VisibleForTesting
+  Predicate serviceDateRangePredicate(
+      Root<?> root,
+      DateRangeParam serviceDate,
+      CriteriaBuilder builder,
+      String startDateAttributeName,
+      String endDateAttributeName) {
+    Path<LocalDate> serviceDateStartPath = root.get(startDateAttributeName);
+    Path<LocalDate> serviceDateEndPath = root.get(endDateAttributeName);
+
+    List<Predicate> predicates = new ArrayList<>();
+
+    // If either of the row's service date attributes is null, don't return it
+    predicates.add(builder.isNotNull(serviceDateStartPath));
+    predicates.add(builder.isNotNull(serviceDateEndPath));
+
+    DateParam lowerBound = serviceDate.getLowerBound();
+
+    if (lowerBound != null) {
+      LocalDate from = lowerBound.getValue().toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
+
+      if (ParamPrefixEnum.GREATERTHAN.equals(lowerBound.getPrefix())) {
+        predicates.add(builder.greaterThan(serviceDateEndPath, from));
+      } else {
+        predicates.add(builder.greaterThanOrEqualTo(serviceDateEndPath, from));
+      }
+    }
+
+    DateParam upperBound = serviceDate.getUpperBound();
+
+    if (upperBound != null) {
+      LocalDate to = upperBound.getValue().toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
+
+      if (ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(upperBound.getPrefix())) {
+        predicates.add(builder.lessThanOrEqualTo(serviceDateStartPath, to));
+      } else {
+        predicates.add(builder.lessThan(serviceDateStartPath, to));
+      }
+    }
+
+    return builder.and(predicates.toArray(new Predicate[0]));
   }
 
   @Override

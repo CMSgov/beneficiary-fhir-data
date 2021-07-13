@@ -35,15 +35,14 @@ import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.ReflectionTestUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.IdType;
@@ -403,11 +402,17 @@ public class AbstractR4ResourceProviderTest {
 
     doReturn(null)
         .when(providerSpy)
-        .createBundleFor(anySet(), anyString(), anyBoolean(), any(DateRangeParam.class));
+        .createBundleFor(
+            anySet(),
+            anyString(),
+            anyBoolean(),
+            any(DateRangeParam.class),
+            any(DateRangeParam.class));
 
     doReturn(expected)
         .when(providerSpy)
-        .createBundleFor(Collections.singleton(mockResourceType), mbi, false, mockLastUpdated);
+        .createBundleFor(
+            Collections.singleton(mockResourceType), mbi, false, mockLastUpdated, mockServiceDate);
 
     Bundle actual =
         providerSpy.findByPatient(
@@ -451,11 +456,16 @@ public class AbstractR4ResourceProviderTest {
 
     doReturn(null)
         .when(providerSpy)
-        .createBundleFor(anySet(), anyString(), anyBoolean(), any(DateRangeParam.class));
+        .createBundleFor(
+            anySet(),
+            anyString(),
+            anyBoolean(),
+            any(DateRangeParam.class),
+            any(DateRangeParam.class));
 
     doReturn(expected)
         .when(providerSpy)
-        .createBundleFor(mockTypesList, mbi, false, mockLastUpdated);
+        .createBundleFor(mockTypesList, mbi, false, mockLastUpdated, mockServiceDate);
 
     Bundle actual =
         providerSpy.findByPatient(
@@ -465,117 +475,381 @@ public class AbstractR4ResourceProviderTest {
   }
 
   @Test
-  public void shouldReturnBundleForMbi() throws NoSuchFieldException, IllegalAccessException {
-    String mbi = "mbimbimbi";
-    // unchecked - This is fine for creating a mock.
-    //noinspection unchecked
-    ResourceTypeV2<Claim> mockResourceType = mock(ResourceTypeV2.class);
-    Set<ResourceTypeV2<Claim>> types = Collections.singleton(mockResourceType);
-    boolean isHashed = false;
+  public void shouldThrowErrorForNoMbiParameter() {
+    ReferenceParam mockRefParam = null;
+    TokenAndListParam mockTokenListParam = mock(TokenAndListParam.class);
+    String hashed = "false";
     DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
-
-    MetricRegistry mockRegistry = mock(MetricRegistry.class);
-
-    ClaimDao mockDao = mock(ClaimDao.class);
+    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
 
     AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
 
-    ReflectionTestUtils.setField(providerSpy, "metricRegistry", mockRegistry);
-    ReflectionTestUtils.setField(providerSpy, "claimDao", mockDao);
+    doReturn(null).when(providerSpy).parseClaimTypes(any(TokenAndListParam.class));
 
-    Class<Object> claimType = Object.class;
+    doReturn(null).when(providerSpy).getResourceTypes();
 
-    Object object1 = "thing1";
-    Object object2 = "thing2";
-    List<Object> entities = Arrays.asList(object1, object2);
+    Exception expected = new IllegalArgumentException("mbi can't be null/blank");
+    Exception actual =
+        AssertUtils.catchExceptions(
+            () ->
+                providerSpy.findByPatient(
+                    mockRefParam,
+                    mockTokenListParam,
+                    hashed,
+                    mockLastUpdated,
+                    mockServiceDate,
+                    null));
 
-    // unchecked - Creating mocks, this is ok.
-    //noinspection unchecked
-    doReturn(null)
-        .when(mockDao)
-        .findAllByMbiHash(any(Class.class), anyString(), any(DateRangeParam.class));
-
-    doReturn(claimType).when(mockResourceType).getEntityClass();
-
-    doReturn(entities).when(mockDao).findAllByMbi(claimType, mbi, mockLastUpdated);
-
-    // unchecked - Creating mocks, this is ok.
-    //noinspection unchecked
-    ResourceTransformer<IBaseResource> mockResourceTransformer = mock(ResourceTransformer.class);
-
-    doReturn(mockResourceTransformer).when(mockResourceType).getTransformer();
-
-    Resource resource1 = new Claim().setId("Thing1");
-    Resource resource2 = new Claim().setId("Thing2");
-
-    doReturn(resource1).when(mockResourceTransformer).transform(mockRegistry, object1);
-
-    doReturn(resource2).when(mockResourceTransformer).transform(mockRegistry, object2);
-
-    Bundle expected = new Bundle();
-    expected.addEntry().setResource(resource1);
-    expected.addEntry().setResource(resource2);
-
-    Bundle actual = providerSpy.createBundleFor(types, mbi, isHashed, mockLastUpdated);
-
-    assertTrue(actual.equalsDeep(expected));
+    AssertUtils.assertThrowEquals(expected, actual);
   }
 
   @Test
-  public void shouldReturnBundleForMbiHash() throws NoSuchFieldException, IllegalAccessException {
+  public void shouldThrowErrorForBlankMbiParameter() {
+    ReferenceParam mockRefParam = mock(ReferenceParam.class);
+    TokenAndListParam mockTokenListParam = mock(TokenAndListParam.class);
+    String hashed = "false";
+    DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
+    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
+
+    doReturn(null).when(mockRefParam).getIdPart();
+
+    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
+
+    doReturn(null).when(providerSpy).parseClaimTypes(any(TokenAndListParam.class));
+
+    doReturn(null).when(providerSpy).getResourceTypes();
+
+    Exception expected = new IllegalArgumentException("mbi can't be null/blank");
+    Exception actual =
+        AssertUtils.catchExceptions(
+            () ->
+                providerSpy.findByPatient(
+                    mockRefParam,
+                    mockTokenListParam,
+                    hashed,
+                    mockLastUpdated,
+                    mockServiceDate,
+                    null));
+
+    AssertUtils.assertThrowEquals(expected, actual);
+  }
+
+  @Test
+  public void shouldReturnBundleForMbi() {
     String mbi = "mbimbimbi";
+
+    ReferenceParam mockRefParam = mock(ReferenceParam.class);
+    TokenAndListParam mockTokenListParam = mock(TokenAndListParam.class);
+    String hashed = "false";
+    DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
+    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
+
+    doReturn(mbi).when(mockRefParam).getIdPart();
+
+    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
+
     // unchecked - This is fine for creating a mock.
     //noinspection unchecked
-    ResourceTypeV2<Claim> mockResourceType = mock(ResourceTypeV2.class);
-    Set<ResourceTypeV2<Claim>> types = Collections.singleton(mockResourceType);
-    boolean isHashed = true;
+    Set<ResourceTypeV2<Claim>> mockTypeSet = mock(Set.class);
+
+    doReturn(null).when(providerSpy).parseClaimTypes(any(TokenAndListParam.class));
+
+    doReturn(mockTypeSet).when(providerSpy).parseClaimTypes(mockTokenListParam);
+
+    doReturn(null).when(providerSpy).getResourceTypes();
+
+    Bundle expected = mock(Bundle.class);
+
+    doReturn(null)
+        .when(providerSpy)
+        .createBundleFor(
+            anySet(),
+            anyString(),
+            anyBoolean(),
+            any(DateRangeParam.class),
+            any(DateRangeParam.class));
+
+    doReturn(expected)
+        .when(providerSpy)
+        .createBundleFor(mockTypeSet, mbi, false, mockLastUpdated, mockServiceDate);
+
+    Bundle actual =
+        providerSpy.findByPatient(
+            mockRefParam, mockTokenListParam, hashed, mockLastUpdated, mockServiceDate, null);
+
+    assertSame(expected, actual);
+  }
+
+  @Test
+  public void shouldReturnBundleForHashedMbi() {
+    String mbi = "mbimbimbi";
+
+    ReferenceParam mockRefParam = mock(ReferenceParam.class);
+    String hashed = "true";
     DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
+    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
+
+    doReturn(mbi).when(mockRefParam).getIdPart();
+
+    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
+
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    Set<ResourceTypeV2<Claim>> mockTypeSet = mock(Set.class);
+
+    doReturn(null).when(providerSpy).parseClaimTypes(any(TokenAndListParam.class));
+
+    doReturn(mockTypeSet).when(providerSpy).getResourceTypes();
+
+    Bundle expected = mock(Bundle.class);
+
+    doReturn(null)
+        .when(providerSpy)
+        .createBundleFor(
+            anySet(),
+            anyString(),
+            anyBoolean(),
+            any(DateRangeParam.class),
+            any(DateRangeParam.class));
+
+    doReturn(expected)
+        .when(providerSpy)
+        .createBundleFor(mockTypeSet, mbi, true, mockLastUpdated, mockServiceDate);
+
+    Bundle actual =
+        providerSpy.findByPatient(
+            mockRefParam, null, hashed, mockLastUpdated, mockServiceDate, null);
+
+    assertSame(expected, actual);
+  }
+
+  @Test
+  public void shouldCreateBundleForNonHashedMbi()
+      throws NoSuchFieldException, IllegalAccessException {
+    String mbi = "mbimbimbi";
+    String mbiAttribute = "mbi";
+    String mbiHashAttribute = "mbiHash";
+    String startAttribute1 = "startAttribute1";
+    String endAttribute1 = "endAttribute1";
+    String startAttribute2 = "startAttribute2";
+    String endAttribute2 = "endAttribute2";
+
+    boolean isHashed = false;
+    DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
+    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
 
     MetricRegistry mockRegistry = mock(MetricRegistry.class);
 
     ClaimDao mockDao = mock(ClaimDao.class);
 
-    AbstractR4ResourceProvider<Claim> providerSpy = spy(new MockR4ResourceProvider());
+    MockR4ResourceProvider provider = new MockR4ResourceProvider();
 
-    ReflectionTestUtils.setField(providerSpy, "metricRegistry", mockRegistry);
-    ReflectionTestUtils.setField(providerSpy, "claimDao", mockDao);
+    ReflectionTestUtils.setField(provider, "metricRegistry", mockRegistry);
+    ReflectionTestUtils.setField(provider, "claimDao", mockDao);
 
-    Class<Object> claimType = Object.class;
-
-    Object object1 = "thing1";
-    Object object2 = "thing2";
-    List<Object> entities = Arrays.asList(object1, object2);
-
-    // unchecked - Creating mocks, this is ok.
+    // unchecked - This is fine for creating a mock.
     //noinspection unchecked
-    doReturn(null)
-        .when(mockDao)
-        .findAllByMbi(any(Class.class), anyString(), any(DateRangeParam.class));
-
-    doReturn(claimType).when(mockResourceType).getEntityClass();
-
-    doReturn(entities).when(mockDao).findAllByMbiHash(claimType, mbi, mockLastUpdated);
-
-    // unchecked - Creating mocks, this is ok.
+    ResourceTypeV2<Claim> resourceType1 = mock(ResourceTypeV2.class);
+    // unchecked - This is fine for creating a mock.
     //noinspection unchecked
-    ResourceTransformer<IBaseResource> mockResourceTransformer = mock(ResourceTransformer.class);
+    ResourceTypeV2<Claim> resourceType2 = mock(ResourceTypeV2.class);
 
-    doReturn(mockResourceTransformer).when(mockResourceType).getTransformer();
+    // Need to use an ordered set to have deterministic testing
+    Set<ResourceTypeV2<Claim>> resourceTypes = new LinkedHashSet<>(2);
+    resourceTypes.add(resourceType1);
+    resourceTypes.add(resourceType2);
+
+    Class<?> mockEntityType1 = Integer.class;
+    Class<?> mockEntityType2 = String.class;
+
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTransformer<Claim> mockTransformer1 = mock(ResourceTransformer.class);
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTransformer<Claim> mockTransformer2 = mock(ResourceTransformer.class);
+
+    Object object1 = "object1";
+    Object object2 = "object2";
+
+    List<?> entityList1 = Collections.singletonList(object1);
+    List<?> entityList2 = Collections.singletonList(object2);
 
     Resource resource1 = new Claim().setId("Thing1");
     Resource resource2 = new Claim().setId("Thing2");
 
-    doReturn(resource1).when(mockResourceTransformer).transform(mockRegistry, object1);
+    doReturn(resource1).when(mockTransformer1).transform(mockRegistry, object1);
 
-    doReturn(resource2).when(mockResourceTransformer).transform(mockRegistry, object2);
+    doReturn(resource2).when(mockTransformer2).transform(mockRegistry, object2);
+
+    doReturn(mbiAttribute).when(resourceType1).getEntityMbiAttribute();
+
+    doReturn(mbiHashAttribute).when(resourceType1).getEntityMbiHashAttribute();
+
+    doReturn(mockEntityType1).when(resourceType1).getEntityClass();
+
+    doReturn(startAttribute1).when(resourceType1).getEntityStartDateAttribute();
+
+    doReturn(endAttribute1).when(resourceType1).getEntityEndDateAttribute();
+
+    doReturn(mockTransformer1).when(resourceType1).getTransformer();
+
+    doReturn(mbiAttribute).when(resourceType2).getEntityMbiAttribute();
+
+    doReturn(mbiHashAttribute).when(resourceType2).getEntityMbiHashAttribute();
+
+    doReturn(mockEntityType2).when(resourceType2).getEntityClass();
+
+    doReturn(startAttribute2).when(resourceType2).getEntityStartDateAttribute();
+
+    doReturn(endAttribute2).when(resourceType2).getEntityEndDateAttribute();
+
+    doReturn(mockTransformer2).when(resourceType2).getTransformer();
+
+    doReturn(entityList1)
+        .when(mockDao)
+        .findAllByAttribute(
+            mockEntityType1,
+            mbiAttribute,
+            mbi,
+            mockLastUpdated,
+            mockServiceDate,
+            startAttribute1,
+            endAttribute1);
+
+    doReturn(entityList2)
+        .when(mockDao)
+        .findAllByAttribute(
+            mockEntityType2,
+            mbiAttribute,
+            mbi,
+            mockLastUpdated,
+            mockServiceDate,
+            startAttribute2,
+            endAttribute2);
 
     Bundle expected = new Bundle();
     expected.addEntry().setResource(resource1);
     expected.addEntry().setResource(resource2);
 
-    Bundle actual = providerSpy.createBundleFor(types, mbi, isHashed, mockLastUpdated);
+    Bundle actual =
+        provider.createBundleFor(resourceTypes, mbi, isHashed, mockLastUpdated, mockServiceDate);
 
-    assertTrue(actual.equalsDeep(expected));
+    assertTrue(expected.equalsDeep(actual));
+  }
+
+  @Test
+  public void shouldCreateBundleForHashedMbi() throws NoSuchFieldException, IllegalAccessException {
+    String mbi = "mbimbimbi";
+    String mbiAttribute = "mbi";
+    String mbiHashAttribute = "mbiHash";
+    String startAttribute1 = "startAttribute1";
+    String endAttribute1 = "endAttribute1";
+    String startAttribute2 = "startAttribute2";
+    String endAttribute2 = "endAttribute2";
+
+    boolean isHashed = true;
+    DateRangeParam mockLastUpdated = mock(DateRangeParam.class);
+    DateRangeParam mockServiceDate = mock(DateRangeParam.class);
+
+    MetricRegistry mockRegistry = mock(MetricRegistry.class);
+
+    ClaimDao mockDao = mock(ClaimDao.class);
+
+    MockR4ResourceProvider provider = new MockR4ResourceProvider();
+
+    ReflectionTestUtils.setField(provider, "metricRegistry", mockRegistry);
+    ReflectionTestUtils.setField(provider, "claimDao", mockDao);
+
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTypeV2<Claim> resourceType1 = mock(ResourceTypeV2.class);
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTypeV2<Claim> resourceType2 = mock(ResourceTypeV2.class);
+
+    // Need to use an ordered set to have deterministic testing
+    Set<ResourceTypeV2<Claim>> resourceTypes = new LinkedHashSet<>(2);
+    resourceTypes.add(resourceType1);
+    resourceTypes.add(resourceType2);
+
+    Class<?> mockEntityType1 = Integer.class;
+    Class<?> mockEntityType2 = String.class;
+
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTransformer<Claim> mockTransformer1 = mock(ResourceTransformer.class);
+    // unchecked - This is fine for creating a mock.
+    //noinspection unchecked
+    ResourceTransformer<Claim> mockTransformer2 = mock(ResourceTransformer.class);
+
+    Object object1 = "object1";
+    Object object2 = "object2";
+
+    List<?> entityList1 = Collections.singletonList(object1);
+    List<?> entityList2 = Collections.singletonList(object2);
+
+    Resource resource1 = new Claim().setId("Thing1");
+    Resource resource2 = new Claim().setId("Thing2");
+
+    doReturn(resource1).when(mockTransformer1).transform(mockRegistry, object1);
+
+    doReturn(resource2).when(mockTransformer2).transform(mockRegistry, object2);
+
+    doReturn(mbiAttribute).when(resourceType1).getEntityMbiAttribute();
+
+    doReturn(mbiHashAttribute).when(resourceType1).getEntityMbiHashAttribute();
+
+    doReturn(mockEntityType1).when(resourceType1).getEntityClass();
+
+    doReturn(startAttribute1).when(resourceType1).getEntityStartDateAttribute();
+
+    doReturn(endAttribute1).when(resourceType1).getEntityEndDateAttribute();
+
+    doReturn(mockTransformer1).when(resourceType1).getTransformer();
+
+    doReturn(mbiAttribute).when(resourceType2).getEntityMbiAttribute();
+
+    doReturn(mbiHashAttribute).when(resourceType2).getEntityMbiHashAttribute();
+
+    doReturn(mockEntityType2).when(resourceType2).getEntityClass();
+
+    doReturn(startAttribute2).when(resourceType2).getEntityStartDateAttribute();
+
+    doReturn(endAttribute2).when(resourceType2).getEntityEndDateAttribute();
+
+    doReturn(mockTransformer2).when(resourceType2).getTransformer();
+
+    doReturn(entityList1)
+        .when(mockDao)
+        .findAllByAttribute(
+            mockEntityType1,
+            mbiHashAttribute,
+            mbi,
+            mockLastUpdated,
+            mockServiceDate,
+            startAttribute1,
+            endAttribute1);
+
+    doReturn(entityList2)
+        .when(mockDao)
+        .findAllByAttribute(
+            mockEntityType2,
+            mbiHashAttribute,
+            mbi,
+            mockLastUpdated,
+            mockServiceDate,
+            startAttribute2,
+            endAttribute2);
+
+    Bundle expected = new Bundle();
+    expected.addEntry().setResource(resource1);
+    expected.addEntry().setResource(resource2);
+
+    Bundle actual =
+        provider.createBundleFor(resourceTypes, mbi, isHashed, mockLastUpdated, mockServiceDate);
+
+    assertTrue(expected.equalsDeep(actual));
   }
 
   private static class MockR4ResourceProvider extends AbstractR4ResourceProvider<Claim> {

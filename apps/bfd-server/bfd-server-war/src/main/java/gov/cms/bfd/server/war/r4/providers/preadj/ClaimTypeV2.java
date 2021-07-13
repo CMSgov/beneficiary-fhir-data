@@ -14,26 +14,49 @@ import org.hl7.fhir.r4.model.ClaimResponse;
  * {@link R4ClaimResponseResourceProvider}.
  */
 public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
-  F(PreAdjFissClaim.class, PreAdjFissClaim.Fields.dcn, FissClaimTransformerV2::transform);
+  F(
+      PreAdjFissClaim.class,
+      PreAdjFissClaim.Fields.mbi,
+      PreAdjFissClaim.Fields.mbiHash,
+      PreAdjFissClaim.Fields.dcn,
+      PreAdjFissClaim.Fields.stmtCovFromDate,
+      PreAdjFissClaim.Fields.stmtCovToDate,
+      FissClaimTransformerV2::transform);
 
   // TODO: [DCGEO-88, DCGEO-98] Complete null fields when entity available
   // M(null, null, McsClaimTransformerV2::transform);
 
   private final Class<?> entityClass;
+  private final String entityMbiAttribute;
+  private final String entityMbiHashAttribute;
   private final String entityIdAttribute;
+  private final String entityStartDateAttribute;
+  private final String entityEndDateAttribute;
   private final ResourceTransformer<Claim> transformer;
 
   /**
    * Enum constant constructor.
    *
    * @param entityClass the value to use for {@link #getEntityClass()}
+   * @param entityMbiAttribute the value to use for {@link #getEntityMbiAttribute()}
+   * @param entityMbiHashAttribute the value to use for {@link #getEntityMbiHashAttribute()}
    * @param entityIdAttribute the value to use for {@link #getEntityIdAttribute()}
    * @param transformer the value to use for {@link #getTransformer()}
    */
   ClaimTypeV2(
-      Class<?> entityClass, String entityIdAttribute, ResourceTransformer<Claim> transformer) {
+      Class<?> entityClass,
+      String entityMbiAttribute,
+      String entityMbiHashAttribute,
+      String entityIdAttribute,
+      String entityStartDateAttribute,
+      String entityEndDateAttribute,
+      ResourceTransformer<Claim> transformer) {
     this.entityClass = entityClass;
+    this.entityMbiAttribute = entityMbiAttribute;
+    this.entityMbiHashAttribute = entityMbiHashAttribute;
     this.entityIdAttribute = entityIdAttribute;
+    this.entityStartDateAttribute = entityStartDateAttribute;
+    this.entityEndDateAttribute = entityEndDateAttribute;
     this.transformer = transformer;
   }
 
@@ -48,6 +71,24 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
   /** @return the JPA {@link Entity} field used as the entity's {@link Id} */
   public String getEntityIdAttribute() {
     return entityIdAttribute;
+  }
+
+  /** @return The attribute name for the entity's mbi attribute. */
+  public String getEntityMbiAttribute() {
+    return entityMbiAttribute;
+  }
+
+  /** @return The attribute name for the entity's mbi hash attribute. */
+  public String getEntityMbiHashAttribute() {
+    return entityMbiHashAttribute;
+  }
+
+  public String getEntityStartDateAttribute() {
+    return entityStartDateAttribute;
+  }
+
+  public String getEntityEndDateAttribute() {
+    return entityEndDateAttribute;
   }
 
   /**

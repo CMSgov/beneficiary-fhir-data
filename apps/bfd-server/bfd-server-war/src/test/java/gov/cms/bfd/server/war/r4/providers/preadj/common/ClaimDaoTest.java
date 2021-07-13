@@ -104,58 +104,12 @@ public class ClaimDaoTest {
   }
 
   @Test
-  public void shouldInvokeFindEntitiesByAttributeForMbi() {
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    MetricRegistry mockRegistry = mock(MetricRegistry.class);
-
-    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, mockRegistry));
-
-    List<Object> expected = Collections.singletonList(5L);
-
-    doReturn(null)
-        .when(daoSpy)
-        .findAllByAttribute(any(), anyString(), anyString(), any(DateRangeParam.class));
-
-    doReturn(expected)
-        .when(daoSpy)
-        .findAllByAttribute(Object.class, "mbi", "123", mockDateRangeParam);
-
-    List<Object> actual = daoSpy.findAllByMbi(Object.class, "123", mockDateRangeParam);
-
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void shouldInvokeFindEntitiesByAttributeForMbiHash() {
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    MetricRegistry mockRegistry = mock(MetricRegistry.class);
-
-    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, mockRegistry));
-
-    List<Object> expected = Collections.singletonList(5L);
-
-    doReturn(null)
-        .when(daoSpy)
-        .findAllByAttribute(any(), anyString(), anyString(), any(DateRangeParam.class));
-
-    doReturn(expected)
-        .when(daoSpy)
-        .findAllByAttribute(Object.class, "mbiHash", "123", mockDateRangeParam);
-
-    List<Object> actual = daoSpy.findAllByMbiHash(Object.class, "123", mockDateRangeParam);
-
-    assertEquals(expected, actual);
-  }
-
-  @Test
   public void shouldFindEntitiesByAttribute() {
     Class<Object> entityClass = Object.class;
     String attributeName = "attr";
     String attributeValue = "value";
+    String startAttribute = "startAttribute";
+    String endAttribute = "endAttribute";
 
     EntityManager mockEntityManager = mock(EntityManager.class);
     MetricRegistry metricRegistry = new MetricRegistry();
@@ -180,9 +134,20 @@ public class ClaimDaoTest {
 
     doReturn(null).when(mockBuilder).and(mockEqualsPredicate, null);
 
-    doReturn(mockAndPredicate).when(mockBuilder).and(mockEqualsPredicate, mockEmptyAndPredicate);
+    doReturn(mockAndPredicate)
+        .when(mockBuilder)
+        .and(mockEqualsPredicate, mockEmptyAndPredicate, mockEmptyAndPredicate);
 
     doReturn(mockEmptyAndPredicate).when(mockBuilder).and();
+
+    doReturn(null)
+        .when(daoSpy)
+        .serviceDateRangePredicate(
+            any(Root.class),
+            any(DateRangeParam.class),
+            any(CriteriaBuilder.class),
+            anyString(),
+            anyString());
 
     doReturn(mockPath).when(mockRoot).get(attributeName);
 
@@ -201,7 +166,8 @@ public class ClaimDaoTest {
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
 
     List<Object> actual =
-        daoSpy.findAllByAttribute(entityClass, attributeName, attributeValue, null);
+        daoSpy.findAllByAttribute(
+            entityClass, attributeName, attributeValue, null, null, startAttribute, endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockAndPredicate);
@@ -213,7 +179,10 @@ public class ClaimDaoTest {
     Class<Object> entityClass = Object.class;
     String attributeName = "attr";
     String attributeValue = "value";
-    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
+    String startAttribute = "startAttribute";
+    String endAttribute = "endAttribute";
+    DateRangeParam mockLastUpdatedParam = mock(DateRangeParam.class);
+    DateRangeParam mockServiceDateParam = mock(DateRangeParam.class);
 
     EntityManager mockEntityManager = mock(EntityManager.class);
     MetricRegistry metricRegistry = new MetricRegistry();
@@ -236,7 +205,7 @@ public class ClaimDaoTest {
 
     doReturn(mockEqualsPredicate).when(mockBuilder).equal(mockPath, attributeValue);
 
-    Predicate mockDateRangePredicate = mock(Predicate.class);
+    Predicate mockLastUpdatedPredicate = mock(Predicate.class);
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -247,15 +216,33 @@ public class ClaimDaoTest {
         .createDateRangePredicate(
             any(Root.class), any(DateRangeParam.class), any(CriteriaBuilder.class));
 
-    doReturn(mockDateRangePredicate)
+    doReturn(mockLastUpdatedPredicate)
         .when(daoSpy)
-        .createDateRangePredicate(mockRoot, mockDateRangeParam, mockBuilder);
+        .createDateRangePredicate(mockRoot, mockLastUpdatedParam, mockBuilder);
+
+    Predicate mockServiceDatePredicate = mock(Predicate.class);
+
+    doReturn(null)
+        .when(daoSpy)
+        .serviceDateRangePredicate(
+            any(Root.class),
+            any(DateRangeParam.class),
+            any(CriteriaBuilder.class),
+            anyString(),
+            anyString());
+
+    doReturn(mockServiceDatePredicate)
+        .when(daoSpy)
+        .serviceDateRangePredicate(
+            mockRoot, mockServiceDateParam, mockBuilder, startAttribute, endAttribute);
 
     doReturn(mockLastUpdatedPath).when(mockRoot).get("lastUpdated");
 
     doReturn(null).when(mockBuilder).and(mockEqualsPredicate, null);
 
-    doReturn(mockAndPredicate).when(mockBuilder).and(mockEqualsPredicate, mockDateRangePredicate);
+    doReturn(mockAndPredicate)
+        .when(mockBuilder)
+        .and(mockEqualsPredicate, mockLastUpdatedPredicate, mockServiceDatePredicate);
 
     doReturn(mockEmptyAndPredicate).when(mockBuilder).and();
 
@@ -276,7 +263,14 @@ public class ClaimDaoTest {
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
 
     List<Object> actual =
-        daoSpy.findAllByAttribute(entityClass, attributeName, attributeValue, mockDateRangeParam);
+        daoSpy.findAllByAttribute(
+            entityClass,
+            attributeName,
+            attributeValue,
+            mockLastUpdatedParam,
+            mockServiceDateParam,
+            startAttribute,
+            endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockAndPredicate);
@@ -293,6 +287,26 @@ public class ClaimDaoTest {
     @Override
     public String getEntityIdAttribute() {
       return "somePropertyName";
+    }
+
+    @Override
+    public String getEntityMbiAttribute() {
+      return "mbiAttribute";
+    }
+
+    @Override
+    public String getEntityMbiHashAttribute() {
+      return "mbiHashAttribute";
+    }
+
+    @Override
+    public String getEntityStartDateAttribute() {
+      return "startDateAttribute";
+    }
+
+    @Override
+    public String getEntityEndDateAttribute() {
+      return "endDeAttribute";
     }
 
     @Override
