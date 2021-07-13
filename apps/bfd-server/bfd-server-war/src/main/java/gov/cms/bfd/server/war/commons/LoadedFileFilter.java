@@ -61,13 +61,12 @@ public class LoadedFileFilter {
     if (upperBound != null) {
       switch (upperBound.getPrefix()) {
         case LESSTHAN:
-          if (upperBound.getValue().toInstant().toEpochMilli()
-              <= getFirstUpdated().toEpochMilli()) {
+          if (upperBound.getValue().toInstant().isBefore(getFirstUpdated())) {
             return false;
           }
           break;
         case LESSTHAN_OR_EQUALS:
-          if (upperBound.getValue().toInstant().toEpochMilli() < getFirstUpdated().toEpochMilli()) {
+          if (!upperBound.getValue().toInstant().isAfter(getFirstUpdated())) {
             return false;
           }
           break;
