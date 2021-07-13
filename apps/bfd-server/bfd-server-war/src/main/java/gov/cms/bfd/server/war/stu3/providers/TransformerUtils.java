@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
@@ -31,6 +32,7 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
+import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
@@ -856,10 +858,15 @@ public final class TransformerUtils {
       CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
-    String stringDate = dateYear.get().toString();
-    DateType dateYearValue = new DateType(stringDate);
-    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
-    extension = new Extension(extensionUrl, dateYearValue);
+    try {
+      String stringDate = dateYear.get().toString();
+      DateType dateYearValue = new DateType(stringDate);
+      String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+      extension = new Extension(extensionUrl, dateYearValue);
+    } catch (DataFormatException e) {
+      throw new InvalidRifValueException(
+          String.format("Unable to create DateYear with reference year: '%s'.", dateYear.get()), e);
+    }
 
     return extension;
   }
