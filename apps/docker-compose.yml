@@ -9,7 +9,7 @@ services:
     image: bfd-server
     ports:
       - '${BFD_PORT:-6500}:6500'
-    env_file: .env
+    env_file: .env.example
     volumes:
       - .:/app
     command: >
