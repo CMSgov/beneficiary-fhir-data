@@ -64,6 +64,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -858,6 +859,9 @@ public final class TransformerUtils {
       CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
+    if (!dateYear.isPresent()) {
+      throw new NoSuchElementException();
+    }
     try {
       String stringDate = dateYear.get().toString();
       DateType dateYearValue = new DateType(stringDate);
@@ -867,7 +871,6 @@ public final class TransformerUtils {
       throw new InvalidRifValueException(
           String.format("Unable to create DateYear with reference year: '%s'.", dateYear.get()), e);
     }
-
     return extension;
   }
 

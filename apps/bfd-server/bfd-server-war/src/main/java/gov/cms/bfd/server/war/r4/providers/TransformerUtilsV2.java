@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -406,6 +407,9 @@ public final class TransformerUtilsV2 {
       CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
+    if (!dateYear.isPresent()) {
+      throw new NoSuchElementException();
+    }
     try {
       String stringDate = dateYear.get().toString();
       DateType dateYearValue = new DateType(stringDate);
