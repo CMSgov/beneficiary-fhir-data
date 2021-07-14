@@ -72,6 +72,7 @@ public final class DatabaseSchemaManager {
     try (Connection connection = dataSource.getConnection()) {
       if (connection.getMetaData().getDatabaseProductName().equals("HSQL Database Engine")) {
         placeholders.put("type.int4", "integer");
+        placeholders.put("type.text", "longvarchar");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "--");
         placeholders.put("logic.alter-column-type", "");
@@ -80,6 +81,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.sequence-increment", "increment by");
       } else {
         placeholders.put("type.int4", "int4");
+        placeholders.put("type.text", "text");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "");
         placeholders.put("logic.alter-column-type", "type");

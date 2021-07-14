@@ -75,17 +75,17 @@ public class ClaimDao {
     return claimEntity;
   }
 
-  public <T> List<T> findAllByMbiHash(
-      Class<T> entityClass, String mbiHash, DateRangeParam lastUpdated) {
-    return findAllByAttribute(entityClass, "mbiHash", mbiHash, lastUpdated);
-  }
-
-  public <T> List<T> findAllByMbi(Class<T> entityClass, String mbi, DateRangeParam lastUpdated) {
-    return findAllByAttribute(entityClass, "mbi", mbi, lastUpdated);
-  }
-
-  @VisibleForTesting
-  <T> List<T> findAllByAttribute(
+  /**
+   * Find records based on a given attribute name and value with a given last updated range.
+   *
+   * @param entityClass The entity type to retrieve.
+   * @param attributeName The name of the attribute to search on.
+   * @param attributeValue The desired value of the attribute be searched on.
+   * @param lastUpdated The range of lastUpdated values to search on.
+   * @param <T> The entity type being retrieved.
+   * @return A list of entities of type T retrieved matching the given parameters.
+   */
+  public <T> List<T> findAllByAttribute(
       Class<T> entityClass,
       String attributeName,
       String attributeValue,
