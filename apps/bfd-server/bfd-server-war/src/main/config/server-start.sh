@@ -118,7 +118,7 @@ cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
 workDirectory="${targetDirectory}/server-work"
-serverLauncher="${workDirectory}/$(ls ${workDirectory} | grep '^bfd-server-launcher-.*\.jar$')"
+serverLauncher="${workDirectory}/$(ls ${workDirectory} | grep '^bfd-server-launcher-' | grep -v '^bfd-server-launcher-.*\.zip$')/bfd-server-launcher.sh"
 serverPortsFile="${workDirectory}/server-ports.properties"
 serverLog="${workDirectory}/server-console.log"
 warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bfd-server-war-.*\.war$')"
@@ -161,14 +161,15 @@ else
 fi
 
 # To enable JVM debugging, uncomment and add this line to the server start command below.
-#	-Dcapsule.jvm.args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
+#	"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
 
 # Launch the server in the background.
 BFD_PORT="${serverPortHttps}" \
 	BFD_KEYSTORE="${keyStore}" \
 	BFD_TRUSTSTORE="${trustStore}" \
 	BFD_WAR="${warArtifact}" \
-	"${javaHome}/bin/java" \
+	BFD_JAVA_HOME="${javaHome}" \
+	"${serverLauncher}" \
 	"${maxHeapArg}" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
@@ -176,7 +177,6 @@ BFD_PORT="${serverPortHttps}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \
-	-jar "${serverLauncher}" \
 	>"${serverLog}" 2>&1 \
 	&
 
