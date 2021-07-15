@@ -12,8 +12,8 @@ import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -30,7 +30,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -104,7 +103,7 @@ public class SpringConfiguration {
       @Value("${" + PROP_DB_SCHEMA_APPLY + ":false}") String schemaApplyText,
       MetricRegistry metricRegistry) {
     HikariDataSource poolingDataSource;
-    if (url.startsWith(DatabaseTestHelper.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
+    if (url.startsWith(DatabaseTestUtils.JDBC_URL_PREFIX_BLUEBUTTON_TEST)) {
       poolingDataSource = createTestDatabaseIfNeeded(url, connectionsMaxText, metricRegistry);
     } else {
       poolingDataSource = new HikariDataSource();
@@ -165,8 +164,22 @@ public class SpringConfiguration {
    */
   private static HikariDataSource createTestDatabaseIfNeededForHsql(
       String url, String connectionsMaxText, MetricRegistry metricRegistry) {
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterCleanAndSchema();
+    /*
+     * Grab the path for the DB server properties, and remove it if found, as it'll be from an older
+     * run. We'll (re-)create it later in this method.
+     */
+    Path testDbPropsPath = DatabaseTestUtils.findTestDatabaseProperties();
+    if (Files.isReadable(testDbPropsPath)) {
+      try {
+        Files.delete(testDbPropsPath);
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+    }
+
+    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
+    DatabaseTestUtils.get().createOrUpdateSchemaForDataSource();
 
     // Create the DataSource to connect to that shiny new DB.
     HikariDataSource dataSourcePool = new HikariDataSource();
@@ -180,7 +193,6 @@ public class SpringConfiguration {
     testDbProps.setProperty(PROP_DB_URL, dataSourceComponents.getUrl());
     testDbProps.setProperty(PROP_DB_USERNAME, dataSourceComponents.getUsername());
     testDbProps.setProperty(PROP_DB_PASSWORD, dataSourceComponents.getPassword());
-    Path testDbPropsPath = findTestDatabaseProperties();
     try {
       testDbProps.store(new FileWriter(testDbPropsPath.toFile()), null);
     } catch (IOException e) {
@@ -188,23 +200,6 @@ public class SpringConfiguration {
     }
 
     return dataSourcePool;
-  }
-
-  /**
-   * @return the {@link Path} to the {@link Properties} file in <code>target/server-work</code> that
-   *     the test DB connection properties will be written out to
-   */
-  public static Path findTestDatabaseProperties() {
-    Path serverRunDir = Paths.get("target", "server-work");
-    if (!Files.isDirectory(serverRunDir))
-      serverRunDir = Paths.get("bfd-server-war", "target", "server-work");
-    if (!Files.isDirectory(serverRunDir))
-      throw new IllegalStateException(
-          "Unable to find 'server-work' directory. Working directory: "
-              + Paths.get(".").toAbsolutePath());
-
-    Path testDbPropertiesPath = serverRunDir.resolve("server-test-db.properties");
-    return testDbPropertiesPath;
   }
 
   /**

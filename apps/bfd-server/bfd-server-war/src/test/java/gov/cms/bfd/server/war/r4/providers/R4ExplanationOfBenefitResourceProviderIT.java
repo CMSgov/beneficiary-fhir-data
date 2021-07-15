@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
@@ -23,7 +22,7 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
@@ -40,10 +39,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
-import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -74,8 +71,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void readEobForExistingCarrierClaim() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     CarrierClaim claim =
         loadedRecords.stream()
@@ -103,7 +101,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingCarrierClaim() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing.
     fhirClient
@@ -124,8 +122,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void readEobForExistingDMEClaim() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     DMEClaim claim =
         loadedRecords.stream()
@@ -154,7 +153,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingDMEClaim() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing.
     fhirClient
@@ -175,8 +174,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void readEobForExistingHHAClaim() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     HHAClaim claim =
         loadedRecords.stream()
@@ -206,7 +206,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingHHAClaim() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing.
     fhirClient
@@ -227,8 +227,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void readEobForExistingHospiceClaim() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     HospiceClaim claim =
         loadedRecords.stream()
@@ -257,7 +258,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingHospiceClaim() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing.
     fhirClient
@@ -278,8 +279,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void readEobForExistingInpatientClaim() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     InpatientClaim claim =
         loadedRecords.stream()
@@ -308,7 +310,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingInpatientClaim() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing.
     fhirClient
@@ -329,8 +331,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void readEobForExistingOutpatientClaim() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     OutpatientClaim claim =
         loadedRecords.stream()
@@ -349,7 +352,10 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     Assert.assertNotNull(eob);
     // Compare result to transformed EOB
     assertEquals(
-        OutpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)),
+        OutpatientClaimTransformerV2.transform(
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            claim,
+            Optional.of(false)),
         eob);
   }
 
@@ -361,7 +367,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingOutpatientClaim() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing.
     fhirClient
@@ -382,8 +388,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void readEobForExistingPartDEvent() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     PartDEvent claim =
         loadedRecords.stream()
@@ -412,7 +419,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingPartDEvent() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing.
     fhirClient
@@ -430,7 +437,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingNegativePartDEvent() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing. Tests negative ID will pass regex pattern.
     fhirClient
@@ -449,7 +456,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = InvalidRequestException.class)
   public void readEobForInvalidIdParamPartDEvent() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // The IdParam is not valid, so this should return an exception.
     fhirClient
@@ -470,8 +477,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void readEobForExistingSNFClaim() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     SNFClaim claim =
         loadedRecords.stream()
@@ -500,7 +508,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingSNFClaim() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return nothing.
     fhirClient
@@ -520,8 +528,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchForEobsByExistingPatient() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -581,8 +590,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchForEobsByExistingPatientWithOddPaging() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -626,8 +636,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchForEobsByExistingPatientWithPageSizeNotProvided() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -695,8 +706,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchForEobsByExistingPatientWithPageSizeZero() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -763,8 +775,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchForEobsWithLargePageSizesOnFewerResults() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -826,8 +839,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test(expected = InvalidRequestException.class)
   public void searchForEobsWithPagingWithNegativePagingParameters() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -870,7 +884,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   @Test
   public void searchForEobsByMissingPatient() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -896,7 +910,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   public void searchForEobsWithSamhsaFiltering() throws FHIRException {
     // Load the SAMPLE_A resources normally.
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     // Tweak the SAMPLE_A Carrier claim such that it's SAMHSA-related.
     CarrierClaim carrierRifRecord =
@@ -906,11 +921,10 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
 
-    DataSource dataSource = ServerTestUtils.createDataSource();
-    EntityManagerFactory entityManagerFactory = null;
+    EntityManagerFactory entityManagerFactory =
+        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
     EntityManager entityManager = null;
     try {
-      entityManagerFactory = RifLoaderTestUtils.createEntityManagerFactory(dataSource);
       entityManager = entityManagerFactory.createEntityManager();
 
       entityManager.getTransaction().begin();
@@ -1005,10 +1019,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     } finally {
       if (entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
       if (entityManager != null) entityManager.close();
-      if (entityManagerFactory != null) entityManagerFactory.close();
     }
 
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Bundle searchResults =
         fhirClient
@@ -1058,8 +1071,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchForEobsIncludeTaxNumbersHandling() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -1107,7 +1121,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
-    fhirClient = ServerTestUtils.createFhirClientWithHeadersV2(requestHeader);
+    fhirClient = ServerTestUtils.get().createFhirClientWithHeadersV2(requestHeader);
 
     searchResults =
         fhirClient
@@ -1131,8 +1145,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchForEobsByExistingPatientAndType() throws FHIRException {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1172,7 +1187,10 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     // Compare result to transformed EOB
     assertEquals(
-        PartDEventTransformerV2.transform(new MetricRegistry(), partDEvent, Optional.of(false)),
+        PartDEventTransformerV2.transform(
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            partDEvent,
+            Optional.of(false)),
         filterToClaimType(searchResults, ClaimTypeV2.PDE).get(0));
   }
 
@@ -1189,7 +1207,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchEobWithLastUpdated() throws FHIRException {
     Beneficiary beneficiary = loadSampleA();
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Build up a list of lastUpdatedURLs that return > all values values
     String nowDateTime = new DateTimeDt(Date.from(Instant.now().plusSeconds(1))).getValueAsString();
@@ -1220,7 +1238,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchEobWithLastUpdatedAndPagination() throws FHIRException {
     Beneficiary beneficiary = loadSampleA();
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Search with lastUpdated range between yesterday and now
     int expectedCount = 3;
@@ -1266,7 +1284,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   public void searchEobWithNullLastUpdated() throws FHIRException {
     // Load a records and clear the lastUpdated field for one
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     String claimId =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
@@ -1278,15 +1297,16 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     String beneId = findFirstBeneficary(loadedRecords).getBeneficiaryId();
 
     // Clear lastupdated in the database
-    ServerTestUtils.doTransaction(
-        (em) -> {
-          em.createQuery("update CarrierClaim set lastUpdated=null where claimId=:claimId")
-              .setParameter("claimId", claimId)
-              .executeUpdate();
-        });
+    ServerTestUtils.get()
+        .doTransaction(
+            (em) -> {
+              em.createQuery("update CarrierClaim set lastUpdated=null where claimId=:claimId")
+                  .setParameter("claimId", claimId)
+                  .executeUpdate();
+            });
 
     // Find all EOBs without lastUpdated
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
     Bundle searchAll =
         fhirClient
             .search()
@@ -1297,7 +1317,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertEquals(
         "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
-        TransformerConstants.FALLBACK_LAST_UPDATED,
+        Date.from(TransformerConstants.FALLBACK_LAST_UPDATED),
         filterToClaimType(searchAll, ClaimTypeV2.CARRIER).get(0).getMeta().getLastUpdated());
 
     // Find all EOBs with < now()
@@ -1312,7 +1332,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertEquals(
         "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
-        TransformerConstants.FALLBACK_LAST_UPDATED,
+        Date.from(TransformerConstants.FALLBACK_LAST_UPDATED),
         filterToClaimType(searchWithLessThan, ClaimTypeV2.CARRIER)
             .get(0)
             .getMeta()
@@ -1352,7 +1372,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   @Test
   public void searchEobWithServiceDate() {
     Beneficiary beneficiary = loadSampleA();
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
     // For SampleA data, we have the following service dates
     // HHA 23-JUN-2015
     // Hospice 30-JAN-2014
@@ -1395,12 +1415,13 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         });
   }
 
-  /** Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after each test case. */
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
   @After
   public void cleanDatabaseServerAfterEachTestCase() {
-    ServerTestUtils.cleanDatabaseServer();
-    // FIXME temporary workaround to free up ram
-    SessionFactoryRegistry.INSTANCE.clearRegistrations();
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**
@@ -1410,7 +1431,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    */
   private Beneficiary loadSampleA() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     // Return beneficiary information
     return findFirstBeneficary(loadedRecords);
@@ -1723,7 +1745,12 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .get();
 
     assertEquals(
-        claimType.getTransformer().transform(new MetricRegistry(), claim, Optional.of(false)),
+        claimType
+            .getTransformer()
+            .transform(
+                PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+                claim,
+                Optional.of(false)),
         searchResults);
   }
 

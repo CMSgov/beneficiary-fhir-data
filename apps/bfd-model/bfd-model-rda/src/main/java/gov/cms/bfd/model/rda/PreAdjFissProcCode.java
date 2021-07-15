@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -16,16 +17,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the PreAdjFissProcCodes table */
+/** JPA class for the FissProcCodes table */
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
 @IdClass(PreAdjFissProcCode.PK.class)
 @Table(name = "`FissProcCodes`", schema = "`pre_adj`")
 public class PreAdjFissProcCode {
-
   @Id
   @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
@@ -51,9 +54,8 @@ public class PreAdjFissProcCode {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the PreAdjFissProcCodes table */
+  /* PK class for the FissProcCodes table */
   public static class PK implements Serializable {
-
     private String dcn;
     private short priority;
   }
