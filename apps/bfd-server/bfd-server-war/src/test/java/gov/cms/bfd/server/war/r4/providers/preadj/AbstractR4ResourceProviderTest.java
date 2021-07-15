@@ -467,6 +467,7 @@ public class AbstractR4ResourceProviderTest {
   @Test
   public void shouldReturnBundleForMbi() throws NoSuchFieldException, IllegalAccessException {
     String mbi = "mbimbimbi";
+    String attributeName = "mbi";
     // unchecked - This is fine for creating a mock.
     //noinspection unchecked
     ResourceTypeV2<Claim> mockResourceType = mock(ResourceTypeV2.class);
@@ -493,11 +494,15 @@ public class AbstractR4ResourceProviderTest {
     //noinspection unchecked
     doReturn(null)
         .when(mockDao)
-        .findAllByMbiHash(any(Class.class), anyString(), any(DateRangeParam.class));
+        .findAllByAttribute(any(Class.class), anyString(), anyString(), any(DateRangeParam.class));
 
     doReturn(claimType).when(mockResourceType).getEntityClass();
 
-    doReturn(entities).when(mockDao).findAllByMbi(claimType, mbi, mockLastUpdated);
+    doReturn(attributeName).when(mockResourceType).getEntityMbiAttribute();
+
+    doReturn(entities)
+        .when(mockDao)
+        .findAllByAttribute(claimType, attributeName, mbi, mockLastUpdated);
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked
@@ -524,6 +529,7 @@ public class AbstractR4ResourceProviderTest {
   @Test
   public void shouldReturnBundleForMbiHash() throws NoSuchFieldException, IllegalAccessException {
     String mbi = "mbimbimbi";
+    String attributeName = "mbiHash";
     // unchecked - This is fine for creating a mock.
     //noinspection unchecked
     ResourceTypeV2<Claim> mockResourceType = mock(ResourceTypeV2.class);
@@ -550,11 +556,15 @@ public class AbstractR4ResourceProviderTest {
     //noinspection unchecked
     doReturn(null)
         .when(mockDao)
-        .findAllByMbi(any(Class.class), anyString(), any(DateRangeParam.class));
+        .findAllByAttribute(any(Class.class), anyString(), anyString(), any(DateRangeParam.class));
 
     doReturn(claimType).when(mockResourceType).getEntityClass();
 
-    doReturn(entities).when(mockDao).findAllByMbiHash(claimType, mbi, mockLastUpdated);
+    doReturn(attributeName).when(mockResourceType).getEntityMbiHashAttribute();
+
+    doReturn(entities)
+        .when(mockDao)
+        .findAllByAttribute(claimType, attributeName, mbi, mockLastUpdated);
 
     // unchecked - Creating mocks, this is ok.
     //noinspection unchecked

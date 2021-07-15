@@ -104,54 +104,6 @@ public class ClaimDaoTest {
   }
 
   @Test
-  public void shouldInvokeFindEntitiesByAttributeForMbi() {
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    MetricRegistry mockRegistry = mock(MetricRegistry.class);
-
-    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, mockRegistry));
-
-    List<Object> expected = Collections.singletonList(5L);
-
-    doReturn(null)
-        .when(daoSpy)
-        .findAllByAttribute(any(), anyString(), anyString(), any(DateRangeParam.class));
-
-    doReturn(expected)
-        .when(daoSpy)
-        .findAllByAttribute(Object.class, "mbi", "123", mockDateRangeParam);
-
-    List<Object> actual = daoSpy.findAllByMbi(Object.class, "123", mockDateRangeParam);
-
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void shouldInvokeFindEntitiesByAttributeForMbiHash() {
-    EntityManager mockEntityManager = mock(EntityManager.class);
-    MetricRegistry mockRegistry = mock(MetricRegistry.class);
-
-    DateRangeParam mockDateRangeParam = mock(DateRangeParam.class);
-
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, mockRegistry));
-
-    List<Object> expected = Collections.singletonList(5L);
-
-    doReturn(null)
-        .when(daoSpy)
-        .findAllByAttribute(any(), anyString(), anyString(), any(DateRangeParam.class));
-
-    doReturn(expected)
-        .when(daoSpy)
-        .findAllByAttribute(Object.class, "mbiHash", "123", mockDateRangeParam);
-
-    List<Object> actual = daoSpy.findAllByMbiHash(Object.class, "123", mockDateRangeParam);
-
-    assertEquals(expected, actual);
-  }
-
-  @Test
   public void shouldFindEntitiesByAttribute() {
     Class<Object> entityClass = Object.class;
     String attributeName = "attr";
@@ -293,6 +245,16 @@ public class ClaimDaoTest {
     @Override
     public String getEntityIdAttribute() {
       return "somePropertyName";
+    }
+
+    @Override
+    public String getEntityMbiAttribute() {
+      return "mbiAttribute";
+    }
+
+    @Override
+    public String getEntityMbiHashAttribute() {
+      return "mbiHashAttribute";
     }
 
     @Override
