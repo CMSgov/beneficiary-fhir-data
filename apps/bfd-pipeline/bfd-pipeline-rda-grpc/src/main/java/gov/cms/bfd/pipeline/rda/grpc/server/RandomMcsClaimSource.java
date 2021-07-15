@@ -1,19 +1,19 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import gov.cms.mpsm.rda.v1.fiss.FissClaim;
+import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.util.NoSuchElementException;
 
 /**
- * A ClaimSource implementation that generates and returns random FissClaim objects. The random
+ * A ClaimSource implementation that generates and returns random McsClaim objects. The random
  * number seed and number of claims to return are specified in the constructor.
  */
-public class RandomFissClaimSource implements ClaimSource<FissClaim> {
-  private final RandomFissClaimGenerator generator;
+public class RandomMcsClaimSource implements ClaimSource<McsClaim> {
+  private final RandomMcsClaimGenerator generator;
   private final int maxToSend;
   private int sent;
 
-  public RandomFissClaimSource(long seed, int maxToSend) {
-    generator = new RandomFissClaimGenerator(seed);
+  public RandomMcsClaimSource(long seed, int maxToSend) {
+    generator = new RandomMcsClaimGenerator(seed);
     this.maxToSend = maxToSend;
     sent = 0;
   }
@@ -24,7 +24,7 @@ public class RandomFissClaimSource implements ClaimSource<FissClaim> {
   }
 
   @Override
-  public FissClaim next() {
+  public McsClaim next() {
     if (sent >= maxToSend) {
       throw new NoSuchElementException();
     }
