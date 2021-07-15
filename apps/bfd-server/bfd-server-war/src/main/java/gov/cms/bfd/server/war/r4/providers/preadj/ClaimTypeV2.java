@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTransformer;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.util.Optional;
@@ -21,10 +22,16 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
       PreAdjFissClaim.Fields.dcn,
       PreAdjFissClaim.Fields.stmtCovFromDate,
       PreAdjFissClaim.Fields.stmtCovToDate,
-      FissClaimTransformerV2::transform);
+      FissClaimTransformerV2::transform),
 
-  // TODO: [DCGEO-88, DCGEO-98] Complete null fields when entity available
-  // M(null, null, McsClaimTransformerV2::transform);
+  M(
+      PreAdjMcsClaim.class,
+      PreAdjMcsClaim.Fields.idrClaimMbi,
+      PreAdjMcsClaim.Fields.idrClaimMbiHash,
+      PreAdjMcsClaim.Fields.idrClmHdIcn,
+      PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc,
+      PreAdjMcsClaim.Fields.idrHdrToDateOfSvc,
+      McsClaimTransformerV2::transform);
 
   private final Class<?> entityClass;
   private final String entityMbiAttribute;
