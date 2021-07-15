@@ -11,9 +11,8 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.math.BigDecimal;
-import java.time.ZoneId;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -42,7 +41,7 @@ public final class InpatientClaimTransformerTest {
             .map(r -> (InpatientClaim) r)
             .findFirst()
             .get();
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit eob =
         InpatientClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());
@@ -181,7 +180,7 @@ public final class InpatientClaimTransformerTest {
         claim.getProcedure1Code().get(),
         eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
     Assert.assertEquals(
-        Date.from(claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+        TransformerUtils.convertToDate(claim.getProcedure1Date().get()),
         eob.getProcedure().get(0).getDate());
 
     // test to ensure the procedure code display lookup table process works
