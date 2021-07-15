@@ -191,7 +191,7 @@ final class DMEClaimTransformerV2 {
                 line.getProviderNPI(),
                 Optional.empty(),
                 Optional.empty(),
-                includeTaxNumbers,
+                includeTaxNumbers.orElse(false),
                 claimGroup.getClaimId() + item.getSequence(),
                 line.getProviderTaxNumber());
 

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -73,7 +74,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     CarrierClaim claim =
         loadedRecords.stream()
@@ -81,6 +81,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .map(r -> (CarrierClaim) r)
             .findFirst()
             .get();
+
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     ExplanationOfBenefit eob =
         fhirClient
@@ -1603,6 +1605,17 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   private static void assertEquals(ExplanationOfBenefit expected, ExplanationOfBenefit actual) {
     // ID in the bundle will have `ExplanationOfBenefit/` in front, so make sure the last bit
     // matches up
+    FhirContext fhirContext = FhirContext.forR4();
+    System.out.println(
+        "\n\n***** RIF loadedRecords - EXPECTED *****\n"
+            + fhirContext.newJsonParser().encodeResourceToString(expected)
+            + "\n\n");
+
+    System.out.println(
+        "\n\n***** searchResults - ACTUAL *****\n"
+            + fhirContext.newJsonParser().encodeResourceToString(actual)
+            + "\n\n");
+
     Assert.assertTrue(actual.getId().endsWith(expected.getId()));
 
     // Clean them out so we can do a deep compare later
@@ -1809,6 +1822,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
       ExplanationOfBenefit searchResults,
       List<Object> loadedRecords,
       Boolean includeTaxNumber) {
+
     Object claim =
         loadedRecords.stream()
             .filter(r -> claimType.getEntityClass().isInstance(r))
@@ -1816,14 +1830,15 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
 
-    assertEquals(
+    ExplanationOfBenefit othEob =
         claimType
             .getTransformer()
             .transform(
                 PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
                 claim,
-                Optional.of(false)),
-        searchResults);
+                Optional.of(includeTaxNumber));
+
+    assertEquals(othEob, searchResults);
   }
 
   /**

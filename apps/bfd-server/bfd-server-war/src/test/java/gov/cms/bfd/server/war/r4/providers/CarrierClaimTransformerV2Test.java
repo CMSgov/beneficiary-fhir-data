@@ -36,23 +36,20 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class CarrierClaimTransformerV2Test {
-  CarrierClaim claim;
+  static CarrierClaim claim;
   ExplanationOfBenefit eob;
-  /**
-   * Generates the Claim object to be used in multiple tests
-   *
-   * @return
-   * @throws FHIRException
-   */
-  public CarrierClaim generateClaim() throws FHIRException {
+
+  @BeforeClass
+  public static void loadRifData() {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    CarrierClaim claim =
+    claim =
         parsedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
             .map(r -> (CarrierClaim) r)
@@ -60,14 +57,12 @@ public class CarrierClaimTransformerV2Test {
             .get();
 
     claim.setLastUpdated(new Date());
-
-    return claim;
   }
 
   @Before
   public void before() {
-    claim = generateClaim();
-    eob = CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    eob = CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false));
+    Assert.assertNotNull(eob);
   }
 
   /**
@@ -80,8 +75,6 @@ public class CarrierClaimTransformerV2Test {
    */
   @Test
   public void transformSampleARecord() throws FHIRException {
-    CarrierClaim claim = generateClaim();
-
     assertMatches(
         claim,
         CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.of(false)),
@@ -98,9 +91,6 @@ public class CarrierClaimTransformerV2Test {
   @Ignore
   @Test
   public void serializeSampleARecord() throws FHIRException {
-    ExplanationOfBenefit eob =
-        CarrierClaimTransformerV2.transform(
-            new MetricRegistry(), generateClaim(), Optional.of(false));
     System.out.println(fhirContext.newJsonParser().encodeResourceToString(eob));
   }
 
@@ -118,7 +108,6 @@ public class CarrierClaimTransformerV2Test {
   @Test
   public void shouldHaveIdentifiers() {
     Assert.assertEquals(2, eob.getIdentifier().size());
-
     Identifier clmGrp1 =
         TransformerTestUtilsV2.findIdentifierBySystem(
             "https://bluebutton.cms.gov/resources/variables/clm_id", eob.getIdentifier());
@@ -190,7 +179,6 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveExtensionsWithCarrierClaimControlNumber() {
-
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/carr_clm_cntl_num", eob.getExtension());
@@ -209,7 +197,6 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveExtensionsWithCarrierClaimPaymentDownloadCode() {
-
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/carr_clm_pmt_dnl_cd",
@@ -229,7 +216,6 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveExtensionsWithCarrierAssignedClaim() {
-
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/asgmntcd", eob.getExtension());
@@ -248,7 +234,6 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveExtensionsWithClaimClinicalTrailNumber() {
-
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/clm_clncl_tril_num",
@@ -268,7 +253,6 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveExtensionsWithClaimEntryCodeNumber() {
-
     Extension ex =
         TransformerTestUtilsV2.findExtensionByUrl(
             "https://bluebutton.cms.gov/resources/variables/carr_clm_entry_cd", eob.getExtension());
@@ -294,7 +278,6 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveSupportingInfoListForClaimReceivedDate() {
-
     SupportingInformationComponent sic =
         TransformerTestUtilsV2.findSupportingInfoByCode("clmrecvddate", eob.getSupportingInfo());
 
@@ -320,7 +303,6 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveSupportingInfoListForClaimReceivedDate2() {
-
     SupportingInformationComponent sic =
         TransformerTestUtilsV2.findSupportingInfoByCode("info", eob.getSupportingInfo());
 
@@ -435,7 +417,6 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldHaveDiagnosesMembers() {
-
     DiagnosisComponent diag1 =
         TransformerTestUtilsV2.findDiagnosisByCode("H5555", eob.getDiagnosis());
 

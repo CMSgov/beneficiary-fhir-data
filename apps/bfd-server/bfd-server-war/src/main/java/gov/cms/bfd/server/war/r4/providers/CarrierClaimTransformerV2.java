@@ -44,8 +44,8 @@ public class CarrierClaimTransformerV2 {
     if (!(claim instanceof CarrierClaim)) {
       throw new BadCodeMonkeyException();
     }
-
-    ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
+    ExplanationOfBenefit eob =
+        transformClaim((CarrierClaim) claim, includeTaxNumbers.orElse(false));
 
     timer.stop();
     return eob;
@@ -57,7 +57,8 @@ public class CarrierClaimTransformerV2 {
    *     CarrierClaim}
    */
   private static ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, Optional<Boolean> includeTaxNumbers) {
+      CarrierClaim claimGroup, boolean includeTaxNumbers) {
+
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -179,7 +180,7 @@ public class CarrierClaimTransformerV2 {
       if (line.getPerformingPhysicianNpi().isPresent()
           || line.getPerformingPhysicianUpin().isPresent()
           || !Strings.isNullOrEmpty(line.getPerformingProviderIdNumber())
-          || includeTaxNumbers.orElse(false)) {
+          || includeTaxNumbers) {
         CareTeamComponent performing =
             TransformerUtilsV2.addCareTeamPerforming(
                 eob,

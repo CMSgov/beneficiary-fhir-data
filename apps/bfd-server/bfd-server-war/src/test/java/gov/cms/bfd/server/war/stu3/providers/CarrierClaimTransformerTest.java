@@ -51,6 +51,18 @@ public final class CarrierClaimTransformerTest {
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
+   * expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void transformSampleARecordWithTaxNumber() throws FHIRException {
+    transformSampleARecord(true);
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform(Object)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
    *
    * @throws FHIRException (indicates test failure)

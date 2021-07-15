@@ -1130,6 +1130,7 @@ public final class TransformerUtilsV2 {
               rootResource.getId());
         }
       }
+      // return Optional.of(matchingVariableValues.get(0).getDescription());
       return Optional.empty();
     } else {
       throw new BadCodeMonkeyException();
@@ -1419,6 +1420,7 @@ public final class TransformerUtilsV2 {
 
     if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
       String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
+      LOGGER.info("retrieveFDADrugCodeDisplay, name: {}", ndcSubstanceName);
       return ndcSubstanceName;
     }
 
@@ -1938,7 +1940,7 @@ public final class TransformerUtilsV2 {
       Optional<String> npiValue,
       Optional<String> upinValue,
       Optional<String> pinValue,
-      Optional<Boolean> includeTaxNumbers,
+      boolean includeTaxNumbers,
       String practionerIdNumber,
       String taxValue) {
 
@@ -1962,7 +1964,7 @@ public final class TransformerUtilsV2 {
               C4BBPractitionerIdentifierType.PIN, pinValue.get()));
     }
 
-    if (includeTaxNumbers.orElse(false)) {
+    if (includeTaxNumbers) {
       identifiers.add(
           TransformerUtilsV2.createC4BBPractionerIdentifier(
               C4BBPractitionerIdentifierType.TAX, taxValue));
@@ -3401,7 +3403,6 @@ public final class TransformerUtilsV2 {
    */
   static Resource findOrCreateContainedOrg(ExplanationOfBenefit eob, String id) {
     Optional<Resource> org = eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
-
     // If it isn't there, add one
     if (!org.isPresent()) {
       org = Optional.of(new Organization().setId(id));

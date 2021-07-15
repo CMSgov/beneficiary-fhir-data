@@ -39,6 +39,7 @@ final class CarrierClaimTransformer {
             .time();
 
     if (!(claim instanceof CarrierClaim)) throw new BadCodeMonkeyException();
+
     ExplanationOfBenefit eob = transformClaim((CarrierClaim) claim, includeTaxNumbers);
 
     timer.stop();

@@ -182,6 +182,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
             .get()
             .getTransformer()
             .transform(metricRegistry, claimEntity, Optional.of(includeTaxNumbers));
+
     return eob;
   }
 
