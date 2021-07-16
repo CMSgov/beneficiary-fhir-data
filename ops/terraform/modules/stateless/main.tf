@@ -113,6 +113,14 @@ data "aws_security_group" "remote" {
   }
 }
 
+# ci security group
+data "aws_security_group" "ci" {
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-cloudbees-jenkins"]
+  }
+}
+
 # ansible vault pw read only policy
 data "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/bfd-ansible-vault-pw-ro-s3"
@@ -227,7 +235,7 @@ module "fhir_asg" {
     vpn_sg    = data.aws_security_group.vpn.id
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
-    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
+    ci_sg     = data.aws_security_group.ci.id
   }
 }
 
@@ -398,7 +406,7 @@ module "bfd_pipeline" {
     vpn_sg    = data.aws_security_group.vpn.id
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
-    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
+    ci_sg     = data.aws_security_group.ci.id
   }
 
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
