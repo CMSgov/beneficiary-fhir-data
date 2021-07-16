@@ -50,4 +50,6 @@ module "stateful" {
   partner_subnets   = var.partner_subnets
 
   medicare_opt_out_config = var.medicare_opt_out_config
+
+  cloudbees_jenkins_subnets = var.cloudbees_jenkins_subnets
 }
