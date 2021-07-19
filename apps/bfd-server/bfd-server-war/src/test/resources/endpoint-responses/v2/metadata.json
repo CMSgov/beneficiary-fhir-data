@@ -55,6 +55,44 @@
         }
       ]
     }, {
+      "type": "ClaimResponse",
+      "profile": "http://hl7.org/fhir/StructureDefinition/ClaimResponse",
+      "interaction": [
+        {
+          "code": "read"
+        },
+        {
+          "code": "search-type"
+        }
+      ],
+      "searchParam": [
+        {
+          "name": "mbi",
+          "type": "reference",
+          "documentation": "The patient identifier to search for"
+        },
+        {
+          "name": "_lastUpdated",
+          "type": "date",
+          "documentation": "Include resources last updated in the given range"
+        },
+        {
+          "name": "isHashed",
+          "type": "string",
+          "documentation": "A boolean indicating whether or not the MBI is hashed"
+        },
+        {
+          "name": "service-date",
+          "type": "date",
+          "documentation": "Include resources that completed in the given range"
+        },
+        {
+          "name": "type",
+          "type": "token",
+          "documentation": "A list of claim types to include"
+        }
+      ]
+    }, {
       "type" : "Coverage",
       "profile" : "http://hl7.org/fhir/StructureDefinition/Coverage",
       "interaction" : [ {
