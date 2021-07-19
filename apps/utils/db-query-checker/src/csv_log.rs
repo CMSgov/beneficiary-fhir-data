@@ -96,7 +96,11 @@ where
         query_result_count,
     };
 
-    // TODO: If performance is slow, I could also batch these writes.
+    /*
+     * Note: If performance is slow, these writes could be batched, by having methods return [CsvOutputRow]s
+     * up the call stack, and then writing all those rows out in larger groups. It's not really clear,
+     * though, that this CSV output code has a major impact on performance.
+     */
 
     let mut csv_serializer_lock = csv_serializer.lock().await;
     csv_serializer_lock
