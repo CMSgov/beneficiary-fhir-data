@@ -21,6 +21,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.Claim;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -36,6 +37,15 @@ public class R4ClaimResourceProviderIT {
     DatabaseSchemaManager.createOrUpdateSchema(dataSource);
 
     entityManager = createEntityManager(dataSource);
+  }
+
+  @AfterClass
+  public static void tearDown() {
+    doTransaction(
+        em -> {
+          em.createQuery("delete from PreAdjFissProcCode f").executeUpdate();
+          em.createQuery("delete from PreAdjFissClaim f").executeUpdate();
+        });
   }
 
   @Test
