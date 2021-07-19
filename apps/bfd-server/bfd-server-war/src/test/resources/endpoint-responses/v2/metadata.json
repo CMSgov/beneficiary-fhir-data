@@ -143,6 +143,10 @@
         "code" : "search-type"
       } ],
       "searchParam" : [ {
+        "name" : "_has:Coverage",
+        "type" : "token",
+        "documentation" : "Part D coverage type"
+      }, {
         "name" : "_id",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
@@ -166,10 +170,6 @@
         "name" : "startIndex",
         "type" : "string",
         "documentation" : "The offset used for result pagination"
-      }, {
-        "name" : "_has:Coverage",
-        "type" : "token",
-        "documentation" : "Part D coverage type"
       }, {
         "name" : "_has:Coverage",
         "type" : "token",
