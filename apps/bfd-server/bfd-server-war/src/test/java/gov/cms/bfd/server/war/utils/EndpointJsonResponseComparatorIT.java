@@ -66,9 +66,28 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 /**
- * Integration tests for comparing changes in the JSON from our endpoint responses. This test code
- * relies on the assumption that SAMPLE_A will have at least one bene and that every bene in it will
- * have >= 1 EOB of every type.
+ * This set of tests compare the application's current responses to a set of previously-recorded
+ * responses. This achieves several goals:
+ *
+ * <ul>
+ *   <li>It helps us to ensure that we're not accidentally changing the application's responses
+ *   <li>It helps us to maintain backwards compatibility.
+ *   <li>As any changes in an operation's output will have to include a change to the recorded
+ *       response, it makes it much easier to tell what our PRs are actually doing.
+ * </ul>
+ *
+ * <p>There SHALL be a 1:1 relationship between test cases here and the application's operations;
+ * every supported operation should have a test case.
+ *
+ * <p>Note that our responses include timestamps and have other differences from request to request
+ * (e.g. element ordering). Each test case must ignore or otherwise work around such differences so
+ * that tests work reliably.
+ *
+ * <p>To re-generate the recorded responses, re-enable the {@link
+ * EndpointJsonResponseComparatorIT#generateApprovedResponseFiles()} "test case" and run it. It will
+ * regenerate ALL operation recordings. It's then your responsibility to ensure that only MEANINGFUL
+ * differences to those responses are included in your PR, by clearing out any incidental noise,
+ * e.g. timestamps.
  */
 @RunWith(Parameterized.class)
 public final class EndpointJsonResponseComparatorIT {

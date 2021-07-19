@@ -83,10 +83,11 @@ import org.junit.runners.Parameterized.Parameters;
  * (e.g. element ordering). Each test case must ignore or otherwise work around such differences so
  * that tests work reliably.
  *
- * <p>To re-generate the recorded responses, re-enable the generateApprovedResponseFiles() "test
- * case" and run it. It will regenerate ALL operation recordings. It's then your responsibility to
- * ensure that only MEANINGFUL differences to those responses are included in your PR, by clearing
- * out any incidental noise, e.g. timestamps.
+ * <p>To re-generate the recorded responses, re-enable the {@link
+ * EndpointJsonResponseComparatorIT#generateApprovedResponseFiles()} "test case" and run it. It will
+ * regenerate ALL operation recordings. It's then your responsibility to ensure that only MEANINGFUL
+ * differences to those responses are included in your PR, by clearing out any incidental noise,
+ * e.g. timestamps.
  */
 @RunWith(Parameterized.class)
 public final class EndpointJsonResponseComparatorV2IT {
