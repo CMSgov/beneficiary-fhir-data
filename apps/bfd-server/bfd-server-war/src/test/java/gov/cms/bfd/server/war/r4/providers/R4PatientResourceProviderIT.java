@@ -6,12 +6,13 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
+import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -39,8 +40,9 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void readExistingPatient() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -163,7 +165,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void readExistingPatientWithNoHistoryIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+        ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     RequestHeaders requestHeader =
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS,
@@ -206,7 +208,7 @@ public final class R4PatientResourceProviderIT {
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readMissingPatient() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
     // No data is loaded, so this should return nothing.
     fhirClient.read().resource(Patient.class).withId("1234").execute();
   }
@@ -219,8 +221,9 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByLogicalId() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -263,7 +266,8 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByLogicalIdIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = createFhirClient("true", "true");
 
     Beneficiary beneficiary =
@@ -308,7 +312,8 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByLogicalIdIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = createFhirClient("false", "true");
 
     Beneficiary beneficiary =
@@ -352,8 +357,9 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForPatientByLogicalIdWithPaging() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -391,7 +397,7 @@ public final class R4PatientResourceProviderIT {
    */
   @Test
   public void searchForMissingPatientByLogicalId() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -415,8 +421,9 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByMbiHash() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -477,7 +484,8 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByMbiHashIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     IGenericClient fhirClient = createFhirClient("true", "true");
 
     Beneficiary beneficiary =
@@ -526,15 +534,16 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByMbiHashWithBeneDups() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     // load additional Beneficiary and Beneficiary History records for
     // testing
     loadedRecords.addAll(
-        ServerTestUtils.loadData(
-            Arrays.asList(StaticRifResourceGroup.SAMPLE_HICN_MULT_BENES.getResources())));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_HICN_MULT_BENES.getResources())));
 
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Stream<Beneficiary> beneficiariesStream =
         loadedRecords.stream().filter(r -> r instanceof Beneficiary).map(r -> (Beneficiary) r);
@@ -658,8 +667,9 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByMbiHashWithPaging() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -706,8 +716,9 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByHistoricalMbiHash() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     loadedRecords.stream()
         .filter(r -> r instanceof BeneficiaryHistory)
@@ -745,8 +756,8 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByMbiWithNoHistory() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     loadedRecords.stream()
         .filter(r -> r instanceof Beneficiary)
@@ -784,7 +795,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByMbiWithNoHistoryIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+        ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = createFhirClient("true", "true");
 
     loadedRecords.stream()
@@ -821,7 +832,7 @@ public final class R4PatientResourceProviderIT {
    */
   @Test
   public void searchForMissingPatientByMbiHash() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -841,8 +852,8 @@ public final class R4PatientResourceProviderIT {
 
   @Test
   public void searchForExistingPatientByPartDContractNum() {
-    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Should return a single match
     Bundle searchResults =
@@ -866,7 +877,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+        ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = createFhirClient("true", "true");
 
     // Should return a single match
@@ -918,11 +929,12 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void
       searchForExistingPatientByPartDContractNumIncludeIdentifiersTrueWithPagingAndMultipleMbis() {
-    ServerTestUtils.loadData(
-        Arrays.asList(
-            StaticRifResource.SAMPLE_A_BENES,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+    ServerTestUtils.get()
+        .loadData(
+            Arrays.asList(
+                StaticRifResource.SAMPLE_A_BENES,
+                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
+                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
     IGenericClient fhirClient = createFhirClient("mbi", "true");
 
     // Should return a single match
@@ -965,11 +977,12 @@ public final class R4PatientResourceProviderIT {
    */
   @Test
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrueAndMultipleMbis() {
-    ServerTestUtils.loadData(
-        Arrays.asList(
-            StaticRifResource.SAMPLE_A_BENES,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
-            StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
+    ServerTestUtils.get()
+        .loadData(
+            Arrays.asList(
+                StaticRifResource.SAMPLE_A_BENES,
+                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
+                StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
     IGenericClient fhirClient = createFhirClient("mbi", "true");
 
     // Should return a single match
@@ -1006,7 +1019,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+        ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
     IGenericClient fhirClient = createFhirClient("false", "true");
 
     // Should return a single match
@@ -1052,8 +1065,8 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForPatientByPartDContractNumWithPaging() {
 
-    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Should return a single match
     Bundle searchResults =
@@ -1084,7 +1097,7 @@ public final class R4PatientResourceProviderIT {
 
   @Test
   public void searchForMissingPatientByPartDContractNum() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -1108,8 +1121,9 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchWithLastUpdated() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1138,8 +1152,8 @@ public final class R4PatientResourceProviderIT {
 
   @Test
   public void searchForExistingPatientByPartDContractNumAndYear() {
-    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Should return a single match
     Bundle searchResults =
@@ -1169,8 +1183,8 @@ public final class R4PatientResourceProviderIT {
 
   @Test
   public void searchForNonExistingPatientByPartDContractNumAndYear() {
-    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Should return a single match
     Bundle searchResults =
@@ -1200,8 +1214,8 @@ public final class R4PatientResourceProviderIT {
 
   @Test
   public void searchForPatientByPartDContractNumWithAInvalidContract() {
-    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Should return a single match
     Bundle searchResults =
@@ -1232,8 +1246,8 @@ public final class R4PatientResourceProviderIT {
   @Test(expected = InvalidRequestException.class)
   public void searchForPatientByPartDContractNumWithAInvalidYear() {
 
-    ServerTestUtils.loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     // Should return a single match
     fhirClient
@@ -1269,7 +1283,8 @@ public final class R4PatientResourceProviderIT {
       boolean expectingMbi, RequestHeaders requestHeader) {
 
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     Beneficiary beneficiary =
         loadedRecords.stream()
@@ -1279,7 +1294,10 @@ public final class R4PatientResourceProviderIT {
             .get();
 
     Patient expected =
-        BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, requestHeader);
+        BeneficiaryTransformerV2.transform(
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            beneficiary,
+            requestHeader);
 
     IGenericClient fhirClient = createFhirClient(requestHeader);
     Patient patient =
@@ -1325,7 +1343,7 @@ public final class R4PatientResourceProviderIT {
    * @return the client with extra params registered
    */
   public static IGenericClient createFhirClient(RequestHeaders requestHeader) {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
     if (requestHeader != null) {
       ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
       extraParamsInterceptor.setHeaders(requestHeader);
@@ -1466,7 +1484,10 @@ public final class R4PatientResourceProviderIT {
     Assert.assertNotNull(patient);
 
     Patient expected =
-        BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, headers);
+        BeneficiaryTransformerV2.transform(
+            PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+            beneficiary,
+            headers);
 
     comparePatient(expected, patient);
   }
@@ -1489,9 +1510,12 @@ public final class R4PatientResourceProviderIT {
     Assert.assertTrue(expected.equalsDeep(patient));
   }
 
-  /** Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after each test case. */
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
   @After
   public void cleanDatabaseServerAfterEachTestCase() {
-    ServerTestUtils.cleanDatabaseServer();
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 }

@@ -159,6 +159,12 @@ resource "aws_autoscaling_group" "main" {
     "GroupTotalInstances",
   ]
 
+  warm_pool {
+    pool_state                  = "Stopped"
+    min_size                    = var.asg_config.min
+    max_group_prepared_capacity = var.asg_config.max_warm
+  }
+
   dynamic "tag" {
     for_each = local.tags
     content {

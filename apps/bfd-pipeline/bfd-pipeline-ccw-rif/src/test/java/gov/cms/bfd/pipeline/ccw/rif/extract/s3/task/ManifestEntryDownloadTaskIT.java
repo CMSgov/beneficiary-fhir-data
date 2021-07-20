@@ -5,7 +5,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.transfer.Download;
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
@@ -15,6 +14,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -79,7 +79,9 @@ public final class ManifestEntryDownloadTaskIT {
                   manifest.getEntries().get(0).getName()));
       Path localTempFile = Files.createTempFile("data-pipeline-s3-temp", ".rif");
       s3TaskManager =
-          new S3TaskManager(new MetricRegistry(), new ExtractionOptions(options.getS3BucketName()));
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              new ExtractionOptions(options.getS3BucketName()));
       LOGGER.info(
           "Downloading '{}' to '{}'...",
           objectRequest.getKey(),

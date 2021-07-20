@@ -12,8 +12,18 @@
     <packaging>jar</packaging>
 
     <description>
-        Loads preadjudicated claims data exported from RDA gRPC service into the BFD database.
+        Loads pre-adjudicated claims data exported from RDA gRPC service into the BFD database.
     </description>
+
+    <properties>
+        <!-- Version of gRPC related dependencies -->
+        <grpc_java.version>1.37.0</grpc_java.version>
+        <!-- Version of the plugin used to build the gRPC stubs from the Health.proto file. -->
+        <protoc.version>3.15.8</protoc.version>
+        <protobuf.version>3.12.0</protobuf.version>
+        <mockito.version>3.8.0</mockito.version>
+        <jackson.version>2.12.3</jackson.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -21,48 +31,81 @@
             <artifactId>bfd-pipeline-shared-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <!-- contains the JPA entities for writing to the database -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-rda</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>${grpc_java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc_java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>${grpc_java.version}</version>
+        </dependency>
+        <dependency>
+            <!-- provides JsonFormat and JsonParser -->
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>${protobuf.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <!-- Used to serialize and deserialize objects to JSON during testing. -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Used to serialize and deserialize objects to JSON during testing. -->
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Adds java-8 types to jackson. -->
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Adds java-8 date/time classes to jackson. -->
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <!-- Just useful. -->
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>24.1.1-jre</version>
         </dependency>
 
         <dependency>
             <!-- Delegates all JCL logging (typically from dependencies) to SLF4J. -->
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.7</version>
-        </dependency>
-
-        <dependency>
-            <!-- Provides some extra collections, e.g. the CircularFifoQueue being
-                    used in DataSetMonitorWorker. -->
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
-        </dependency>
-
-        <dependency>
-            <!-- Provides JAXB adapters for the java.time types. See https://github.com/migesok/jaxb-java-time-adapters
-                    for details. -->
-            <groupId>com.migesok</groupId>
-            <artifactId>jaxb-java-time-adapters</artifactId>
-            <version>1.1.3</version>
-        </dependency>
-
-        <dependency>
-            <!-- Hibernate's JPA implementation is used to load data into the Blue
-                    Button API's database. -->
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
-                    for details. -->
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
         </dependency>
 
         <dependency>
@@ -78,33 +121,42 @@
         </dependency>
 
         <dependency>
-            <!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2).
-                    Brought into the compile classpath here, because RifLoader directly uses
-                    its CopyManager API. -->
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <!-- Used to run our unit and integration tests. -->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Used in tests to help with managing asynchronous behavior. Reference:
-                    https://github.com/awaitility/awaitility -->
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>2.0.0</version>
+            <!-- provides DatabaseSchemaManager to apply flyway migrations -->
+            <groupId>gov.cms.bfd</groupId>
+            <artifactId>bfd-model-rif</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- The builds for this and other Blue Button API projects use HSQL in
-                    tests. -->
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- In-memory database that can be used for testing. -->
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Logback is used as the logging target/backend for SLF4J during tests:
+                    all logging events will be sent to it. -->
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Used in tests to help with managing asynchronous behavior. Reference:
+                   https://github.com/awaitility/awaitility -->
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>2.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -125,7 +177,7 @@
             <!-- Used to create mock objects for unit tests. -->
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.8.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -135,17 +187,28 @@
             <plugins>
             </plugins>
         </pluginManagement>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.2</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
-                <!-- Will run the `*IT.java` integration tests in this project, as part
-                        of the build. -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.6.1</version>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc_java.version}:exe:${os.detected.classifier}</pluginArtifact>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
+                            <goal>compile</goal>
+                            <goal>compile-custom</goal>
                         </goals>
                     </execution>
                 </executions>
