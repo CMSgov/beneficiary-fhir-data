@@ -10,8 +10,8 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -86,6 +86,15 @@ public final class CarrierClaimTransformerTest {
         CarrierClaimTransformer.transform(
             new MetricRegistry(), claim, Optional.of(includeTaxNumbers));
     assertMatches(claim, eob, Optional.of(includeTaxNumbers));
+    claim.setLastUpdated(Instant.now());
+    ExplanationOfBenefit eobWithLastUpdated =
+        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+    assertMatches(claim, eobWithLastUpdated, Optional.of(true));
+
+    claim.setLastUpdated(null);
+    ExplanationOfBenefit eobWithoutLastUpdated =
+        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
+    assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
   }
 
   /**
@@ -105,7 +114,7 @@ public final class CarrierClaimTransformerTest {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit eobWithLastUpdated =
         CarrierClaimTransformer.transform(
             new MetricRegistry(), claim, Optional.of(includeTaxNumbers));

@@ -1388,7 +1388,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertEquals(
         "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
-        TransformerConstants.FALLBACK_LAST_UPDATED,
+        Date.from(TransformerConstants.FALLBACK_LAST_UPDATED),
         filterToClaimType(searchAll, ClaimTypeV2.CARRIER).get(0).getMeta().getLastUpdated());
 
     // Find all EOBs with < now()
@@ -1403,7 +1403,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     Assert.assertEquals(
         "Expect null lastUpdated fields to map to the FALLBACK_LAST_UPDATED",
-        TransformerConstants.FALLBACK_LAST_UPDATED,
+        Date.from(TransformerConstants.FALLBACK_LAST_UPDATED),
         filterToClaimType(searchWithLessThan, ClaimTypeV2.CARRIER)
             .get(0)
             .getMeta()
