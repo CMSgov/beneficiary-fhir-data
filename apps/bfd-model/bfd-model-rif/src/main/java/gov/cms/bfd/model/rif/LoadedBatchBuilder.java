@@ -1,14 +1,14 @@
 package gov.cms.bfd.model.rif;
 
-import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /** Class to build a LoadedBatch. Thread safe. */
 public class LoadedBatchBuilder {
   private final List<String> beneficiaries;
   private final long loadedFileId;
-  private final Instant timestamp;
+  private final Date timestamp;
 
   /**
    * Create a builder from a particular file event
@@ -19,7 +19,7 @@ public class LoadedBatchBuilder {
   public LoadedBatchBuilder(long loadedFileId, int capacityIncrement) {
     this.loadedFileId = loadedFileId;
     this.beneficiaries = new ArrayList<>(capacityIncrement);
-    this.timestamp = Instant.now();
+    this.timestamp = new Date();
   }
 
   /**
@@ -52,7 +52,7 @@ public class LoadedBatchBuilder {
    *
    * @return the timestamp of the batch
    */
-  public Instant getTimestamp() {
+  public Date getTimestamp() {
     return timestamp;
   }
 }

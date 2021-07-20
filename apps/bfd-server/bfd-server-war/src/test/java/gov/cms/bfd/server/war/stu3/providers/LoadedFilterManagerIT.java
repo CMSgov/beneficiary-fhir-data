@@ -44,7 +44,7 @@ public final class LoadedFilterManagerIT {
               // After init manager should have an empty filter list but a valid transaction time
               Assert.assertTrue(
                   "Expect transactionTime be before now",
-                  filterManager.getTransactionTime().isBefore(Instant.now()));
+                  filterManager.getTransactionTime().before(new Date()));
               final List<LoadedFileFilter> beforeFilters = filterManager.getFilters();
               Assert.assertEquals(0, beforeFilters.size());
               final DateRangeParam testBound =
@@ -59,7 +59,7 @@ public final class LoadedFilterManagerIT {
               // Should have zero filters
               Assert.assertTrue(
                   "Expect transactionTime be before now",
-                  filterManager.getTransactionTime().isBefore(Instant.now()));
+                  filterManager.getTransactionTime().before(new Date()));
               final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
               Assert.assertEquals(0, afterFilters.size());
               Assert.assertFalse(filterManager.isInBounds(testBound));
@@ -75,8 +75,9 @@ public final class LoadedFilterManagerIT {
               final LoadedFilterManager filterManager = new LoadedFilterManager();
               filterManager.setEntityManager(entityManager);
               filterManager.init();
-              final Instant initialTransactionTime = filterManager.getTransactionTime();
-              Assert.assertTrue(initialTransactionTime.isBefore(Instant.now().plusMillis(1)));
+              final Date initialTransactionTime = filterManager.getTransactionTime();
+              Assert.assertTrue(
+                  initialTransactionTime.before(Date.from(Instant.now().plusMillis(1))));
               loadData(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               Date afterLoad = new Date();
 
@@ -91,12 +92,11 @@ public final class LoadedFilterManagerIT {
               // Should have many filters
               final List<LoadedFileFilter> afterFilters = filterManager.getFilters();
               Assert.assertTrue(
-                  filterManager.getFirstBatchCreated().toEpochMilli() <= afterLoad.getTime());
+                  filterManager.getFirstBatchCreated().getTime() <= afterLoad.getTime());
               Assert.assertTrue(
-                  filterManager.getLastBatchCreated().toEpochMilli() <= afterRefresh.getTime());
+                  filterManager.getLastBatchCreated().getTime() <= afterRefresh.getTime());
               Assert.assertTrue(
-                  filterManager.getTransactionTime().toEpochMilli()
-                      > initialTransactionTime.toEpochMilli());
+                  filterManager.getTransactionTime().getTime() > initialTransactionTime.getTime());
               Assert.assertTrue(afterFilters.size() > 1);
             });
   }

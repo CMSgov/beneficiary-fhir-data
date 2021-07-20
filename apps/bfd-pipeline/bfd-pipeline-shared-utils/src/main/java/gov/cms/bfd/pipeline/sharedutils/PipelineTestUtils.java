@@ -29,6 +29,7 @@ import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
+import gov.cms.bfd.sharedutils.database.DatabaseUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -183,10 +184,16 @@ public final class PipelineTestUtils {
           connection.setSchema(defaultSchemaName.get());
         }
 
-        // Finally, run the TRUNCATE.
-        connection
-            .createStatement()
-            .execute(String.format("TRUNCATE TABLE %s", tableNameSpecifier));
+        /*
+         * Finally, run the TRUNCATE. On Postgres the cascade option is required due to the
+         * presence of FK constraints.
+         */
+        String truncateTableSql = String.format("TRUNCATE TABLE %s", tableNameSpecifier);
+        if (DatabaseUtils.isPostgresConnection(connection)) {
+          truncateTableSql = truncateTableSql + " CASCADE";
+        }
+        connection.createStatement().execute(truncateTableSql);
+
         connection.setSchema(defaultSchemaName.get());
       }
 
