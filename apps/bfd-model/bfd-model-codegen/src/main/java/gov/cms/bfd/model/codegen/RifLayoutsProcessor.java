@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -65,8 +64,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -1123,12 +1120,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     // Add a lastUpdated field.
     final FieldSpec lastUpdatedField =
-        FieldSpec.builder(Date.class, "lastUpdated", Modifier.PRIVATE)
-            .addAnnotation(
-                AnnotationSpec.builder(Temporal.class)
-                    .addMember("value", "$T.TIMESTAMP", TemporalType.class)
-                    .build())
-            .build();
+        FieldSpec.builder(Instant.class, "lastUpdated", Modifier.PRIVATE).build();
     headerEntityClass.addField(lastUpdatedField);
 
     // Getter method
@@ -1136,7 +1128,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         MethodSpec.methodBuilder("getLastUpdated")
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return Optional.ofNullable(lastUpdated)")
-            .returns(ParameterizedTypeName.get(Optional.class, Date.class))
+            .returns(ParameterizedTypeName.get(Optional.class, Instant.class))
             .build();
     headerEntityClass.addMethod(lastUpdatedGetter);
 
@@ -1144,7 +1136,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     final MethodSpec lastUpdatedSetter =
         MethodSpec.methodBuilder("setLastUpdated")
             .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterSpec.builder(Date.class, "lastUpdated").build())
+            .addParameter(ParameterSpec.builder(Instant.class, "lastUpdated").build())
             .addStatement("this.lastUpdated = lastUpdated")
             .returns(TypeName.VOID)
             .build();
