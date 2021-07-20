@@ -863,7 +863,8 @@ public final class TransformerUtils {
       throw new NoSuchElementException();
     }
     try {
-      String stringDate = dateYear.get().toString();
+      String stringDate = String.format("%0" + 4 + "d", dateYear.get());
+      ;
       DateType dateYearValue = new DateType(stringDate);
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
