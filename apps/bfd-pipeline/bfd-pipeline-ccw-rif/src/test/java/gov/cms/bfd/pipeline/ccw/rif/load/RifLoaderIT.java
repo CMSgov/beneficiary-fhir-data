@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -136,7 +137,7 @@ public final class RifLoaderIT {
                   afterOldestFile.getLoadedFileId());
               Assert.assertTrue(
                   "Expected range to expand",
-                  beforeLoadedFile.getCreated().isBefore(afterLoadedFile.getCreated()));
+                  beforeLoadedFile.getCreated().before(afterLoadedFile.getCreated()));
             });
   }
 
@@ -152,16 +153,16 @@ public final class RifLoaderIT {
               final EntityTransaction txn = entityManager.getTransaction();
               txn.begin();
               LoadedFile oldFile = loadedFiles.get(loadedFiles.size() - 1);
-              oldFile.setCreated(Instant.now().minus(101, ChronoUnit.DAYS));
+              oldFile.setCreated(Date.from(Instant.now().minus(101, ChronoUnit.DAYS)));
               txn.commit();
 
               // Look at the files now
               final List<LoadedFile> beforeFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-              final Instant oldDate = Instant.now().minus(99, ChronoUnit.DAYS);
+              final Date oldDate = Date.from(Instant.now().minus(99, ChronoUnit.DAYS));
               Assert.assertTrue(
                   "Expect to have old files",
-                  beforeFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)));
+                  beforeFiles.stream().anyMatch(file -> file.getCreated().before(oldDate)));
 
               // Load another set that will cause the old file to be trimmed
               loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
@@ -171,7 +172,7 @@ public final class RifLoaderIT {
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               Assert.assertFalse(
                   "Expect to not have old files",
-                  afterFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)));
+                  afterFiles.stream().anyMatch(file -> file.getCreated().before(oldDate)));
             });
   }
 
@@ -229,7 +230,7 @@ public final class RifLoaderIT {
                 lastUpdated -> {
                   Assert.assertTrue(
                       "Expected a recent lastUpdated timestamp",
-                      lastUpdated.isAfter(Instant.now().minus(10, ChronoUnit.MINUTES)));
+                      lastUpdated.after(Date.from(Instant.now().minus(10, ChronoUnit.MINUTES))));
                 });
       }
       Assert.assertEquals(4, beneficiaryHistoryEntries.size());
@@ -255,7 +256,7 @@ public final class RifLoaderIT {
               lastUpdated -> {
                 Assert.assertTrue(
                     "Expected a recent lastUpdated timestamp",
-                    lastUpdated.isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)));
+                    lastUpdated.after(Date.from(Instant.now().minus(1, ChronoUnit.MINUTES))));
               });
 
       CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, "9991831999");
@@ -273,7 +274,7 @@ public final class RifLoaderIT {
               lastUpdated -> {
                 Assert.assertTrue(
                     "Expected a recent lastUpdated timestamp",
-                    lastUpdated.isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)));
+                    lastUpdated.after(Date.from(Instant.now().minus(1, ChronoUnit.MINUTES))));
               });
 
       CarrierClaimLine carrierLineRecordFromDb = carrierRecordFromDb.getLines().get(0);
@@ -331,7 +332,7 @@ public final class RifLoaderIT {
                 lastUpdated -> {
                   Assert.assertFalse(
                       "Expected not a recent lastUpdated timestamp",
-                      lastUpdated.isAfter(Instant.now().minusSeconds(secs)));
+                      lastUpdated.after(Date.from(Instant.now().minusSeconds(secs))));
                 });
       }
       // Make sure the size is the same and no records have been inserted if the same fields in the
