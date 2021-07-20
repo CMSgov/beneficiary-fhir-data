@@ -1,5 +1,7 @@
 package gov.cms.bfd.model.rif.schema;
 
+import gov.cms.bfd.sharedutils.database.DatabaseUtils;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedSqlException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -70,7 +72,7 @@ public final class DatabaseSchemaManager {
   private static Map<String, String> createScriptPlaceholdersMap(DataSource dataSource) {
     Map<String, String> placeholders = new HashMap<>();
     try (Connection connection = dataSource.getConnection()) {
-      if (connection.getMetaData().getDatabaseProductName().equals("HSQL Database Engine")) {
+      if (DatabaseUtils.isHsqlConnection(connection)) {
         placeholders.put("type.int4", "integer");
         placeholders.put("type.text", "longvarchar");
         placeholders.put("logic.tablespaces-escape", "--");
@@ -79,7 +81,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.index-create-concurrently", "");
         placeholders.put("logic.sequence-start", "start with");
         placeholders.put("logic.sequence-increment", "increment by");
-      } else {
+      } else if (DatabaseUtils.isPostgresConnection(connection)) {
         placeholders.put("type.int4", "int4");
         placeholders.put("type.text", "text");
         placeholders.put("logic.tablespaces-escape", "--");
@@ -88,6 +90,10 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.index-create-concurrently", "concurrently");
         placeholders.put("logic.sequence-start", "start");
         placeholders.put("logic.sequence-increment", "increment");
+      } else {
+        throw new BadCodeMonkeyException(
+            String.format(
+                "Unknown database vendor: %s", DatabaseUtils.extractVendorName(connection)));
       }
     } catch (SQLException e) {
       throw new UncheckedSqlException(e);
