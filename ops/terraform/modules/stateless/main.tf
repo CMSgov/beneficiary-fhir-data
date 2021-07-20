@@ -197,7 +197,6 @@ module "fhir_asg" {
   asg_config = {
     min             = local.is_prod ? 2 * length(local.azs) : length(local.azs)
     max             = 8 * length(local.azs)
-    max_warm        = 4 * length(local.azs)
     desired         = local.is_prod ? 2 * length(local.azs) : length(local.azs)
     sns_topic_arn   = ""
     instance_warmup = 430
