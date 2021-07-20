@@ -226,9 +226,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       try {
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
-                .filter(
-                    p ->
-                        QueryUtils.isInRange(p.getMeta().getLastUpdated().toInstant(), lastUpdated))
+                .filter(p -> QueryUtils.isInRange(p.getMeta().getLastUpdated(), lastUpdated))
                 .map(p -> Collections.singletonList((IBaseResource) p))
                 .orElse(Collections.emptyList());
       } catch (ResourceNotFoundException e) {
@@ -589,7 +587,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       }
 
       patients =
-          QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)
+          QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
               ? Collections.singletonList(patient)
               : Collections.emptyList();
     } catch (NoResultException e) {
