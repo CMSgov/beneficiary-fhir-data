@@ -418,7 +418,7 @@ public final class TransformerUtilsV2 {
       extension = new Extension(extensionUrl, dateYearValue);
     } catch (DataFormatException e) {
       throw new InvalidRifValueException(
-          String.format("Unable to create DateYear with reference year: '%s'.", dateYear.get()), e);
+          String.format("Unable to create DateType with reference year: '%s'.", dateYear.get()), e);
     }
     return extension;
   }
