@@ -10,8 +10,8 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -56,7 +56,7 @@ public class CarrierClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
+    claim.setLastUpdated(new Date());
   }
 
   @Before
