@@ -265,6 +265,53 @@ public final class PipelineManager implements AutoCloseable {
   }
 
   /**
+   * Handle job failure by de-queueing and recording the failure.
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   * @param exception The exception from the job failure
+   */
+  private void handleJobFailure(PipelineJobRecordId jobRecordId, Exception exception) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.remove(jobRecordId) != null) {
+        jobRecordStore.recordJobFailure(jobRecordId, new PipelineJobFailure(exception));
+      } else {
+        // This can happen if the job is cancelled right before it failed.
+        LOGGER.warn("Job '{}' failed but was already dequeued", jobRecordId, exception);
+      }
+    }
+  }
+
+  /**
+   * Handle job cancellation by de-queueing and recording cancellation.
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   */
+  private void handleJobCancellation(PipelineJobRecordId jobRecordId) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.remove(jobRecordId) != null) {
+        jobRecordStore.recordJobCancellation(jobRecordId);
+      } else {
+        // This can happen if the job is cancelled by shutdown and by a callback to onFailure.
+        LOGGER.debug("Job '{}' was cancelled but was already dequeued", jobRecordId);
+      }
+    }
+  }
+
+  /**
+   * Handle normal job completion by de-queueing and recording completion.
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   * @param jobOutcome
+   */
+  private void handleJobCompletion(PipelineJobRecordId jobRecordId, PipelineJobOutcome jobOutcome) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.remove(jobRecordId) != null) {
+        jobRecordStore.recordJobCompletion(jobRecordId, jobOutcome);
+      } else {
+        // This can happen if the job is cancelled right before it completed.
+        LOGGER.warn("Job '{}' completed but was already dequeued", jobRecordId);
+      }
+    }
+  }
+
+  /**
    * This will eventually end all jobs and shut down this {@link PipelineManager}. Note: not all
    * jobs support being stopped while in progress, so this method may block for quite a while.
    */
@@ -432,11 +479,7 @@ public final class PipelineManager implements AutoCloseable {
 
       try {
         PipelineJobOutcome jobOutcome = wrappedJob.call();
-        synchronized (jobsEnqueuedHandles) {
-          if (jobsEnqueuedHandles.remove(jobRecord.getId()) != null) {
-            jobRecordStore.recordJobCompletion(jobRecord.getId(), jobOutcome);
-          }
-        }
+        handleJobCompletion(jobRecord.getId(), jobOutcome);
         return jobOutcome;
       } catch (InterruptedException e) {
         /*
@@ -444,21 +487,13 @@ public final class PipelineManager implements AutoCloseable {
          * happened when we're trying to shut down. Whether or not PipelineJob.isInterruptible() for
          * this job, it's now been stopped, so we should record the cancellation.
          */
-        synchronized (jobsEnqueuedHandles) {
-          if (jobsEnqueuedHandles.remove(jobRecord.getId()) != null) {
-            jobRecordStore.recordJobCancellation(jobRecord.getId());
-          }
-        }
+        handleJobCancellation(jobRecord.getId());
 
         // Restore the interrupt so things can get back to shutting down.
         Thread.currentThread().interrupt();
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
-        synchronized (jobsEnqueuedHandles) {
-          if (jobsEnqueuedHandles.remove(jobRecord.getId()) != null) {
-            jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
-          }
-        }
+        handleJobFailure(jobRecord.getId(), e);
 
         // Wrap and re-throw the failure.
         throw new Exception("Re-throwing job failure.", e);
@@ -499,11 +534,7 @@ public final class PipelineManager implements AutoCloseable {
          * way we have to catch cancel-before-start events (the PipelineJobWrapper can't do it,
          * since it won't get called in the first place).
          */
-        synchronized (jobsEnqueuedHandles) {
-          if (jobsEnqueuedHandles.remove(jobRecord.getId()) != null) {
-            jobRecordStore.recordJobCancellation(jobRecord.getId());
-          }
-        }
+        handleJobCancellation(jobRecord.getId());
       }
     }
   }
