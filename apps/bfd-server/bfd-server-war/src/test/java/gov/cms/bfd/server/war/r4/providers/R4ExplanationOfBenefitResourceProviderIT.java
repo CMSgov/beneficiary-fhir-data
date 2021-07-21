@@ -1640,11 +1640,27 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         Assert.assertEquals(
             expectedContained.getMeta().getProfile().size(),
             actualContained.getMeta().getProfile().size());
-        Assert.assertEquals(expectedContained.getMeta().getExtension().size(), actualContained.getMeta().getExtension().size());
-        Assert.assertEquals(expectedContained.getMeta().getFormatCommentsPre().size(), actualContained.getMeta().getFormatCommentsPre().size());
-        Assert.assertEquals(expectedContained.getMeta().getFormatCommentsPost().size(), expectedContained.getMeta().getFormatCommentsPost().size());
+        Assert.assertEquals(
+            expectedContained.getMeta().getExtension().size(),
+            actualContained.getMeta().getExtension().size());
+        Assert.assertEquals(
+            expectedContained.getMeta().getFormatCommentsPre().size(),
+            actualContained.getMeta().getFormatCommentsPre().size());
+        Assert.assertEquals(
+            expectedContained.getMeta().getFormatCommentsPost().size(),
+            expectedContained.getMeta().getFormatCommentsPost().size());
+        expectedContained.setIdBase(null);
+        expectedContained.setIdElement(null);
+        expectedContained.setImplicitRules(null);
         expectedContained.setMeta(null);
+        expectedContained.setLanguage(null);
+        expectedContained.setLanguageElement(null);
         actualContained.setMeta(null);
+        actualContained.setIdBase(null);
+        actualContained.setIdElement(null);
+        actualContained.setImplicitRules(null);
+        actualContained.setLanguage(null);
+        actualContained.setLanguageElement(null);
       }
 
       expectedContained.setId("");
@@ -1789,7 +1805,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     expected.getPayment().setAmount(null);
     actual.getPayment().setAmount(null);
     // Now for the grand finale, we can do an `equalsDeep` on the rest
-    // Assert.assertTrue(expected.equalsDeep(actual));
+    Assert.assertTrue(expected.equalsDeep(actual));
   }
 
   /**
