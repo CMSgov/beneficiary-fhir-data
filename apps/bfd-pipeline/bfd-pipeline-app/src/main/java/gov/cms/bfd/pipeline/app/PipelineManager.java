@@ -275,9 +275,6 @@ public final class PipelineManager implements AutoCloseable {
       if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
         jobRecordStore.recordJobFailure(jobRecordId, new PipelineJobFailure(exception));
         jobsEnqueuedHandles.remove(jobRecordId);
-      } else {
-        // This can happen if the job is cancelled right before it failed.
-        LOGGER.warn("Job '{}' failed but was already dequeued", jobRecordId, exception);
       }
     }
   }
@@ -292,9 +289,6 @@ public final class PipelineManager implements AutoCloseable {
       if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
         jobRecordStore.recordJobCancellation(jobRecordId);
         jobsEnqueuedHandles.remove(jobRecordId);
-      } else {
-        // This can happen if the job is cancelled by shutdown and by a callback to onFailure.
-        LOGGER.debug("Job '{}' was cancelled but was already dequeued", jobRecordId);
       }
     }
   }
@@ -310,9 +304,6 @@ public final class PipelineManager implements AutoCloseable {
       if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
         jobRecordStore.recordJobCompletion(jobRecordId, jobOutcome);
         jobsEnqueuedHandles.remove(jobRecordId);
-      } else {
-        // This can happen if the job is cancelled right before it completed.
-        LOGGER.warn("Job '{}' completed but was already dequeued", jobRecordId);
       }
     }
   }
