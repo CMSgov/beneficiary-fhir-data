@@ -2,7 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import java.time.Instant;
+import java.util.Date;
 import org.apache.spark.util.sketch.BloomFilter;
 
 /**
@@ -20,8 +20,8 @@ public class LoadedFileFilter {
   private final int batchesCount;
 
   // The interval of time when the RIF load took place
-  private final Instant firstUpdated;
-  private final Instant lastUpdated;
+  private final Date firstUpdated;
+  private final Date lastUpdated;
 
   // The beneficiaries that were updated in the RIF load
   private final BloomFilter updatedBeneficiaries;
@@ -38,8 +38,8 @@ public class LoadedFileFilter {
   public LoadedFileFilter(
       long loadedFileId,
       int batchesCount,
-      Instant firstUpdated,
-      Instant lastUpdated,
+      Date firstUpdated,
+      Date lastUpdated,
       BloomFilter updatedBeneficiaries) {
     this.loadedFileId = loadedFileId;
     this.batchesCount = batchesCount;
@@ -61,12 +61,12 @@ public class LoadedFileFilter {
     if (upperBound != null) {
       switch (upperBound.getPrefix()) {
         case LESSTHAN:
-          if (upperBound.getValue().toInstant().isBefore(getFirstUpdated())) {
+          if (upperBound.getValue().getTime() <= getFirstUpdated().getTime()) {
             return false;
           }
           break;
         case LESSTHAN_OR_EQUALS:
-          if (!upperBound.getValue().toInstant().isAfter(getFirstUpdated())) {
+          if (upperBound.getValue().getTime() < getFirstUpdated().getTime()) {
             return false;
           }
           break;
@@ -79,12 +79,12 @@ public class LoadedFileFilter {
     if (lowerBound != null) {
       switch (lowerBound.getPrefix()) {
         case GREATERTHAN:
-          if (!lowerBound.getValue().toInstant().isBefore(getLastUpdated())) {
+          if (lowerBound.getValue().getTime() >= getLastUpdated().getTime()) {
             return false;
           }
           break;
         case GREATERTHAN_OR_EQUALS:
-          if (lowerBound.getValue().toInstant().isAfter(getLastUpdated())) {
+          if (lowerBound.getValue().getTime() > getLastUpdated().getTime()) {
             return false;
           }
           break;
@@ -112,12 +112,12 @@ public class LoadedFileFilter {
   }
 
   /** @return the firstUpdated */
-  public Instant getFirstUpdated() {
+  public Date getFirstUpdated() {
     return firstUpdated;
   }
 
   /** @return the lastUpdated */
-  public Instant getLastUpdated() {
+  public Date getLastUpdated() {
     return lastUpdated;
   }
 

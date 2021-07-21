@@ -11,8 +11,8 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -228,7 +228,7 @@ public final class BeneficiaryTransformerTest {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
     RequestHeaders requestHeader = getRHwithIncldIdntityHdr("");
-    beneficiary.setLastUpdated(Instant.now());
+    beneficiary.setLastUpdated(new Date());
     Patient patientWithLastUpdated =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patientWithLastUpdated, requestHeader);
