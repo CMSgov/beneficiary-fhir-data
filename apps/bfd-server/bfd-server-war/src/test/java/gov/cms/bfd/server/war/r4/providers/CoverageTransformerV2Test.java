@@ -49,7 +49,7 @@ public final class CoverageTransformerV2Test {
 
     Calendar calen = Calendar.getInstance();
     calen.set(2021, 3, 17);
-    beneficiary.setLastUpdated(calen.getTime().toInstant());
+    beneficiary.setLastUpdated(calen.getTime());
   }
 
   /** Standalone wrapper to output PART_A */

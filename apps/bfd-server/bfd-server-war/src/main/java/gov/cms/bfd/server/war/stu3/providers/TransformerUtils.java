@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
@@ -53,7 +52,8 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -64,7 +64,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -964,18 +963,18 @@ public final class TransformerUtils {
       CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
-    if (!dateYear.isPresent()) {
-      throw new NoSuchElementException();
-    }
     try {
-      String stringDate = dateYear.get().toString();
-      DateType dateYearValue = new DateType(stringDate);
+      String stringDate = dateYear.get().toString() + "-01-01";
+      Date date1 = new SimpleDateFormat("yyyy-MM-dd").parse(stringDate);
+      DateType dateYearValue = new DateType(date1, TemporalPrecisionEnum.YEAR);
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
-    } catch (DataFormatException e) {
+
+    } catch (ParseException e) {
       throw new InvalidRifValueException(
-          String.format("Unable to create DateYear with reference year: '%s'.", dateYear.get()), e);
+          String.format("Unable to parse reference year: '%s'.", dateYear.get()), e);
     }
+
     return extension;
   }
 
@@ -1406,7 +1405,9 @@ public final class TransformerUtils {
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
   static void setPeriodEnd(Period period, LocalDate date) {
-    period.setEnd(convertToDate(date), TemporalPrecisionEnum.DAY);
+    period.setEnd(
+        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+        TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -1414,7 +1415,9 @@ public final class TransformerUtils {
    * @param date the {@link LocalDate} to set the {@link Period#getStart()} value with/to
    */
   static void setPeriodStart(Period period, LocalDate date) {
-    period.setStart(convertToDate(date), TemporalPrecisionEnum.DAY);
+    period.setStart(
+        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
+        TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -3362,7 +3365,7 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime) {
+      OffsetLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
     Bundle bundle = new Bundle();
     if (paging.isPagingRequested()) {
       /*
@@ -3384,18 +3387,18 @@ public final class TransformerUtils {
      * performance reason, the resources of the bundle may be after the filter manager's version of
      * the timestamp.
      */
-    Instant maxBundleDate =
+    Date maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated().toInstant())
+            .map(r -> r.getMeta().getLastUpdated())
             .filter(Objects::nonNull)
-            .max(Instant::compareTo)
+            .max(Date::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
         .setLastUpdated(
-            transactionTime.isAfter(maxBundleDate)
-                ? Date.from(transactionTime)
-                : Date.from(maxBundleDate));
+            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
+                ? transactionTime
+                : maxBundleDate);
     bundle.setTotal(resources.size());
     return bundle;
   }
@@ -3411,7 +3414,7 @@ public final class TransformerUtils {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      List<IBaseResource> resources, LinkBuilder paging, Instant transactionTime) {
+      List<IBaseResource> resources, LinkBuilder paging, Date transactionTime) {
     Bundle bundle = new Bundle();
     TransformerUtils.addResourcesToBundle(bundle, resources);
     paging.addLinks(bundle);
@@ -3424,18 +3427,18 @@ public final class TransformerUtils {
      * performance reason, the resources of the bundle may be after the filter manager's version of
      * the timestamp.
      */
-    Instant maxBundleDate =
+    Date maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated().toInstant())
+            .map(r -> r.getMeta().getLastUpdated())
             .filter(Objects::nonNull)
-            .max(Instant::compareTo)
+            .max(Date::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
         .setLastUpdated(
-            transactionTime.isAfter(maxBundleDate)
-                ? Date.from(transactionTime)
-                : Date.from(maxBundleDate));
+            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
+                ? transactionTime
+                : maxBundleDate);
     return bundle;
   }
 
@@ -3500,10 +3503,10 @@ public final class TransformerUtils {
    * @param resource is the FHIR resource to set lastUpdate
    * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUdpated.
    */
-  public static void setLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
+  public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
     resource
         .getMeta()
-        .setLastUpdated(Date.from(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED)));
+        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
   }
 
   /**
@@ -3513,15 +3516,12 @@ public final class TransformerUtils {
    * @param resource is the FHIR resource to update
    * @param lastUpdated is the lastUpdated value from the entity
    */
-  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
+  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
     lastUpdated.ifPresent(
         newDate -> {
-          Instant currentDate =
-              resource.getMeta().getLastUpdated() != null
-                  ? resource.getMeta().getLastUpdated().toInstant()
-                  : null;
-          if (currentDate != null && newDate.isAfter(currentDate)) {
-            resource.getMeta().setLastUpdated(Date.from(newDate));
+          Date currentDate = resource.getMeta().getLastUpdated();
+          if (currentDate != null && newDate.after(currentDate)) {
+            resource.getMeta().setLastUpdated(newDate);
           }
         });
   }

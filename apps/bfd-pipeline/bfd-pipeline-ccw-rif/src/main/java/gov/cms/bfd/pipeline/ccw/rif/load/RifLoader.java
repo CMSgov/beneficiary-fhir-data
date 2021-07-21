@@ -39,6 +39,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -917,7 +918,7 @@ public final class RifLoader {
       EntityManager entityManager,
       Beneficiary newBeneficiaryRecord,
       Optional<Beneficiary> oldBeneficiaryRecord,
-      Instant batchTimestamp) {
+      Date batchTimestamp) {
     if (oldBeneficiaryRecord.isPresent()
         && !isBeneficiaryHistoryEqual(newBeneficiaryRecord, oldBeneficiaryRecord.get())) {
       BeneficiaryHistory oldBeneCopy = new BeneficiaryHistory();
@@ -1035,7 +1036,7 @@ public final class RifLoader {
 
     final LoadedFile loadedFile = new LoadedFile();
     loadedFile.setRifType(fileEvent.getFile().getFileType().toString());
-    loadedFile.setCreated(Instant.now());
+    loadedFile.setCreated(new Date());
 
     try {
       EntityManager em = appState.getEntityManagerFactory().createEntityManager();
@@ -1079,7 +1080,7 @@ public final class RifLoader {
       try {
         txn = em.getTransaction();
         txn.begin();
-        final Instant oldDate = Instant.now().minus(MAX_FILE_AGE_DAYS);
+        final Date oldDate = Date.from(Instant.now().minus(MAX_FILE_AGE_DAYS));
 
         em.clear(); // Must be done before JPQL statements
         em.flush();

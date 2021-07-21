@@ -1,6 +1,6 @@
 package gov.cms.bfd.model.rif;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -21,7 +21,8 @@ public class LoadedFile {
   private String rifType;
 
   @Column(name = "`created`", nullable = false)
-  private Instant created;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date created;
 
   @OneToMany(
       mappedBy = "loadedFileId",
@@ -39,7 +40,7 @@ public class LoadedFile {
    * @param rifType RifFileType
    * @param created time stamp
    */
-  public LoadedFile(long loadedFileId, String rifType, Instant created) {
+  public LoadedFile(long loadedFileId, String rifType, Date created) {
     this();
     this.loadedFileId = loadedFileId;
     this.rifType = rifType;
@@ -77,12 +78,12 @@ public class LoadedFile {
   }
 
   /** @return the creation time stamp */
-  public Instant getCreated() {
+  public Date getCreated() {
     return created;
   }
 
   /** @param created time stamp to set */
-  public void setCreated(Instant created) {
+  public void setCreated(Date created) {
     this.created = created;
   }
 

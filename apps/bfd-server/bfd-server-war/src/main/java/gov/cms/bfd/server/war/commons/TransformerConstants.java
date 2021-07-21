@@ -6,6 +6,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaimColumn;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
 import java.time.Instant;
+import java.util.Date;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.GroupComponent;
@@ -348,7 +349,7 @@ public final class TransformerConstants {
    * Fallback value to use when a record does not have a lastUpdated value. These records where
    * loaded before the lastUpdated feature was in place.
    */
-  public static final Instant FALLBACK_LAST_UPDATED = Instant.parse("2020-01-01T00:00:00Z");
+  public static final Date FALLBACK_LAST_UPDATED = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
 
   /**
    * CARIN Code System for Patient Identifier Type <a

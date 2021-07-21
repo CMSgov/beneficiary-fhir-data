@@ -26,12 +26,12 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -428,21 +428,15 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     }
 
     if (claimEntities != null && serviceDate != null && !serviceDate.isEmpty()) {
-      final Instant lowerBound =
-          serviceDate.getLowerBoundAsInstant() != null
-              ? serviceDate.getLowerBoundAsInstant().toInstant()
-              : null;
-      final Instant upperBound =
-          serviceDate.getUpperBoundAsInstant() != null
-              ? serviceDate.getUpperBoundAsInstant().toInstant()
-              : null;
+      final Date lowerBound = serviceDate.getLowerBoundAsInstant();
+      final Date upperBound = serviceDate.getUpperBoundAsInstant();
       final java.util.function.Predicate<LocalDate> lowerBoundCheck =
           lowerBound == null
               ? (date) -> true
               : (date) ->
                   compareLocalDate(
                       date,
-                      lowerBound.atZone(ZoneId.systemDefault()).toLocalDate(),
+                      lowerBound.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.getLowerBound().getPrefix());
       final java.util.function.Predicate<LocalDate> upperBoundCheck =
           upperBound == null
@@ -450,7 +444,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
               : (date) ->
                   compareLocalDate(
                       date,
-                      upperBound.atZone(ZoneId.systemDefault()).toLocalDate(),
+                      upperBound.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.getUpperBound().getPrefix());
       return claimEntities.stream()
           .filter(

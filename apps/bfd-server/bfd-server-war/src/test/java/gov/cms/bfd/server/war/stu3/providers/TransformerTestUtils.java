@@ -39,7 +39,9 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import junit.framework.AssertionFailedError;
@@ -402,7 +404,8 @@ final class TransformerTestUtils {
    * @param actual the actual {@link BaseDateTimeType} to verify
    */
   static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
-    Assert.assertEquals(TransformerUtils.convertToDate(expected), actual.getValue());
+    Assert.assertEquals(
+        Date.from(expected.atStartOfDay(ZoneId.systemDefault()).toInstant()), actual.getValue());
     Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
   }
 
@@ -2079,7 +2082,7 @@ final class TransformerTestUtils {
    * @param actualResource that is being created by the transform
    */
   static void assertLastUpdatedEquals(
-      Optional<Instant> expectedDateTime, IAnyResource actualResource) {
+      Optional<Date> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
       /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
        * use one instance of an IT DB with the same resources for most tests.
@@ -2087,7 +2090,7 @@ final class TransformerTestUtils {
        * because another test over wrote the same resource.
        * To handle this case, dates that are within a second of each other match.
        */
-      final Instant expectedLastUpdated = expectedDateTime.get();
+      final Instant expectedLastUpdated = expectedDateTime.get().toInstant();
       final Instant actualLastUpdated = actualResource.getMeta().getLastUpdated().toInstant();
       final Duration diff = Duration.between(expectedLastUpdated, actualLastUpdated);
       Assert.assertTrue(
@@ -2097,7 +2100,7 @@ final class TransformerTestUtils {
       Assert.assertEquals(
           "Expect lastUpdated to be the fallback value",
           TransformerConstants.FALLBACK_LAST_UPDATED,
-          actualResource.getMeta().getLastUpdated().toInstant());
+          actualResource.getMeta().getLastUpdated());
     }
   }
 
