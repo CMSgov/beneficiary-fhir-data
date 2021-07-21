@@ -10,7 +10,9 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -158,7 +160,7 @@ public final class SNFClaimTransformerTest {
         claim.getProcedure1Code().get(),
         eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
     Assert.assertEquals(
-        TransformerUtils.convertToDate(claim.getProcedure1Date().get()),
+        Date.from(claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
         eob.getProcedure().get(0).getDate());
 
     Assert.assertEquals(1, eob.getItem().size());
