@@ -19,7 +19,11 @@ public final class LoadedFilterTest {
     final BloomFilter emptyFilter = LoadedFileFilter.createFilter(10);
     final LoadedFileFilter filter1 =
         new LoadedFileFilter(
-            1, 0, Instant.now().minusSeconds(10), Instant.now().minusSeconds(5), emptyFilter);
+            1,
+            0,
+            Date.from(Instant.now().minusSeconds(10)),
+            Date.from(Instant.now().minusSeconds(5)),
+            emptyFilter);
 
     Assert.assertTrue(
         "Expected null range to be treated as an infinite range", filter1.matchesDateRange(null));
@@ -87,7 +91,11 @@ public final class LoadedFilterTest {
 
     final LoadedFileFilter filter1 =
         new LoadedFileFilter(
-            1, 1, Instant.now().minusSeconds(10), Instant.now().minusSeconds(5), smallFilter);
+            1,
+            1,
+            Date.from(Instant.now().minusSeconds(10)),
+            Date.from(Instant.now().minusSeconds(5)),
+            smallFilter);
 
     Assert.assertTrue("Expected to contain this", filter1.mightContain("1"));
     Assert.assertFalse("Expected to not contain this", filter1.mightContain("888"));

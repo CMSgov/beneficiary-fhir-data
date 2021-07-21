@@ -5,11 +5,10 @@ import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.server.war.commons.LoadedFileFilter;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import java.sql.Timestamp;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +31,7 @@ public final class LoadedFilterManagerTest {
   private static final String SAMPLE_BENE = "567834";
   private static final String INVALID_BENE = "1";
   private static final LoadedBatch[] preBatches = new LoadedBatch[8];
-  private static final Instant[] preDates = new Instant[preBatches.length * 5];
+  private static final Date[] preDates = new Date[preBatches.length * 5];
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
@@ -41,7 +40,7 @@ public final class LoadedFilterManagerTest {
     // Create a few time stamps to play with
     Instant now = Instant.now().truncatedTo(ChronoUnit.DAYS);
     for (int i = 0; i < preDates.length; i++) {
-      preDates[i] = now.plusSeconds(i);
+      preDates[i] = Date.from(now.plusSeconds(i));
     }
     List<String> beneficiaries = Collections.singletonList(SAMPLE_BENE);
     for (int i = 0; i < preBatches.length; i++) {
@@ -65,8 +64,7 @@ public final class LoadedFilterManagerTest {
     Assert.assertEquals(1, filters.size());
 
     // Test the filter
-    final DateRangeParam during1 =
-        new DateRangeParam(Date.from(preDates[1]), Date.from(preDates[2]));
+    final DateRangeParam during1 = new DateRangeParam(preDates[1], preDates[2]);
     Assert.assertTrue(filters.get(0).matchesDateRange(during1));
     Assert.assertEquals(1, filters.get(0).getBatchesCount());
     Assert.assertTrue(filters.get(0).mightContain(SAMPLE_BENE));
@@ -132,24 +130,21 @@ public final class LoadedFilterManagerTest {
     // Setup the manager and test a few lastUpdated ranges
     final LoadedFilterManager filterManagerA = new LoadedFilterManager();
     filterManagerA.set(aFilters, preDates[1], preBatches[2].getCreated());
-    final DateRangeParam beforeRange =
-        new DateRangeParam(Date.from(preDates[0]), Date.from(preDates[1]));
+    final DateRangeParam beforeRange = new DateRangeParam(preDates[0], preDates[1]);
     Assert.assertFalse(filterManagerA.isInBounds(beforeRange));
     Assert.assertFalse(filterManagerA.isResultSetEmpty(SAMPLE_BENE, beforeRange));
-    final DateRangeParam duringRange1 =
-        new DateRangeParam(Date.from(preDates[2]), Date.from(preDates[3]));
+    final DateRangeParam duringRange1 = new DateRangeParam(preDates[2], preDates[3]);
     Assert.assertTrue(filterManagerA.isInBounds(duringRange1));
     Assert.assertFalse(filterManagerA.isResultSetEmpty(SAMPLE_BENE, duringRange1));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(INVALID_BENE, duringRange1));
     final DateRangeParam duringRange2 =
         new DateRangeParam()
-            .setLowerBoundExclusive(Date.from(preDates[9]))
-            .setUpperBoundExclusive(Date.from(preDates[10]));
+            .setLowerBoundExclusive(preDates[9])
+            .setUpperBoundExclusive(preDates[10]);
     Assert.assertTrue(filterManagerA.isInBounds(duringRange2));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(SAMPLE_BENE, duringRange2));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(INVALID_BENE, duringRange2));
-    final DateRangeParam afterRange =
-        new DateRangeParam(Date.from(preDates[20]), Date.from(preDates[21]));
+    final DateRangeParam afterRange = new DateRangeParam(preDates[20], preDates[21]);
     Assert.assertTrue(filterManagerA.isInBounds(afterRange));
     Assert.assertTrue(filterManagerA.isResultSetEmpty(SAMPLE_BENE, afterRange));
   }
@@ -206,21 +201,21 @@ public final class LoadedFilterManagerTest {
 
   @Test
   public void testDateComparisonAssumptions() throws ParseException {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss.SSS");
     // Root cause of BFD-713.
     // Adding this here in case a new version of Java changes behavior.  The Date objects used in
     // LoadedFilterManager are actually java.sql.Timestamps, which split milliseconds from the
     // seconds
-    Instant lastBatchCreated =
-        (LocalDateTime.parse("2021-03-27 21:14:52.316", formatter))
-            .atZone(ZoneId.of("UTC"))
-            .toInstant();
-    Instant currentLastBatchCreated =
-        (LocalDateTime.parse("2021-03-27 21:14:52.557", formatter))
-            .atZone(ZoneId.of("UTC"))
-            .toInstant();
+    Date lastBatchCreated = new Timestamp(formatter.parse("2021-03-27 21:14:52.316").getTime());
+    Date currentLastBatchCreated =
+        new Timestamp(formatter.parse("2021-03-27 21:14:52.557").getTime());
 
-    Assert.assertTrue(lastBatchCreated.isBefore(currentLastBatchCreated));
+    // You would expect this to be true, but Timestamp splits the ms from the seconds, and this is
+    // only comparing the seconds which are equal
+    Assert.assertFalse(lastBatchCreated.before(currentLastBatchCreated));
+
+    // If we convert to instants, it will work in either case:
+    Assert.assertTrue(lastBatchCreated.toInstant().isBefore(currentLastBatchCreated.toInstant()));
   }
 
   @Test
@@ -256,7 +251,7 @@ public final class LoadedFilterManagerTest {
       return this;
     }
 
-    MockDb insert(long loadedFileId, Instant firstUpdated) {
+    MockDb insert(long loadedFileId, Date firstUpdated) {
       files.add(new LoadedFile(loadedFileId, "BENEFICIARY", firstUpdated));
       return this;
     }
@@ -278,11 +273,11 @@ public final class LoadedFilterManagerTest {
       ArrayList<LoadedFilterManager.LoadedTuple> tuples = new ArrayList<>();
       files.forEach(
           file -> {
-            Optional<Instant> lastUpdated =
+            Optional<Date> lastUpdated =
                 batches.stream()
                     .filter(b -> b.getLoadedFileId() == file.getLoadedFileId())
                     .map(LoadedBatch::getCreated)
-                    .reduce((a, b) -> a.isAfter(b) ? a : b);
+                    .reduce((a, b) -> a.after(b) ? a : b);
             lastUpdated.ifPresent(
                 updated ->
                     tuples.add(

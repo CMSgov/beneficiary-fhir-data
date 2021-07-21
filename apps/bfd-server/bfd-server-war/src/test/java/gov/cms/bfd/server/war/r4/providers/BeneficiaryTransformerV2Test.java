@@ -17,7 +17,6 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -63,7 +62,7 @@ public final class BeneficiaryTransformerV2Test {
             .findFirst()
             .get();
 
-    beneficiary.setLastUpdated(Instant.now());
+    beneficiary.setLastUpdated(new Date());
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
     // Add the history records to the Beneficiary, but nill out the HICN fields.
