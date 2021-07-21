@@ -1649,10 +1649,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
         Assert.assertEquals(
             expectedContained.getMeta().getFormatCommentsPost().size(),
             expectedContained.getMeta().getFormatCommentsPost().size());
+
+        expectedContained.setMeta(null);
         expectedContained.setIdBase(null);
         expectedContained.setIdElement(null);
         expectedContained.setImplicitRules(null);
-        expectedContained.setMeta(null);
         expectedContained.setLanguage(null);
         expectedContained.setLanguageElement(null);
         actualContained.setMeta(null);
