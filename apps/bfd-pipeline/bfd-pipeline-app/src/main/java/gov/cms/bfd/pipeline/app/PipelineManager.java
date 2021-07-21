@@ -432,7 +432,11 @@ public final class PipelineManager implements AutoCloseable {
 
       try {
         PipelineJobOutcome jobOutcome = wrappedJob.call();
-        jobRecordStore.recordJobCompletion(jobRecord.getId(), jobOutcome);
+        synchronized (jobsEnqueuedHandles) {
+          if (jobsEnqueuedHandles.remove(jobRecord.getId()) != null) {
+            jobRecordStore.recordJobCompletion(jobRecord.getId(), jobOutcome);
+          }
+        }
         return jobOutcome;
       } catch (InterruptedException e) {
         /*
@@ -440,20 +444,24 @@ public final class PipelineManager implements AutoCloseable {
          * happened when we're trying to shut down. Whether or not PipelineJob.isInterruptible() for
          * this job, it's now been stopped, so we should record the cancellation.
          */
-        jobRecordStore.recordJobCancellation(jobRecord.getId());
+        synchronized (jobsEnqueuedHandles) {
+          if (jobsEnqueuedHandles.remove(jobRecord.getId()) != null) {
+            jobRecordStore.recordJobCancellation(jobRecord.getId());
+          }
+        }
 
         // Restore the interrupt so things can get back to shutting down.
         Thread.currentThread().interrupt();
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
-        jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
+        synchronized (jobsEnqueuedHandles) {
+          if (jobsEnqueuedHandles.remove(jobRecord.getId()) != null) {
+            jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
+          }
+        }
 
         // Wrap and re-throw the failure.
         throw new Exception("Re-throwing job failure.", e);
-      } finally {
-        synchronized (jobsEnqueuedHandles) {
-          jobsEnqueuedHandles.remove(jobRecord.getId());
-        }
       }
     }
   }
@@ -492,9 +500,10 @@ public final class PipelineManager implements AutoCloseable {
          * since it won't get called in the first place).
          */
         synchronized (jobsEnqueuedHandles) {
-          jobsEnqueuedHandles.remove(jobRecord.getId());
+          if (jobsEnqueuedHandles.remove(jobRecord.getId()) != null) {
+            jobRecordStore.recordJobCancellation(jobRecord.getId());
+          }
         }
-        jobRecordStore.recordJobCancellation(jobRecord.getId());
       }
     }
   }

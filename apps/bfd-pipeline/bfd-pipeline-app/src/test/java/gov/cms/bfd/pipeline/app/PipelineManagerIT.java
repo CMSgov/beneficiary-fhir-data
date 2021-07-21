@@ -487,11 +487,14 @@ public final class PipelineManagerIT {
     }
   }
 
-  /** Reduce tick time on built-in jobs, to speed test execution. */
+  /** Reduce tick time on built-in jobs, to speed test execution. Setting this too low can
+   * expose a race condition in the volunteer job where it attempts to enqueue the same job
+   * twice.
+   */
   @BeforeClass
   public static void configureTimers() {
-    VolunteerJob.VOLUNTEER_TICK_MILLIS = 10;
-    SchedulerJob.SCHEDULER_TICK_MILLIS = 10;
+    VolunteerJob.VOLUNTEER_TICK_MILLIS = 100;
+    SchedulerJob.SCHEDULER_TICK_MILLIS = 100;
   }
 
   /** This mock {@link PipelineJob} returns a specified result. */
