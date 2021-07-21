@@ -1632,7 +1632,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
       if (expectedContained.getResourceType().name().equals("Observation")) {
         String expectedId = "#" + expectedContained.getId();
         expectedContained.setId(expectedId);
-        Assert.assertEquals(expectedContained.getId(), actualContained.getId());
         Assert.assertTrue(expectedContained.equalsDeep(actualContained));
       }
 
