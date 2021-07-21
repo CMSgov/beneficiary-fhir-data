@@ -1629,43 +1629,24 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
       // This is incorrect according to the FHIR spec:
       // https://build.fhir.org/references.html#contained
       // This works around that problem
-      if (expectedContained.getResourceType().name().equals("Observation"))
-        Assert.assertEquals("#" + expectedContained.getId(), actualContained.getId());
+      if (expectedContained.getResourceType().name().equals("Observation")) {
+        String expectedId = "#" + expectedContained.getId();
+        expectedContained.setId(expectedId);
+        Assert.assertEquals(expectedContained.getId(), actualContained.getId());
+        Assert.assertTrue(expectedContained.equalsDeep(actualContained));
+      }
 
       if (expectedContained.getResourceType().name().equals("Practitioner")) {
-        Assert.assertEquals(expectedContained.getId(), actualContained.getId());
-        Assert.assertEquals(expectedContained.getResourceType(), actualContained.getResourceType());
-        Assert.assertEquals(
-            expectedContained.getMeta().getTag().size(), actualContained.getMeta().getTag().size());
-        Assert.assertEquals(
-            expectedContained.getMeta().getProfile().size(),
-            actualContained.getMeta().getProfile().size());
-        Assert.assertEquals(
-            expectedContained.getMeta().getExtension().size(),
-            actualContained.getMeta().getExtension().size());
-        Assert.assertEquals(
-            expectedContained.getMeta().getFormatCommentsPre().size(),
-            actualContained.getMeta().getFormatCommentsPre().size());
-        Assert.assertEquals(
-            expectedContained.getMeta().getFormatCommentsPost().size(),
-            expectedContained.getMeta().getFormatCommentsPost().size());
-
-        expectedContained.setMeta(null);
-        expectedContained.setIdBase(null);
-        expectedContained.setIdElement(null);
-        expectedContained.setImplicitRules(null);
-        expectedContained.setLanguage(null);
-        expectedContained.setLanguageElement(null);
-        actualContained.setMeta(null);
-        actualContained.setIdBase(null);
-        actualContained.setIdElement(null);
-        actualContained.setImplicitRules(null);
-        actualContained.setLanguage(null);
-        actualContained.setLanguageElement(null);
+        Assert.assertTrue(expectedContained.equalsDeep(actualContained));
       }
 
       expectedContained.setId("");
       actualContained.setId("");
+    }
+
+    if (expected.getContained().size() > 0) {
+      expected.setContained(null);
+      actual.setContained(null);
     }
 
     // Dates are not easy to compare so just make sure they are there
