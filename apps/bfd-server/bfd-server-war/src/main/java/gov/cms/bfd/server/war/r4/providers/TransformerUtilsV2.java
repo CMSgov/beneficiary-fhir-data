@@ -1979,22 +1979,21 @@ public final class TransformerUtilsV2 {
       ItemComponent eobItem,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
       List<Identifier> identifiers,
-      String practionerIdNumber) {
+      String practitionerIdNumber) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry = eob.addCareTeam();
     // addItem adds and returns, so we want size() not size() + 1 here
     careTeamEntry.setSequence(eob.getCareTeam().size());
 
-    String practionerId = "#practitioner-" + practionerIdNumber;
+    String practitionerId = "#practitioner-" + practitionerIdNumber;
 
-    Practitioner practioner = new Practitioner();
-    practioner.setIdentifier(identifiers);
-    practioner.setId(practionerId);
+    Practitioner practitioner = findOrCreateContainedPractioner(eob, practitionerId);
+    practitioner.setIdentifier(identifiers);
 
-    Reference ref = new Reference(practioner);
+    Reference ref = new Reference(practitioner);
+    ref.setId(practitionerId);
 
-    ref.setId(practionerId);
-    StringType referenceElement = new StringType(practionerId);
+    StringType referenceElement = new StringType(practitionerId);
     ref.setReferenceElement(referenceElement);
     careTeamEntry.setProvider(ref);
 
@@ -3391,6 +3390,24 @@ public final class TransformerUtilsV2 {
     }
 
     return (Observation) observation.get();
+  }
+
+  static Practitioner findOrCreateContainedPractioner(ExplanationOfBenefit eob, String id) {
+    Optional<Resource> practioner =
+        eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
+
+    // If it isn't there, add one
+    if (!practioner.isPresent()) {
+      practioner = Optional.of(new Practitioner().setId(id));
+      eob.getContained().add(practioner.get());
+    }
+
+    // At this point `observation.get()` will always return
+    if (!Practitioner.class.isInstance(practioner.get())) {
+      throw new BadCodeMonkeyException();
+    }
+
+    return (Practitioner) practioner.get();
   }
 
   /**
