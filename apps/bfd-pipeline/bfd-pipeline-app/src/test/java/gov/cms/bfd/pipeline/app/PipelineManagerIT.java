@@ -493,8 +493,8 @@ public final class PipelineManagerIT {
    */
   @BeforeClass
   public static void configureTimers() {
-    VolunteerJob.VOLUNTEER_TICK_MILLIS = 100;
-    SchedulerJob.SCHEDULER_TICK_MILLIS = 100;
+    VolunteerJob.VOLUNTEER_TICK_MILLIS = 500;
+    SchedulerJob.SCHEDULER_TICK_MILLIS = 500;
   }
 
   /** This mock {@link PipelineJob} returns a specified result. */
