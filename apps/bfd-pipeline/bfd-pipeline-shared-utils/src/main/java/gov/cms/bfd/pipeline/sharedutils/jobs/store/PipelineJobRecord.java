@@ -153,7 +153,9 @@ public final class PipelineJobRecord<A extends PipelineJobArguments> {
   }
 
   /** @return <code>true</code> if this job has been enqueued, <code>false</code> if it has not */
-  public boolean isEnqueued() { return enqueuedTime.isPresent(); }
+  public boolean isEnqueued() {
+    return enqueuedTime.isPresent();
+  }
 
   /** @return the {@link Instant} that this job started running at, if any */
   public Optional<Instant> getStartedTime() {
