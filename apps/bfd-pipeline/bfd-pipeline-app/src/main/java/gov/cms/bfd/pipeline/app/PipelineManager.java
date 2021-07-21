@@ -266,6 +266,7 @@ public final class PipelineManager implements AutoCloseable {
 
   /**
    * Handle job failure by de-queueing and recording the failure.
+   *
    * @param jobRecordId the {@link PipelineJobRecord} of the job
    * @param exception The exception from the job failure
    */
@@ -282,6 +283,7 @@ public final class PipelineManager implements AutoCloseable {
 
   /**
    * Handle job cancellation by de-queueing and recording cancellation.
+   *
    * @param jobRecordId the {@link PipelineJobRecord} of the job
    */
   private void handleJobCancellation(PipelineJobRecordId jobRecordId) {
@@ -297,6 +299,7 @@ public final class PipelineManager implements AutoCloseable {
 
   /**
    * Handle normal job completion by de-queueing and recording completion.
+   *
    * @param jobRecordId the {@link PipelineJobRecord} of the job
    * @param jobOutcome
    */
