@@ -12,6 +12,7 @@ import gov.cms.bfd.server.war.commons.CCWProcedure;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -197,8 +198,9 @@ public final class OutpatientClaimTransformerTest {
           claim.getProcedure1Code().get(),
           eob.getProcedure().get(0).getProcedureCodeableConcept().getCoding());
       Assert.assertEquals(
-          claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant(),
-          eob.getProcedure().get(0).getDate().toInstant());
+          Date.from(
+              claim.getProcedure1Date().get().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+          eob.getProcedure().get(0).getDate());
     }
 
     Assert.assertTrue("Expect actual item count is above 0", 1 <= eob.getItem().size());
