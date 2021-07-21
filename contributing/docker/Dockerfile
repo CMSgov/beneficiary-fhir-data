@@ -10,6 +10,7 @@ RUN mv apache-maven-${MVN_VER} /opt/maven
 ENV LANG en_US.UTF-8
 RUN useradd -ms /bin/bash dev
 ENV BFD_V2_ENABLED true
+ENV BFD_PREADJ_ENABLED true
 USER dev
 ENV MAVEN_HOME /opt/maven
 ENV PATH="${PATH}:${MAVEN_HOME}/bin"
