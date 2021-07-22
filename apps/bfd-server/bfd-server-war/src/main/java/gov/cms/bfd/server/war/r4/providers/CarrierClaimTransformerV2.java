@@ -190,7 +190,6 @@ public class CarrierClaimTransformerV2 {
                 line.getPerformingPhysicianUpin(),
                 Optional.of(line.getPerformingProviderIdNumber()),
                 includeTaxNumbers,
-                claimGroup.getClaimId() + item.getSequence(),
                 line.getProviderTaxNumber());
 
         performing.setResponsible(true);

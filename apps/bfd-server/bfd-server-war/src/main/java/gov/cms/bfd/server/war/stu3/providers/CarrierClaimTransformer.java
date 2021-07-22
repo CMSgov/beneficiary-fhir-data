@@ -130,7 +130,6 @@ final class CarrierClaimTransformer {
                 claimLine.getPerformingPhysicianNpi(),
                 claimLine.getPerformingPhysicianUpin(),
                 includeTaxNumbers,
-                claimGroup.getClaimId() + item.getSequence(),
                 claimLine.getProviderTaxNumber());
 
         performingCareTeam.setResponsible(true);

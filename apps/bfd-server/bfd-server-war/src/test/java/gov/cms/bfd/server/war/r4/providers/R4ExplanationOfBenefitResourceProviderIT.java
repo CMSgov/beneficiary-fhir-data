@@ -1631,11 +1631,14 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
       // This works around that problem
       if (expectedContained.getResourceType().name().equals("Observation")) {
         String expectedId = "#" + expectedContained.getId();
+        // Have to prefix the expected id with a hash and than do a deep equals
         expectedContained.setId(expectedId);
         Assert.assertTrue(expectedContained.equalsDeep(actualContained));
       }
 
       if (expectedContained.getResourceType().name().equals("Practitioner")) {
+        // Expected Id is null and needs to be set for a deep equals
+        expectedContained.setId(actualContained.getId());
         Assert.assertTrue(expectedContained.equalsDeep(actualContained));
       }
 
@@ -1643,6 +1646,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
       actualContained.setId("");
     }
 
+    Assert.assertEquals(expected.getProvider().getReference(), actual.getProvider().getReference());
+    expected.setProvider(null);
+    actual.setProvider(null);
+
+    // did a deep equals for the contained up top so we can zero out the contained resource
     if (expected.getContained().size() > 0) {
       expected.setContained(null);
       actual.setContained(null);
@@ -1785,6 +1793,15 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
 
     expected.getPayment().setAmount(null);
     actual.getPayment().setAmount(null);
+
+    for (int i = 0; i < expected.getCareTeam().size(); i++) {
+      Assert.assertEquals(
+          expected.getCareTeam().get(i).getProvider(), actual.getCareTeam().get(i).getProvider());
+      expected.getCareTeam().get(i).setProvider(null);
+      actual.getCareTeam().get(i).setProvider(null);
+    }
+    // expected.setCareTeam(null);
+    // actual.setCareTeam(null);
     // Now for the grand finale, we can do an `equalsDeep` on the rest
     Assert.assertTrue(expected.equalsDeep(actual));
   }

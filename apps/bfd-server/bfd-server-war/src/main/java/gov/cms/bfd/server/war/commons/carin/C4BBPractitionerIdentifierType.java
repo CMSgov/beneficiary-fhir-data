@@ -9,9 +9,7 @@ public enum C4BBPractitionerIdentifierType {
   NPI,
   UPIN,
   PIN,
-  TAX,
-  EN,
-  NE;
+  TAX;
 
   public String getSystem() {
     switch (this) {
@@ -32,10 +30,6 @@ public enum C4BBPractitionerIdentifierType {
         return "PIN";
       case TAX:
         return "TAX";
-      case EN:
-        return "Employer number";
-      case NE:
-        return "National employer identifier";
       default:
         return "?";
     }
@@ -51,10 +45,6 @@ public enum C4BBPractitionerIdentifierType {
         return "Premises Identifier Number (US Official)";
       case TAX:
         return "Tax ID number";
-      case EN:
-        return "Employer number";
-      case NE:
-        return "National employer identifier";
       default:
         return "?";
     }
@@ -70,11 +60,6 @@ public enum C4BBPractitionerIdentifierType {
         return "Identifier that uniquely identifies a geographic location in the US.";
       case TAX:
         return "Tax ID number";
-      case EN:
-        return "Employer number";
-      case NE:
-        return "National employer identifier";
-
       default:
         return "?";
     }

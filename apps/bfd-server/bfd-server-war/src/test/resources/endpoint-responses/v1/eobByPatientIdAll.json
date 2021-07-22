@@ -678,7 +678,7 @@
         } ]
       }, {
         "resourceType" : "Practitioner",
-        "id" : "practitioner-21888888881",
+        "id" : "2",
         "identifier" : [ {
           "type" : {
             "coding" : [ {
@@ -691,7 +691,7 @@
         } ]
       }, {
         "resourceType" : "Observation",
-        "id" : "2",
+        "id" : "3",
         "status" : "unknown",
         "code" : {
           "coding" : [ {
@@ -834,8 +834,7 @@
         } ],
         "sequence" : 1,
         "provider" : {
-          "id" : "#practitioner-21888888881",
-          "reference" : "#practitioner-21888888881"
+          "reference" : "#2"
         },
         "responsible" : true,
         "role" : {
@@ -964,14 +963,14 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
           "valueReference" : {
-            "reference" : "#2"
+            "reference" : "#3"
           }
         }, {
           "url" : "http://hl7.org/fhir/sid/ndc",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "667159747",
-            "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
+            "code" : "495800192",
+            "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
           }
         } ],
         "sequence" : 1,
@@ -3360,8 +3359,8 @@
         "service" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "667159747",
-            "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
+            "code" : "495800192",
+            "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
           } ]
         },
         "servicedDate" : "2015-05-12",
@@ -3548,7 +3547,7 @@
         } ]
       }, {
         "resourceType" : "Practitioner",
-        "id" : "practitioner-99918319996",
+        "id" : "2",
         "identifier" : [ {
           "type" : {
             "coding" : [ {
@@ -3561,7 +3560,7 @@
         } ]
       }, {
         "resourceType" : "Observation",
-        "id" : "2",
+        "id" : "3",
         "status" : "unknown",
         "code" : {
           "coding" : [ {
@@ -3714,8 +3713,7 @@
         } ],
         "sequence" : 1,
         "provider" : {
-          "id" : "#practitioner-99918319996",
-          "reference" : "#practitioner-99918319996"
+          "reference" : "#2"
         },
         "responsible" : true,
         "role" : {
@@ -3867,7 +3865,7 @@
         }, {
           "url" : "https://bluebutton.cms.gov/resources/variables/line_hct_hgb_rslt_num",
           "valueReference" : {
-            "reference" : "#2"
+            "reference" : "#3"
           }
         }, {
           "url" : "http://hl7.org/fhir/sid/ndc",

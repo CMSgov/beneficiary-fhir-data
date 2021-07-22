@@ -819,7 +819,7 @@
         }
       }, {
         "resourceType" : "Practitioner",
-        "id" : "practitioner-21888888881",
+        "id" : "1",
         "identifier" : [ {
           "type" : {
             "coding" : [ {
@@ -976,8 +976,7 @@
         } ],
         "sequence" : 2,
         "provider" : {
-          "id" : "#practitioner-21888888881",
-          "reference" : "#practitioner-21888888881"
+          "reference" : "#1"
         },
         "responsible" : true,
         "role" : {
@@ -1161,8 +1160,8 @@
             "url" : "http://hl7.org/fhir/sid/ndc",
             "valueCoding" : {
               "system" : "http://hl7.org/fhir/sid/ndc",
-              "code" : "667159747",
-              "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
+              "code" : "495800192",
+              "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
             }
           } ],
           "coding" : [ {
@@ -4322,8 +4321,8 @@
         "productOrService" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "667159747",
-            "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
+            "code" : "495800192",
+            "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
           } ]
         },
         "servicedDate" : "2015-05-12",
@@ -4504,7 +4503,7 @@
         }
       }, {
         "resourceType" : "Practitioner",
-        "id" : "practitioner-99918319996",
+        "id" : "1",
         "identifier" : [ {
           "type" : {
             "coding" : [ {
@@ -4695,8 +4694,7 @@
         } ],
         "sequence" : 3,
         "provider" : {
-          "id" : "#practitioner-99918319996",
-          "reference" : "#practitioner-99918319996"
+          "reference" : "#1"
         },
         "responsible" : true,
         "role" : {

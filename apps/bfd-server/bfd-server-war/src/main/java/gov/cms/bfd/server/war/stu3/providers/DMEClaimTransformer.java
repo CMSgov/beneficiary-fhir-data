@@ -153,7 +153,6 @@ final class DMEClaimTransformer {
                 claimLine.getProviderNPI(),
                 Optional.empty(),
                 includeTaxNumbers,
-                claimGroup.getClaimId() + item.getSequence(),
                 claimLine.getProviderTaxNumber());
 
         performingCareTeam.setResponsible(true);

@@ -91,7 +91,6 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.r4.model.codesystems.ExBenefitcategory;
@@ -1420,7 +1419,6 @@ public final class TransformerUtilsV2 {
 
     if (ndcProductMap.containsKey(claimDrugCodeReformatted)) {
       String ndcSubstanceName = ndcProductMap.get(claimDrugCodeReformatted);
-      LOGGER.info("retrieveFDADrugCodeDisplay, name: {}", ndcSubstanceName);
       return ndcSubstanceName;
     }
 
@@ -1941,7 +1939,6 @@ public final class TransformerUtilsV2 {
       Optional<String> upinValue,
       Optional<String> pinValue,
       boolean includeTaxNumbers,
-      String practionerIdNumber,
       String taxValue) {
 
     List<Identifier> identifiers = new ArrayList<Identifier>();
@@ -1970,31 +1967,24 @@ public final class TransformerUtilsV2 {
               C4BBPractitionerIdentifierType.TAX, taxValue));
     }
 
-    return addCareTeamPractitionerForPerforming(
-        eob, eobItem, role, identifiers, practionerIdNumber);
+    return addCareTeamPractitionerForPerforming(eob, eobItem, role, identifiers);
   }
 
   public static CareTeamComponent addCareTeamPractitionerForPerforming(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole role,
-      List<Identifier> identifiers,
-      String practitionerIdNumber) {
+      List<Identifier> identifiers) {
     // Try to find a matching pre-existing entry.
     CareTeamComponent careTeamEntry = eob.addCareTeam();
     // addItem adds and returns, so we want size() not size() + 1 here
     careTeamEntry.setSequence(eob.getCareTeam().size());
 
-    String practitionerId = "#practitioner-" + practitionerIdNumber;
-
-    Practitioner practitioner = findOrCreateContainedPractioner(eob, practitionerId);
+    Practitioner practitioner = createContainedPractitioner(eob);
     practitioner.setIdentifier(identifiers);
 
     Reference ref = new Reference(practitioner);
-    ref.setId(practitionerId);
 
-    StringType referenceElement = new StringType(practitionerId);
-    ref.setReferenceElement(referenceElement);
     careTeamEntry.setProvider(ref);
 
     CodeableConcept careTeamRoleConcept = createCodeableConcept(role.getSystem(), role.toCode());
@@ -3392,22 +3382,17 @@ public final class TransformerUtilsV2 {
     return (Observation) observation.get();
   }
 
-  static Practitioner findOrCreateContainedPractioner(ExplanationOfBenefit eob, String id) {
-    Optional<Resource> practioner =
-        eob.getContained().stream().filter(r -> r.getId() == id).findFirst();
+  static Practitioner createContainedPractitioner(ExplanationOfBenefit eob) {
 
-    // If it isn't there, add one
-    if (!practioner.isPresent()) {
-      practioner = Optional.of(new Practitioner().setId(id));
-      eob.getContained().add(practioner.get());
-    }
+    Optional<Resource> practitioner = Optional.of(new Practitioner());
+    eob.getContained().add(practitioner.get());
 
-    // At this point `observation.get()` will always return
-    if (!Practitioner.class.isInstance(practioner.get())) {
+    // At this point `practitioner.get()` will always return
+    if (!Practitioner.class.isInstance(practitioner.get())) {
       throw new BadCodeMonkeyException();
     }
 
-    return (Practitioner) practioner.get();
+    return (Practitioner) practitioner.get();
   }
 
   /**

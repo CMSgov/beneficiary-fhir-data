@@ -192,7 +192,6 @@ final class DMEClaimTransformerV2 {
                 Optional.empty(),
                 Optional.empty(),
                 includeTaxNumbers.orElse(false),
-                claimGroup.getClaimId() + item.getSequence(),
                 line.getProviderTaxNumber());
 
         // Update the responsible flag
