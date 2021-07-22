@@ -370,7 +370,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-05:00",
+        "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -928,8 +928,8 @@
           "url" : "http://hl7.org/fhir/sid/ndc",
           "valueCoding" : {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "667159747",
-            "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
+            "code" : "495800192",
+            "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
           }
         } ],
         "sequence" : 1,
@@ -2193,7 +2193,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-05:00",
+        "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2202,7 +2202,7 @@
         }
       }, {
         "sequence" : 2,
-        "date" : "2016-01-16T00:00:00-05:00",
+        "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2211,7 +2211,7 @@
         }
       }, {
         "sequence" : 3,
-        "date" : "2016-01-15T00:00:00-05:00",
+        "date" : "2016-01-15T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2220,7 +2220,7 @@
         }
       }, {
         "sequence" : 4,
-        "date" : "2016-01-17T00:00:00-05:00",
+        "date" : "2016-01-17T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2229,7 +2229,7 @@
         }
       }, {
         "sequence" : 5,
-        "date" : "2016-01-24T00:00:00-05:00",
+        "date" : "2016-01-24T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2238,7 +2238,7 @@
         }
       }, {
         "sequence" : 6,
-        "date" : "2016-01-24T00:00:00-05:00",
+        "date" : "2016-01-24T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-10",
@@ -2881,7 +2881,7 @@
       } ],
       "procedure" : [ {
         "sequence" : 1,
-        "date" : "2016-01-16T00:00:00-05:00",
+        "date" : "2016-01-16T00:00:00+00:00",
         "procedureCodeableConcept" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/icd-9-cm",
@@ -3318,8 +3318,8 @@
         "service" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "667159747",
-            "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
+            "code" : "495800192",
+            "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
           } ]
         },
         "servicedDate" : "2015-05-12",
