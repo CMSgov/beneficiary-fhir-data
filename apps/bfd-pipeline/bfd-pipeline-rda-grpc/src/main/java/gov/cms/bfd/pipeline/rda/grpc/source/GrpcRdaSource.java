@@ -101,7 +101,6 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     Exception error = null;
     int processed = 0;
     try {
-      LOGGER.info("calling service");
       final GrpcResponseStream<TResponse> responseStream = caller.callService(channel);
       final List<TResponse> batch = new ArrayList<>();
       try {
