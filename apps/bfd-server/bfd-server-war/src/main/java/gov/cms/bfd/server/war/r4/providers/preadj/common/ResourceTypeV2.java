@@ -29,9 +29,6 @@ public interface ResourceTypeV2<T extends IBaseResource> {
   /** @return The attribute name for the entity's mbi hash attribute. */
   String getEntityMbiHashAttribute();
 
-  /** @return The attribute name for the entity's service start date attribute. */
-  String getEntityStartDateAttribute();
-
   /** @return The attribute name for the entity's service end date attribute. */
   String getEntityEndDateAttribute();
 

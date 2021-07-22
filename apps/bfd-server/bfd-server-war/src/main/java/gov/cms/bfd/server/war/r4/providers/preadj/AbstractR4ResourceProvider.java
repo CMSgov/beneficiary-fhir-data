@@ -266,7 +266,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               mbi,
               lastUpdated,
               serviceDate,
-              type.getEntityStartDateAttribute(),
               type.getEntityEndDateAttribute());
 
       resources.addAll(

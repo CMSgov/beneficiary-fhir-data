@@ -108,7 +108,6 @@ public class ClaimDaoTest {
     Class<Object> entityClass = Object.class;
     String attributeName = "attr";
     String attributeValue = "value";
-    String startAttribute = "startAttribute";
     String endAttribute = "endAttribute";
 
     EntityManager mockEntityManager = mock(EntityManager.class);
@@ -143,11 +142,7 @@ public class ClaimDaoTest {
     doReturn(null)
         .when(daoSpy)
         .serviceDateRangePredicate(
-            any(Root.class),
-            any(DateRangeParam.class),
-            any(CriteriaBuilder.class),
-            anyString(),
-            anyString());
+            any(Root.class), any(DateRangeParam.class), any(CriteriaBuilder.class), anyString());
 
     doReturn(mockPath).when(mockRoot).get(attributeName);
 
@@ -167,7 +162,7 @@ public class ClaimDaoTest {
 
     List<Object> actual =
         daoSpy.findAllByAttribute(
-            entityClass, attributeName, attributeValue, null, null, startAttribute, endAttribute);
+            entityClass, attributeName, attributeValue, null, null, endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockAndPredicate);
@@ -179,7 +174,6 @@ public class ClaimDaoTest {
     Class<Object> entityClass = Object.class;
     String attributeName = "attr";
     String attributeValue = "value";
-    String startAttribute = "startAttribute";
     String endAttribute = "endAttribute";
     DateRangeParam mockLastUpdatedParam = mock(DateRangeParam.class);
     DateRangeParam mockServiceDateParam = mock(DateRangeParam.class);
@@ -225,16 +219,11 @@ public class ClaimDaoTest {
     doReturn(null)
         .when(daoSpy)
         .serviceDateRangePredicate(
-            any(Root.class),
-            any(DateRangeParam.class),
-            any(CriteriaBuilder.class),
-            anyString(),
-            anyString());
+            any(Root.class), any(DateRangeParam.class), any(CriteriaBuilder.class), anyString());
 
     doReturn(mockServiceDatePredicate)
         .when(daoSpy)
-        .serviceDateRangePredicate(
-            mockRoot, mockServiceDateParam, mockBuilder, startAttribute, endAttribute);
+        .serviceDateRangePredicate(mockRoot, mockServiceDateParam, mockBuilder, endAttribute);
 
     doReturn(mockLastUpdatedPath).when(mockRoot).get("lastUpdated");
 
@@ -269,7 +258,6 @@ public class ClaimDaoTest {
             attributeValue,
             mockLastUpdatedParam,
             mockServiceDateParam,
-            startAttribute,
             endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
@@ -297,11 +285,6 @@ public class ClaimDaoTest {
     @Override
     public String getEntityMbiHashAttribute() {
       return "mbiHashAttribute";
-    }
-
-    @Override
-    public String getEntityStartDateAttribute() {
-      return "startDateAttribute";
     }
 
     @Override

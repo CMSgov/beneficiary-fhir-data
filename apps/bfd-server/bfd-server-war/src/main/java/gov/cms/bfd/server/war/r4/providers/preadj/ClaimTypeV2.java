@@ -20,7 +20,6 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
       PreAdjFissClaim.Fields.mbi,
       PreAdjFissClaim.Fields.mbiHash,
       PreAdjFissClaim.Fields.dcn,
-      PreAdjFissClaim.Fields.stmtCovFromDate,
       PreAdjFissClaim.Fields.stmtCovToDate,
       FissClaimTransformerV2::transform),
 
@@ -29,7 +28,6 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
       PreAdjMcsClaim.Fields.idrClaimMbi,
       PreAdjMcsClaim.Fields.idrClaimMbiHash,
       PreAdjMcsClaim.Fields.idrClmHdIcn,
-      PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc,
       PreAdjMcsClaim.Fields.idrHdrToDateOfSvc,
       McsClaimTransformerV2::transform);
 
@@ -37,32 +35,31 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
   private final String entityMbiAttribute;
   private final String entityMbiHashAttribute;
   private final String entityIdAttribute;
-  private final String entityStartDateAttribute;
   private final String entityEndDateAttribute;
   private final ResourceTransformer<Claim> transformer;
 
   /**
    * Enum constant constructor.
    *
-   * @param entityClass the value to use for {@link #getEntityClass()}
-   * @param entityMbiAttribute the value to use for {@link #getEntityMbiAttribute()}
-   * @param entityMbiHashAttribute the value to use for {@link #getEntityMbiHashAttribute()}
-   * @param entityIdAttribute the value to use for {@link #getEntityIdAttribute()}
-   * @param transformer the value to use for {@link #getTransformer()}
+   * @param entityClass the entity class for the associated resource
+   * @param entityMbiAttribute the attribute name for the mbi value on the entity class
+   * @param entityMbiHashAttribute the attribute name for the mbiHash value on the entity class
+   * @param entityIdAttribute the attribute name for the ID of the entity class
+   * @param entityEndDateAttribute the attribute name for the service end date on the entity class
+   * @param transformer the transformer used to convert from the given entity to the associated
+   *     resource type
    */
   ClaimTypeV2(
       Class<?> entityClass,
       String entityMbiAttribute,
       String entityMbiHashAttribute,
       String entityIdAttribute,
-      String entityStartDateAttribute,
       String entityEndDateAttribute,
       ResourceTransformer<Claim> transformer) {
     this.entityClass = entityClass;
     this.entityMbiAttribute = entityMbiAttribute;
     this.entityMbiHashAttribute = entityMbiHashAttribute;
     this.entityIdAttribute = entityIdAttribute;
-    this.entityStartDateAttribute = entityStartDateAttribute;
     this.entityEndDateAttribute = entityEndDateAttribute;
     this.transformer = transformer;
   }
@@ -88,10 +85,6 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
   /** @return The attribute name for the entity's mbi hash attribute. */
   public String getEntityMbiHashAttribute() {
     return entityMbiHashAttribute;
-  }
-
-  public String getEntityStartDateAttribute() {
-    return entityStartDateAttribute;
   }
 
   public String getEntityEndDateAttribute() {

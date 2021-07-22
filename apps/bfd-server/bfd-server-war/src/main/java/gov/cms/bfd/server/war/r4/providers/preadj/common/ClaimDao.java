@@ -98,7 +98,6 @@ public class ClaimDao {
       String attributeValue,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
-      String startDateAttributeName,
       String endDateAttributeName) {
     List<T> claimEntities = null;
 
@@ -115,8 +114,7 @@ public class ClaimDao {
                 : createDateRangePredicate(root, lastUpdated, builder),
             serviceDate == null
                 ? builder.and()
-                : serviceDateRangePredicate(
-                    root, serviceDate, builder, startDateAttributeName, endDateAttributeName)));
+                : serviceDateRangePredicate(root, serviceDate, builder, endDateAttributeName)));
 
     Timer.Context timerClaimQuery = metricRegistry.timer(CLAIM_BY_MBI_METRIC_NAME).time();
     try {
@@ -143,15 +141,12 @@ public class ClaimDao {
       Root<?> root,
       DateRangeParam serviceDate,
       CriteriaBuilder builder,
-      String startDateAttributeName,
       String endDateAttributeName) {
-    Path<LocalDate> serviceDateStartPath = root.get(startDateAttributeName);
     Path<LocalDate> serviceDateEndPath = root.get(endDateAttributeName);
 
     List<Predicate> predicates = new ArrayList<>();
 
-    // If either of the row's service date attributes is null, don't return it
-    predicates.add(builder.isNotNull(serviceDateStartPath));
+    // If the row's end service date attribute is null, don't return it
     predicates.add(builder.isNotNull(serviceDateEndPath));
 
     DateParam lowerBound = serviceDate.getLowerBound();
@@ -172,9 +167,9 @@ public class ClaimDao {
       LocalDate to = upperBound.getValue().toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
 
       if (ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(upperBound.getPrefix())) {
-        predicates.add(builder.lessThanOrEqualTo(serviceDateStartPath, to));
+        predicates.add(builder.lessThanOrEqualTo(serviceDateEndPath, to));
       } else {
-        predicates.add(builder.lessThan(serviceDateStartPath, to));
+        predicates.add(builder.lessThan(serviceDateEndPath, to));
       }
     }
 

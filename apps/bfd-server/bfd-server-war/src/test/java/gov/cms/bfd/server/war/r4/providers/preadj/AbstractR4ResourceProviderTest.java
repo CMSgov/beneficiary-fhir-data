@@ -629,9 +629,7 @@ public class AbstractR4ResourceProviderTest {
     String mbi = "mbimbimbi";
     String mbiAttribute = "mbi";
     String mbiHashAttribute = "mbiHash";
-    String startAttribute1 = "startAttribute1";
     String endAttribute1 = "endAttribute1";
-    String startAttribute2 = "startAttribute2";
     String endAttribute2 = "endAttribute2";
 
     boolean isHashed = false;
@@ -688,8 +686,6 @@ public class AbstractR4ResourceProviderTest {
 
     doReturn(mockEntityType1).when(resourceType1).getEntityClass();
 
-    doReturn(startAttribute1).when(resourceType1).getEntityStartDateAttribute();
-
     doReturn(endAttribute1).when(resourceType1).getEntityEndDateAttribute();
 
     doReturn(mockTransformer1).when(resourceType1).getTransformer();
@@ -700,8 +696,6 @@ public class AbstractR4ResourceProviderTest {
 
     doReturn(mockEntityType2).when(resourceType2).getEntityClass();
 
-    doReturn(startAttribute2).when(resourceType2).getEntityStartDateAttribute();
-
     doReturn(endAttribute2).when(resourceType2).getEntityEndDateAttribute();
 
     doReturn(mockTransformer2).when(resourceType2).getTransformer();
@@ -709,24 +703,12 @@ public class AbstractR4ResourceProviderTest {
     doReturn(entityList1)
         .when(mockDao)
         .findAllByAttribute(
-            mockEntityType1,
-            mbiAttribute,
-            mbi,
-            mockLastUpdated,
-            mockServiceDate,
-            startAttribute1,
-            endAttribute1);
+            mockEntityType1, mbiAttribute, mbi, mockLastUpdated, mockServiceDate, endAttribute1);
 
     doReturn(entityList2)
         .when(mockDao)
         .findAllByAttribute(
-            mockEntityType2,
-            mbiAttribute,
-            mbi,
-            mockLastUpdated,
-            mockServiceDate,
-            startAttribute2,
-            endAttribute2);
+            mockEntityType2, mbiAttribute, mbi, mockLastUpdated, mockServiceDate, endAttribute2);
 
     Bundle expected = new Bundle();
     expected.addEntry().setResource(resource1);
@@ -743,9 +725,7 @@ public class AbstractR4ResourceProviderTest {
     String mbi = "mbimbimbi";
     String mbiAttribute = "mbi";
     String mbiHashAttribute = "mbiHash";
-    String startAttribute1 = "startAttribute1";
     String endAttribute1 = "endAttribute1";
-    String startAttribute2 = "startAttribute2";
     String endAttribute2 = "endAttribute2";
 
     boolean isHashed = true;
@@ -802,8 +782,6 @@ public class AbstractR4ResourceProviderTest {
 
     doReturn(mockEntityType1).when(resourceType1).getEntityClass();
 
-    doReturn(startAttribute1).when(resourceType1).getEntityStartDateAttribute();
-
     doReturn(endAttribute1).when(resourceType1).getEntityEndDateAttribute();
 
     doReturn(mockTransformer1).when(resourceType1).getTransformer();
@@ -813,8 +791,6 @@ public class AbstractR4ResourceProviderTest {
     doReturn(mbiHashAttribute).when(resourceType2).getEntityMbiHashAttribute();
 
     doReturn(mockEntityType2).when(resourceType2).getEntityClass();
-
-    doReturn(startAttribute2).when(resourceType2).getEntityStartDateAttribute();
 
     doReturn(endAttribute2).when(resourceType2).getEntityEndDateAttribute();
 
@@ -828,7 +804,6 @@ public class AbstractR4ResourceProviderTest {
             mbi,
             mockLastUpdated,
             mockServiceDate,
-            startAttribute1,
             endAttribute1);
 
     doReturn(entityList2)
@@ -839,7 +814,6 @@ public class AbstractR4ResourceProviderTest {
             mbi,
             mockLastUpdated,
             mockServiceDate,
-            startAttribute2,
             endAttribute2);
 
     Bundle expected = new Bundle();
