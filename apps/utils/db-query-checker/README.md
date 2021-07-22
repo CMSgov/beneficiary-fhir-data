@@ -13,26 +13,25 @@ Because query planners are inscrutable
 First, ensure you have installed the following prerequisites:
 
 * [Rust](https://www.rust-lang.org/) >= v1.51.0, as installed via [rustup](https://www.rust-lang.org/learn/get-started).
+* If you're looking to build the application on RHEL 7,
+    you will also need to install the "Development Tools", e.g.:
 
-Then, run these commands to build the application:
+    ```shell
+    $ sudo yum groupinstall "Development Tools"
+    ```
+
+Then, run these commands to build and run the application:
 
 ```shell
 $ cd beneficiary-fhir-data.git/apps/utils/db-query-checker/
-$ cargo build --release
-```
-
-This will produce a single application binary in `target/release/db-query-checker`.
-That binary can then be copied to whatever server you wish to run it from and executed, as follows:
-
-```shell
 $ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
     DB_QUERIES_CONNECTIONS=10 \
     DB_QUERIES_OUTPUT=results/db_query_checker_2021-07-07-T14-31.csv \
-    db-query-checker
+    cargo run --release
 ```
 
-Alternatively, if you want to run it locally,
-  you can instead configure the environment variables in a `.env` file, instead,
+Alternatively,
+  you can instead configure the environment variables in a `.env` file,
   and run it as follows:
 
 ```
@@ -55,6 +54,60 @@ Some additional notes:
 
 * The application will write/overwrite its output data to the specified `DB_QUERIES_OUTPUT` CSV file.
 * The application's tracing/logging output will go out to the console on `STDERR`.
+
+
+### Building and Copying Around a Binary
+
+The `cargo run --release` command builds the application,
+  saves the application as a single binary/executable file in `target/release/db-query-checker`,
+  and then runs that binary locally.
+
+You can also copy that binary to another computer and run it there.
+However, it's important to remember that executables generally aren't cross-platform;
+  a binary built for Mac OS can't be copied and run on a Linux system.
+
+
+### Cross-Compiling
+
+<em>
+Note:
+The instructions in this section, should work, but don't.
+If you need to run the application on RHEL 7,
+  your best bet is to copy the source over to a RHEL 7 box and build it there.
+See <https://github.com/rust-embedded/cross/issues/455#issuecomment-883514537>
+  for details on how/why cross-compiling from MacOS to RHEL 7 is broken.
+</em>
+
+Fortunately, Rust has excellent support for cross-compilation,
+  where a binary for a different target architecture and OS can be built locally.
+There are actually many mechanisms for cross-compiling Rust,
+  but the one recommended for this project is
+  <https://github.com/rust-embedded/cross>.
+
+To cross-compile the application for a RHEL 7 system,
+  first install and configure [Docker](https://www.docker.com).
+
+Then, run the following commands:
+
+```
+$ cargo install cross
+$ cross build --target x86_64-unknown-linux-gnu --release
+```
+
+This will produce a single application binary
+  in `target/x86_64-unknown-linux-gnu/release/db-query-checker`.
+That binary can then be copied to whatever RHEL 7 server you wish to run it from
+  and can then executed, as follows:
+
+```shell
+$ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
+    DB_QUERIES_CONNECTIONS=10 \
+    DB_QUERIES_OUTPUT=results/db_query_checker_2021-07-07-T14-31.csv \
+    db-query-checker
+```
+
+Please note that cross-compiling is slower, mostly due to its reliance on Docker:
+  clean builds may take around 15 minutes.
 
 
 ## Engineering Design
