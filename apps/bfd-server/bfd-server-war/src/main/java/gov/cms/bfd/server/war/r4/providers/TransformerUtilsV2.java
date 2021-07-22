@@ -1129,7 +1129,6 @@ public final class TransformerUtilsV2 {
               rootResource.getId());
         }
       }
-      // return Optional.of(matchingVariableValues.get(0).getDescription());
       return Optional.empty();
     } else {
       throw new BadCodeMonkeyException();
