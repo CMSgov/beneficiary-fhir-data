@@ -60,6 +60,7 @@ public enum C4BBPractitionerIdentifierType {
         return "Identifier that uniquely identifies a geographic location in the US.";
       case TAX:
         return "Tax ID number";
+
       default:
         return "?";
     }
