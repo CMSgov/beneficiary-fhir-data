@@ -194,11 +194,6 @@ public final class CarrierClaimTransformerTest {
         CcwCodebookVariable.PRTCPTNG_IND_CD,
         claimLine1.getProviderParticipatingIndCode(),
         performingCareTeamEntry);
-    /*     TransformerTestUtils.assertExtensionCodingEquals(
-    performingCareTeamEntry,
-    TransformerConstants.CODING_NPI_US,
-    TransformerConstants.CODING_NPI_US,
-    "" + claimLine1.getOrganizationNpi().get()); */
 
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.PRVDR_STATE_CD,
