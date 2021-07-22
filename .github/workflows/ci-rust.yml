@@ -1,5 +1,8 @@
 name: 'CI - Rust'
-on: pull_request
+on:
+  pull_request:
+    paths:
+      - apps/utils/db-query-checker
 
 jobs:
 
