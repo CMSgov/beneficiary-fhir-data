@@ -39,22 +39,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Orchestrates and manages the execution of {@link PipelineJob}s. */
-public final class PipelineManager {
-  /**
-   * The {@link Logger} message that will be recorded if/when the {@link PipelineManager} starts
-   * scanning for data sets.
-   */
-  public static final String LOG_MESSAGE_STARTING_WORKER =
-      "Starting data set monitor: watching for data sets to process...";
-
+public final class PipelineManager implements AutoCloseable {
   /**
    * The number of jobs that can be run at one time. Because the {@link VolunteerJob} and {@link
    * SchedulerJob} will always be running, this number must be greater than or equal to 3, in order
-   * for any actual jobs to get run.
+   * for any actual jobs to get run. Value of 5 is sufficient for VolunteerJob, SchedulerJob,
+   * CcwRifLoadJob, RdaFissClaimLoadJob, and RdaMcsClaimLoadJob.
    *
    * @see #jobExecutor
    */
-  public static final int JOB_EXECUTOR_THREADS = 3;
+  public static final int JOB_EXECUTOR_THREADS = 5;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManager.class);
 
@@ -271,6 +265,50 @@ public final class PipelineManager {
   }
 
   /**
+   * Handle job failure by de-queueing and recording the failure.
+   *
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   * @param exception The exception from the job failure
+   */
+  private void handleJobFailure(PipelineJobRecordId jobRecordId, Exception exception) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
+        jobRecordStore.recordJobFailure(jobRecordId, new PipelineJobFailure(exception));
+        jobsEnqueuedHandles.remove(jobRecordId);
+      }
+    }
+  }
+
+  /**
+   * Handle job cancellation by de-queueing and recording cancellation.
+   *
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   */
+  private void handleJobCancellation(PipelineJobRecordId jobRecordId) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
+        jobRecordStore.recordJobCancellation(jobRecordId);
+        jobsEnqueuedHandles.remove(jobRecordId);
+      }
+    }
+  }
+
+  /**
+   * Handle normal job completion by de-queueing and recording completion.
+   *
+   * @param jobRecordId the {@link PipelineJobRecord} of the job
+   * @param jobOutcome
+   */
+  private void handleJobCompletion(PipelineJobRecordId jobRecordId, PipelineJobOutcome jobOutcome) {
+    synchronized (jobsEnqueuedHandles) {
+      if (jobsEnqueuedHandles.containsKey(jobRecordId)) {
+        jobRecordStore.recordJobCompletion(jobRecordId, jobOutcome);
+        jobsEnqueuedHandles.remove(jobRecordId);
+      }
+    }
+  }
+
+  /**
    * This will eventually end all jobs and shut down this {@link PipelineManager}. Note: not all
    * jobs support being stopped while in progress, so this method may block for quite a while.
    */
@@ -343,6 +381,12 @@ public final class PipelineManager {
     }
     LOGGER.info("Stopped PipelineManager.");
     timerStop.stop();
+  }
+
+  /** @see java.lang.AutoCloseable#close() */
+  @Override
+  public void close() throws Exception {
+    stop();
   }
 
   /**
@@ -432,7 +476,7 @@ public final class PipelineManager {
 
       try {
         PipelineJobOutcome jobOutcome = wrappedJob.call();
-        jobRecordStore.recordJobCompletion(jobRecord.getId(), jobOutcome);
+        handleJobCompletion(jobRecord.getId(), jobOutcome);
         return jobOutcome;
       } catch (InterruptedException e) {
         /*
@@ -440,20 +484,16 @@ public final class PipelineManager {
          * happened when we're trying to shut down. Whether or not PipelineJob.isInterruptible() for
          * this job, it's now been stopped, so we should record the cancellation.
          */
-        jobRecordStore.recordJobCancellation(jobRecord.getId());
+        handleJobCancellation(jobRecord.getId());
 
         // Restore the interrupt so things can get back to shutting down.
         Thread.currentThread().interrupt();
         throw new InterruptedException("Re-firing job interrupt.");
       } catch (Exception e) {
-        jobRecordStore.recordJobFailure(jobRecord.getId(), new PipelineJobFailure(e));
+        handleJobFailure(jobRecord.getId(), e);
 
         // Wrap and re-throw the failure.
         throw new Exception("Re-throwing job failure.", e);
-      } finally {
-        synchronized (jobsEnqueuedHandles) {
-          jobsEnqueuedHandles.remove(jobRecord.getId());
-        }
       }
     }
   }
@@ -491,10 +531,7 @@ public final class PipelineManager {
          * way we have to catch cancel-before-start events (the PipelineJobWrapper can't do it,
          * since it won't get called in the first place).
          */
-        synchronized (jobsEnqueuedHandles) {
-          jobsEnqueuedHandles.remove(jobRecord.getId());
-        }
-        jobRecordStore.recordJobCancellation(jobRecord.getId());
+        handleJobCancellation(jobRecord.getId());
       }
     }
   }

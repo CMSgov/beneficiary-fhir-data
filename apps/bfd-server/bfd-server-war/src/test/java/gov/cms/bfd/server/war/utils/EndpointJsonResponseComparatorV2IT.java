@@ -19,6 +19,7 @@ import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.PartDEvent;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -27,6 +28,8 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.ClaimTypeV2;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
+import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
+import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,7 +52,6 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.hibernate.internal.SessionFactoryRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Coverage;
@@ -395,7 +397,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String patientRead() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -417,7 +420,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String patientReadWithIncludeIdentifiers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -446,7 +450,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String patientSearchById() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -474,7 +479,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String patientSearchByIdWithIncludeIdentifiers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -508,7 +514,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String patientByIdentifier() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -540,7 +547,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String patientByIdentifierWithIncludeIdentifiers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -643,7 +651,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String coverageRead() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -669,7 +678,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String coverageSearchByPatientId() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -698,7 +708,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobByPatientIdAll() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -725,7 +736,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobByPatientIdPaged() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -755,7 +767,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadCarrierWithTaxNumbers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     RequestHeaders requestHeader =
@@ -787,7 +800,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadCarrier() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -815,7 +829,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadDmeWithTaxNumbers() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     RequestHeaders requestHeader =
@@ -847,7 +862,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadDme() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -873,7 +889,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadHha() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -899,7 +916,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadHospice() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -925,7 +943,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadInpatient() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -951,7 +970,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadOutpatient() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -977,7 +997,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadPde() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -1003,7 +1024,8 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   public static String eobReadSnf() {
     List<Object> loadedRecords =
-        ServerTestUtils.loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+        ServerTestUtils.get()
+            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
     IGenericClient fhirClient = createFhirClientAndSetEncoding();
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
@@ -1097,7 +1119,7 @@ public final class EndpointJsonResponseComparatorV2IT {
 
   /** @return a new {@link IGenericClient} fhirClient after setting the encoding to JSON */
   private static IGenericClient createFhirClientAndSetEncoding() {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClientV2();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
     fhirClient.setEncoding(EncodingEnum.JSON);
 
     return fhirClient;
@@ -1209,12 +1231,12 @@ public final class EndpointJsonResponseComparatorV2IT {
     }
   }
 
-  /** Ensures that {@link ServerTestUtils#cleanDatabaseServer()} is called after each test case. */
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
   @After
   public void cleanDatabaseServerAfterEachTestCase() {
-    ServerTestUtils.cleanDatabaseServer();
-    // FIXME temporary workaround to free up ram. Details on this can be found at
-    // https://jira.cms.gov/browse/BLUEBUTTON-797
-    SessionFactoryRegistry.INSTANCE.clearRegistrations();
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 }
