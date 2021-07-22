@@ -33,6 +33,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -210,6 +211,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
+    root.fetch(Beneficiary_.beneficiaryMonthlys, JoinType.LEFT);
     criteria.select(root);
     Predicate wherePredicate = builder.equal(root.get(Beneficiary_.beneficiaryId), beneficiaryId);
     if (lastUpdatedRange != null) {

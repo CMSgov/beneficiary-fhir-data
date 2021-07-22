@@ -37,6 +37,7 @@
         name: bfd-server
       vars:
         data_server_dir: "{{ bfd_server_dir }}"
+        data_server_tmp_dir: "{{ data_server_dir }}/tmp"
         data_server_container: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
         data_server_container_name: jboss-eap-7.0
         data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:{{ bfd_server_dir }}/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PreserveFramePointer"

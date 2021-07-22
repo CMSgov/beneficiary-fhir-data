@@ -3,6 +3,9 @@
 # The directory that the Blue Button Data Server will be installed to. 
 data_server_dir: /usr/local/bfd-server
 
+# The directory that will be set as the 'java.io.tmpdir'
+data_server_tmp_dir: "{{ data_server_dir }}/tmp"
+
 # The system service that will run the Blue Button Data Server's app server.
 data_server_appserver_service: bfd-server
 

@@ -1,14 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.pipeline.rda.grpc.RdaLoadJob.Config;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,12 +28,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RdaLoadJobTest {
+public class AbstractRdaLoadJobTest {
   @Mock private Callable<RdaSource<Integer>> sourceFactory;
   @Mock private Callable<RdaSink<Integer>> sinkFactory;
   @Mock private RdaSource<Integer> source;
   @Mock private RdaSink<Integer> sink;
-  private RdaLoadJob<Integer> job;
+  private TestingLoadJob job;
   private MetricRegistry appMetrics;
   private Config config;
 
@@ -45,7 +41,13 @@ public class RdaLoadJobTest {
   public void setUp() {
     config = new Config(Duration.ofSeconds(10), 3);
     appMetrics = new MetricRegistry();
-    job = new RdaLoadJob<>(config, sourceFactory, sinkFactory, appMetrics);
+    job = new TestingLoadJob(config, sourceFactory, sinkFactory, appMetrics);
+  }
+
+  @Test
+  public void meterNames() {
+    assertEquals("TestingLoadJob.calls", job.metricName(CALLS_METER_NAME));
+    assertEquals("TestingLoadJob.failures", job.metricName(FAILURES_METER_NAME));
   }
 
   @Test
@@ -55,12 +57,12 @@ public class RdaLoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getCause().getMessage());
+      assertEquals("oops", ex.getCause().getMessage());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verifyNoInteractions(sinkFactory);
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.FAILURES_METER_NAME).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(FAILURES_METER_NAME)).getCount());
   }
 
   @Test
@@ -71,12 +73,12 @@ public class RdaLoadJobTest {
       job.call();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
-      Assert.assertEquals("oops", ex.getCause().getMessage());
+      assertEquals("oops", ex.getCause().getMessage());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verify(source).close();
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.FAILURES_METER_NAME).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(FAILURES_METER_NAME)).getCount());
   }
 
   @Test
@@ -92,15 +94,15 @@ public class RdaLoadJobTest {
     } catch (Exception ex) {
       Assert.assertNotNull(ex.getCause());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(ProcessingException.class));
-      Assert.assertEquals(7, ((ProcessingException) ex.getCause()).getProcessedCount());
+      assertEquals(7, ((ProcessingException) ex.getCause()).getProcessedCount());
       final Throwable actualCause = ex.getCause().getCause();
       MatcherAssert.assertThat(actualCause, Matchers.instanceOf(IOException.class));
-      Assert.assertEquals("oops", actualCause.getMessage());
+      assertEquals("oops", actualCause.getMessage());
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.FAILURES_METER_NAME).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(FAILURES_METER_NAME)).getCount());
   }
 
   @Test
@@ -110,14 +112,14 @@ public class RdaLoadJobTest {
     doReturn(0).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       PipelineJobOutcome outcome = job.call();
-      Assert.assertEquals(PipelineJobOutcome.NOTHING_TO_DO, outcome);
+      assertEquals(PipelineJobOutcome.NOTHING_TO_DO, outcome);
     } catch (Exception ex) {
       Assert.fail("job should NOT have thrown exception");
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.SUCCESSES_METER_NAME).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(SUCCESSES_METER_NAME)).getCount());
   }
 
   @Test
@@ -127,14 +129,14 @@ public class RdaLoadJobTest {
     doReturn(25000).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       PipelineJobOutcome outcome = job.call();
-      Assert.assertEquals(PipelineJobOutcome.WORK_DONE, outcome);
+      assertEquals(PipelineJobOutcome.WORK_DONE, outcome);
     } catch (Exception ex) {
       Assert.fail("job should NOT have thrown exception");
     }
     verify(source).close();
     verify(sink).close();
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.CALLS_METER_NAME).getCount());
-    Assert.assertEquals(1, appMetrics.meter(RdaLoadJob.SUCCESSES_METER_NAME).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
+    assertEquals(1, appMetrics.meter(job.metricName(SUCCESSES_METER_NAME)).getCount());
   }
 
   @Test
@@ -150,7 +152,7 @@ public class RdaLoadJobTest {
 
     // A test job that waits for the second job to complete before doing any work itself.
     job =
-        new RdaLoadJob<>(
+        new TestingLoadJob(
             config,
             () -> {
               // lets the main thread know we've acquired the semaphore
@@ -171,11 +173,11 @@ public class RdaLoadJobTest {
 
       // this job should exit immediately without doing any work
       Future<PipelineJobOutcome> secondCall = pool.submit(() -> job.call());
-      Assert.assertEquals(PipelineJobOutcome.NOTHING_TO_DO, secondCall.get());
+      assertEquals(PipelineJobOutcome.NOTHING_TO_DO, secondCall.get());
 
       // now allow the first call to proceed and it should reflect that it has done some work
       waitForCompletion.countDown();
-      Assert.assertEquals(PipelineJobOutcome.WORK_DONE, firstCall.get());
+      assertEquals(PipelineJobOutcome.WORK_DONE, firstCall.get());
     } finally {
       pool.shutdown();
       pool.awaitTermination(5, TimeUnit.SECONDS);
@@ -184,16 +186,26 @@ public class RdaLoadJobTest {
 
   @Test
   public void configIsSerializable() throws Exception {
-    final RdaLoadJob.Config original = new Config(Duration.ofMillis(1000), 45);
+    final AbstractRdaLoadJob.Config original = new Config(Duration.ofMillis(1000), 45);
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
       out.writeObject(original);
     }
-    RdaLoadJob.Config loaded;
+    AbstractRdaLoadJob.Config loaded;
     try (ObjectInputStream inp =
         new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
       loaded = (Config) inp.readObject();
     }
-    Assert.assertEquals(original, loaded);
+    assertEquals(original, loaded);
+  }
+
+  private static class TestingLoadJob extends AbstractRdaLoadJob<Integer> {
+    public TestingLoadJob(
+        Config config,
+        Callable<RdaSource<Integer>> sourceFactory,
+        Callable<RdaSink<Integer>> sinkFactory,
+        MetricRegistry appMetrics) {
+      super(config, sourceFactory, sinkFactory, appMetrics);
+    }
   }
 }
