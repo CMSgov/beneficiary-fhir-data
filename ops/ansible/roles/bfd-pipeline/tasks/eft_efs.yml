@@ -50,8 +50,7 @@
   tags:
     - pre-ami
 
-## Create the base EFT EFS mount directory
-# e.g., /mnt/eft
+# Create the base EFT EFS mount directory (ex. /mnt/efs)
 - name: Ensure base EFT mount directory exists
   become: true
   file:
@@ -63,8 +62,7 @@
   tags:
     - pre-ami
 
-# Create partner EFT EFS mount directories.
-# e.g., /mnt/eft/bcda
+# Create partner EFT EFS mount directories (ex. /mnt/efs/bcda)
 - name: Ensure partner EFT EFS mount directories exists
   become: true
   file:
@@ -77,11 +75,7 @@
   tags:
     - pre-ami
 
-## Configure instances to mount the file systems
-# Note: Because our VPC's use custom DNS and not the default amazondns, we are unable to simply
-# mount using the EFS file system id in /etc/fstab. Instead, we will use a helper script that
-# will add the appropriate EFS entries for that instance's AZ to /etc/hosts, mount the file
-# systems, and finally add an entry to /etc/fstab so that file systems persist through reboots.
+# Add the mount helper script to the ETL server. It will be available in /usr/local/sbin/.
 - name: Add EFS mount helper scripts
   become: true
   template:
@@ -93,29 +87,3 @@
   with_items: "{{ eft_efs_mounts }}"
   tags: 
     - pre-ami
-
-# This adds a simple systemd unit file that will call the above script
-- name: Copy systemd unit files (used for mounting)
-  become: true
-  template:
-    src: mount-eft-efs-file-systems.systemd.j2
-    dest: /etc/systemd/system/mount-{{ item.name }}-efs.service
-    owner: root
-    group: root
-    mode: u=rw,g=r,o=r
-  with_items: "{{ eft_efs_mounts }}"
-  tags:
-    - pre-ami
-
-# This simply enables and unmasks the unit file
-- name: Enable and unmask systemd unit files
-  become: true
-  systemd:
-    name: mount-{{ item.name }}-efs.service
-    enabled: yes
-    masked: no
-    state: reloaded
-  with_items: "{{ eft_efs_mounts }}"
-  tags:
-    - pre-ami
-  
