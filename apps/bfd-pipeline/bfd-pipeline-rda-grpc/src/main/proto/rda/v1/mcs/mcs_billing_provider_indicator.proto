@@ -4,9 +4,9 @@ package gov.cms.mpsm.rda.v1.mcs;
 
 option java_multiple_files = true;
 
-enum McsBillingProviderIndicator {
-  BILLING_PROVIDER_INDICATOR_UNSET = 0;
+import "rda/v1/enum_options.proto";
 
+enum McsBillingProviderIndicator {
   // ASCII G
-  BILLING_PROVIDER_INDICATOR_GROUP = 71;
+  BILLING_PROVIDER_INDICATOR_GROUP = 0 [(string_value) = "G"];
 }

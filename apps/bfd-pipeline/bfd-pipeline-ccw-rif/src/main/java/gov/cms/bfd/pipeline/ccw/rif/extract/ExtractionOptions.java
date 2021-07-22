@@ -23,8 +23,8 @@ public final class ExtractionOptions implements Serializable {
    * @param s3BucketName the value to use for {@link #getS3BucketName()}
    * @param allowedRifFileType the value to use for {@link #getDataSetFilter()}
    */
-  public ExtractionOptions(String s3BucketName, RifFileType allowedRifFileType) {
-    this(s3BucketName, allowedRifFileType, null);
+  public ExtractionOptions(String s3BucketName, Optional<RifFileType> allowedRifFileType) {
+    this(s3BucketName, allowedRifFileType, Optional.empty());
   }
 
   /**
@@ -35,10 +35,12 @@ public final class ExtractionOptions implements Serializable {
    * @param s3ListMaxKeys the value to use for {@link #getS3ListMaxKeys()}
    */
   public ExtractionOptions(
-      String s3BucketName, RifFileType allowedRifFileType, Integer s3ListMaxKeys) {
+      String s3BucketName,
+      Optional<RifFileType> allowedRifFileType,
+      Optional<Integer> s3ListMaxKeys) {
     this.s3BucketName = s3BucketName;
-    this.allowedRifFileType = allowedRifFileType;
-    this.s3ListMaxKeys = s3ListMaxKeys;
+    this.allowedRifFileType = allowedRifFileType.orElse(null);
+    this.s3ListMaxKeys = s3ListMaxKeys.orElse(null);
   }
 
   /**
@@ -48,7 +50,7 @@ public final class ExtractionOptions implements Serializable {
    * @param s3BucketName the value to use for {@link #getS3BucketName()}
    */
   public ExtractionOptions(String s3BucketName) {
-    this(s3BucketName, null);
+    this(s3BucketName, Optional.empty());
   }
 
   /** @return the AWS {@link Regions} that should be used when interacting with S3 */
@@ -68,13 +70,13 @@ public final class ExtractionOptions implements Serializable {
   }
 
   /**
-   * @return the single {@link RifFileType} that the application should process, or <code>null
-   *     </code> if it should process all {@link RifFileType}s (when set, any data sets that do not
-   *     <strong>only</strong> contain the specified {@link RifFileType} will be skipped by the
-   *     application)
+   * @return the single {@link RifFileType} that the application should process, or {@link
+   *     Optional#empty()} if it should process all {@link RifFileType}s (when set, any data sets
+   *     that do not <strong>only</strong> contain the specified {@link RifFileType} will be skipped
+   *     by the application)
    */
-  public RifFileType getAllowedRifFileType() {
-    return allowedRifFileType;
+  public Optional<RifFileType> getAllowedRifFileType() {
+    return Optional.ofNullable(allowedRifFileType);
   }
 
   /**

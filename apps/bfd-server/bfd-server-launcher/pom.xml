@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<jetty.version>9.4.39.v20210325</jetty.version>
+		<jetty.version>9.4.43.v20210629</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -211,20 +211,6 @@
 					<execution>
 						<goals>
 							<goal>build</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Will run the `*IT.java` integration tests in this project, as part
-					of the build. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
 						</goals>
 					</execution>
 				</executions>

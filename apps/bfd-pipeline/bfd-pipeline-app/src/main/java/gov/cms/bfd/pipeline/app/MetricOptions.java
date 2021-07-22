@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.app;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 /** Models the user-configurable options for sending telemetry to New Relic. */
 public final class MetricOptions implements Serializable {
@@ -10,7 +11,7 @@ public final class MetricOptions implements Serializable {
   private final String newRelicAppName;
   private final String newRelicMetricHost;
   private final String newRelicMetricPath;
-  private final int newRelicMetricPeriod;
+  private final Integer newRelicMetricPeriod;
   private final String hostname;
 
   /**
@@ -24,48 +25,48 @@ public final class MetricOptions implements Serializable {
    * @param hostname the value to use for {@link #getHostname()}
    */
   public MetricOptions(
-      String newRelicMetricKey,
-      String newRelicAppName,
-      String newRelicMetricHost,
-      String newRelicMetricPath,
-      int newRelicMetricPeriod,
-      String hostname) {
-    this.newRelicMetricKey = newRelicMetricKey;
-    this.newRelicAppName = newRelicAppName;
-    this.newRelicMetricHost = newRelicMetricHost;
-    this.newRelicMetricPath = newRelicMetricPath;
-    this.newRelicMetricPeriod = newRelicMetricPeriod;
-    this.hostname = hostname;
+      Optional<String> newRelicMetricKey,
+      Optional<String> newRelicAppName,
+      Optional<String> newRelicMetricHost,
+      Optional<String> newRelicMetricPath,
+      Optional<Integer> newRelicMetricPeriod,
+      Optional<String> hostname) {
+    this.newRelicMetricKey = newRelicMetricKey.orElse(null);
+    this.newRelicAppName = newRelicAppName.orElse(null);
+    this.newRelicMetricHost = newRelicMetricHost.orElse(null);
+    this.newRelicMetricPath = newRelicMetricPath.orElse(null);
+    this.newRelicMetricPeriod = newRelicMetricPeriod.orElse(null);
+    this.hostname = hostname.orElse(null);
   }
 
   /** @return the hostname that will send metrics to New Relic */
-  public String getHostname() {
-    return hostname;
+  public Optional<String> getHostname() {
+    return Optional.ofNullable(hostname);
   }
 
   /** @return the interval between when each batch of metrics is sent to New Relic */
-  public int getNewRelicMetricPeriod() {
-    return newRelicMetricPeriod;
+  public Optional<Integer> getNewRelicMetricPeriod() {
+    return Optional.ofNullable(newRelicMetricPeriod);
   }
 
   /** @return the relative path of the New Relic Metric API where telemetry will be sent */
-  public String getNewRelicMetricPath() {
-    return newRelicMetricPath;
+  public Optional<String> getNewRelicMetricPath() {
+    return Optional.ofNullable(newRelicMetricPath);
   }
 
   /** @return the host of the New Relic Metric API where telemetry will be sent */
-  public String getNewRelicMetricHost() {
-    return newRelicMetricHost;
+  public Optional<String> getNewRelicMetricHost() {
+    return Optional.ofNullable(newRelicMetricHost);
   }
 
   /** @return the name of the app with which metrics are tagged in New Relic */
-  public String getNewRelicAppName() {
-    return newRelicAppName;
+  public Optional<String> getNewRelicAppName() {
+    return Optional.ofNullable(newRelicAppName);
   }
 
   /** @return the secret key granting access to the New Relic Metric API */
-  public String getNewRelicMetricKey() {
-    return newRelicMetricKey;
+  public Optional<String> getNewRelicMetricKey() {
+    return Optional.ofNullable(newRelicMetricKey);
   }
 
   /** @see java.lang.Object#toString() */

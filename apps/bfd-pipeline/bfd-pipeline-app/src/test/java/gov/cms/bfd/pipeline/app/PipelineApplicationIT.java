@@ -4,15 +4,15 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,11 +24,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.AssumptionViolatedException;
@@ -140,9 +142,16 @@ public final class PipelineApplicationIT {
       appRunConsumerThread.start();
 
       // Wait for it to start scanning.
-      Awaitility.await()
-          .atMost(Duration.ONE_MINUTE)
-          .until(() -> hasScanningStarted(appRunConsumer));
+      try {
+        Awaitility.await()
+            .atMost(Duration.ONE_MINUTE)
+            .until(() -> hasCcwRifLoadJobCompleted(appRunConsumer));
+      } catch (ConditionTimeoutException e) {
+        throw new RuntimeException(
+            "Pipeline application failed to start scanning within timeout, STDOUT:\n"
+                + appRunConsumer.getStdoutContents(),
+            e);
+      }
 
       // Stop the application.
       sendSigterm(appProcess);
@@ -245,8 +254,10 @@ public final class PipelineApplicationIT {
      * requests, and handles them gracefully.
      */
 
+    ;
     Assume.assumeTrue(
-        "Unsupported OS for this test case.", "Linux".equals(System.getProperty("os.name")));
+        "Unsupported OS for this test case.",
+        Arrays.asList("Linux", "Mac OS X").contains(System.getProperty("os.name")));
   }
 
   /**
@@ -254,11 +265,10 @@ public final class PipelineApplicationIT {
    * @return <code>true</code> if the application output indicates that data set scanning has
    *     started, <code>false</code> if not
    */
-  private static boolean hasScanningStarted(ProcessOutputConsumer appRunConsumer) {
-    return appRunConsumer
-        .getStdoutContents()
-        .toString()
-        .contains(PipelineManager.LOG_MESSAGE_STARTING_WORKER);
+  private static boolean hasCcwRifLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
+    String stdout = appRunConsumer.getStdoutContents().toString();
+    return stdout.contains(PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_COMPLETED)
+        && stdout.contains(CcwRifLoadJob.class.getSimpleName());
   }
 
   /**
@@ -355,7 +365,7 @@ public final class PipelineApplicationIT {
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
 
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
@@ -363,12 +373,12 @@ public final class PipelineApplicationIT {
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
-            String.valueOf(RifLoaderTestUtils.HICN_HASH_ITERATIONS));
+            String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
     appRunBuilder
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
-            Hex.encodeHexString(RifLoaderTestUtils.HICN_HASH_PEPPER));
+            Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
@@ -387,7 +397,7 @@ public final class PipelineApplicationIT {
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
-            String.valueOf(RifLoaderTestUtils.IDEMPOTENCY_REQUIRED));
+            String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
     /*
      * Note: Not explicitly providing AWS credentials here, as the child
      * process will inherit any that are present in this build/test process.
