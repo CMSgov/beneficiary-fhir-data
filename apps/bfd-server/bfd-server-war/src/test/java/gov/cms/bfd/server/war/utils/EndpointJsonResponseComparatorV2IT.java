@@ -222,7 +222,7 @@ public final class EndpointJsonResponseComparatorV2IT {
     replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
     replaceIgnoredFieldsWithFillerText(jsonNode, "created", Optional.empty());
 
-    if (endpointId == "metadata")
+    if (endpointId.equals("metadata"))
       replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
 
     String jsonResponse = null;
@@ -248,7 +248,7 @@ public final class EndpointJsonResponseComparatorV2IT {
         Pattern p = pattern.get();
         Matcher m = p.matcher(parent.get(fieldName).toString());
         if (m.find())
-          if (fieldName == "url") {
+          if (fieldName.equals("url")) {
             // Only replace the port numbers (m.group(2)) on urls
             String replacementUrl = m.group(1) + IGNORED_FIELD_TEXT + m.group(3);
             ((ObjectNode) parent)
