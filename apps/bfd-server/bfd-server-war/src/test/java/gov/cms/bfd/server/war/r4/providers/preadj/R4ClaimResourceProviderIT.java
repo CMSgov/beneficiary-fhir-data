@@ -13,9 +13,8 @@ import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
-import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -24,11 +23,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import javax.sql.DataSource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.Meta;
@@ -39,44 +33,23 @@ import org.junit.Test;
 
 public class R4ClaimResourceProviderIT {
 
-  public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
-
-  private static EntityManager entityManager;
+  private static final RDATestUtils testUtils = new RDATestUtils();
 
   @BeforeClass
   public static void init() {
-    final DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
+    testUtils.init();
 
-    entityManager = createEntityManager(dataSource);
-
-    List<PreAdjFissClaim> fissClaims = fissTestData();
-
-    for (PreAdjFissClaim claim : fissClaims) {
-      doTransaction((em) -> em.persist(claim));
-    }
-
-    List<PreAdjMcsClaim> mcsClaims = mcsTestData();
-
-    for (PreAdjMcsClaim claim : mcsClaims) {
-      doTransaction((em) -> em.persist(claim));
-    }
+    testUtils.seedData(fissTestData());
+    testUtils.seedData(mcsTestData());
   }
 
   @AfterClass
   public static void tearDown() {
-    doTransaction(
-        em -> {
-          em.createQuery("delete from PreAdjFissProcCode f").executeUpdate();
-          em.createQuery("delete from PreAdjFissClaim f").executeUpdate();
-        });
-
-    doTransaction(
-        em -> {
-          em.createQuery("delete from PreAdjMcsDetail m").executeUpdate();
-          em.createQuery("delete from PreAdjMcsDiagnosisCode m").executeUpdate();
-          em.createQuery("delete from PreAdjMcsClaim m").executeUpdate();
-        });
+    testUtils.truncate(PreAdjFissProcCode.class);
+    testUtils.truncate(PreAdjFissClaim.class);
+    testUtils.truncate(PreAdjMcsDetail.class);
+    testUtils.truncate(PreAdjMcsDiagnosisCode.class);
+    testUtils.truncate(PreAdjMcsClaim.class);
   }
 
   @Test
@@ -280,20 +253,6 @@ public class R4ClaimResourceProviderIT {
                 "654321", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
-  }
-
-  private static void doTransaction(Consumer<EntityManager> transaction) {
-    entityManager.getTransaction().begin();
-    transaction.accept(entityManager);
-    entityManager.getTransaction().commit();
-  }
-
-  private static EntityManager createEntityManager(DataSource dataSource) {
-    final Map<String, Object> hibernateProperties =
-        ImmutableMap.of(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
-
-    return Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties)
-        .createEntityManager();
   }
 
   private static class TestResults {
