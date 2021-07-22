@@ -298,8 +298,8 @@
     "service" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/ndc",
-        "code" : "667159747",
-        "display" : "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"
+        "code" : "495800192",
+        "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
       } ]
     },
     "servicedDate" : "2015-05-12",
