@@ -1795,13 +1795,22 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     actual.getPayment().setAmount(null);
 
     for (int i = 0; i < expected.getCareTeam().size(); i++) {
-      Assert.assertEquals(
-          expected.getCareTeam().get(i).getProvider(), actual.getCareTeam().get(i).getProvider());
-      expected.getCareTeam().get(i).setProvider(null);
-      actual.getCareTeam().get(i).setProvider(null);
+      ExplanationOfBenefit.CareTeamComponent expectedCareTeam = expected.getCareTeam().get(i);
+
+      ExplanationOfBenefit.CareTeamComponent actualCareTeam =
+          actual.getCareTeam().stream()
+              .filter(ac -> ac.getSequence() == expectedCareTeam.getSequence())
+              .findAny()
+              .orElse(null);
+
+      expectedCareTeam.setProvider(null);
+      actualCareTeam.setProvider(null);
+      Assert.assertTrue(expectedCareTeam.equalsDeep(actualCareTeam));
     }
-    // expected.setCareTeam(null);
-    // actual.setCareTeam(null);
+
+    // Did a deep equals above for CareTeam
+    expected.setCareTeam(null);
+    actual.setCareTeam(null);
     // Now for the grand finale, we can do an `equalsDeep` on the rest
     Assert.assertTrue(expected.equalsDeep(actual));
   }
