@@ -152,7 +152,7 @@ try {
 				gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
 				// Send notifications that the build has started
-				sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+				//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 			}
 		}
 
@@ -292,5 +292,5 @@ try {
 	currentBuild.result = "FAILURE"
 	throw ex
 } finally {
-	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+	//sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
 }
