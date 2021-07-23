@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1;
+
+option java_multiple_files = true;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.EnumValueOptions {
+  optional string string_value = 50000;
+}
