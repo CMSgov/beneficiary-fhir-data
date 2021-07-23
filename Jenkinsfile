@@ -130,29 +130,31 @@ try {
 		stage('Prepare') {
 			currentStage = "${env.STAGE_NAME}"
 			node(POD_LABEL) {
-				// Grab the commit that triggered the build.
-				checkout scm
+				container('bfd-cbc-build') {
+					// Grab the commit that triggered the build.
+					checkout scm
 
-				// Load the child Jenkinsfiles.
-				scriptForApps = load('apps/build.groovy')
-				scriptForDeploys = load('ops/deploy-ccs.groovy')
+					// Load the child Jenkinsfiles.
+					scriptForApps = load('apps/build.groovy')
+					scriptForDeploys = load('ops/deploy-ccs.groovy')
 
-				// Find the most current AMI IDs (if any).
-				amiIds = null
-				amiIds = scriptForDeploys.findAmis()
+					// Find the most current AMI IDs (if any).
+					amiIds = null
+					amiIds = scriptForDeploys.findAmis()
 
-				// These variables track our decision on whether or not to deploy to prod-like envs.
-				canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
-				willDeployToProdEnvs = false
+					// These variables track our decision on whether or not to deploy to prod-like envs.
+					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
+					willDeployToProdEnvs = false
 
-				// Get the current commit id 
-				gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+					// Get the current commit id 
+					gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
-				// Get the remote repo url. This assumes we are using git+https not git+ssh.
-				gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
+					// Get the remote repo url. This assumes we are using git+https not git+ssh.
+					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
-				// Send notifications that the build has started
-				//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+					// Send notifications that the build has started
+					//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+				}
 			}
 		}
 
