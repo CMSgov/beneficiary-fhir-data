@@ -7,7 +7,7 @@ ARG PACKER_VERSION
 ARG TERRAFORM_VERSION
 
 RUN apt -y update && \
-    apt -y install python3-pip && \
+    apt -y install python3-pip jq && \
     pip3 install ansible==${ANSIBLE_VERSION} awscli boto && \
     curl -L -o packer.zip https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip && \
     unzip packer.zip -d /usr/local/bin && \
