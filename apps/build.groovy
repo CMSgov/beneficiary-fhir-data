@@ -16,10 +16,6 @@
  * @throws RuntimeException An exception will be bubbled up if the Maven build returns a non-zero exit code.
  */
 def mvn(args) {
-	// This tool must be setup and named correctly in the Jenkins config.
-
-	def mvnHome = tool 'maven-3'
-
 	// Run the build, using Maven, with the appropriate config.
 	configFileProvider(
 			[
@@ -27,7 +23,7 @@ def mvn(args) {
 				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
 			]
 	) {
-		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
+		sh "mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
 	}
 }
 
