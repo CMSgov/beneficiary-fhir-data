@@ -1927,7 +1927,6 @@ public final class TransformerUtilsV2 {
     return careTeamEntry;
   }
 
-  
   /**
    * Ensures that the specified {@link ExplanationOfBenefit} has the specified {@link
    * CareTeamComponent}, and links the specified {@link ItemComponent} to that {@link
