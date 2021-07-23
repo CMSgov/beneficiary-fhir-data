@@ -328,7 +328,7 @@ public final class TransformerUtils {
     // If no match was found, add one to the EOB.
     if (careTeamEntry == null) {
       careTeamEntry = eob.addCareTeam();
-      careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
+      careTeamEntry.setSequence(eob.getCareTeam().size());
       careTeamEntry.setProvider(
           createIdentifierReference(practitionerIdSystem, practitionerIdValue));
 
@@ -397,7 +397,7 @@ public final class TransformerUtils {
     // <ID Value> => ExplanationOfBenefit.careTeam.provider
     if (careTeamEntry == null) {
       careTeamEntry = eob.addCareTeam();
-      careTeamEntry.setSequence(eob.getCareTeam().size() + 1);
+      careTeamEntry.setSequence(eob.getCareTeam().size());
       careTeamEntry.setProvider(createPractitionerIdentifierReference(type, practitionerIdValue));
 
       CodeableConcept careTeamRoleConcept = createCodeableConcept(roleSystem, roleCode);

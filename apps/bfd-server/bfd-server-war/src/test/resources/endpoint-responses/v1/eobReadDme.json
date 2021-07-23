@@ -211,7 +211,7 @@
         "display" : "Participating"
       }
     } ],
-    "sequence" : 3,
+    "sequence" : 2,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -325,7 +325,7 @@
       }
     } ],
     "sequence" : 1,
-    "careTeamLinkId" : [ 1, 3 ],
+    "careTeamLinkId" : [ 1, 2 ],
     "diagnosisLinkId" : [ 3 ],
     "category" : {
       "coding" : [ {

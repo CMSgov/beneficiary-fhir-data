@@ -245,7 +245,7 @@
         }
       } ],
       "careTeam" : [ {
-        "sequence" : 2,
+        "sequence" : 1,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -260,7 +260,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 2,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -275,7 +275,7 @@
           } ]
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 3,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -290,7 +290,7 @@
           } ]
         }
       }, {
-        "sequence" : 5,
+        "sequence" : 4,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -399,7 +399,7 @@
           }
         } ],
         "sequence" : 25,
-        "careTeamLinkId" : [ 5 ],
+        "careTeamLinkId" : [ 4 ],
         "revenue" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
@@ -866,7 +866,7 @@
             "display" : "Participating"
           }
         } ],
-        "sequence" : 3,
+        "sequence" : 2,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -980,7 +980,7 @@
           }
         } ],
         "sequence" : 1,
-        "careTeamLinkId" : [ 1, 3 ],
+        "careTeamLinkId" : [ 1, 2 ],
         "diagnosisLinkId" : [ 3 ],
         "category" : {
           "coding" : [ {
@@ -1390,7 +1390,7 @@
         }
       } ],
       "careTeam" : [ {
-        "sequence" : 2,
+        "sequence" : 1,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -1405,7 +1405,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 2,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -1492,7 +1492,7 @@
           }
         } ],
         "sequence" : 1,
-        "careTeamLinkId" : [ 3 ],
+        "careTeamLinkId" : [ 2 ],
         "revenue" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_stus_ind_cd",
@@ -2015,7 +2015,7 @@
         }
       } ],
       "careTeam" : [ {
-        "sequence" : 2,
+        "sequence" : 1,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -2030,7 +2030,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 2,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -2045,7 +2045,7 @@
           } ]
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 3,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -2060,7 +2060,7 @@
           } ]
         }
       }, {
-        "sequence" : 5,
+        "sequence" : 4,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -2313,7 +2313,7 @@
           }
         } ],
         "sequence" : 1,
-        "careTeamLinkId" : [ 5 ],
+        "careTeamLinkId" : [ 4 ],
         "revenue" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",
@@ -2790,7 +2790,7 @@
         }
       } ],
       "careTeam" : [ {
-        "sequence" : 2,
+        "sequence" : 1,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -2805,7 +2805,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 2,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -2820,7 +2820,7 @@
           } ]
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 3,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -2835,7 +2835,7 @@
           } ]
         }
       }, {
-        "sequence" : 5,
+        "sequence" : 4,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -2947,7 +2947,7 @@
       },
       "item" : [ {
         "sequence" : 1,
-        "careTeamLinkId" : [ 5 ],
+        "careTeamLinkId" : [ 4 ],
         "revenue" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",
@@ -3325,7 +3325,7 @@
         }
       } ],
       "careTeam" : [ {
-        "sequence" : 2,
+        "sequence" : 1,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -3361,7 +3361,7 @@
       },
       "item" : [ {
         "sequence" : 1,
-        "careTeamLinkId" : [ 2 ],
+        "careTeamLinkId" : [ 1 ],
         "service" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/ndc",
@@ -3758,7 +3758,7 @@
             "display" : "CUMBERLAND COUNTY HOSPITAL SYSTEM, INC"
           }
         } ],
-        "sequence" : 3,
+        "sequence" : 2,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -3881,7 +3881,7 @@
           }
         } ],
         "sequence" : 6,
-        "careTeamLinkId" : [ 1, 3 ],
+        "careTeamLinkId" : [ 1, 2 ],
         "diagnosisLinkId" : [ 5 ],
         "category" : {
           "coding" : [ {
@@ -4274,7 +4274,7 @@
         }
       } ],
       "careTeam" : [ {
-        "sequence" : 2,
+        "sequence" : 1,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -4289,7 +4289,7 @@
           } ]
         }
       }, {
-        "sequence" : 3,
+        "sequence" : 2,
         "provider" : {
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -4383,7 +4383,7 @@
           }
         } ],
         "sequence" : 1,
-        "careTeamLinkId" : [ 3 ],
+        "careTeamLinkId" : [ 2 ],
         "revenue" : {
           "extension" : [ {
             "url" : "https://bluebutton.cms.gov/resources/variables/rev_cntr_ddctbl_coinsrnc_cd",

@@ -258,7 +258,7 @@
     }
   } ],
   "careTeam" : [ {
-    "sequence" : 2,
+    "sequence" : 1,
     "provider" : {
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -294,7 +294,7 @@
   },
   "item" : [ {
     "sequence" : 1,
-    "careTeamLinkId" : [ 2 ],
+    "careTeamLinkId" : [ 1 ],
     "service" : {
       "coding" : [ {
         "system" : "http://hl7.org/fhir/sid/ndc",
