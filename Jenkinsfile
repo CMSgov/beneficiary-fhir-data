@@ -129,7 +129,7 @@ try {
 	]) {
 		stage('Prepare') {
 			currentStage = "${env.STAGE_NAME}"
-			node {
+			node(POD_LABEL) {
 				// Grab the commit that triggered the build.
 				checkout scm
 
@@ -175,7 +175,7 @@ try {
 			currentStage = "${env.STAGE_NAME}"
 			if (params.build_platinum || amiIds.platinumAmiId == null) {
 				milestone(label: 'stage_build_platinum_ami_start')
-				node {
+				node(POD_LABEL) {
 					amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 				}
 			} else {
@@ -189,7 +189,7 @@ try {
 				lock(resource: 'env_management', inversePrecendence: true) {
 					milestone(label: 'stage_management_jenkins_start')
 
-					node {
+					node(POD_LABEL) {
 						scriptForDeploy.deployManagement(amiIds)
 					}
 				}
@@ -202,7 +202,7 @@ try {
 			currentStage = "${env.STAGE_NAME}"
 			milestone(label: 'stage_build_apps_start')
 
-			node {
+			node(POD_LABEL) {
 				build_env = deployEnvironment
 				appBuildResults = scriptForApps.build(build_env)
 			}
@@ -213,7 +213,7 @@ try {
 			currentStage = "${env.STAGE_NAME}"
 			milestone(label: 'stage_build_app_amis_test_start')
 
-			node {
+			node(POD_LABEL) {
 				amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
 			}
 		}
@@ -223,7 +223,7 @@ try {
 			lock(resource: 'env_test', inversePrecendence: true) {
 				milestone(label: 'stage_deploy_test_start')
 
-				node {
+				node(POD_LABEL) {
 					scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 				}
 			}
@@ -261,7 +261,7 @@ try {
 				lock(resource: 'env_prod_sbx', inversePrecendence: true) {
 					milestone(label: 'stage_deploy_prod_sbx_start')
 
-					node {
+					node(POD_LABEL) {
 						scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
 					}
 				}
@@ -276,7 +276,7 @@ try {
 				lock(resource: 'env_prod', inversePrecendence: true) {
 					milestone(label: 'stage_deploy_prod_start')
 
-					node {
+					node(POD_LABEL) {
 						scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 					}
 				}
