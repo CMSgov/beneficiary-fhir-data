@@ -178,7 +178,9 @@ try {
 			if (params.build_platinum || amiIds.platinumAmiId == null) {
 				milestone(label: 'stage_build_platinum_ami_start')
 				node(POD_LABEL) {
-					amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+					container('bfd-cbc-build') {
+						amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
+					}
 				}
 			} else {
 				org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
@@ -192,7 +194,9 @@ try {
 					milestone(label: 'stage_management_jenkins_start')
 
 					node(POD_LABEL) {
-						scriptForDeploy.deployManagement(amiIds)
+						container('bfd-cbc-build') {
+							scriptForDeploy.deployManagement(amiIds)
+						}
 					}
 				}
 			} else {
@@ -205,8 +209,10 @@ try {
 			milestone(label: 'stage_build_apps_start')
 
 			node(POD_LABEL) {
-				build_env = deployEnvironment
-				appBuildResults = scriptForApps.build(build_env)
+				container('bfd-cbc-build') {
+					build_env = deployEnvironment
+					appBuildResults = scriptForApps.build(build_env)
+				}
 			}
 		}
 
@@ -216,7 +222,9 @@ try {
 			milestone(label: 'stage_build_app_amis_test_start')
 
 			node(POD_LABEL) {
-				amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+				container('bfd-cbc-build') {
+					amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
+				}
 			}
 		}
 
@@ -226,7 +234,9 @@ try {
 				milestone(label: 'stage_deploy_test_start')
 
 				node(POD_LABEL) {
-					scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+					container('bfd-cbc-build') {
+						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+					}
 				}
 			}
 		}
@@ -264,7 +274,9 @@ try {
 					milestone(label: 'stage_deploy_prod_sbx_start')
 
 					node(POD_LABEL) {
-						scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+						container('bfd-cbc-build') {
+							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+						}
 					}
 				}
 			} else {
@@ -279,7 +291,9 @@ try {
 					milestone(label: 'stage_deploy_prod_start')
 
 					node(POD_LABEL) {
-						scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+						container('bfd-cbc-build') {
+							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+						}
 					}
 				}
 			} else {
