@@ -147,10 +147,8 @@ try {
 				scriptForDeploys = load('ops/deploy-ccs.groovy')
 
 				// Find the most current AMI IDs (if any).
-				container('bfd-cbc-build') {
-					amiIds = null
-					amiIds = scriptForDeploys.findAmis()
-				}
+				amiIds = null
+				amiIds = scriptForDeploys.findAmis()
 
 				// These variables track our decision on whether or not to deploy to prod-like envs.
 				canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
