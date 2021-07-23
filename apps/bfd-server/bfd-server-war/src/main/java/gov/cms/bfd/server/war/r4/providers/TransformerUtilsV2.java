@@ -1870,12 +1870,11 @@ public final class TransformerUtilsV2 {
    * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
    *     of
    * @param eobItem the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
-   * @param practitionerIdSystem the {@link Identifier#getSystem()} of the practitioner to reference
-   *     in {@link CareTeamComponent#getProvider()}
-   * @param practitionerIdValue the {@link Identifier#getValue()} of the practitioner to reference
-   *     in {@link CareTeamComponent#getProvider()}
-   * @param careTeamRole the {@link ClaimCareteamrole} to use for the {@link
-   *     CareTeamComponent#getRole()}
+   * @param type
+   * @param practitionerIdValue
+   * @param roleSystem
+   * @param roleCode
+   * @param roleDisplay
    * @return the {@link CareTeamComponent} that was created/linked
    */
   public static CareTeamComponent addCareTeamPractitioner(
@@ -1928,8 +1927,23 @@ public final class TransformerUtilsV2 {
     return careTeamEntry;
   }
 
-  // Chris
-
+  
+  /**
+   * Ensures that the specified {@link ExplanationOfBenefit} has the specified {@link
+   * CareTeamComponent}, and links the specified {@link ItemComponent} to that {@link
+   * CareTeamComponent} (via {@link ItemComponent#addCareTeamLinkId(int)}).
+   *
+   * @param eob the {@link ExplanationOfBenefit} that the {@link CareTeamComponent} should be part
+   *     of
+   * @param eobItem the {@link ItemComponent} that should be linked to the {@link CareTeamComponent}
+   * @param practitionerIdSystem the {@link Identifier#getSystem()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param practitionerIdValue the {@link Identifier#getValue()} of the practitioner to reference
+   *     in {@link CareTeamComponent#getProvider()}
+   * @param careTeamRole the {@link ClaimCareteamrole} to use for the {@link
+   *     CareTeamComponent#getRole()}
+   * @return the {@link CareTeamComponent} that was created/linked
+   */
   public static CareTeamComponent addCareTeamPerforming(
       ExplanationOfBenefit eob,
       ItemComponent eobItem,
