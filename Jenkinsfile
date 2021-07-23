@@ -124,180 +124,165 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 
 // begin pipeline
 try {
-	podTemplate(containers: [
-		containerTemplate(name: 'bfd-cbc-build', image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk8-an29-tf12', command: 'cat', ttyEnabled: true, alwaysPullImage: true)
-	], serviceAccount: 'bfd') {
-		stage('Prepare') {
-			currentStage = "${env.STAGE_NAME}"
-			node(POD_LABEL) {
-				container('bfd-cbc-build') {
-					// Grab the commit that triggered the build.
-					checkout scm
+	podTemplate(containers: [containerTemplate(name: 'bfd-cbc-build', image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk8-an29-tf12', command: 'cat', ttyEnabled: true, alwaysPullImage: true)], serviceAccount: 'bfd') {
+		node(POD_LABEL) {
+			stage('Prepare') {
+				currentStage = "${env.STAGE_NAME}"
+					container('bfd-cbc-build') {
+						// Grab the commit that triggered the build.
+						checkout scm
 
-					// Load the child Jenkinsfiles.
-					scriptForApps = load('apps/build.groovy')
-					scriptForDeploys = load('ops/deploy-ccs.groovy')
+						// Load the child Jenkinsfiles.
+						scriptForApps = load('apps/build.groovy')
+						scriptForDeploys = load('ops/deploy-ccs.groovy')
 
-					// Find the most current AMI IDs (if any).
-					amiIds = null
-					amiIds = scriptForDeploys.findAmis()
+						// Find the most current AMI IDs (if any).
+						amiIds = null
+						amiIds = scriptForDeploys.findAmis()
 
-					// These variables track our decision on whether or not to deploy to prod-like envs.
-					canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
-					willDeployToProdEnvs = false
+						// These variables track our decision on whether or not to deploy to prod-like envs.
+						canDeployToProdEnvs = env.BRANCH_NAME == "master" || params.deploy_prod_from_non_master
+						willDeployToProdEnvs = false
 
-					// Get the current commit id 
-					gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+						// Get the current commit id 
+						gitCommitId = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 
-					// Get the remote repo url. This assumes we are using git+https not git+ssh.
-					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
+						// Get the remote repo url. This assumes we are using git+https not git+ssh.
+						gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
-					// Send notifications that the build has started
-					//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+						// Send notifications that the build has started
+						//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+					}
+			}
+
+			/* This stage switches the gitBranchName (needed for our CCS downsream stages) 
+			value if the build is a PR as the BRANCH_NAME var is populated with the build 
+			name during PR builds. 
+			*/
+			stage('Set Branch Name') {
+				currentStage = "${env.STAGE_NAME}"
+				script {
+					if (env.BRANCH_NAME.startsWith('PR')) {
+						gitBranchName = env.CHANGE_BRANCH
+					} else {
+						gitBranchName = env.BRANCH_NAME
+					}
 				}
 			}
-		}
 
-		/* This stage switches the gitBranchName (needed for our CCS downsream stages) 
-		value if the build is a PR as the BRANCH_NAME var is populated with the build 
-		name during PR builds. 
-		*/
-		stage('Set Branch Name') {
-			currentStage = "${env.STAGE_NAME}"
-			script {
-				if (env.BRANCH_NAME.startsWith('PR')) {
-					gitBranchName = env.CHANGE_BRANCH
-				} else {
-					gitBranchName = env.BRANCH_NAME
-				}
-			}
-		}
+			stage('Build Platinum AMI') {
+				currentStage = "${env.STAGE_NAME}"
+				if (params.build_platinum || amiIds.platinumAmiId == null) {
+					milestone(label: 'stage_build_platinum_ami_start')
 
-		stage('Build Platinum AMI') {
-			currentStage = "${env.STAGE_NAME}"
-			if (params.build_platinum || amiIds.platinumAmiId == null) {
-				milestone(label: 'stage_build_platinum_ami_start')
-				node(POD_LABEL) {
 					container('bfd-cbc-build') {
 						amiIds = scriptForDeploys.buildPlatinumAmi(amiIds)
 					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
 				}
-			} else {
-				org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
 			}
-		}
 
-		stage('Deploy mgmt') {
-			currentStage = "${env.STAGE_NAME}"
-			if (canDeployToProdEnvs && params.deploy_management) {
-				lock(resource: 'env_management', inversePrecendence: true) {
-					milestone(label: 'stage_management_jenkins_start')
+			stage('Deploy mgmt') {
+				currentStage = "${env.STAGE_NAME}"
+				if (canDeployToProdEnvs && params.deploy_management) {
+					lock(resource: 'env_management', inversePrecendence: true) {
+						milestone(label: 'stage_management_jenkins_start')
 
-					node(POD_LABEL) {
 						container('bfd-cbc-build') {
 							scriptForDeploy.deployManagement(amiIds)
 						}
 					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy mgmt')
 				}
-			} else {
-				org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy mgmt')
 			}
-		}
 
-		stage('Build Apps') {
-			currentStage = "${env.STAGE_NAME}"
-			milestone(label: 'stage_build_apps_start')
+			stage('Build Apps') {
+				currentStage = "${env.STAGE_NAME}"
+				milestone(label: 'stage_build_apps_start')
 
-			node(POD_LABEL) {
 				container('bfd-cbc-build') {
 					build_env = deployEnvironment
 					appBuildResults = scriptForApps.build(build_env)
 				}
 			}
-		}
 
 
-		stage('Build App AMIs') {
-			currentStage = "${env.STAGE_NAME}"
-			milestone(label: 'stage_build_app_amis_test_start')
+			stage('Build App AMIs') {
+				currentStage = "${env.STAGE_NAME}"
+				milestone(label: 'stage_build_app_amis_test_start')
 
-			node(POD_LABEL) {
 				container('bfd-cbc-build') {
 					amiIds = scriptForDeploys.buildAppAmis(gitBranchName, gitCommitId, amiIds, appBuildResults)
 				}
 			}
-		}
 
-		stage('Deploy to TEST') {
-			currentStage = "${env.STAGE_NAME}"
-			lock(resource: 'env_test', inversePrecendence: true) {
-				milestone(label: 'stage_deploy_test_start')
+			stage('Deploy to TEST') {
+				currentStage = "${env.STAGE_NAME}"
+				lock(resource: 'env_test', inversePrecendence: true) {
+					milestone(label: 'stage_deploy_test_start')
 
-				node(POD_LABEL) {
 					container('bfd-cbc-build') {
 						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
 					}
 				}
 			}
-		}
 
-		stage('Manual Approval') {
-			currentStage = "${env.STAGE_NAME}"
-			if (canDeployToProdEnvs) {
-				/*
-				* Unless it was explicitly requested at the start of the build, prompt for confirmation before
-				* deploying to production environments.
-				*/
-				if (!params.deploy_prod_skip_confirm) {
+			stage('Manual Approval') {
+				currentStage = "${env.STAGE_NAME}"
+				if (canDeployToProdEnvs) {
 					/*
-					* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-					* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-					* an exception will be thrown.
+					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
+					* deploying to production environments.
 					*/
-					try {
-						input 'Deploy to production environments (prod-sbx, prod)?'
-						willDeployToProdEnvs = true
-					} catch(err) {
-						willDeployToProdEnvs = false
-						echo 'User opted not to deploy to prod-like envs.'
+					if (!params.deploy_prod_skip_confirm) {
+						/*
+						* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
+						* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
+						* an exception will be thrown.
+						*/
+						try {
+							input 'Deploy to production environments (prod-sbx, prod)?'
+							willDeployToProdEnvs = true
+						} catch(err) {
+							willDeployToProdEnvs = false
+							echo 'User opted not to deploy to prod-like envs.'
+						}
 					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
 				}
-			} else {
-				org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
 			}
-		}
 
-		stage('Deploy to PROD-SBX') {
-			currentStage = "${env.STAGE_NAME}"
-			if (willDeployToProdEnvs) {
-				lock(resource: 'env_prod_sbx', inversePrecendence: true) {
-					milestone(label: 'stage_deploy_prod_sbx_start')
+			stage('Deploy to PROD-SBX') {
+				currentStage = "${env.STAGE_NAME}"
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx', inversePrecendence: true) {
+						milestone(label: 'stage_deploy_prod_sbx_start')
 
-					node(POD_LABEL) {
 						container('bfd-cbc-build') {
 							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
 						}
 					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
 				}
-			} else {
-				org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
 			}
-		}
 
-		stage('Deploy to PROD') {
-			currentStage = "${env.STAGE_NAME}"
-			if (willDeployToProdEnvs) {
-				lock(resource: 'env_prod', inversePrecendence: true) {
-					milestone(label: 'stage_deploy_prod_start')
+			stage('Deploy to PROD') {
+				currentStage = "${env.STAGE_NAME}"
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod', inversePrecendence: true) {
+						milestone(label: 'stage_deploy_prod_start')
 
-					node(POD_LABEL) {
 						container('bfd-cbc-build') {
 							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
 						}
 					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 				}
-			} else {
-				org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
 			}
 		}
 	}
