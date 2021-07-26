@@ -24,6 +24,25 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
+# Create the temp directory iff it's missing. (Don't want to accidentally
+# change the permissions on /tmp.)
+- name: Check for Custom Temp Directory
+  stat:
+    path: "{{ data_server_tmp_dir }}"
+  become: true
+  register: stat_tmp
+  when: data_server_tmp_dir is defined
+
+- name: Create Custom Temp Directory
+  file:
+    path: "{{ data_server_tmp_dir }}"
+    state: directory
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  when: data_server_tmp_dir is defined and stat_tmp.stat.exists == false
+
 - name: Copy BFD Server Launcher
   copy:
     src: "{{ data_server_launcher }}"

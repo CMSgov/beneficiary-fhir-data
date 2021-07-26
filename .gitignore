@@ -4,6 +4,12 @@
 !.gitignore
 !.gitattributes
 !.github
+!.secrets
 
 # OSX system files
 .DS_Store
+
+# Ignore IntelliJ configuration files
+*.iml
+*.ipr
+*.iws
