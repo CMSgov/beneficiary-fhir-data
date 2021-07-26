@@ -156,8 +156,11 @@ public class ClaimDao {
 
       if (ParamPrefixEnum.GREATERTHAN.equals(lowerBound.getPrefix())) {
         predicates.add(builder.greaterThan(serviceDateEndPath, from));
-      } else {
+      } else if (ParamPrefixEnum.GREATERTHAN_OR_EQUALS.equals(lowerBound.getPrefix())) {
         predicates.add(builder.greaterThanOrEqualTo(serviceDateEndPath, from));
+      } else {
+        throw new IllegalArgumentException(
+            String.format("Unsupported prefix supplied %s", lowerBound.getPrefix()));
       }
     }
 
@@ -168,8 +171,11 @@ public class ClaimDao {
 
       if (ParamPrefixEnum.LESSTHAN_OR_EQUALS.equals(upperBound.getPrefix())) {
         predicates.add(builder.lessThanOrEqualTo(serviceDateEndPath, to));
-      } else {
+      } else if (ParamPrefixEnum.LESSTHAN.equals(upperBound.getPrefix())) {
         predicates.add(builder.lessThan(serviceDateEndPath, to));
+      } else {
+        throw new IllegalArgumentException(
+            String.format("Unsupported prefix supplied %s", upperBound.getPrefix()));
       }
     }
 
