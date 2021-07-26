@@ -45,6 +45,7 @@ properties([
 ])
 
 // These variables are accessible throughout this file (except inside methods and classes).
+def awsCredentials
 def deployEnvironment
 def scriptForApps
 def scriptForDeploys
@@ -136,6 +137,15 @@ try {
 					scriptForApps = load('apps/build.groovy')
 					scriptForDeploys = load('ops/deploy-ccs.groovy')
 
+					// Set global AWS environment variables from role assumption
+					withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
+						awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").split(' +')
+						env.AWS_DEFAULT_REGION = 'us-east-1'
+						env.AWS_ACCESS_KEY_ID = awsCredentials[0]
+						env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
+						env.AWS_SESSION_TOKEN = awsCredentials[3]
+					}
+
 					// Find the most current AMI IDs (if any).
 					amiIds = null
 					amiIds = scriptForDeploys.findAmis()
@@ -149,15 +159,6 @@ try {
 
 					// Get the remote repo url. This assumes we are using git+https not git+ssh.
 					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
-
-					// Get temp assume role credentials and set global env vars for containers
-					withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-						awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").split(' +')
-						env.AWS_DEFAULT_REGION = 'us-east-1'
-						env.AWS_ACCESS_KEY_ID = awsCredentials[0]
-						env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]
-						env.AWS_SESSION_TOKEN = awsCredentials[3]
-					}
 
 					// Send notifications that the build has started
 					//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
