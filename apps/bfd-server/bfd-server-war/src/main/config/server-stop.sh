@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -m
+
 # Check to see if we are running in Cygwin.
 uname="$(uname 2>/dev/null)"
 if [[ -z "${uname}" ]]; then uname="$(/usr/bin/uname 2>/dev/null)"; fi
