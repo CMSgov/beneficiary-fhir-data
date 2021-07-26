@@ -1,6 +1,6 @@
 insert into public.inpatient_claim_lines (
 	parent_claim,
-	clm_line_num,
+	line_num,
 	rev_cntr_ddctbl_coinsrnc_cd,
 	rev_cntr_ndc_qty_qlfr_cd,
 	rev_cntr_ndc_qty,

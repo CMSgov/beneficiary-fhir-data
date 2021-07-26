@@ -202,7 +202,7 @@ insert into public.outpatient_claims (
 select
 	cast("claimId" as bigint),
 	cast("beneficiaryId" as bigint),
-		cast("claimGroupId" as bigint),
+	cast("claimGroupId" as bigint),
 	"claimFacilityTypeCode",
 	"claimFrequencyCode",
 	"dateFrom",

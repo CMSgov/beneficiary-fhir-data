@@ -1,7 +1,7 @@
 insert into public.hospice_claim_lines (
 	parent_claim,
-	clm_line_num,
-	clm_pmt_amt,
+	line_num,
+	line_pmt_amt,
 	rev_cntr,
 	rev_cntr_dt,
 	rev_cntr_tot_chrg_amt,

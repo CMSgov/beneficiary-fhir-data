@@ -1,6 +1,6 @@
 insert into public.snf_claim_lines (
 	parent_claim,
-	clm_line_num,
+	line_num,
 	hcpcs_cd,
 	rev_cntr,
 	rev_cntr_ndc_qty_qlfr_cd,

@@ -16,7 +16,7 @@ if [ -z "$PGHOST" ] || [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ]; then
     echo "*****  E r r o r - Missing required variables  *****"
     echo "$0 requires ENV variable(s) for: DB_HOST, DB_USER, DB_PSWD";
     echo "or";
-    echo "$0 requires cmd-line args for: <year> <db host> <db username> <db password>";
+    echo "$0 requires cmd-line args for: <db host> <db username> <db password>";
     exit 1;
 fi
 

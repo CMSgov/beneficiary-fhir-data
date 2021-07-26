@@ -222,5 +222,5 @@ select
 	"diagnosis23CodeVersion",
 	"diagnosis24CodeVersion",
 	"diagnosis25CodeVersion",
-	"lastupdated"	
-from public."HospiceClaims";
+	"lastupdated"
+	from public."HospiceClaims";

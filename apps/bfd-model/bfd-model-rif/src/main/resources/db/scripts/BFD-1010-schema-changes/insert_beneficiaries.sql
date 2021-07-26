@@ -202,10 +202,10 @@ insert into public.beneficiaries (
 	state_cd,
 	state_cnty_zip_cd,
 	mbi_efctv_bgn_dt,
-	efctv_end_dt,
+	mbi_efctv_end_dt,
 	bene_link_key,
-	last_updated	
-) 
+	last_updated
+)
 select
 	Cast("beneficiaryId" as bigint),
 	"birthDate",

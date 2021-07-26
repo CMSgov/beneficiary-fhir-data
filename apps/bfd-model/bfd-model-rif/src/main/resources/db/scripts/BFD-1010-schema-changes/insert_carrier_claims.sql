@@ -15,10 +15,10 @@ insert into public.carrier_claims(
 	carr_clm_rfrng_pin_num,
 	carr_num,
 	final_action,
-	line_alowd_chrg_amt,
-	line_bene_pmt_amt,
-	line_bene_ptb_ddctbl_amt,
-	line_sbmtd_chrg_amt,
+	nch_clm_alowd_amt,
+	nch_clm_sbmtd_chrg_amt,
+	nch_clm_bene_pmt_amt,
+	nch_clm_bene_ptb_ddctbl_amt,
 	nch_clm_type_cd,
 	nch_near_line_rec_ident_cd,
 	nch_prmry_pyr_clm_pd_amt,
@@ -72,9 +72,9 @@ select
 	"carrierNumber",
 	"finalAction",
 	"allowedChargeAmount",
+	"submittedChargeAmount",
 	"beneficiaryPaymentAmount",
 	"beneficiaryPartBDeductAmount",
-	"submittedChargeAmount",
 	"claimTypeCode",
 	"nearLineRecordIdCode",
 	"primaryPayerPaidAmount",
@@ -108,5 +108,5 @@ select
 	"diagnosis10CodeVersion",
 	"diagnosis11CodeVersion",
 	"diagnosis12CodeVersion",
-	"lastupdated"	
+	"lastupdated"
 from   public."CarrierClaims"; 

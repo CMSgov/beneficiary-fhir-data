@@ -1,7 +1,7 @@
-insert into public.hha_claim_lines (
+insert into public.hha_claim_lines ( 
 	parent_claim,
-	clm_line_num,
-	clm_pmt_amt,
+	line_num,
+	line_pmt_amt,
 	hcpcs_cd,
 	hcpcs_1st_mdfr_cd,
 	hcpcs_2nd_mdfr_cd,
@@ -43,4 +43,4 @@ select
 	"statusCode",
 	"totalChargeAmount",
 	"unitCount"
-from public."HHAClaimLines"
+from public."HHAClaimLines";
