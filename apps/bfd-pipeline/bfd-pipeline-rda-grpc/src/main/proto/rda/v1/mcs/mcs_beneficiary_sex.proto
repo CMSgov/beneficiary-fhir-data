@@ -4,12 +4,12 @@ package gov.cms.mpsm.rda.v1.mcs;
 
 option java_multiple_files = true;
 
-enum McsBeneficiarySex {
-  BENEFICIARY_SEX_UNSET = 0;
+import "rda/v1/enum_options.proto";
 
+enum McsBeneficiarySex {
   // ASCII M
-  BENEFICIARY_SEX_MALE = 77;
+  BENEFICIARY_SEX_MALE = 0   [(string_value) = "M"];
 
   // ASCII F
-  BENEFICIARY_SEX_FEMALE = 70;
+  BENEFICIARY_SEX_FEMALE = 1 [(string_value) = "F"];
 }
