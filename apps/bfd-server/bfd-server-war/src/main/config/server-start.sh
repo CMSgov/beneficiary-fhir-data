@@ -164,7 +164,9 @@ fi
 #	-Dcapsule.jvm.args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
 
 # Launch the server in the background.
-BFD_PORT="${serverPortHttps}" \
+#BFD_PORT="${serverPortHttps}" \
+# Hardcode port for testing only!
+BFD_PORT="8000" \
 	BFD_KEYSTORE="${keyStore}" \
 	BFD_TRUSTSTORE="${trustStore}" \
 	BFD_WAR="${warArtifact}" \
