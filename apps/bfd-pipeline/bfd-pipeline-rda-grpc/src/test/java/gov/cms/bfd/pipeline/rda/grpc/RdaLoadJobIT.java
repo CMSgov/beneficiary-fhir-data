@@ -10,6 +10,7 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -20,9 +21,8 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
-import io.grpc.ManagedChannel;
+import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import io.grpc.Server;
-import io.grpc.inprocess.InProcessChannelBuilder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
@@ -36,6 +36,9 @@ import org.junit.Test;
 public class RdaLoadJobIT {
   private static final CharSource fissClaimsSource =
       Resources.asCharSource(Resources.getResource("FISS.ndjson"), StandardCharsets.UTF_8);
+  private static final CharSource mcsClaimsSource =
+      Resources.asCharSource(Resources.getResource("MCS.ndjson"), StandardCharsets.UTF_8);
+
   private PipelineApplicationState appState;
 
   @Before
@@ -79,7 +82,7 @@ public class RdaLoadJobIT {
                   .getResultList();
           assertEquals(expectedClaims.size(), claims.size());
           for (PreAdjFissClaim resultClaim : claims) {
-            FissClaim expected = findMatchingClaim(expectedClaims, resultClaim);
+            FissClaim expected = findMatchingFissClaim(expectedClaims, resultClaim);
             assertNotNull(expected);
             assertEquals(expected.getHicNo(), resultClaim.getHicNo());
             assertEquals(
@@ -90,12 +93,54 @@ public class RdaLoadJobIT {
         });
   }
 
+  @Test
+  public void mcsClaimsTest() throws Exception {
+    final ImmutableList<String> mcsClaimJson = mcsClaimsSource.readLines();
+    runServerTest(
+        ImmutableList.of(),
+        mcsClaimJson,
+        port -> {
+          final RdaLoadOptions config = createRdaLoadOptions(port);
+          final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
+          job.call();
+        });
+    runHibernateAssertions(
+        entityManager -> {
+          final ImmutableList<ClaimChange> expectedClaims =
+              JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseClaimChange);
+          List<PreAdjMcsClaim> claims =
+              entityManager
+                  .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
+                  .getResultList();
+          assertEquals(expectedClaims.size(), claims.size());
+          for (PreAdjMcsClaim resultClaim : claims) {
+            McsClaim expected = findMatchingMcsClaim(expectedClaims, resultClaim);
+            assertNotNull(expected);
+            assertEquals(expected.getIdrHic(), Strings.nullToEmpty(resultClaim.getIdrHic()));
+            assertEquals(
+                expected.getIdrClaimMbi(), Strings.nullToEmpty(resultClaim.getIdrClaimMbi()));
+            assertEquals(expected.getMcsDetailsCount(), resultClaim.getDetails().size());
+            assertEquals(expected.getMcsDiagnosisCodesCount(), resultClaim.getDiagCodes().size());
+          }
+        });
+  }
+
   @Nullable
-  private FissClaim findMatchingClaim(
+  private FissClaim findMatchingFissClaim(
       ImmutableList<ClaimChange> expectedClaims, PreAdjFissClaim resultClaim) {
     return expectedClaims.stream()
         .map(ClaimChange::getFissClaim)
         .filter(claim -> claim.getDcn().equals(resultClaim.getDcn()))
+        .findAny()
+        .orElse(null);
+  }
+
+  @Nullable
+  private McsClaim findMatchingMcsClaim(
+      ImmutableList<ClaimChange> expectedClaims, PreAdjMcsClaim resultClaim) {
+    return expectedClaims.stream()
+        .map(ClaimChange::getMcsClaim)
+        .filter(claim -> claim.getIdrClmHdIcn().equals(resultClaim.getIdrClmHdIcn()))
         .findAny()
         .orElse(null);
   }
@@ -133,13 +178,7 @@ public class RdaLoadJobIT {
             () -> new JsonMessageSource<>(fissClaimJson, JsonMessageSource::parseClaimChange),
             () -> new JsonMessageSource<>(mcsClaimJson, JsonMessageSource::parseClaimChange));
     try {
-      final ManagedChannel channel = InProcessChannelBuilder.forName("test").build();
-      try {
-        test.accept(server.getPort());
-      } finally {
-        channel.shutdown();
-        channel.awaitTermination(5, TimeUnit.SECONDS);
-      }
+      test.accept(server.getPort());
     } finally {
       server.shutdown();
       server.awaitTermination(5, TimeUnit.SECONDS);
