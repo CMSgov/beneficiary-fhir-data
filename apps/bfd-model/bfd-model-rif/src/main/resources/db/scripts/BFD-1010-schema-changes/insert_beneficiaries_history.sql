@@ -1,7 +1,7 @@
 insert into public.beneficiaries_history (
 	beneficiary_history_id, 
 	bene_id, 
-	bene_crnt_hicn,
+	bene_crnt_hic_num,
 	hicn_unhashed,
 	mbi_num, 
 	mbi_hash, 

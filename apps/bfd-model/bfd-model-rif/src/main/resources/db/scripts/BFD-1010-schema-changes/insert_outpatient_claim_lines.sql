@@ -1,6 +1,6 @@
 insert into  public.outpatient_claim_lines (
 	parent_claim,
-	line_num,
+	clm_line_num,
 	line_ndc_cd,
 	hcpcs_cd,
 	hcpcs_1st_mdfr_cd,

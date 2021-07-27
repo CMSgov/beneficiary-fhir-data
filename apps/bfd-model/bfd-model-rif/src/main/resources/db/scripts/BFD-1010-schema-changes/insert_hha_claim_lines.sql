@@ -1,6 +1,6 @@
 insert into public.hha_claim_lines ( 
 	parent_claim,
-	line_num,
+	clm_line_num,
 	line_pmt_amt,
 	hcpcs_cd,
 	hcpcs_1st_mdfr_cd,

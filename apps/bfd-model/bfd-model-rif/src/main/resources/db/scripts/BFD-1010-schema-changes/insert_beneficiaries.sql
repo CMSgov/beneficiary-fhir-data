@@ -5,7 +5,7 @@ insert into public.beneficiaries (
 	bene_esrd_ind,
 	bene_entlmt_rsn_curr,
 	bene_entlmt_rsn_orig,
-	bene_crnt_hicn,
+	bene_crnt_hic_num,
 	bene_mdcr_status_cd,
 	bene_gvn_name,
 	bene_mdl_name,

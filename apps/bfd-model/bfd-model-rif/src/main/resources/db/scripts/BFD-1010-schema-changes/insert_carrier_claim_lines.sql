@@ -1,6 +1,6 @@
 insert into public.carrier_claim_lines(
 	parent_claim,
-	line_num,
+	clm_line_num,
 	line_pmt_amt,
 	line_1st_expns_dt,
 	line_alowd_chrg_amt,

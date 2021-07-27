@@ -1,6 +1,6 @@
 insert into public.dme_claim_lines(
 	parent_claim,
-	line_num,
+	clm_line_num,
 	line_pmt_amt,
 	line_sbmtd_chrg_amt,
 	line_alowd_chrg_amt,
