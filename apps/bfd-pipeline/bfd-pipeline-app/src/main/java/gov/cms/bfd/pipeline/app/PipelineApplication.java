@@ -12,6 +12,7 @@ import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
@@ -140,7 +141,10 @@ public final class PipelineApplication {
     /*
      * Create and register the other jobs.
      */
-    pipelineManager.registerJob(createCcwRifLoadJob(appConfig, appState));
+    if (appConfig.getCcwRifLoadOptions().isPresent()) {
+      pipelineManager.registerJob(
+          createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
+    }
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
       LOGGER.info("RDA API jobs are enabled in app configuration.");
@@ -168,22 +172,20 @@ public final class PipelineApplication {
   }
 
   /**
-   * @param appConfig the {@link AppConfiguration} to use
+   * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private static PipelineJob<?> createCcwRifLoadJob(
-      AppConfiguration appConfig, PipelineApplicationState appState) {
+      CcwRifLoadOptions loadOptions, PipelineApplicationState appState) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
      */
     S3TaskManager s3TaskManager =
-        new S3TaskManager(
-            appState.getMetrics(), appConfig.getCcwRifLoadOptions().getExtractionOptions());
+        new S3TaskManager(appState.getMetrics(), loadOptions.getExtractionOptions());
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
-    RifLoader rifLoader =
-        new RifLoader(appConfig.getCcwRifLoadOptions().getLoadOptions(), appState);
+    RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
     /*
      * Create the DataSetMonitorListener that will glue those stages together and run them all for
@@ -198,7 +200,7 @@ public final class PipelineApplication {
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState.getMetrics(),
-            appConfig.getCcwRifLoadOptions().getExtractionOptions(),
+            loadOptions.getExtractionOptions(),
             s3TaskManager,
             dataSetMonitorListener);
 
