@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
-import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
-
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
@@ -48,7 +46,7 @@ public class DirectRdaLoadApp {
         new PipelineApplicationState(
             new MetricRegistry(),
             PipelineApplicationState.createPooledDataSource(databaseConfig, new MetricRegistry()),
-            RDA_PERSISTENCE_UNIT_NAME);
+            PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME);
     final Optional<PipelineJob<?>> job = createPipelineJob(jobConfig, appState, claimType);
     if (!job.isPresent()) {
       System.err.printf("error: invalid claim type: '%s' expected 'fiss' or 'mcs'%n", claimType);

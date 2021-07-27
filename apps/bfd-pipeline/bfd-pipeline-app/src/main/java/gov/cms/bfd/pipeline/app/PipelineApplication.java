@@ -133,24 +133,28 @@ public final class PipelineApplication {
       throw new InterruptedException();
     }
 
-    // Now create an application state that reuses the existing pooled data source.
-    final PipelineApplicationState appState =
-        new PipelineApplicationState(
-            appMetrics, pooledDataSource, PipelineApplicationState.PERSISTENCE_UNIT_NAME);
-
     /*
      * Create and register the other jobs.
      */
     if (appConfig.getCcwRifLoadOptions().isPresent()) {
+      // Create an application state that reuses the existing pooled data source with the ccw/rif
+      // persistence unit.
+      final PipelineApplicationState appState =
+          new PipelineApplicationState(
+              appMetrics, pooledDataSource, PipelineApplicationState.PERSISTENCE_UNIT_NAME);
+
       pipelineManager.registerJob(
           createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
     }
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
       LOGGER.info("RDA API jobs are enabled in app configuration.");
+      // Create an application state that reuses the existing pooled data source with the rda
+      // persistence unit.
       final PipelineApplicationState rdaAppState =
           new PipelineApplicationState(
               appMetrics, pooledDataSource, PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME);
+
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
 
       pipelineManager.registerJob(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));

@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
+import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
 import static org.junit.Assert.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
@@ -23,8 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class JpaClaimRdaSinkIT {
-  public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
-
   private PipelineApplicationState appState;
   private EntityManager entityManager;
 
@@ -35,7 +34,8 @@ public class JpaClaimRdaSinkIT {
     final HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dbOptiona, appMetrics);
     DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
-    appState = new PipelineApplicationState(appMetrics, pooledDataSource, PERSISTENCE_UNIT_NAME);
+    appState =
+        new PipelineApplicationState(appMetrics, pooledDataSource, RDA_PERSISTENCE_UNIT_NAME);
     entityManager = appState.getEntityManagerFactory().createEntityManager();
   }
 
