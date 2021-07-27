@@ -138,6 +138,9 @@ if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact
 if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
 if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
 
+# Debug server ports file, remove when done!
+cat "${serverPortsFile}"
+
 # Read the server port to be used from the ports file.
 serverPortHttps=${BFD_PORT:-$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)}
 if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified in '${serverPortsFile}'."; exit 1; fi
@@ -164,9 +167,7 @@ fi
 #	-Dcapsule.jvm.args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8083" \
 
 # Launch the server in the background.
-#BFD_PORT="${serverPortHttps}" \
-# Hardcode port for testing only!
-BFD_PORT="8000" \
+BFD_PORT="${serverPortHttps}" \
 	BFD_KEYSTORE="${keyStore}" \
 	BFD_TRUSTSTORE="${trustStore}" \
 	BFD_WAR="${warArtifact}" \
