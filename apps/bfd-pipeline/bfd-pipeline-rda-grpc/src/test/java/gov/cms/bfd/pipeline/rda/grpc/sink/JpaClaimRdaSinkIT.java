@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import static org.junit.Assert.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
+import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
@@ -11,12 +12,12 @@ import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.EntityManager;
-import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,11 +30,12 @@ public class JpaClaimRdaSinkIT {
 
   @Before
   public void setUp() {
-    JDBCDataSource dataSource = new JDBCDataSource();
-    dataSource.setUrl("jdbc:hsqldb:mem:unit-tests");
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
-    appState =
-        new PipelineApplicationState(new MetricRegistry(), dataSource, 10, PERSISTENCE_UNIT_NAME);
+    final DatabaseOptions dbOptiona = new DatabaseOptions("jdbc:hsqldb:mem:unit-tests", "", "", 10);
+    final MetricRegistry appMetrics = new MetricRegistry();
+    final HikariDataSource pooledDataSource =
+        PipelineApplicationState.createPooledDataSource(dbOptiona, appMetrics);
+    DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
+    appState = new PipelineApplicationState(appMetrics, pooledDataSource, PERSISTENCE_UNIT_NAME);
     entityManager = appState.getEntityManagerFactory().createEntityManager();
   }
 

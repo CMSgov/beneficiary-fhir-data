@@ -46,7 +46,9 @@ public class DirectRdaLoadApp {
     final DatabaseOptions databaseConfig = readDatabaseOptions(props);
     final PipelineApplicationState appState =
         new PipelineApplicationState(
-            new MetricRegistry(), databaseConfig, RDA_PERSISTENCE_UNIT_NAME);
+            new MetricRegistry(),
+            PipelineApplicationState.createPooledDataSource(databaseConfig, new MetricRegistry()),
+            RDA_PERSISTENCE_UNIT_NAME);
     final Optional<PipelineJob<?>> job = createPipelineJob(jobConfig, appState, claimType);
     if (!job.isPresent()) {
       System.err.printf("error: invalid claim type: '%s' expected 'fiss' or 'mcs'%n", claimType);

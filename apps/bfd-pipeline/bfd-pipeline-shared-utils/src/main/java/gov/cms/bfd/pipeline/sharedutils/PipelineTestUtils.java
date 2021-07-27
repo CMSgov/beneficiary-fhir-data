@@ -83,7 +83,10 @@ public final class PipelineTestUtils {
     DatabaseTestUtils.get().createOrUpdateSchemaForDataSource();
     this.pipelineApplicationState =
         new PipelineApplicationState(
-            testMetrics, DatabaseTestUtils.get().getUnpooledDataSource(), DEFAULT_MAX_POOL_SIZE);
+            testMetrics,
+            DatabaseTestUtils.get().getUnpooledDataSource(),
+            DEFAULT_MAX_POOL_SIZE,
+            PipelineApplicationState.PERSISTENCE_UNIT_NAME);
   }
 
   /** @return the singleton {@link PipelineTestUtils} instance to use everywhere */
