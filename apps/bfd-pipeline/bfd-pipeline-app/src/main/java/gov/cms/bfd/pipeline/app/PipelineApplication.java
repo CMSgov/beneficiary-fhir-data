@@ -143,13 +143,19 @@ public final class PipelineApplication {
     pipelineManager.registerJob(createCcwRifLoadJob(appConfig, appState));
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
+      LOGGER.info("RDA API jobs are enabled in app configuration.");
+      final PipelineApplicationState rdaAppState =
+          new PipelineApplicationState(
+              appMetrics, pooledDataSource, PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME);
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
-      final PipelineJob<NullPipelineJobArguments> fissLoadJob =
-          rdaLoadOptions.createFissClaimsLoadJob(appState);
-      final PipelineJob<NullPipelineJobArguments> mcsLoadJob =
-          rdaLoadOptions.createMcsClaimsLoadJob(appState);
-      pipelineManager.registerJob(fissLoadJob);
-      pipelineManager.registerJob(mcsLoadJob);
+
+      pipelineManager.registerJob(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
+      LOGGER.info("Registered RdaFissClaimLoadJob.");
+
+      pipelineManager.registerJob(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
+      LOGGER.info("Registered RdaMcsClaimLoadJob.");
+    } else {
+      LOGGER.info("RDA API jobs are not enabled in app configuration.");
     }
 
     /*

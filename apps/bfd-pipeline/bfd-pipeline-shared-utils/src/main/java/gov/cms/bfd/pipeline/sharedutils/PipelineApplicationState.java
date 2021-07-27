@@ -17,6 +17,7 @@ import org.hibernate.tool.schema.Action;
  */
 public final class PipelineApplicationState implements AutoCloseable {
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+  public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   private final MetricRegistry metrics;
   private final HikariDataSource pooledDataSource;

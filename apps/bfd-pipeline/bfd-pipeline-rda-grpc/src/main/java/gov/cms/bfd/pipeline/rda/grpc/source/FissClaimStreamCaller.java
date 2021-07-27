@@ -13,6 +13,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.MethodDescriptor;
 import io.grpc.stub.ClientCalls;
 import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * GrpcStreamCaller implementation that calls the RDA FissClaim service. At this stage in RDA API
@@ -20,6 +22,8 @@ import java.util.Iterator;
  * service is called it sends all of its values.
  */
 public class FissClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjFissClaim>> {
+  static final Logger LOGGER = LoggerFactory.getLogger(FissClaimStreamCaller.class);
+
   private final FissClaimTransformer transformer;
 
   public FissClaimStreamCaller(FissClaimTransformer transformer) {
@@ -37,6 +41,7 @@ public class FissClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjF
   @Override
   public GrpcResponseStream<RdaChange<PreAdjFissClaim>> callService(ManagedChannel channel)
       throws Exception {
+    LOGGER.info("calling service");
     Preconditions.checkNotNull(channel);
     final Empty request = Empty.newBuilder().build();
     final MethodDescriptor<Empty, ClaimChange> method = RDAServiceGrpc.getGetFissClaimsMethod();
