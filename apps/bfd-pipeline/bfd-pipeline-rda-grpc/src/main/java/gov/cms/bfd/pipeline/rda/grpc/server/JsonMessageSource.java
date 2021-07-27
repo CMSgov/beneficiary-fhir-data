@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
@@ -94,6 +95,24 @@ public class JsonMessageSource<T> implements MessageSource<T> {
     ClaimChange.Builder claim = ClaimChange.newBuilder();
     JsonFormat.parser().merge(jsonString, claim);
     return claim.build();
+  }
+
+  /**
+   * Parse every json string in the input to produce a new List of parsed objects.
+   *
+   * @param jsonStrings collection of JSON strings recognizable by the parser
+   * @param parser parser able to parse the strings
+   * @param <T> type produced by the porser
+   * @return an immutable list of parsed strings
+   * @throws Exception any error caused by invalid JSON
+   */
+  public static <T> ImmutableList<T> parseAll(Iterable<String> jsonStrings, Parser<T> parser)
+      throws Exception {
+    final ImmutableList.Builder<T> builder = ImmutableList.builder();
+    for (String jsonString : jsonStrings) {
+      builder.add(parser.parseJson(jsonString));
+    }
+    return builder.build();
   }
 
   @Override

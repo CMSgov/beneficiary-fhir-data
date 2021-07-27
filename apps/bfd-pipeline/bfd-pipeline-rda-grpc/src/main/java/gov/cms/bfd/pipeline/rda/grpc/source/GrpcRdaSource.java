@@ -183,7 +183,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       this.port = port;
       this.maxIdle = maxIdle;
       Preconditions.checkArgument(host.length() >= 1, "host name is empty");
-      Preconditions.checkArgument(port >= 1, "port is negative (%s)");
+      Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
     }
 
