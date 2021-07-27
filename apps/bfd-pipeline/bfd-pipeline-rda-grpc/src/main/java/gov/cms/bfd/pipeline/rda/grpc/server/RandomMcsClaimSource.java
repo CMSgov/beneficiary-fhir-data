@@ -7,7 +7,7 @@ import java.util.NoSuchElementException;
  * A ClaimSource implementation that generates and returns random McsClaim objects. The random
  * number seed and number of claims to return are specified in the constructor.
  */
-public class RandomMcsClaimSource implements ClaimSource<McsClaim> {
+public class RandomMcsClaimSource implements MessageSource<McsClaim> {
   private final RandomMcsClaimGenerator generator;
   private final int maxToSend;
   private int sent;

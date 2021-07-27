@@ -13,9 +13,10 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.rda.grpc.server.EmptyClaimSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.JsonClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -102,8 +103,10 @@ public class GrpcRdaSourceIT {
       final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
       server =
           RdaServer.startLocal(
-              () -> new JsonClaimSource<>(claimsJson, JsonClaimSource::parseFissClaim),
-              EmptyClaimSource::new);
+              () ->
+                  WrappedClaimSource.wrapFissClaims(
+                      new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim)),
+              EmptyMessageSource::new);
       final ManagedChannel channel =
           ManagedChannelBuilder.forAddress("localhost", server.getPort())
               .usePlaintext()

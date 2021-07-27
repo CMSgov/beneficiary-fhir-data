@@ -4,9 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.server.EmptyClaimSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.JsonClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
@@ -53,9 +54,11 @@ public class FissClaimStreamCallerIT {
         RdaServer.startInProcess(
             "test",
             () ->
-                new JsonClaimSource<>(
-                    CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonClaimSource::parseFissClaim),
-            EmptyClaimSource::new);
+                WrappedClaimSource.wrapFissClaims(
+                    new JsonMessageSource<>(
+                        CLAIM_1 + System.lineSeparator() + CLAIM_2,
+                        JsonMessageSource::parseFissClaim)),
+            EmptyMessageSource::new);
     try {
       final ManagedChannel channel = InProcessChannelBuilder.forName("test").build();
       try {

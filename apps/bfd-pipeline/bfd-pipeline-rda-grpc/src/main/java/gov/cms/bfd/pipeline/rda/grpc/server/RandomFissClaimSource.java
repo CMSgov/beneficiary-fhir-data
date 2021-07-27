@@ -7,7 +7,7 @@ import java.util.NoSuchElementException;
  * A ClaimSource implementation that generates and returns random FissClaim objects. The random
  * number seed and number of claims to return are specified in the constructor.
  */
-public class RandomFissClaimSource implements ClaimSource<FissClaim> {
+public class RandomFissClaimSource implements MessageSource<FissClaim> {
   private final RandomFissClaimGenerator generator;
   private final int maxToSend;
   private int sent;

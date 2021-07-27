@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.protobuf.util.JsonFormat;
+import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.io.BufferedReader;
@@ -17,7 +18,7 @@ import java.util.NoSuchElementException;
  * library includes a JsonFormat class that can be used to convert gRPC message objects into JSON
  * strings and vice versa. The NDJSON data must contain one valid message object JSON per line.
  */
-public class JsonClaimSource<T> implements ClaimSource<T> {
+public class JsonMessageSource<T> implements MessageSource<T> {
   private final Parser<T> parser;
   private final BufferedReader reader;
   private String line;
@@ -27,7 +28,7 @@ public class JsonClaimSource<T> implements ClaimSource<T> {
    *
    * @param json String containing one or more lines of NDJSON data
    */
-  public JsonClaimSource(String json, Parser<T> parser) {
+  public JsonMessageSource(String json, Parser<T> parser) {
     reader = new BufferedReader(new StringReader(json));
     this.parser = parser;
   }
@@ -38,7 +39,7 @@ public class JsonClaimSource<T> implements ClaimSource<T> {
    *
    * @param lines List of NDJSON data to be concatenated and parsed.
    */
-  public JsonClaimSource(List<String> lines, Parser<T> parser) {
+  public JsonMessageSource(List<String> lines, Parser<T> parser) {
     this(String.join(System.lineSeparator(), lines), parser);
   }
 
@@ -47,7 +48,7 @@ public class JsonClaimSource<T> implements ClaimSource<T> {
    *
    * @param filename identifies a NDJSON file containing message objects
    */
-  public JsonClaimSource(File filename, Parser<T> parser) {
+  public JsonMessageSource(File filename, Parser<T> parser) {
     try {
       reader = new BufferedReader(new FileReader(filename));
     } catch (FileNotFoundException e) {
@@ -78,6 +79,19 @@ public class JsonClaimSource<T> implements ClaimSource<T> {
    */
   public static McsClaim parseMcsClaim(String jsonString) throws Exception {
     McsClaim.Builder claim = McsClaim.newBuilder();
+    JsonFormat.parser().merge(jsonString, claim);
+    return claim.build();
+  }
+
+  /**
+   * This method fits the signature of Parser&lt;ClaimChange&gt;
+   *
+   * @param jsonString JSON to be parsed
+   * @return a ClaimChange object
+   * @throws Exception any error caused by invalid JSON
+   */
+  public static ClaimChange parseClaimChange(String jsonString) throws Exception {
+    ClaimChange.Builder claim = ClaimChange.newBuilder();
     JsonFormat.parser().merge(jsonString, claim);
     return claim.build();
   }

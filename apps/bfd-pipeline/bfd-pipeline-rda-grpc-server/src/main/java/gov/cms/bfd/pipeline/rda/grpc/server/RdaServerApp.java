@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import gov.cms.mpsm.rda.v1.fiss.FissClaim;
-import gov.cms.mpsm.rda.v1.mcs.McsClaim;
+import gov.cms.mpsm.rda.v1.ClaimChange;
 import io.grpc.Server;
 import java.io.File;
 import java.io.IOException;
@@ -81,33 +80,33 @@ public class RdaServerApp {
       return port;
     }
 
-    private ClaimSource<FissClaim> createFissClaims() {
+    private MessageSource<ClaimChange> createFissClaims() {
       if (fissClaimFile != null) {
         LOGGER.info(
             "serving FissClaims using JsonClaimSource with data from file {}",
             fissClaimFile.getAbsolutePath());
-        return new JsonClaimSource<>(fissClaimFile, JsonClaimSource::parseFissClaim);
+        return new JsonMessageSource<>(fissClaimFile, JsonMessageSource::parseClaimChange);
       } else {
         LOGGER.info(
             "serving no more than {} FissClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
             seed);
-        return new RandomFissClaimSource(seed, maxToSend);
+        return WrappedClaimSource.wrapFissClaims(new RandomFissClaimSource(seed, maxToSend));
       }
     }
 
-    private ClaimSource<McsClaim> createMcsClaims() {
+    private MessageSource<ClaimChange> createMcsClaims() {
       if (mcsClaimFile != null) {
         LOGGER.info(
             "serving McsClaims using JsonClaimSource with data from file {}",
             mcsClaimFile.getAbsolutePath());
-        return new JsonClaimSource<>(mcsClaimFile, JsonClaimSource::parseMcsClaim);
+        return new JsonMessageSource<>(mcsClaimFile, JsonMessageSource::parseClaimChange);
       } else {
         LOGGER.info(
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
             seed);
-        return new RandomMcsClaimSource(seed, maxToSend);
+        return WrappedClaimSource.wrapMcsClaims(new RandomMcsClaimSource(seed, maxToSend));
       }
     }
   }
