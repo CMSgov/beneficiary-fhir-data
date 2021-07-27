@@ -27,6 +27,12 @@ This role is highly configurable, though it tries to provide reasonable defaults
     data_pipeline_db_url: 'jdbc:postgresql://mydbserver.example.com:5432/mydb'
     data_pipeline_db_username: karlmdavis
     data_pipeline_db_password: 'notverysecureeither'
+    data_pipeline_rda_job_enabled: false
+    data_pipeline_rda_job_interval_seconds: 300
+    data_pipeline_rda_job_batch_size: 20
+    data_pipeline_rda_grpc_host: myrdahost.example.com
+    data_pipeline_rda_grpc_port: 443
+    data_pipeline_rda_grpc_max_idle_seconds: 600
 
 See [defaults/main.yml](./defaults/main.yml) for the list of defaulted variables and their default values.
 

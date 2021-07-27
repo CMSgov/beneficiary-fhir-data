@@ -131,6 +131,13 @@ public class DataTransformerTest {
     transformer
         .copyEnumAsString(
             "no-value",
+            false,
+            0,
+            10,
+            new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
+            copied::add)
+        .copyEnumAsString(
+            "no-value-ok",
             true,
             0,
             10,
