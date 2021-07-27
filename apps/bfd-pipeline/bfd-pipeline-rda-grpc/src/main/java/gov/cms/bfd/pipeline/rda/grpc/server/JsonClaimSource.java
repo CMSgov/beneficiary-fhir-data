@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * A FissClaimSource implementation that produces FissClaim objects from JSONL data. The grpc-java
+ * A FissClaimSource implementation that produces FissClaim objects from NDJSON data. The grpc-java
  * library includes a JsonFormat class that can be used to convert gRPC message objects into JSON
- * strings and vice versa. The JSONL data must contain one valid message object JSON per line.
+ * strings and vice versa. The NDJSON data must contain one valid message object JSON per line.
  */
 public class JsonClaimSource<T> implements ClaimSource<T> {
   private final Parser<T> parser;
@@ -23,9 +23,9 @@ public class JsonClaimSource<T> implements ClaimSource<T> {
   private String line;
 
   /**
-   * Produce a JsonFissClaimSource that parses the provided JSONL data.
+   * Produce a JsonFissClaimSource that parses the provided NDJSON data.
    *
-   * @param json String containing one or more lines of JSONL data
+   * @param json String containing one or more lines of NDJSON data
    */
   public JsonClaimSource(String json, Parser<T> parser) {
     reader = new BufferedReader(new StringReader(json));
@@ -33,19 +33,19 @@ public class JsonClaimSource<T> implements ClaimSource<T> {
   }
 
   /**
-   * Produce a JsonFissClaimSource that parses all of the provided JSONL data. Each value in the
-   * list can contain one or more lines of JSONL data.
+   * Produce a JsonFissClaimSource that parses all of the provided NDJSON data. Each value in the
+   * list can contain one or more lines of NDJSON data.
    *
-   * @param lines List of JSONL data to be concatenated and parsed.
+   * @param lines List of NDJSON data to be concatenated and parsed.
    */
   public JsonClaimSource(List<String> lines, Parser<T> parser) {
     this(String.join(System.lineSeparator(), lines), parser);
   }
 
   /**
-   * Produce a JsonFissClaimSource that parses the JSONL contents of the specified File.
+   * Produce a JsonFissClaimSource that parses the NDJSON contents of the specified File.
    *
-   * @param filename identifies a JSONL file containing message objects
+   * @param filename identifies a NDJSON file containing message objects
    */
   public JsonClaimSource(File filename, Parser<T> parser) {
     try {
