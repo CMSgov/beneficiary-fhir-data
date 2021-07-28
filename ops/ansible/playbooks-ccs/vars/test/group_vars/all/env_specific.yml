@@ -20,6 +20,9 @@ data_pipeline_idempotency_required: false
 # Whether to enable BFD API V2
 data_server_v2_enabled: true
 
+# Whether to enable BFD PreAdj Resources
+pre_adj_resources_enabled: true
+
 # New Relic Metric API
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_server_new_relic_metric_path: '/metric/v1'
@@ -47,3 +50,7 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_performance_tester
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
+
+# Enables the RDA API data pipline with a 1 hour retry interval.
+data_pipeline_rda_job_enabled: true
+data_pipeline_rda_job_interval_seconds: 3600

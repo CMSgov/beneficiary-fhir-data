@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static org.hamcrest.CoreMatchers.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -51,7 +49,7 @@ public final class CoverageTransformerV2Test {
 
     Calendar calen = Calendar.getInstance();
     calen.set(2021, 3, 17);
-    beneficiary.setLastUpdated(calen.getTime());
+    beneficiary.setLastUpdated(calen.getTime().toInstant());
   }
 
   /** Standalone wrapper to output PART_A */

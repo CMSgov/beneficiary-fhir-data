@@ -1,11 +1,14 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
@@ -14,10 +17,18 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hamcrest.collection.IsEmptyCollection;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
@@ -55,7 +66,7 @@ public final class BeneficiaryTransformerV2Test {
             .findFirst()
             .get();
 
-    beneficiary.setLastUpdated(new Date());
+    beneficiary.setLastUpdated(Instant.now());
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
     // Add the history records to the Beneficiary, but nill out the HICN fields.
@@ -345,6 +356,26 @@ public final class BeneficiaryTransformerV2Test {
             .setUrl("https://bluebutton.cms.gov/resources/variables/rfrnc_yr");
 
     Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+  /**
+   * test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2} sets a
+   * valid extension date.
+   */
+  @Test
+  public void shouldSetExtensionDate() {
+
+    IBaseDatatype ex =
+        TransformerUtilsV2.createExtensionDate(
+                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear())
+            .getValue();
+
+    IBaseDatatype compare =
+        TransformerUtilsV2.createExtensionDate(
+                CcwCodebookVariable.RFRNC_YR, Optional.of(new BigDecimal(3)))
+            .getValue();
+
+    Assert.assertEquals(ex.toString().length(), compare.toString().length());
   }
 
   /**

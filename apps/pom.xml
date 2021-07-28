@@ -232,6 +232,14 @@
 				<version>3.3.0</version>
 			</dependency>
 
+			 <dependency>
+				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
+				 <groupId>org.projectlombok</groupId>
+				 <artifactId>lombok</artifactId>
+				 <version>1.18.20</version>
+				 <scope>provided</scope>
+			 </dependency>
+
 			<dependency>
 				<!-- The test framework used for unit and integration tests. -->
 				<groupId>junit</groupId>
@@ -239,6 +247,7 @@
 				<version>4.13.1</version>
 				<scope>test</scope>
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -310,7 +319,7 @@
 					<configuration>
 						<hooks>
 							<pre-commit>
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 
 checkJavaFormat() {
@@ -337,6 +346,37 @@ checkJavaFormat() {
   return ${checkResult}
 }
 
+checkSecretFilesForPlainText() {
+  echo 'Verifying secret files are not in plaintext...'
+  set +e
+  # read list of files containing secrets
+  IFS=$'\n' read -d '' -r -a secrets &lt; .secrets
+
+  # make list of files to be committed by printing out a newline
+  # separated list of files staged for commit to a temporary file
+  # and reading it as an array
+  tmpfile=$(mktemp)
+  git diff --cached --name-only --diff-filter=ACM > $tmpfile
+  IFS=$'\n' read -d '' -r -a commits &lt; $tmpfile
+
+  # for all files to be committed which are a secret file,
+  # grep for the header "$ANSIBLE_VAULT;1.1;AES256"
+  # if it's not there, abort.
+  for commitFile in ${commits[@]}; do
+    for secretFile in ${secrets[@]}; do
+      if [ $commitFile == $secretFile ]; then
+        header=$(echo "$(git show :./$secretFile)" | grep "\$ANSIBLE_VAULT;1.1;AES256")
+        if [ -z $header ]; then
+          echo "attempting to commit an unencrypted secret: $secretFile; aborting"
+          exit 1
+        fi
+      fi
+    done
+  done
+  set -e
+}
+
+checkSecretFilesForPlainText
 checkJavaFormat
 							</pre-commit>
 						</hooks>
@@ -362,6 +402,8 @@ checkJavaFormat
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
+						<trimStackTrace>false</trimStackTrace>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -374,11 +416,18 @@ checkJavaFormat
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
+						<trimStackTrace>false</trimStackTrace>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<systemPropertyVariables>
 							<its.db.url>${its.db.url}</its.db.url>
 							<its.db.username>${its.db.username}</its.db.username>
 							<its.db.password>${its.db.password}</its.db.password>
 						</systemPropertyVariables>
+						
+						<!-- Needed to avoid test failures when comparing ETL timestamps. -->
+						<environmentVariables>
+							<TZ>UTC</TZ>
+						</environmentVariables>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -563,6 +612,20 @@ checkJavaFormat
 						<configuration>
 							<failOnError>false</failOnError>
             			</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Will run the `*IT.java` integration tests in the modules, as part
+					of the build. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>

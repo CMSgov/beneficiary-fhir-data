@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.DMEClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -11,8 +10,8 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -33,7 +32,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit.Use;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Money;
-import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Assert;
@@ -62,7 +60,7 @@ public final class DMEClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
 
     return claim;
   }
@@ -512,8 +510,8 @@ public final class DMEClaimTransformerV2Test {
             "http://hl7.org/fhir/sid/ndc",
             new Coding(
                 "http://hl7.org/fhir/sid/ndc",
-                "667159747",
-                "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN"));
+                "495800192",
+                "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"));
 
     Assert.assertTrue(compare.equalsDeep(ex));
   }
@@ -536,17 +534,14 @@ public final class DMEClaimTransformerV2Test {
 
   @Test
   public void shouldHaveLineItemServicedPeriod() throws Exception {
-    Date serviceStart = eob.getItemFirstRep().getServicedPeriod().getStart();
-    Date serviceEnd = eob.getItemFirstRep().getServicedPeriod().getEnd();
-
-    Period compare = new Period();
-    compare.setStart(
-        new SimpleDateFormat("yyy-MM-dd").parse("2014-02-03"), TemporalPrecisionEnum.DAY);
-    compare.setEnd(
-        new SimpleDateFormat("yyy-MM-dd").parse("2014-02-03"), TemporalPrecisionEnum.DAY);
-
-    Assert.assertEquals(compare.getStart().toString(), serviceStart.toString());
-    Assert.assertEquals(compare.getEnd().toString(), serviceEnd.toString());
+    Assert.assertNotNull(eob.getItemFirstRep().getServicedPeriod().getStart());
+    Assert.assertNotNull(eob.getItemFirstRep().getServicedPeriod().getEnd());
+    Assert.assertEquals(
+        (new SimpleDateFormat("yyy-MM-dd")).parse("2014-02-03"),
+        eob.getItemFirstRep().getServicedPeriod().getStart());
+    Assert.assertEquals(
+        (new SimpleDateFormat("yyy-MM-dd")).parse("2014-02-03"),
+        eob.getItemFirstRep().getServicedPeriod().getEnd());
   }
 
   @Test

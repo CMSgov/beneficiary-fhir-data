@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/mcs/mcs_diagnosis_icd_type.proto";
+
+message McsDiagnosisCode {
+  string idr_clm_hd_icn = 1;
+
+  oneof idr_diag_icd_type {
+    McsDiagnosisIcdType idr_diag_icd_type_enum = 2;
+    string idr_diag_icd_type_enum_unrecognized = 4;
+  };
+
+  // Note: Not on original claim.
+  optional string idr_diag_code = 3;
+}
