@@ -257,7 +257,11 @@ public final class PipelineApplicationIT {
               Instant.now(),
               0,
               new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
-              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER),
+              new DataSetManifestEntry("inpatient.rif", RifFileType.INPATIENT),
+              new DataSetManifestEntry("outpatient.rif", RifFileType.OUTPATIENT),
+              new DataSetManifestEntry("snf.rif", RifFileType.SNF),
+              new DataSetManifestEntry("hospice.rif", RifFileType.HOSPICE));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
       s3Client.putObject(
           DataSetTestUtilities.createPutRequest(
@@ -271,6 +275,30 @@ public final class PipelineApplicationIT {
               manifest,
               manifest.getEntries().get(1),
               StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(2),
+              StaticRifResource.SAMPLE_SYNTHEA_INPATIENT.getResourceUrl()));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(3),
+              StaticRifResource.SAMPLE_SYNTHEA_OUTPATIENT.getResourceUrl()));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(4),
+              StaticRifResource.SAMPLE_SYNTHEA_SNF.getResourceUrl()));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(5),
+              StaticRifResource.SAMPLE_SYNTHEA_HOSPICE.getResourceUrl()));
 
       // Start the app.
       ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
