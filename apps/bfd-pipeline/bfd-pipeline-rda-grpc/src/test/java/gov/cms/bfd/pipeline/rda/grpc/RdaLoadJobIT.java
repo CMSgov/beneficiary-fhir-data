@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -41,6 +42,7 @@ public class RdaLoadJobIT {
       Resources.asCharSource(Resources.getResource("FISS.ndjson"), StandardCharsets.UTF_8);
   private static final CharSource mcsClaimsSource =
       Resources.asCharSource(Resources.getResource("MCS.ndjson"), StandardCharsets.UTF_8);
+  private static final int BATCH_SIZE = 17;
 
   private PipelineApplicationState appState;
   private Connection dbLifetimeConnection;
@@ -52,11 +54,10 @@ public class RdaLoadJobIT {
     dbLifetimeConnection = DriverManager.getConnection(dbUrl + ";shutdown=true", "", "");
     final DatabaseOptions dbOptions = new DatabaseOptions(dbUrl, "", "", 10);
     final MetricRegistry appMetrics = new MetricRegistry();
-    final HikariDataSource pooledDataSource =
+    final HikariDataSource dataSource =
         PipelineApplicationState.createPooledDataSource(dbOptions, appMetrics);
-    DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
-    appState =
-        new PipelineApplicationState(appMetrics, pooledDataSource, RDA_PERSISTENCE_UNIT_NAME);
+    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
+    appState = new PipelineApplicationState(appMetrics, dataSource, RDA_PERSISTENCE_UNIT_NAME);
   }
 
   @After
@@ -88,10 +89,7 @@ public class RdaLoadJobIT {
         entityManager -> {
           final ImmutableList<ClaimChange> expectedClaims =
               JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseClaimChange);
-          List<PreAdjFissClaim> claims =
-              entityManager
-                  .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
-                  .getResultList();
+          List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (PreAdjFissClaim resultClaim : claims) {
             FissClaim expected = findMatchingFissClaim(expectedClaims, resultClaim);
@@ -102,6 +100,42 @@ public class RdaLoadJobIT {
             assertEquals(expected.getFissProcCodesCount(), resultClaim.getProcCodes().size());
             assertEquals(expected.getFissDiagCodesCount(), resultClaim.getDiagCodes().size());
           }
+        });
+  }
+
+  /**
+   * Verifies that an invalid FISS claim terminates the job and that all complete batches prior to
+   * the bad claim have been written to the database.
+   */
+  @Test
+  public void invalidFissClaimTest() throws Exception {
+    final List<String> fissClaimJson = new ArrayList<>(fissClaimsSource.readLines());
+    final int lastIndex = fissClaimJson.size() - 1;
+    final int fullBatchSize = fissClaimJson.size() - fissClaimJson.size() % BATCH_SIZE;
+    fissClaimJson.set(
+        lastIndex,
+        fissClaimJson
+            .get(lastIndex)
+            .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
+    assertTablesAreEmpty();
+    runServerTest(
+        fissClaimJson,
+        ImmutableList.of(),
+        port -> {
+          final RdaLoadOptions config = createRdaLoadOptions(port);
+          final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
+          try {
+            job.call();
+            fail("expected an exception to be thrown");
+          } catch (ProcessingException ex) {
+            assertEquals(fullBatchSize, ex.getProcessedCount());
+            assertEquals(true, ex.getMessage().contains("invalid length"));
+          }
+        });
+    runHibernateAssertions(
+        entityManager -> {
+          List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
+          assertEquals(fullBatchSize, claims.size());
         });
   }
 
@@ -121,10 +155,7 @@ public class RdaLoadJobIT {
         entityManager -> {
           final ImmutableList<ClaimChange> expectedClaims =
               JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseClaimChange);
-          List<PreAdjMcsClaim> claims =
-              entityManager
-                  .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
-                  .getResultList();
+          List<PreAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (PreAdjMcsClaim resultClaim : claims) {
             McsClaim expected = findMatchingMcsClaim(expectedClaims, resultClaim);
@@ -161,22 +192,26 @@ public class RdaLoadJobIT {
   private void assertTablesAreEmpty() throws Exception {
     runHibernateAssertions(
         entityManager -> {
-          List<PreAdjFissClaim> claims =
-              entityManager
-                  .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
-                  .getResultList();
-          assertEquals(0, claims.size());
-          List<PreAdjMcsClaim> claims2 =
-              entityManager
-                  .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
-                  .getResultList();
-          assertEquals(0, claims2.size());
+          assertEquals(0, getPreAdjFissClaims(entityManager).size());
+          assertEquals(0, getPreAdjMcsClaims(entityManager).size());
         });
+  }
+
+  private List<PreAdjMcsClaim> getPreAdjMcsClaims(EntityManager entityManager) {
+    return entityManager
+        .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
+        .getResultList();
+  }
+
+  private List<PreAdjFissClaim> getPreAdjFissClaims(EntityManager entityManager) {
+    return entityManager
+        .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+        .getResultList();
   }
 
   private static RdaLoadOptions createRdaLoadOptions(int serverPort) {
     return new RdaLoadOptions(
-        new AbstractRdaLoadJob.Config(Duration.ofSeconds(1), 17),
+        new AbstractRdaLoadJob.Config(Duration.ofSeconds(1), BATCH_SIZE),
         new GrpcRdaSource.Config("localhost", serverPort, Duration.ofMinutes(1)),
         new IdHasher.Config(100, "thisisjustatest"));
   }
