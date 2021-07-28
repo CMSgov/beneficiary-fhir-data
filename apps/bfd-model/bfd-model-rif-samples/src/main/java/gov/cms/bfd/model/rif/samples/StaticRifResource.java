@@ -168,51 +168,25 @@ public enum StaticRifResource {
 
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 
-  SAMPLE_SYNTHEA_BENES(
-      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "sample-a-bcarrier.txt"),
-      RifFileType.BENEFICIARY,
-      1),
+  SAMPLE_SYNTHEA_BENES(resourceUrl("rif-synthea/sample-benes.txt"), RifFileType.BENEFICIARY, 1),
 
-  SAMPLE_SYNTHEA_CARRIER(
-      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "rif-static-samples/sample-a-bcarrier.txt"),
-      RifFileType.CARRIER,
-      1),
+  SAMPLE_SYNTHEA_CARRIER(resourceUrl("rif-synthea/sample-bcarrier.txt"), RifFileType.CARRIER, 1),
 
   SAMPLE_SYNTHEA_INPATIENT(
-      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "rif-static-samples/sample-a-inpatient.txt"),
-      RifFileType.INPATIENT,
-      1),
+      resourceUrl("rif-synthea/sample-inpatient.txt"), RifFileType.INPATIENT, 1),
 
   SAMPLE_SYNTHEA_OUTPATIENT(
-      remoteS3Data(
-          TestDataSetLocation.SYNTHETIC_DATA, "rif-static-samples/sample-a-outpatient.txt"),
-      RifFileType.OUTPATIENT,
-      1),
+      resourceUrl("rif-synthea/sample-outpatient.txt"), RifFileType.OUTPATIENT, 1),
 
-  SAMPLE_SYNTHEA_SNF(
-      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "rif-static-samples/sample-a-snf.txt"),
-      RifFileType.SNF,
-      1),
+  SAMPLE_SYNTHEA_SNF(resourceUrl("rif-synthea/sample-snf.txt"), RifFileType.SNF, 1),
 
-  SAMPLE_SYNTHEA_HOSPICE(
-      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "rif-static-samples/sample-a-hospice.txt"),
-      RifFileType.HOSPICE,
-      1),
+  SAMPLE_SYNTHEA_HOSPICE(resourceUrl("rif-synthea/sample-hospice.txt"), RifFileType.HOSPICE, 1),
 
-  SAMPLE_SYNTHEA_HHA(
-      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "rif-static-samples/sample-a-hha.txt"),
-      RifFileType.HHA,
-      1),
+  SAMPLE_SYNTHEA_HHA(resourceUrl("rif-synthea//sample-hha.txt"), RifFileType.HHA, 1),
 
-  SAMPLE_SYNTHEA_DME(
-      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "rif-static-samples/sample-a-dme.txt"),
-      RifFileType.DME,
-      1),
+  SAMPLE_SYNTHEA_DME(resourceUrl("rif-synthea/sample-dme.txt"), RifFileType.DME, 1),
 
-  SAMPLE_SYNTHEA_PDE(
-      remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "rif-static-samples/sample-a-pde.txt"),
-      RifFileType.PDE,
-      1),
+  SAMPLE_SYNTHEA_PDE(resourceUrl("rif-synthea/sample-pde.txt"), RifFileType.PDE, 1),
 
   SYNTHETIC_BENEFICIARY_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-1999.rif"),
