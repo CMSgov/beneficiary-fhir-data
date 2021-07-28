@@ -261,7 +261,10 @@ public final class PipelineApplicationIT {
               new DataSetManifestEntry("inpatient.rif", RifFileType.INPATIENT),
               new DataSetManifestEntry("outpatient.rif", RifFileType.OUTPATIENT),
               new DataSetManifestEntry("snf.rif", RifFileType.SNF),
-              new DataSetManifestEntry("hospice.rif", RifFileType.HOSPICE));
+              new DataSetManifestEntry("hospice.rif", RifFileType.HOSPICE),
+              new DataSetManifestEntry("hha.rif", RifFileType.HHA),
+              new DataSetManifestEntry("dme.rif", RifFileType.DME),
+              new DataSetManifestEntry("pde.rif", RifFileType.PDE));
       s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
       s3Client.putObject(
           DataSetTestUtilities.createPutRequest(
@@ -299,6 +302,24 @@ public final class PipelineApplicationIT {
               manifest,
               manifest.getEntries().get(5),
               StaticRifResource.SAMPLE_SYNTHEA_HOSPICE.getResourceUrl()));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(6),
+              StaticRifResource.SAMPLE_SYNTHEA_HHA.getResourceUrl()));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(7),
+              StaticRifResource.SAMPLE_SYNTHEA_DME.getResourceUrl()));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(8),
+              StaticRifResource.SAMPLE_SYNTHEA_PDE.getResourceUrl()));
 
       // Start the app.
       ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
