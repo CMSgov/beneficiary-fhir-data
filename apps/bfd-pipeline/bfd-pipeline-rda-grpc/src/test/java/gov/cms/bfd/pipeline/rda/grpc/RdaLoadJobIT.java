@@ -12,7 +12,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
@@ -23,14 +26,15 @@ import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import io.grpc.Server;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import org.junit.After;
@@ -44,11 +48,19 @@ public class RdaLoadJobIT {
       Resources.asCharSource(Resources.getResource("MCS.ndjson"), StandardCharsets.UTF_8);
   private static final int BATCH_SIZE = 17;
 
+  private ImmutableList<String> fissClaimJson;
+  private ImmutableList<String> mcsClaimJson;
   private PipelineApplicationState appState;
   private Connection dbLifetimeConnection;
 
   @Before
-  public void setUp() throws SQLException {
+  public void setUp() throws Exception {
+    if (fissClaimJson == null) {
+      fissClaimJson = fissClaimsSource.readLines();
+    }
+    if (mcsClaimJson == null) {
+      mcsClaimJson = mcsClaimsSource.readLines();
+    }
     final String dbUrl = "jdbc:hsqldb:mem:RdaLoadJobIT";
     // the HSQLDB database will be destroyed when this connection is closed
     dbLifetimeConnection = DriverManager.getConnection(dbUrl + ";shutdown=true", "", "");
@@ -75,11 +87,10 @@ public class RdaLoadJobIT {
 
   @Test
   public void fissClaimsTest() throws Exception {
-    final ImmutableList<String> fissClaimJson = fissClaimsSource.readLines();
     assertTablesAreEmpty();
     runServerTest(
-        fissClaimJson,
-        ImmutableList.of(),
+        jsonSource(fissClaimJson),
+        EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
           final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
@@ -109,18 +120,18 @@ public class RdaLoadJobIT {
    */
   @Test
   public void invalidFissClaimTest() throws Exception {
-    final List<String> fissClaimJson = new ArrayList<>(fissClaimsSource.readLines());
-    final int lastIndex = fissClaimJson.size() - 1;
-    final int fullBatchSize = fissClaimJson.size() - fissClaimJson.size() % BATCH_SIZE;
-    fissClaimJson.set(
-        lastIndex,
-        fissClaimJson
-            .get(lastIndex)
-            .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
     assertTablesAreEmpty();
+    final List<String> badFissClaimJson = new ArrayList<>(fissClaimJson);
+    final int badClaimIndex = badFissClaimJson.size() - 1;
+    final int fullBatchSize = badFissClaimJson.size() - badFissClaimJson.size() % BATCH_SIZE;
+    badFissClaimJson.set(
+        badClaimIndex,
+        badFissClaimJson
+            .get(badClaimIndex)
+            .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
     runServerTest(
-        fissClaimJson,
-        ImmutableList.of(),
+        jsonSource(badFissClaimJson),
+        EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
           final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
@@ -142,10 +153,9 @@ public class RdaLoadJobIT {
   @Test
   public void mcsClaimsTest() throws Exception {
     assertTablesAreEmpty();
-    final ImmutableList<String> mcsClaimJson = mcsClaimsSource.readLines();
     runServerTest(
-        ImmutableList.of(),
-        mcsClaimJson,
+        EmptyMessageSource::new,
+        jsonSource(mcsClaimJson),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
           final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
@@ -166,6 +176,41 @@ public class RdaLoadJobIT {
             assertEquals(expected.getMcsDetailsCount(), resultClaim.getDetails().size());
             assertEquals(expected.getMcsDiagnosisCodesCount(), resultClaim.getDiagCodes().size());
           }
+        });
+  }
+
+  /**
+   * Verifies that a Server error terminates the job and that all complete batches prior to the bad
+   * claim have been written to the database.
+   */
+  @Test
+  public void serverExceptionTest() throws Exception {
+    assertTablesAreEmpty();
+    final int claimsToSendBeforeThrowing = mcsClaimJson.size() / 2;
+    final int fullBatchSize = claimsToSendBeforeThrowing - claimsToSendBeforeThrowing % BATCH_SIZE;
+    assertEquals(true, fullBatchSize > 0);
+    runServerTest(
+        EmptyMessageSource::new,
+        () ->
+            new ExceptionMessageSource<>(
+                new JsonMessageSource<>(mcsClaimJson, JsonMessageSource::parseClaimChange),
+                claimsToSendBeforeThrowing,
+                () -> new IOException("oops")),
+        port -> {
+          final RdaLoadOptions config = createRdaLoadOptions(port);
+          final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
+          try {
+            job.call();
+            fail("expected an exception to be thrown");
+          } catch (ProcessingException ex) {
+            assertEquals(fullBatchSize, ex.getProcessedCount());
+            assertEquals(true, ex.getMessage().contains("UNKNOWN"));
+          }
+        });
+    runHibernateAssertions(
+        entityManager -> {
+          List<PreAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
+          assertEquals(fullBatchSize, claims.size());
         });
   }
 
@@ -235,18 +280,21 @@ public class RdaLoadJobIT {
    * @throws Exception any exception is passed through to the caller
    */
   private static void runServerTest(
-      List<String> fissClaimJson, List<String> mcsClaimJson, ThrowableConsumer<Integer> test)
+      Supplier<MessageSource<ClaimChange>> fissClaims,
+      Supplier<MessageSource<ClaimChange>> mcsClaims,
+      ThrowableConsumer<Integer> test)
       throws Exception {
-    final Server server =
-        RdaServer.startLocal(
-            () -> new JsonMessageSource<>(fissClaimJson, JsonMessageSource::parseClaimChange),
-            () -> new JsonMessageSource<>(mcsClaimJson, JsonMessageSource::parseClaimChange));
+    final Server server = RdaServer.startLocal(fissClaims, mcsClaims);
     try {
       test.accept(server.getPort());
     } finally {
       server.shutdown();
       server.awaitTermination(5, TimeUnit.SECONDS);
     }
+  }
+
+  private Supplier<MessageSource<ClaimChange>> jsonSource(List<String> claimJson) {
+    return () -> new JsonMessageSource<>(claimJson, JsonMessageSource::parseClaimChange);
   }
 
   /**
