@@ -24,6 +24,9 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import io.grpc.Server;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -40,10 +43,13 @@ public class RdaLoadJobIT {
       Resources.asCharSource(Resources.getResource("MCS.ndjson"), StandardCharsets.UTF_8);
 
   private PipelineApplicationState appState;
+  private Connection dbLifetimeConnection;
 
   @Before
-  public void setUp() {
-    final String dbUrl = String.format("jdbc:hsqldb:mem:testing-%d", System.currentTimeMillis());
+  public void setUp() throws SQLException {
+    final String dbUrl = "jdbc:hsqldb:mem:RdaLoadJobIT";
+    // the HSQLDB database will be destroyed when this connection is closed
+    dbLifetimeConnection = DriverManager.getConnection(dbUrl + ";shutdown=true", "", "");
     final DatabaseOptions dbOptions = new DatabaseOptions(dbUrl, "", "", 10);
     final MetricRegistry appMetrics = new MetricRegistry();
     final HikariDataSource pooledDataSource =
@@ -59,11 +65,17 @@ public class RdaLoadJobIT {
       appState.close();
       appState = null;
     }
+    if (dbLifetimeConnection != null) {
+      // ensures that the HSQLDB database is destroyed before the next test begins
+      dbLifetimeConnection.close();
+      dbLifetimeConnection = null;
+    }
   }
 
   @Test
   public void fissClaimsTest() throws Exception {
     final ImmutableList<String> fissClaimJson = fissClaimsSource.readLines();
+    assertTablesAreEmpty();
     runServerTest(
         fissClaimJson,
         ImmutableList.of(),
@@ -95,6 +107,7 @@ public class RdaLoadJobIT {
 
   @Test
   public void mcsClaimsTest() throws Exception {
+    assertTablesAreEmpty();
     final ImmutableList<String> mcsClaimJson = mcsClaimsSource.readLines();
     runServerTest(
         ImmutableList.of(),
@@ -143,6 +156,22 @@ public class RdaLoadJobIT {
         .filter(claim -> claim.getIdrClmHdIcn().equals(resultClaim.getIdrClmHdIcn()))
         .findAny()
         .orElse(null);
+  }
+
+  private void assertTablesAreEmpty() throws Exception {
+    runHibernateAssertions(
+        entityManager -> {
+          List<PreAdjFissClaim> claims =
+              entityManager
+                  .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+                  .getResultList();
+          assertEquals(0, claims.size());
+          List<PreAdjMcsClaim> claims2 =
+              entityManager
+                  .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
+                  .getResultList();
+          assertEquals(0, claims2.size());
+        });
   }
 
   private static RdaLoadOptions createRdaLoadOptions(int serverPort) {
