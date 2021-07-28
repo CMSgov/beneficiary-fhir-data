@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.HHAClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -71,14 +72,18 @@ public class HHAClaimTransformerV2Test {
   @Before
   public void before() {
     claim = generateClaim();
-    eob = HHAClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    ExplanationOfBenefit genEob =
+        HHAClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
 
   @Test
   public void shouldSetID() {
-    Assert.assertEquals("hha-" + claim.getClaimId(), eob.getId());
+    Assert.assertEquals("ExplanationOfBenefit/hha-" + claim.getClaimId(), eob.getId());
   }
 
   @Test
