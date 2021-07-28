@@ -187,13 +187,13 @@ public final class ServerProcess implements AutoCloseable {
               .filter(f -> f.getFileName().toString().startsWith("bfd-server-launcher-"))
               .findFirst()
               .get();
-      Path appJar =
+      Path serverLauncherScript =
           Files.list(assemblyDirectory)
               .filter(f -> f.getFileName().toString().equals("bfd-server-launcher.sh"))
               .findFirst()
               .get();
 
-      return new String[] {appJar.toAbsolutePath().toString()};
+      return new String[] {serverLauncherScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

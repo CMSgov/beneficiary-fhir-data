@@ -361,7 +361,7 @@ public final class PipelineApplicationIT {
    * @return a {@link ProcessBuilder} that can be used to launch the application
    */
   private static ProcessBuilder createAppProcessBuilder(Bucket bucket) {
-    String[] command = createCommandForPipelineApplication();
+    String[] command = createCommandForPipelineApp();
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
 
@@ -409,20 +409,20 @@ public final class PipelineApplicationIT {
    * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
    *     the application via its <code>.x</code> assembly executable script
    */
-  private static String[] createCommandForPipelineApplication() {
+  private static String[] createCommandForPipelineApp() {
     try {
       Path assemblyDirectory =
           Files.list(Paths.get(".", "target", "pipeline-app"))
               .filter(f -> f.getFileName().toString().startsWith("bfd-pipeline-app-"))
               .findFirst()
               .get();
-      Path appJar =
+      Path pipelineAppScript =
           Files.list(assemblyDirectory)
               .filter(f -> f.getFileName().toString().equals("bfd-pipeline-app.sh"))
               .findFirst()
               .get();
 
-      return new String[] {appJar.toAbsolutePath().toString()};
+      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
