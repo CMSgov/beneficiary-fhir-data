@@ -69,16 +69,16 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
             running.set(false);
             responseObserver.onCompleted();
             generator.close();
-            LOGGER.info("getFissClaims call cancelled by client");
+            LOGGER.info("call cancelled by client");
           } else if (!generator.hasNext()) {
             running.set(false);
             responseObserver.onCompleted();
             generator.close();
-            LOGGER.info("getFissClaims call complete");
+            LOGGER.info("call complete");
           }
         } catch (Exception ex) {
           running.set(false);
-          LOGGER.error("getFissClaims caught exception: {}", ex.getMessage(), ex);
+          LOGGER.error("caught exception: {}", ex.getMessage(), ex);
           responseObserver.onError(ex);
         }
       }
