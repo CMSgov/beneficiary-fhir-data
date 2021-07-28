@@ -66,6 +66,26 @@ public enum StaticRifResource {
 
   SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
 
+  SAMPLE_SYNTHEA_BENES(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.BENEFICIARY, 1),
+
+  SAMPLE_SYNTHEA_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
+
+  SAMPLE_SYNTHEA_INPATIENT(
+      resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
+
+  SAMPLE_SYNTHEA_OUTPATIENT(
+      resourceUrl("rif-static-samples/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
+
+  SAMPLE_SYNTHEA_SNF(resourceUrl("rif-static-samples/sample-a-snf.txt"), RifFileType.SNF, 1),
+
+  SAMPLE_SYNTHEA_HOSPICE(resourceUrl("rif-static-samples/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
+
+  SAMPLE_SYNTHEA_HHA(resourceUrl("rif-static-samples/sample-a-hha.txt"), RifFileType.HHA, 1),
+
+  SAMPLE_SYNTHEA_DME(resourceUrl("rif-static-samples/sample-a-dme.txt"), RifFileType.DME, 1),
+
+  SAMPLE_SYNTHEA_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
+
   SAMPLE_B_BENES(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "beneficiary_test.rif"),
       RifFileType.BENEFICIARY,

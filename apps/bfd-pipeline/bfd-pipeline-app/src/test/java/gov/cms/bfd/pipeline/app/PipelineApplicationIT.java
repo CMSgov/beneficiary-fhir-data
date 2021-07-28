@@ -34,6 +34,7 @@ import org.awaitility.core.ConditionTimeoutException;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.AssumptionViolatedException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -207,6 +208,69 @@ public final class PipelineApplicationIT {
               manifest,
               manifest.getEntries().get(1),
               StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
+
+      // Start the app.
+      ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
+      appRunBuilder.redirectErrorStream(true);
+      appProcess = appRunBuilder.start();
+      appProcess.getOutputStream().close();
+
+      // Read the app's output.
+      ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+      Thread appRunConsumerThread = new Thread(appRunConsumer);
+      appRunConsumerThread.start();
+
+      // Wait for it to process a data set.
+      Awaitility.await()
+          .atMost(Duration.ONE_MINUTE)
+          .until(() -> hasADataSetBeenProcessed(appRunConsumer));
+
+      // Stop the application.
+      sendSigterm(appProcess);
+      appProcess.waitFor(1, TimeUnit.MINUTES);
+      appRunConsumerThread.join();
+
+      // Verify that the application exited as expected.
+      verifyExitValueMatchesSignal(SIGTERM, appProcess);
+    } finally {
+      if (appProcess != null) appProcess.destroyForcibly();
+      if (bucket != null) DataSetTestUtilities.deleteObjectsAndBucket(s3Client, bucket);
+    }
+  }
+
+  @Ignore
+  @Test
+  public void processSyntheaDataLocally() throws IOException, InterruptedException {
+    skipOnUnsupportedOs();
+
+    AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
+    Bucket bucket = null;
+    Process appProcess = null;
+    try {
+      /*
+       * Create the (empty) bucket to run against, and populate it with a
+       * data set.
+       */
+      bucket = DataSetTestUtilities.createTestBucket(s3Client);
+      DataSetManifest manifest =
+          new DataSetManifest(
+              Instant.now(),
+              0,
+              new DataSetManifestEntry("beneficiaries.rif", RifFileType.BENEFICIARY),
+              new DataSetManifestEntry("carrier.rif", RifFileType.CARRIER));
+      s3Client.putObject(DataSetTestUtilities.createPutRequest(bucket, manifest));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(0),
+              StaticRifResource.SAMPLE_SYNTHEA_BENES.getResourceUrl()));
+      s3Client.putObject(
+          DataSetTestUtilities.createPutRequest(
+              bucket,
+              manifest,
+              manifest.getEntries().get(1),
+              StaticRifResource.SAMPLE_SYNTHEA_CARRIER.getResourceUrl()));
 
       // Start the app.
       ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
