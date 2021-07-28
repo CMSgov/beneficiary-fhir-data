@@ -1,13 +1,7 @@
-/*
- * Creates the RDA FISS pre-adjudicated claims tables required by the application.
- * https://confluenceent.cms.gov/pages/viewpage.action?spaceKey=MPSM&title=MVP+0.1+Data+Dictionary+for+Replicated+Data+Access+API
- */
-
-CREATE SCHEMA IF NOT EXISTS "pre_adj";
-
-/*
- * Where possible column names map directly to fields in the RDA API result message.
- */
+-- Creates the RDA FISS pre-adjudicated claims tables required by the application.
+-- https://confluenceent.cms.gov/pages/viewpage.action?spaceKey=MPSM&title=MVP+0.1+Data+Dictionary+for+Replicated+Data+Access+API
+ 
+-- Where possible column names map directly to fields in the RDA API result message.
 create table "pre_adj"."FissClaims"
 (
     "dcn"               varchar(23) not null,
