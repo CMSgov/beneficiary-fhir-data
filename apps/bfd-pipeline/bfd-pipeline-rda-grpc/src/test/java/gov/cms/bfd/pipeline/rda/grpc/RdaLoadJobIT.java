@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import static gov.cms.bfd.pipeline.rda.grpc.server.RdaServer.runWithLocalServer;
 import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
 import static org.junit.Assert.*;
 
@@ -16,7 +17,6 @@ import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -25,7 +25,6 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
-import io.grpc.Server;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -33,7 +32,6 @@ import java.sql.DriverManager;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
@@ -88,7 +86,7 @@ public class RdaLoadJobIT {
   @Test
   public void fissClaimsTest() throws Exception {
     assertTablesAreEmpty();
-    runServerTest(
+    runWithLocalServer(
         jsonSource(fissClaimJson),
         EmptyMessageSource::new,
         port -> {
@@ -129,7 +127,7 @@ public class RdaLoadJobIT {
         badFissClaimJson
             .get(badClaimIndex)
             .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
-    runServerTest(
+    runWithLocalServer(
         jsonSource(badFissClaimJson),
         EmptyMessageSource::new,
         port -> {
@@ -153,7 +151,7 @@ public class RdaLoadJobIT {
   @Test
   public void mcsClaimsTest() throws Exception {
     assertTablesAreEmpty();
-    runServerTest(
+    runWithLocalServer(
         EmptyMessageSource::new,
         jsonSource(mcsClaimJson),
         port -> {
@@ -189,7 +187,7 @@ public class RdaLoadJobIT {
     final int claimsToSendBeforeThrowing = mcsClaimJson.size() / 2;
     final int fullBatchSize = claimsToSendBeforeThrowing - claimsToSendBeforeThrowing % BATCH_SIZE;
     assertEquals(true, fullBatchSize > 0);
-    runServerTest(
+    runWithLocalServer(
         EmptyMessageSource::new,
         () ->
             new ExceptionMessageSource<>(
@@ -259,38 +257,6 @@ public class RdaLoadJobIT {
         new AbstractRdaLoadJob.Config(Duration.ofSeconds(1), BATCH_SIZE),
         new GrpcRdaSource.Config("localhost", serverPort, Duration.ofMinutes(1)),
         new IdHasher.Config(100, "thisisjustatest"));
-  }
-
-  /**
-   * Used to define lambdas that might throw a checked exception. Allowing the exception to pass
-   * through makes it easier for a specific test to assert on it.
-   */
-  @FunctionalInterface
-  private interface ThrowableConsumer<T> {
-    void accept(T arg) throws Exception;
-  }
-
-  /**
-   * Starts a server, runs a test with the server's port as a parameter, and then shuts down the
-   * server once the test has finished running.
-   *
-   * @param fissClaimJson the FISS claims in JSON format, one per line
-   * @param mcsClaimJson the MCS claims in JSON format, one per line
-   * @param test the test to execute
-   * @throws Exception any exception is passed through to the caller
-   */
-  private static void runServerTest(
-      Supplier<MessageSource<ClaimChange>> fissClaims,
-      Supplier<MessageSource<ClaimChange>> mcsClaims,
-      ThrowableConsumer<Integer> test)
-      throws Exception {
-    final Server server = RdaServer.startLocal(fissClaims, mcsClaims);
-    try {
-      test.accept(server.getPort());
-    } finally {
-      server.shutdown();
-      server.awaitTermination(5, TimeUnit.SECONDS);
-    }
   }
 
   private Supplier<MessageSource<ClaimChange>> jsonSource(List<String> claimJson) {
