@@ -88,7 +88,7 @@ public final class PipelineJobRecordStore {
        * jobs. That's acceptable, since only VolunteerJob calls this.
        */
       return jobRecords.values().stream()
-          .filter(j -> !j.isStarted())
+          .filter(j -> !j.isEnqueued())
           .sorted(Comparator.comparing(PipelineJobRecord::getCreatedTime))
           .limit(maxJobRecords)
           .collect(Collectors.toSet());

@@ -18,7 +18,6 @@ import java.util.concurrent.Semaphore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * General PipelineJob instance that delegates the actual ETL work to two other objects. The
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractRdaLoadJob<TResponse>
     implements PipelineJob<NullPipelineJobArguments> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRdaLoadJob.class);
   public static final String CALLS_METER_NAME = "calls";
   public static final String FAILURES_METER_NAME = "failures";
   public static final String SUCCESSES_METER_NAME = "successes";
@@ -42,6 +40,7 @@ public abstract class AbstractRdaLoadJob<TResponse>
   private final Config config;
   private final Callable<RdaSource<TResponse>> sourceFactory;
   private final Callable<RdaSink<TResponse>> sinkFactory;
+  private final Logger logger; // each subclass provides its own logger
   private final Meter callsMeter;
   private final Meter failuresMeter;
   private final Meter successesMeter;
@@ -54,10 +53,12 @@ public abstract class AbstractRdaLoadJob<TResponse>
       Config config,
       Callable<RdaSource<TResponse>> sourceFactory,
       Callable<RdaSink<TResponse>> sinkFactory,
-      MetricRegistry appMetrics) {
+      MetricRegistry appMetrics,
+      Logger logger) {
     this.config = Preconditions.checkNotNull(config);
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
     this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
+    this.logger = logger;
     callsMeter = appMetrics.meter(metricName(CALLS_METER_NAME));
     failuresMeter = appMetrics.meter(metricName(FAILURES_METER_NAME));
     successesMeter = appMetrics.meter(metricName(SUCCESSES_METER_NAME));
@@ -70,10 +71,11 @@ public abstract class AbstractRdaLoadJob<TResponse>
     // We only allow one outstanding call at a time.  If this job is already running any other
     // call to the same job exits immediately with NOTHING_TO_DO.
     if (!runningSemaphore.tryAcquire()) {
-      LOGGER.warn("job is already running");
+      logger.warn("job is already running");
       return NOTHING_TO_DO;
     }
     try {
+      logger.info("processing begins");
       final long startMillis = System.currentTimeMillis();
       int processedCount = 0;
       Exception error = null;
@@ -91,10 +93,10 @@ public abstract class AbstractRdaLoadJob<TResponse>
       }
       processedMeter.mark(processedCount);
       final long stopMillis = System.currentTimeMillis();
-      LOGGER.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
+      logger.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
       if (error != null) {
         failuresMeter.mark();
-        LOGGER.error("processing aborted by an exception: message={}", error.getMessage(), error);
+        logger.error("processing aborted by an exception: message={}", error.getMessage(), error);
         throw new ProcessingException(error, processedCount);
       }
       successesMeter.mark();
