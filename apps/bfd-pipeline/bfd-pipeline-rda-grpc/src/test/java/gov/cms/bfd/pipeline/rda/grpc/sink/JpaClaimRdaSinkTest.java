@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -196,6 +197,6 @@ public class JpaClaimRdaSinkTest {
   private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
     PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn(dcn);
-    return new RdaChange<>(RdaChange.Type.INSERT, claim);
+    return new RdaChange<>(RdaChange.Type.INSERT, claim, Instant.now());
   }
 }

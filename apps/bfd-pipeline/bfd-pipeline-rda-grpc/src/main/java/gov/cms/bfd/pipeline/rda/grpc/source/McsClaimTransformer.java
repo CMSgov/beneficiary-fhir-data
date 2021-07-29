@@ -102,7 +102,10 @@ public class McsClaimTransformer {
               errors.size(), from.getIdrClmHdIcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
-    return new RdaChange<>(RdaApiUtils.mapApiChangeType(change.getChangeType()), to);
+    return new RdaChange<>(
+        RdaApiUtils.mapApiChangeType(change.getChangeType()),
+        to,
+        transformer.instant(change.getTimestamp()));
   }
 
   private PreAdjMcsClaim transformClaim(McsClaim from, DataTransformer transformer) {

@@ -79,7 +79,7 @@ public class JpaClaimRdaSinkIT {
     diagCode0.setDiagPoaInd("Q");
     claim.getDiagCodes().add(diagCode0);
 
-    int count = sink.writeObject(new RdaChange<>(RdaChange.Type.INSERT, claim));
+    int count = sink.writeObject(new RdaChange<>(RdaChange.Type.INSERT, claim, Instant.now()));
     assertEquals(1, count);
 
     List<PreAdjFissClaim> claims =
@@ -116,7 +116,7 @@ public class JpaClaimRdaSinkIT {
     diagCode.setIdrDiagIcdType("T");
     claim.getDiagCodes().add(diagCode);
 
-    int count = sink.writeObject(new RdaChange<>(RdaChange.Type.INSERT, claim));
+    int count = sink.writeObject(new RdaChange<>(RdaChange.Type.INSERT, claim, Instant.now()));
     assertEquals(1, count);
 
     List<PreAdjMcsClaim> resultClaims =
