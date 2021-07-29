@@ -325,8 +325,8 @@ public final class PipelineApplicationIT {
                   .atMost(Duration.ONE_MINUTE)
                   .until(
                       () ->
-                          hasRdaFissLoadJobFailed(appRunConsumer)
-                              && hasRdaMcsLoadJobFailed(appRunConsumer));
+                          hasRdaFissLoadJobCompleted(appRunConsumer)
+                              && hasRdaMcsLoadJobCompleted(appRunConsumer));
             } catch (ConditionTimeoutException e) {
               throw new RuntimeException(
                   "Pipeline application failed to start scanning within timeout, STDOUT:\n"

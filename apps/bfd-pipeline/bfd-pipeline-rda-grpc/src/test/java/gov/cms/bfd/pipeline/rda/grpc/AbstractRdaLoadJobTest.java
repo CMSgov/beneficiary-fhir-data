@@ -55,7 +55,7 @@ public class AbstractRdaLoadJobTest {
   public void openSourceFails() throws Exception {
     doThrow(new IOException("oops")).when(sourceFactory).call();
     try {
-      job.call();
+      job.callRdaServiceAndStoreRecords();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
       assertEquals("oops", ex.getCause().getMessage());
@@ -71,7 +71,7 @@ public class AbstractRdaLoadJobTest {
     doReturn(source).when(sourceFactory).call();
     doThrow(new IOException("oops")).when(sinkFactory).call();
     try {
-      job.call();
+      job.callRdaServiceAndStoreRecords();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
       assertEquals("oops", ex.getCause().getMessage());
@@ -90,7 +90,7 @@ public class AbstractRdaLoadJobTest {
         .when(source)
         .retrieveAndProcessObjects(anyInt(), same(sink));
     try {
-      job.call();
+      job.callRdaServiceAndStoreRecords();
       Assert.fail("job should have thrown exception");
     } catch (Exception ex) {
       Assert.assertNotNull(ex.getCause());

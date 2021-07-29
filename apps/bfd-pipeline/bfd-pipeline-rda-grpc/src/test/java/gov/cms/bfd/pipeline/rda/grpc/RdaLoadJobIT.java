@@ -133,9 +133,9 @@ public class RdaLoadJobIT {
         EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
+          final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState);
           try {
-            job.call();
+            job.callRdaServiceAndStoreRecords();
             fail("expected an exception to be thrown");
           } catch (ProcessingException ex) {
             assertEquals(fullBatchSize, ex.getProcessedCount());
@@ -197,9 +197,9 @@ public class RdaLoadJobIT {
                 () -> new IOException("oops")),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
+          final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState);
           try {
-            job.call();
+            job.callRdaServiceAndStoreRecords();
             fail("expected an exception to be thrown");
           } catch (ProcessingException ex) {
             assertEquals(fullBatchSize, ex.getProcessedCount());
