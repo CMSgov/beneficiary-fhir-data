@@ -1,5 +1,15 @@
 /*
- * schema definition for new BFD table names and idiomatic column names based on CCW data names
+ * schema definition for new BFD table names and idiomatic CCW column names.
+ *
+ * At a high level, the primary changes are:
+ *   1) convert beneficiaryId, claimId, and claimGroupId froam CHAR(11) to BIGINT which
+ *      will result in smaller and more efficient indeces.
+ *   2) Use better defined Postgres data types (i.e., NUMERIC(3,0) to SMALLINT)
+ *   3) minor changes to column ordering to facilitate potential indexing; also group together
+ *      like data elements.
+ *
+ * In all table definitions, there is a commented identifier to the right of each table column;
+ * this represents the previous schema name for that data column.
  */
 
 ${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
