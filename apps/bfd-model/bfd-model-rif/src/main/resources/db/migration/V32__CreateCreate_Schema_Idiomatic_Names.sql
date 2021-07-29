@@ -1,17 +1,40 @@
 /*
- * schema definition for new BFD table names and idiomatic CCW column names.
+ * This migration has two primary goals:
  *
- * At a high level, the primary changes are:
- *   1) convert beneficiaryId, claimId, and claimGroupId froam CHAR(11) to BIGINT which
- *      will result in smaller and more efficient indeces.
- *   2) Use better defined Postgres data types (i.e., NUMERIC(3,0) to SMALLINT)
- *   3) minor changes to column ordering to facilitate potential indexing; also group together
- *      like data elements.
+ * First, we want to convert the beneficiaryId, claimId and claimGroupId columns to `bigint`, rather than
+ * their current `varchar(11)` types. Per the PostgreSQL documentation, a `varchar(11)` column requires 16 bytes
+ * per record on disk [1], and a `bigint` column only requires 8 bytes. Accordingly, this change roughly halves
+ * the size of our indexes using those columns.
+ *
+ * Second, we're _finally_ moving to a more idiomatic (and user-friendly) naming scheme for these tables based
+ * (almost entirely) on CCW field names.
+ *
+ * In addition to those primary goals, this schema migration is also being used as a good opportunity to
+ * address all of these other less major schema changes:
+ * 
+ * * Use better defined Postgres data types (i.e., NUMERIC(3,0) to SMALLINT)
+ * * Minor changes to column ordering to facilitate potential indexing
+ * * Group together like data elements.
  *
  * In all table definitions, there is a commented identifier to the right of each table column;
  * this represents the previous schema name for that data column.
+ *
+ * Overall, it is expected that these migrations will be in steps:
+ *
+ * 1. Create the new tables in the same schema as the current database schema.
+ * 2. Migrate current data to new tables (i.e., Insert-Select)
+ * 3. apply indeces as needed; based on some of the known queries that have proven probabmatic,
+ *    final disposition of all indeces will not be defined in this file.
+ * 3. Deploy a new version of the application that only uses those new tables.
+ * 4. Remove the original tables.
+ * 
+ * This script is for Step 1.
+ *
+ * NOTE: Steps 1 and 2 may be combined as a single step depending on final strategic paln.
+ *
+ * [1]: https://www.postgresql.org/docs/10/datatype-character.html
+ * [2]: https://www.postgresql.org/docs/10/datatype-numeric.html
  */
-
 ${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
 
 create table beneficiaries (
@@ -223,7 +246,6 @@ create table beneficiaries (
     last_updated                             timestamp with time zone,                 -- lastupdated
     constraint beneficiaries_pkey primary key (bene_id)
 )
-${logic.tablespaces-escape} tablespace beneficiaries_ts
 
 
 create table beneficiaries_history (
@@ -240,7 +262,6 @@ create table beneficiaries_history (
     last_updated                             timestamp with time zone,                 -- lastupdated
     constraint beneficiaries_history_pkey primary key (beneficiary_history_id)
 )
-${logic.tablespaces-escape} tablespace beneficiaries_ts
 
 
 create table beneficiaries_history_invalid_beneficiaries (
@@ -253,7 +274,6 @@ create table beneficiaries_history_invalid_beneficiaries (
     bene_birth_dt                            date not null,                            -- birthDate
     constraint beneficiaries_history_invalid_beneficiaries_pkey primary key (beneficiary_history_id)
 )
-${logic.tablespaces-escape} tablespace beneficiaries_ts
 
 
 create table beneficiary_monthly (
@@ -274,7 +294,6 @@ create table beneficiary_monthly (
     medicaid_dual_eligibility_code           character varying(2),                     -- medicaidDualEligibilityCode
     constraint beneficiary_monthly_pkey primary key (bene_id, year_month)
 )
-${logic.tablespaces-escape} tablespace beneficiary_monthly_ts
 
 
 create table loaded_batches (
