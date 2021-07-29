@@ -117,7 +117,7 @@ public class GrpcRdaSourceIT {
       FissClaimStreamCaller streamCaller =
           new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
       try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source =
-          new GrpcRdaSource<>(channel, streamCaller, appMetrics)) {
+          new GrpcRdaSource<>(channel, streamCaller, appMetrics, "fiss")) {
         count = source.retrieveAndProcessObjects(3, sink);
       }
       assertEquals(2, count);

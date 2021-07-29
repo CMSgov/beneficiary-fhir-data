@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,20 +36,8 @@ import org.slf4j.LoggerFactory;
 public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
 
-  public static final String CALLS_METER =
-      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "calls");
-  public static final String RECORDS_RECEIVED_METER =
-      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "recordsReceived");
-  public static final String RECORDS_STORED_METER =
-      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "recordsStored");
-  public static final String BATCHES_METER =
-      MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), "batches");
-
   private final GrpcStreamCaller<TResponse> caller;
-  private final Meter callsMeter;
-  private final Meter recordsReceivedMeter;
-  private final Meter recordsStoredMeter;
-  private final Meter batchesMeter;
+  private final Metrics metrics;
   private ManagedChannel channel;
 
   /**
@@ -60,8 +49,11 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @param appMetrics the MetricRegistry used to track metrics
    */
   public GrpcRdaSource(
-      Config config, GrpcStreamCaller<TResponse> caller, MetricRegistry appMetrics) {
-    this(config.createChannel(), caller, appMetrics);
+      Config config,
+      GrpcStreamCaller<TResponse> caller,
+      MetricRegistry appMetrics,
+      String claimType) {
+    this(config.createChannel(), caller, appMetrics, claimType);
   }
 
   /**
@@ -75,13 +67,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    */
   @VisibleForTesting
   GrpcRdaSource(
-      ManagedChannel channel, GrpcStreamCaller<TResponse> caller, MetricRegistry appMetrics) {
+      ManagedChannel channel,
+      GrpcStreamCaller<TResponse> caller,
+      MetricRegistry appMetrics,
+      String claimType) {
     this.caller = Preconditions.checkNotNull(caller);
     this.channel = Preconditions.checkNotNull(channel);
-    callsMeter = appMetrics.meter(CALLS_METER);
-    recordsReceivedMeter = appMetrics.meter(RECORDS_RECEIVED_METER);
-    recordsStoredMeter = appMetrics.meter(RECORDS_STORED_METER);
-    batchesMeter = appMetrics.meter(BATCHES_METER);
+    metrics = new Metrics(appMetrics, claimType);
   }
 
   /**
@@ -96,7 +88,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   @Override
   public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TResponse> sink)
       throws ProcessingException {
-    callsMeter.mark();
+    metrics.calls.mark();
     boolean interrupted = false;
     Exception error = null;
     int processed = 0;
@@ -106,7 +98,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       try {
         while (responseStream.hasNext()) {
           final TResponse result = responseStream.next();
-          recordsReceivedMeter.mark();
+          metrics.objectsReceived.mark();
           batch.add(result);
           if (batch.size() >= maxPerBatch) {
             processed += submitBatchToSink(sink, batch);
@@ -159,14 +151,18 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     }
   }
 
+  public Metrics getMetrics() {
+    return metrics;
+  }
+
   private int submitBatchToSink(RdaSink<TResponse> sink, List<TResponse> batch)
       throws ProcessingException {
     LOGGER.info("submitting batch to sink: size={}", batch.size());
     int processed = sink.writeBatch(batch);
     LOGGER.info("submitted batch to sink: size={} processed={}", batch.size(), processed);
     batch.clear();
-    batchesMeter.mark();
-    recordsStoredMeter.mark(processed);
+    metrics.batches.mark();
+    metrics.objectsStored.mark(processed);
     return processed;
   }
 
@@ -236,6 +232,28 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     @Override
     public int hashCode() {
       return Objects.hash(host, port, maxIdle);
+    }
+  }
+
+  /**
+   * Metrics are tested in unit tests so they need to be easily accessible from tests. Also this
+   * class is used to write both MCS and FISS claims so the metric names need to include a claim
+   * type to distinguish them.
+   */
+  @Getter
+  @VisibleForTesting
+  static class Metrics {
+    private final Meter calls;
+    private final Meter objectsReceived;
+    private final Meter objectsStored;
+    private final Meter batches;
+
+    public Metrics(MetricRegistry appMetrics, String claimType) {
+      final String base = MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), claimType);
+      calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
+      objectsReceived = appMetrics.meter(MetricRegistry.name(base, "objects", "received"));
+      objectsStored = appMetrics.meter(MetricRegistry.name(base, "objects", "stored"));
+      batches = appMetrics.meter(MetricRegistry.name(base, "batches"));
     }
   }
 }
