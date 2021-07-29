@@ -15,10 +15,10 @@ import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaFissClaimLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaMcsClaimLoadJob;
+import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -254,8 +254,8 @@ public final class PipelineApplicationIT {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.runWithLocalServer(
-          () -> WrappedClaimSource.wrapFissClaims(new RandomFissClaimSource(12345, 100)),
-          () -> WrappedClaimSource.wrapMcsClaims(new RandomMcsClaimSource(12345, 100)),
+          () -> new RandomFissClaimSource(12345, 100).toClaimChanges(),
+          () -> new RandomMcsClaimSource(12345, 100).toClaimChanges(),
           port -> {
             // Start the app.
             ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
@@ -275,6 +275,58 @@ public final class PipelineApplicationIT {
                       () ->
                           hasRdaFissLoadJobCompleted(appRunConsumer)
                               && hasRdaMcsLoadJobCompleted(appRunConsumer));
+            } catch (ConditionTimeoutException e) {
+              throw new RuntimeException(
+                  "Pipeline application failed to start scanning within timeout, STDOUT:\n"
+                      + appRunConsumer.getStdoutContents(),
+                  e);
+            }
+
+            // Stop the application.
+            sendSigterm(appProcess.get());
+            appProcess.get().waitFor(1, TimeUnit.MINUTES);
+            appRunConsumerThread.join();
+
+            // Verify that the application exited as expected.
+            verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
+          });
+    } finally {
+      if (appProcess.get() != null) appProcess.get().destroyForcibly();
+    }
+  }
+
+  @Test
+  public void rdaPipelineServerFailure() throws Exception {
+    skipOnUnsupportedOs();
+
+    final AtomicReference<Process> appProcess = new AtomicReference<>();
+    try {
+      RdaServer.runWithLocalServer(
+          () ->
+              new ExceptionMessageSource<>(
+                  new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
+          () ->
+              new ExceptionMessageSource<>(
+                  new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
+          port -> {
+            // Start the app.
+            ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
+            appRunBuilder.redirectErrorStream(true);
+            appProcess.set(appRunBuilder.start());
+
+            // Read the app's output.
+            ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess.get());
+            Thread appRunConsumerThread = new Thread(appRunConsumer);
+            appRunConsumerThread.start();
+
+            // Wait for it to start scanning.
+            try {
+              Awaitility.await()
+                  .atMost(Duration.ONE_MINUTE)
+                  .until(
+                      () ->
+                          hasRdaFissLoadJobFailed(appRunConsumer)
+                              && hasRdaMcsLoadJobFailed(appRunConsumer));
             } catch (ConditionTimeoutException e) {
               throw new RuntimeException(
                   "Pipeline application failed to start scanning within timeout, STDOUT:\n"
@@ -361,6 +413,30 @@ public final class PipelineApplicationIT {
   private static boolean hasCcwRifLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
     return hasJobRecordMatching(
         appRunConsumer, PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED, CcwRifLoadJob.class);
+  }
+
+  /**
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
+   */
+  private static boolean hasRdaFissLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
+    return hasJobRecordMatching(
+        appRunConsumer,
+        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED,
+        RdaFissClaimLoadJob.class);
+  }
+
+  /**
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
+   */
+  private static boolean hasRdaMcsLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
+    return hasJobRecordMatching(
+        appRunConsumer,
+        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED,
+        RdaMcsClaimLoadJob.class);
   }
 
   private static boolean hasJobRecordMatching(

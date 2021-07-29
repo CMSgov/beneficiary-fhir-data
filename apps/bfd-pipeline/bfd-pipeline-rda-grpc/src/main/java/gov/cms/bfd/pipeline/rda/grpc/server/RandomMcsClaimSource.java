@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.util.NoSuchElementException;
 
@@ -34,4 +35,8 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
 
   @Override
   public void close() {}
+
+  public MessageSource<ClaimChange> toClaimChanges() {
+    return WrappedClaimSource.wrapMcsClaims(this);
+  }
 }

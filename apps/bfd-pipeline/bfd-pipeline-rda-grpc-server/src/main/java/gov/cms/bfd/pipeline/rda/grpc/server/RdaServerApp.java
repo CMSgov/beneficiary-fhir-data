@@ -91,7 +91,7 @@ public class RdaServerApp {
             "serving no more than {} FissClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
             seed);
-        return WrappedClaimSource.wrapFissClaims(new RandomFissClaimSource(seed, maxToSend));
+        return new RandomFissClaimSource(seed, maxToSend).toClaimChanges();
       }
     }
 
@@ -106,7 +106,7 @@ public class RdaServerApp {
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
             seed);
-        return WrappedClaimSource.wrapMcsClaims(new RandomMcsClaimSource(seed, maxToSend));
+        return new RandomMcsClaimSource(seed, maxToSend).toClaimChanges();
       }
     }
   }

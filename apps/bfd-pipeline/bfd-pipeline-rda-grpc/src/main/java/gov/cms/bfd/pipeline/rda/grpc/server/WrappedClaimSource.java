@@ -22,7 +22,7 @@ public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
    * @param source the actual source of FISS/MCS claims
    * @param setter lambda to add the claim to the appropriate field in the ClaimChange builder
    */
-  public WrappedClaimSource(MessageSource<T> source, BiConsumer<ClaimChange.Builder, T> setter) {
+  private WrappedClaimSource(MessageSource<T> source, BiConsumer<ClaimChange.Builder, T> setter) {
     this.source = source;
     this.setter = setter;
   }
