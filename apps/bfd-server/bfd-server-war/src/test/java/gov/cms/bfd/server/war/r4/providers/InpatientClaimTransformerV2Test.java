@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -71,7 +72,11 @@ public final class InpatientClaimTransformerV2Test {
   @Before
   public void before() {
     claim = generateClaim();
-    eob = InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    ExplanationOfBenefit genEob =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -79,7 +84,7 @@ public final class InpatientClaimTransformerV2Test {
   /** Common top level EOB values */
   @Test
   public void shouldSetID() {
-    Assert.assertEquals("inpatient-" + claim.getClaimId(), eob.getId());
+    Assert.assertEquals("inpatient-" + claim.getClaimId(), eob.getIdElement().getIdPart());
   }
 
   @Test
