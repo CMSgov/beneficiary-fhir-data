@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -44,7 +45,7 @@ public class CarrierClaimTransformerV2Test {
   /**
    * Generates the Claim object to be used in multiple tests
    *
-   * @return
+   * @return claim object
    * @throws FHIRException
    */
   public CarrierClaim generateClaim() throws FHIRException {
@@ -66,14 +67,18 @@ public class CarrierClaimTransformerV2Test {
   @Before
   public void before() {
     claim = generateClaim();
-    eob = CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    ExplanationOfBenefit genEob =
+        CarrierClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.CarrierClaimTransformer#transform(Object)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link
-   * InpatientClaim}.
+   * gov.cms.bfd.server.war.r4.providers.CarrierClaimTransformerV2#transform(MetricRegistry, Object,
+   * Optional<Boolean>)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_INPATIENT} {@link InpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -372,7 +377,7 @@ public class CarrierClaimTransformerV2Test {
 
   @Test
   public void shouldSetID() {
-    Assert.assertEquals("carrier-" + claim.getClaimId(), eob.getId());
+    Assert.assertEquals("ExplanationOfBenefit/carrier-" + claim.getClaimId(), eob.getId());
   }
 
   @Test
