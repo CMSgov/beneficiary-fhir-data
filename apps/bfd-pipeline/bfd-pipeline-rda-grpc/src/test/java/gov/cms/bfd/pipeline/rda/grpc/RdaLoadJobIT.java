@@ -25,6 +25,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
+import io.grpc.StatusRuntimeException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -202,7 +203,7 @@ public class RdaLoadJobIT {
             fail("expected an exception to be thrown");
           } catch (ProcessingException ex) {
             assertEquals(fullBatchSize, ex.getProcessedCount());
-            assertEquals(true, ex.getMessage().contains("UNKNOWN"));
+            assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
           }
         });
     runHibernateAssertions(
