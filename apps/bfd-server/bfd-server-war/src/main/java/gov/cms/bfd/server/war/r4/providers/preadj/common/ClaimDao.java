@@ -147,9 +147,6 @@ public class ClaimDao {
 
     List<Predicate> predicates = new ArrayList<>();
 
-    // If the row's end service date attribute is null, don't return it
-    predicates.add(builder.isNotNull(serviceDateEndPath));
-
     DateParam lowerBound = serviceDate.getLowerBound();
 
     if (lowerBound != null) {
