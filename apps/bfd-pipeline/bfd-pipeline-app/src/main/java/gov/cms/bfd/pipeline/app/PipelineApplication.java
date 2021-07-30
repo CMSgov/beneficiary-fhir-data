@@ -10,6 +10,7 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
+import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
@@ -104,10 +105,6 @@ public final class PipelineApplication {
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
-    // Create the application state.
-    PipelineApplicationState appState =
-        new PipelineApplicationState(appMetrics, appConfig.getDatabaseOptions());
-
     /*
      * Create the PipelineManager that will be responsible for running and managing the various
      * jobs.
@@ -117,19 +114,28 @@ public final class PipelineApplication {
     registerShutdownHook(appMetrics, pipelineManager);
     LOGGER.info("Job processing started.");
 
+    // Create a pooled data source for use by the DatabaseSchemaUpdateJob.
+    final HikariDataSource pooledDataSource =
+        PipelineApplicationState.createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
+
     /*
      * Register and wait for the database schema job to run, so that we don't have to worry about
      * declaring it as a dependency (since it is for pretty much everything right now).
      */
-    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(appState.getPooledDataSource()));
+    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(pooledDataSource));
     PipelineJobRecord<NullPipelineJobArguments> dbSchemaJobRecord =
         jobRecordStore.submitPendingJob(DatabaseSchemaUpdateJob.JOB_TYPE, null);
     try {
       jobRecordStore.waitForJobs(dbSchemaJobRecord);
     } catch (InterruptedException e) {
-      appState.close();
+      pooledDataSource.close();
       throw new InterruptedException();
     }
+
+    // Now create an application state that reuses the existing pooled data source.
+    final PipelineApplicationState appState =
+        new PipelineApplicationState(
+            appMetrics, pooledDataSource, PipelineApplicationState.PERSISTENCE_UNIT_NAME);
 
     /*
      * Create and register the other jobs.
@@ -137,13 +143,19 @@ public final class PipelineApplication {
     pipelineManager.registerJob(createCcwRifLoadJob(appConfig, appState));
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
+      LOGGER.info("RDA API jobs are enabled in app configuration.");
+      final PipelineApplicationState rdaAppState =
+          new PipelineApplicationState(
+              appMetrics, pooledDataSource, PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME);
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
-      final PipelineJob<NullPipelineJobArguments> fissLoadJob =
-          rdaLoadOptions.createFissClaimsLoadJob(appState);
-      final PipelineJob<NullPipelineJobArguments> mcsLoadJob =
-          rdaLoadOptions.createMcsClaimsLoadJob(appState);
-      pipelineManager.registerJob(fissLoadJob);
-      pipelineManager.registerJob(mcsLoadJob);
+
+      pipelineManager.registerJob(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
+      LOGGER.info("Registered RdaFissClaimLoadJob.");
+
+      pipelineManager.registerJob(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
+      LOGGER.info("Registered RdaMcsClaimLoadJob.");
+    } else {
+      LOGGER.info("RDA API jobs are not enabled in app configuration.");
     }
 
     /*

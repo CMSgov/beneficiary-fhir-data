@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
@@ -12,9 +13,9 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -66,12 +67,16 @@ public final class HospiceClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
     createEOB(Optional.of(false));
   }
 
   private void createEOB(Optional<Boolean> includeTaxNumber) {
-    eob = HospiceClaimTransformerV2.transform(new MetricRegistry(), claim, includeTaxNumber);
+    ExplanationOfBenefit genEob =
+        HospiceClaimTransformerV2.transform(new MetricRegistry(), claim, includeTaxNumber);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
   /**
@@ -88,8 +93,9 @@ public final class HospiceClaimTransformerV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SNFClaimTransformer#transform(Object)} works as expected
-   * when run against the {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
+   * gov.cms.bfd.server.war.r4.providers.SNFClaimTransformerV2#transform(MetricRegistry, Object,
+   * Optional<Boolean>)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -103,7 +109,7 @@ public final class HospiceClaimTransformerV2Test {
   /** Common top level ExplanationOfBenefit values */
   @Test
   public void shouldSetId() {
-    Assert.assertEquals("hospice-" + claim.getClaimId(), eob.getId());
+    Assert.assertEquals("ExplanationOfBenefit/hospice-" + claim.getClaimId(), eob.getId());
   }
 
   @Test

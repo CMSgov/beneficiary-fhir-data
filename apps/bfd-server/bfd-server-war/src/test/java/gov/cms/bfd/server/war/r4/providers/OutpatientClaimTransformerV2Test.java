@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.OutpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
@@ -8,8 +9,8 @@ import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -60,7 +61,7 @@ public final class OutpatientClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
 
     return claim;
   }
@@ -68,14 +69,18 @@ public final class OutpatientClaimTransformerV2Test {
   @Before
   public void before() {
     claim = generateClaim();
-    eob = OutpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    ExplanationOfBenefit genEob =
+        OutpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genEob);
+    eob = parser.parseResource(ExplanationOfBenefit.class, json);
   }
 
   private static final FhirContext fhirContext = FhirContext.forR4();
 
   @Test
   public void shouldSetID() {
-    Assert.assertEquals("outpatient-" + claim.getClaimId(), eob.getId());
+    Assert.assertEquals("ExplanationOfBenefit/outpatient-" + claim.getClaimId(), eob.getId());
   }
 
   @Test
