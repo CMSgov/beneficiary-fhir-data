@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob.*;
+import static gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob.Config;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -12,6 +13,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -47,8 +50,13 @@ public class AbstractRdaLoadJobTest {
 
   @Test
   public void meterNames() {
-    assertEquals("TestingLoadJob.calls", job.metricName(CALLS_METER_NAME));
-    assertEquals("TestingLoadJob.failures", job.metricName(FAILURES_METER_NAME));
+    assertEquals(
+        Arrays.asList(
+            "TestingLoadJob.calls",
+            "TestingLoadJob.failures",
+            "TestingLoadJob.processed",
+            "TestingLoadJob.successes"),
+        new ArrayList<>(appMetrics.getNames()));
   }
 
   @Test
@@ -62,8 +70,10 @@ public class AbstractRdaLoadJobTest {
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verifyNoInteractions(sinkFactory);
-    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
-    assertEquals(1, appMetrics.meter(job.metricName(FAILURES_METER_NAME)).getCount());
+    assertMeterReading(1, "calls", job.getMetrics().getCalls());
+    assertMeterReading(0, "successes", job.getMetrics().getSuccesses());
+    assertMeterReading(1, "failures", job.getMetrics().getFailures());
+    assertMeterReading(0, "processed", job.getMetrics().getProcessed());
   }
 
   @Test
@@ -78,8 +88,10 @@ public class AbstractRdaLoadJobTest {
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     verify(source).close();
-    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
-    assertEquals(1, appMetrics.meter(job.metricName(FAILURES_METER_NAME)).getCount());
+    assertMeterReading(1, "calls", job.getMetrics().getCalls());
+    assertMeterReading(0, "successes", job.getMetrics().getSuccesses());
+    assertMeterReading(1, "failures", job.getMetrics().getFailures());
+    assertMeterReading(0, "processed", job.getMetrics().getProcessed());
   }
 
   @Test
@@ -102,8 +114,10 @@ public class AbstractRdaLoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
-    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
-    assertEquals(1, appMetrics.meter(job.metricName(FAILURES_METER_NAME)).getCount());
+    assertMeterReading(1, "calls", job.getMetrics().getCalls());
+    assertMeterReading(0, "successes", job.getMetrics().getSuccesses());
+    assertMeterReading(1, "failures", job.getMetrics().getFailures());
+    assertMeterReading(7, "processed", job.getMetrics().getProcessed());
   }
 
   @Test
@@ -119,15 +133,17 @@ public class AbstractRdaLoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
-    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
-    assertEquals(1, appMetrics.meter(job.metricName(SUCCESSES_METER_NAME)).getCount());
+    assertMeterReading(1, "calls", job.getMetrics().getCalls());
+    assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
+    assertMeterReading(0, "failures", job.getMetrics().getFailures());
+    assertMeterReading(0, "processed", job.getMetrics().getProcessed());
   }
 
   @Test
   public void workDone() throws Exception {
     doReturn(source).when(sourceFactory).call();
     doReturn(sink).when(sinkFactory).call();
-    doReturn(25000).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
+    doReturn(25_000).when(source).retrieveAndProcessObjects(anyInt(), same(sink));
     try {
       PipelineJobOutcome outcome = job.call();
       assertEquals(PipelineJobOutcome.WORK_DONE, outcome);
@@ -136,8 +152,10 @@ public class AbstractRdaLoadJobTest {
     }
     verify(source).close();
     verify(sink).close();
-    assertEquals(1, appMetrics.meter(job.metricName(CALLS_METER_NAME)).getCount());
-    assertEquals(1, appMetrics.meter(job.metricName(SUCCESSES_METER_NAME)).getCount());
+    assertMeterReading(1, "calls", job.getMetrics().getCalls());
+    assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
+    assertMeterReading(0, "failures", job.getMetrics().getFailures());
+    assertMeterReading(25_000, "processed", job.getMetrics().getProcessed());
   }
 
   @Test
@@ -183,6 +201,10 @@ public class AbstractRdaLoadJobTest {
       pool.shutdown();
       pool.awaitTermination(5, TimeUnit.SECONDS);
     }
+    assertMeterReading(1, "calls", job.getMetrics().getCalls());
+    assertMeterReading(1, "successes", job.getMetrics().getSuccesses());
+    assertMeterReading(0, "failures", job.getMetrics().getFailures());
+    assertMeterReading(100, "processed", job.getMetrics().getProcessed());
   }
 
   @Test

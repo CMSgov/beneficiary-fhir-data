@@ -124,12 +124,14 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       if (isInterrupted(error)) {
         interrupted = true;
       } else {
+        metrics.failures.mark();
         throw new ProcessingException(error, processed);
       }
     }
     if (interrupted) {
       LOGGER.warn("interrupted with processedCount {}", processed);
     }
+    metrics.successes.mark();
     return processed;
   }
 
@@ -243,14 +245,30 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   @Getter
   @VisibleForTesting
   static class Metrics {
+    /** Number of times the source has been called to retrieve data from the RDA API. */
     private final Meter calls;
+    /** Number of calls that successfully called service and stored results. */
+    private final Meter successes;
+    /** Number of calls that ended in some sort of failure. */
+    private final Meter failures;
+    /** Number of objects that have been received from the RDA API. */
     private final Meter objectsReceived;
+    /**
+     * Number of objects that have been successfully stored by the sink. Generally <code>
+     * batches * maxPerBatch</code>
+     */
     private final Meter objectsStored;
+    /**
+     * Number of batches/transactions used to store the objects. Generally <code>
+     * objectsReceived / maxPerBatch</code>
+     */
     private final Meter batches;
 
-    public Metrics(MetricRegistry appMetrics, String claimType) {
+    private Metrics(MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), claimType);
       calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
+      failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
       objectsReceived = appMetrics.meter(MetricRegistry.name(base, "objects", "received"));
       objectsStored = appMetrics.meter(MetricRegistry.name(base, "objects", "stored"));
       batches = appMetrics.meter(MetricRegistry.name(base, "batches"));

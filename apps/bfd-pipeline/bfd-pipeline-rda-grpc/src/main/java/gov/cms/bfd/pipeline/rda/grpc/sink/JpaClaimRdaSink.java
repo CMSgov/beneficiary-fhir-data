@@ -62,6 +62,7 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
       metrics.failures.mark();
       throw new ProcessingException(error, 0);
     }
+    metrics.successes.mark();
     metrics.objectsWritten.mark(claims.size());
     return claims.size();
   }
@@ -144,15 +145,23 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
   @Getter
   @VisibleForTesting
   static class Metrics {
+    /** Number of times the sink has been called to store objects. */
     private final Meter calls;
+    /** Number of calls that successfully stored the objects. */
+    private final Meter successes;
+    /** Number of calls that failed to store the objects. */
     private final Meter failures;
+    /** Number of objects written. */
     private final Meter objectsWritten;
+    /** Number of objects stored using <code>persist()</code>. */
     private final Meter objectsPersisted;
+    /** Number of objects stored using <code>merge()</code> */
     private final Meter objectsMerged;
 
-    public Metrics(MetricRegistry appMetrics, String claimType) {
+    private Metrics(MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(JpaClaimRdaSink.class.getSimpleName(), claimType);
       calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
       failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
       objectsWritten = appMetrics.meter(MetricRegistry.name(base, "writes", "total"));
       objectsPersisted = appMetrics.meter(MetricRegistry.name(base, "writes", "persisted"));

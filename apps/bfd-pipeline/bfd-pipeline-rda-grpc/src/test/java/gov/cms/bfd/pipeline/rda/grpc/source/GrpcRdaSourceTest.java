@@ -1,10 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +53,19 @@ public class GrpcRdaSourceTest {
   }
 
   @Test
+  public void metricNames() {
+    assertEquals(
+        Arrays.asList(
+            "GrpcRdaSource.ints.batches",
+            "GrpcRdaSource.ints.calls",
+            "GrpcRdaSource.ints.failures",
+            "GrpcRdaSource.ints.objects.received",
+            "GrpcRdaSource.ints.objects.stored",
+            "GrpcRdaSource.ints.successes"),
+        new ArrayList<>(appMetrics.getNames()));
+  }
+
+  @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3)).when(caller).callService(channel);
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
@@ -63,6 +77,8 @@ public class GrpcRdaSourceTest {
     assertMeterReading(3, "received", metrics.getObjectsReceived());
     assertMeterReading(3, "stored", metrics.getObjectsStored());
     assertMeterReading(2, "batches", metrics.getBatches());
+    assertMeterReading(1, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
   }
 
   @Test
@@ -89,6 +105,8 @@ public class GrpcRdaSourceTest {
     assertMeterReading(4, "received", metrics.getObjectsReceived());
     assertMeterReading(2, "stored", metrics.getObjectsStored());
     assertMeterReading(1, "batches", metrics.getBatches());
+    assertMeterReading(0, "successes", metrics.getSuccesses());
+    assertMeterReading(1, "failures", metrics.getFailures());
   }
 
   @Test
@@ -114,6 +132,8 @@ public class GrpcRdaSourceTest {
     assertMeterReading(0, "received", metrics.getObjectsReceived());
     assertMeterReading(0, "stored", metrics.getObjectsStored());
     assertMeterReading(0, "batches", metrics.getBatches());
+    assertMeterReading(0, "successes", metrics.getSuccesses());
+    assertMeterReading(1, "failures", metrics.getFailures());
   }
 
   @Test
@@ -137,6 +157,8 @@ public class GrpcRdaSourceTest {
     assertMeterReading(4, "received", metrics.getObjectsReceived());
     assertMeterReading(2, "stored", metrics.getObjectsStored());
     assertMeterReading(1, "batches", metrics.getBatches());
+    assertMeterReading(0, "successes", metrics.getSuccesses());
+    assertMeterReading(1, "failures", metrics.getFailures());
   }
 
   @Test
@@ -159,6 +181,8 @@ public class GrpcRdaSourceTest {
     assertMeterReading(2, "received", metrics.getObjectsReceived());
     assertMeterReading(2, "stored", metrics.getObjectsStored());
     assertMeterReading(1, "batches", metrics.getBatches());
+    assertMeterReading(1, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
     verify(response).cancelStream(anyString());
   }
 
@@ -185,10 +209,6 @@ public class GrpcRdaSourceTest {
       loaded = (GrpcRdaSource.Config) inp.readObject();
     }
     Assert.assertEquals(original, loaded);
-  }
-
-  private void assertMeterReading(long expected, String name, Meter meter) {
-    assertEquals("Meter " + name, expected, meter.getCount());
   }
 
   private GrpcResponseStream<Integer> createResponse(int... values) {
