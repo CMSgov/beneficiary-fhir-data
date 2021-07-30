@@ -210,7 +210,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     private ManagedChannel createChannel() {
       final ManagedChannelBuilder<?> builder =
           ManagedChannelBuilder.forAddress(host, port)
-              .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS);
+              .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS)
+              .enableRetry();
       if (host.equals("localhost")) {
         builder.usePlaintext();
       }
