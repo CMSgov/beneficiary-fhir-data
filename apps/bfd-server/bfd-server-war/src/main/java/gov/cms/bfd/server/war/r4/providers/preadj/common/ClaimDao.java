@@ -89,6 +89,7 @@ public class ClaimDao {
    * @param attributeValue The desired value of the attribute be searched on.
    * @param lastUpdated The range of lastUpdated values to search on.
    * @param serviceDate Date range of the desired service date to search on.
+   * @param endDateAttributeName The name of the entity attribute denoting service end date.
    * @param <T> The entity type being retrieved.
    * @return A list of entities of type T retrieved matching the given parameters.
    */
