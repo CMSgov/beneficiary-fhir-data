@@ -6,6 +6,7 @@ NOTES:
 - PL/pgSQL's BEGIN/END are only for grouping, they do not start or end a transaction.
 - The logic.perms placeholder will be replaced by '--' (commented out) if hsql, removed if postgres.
 - So these perms will only be applied if run on postgres. See DatabaseSchemaManager.java for placeholders.
+- Fixes perms on existing tables.
 */
 
 ${logic.perms} DO $$
