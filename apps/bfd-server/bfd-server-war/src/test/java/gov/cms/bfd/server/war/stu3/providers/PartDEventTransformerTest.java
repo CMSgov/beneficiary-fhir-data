@@ -285,7 +285,8 @@ public final class PartDEventTransformerTest {
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
       TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(), "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN");
+          claim.getNationalDrugCode(),
+          "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

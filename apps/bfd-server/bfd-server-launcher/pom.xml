@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<jetty.version>9.4.39.v20210325</jetty.version>
+		<jetty.version>9.4.43.v20210629</jetty.version>
 	</properties>
 
 	<dependencies>

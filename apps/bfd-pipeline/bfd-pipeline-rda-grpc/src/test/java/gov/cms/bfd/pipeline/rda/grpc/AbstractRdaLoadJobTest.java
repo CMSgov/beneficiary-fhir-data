@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractRdaLoadJobTest {
@@ -205,7 +206,12 @@ public class AbstractRdaLoadJobTest {
         Callable<RdaSource<Integer>> sourceFactory,
         Callable<RdaSink<Integer>> sinkFactory,
         MetricRegistry appMetrics) {
-      super(config, sourceFactory, sinkFactory, appMetrics);
+      super(
+          config,
+          sourceFactory,
+          sinkFactory,
+          appMetrics,
+          LoggerFactory.getLogger(TestingLoadJob.class));
     }
   }
 }
