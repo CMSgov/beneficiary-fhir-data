@@ -50,3 +50,7 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_performance_tester
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
+
+# Enables the RDA API data pipline with a 1 hour retry interval.
+data_pipeline_rda_job_enabled: true
+data_pipeline_rda_job_interval_seconds: 3600

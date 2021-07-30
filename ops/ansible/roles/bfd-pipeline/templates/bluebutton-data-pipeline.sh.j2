@@ -12,6 +12,12 @@ export NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
 export NEW_RELIC_METRIC_HOST='{{ data_pipeline_new_relic_metric_host }}'
 export NEW_RELIC_METRIC_PATH='{{ data_pipeline_new_relic_metric_path }}'
 export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
+export RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
+export RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
+export RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
+export RDA_GRPC_HOST='{{ data_pipeline_rda_grpc_host }}'
+export RDA_GRPC_PORT='{{ data_pipeline_rda_grpc_port }}'
+export RDA_GRPC_MAX_IDLE_SECONDS='{{ data_pipeline_rda_grpc_max_idle_seconds }}'
 
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"

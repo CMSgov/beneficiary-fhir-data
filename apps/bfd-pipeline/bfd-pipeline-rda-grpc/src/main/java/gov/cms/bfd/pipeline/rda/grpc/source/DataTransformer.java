@@ -181,7 +181,7 @@ public class DataTransformer {
       EnumStringExtractor.Result enumResult,
       Consumer<String> copier) {
     final EnumStringExtractor.Status status = enumResult.getStatus();
-    if (status == EnumStringExtractor.Status.NoValue) {
+    if (status == EnumStringExtractor.Status.NoValue && !nullable) {
       addError(fieldName, "no value set");
     } else if (status == EnumStringExtractor.Status.InvalidValue) {
       addError(fieldName, "unrecognized enum value");
