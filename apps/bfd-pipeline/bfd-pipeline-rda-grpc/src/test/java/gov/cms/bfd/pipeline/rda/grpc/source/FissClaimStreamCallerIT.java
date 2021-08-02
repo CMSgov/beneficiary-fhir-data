@@ -13,6 +13,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
@@ -50,6 +52,8 @@ public class FissClaimStreamCallerIT {
 
   @Test
   public void test() throws Exception {
+    // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
+    final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
     final Server server =
         RdaServer.startInProcess(
             "test",
@@ -57,7 +61,8 @@ public class FissClaimStreamCallerIT {
                 WrappedClaimSource.wrapFissClaims(
                     new JsonMessageSource<>(
                         CLAIM_1 + System.lineSeparator() + CLAIM_2,
-                        JsonMessageSource::parseFissClaim)),
+                        JsonMessageSource::parseFissClaim),
+                    clock),
             EmptyMessageSource::new);
     try {
       final ManagedChannel channel = InProcessChannelBuilder.forName("test").build();

@@ -37,6 +37,6 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
   public void close() {}
 
   public MessageSource<ClaimChange> toClaimChanges() {
-    return WrappedClaimSource.wrapFissClaims(this);
+    return WrappedClaimSource.wrapFissClaims(this, generator.getClock());
   }
 }

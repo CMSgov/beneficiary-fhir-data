@@ -37,6 +37,6 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
   public void close() {}
 
   public MessageSource<ClaimChange> toClaimChanges() {
-    return WrappedClaimSource.wrapMcsClaims(this);
+    return WrappedClaimSource.wrapMcsClaims(this, generator.getClock());
   }
 }

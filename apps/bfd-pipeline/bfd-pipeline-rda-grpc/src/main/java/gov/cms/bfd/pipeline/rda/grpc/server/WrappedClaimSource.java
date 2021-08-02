@@ -1,8 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.protobuf.Timestamp;
 import gov.cms.mpsm.rda.v1.ClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
+import java.time.Clock;
 import java.util.function.BiConsumer;
 
 /**
@@ -13,6 +15,7 @@ import java.util.function.BiConsumer;
  */
 public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
   private final MessageSource<T> source;
+  private final Clock clock;
   private final BiConsumer<ClaimChange.Builder, T> setter;
 
   /**
@@ -22,8 +25,10 @@ public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
    * @param source the actual source of FISS/MCS claims
    * @param setter lambda to add the claim to the appropriate field in the ClaimChange builder
    */
-  private WrappedClaimSource(MessageSource<T> source, BiConsumer<ClaimChange.Builder, T> setter) {
+  private WrappedClaimSource(
+      MessageSource<T> source, Clock clock, BiConsumer<ClaimChange.Builder, T> setter) {
     this.source = source;
+    this.clock = clock;
     this.setter = setter;
   }
 
@@ -34,8 +39,11 @@ public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
 
   @Override
   public ClaimChange next() throws Exception {
+    final Timestamp timestamp =
+        Timestamp.newBuilder().setSeconds(clock.instant().getEpochSecond()).build();
     final ClaimChange.Builder builder = ClaimChange.newBuilder();
     builder.setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE);
+    builder.setTimestamp(timestamp);
     setter.accept(builder, source.next());
     return builder.build();
   }
@@ -45,11 +53,13 @@ public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
     source.close();
   }
 
-  public static WrappedClaimSource<FissClaim> wrapFissClaims(MessageSource<FissClaim> source) {
-    return new WrappedClaimSource<>(source, ClaimChange.Builder::setFissClaim);
+  public static WrappedClaimSource<FissClaim> wrapFissClaims(
+      MessageSource<FissClaim> source, Clock clock) {
+    return new WrappedClaimSource<>(source, clock, ClaimChange.Builder::setFissClaim);
   }
 
-  public static WrappedClaimSource<McsClaim> wrapMcsClaims(MessageSource<McsClaim> source) {
-    return new WrappedClaimSource<>(source, ClaimChange.Builder::setMcsClaim);
+  public static WrappedClaimSource<McsClaim> wrapMcsClaims(
+      MessageSource<McsClaim> source, Clock clock) {
+    return new WrappedClaimSource<>(source, clock, ClaimChange.Builder::setMcsClaim);
   }
 }
