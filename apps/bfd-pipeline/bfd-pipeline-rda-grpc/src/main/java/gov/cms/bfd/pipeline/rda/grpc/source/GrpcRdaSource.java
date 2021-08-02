@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.ProcessingException.isInterrupted;
 
-import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,15 +95,15 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     Exception error = null;
     int processed = 0;
     try {
-      metrics.activity.inc();
+      setUptimeToRunning();
       final GrpcResponseStream<TResponse> responseStream = caller.callService(channel);
       final List<TResponse> batch = new ArrayList<>();
       try {
         while (responseStream.hasNext()) {
+          setUptimeToReceiving();
           final TResponse result = responseStream.next();
           metrics.objectsReceived.mark();
           batch.add(result);
-          metrics.activity.inc();
           if (batch.size() >= maxPerBatch) {
             processed += submitBatchToSink(sink, batch);
           }
@@ -122,7 +123,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     } catch (Exception ex) {
       error = ex;
     } finally {
-      metrics.activity.dec(metrics.activity.getCount());
+      setUptimeToStopped();
     }
     if (error != null) {
       // InterruptedException isn't really an error so we exit normally rather than rethrowing.
@@ -162,6 +163,27 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     return metrics;
   }
 
+  /**
+   * Indicates service is running but not actively processing a new record. Called at start of job
+   * and when a batch has been written.
+   */
+  @VisibleForTesting
+  void setUptimeToRunning() {
+    metrics.uptimeValue.set(10);
+  }
+
+  /** Indicates service is actively receiving a batch of data. */
+  @VisibleForTesting
+  void setUptimeToReceiving() {
+    metrics.uptimeValue.set(20);
+  }
+
+  /** Indicates service is not running. */
+  @VisibleForTesting
+  void setUptimeToStopped() {
+    metrics.uptimeValue.set(0);
+  }
+
   private int submitBatchToSink(RdaSink<TResponse> sink, List<TResponse> batch)
       throws ProcessingException {
     LOGGER.info("submitting batch to sink: size={}", batch.size());
@@ -170,7 +192,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     batch.clear();
     metrics.batches.mark();
     metrics.objectsStored.mark(processed);
-    metrics.activity.dec(processed);
+    setUptimeToRunning();
     return processed;
   }
 
@@ -271,11 +293,11 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
      */
     private final Meter batches;
 
-    /**
-     * Used to track job activity by incrementing at start and when objects are received and
-     * decrementing when batches are written or the job terminates.
-     */
-    private final Counter activity;
+    /** Used to provide a metric indicating whether the service is running. */
+    private final Gauge<?> uptime;
+
+    /** Holds the value that is reported in the update gauge. */
+    private final AtomicInteger uptimeValue = new AtomicInteger();
 
     private Metrics(MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), claimType);
@@ -285,7 +307,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       objectsReceived = appMetrics.meter(MetricRegistry.name(base, "objects", "received"));
       objectsStored = appMetrics.meter(MetricRegistry.name(base, "objects", "stored"));
       batches = appMetrics.meter(MetricRegistry.name(base, "batches"));
-      activity = appMetrics.counter(MetricRegistry.name(base, "activity"));
+      uptime = appMetrics.gauge(MetricRegistry.name(base, "uptime"), () -> uptimeValue::get);
     }
   }
 }

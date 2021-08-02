@@ -56,13 +56,13 @@ public class GrpcRdaSourceTest {
   public void metricNames() {
     assertEquals(
         Arrays.asList(
-            "GrpcRdaSource.ints.activity",
             "GrpcRdaSource.ints.batches",
             "GrpcRdaSource.ints.calls",
             "GrpcRdaSource.ints.failures",
             "GrpcRdaSource.ints.objects.received",
             "GrpcRdaSource.ints.objects.stored",
-            "GrpcRdaSource.ints.successes"),
+            "GrpcRdaSource.ints.successes",
+            "GrpcRdaSource.ints.uptime"),
         new ArrayList<>(appMetrics.getNames()));
   }
 
@@ -80,6 +80,11 @@ public class GrpcRdaSourceTest {
     assertMeterReading(2, "batches", metrics.getBatches());
     assertMeterReading(1, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
+    // once at start, twice after a batch
+    verify(source, times(3)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(3)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
   }
 
   @Test
@@ -108,6 +113,11 @@ public class GrpcRdaSourceTest {
     assertMeterReading(1, "batches", metrics.getBatches());
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(1, "failures", metrics.getFailures());
+    // once at start, once after a batch
+    verify(source, times(2)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(4)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
   }
 
   @Test
@@ -136,6 +146,9 @@ public class GrpcRdaSourceTest {
     assertMeterReading(0, "batches", metrics.getBatches());
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(1, "failures", metrics.getFailures());
+    verify(source).setUptimeToRunning();
+    verify(source, times(0)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
   }
 
   @Test
@@ -161,6 +174,11 @@ public class GrpcRdaSourceTest {
     assertMeterReading(1, "batches", metrics.getBatches());
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(1, "failures", metrics.getFailures());
+    // once at start, once after a batch
+    verify(source, times(2)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(4)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
   }
 
   @Test
@@ -186,6 +204,11 @@ public class GrpcRdaSourceTest {
     assertMeterReading(1, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
     verify(response).cancelStream(anyString());
+    // once at start, once after a batch
+    verify(source, times(2)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(2)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
   }
 
   @Test
