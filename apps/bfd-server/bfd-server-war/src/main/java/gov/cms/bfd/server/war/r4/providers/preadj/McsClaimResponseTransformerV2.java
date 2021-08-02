@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.collect.ImmutableMap;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -24,6 +26,80 @@ public class McsClaimResponseTransformerV2 {
 
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
+
+  private static final Map<String, String> STATUS_TEXT;
+
+  static {
+    STATUS_TEXT =
+        ImmutableMap.<String, String>builder()
+            .put("a", "Current Active Claim")
+            .put("b", "Suspended")
+            .put("c", "Approved Awaiting CWF Tesponse")
+            .put("d", "Approved and Paid")
+            .put("e", "Denied")
+            .put("f", "Full Claim Refund")
+            .put("g", "Partial Refund Applied")
+            .put("j", "Claim Still Active")
+            .put("k", "Claim Pending Suspense")
+            .put("l", "CWF Suspense")
+            .put("m", "Approved and Paid")
+            .put("n", "Denied for Payment")
+            .put("p", "Partial Claim Refund")
+            .put("q", "Adjusted")
+            .put("r", "Claim Deleted")
+            .put("u", "Paid, but Not for Dup Use")
+            .put("v", "Denied, but Not for Dup Use")
+            .put("w", "Rejected")
+            .put("x", "Partial Refund")
+            .put("y", "Full Refund")
+            .put("z", "Voided")
+            .put("1", "Current Active Claim")
+            .put("2", "Suspended")
+            .put("3", "Approved Awaiting CWF")
+            .put("4", "Approved and Paid")
+            .put("5", "Denied")
+            // .put("6", "Not Used")
+            .put("8", "Claim Moved to Another Hic")
+            .put("9", "Claim Deleted")
+            .build();
+  }
+
+  private static final Map<String, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME;
+
+  static {
+    STATUS_TO_OUTCOME =
+        ImmutableMap.<String, ClaimResponse.RemittanceOutcome>builder()
+            .put("a", ClaimResponse.RemittanceOutcome.QUEUED)
+            .put("b", ClaimResponse.RemittanceOutcome.QUEUED)
+            .put("c", ClaimResponse.RemittanceOutcome.PARTIAL)
+            .put("d", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("e", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("f", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("g", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("j", ClaimResponse.RemittanceOutcome.QUEUED)
+            .put("k", ClaimResponse.RemittanceOutcome.QUEUED)
+            .put("l", ClaimResponse.RemittanceOutcome.PARTIAL)
+            .put("m", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("n", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("p", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("q", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("r", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("u", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("v", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("w", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("x", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("y", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("z", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("1", ClaimResponse.RemittanceOutcome.QUEUED)
+            .put("2", ClaimResponse.RemittanceOutcome.QUEUED)
+            .put("3", ClaimResponse.RemittanceOutcome.PARTIAL)
+            .put("4", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put("5", ClaimResponse.RemittanceOutcome.COMPLETE)
+            // .put("6", null)
+            .put("8", ClaimResponse.RemittanceOutcome.PARTIAL)
+            .put("9", ClaimResponse.RemittanceOutcome.COMPLETE)
+            .build();
+  }
 
   private McsClaimResponseTransformerV2() {}
 
@@ -56,7 +132,7 @@ public class McsClaimResponseTransformerV2 {
     claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
     claim.setStatus(ClaimResponse.ClaimResponseStatus.ACTIVE);
-    claim.setOutcome(ClaimResponse.RemittanceOutcome.QUEUED);
+    claim.setOutcome(STATUS_TO_OUTCOME.get(claimGroup.getIdrStatusCode().toLowerCase()));
     claim.setType(getType());
     claim.setUse(ClaimResponse.Use.CLAIM);
     claim.setCreated(new Date());
@@ -75,7 +151,7 @@ public class McsClaimResponseTransformerV2 {
                 new Coding(
                     "https://dcgeo.cms.gov/resources/variables/mcs-status",
                     claimGroup.getIdrStatusCode(),
-                    claimGroup.getIdrStatusCode().toLowerCase())));
+                    STATUS_TEXT.get(claimGroup.getIdrStatusCode().toLowerCase()))));
   }
 
   private static List<Identifier> getIdentifier(PreAdjMcsClaim claimGroup) {
