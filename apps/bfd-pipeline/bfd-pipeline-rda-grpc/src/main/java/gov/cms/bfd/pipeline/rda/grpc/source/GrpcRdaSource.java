@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.ProcessingException.isInterrupted;
 
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -93,6 +94,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     Exception error = null;
     int processed = 0;
     try {
+      metrics.activity.inc();
       final GrpcResponseStream<TResponse> responseStream = caller.callService(channel);
       final List<TResponse> batch = new ArrayList<>();
       try {
@@ -100,6 +102,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
           final TResponse result = responseStream.next();
           metrics.objectsReceived.mark();
           batch.add(result);
+          metrics.activity.inc();
           if (batch.size() >= maxPerBatch) {
             processed += submitBatchToSink(sink, batch);
           }
@@ -118,6 +121,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       error = ex;
     } catch (Exception ex) {
       error = ex;
+    } finally {
+      metrics.activity.dec(metrics.activity.getCount());
     }
     if (error != null) {
       // InterruptedException isn't really an error so we exit normally rather than rethrowing.
@@ -165,6 +170,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     batch.clear();
     metrics.batches.mark();
     metrics.objectsStored.mark(processed);
+    metrics.activity.dec(processed);
     return processed;
   }
 
@@ -265,6 +271,12 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
      */
     private final Meter batches;
 
+    /**
+     * Used to track job activity by incrementing at start and when objects are received and
+     * decrementing when batches are written or the job terminates.
+     */
+    private final Counter activity;
+
     private Metrics(MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(GrpcRdaSource.class.getSimpleName(), claimType);
       calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
@@ -273,6 +285,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       objectsReceived = appMetrics.meter(MetricRegistry.name(base, "objects", "received"));
       objectsStored = appMetrics.meter(MetricRegistry.name(base, "objects", "stored"));
       batches = appMetrics.meter(MetricRegistry.name(base, "batches"));
+      activity = appMetrics.counter(MetricRegistry.name(base, "activity"));
     }
   }
 }

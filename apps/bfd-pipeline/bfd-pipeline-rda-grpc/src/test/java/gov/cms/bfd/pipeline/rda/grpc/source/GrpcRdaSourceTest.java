@@ -48,7 +48,7 @@ public class GrpcRdaSourceTest {
   @Before
   public void setUp() throws Exception {
     appMetrics = new MetricRegistry();
-    source = new GrpcRdaSource<>(channel, caller, appMetrics, "ints");
+    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints"));
     metrics = source.getMetrics();
   }
 
@@ -56,6 +56,7 @@ public class GrpcRdaSourceTest {
   public void metricNames() {
     assertEquals(
         Arrays.asList(
+            "GrpcRdaSource.ints.activity",
             "GrpcRdaSource.ints.batches",
             "GrpcRdaSource.ints.calls",
             "GrpcRdaSource.ints.failures",
@@ -113,13 +114,14 @@ public class GrpcRdaSourceTest {
   public void testHandlesExceptionFromCaller() {
     final Exception error = new IOException("oops");
     source =
-        new GrpcRdaSource<>(
-            channel,
-            c -> {
-              throw error;
-            },
-            appMetrics,
-            "ints");
+        spy(
+            new GrpcRdaSource<>(
+                channel,
+                c -> {
+                  throw error;
+                },
+                appMetrics,
+                "ints"));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
