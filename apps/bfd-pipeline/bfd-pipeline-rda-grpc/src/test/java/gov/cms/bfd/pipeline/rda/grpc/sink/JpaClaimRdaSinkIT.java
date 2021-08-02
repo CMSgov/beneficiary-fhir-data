@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -53,7 +54,8 @@ public class JpaClaimRdaSinkIT {
 
   @Test
   public void fissClaim() throws Exception {
-    final JpaClaimRdaSink<PreAdjFissClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
+    final JpaClaimRdaSink<PreAdjFissClaim> sink =
+        new JpaClaimRdaSink<>("fiss", appState, Clock.systemUTC());
 
     final PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn("1");
@@ -96,7 +98,8 @@ public class JpaClaimRdaSinkIT {
 
   @Test
   public void mcsClaim() throws Exception {
-    final JpaClaimRdaSink<PreAdjMcsClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
+    final JpaClaimRdaSink<PreAdjMcsClaim> sink =
+        new JpaClaimRdaSink<>("fiss", appState, Clock.systemUTC());
 
     final PreAdjMcsClaim claim = new PreAdjMcsClaim();
     claim.setIdrClmHdIcn("3");

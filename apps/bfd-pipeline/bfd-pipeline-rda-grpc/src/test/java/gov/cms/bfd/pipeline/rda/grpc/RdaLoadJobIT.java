@@ -30,7 +30,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -41,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class RdaLoadJobIT {
+  private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   private static final CharSource fissClaimsSource =
       Resources.asCharSource(Resources.getResource("FISS.ndjson"), StandardCharsets.UTF_8);
   private static final CharSource mcsClaimsSource =
@@ -92,7 +96,7 @@ public class RdaLoadJobIT {
         EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
+          final PipelineJob<?> job = config.createFissClaimsLoadJob(appState, clock);
           job.call();
         });
     runHibernateAssertions(
@@ -133,7 +137,7 @@ public class RdaLoadJobIT {
         EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState);
+          final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState, clock);
           try {
             job.callRdaServiceAndStoreRecords();
             fail("expected an exception to be thrown");
@@ -157,7 +161,7 @@ public class RdaLoadJobIT {
         jsonSource(mcsClaimJson),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
+          final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState, clock);
           job.call();
         });
     runHibernateAssertions(
@@ -197,7 +201,7 @@ public class RdaLoadJobIT {
                 () -> new IOException("oops")),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState);
+          final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState, clock);
           try {
             job.callRdaServiceAndStoreRecords();
             fail("expected an exception to be thrown");

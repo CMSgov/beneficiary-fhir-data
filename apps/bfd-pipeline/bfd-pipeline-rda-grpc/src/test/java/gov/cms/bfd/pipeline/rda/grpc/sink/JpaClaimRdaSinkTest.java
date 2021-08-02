@@ -14,7 +14,9 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.IOException;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +34,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JpaClaimRdaSinkTest {
+  private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   @Mock private HikariDataSource dataSource;
   @Mock private EntityManagerFactory entityManagerFactory;
   @Mock private EntityManager entityManager;
@@ -47,7 +50,7 @@ public class JpaClaimRdaSinkTest {
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory);
-    sink = new JpaClaimRdaSink<>("fiss", appState);
+    sink = new JpaClaimRdaSink<>("fiss", appState, clock);
   }
 
   @Test
@@ -55,6 +58,7 @@ public class JpaClaimRdaSinkTest {
     assertEquals(
         Arrays.asList(
             "JpaClaimRdaSink.fiss.calls",
+            "JpaClaimRdaSink.fiss.change.latency.millis",
             "JpaClaimRdaSink.fiss.failures",
             "JpaClaimRdaSink.fiss.successes",
             "JpaClaimRdaSink.fiss.writes.merged",
@@ -199,6 +203,6 @@ public class JpaClaimRdaSinkTest {
   private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
     PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn(dcn);
-    return new RdaChange<>(RdaChange.Type.INSERT, claim, Instant.now());
+    return new RdaChange<>(RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
   }
 }

@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Properties;
@@ -76,9 +77,9 @@ public class DirectRdaLoadApp {
       RdaLoadOptions jobConfig, PipelineApplicationState appState, String claimType) {
     switch (claimType.toLowerCase()) {
       case "fiss":
-        return Optional.of(jobConfig.createFissClaimsLoadJob(appState));
+        return Optional.of(jobConfig.createFissClaimsLoadJob(appState, Clock.systemUTC()));
       case "mcs":
-        return Optional.of(jobConfig.createMcsClaimsLoadJob(appState));
+        return Optional.of(jobConfig.createMcsClaimsLoadJob(appState, Clock.systemUTC()));
       default:
         return Optional.empty();
     }

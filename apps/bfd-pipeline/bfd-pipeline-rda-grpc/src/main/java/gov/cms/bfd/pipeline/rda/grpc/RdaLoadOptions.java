@@ -52,7 +52,8 @@ public class RdaLoadOptions implements Serializable {
    * @param appState the shared {@link PipelineApplicationState}
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
-  public RdaFissClaimLoadJob createFissClaimsLoadJob(PipelineApplicationState appState) {
+  public RdaFissClaimLoadJob createFissClaimsLoadJob(
+      PipelineApplicationState appState, Clock clock) {
     return new RdaFissClaimLoadJob(
         jobConfig,
         () ->
@@ -62,7 +63,7 @@ public class RdaLoadOptions implements Serializable {
                     new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
                 appState.getMetrics(),
                 "fiss"),
-        () -> new JpaClaimRdaSink<>("fiss", appState),
+        () -> new JpaClaimRdaSink<>("fiss", appState, clock),
         appState.getMetrics());
   }
 
@@ -73,7 +74,7 @@ public class RdaLoadOptions implements Serializable {
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
-  public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState) {
+  public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState, Clock clock) {
     return new RdaMcsClaimLoadJob(
         jobConfig,
         () ->
@@ -83,7 +84,7 @@ public class RdaLoadOptions implements Serializable {
                     new McsClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
                 appState.getMetrics(),
                 "mcs"),
-        () -> new JpaClaimRdaSink<>("mcs", appState),
+        () -> new JpaClaimRdaSink<>("mcs", appState, clock),
         appState.getMetrics());
   }
 

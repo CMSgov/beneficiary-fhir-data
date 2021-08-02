@@ -25,6 +25,7 @@ import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.time.Clock;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,10 +158,12 @@ public final class PipelineApplication {
 
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
 
-      pipelineManager.registerJob(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
+      pipelineManager.registerJob(
+          rdaLoadOptions.createFissClaimsLoadJob(rdaAppState, Clock.systemUTC()));
       LOGGER.info("Registered RdaFissClaimLoadJob.");
 
-      pipelineManager.registerJob(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
+      pipelineManager.registerJob(
+          rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState, Clock.systemUTC()));
       LOGGER.info("Registered RdaMcsClaimLoadJob.");
     } else {
       LOGGER.info("RDA API jobs are not enabled in app configuration.");
