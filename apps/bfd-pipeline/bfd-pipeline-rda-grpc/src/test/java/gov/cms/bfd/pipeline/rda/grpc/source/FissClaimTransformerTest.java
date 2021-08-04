@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.Assert.*;
 
+import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
@@ -24,11 +25,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,12 +65,6 @@ public class FissClaimTransformerTest {
         .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
         .setFissClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
-  }
-
-  private void assertChangeMatches(RdaChange.Type changeType) {
-    RdaChange<PreAdjFissClaim> changed = transformer.transformClaim(changeBuilder.build());
-    assertEquals(changeType, changed.getType());
-    assertThat(changed.getClaim(), samePropertyValuesAs(claim));
   }
 
   @Test
@@ -173,7 +163,7 @@ public class FissClaimTransformerTest {
         .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
         .setFissClaim(claimBuilder.build());
     PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
-    assertListContentsHaveSamePropertyValues(
+    TransformerTestUtils.assertListContentsHaveSamePropertyValues(
         claim.getProcCodes(), transformed.getProcCodes(), PreAdjFissProcCode::getPriority);
   }
 
@@ -228,7 +218,7 @@ public class FissClaimTransformerTest {
         .setFissClaim(claimBuilder.build());
     PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
-    assertListContentsHaveSamePropertyValues(
+    TransformerTestUtils.assertListContentsHaveSamePropertyValues(
         claim.getDiagCodes(), transformed.getDiagCodes(), PreAdjFissDiagnosisCode::getPriority);
   }
 
@@ -336,15 +326,31 @@ public class FissClaimTransformerTest {
     }
   }
 
-  private <T> void assertListContentsHaveSamePropertyValues(
-      Set<T> expectedSet, Set<T> actualSet, ToIntFunction<T> priority) {
-    List<T> expected =
-        expectedSet.stream().sorted(Comparator.comparingInt(priority)).collect(Collectors.toList());
-    List<T> actual =
-        actualSet.stream().sorted(Comparator.comparingInt(priority)).collect(Collectors.toList());
-    assertEquals(expected.size(), actual.size());
-    for (int i = 0; i < expected.size(); ++i) {
-      assertThat(actual.get(i), samePropertyValuesAs(expected.get(i)));
+  @Test
+  public void unrecognizedCurrStatus() {
+    try {
+      claimBuilder
+          .setDcn("dcn")
+          .setHicNo("hicn")
+          .setCurrStatusUnrecognized("X")
+          .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
+          .setCurrLoc2Unrecognized("9000");
+      changeBuilder
+          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+          .setFissClaim(claimBuilder.build());
+      transformer.transformClaim(changeBuilder.build());
+      fail("should have thrown");
+    } catch (DataTransformer.TransformationException ex) {
+      assertEquals(
+          ImmutableList.of(
+              new DataTransformer.ErrorMessage("currStatus", "unsupported enum value")),
+          ex.getErrors());
     }
+  }
+
+  private void assertChangeMatches(RdaChange.Type changeType) {
+    RdaChange<PreAdjFissClaim> changed = transformer.transformClaim(changeBuilder.build());
+    assertEquals(changeType, changed.getType());
+    assertThat(changed.getClaim(), samePropertyValuesAs(claim));
   }
 }

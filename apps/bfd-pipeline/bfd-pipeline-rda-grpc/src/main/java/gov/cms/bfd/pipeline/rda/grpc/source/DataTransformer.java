@@ -185,6 +185,8 @@ public class DataTransformer {
       addError(fieldName, "no value set");
     } else if (status == EnumStringExtractor.Status.InvalidValue) {
       addError(fieldName, "unrecognized enum value");
+    } else if (status == EnumStringExtractor.Status.UnsupportedValue) {
+      addError(fieldName, "unsupported enum value");
     } else {
       final String value = enumResult.getValue();
       copyString(fieldName, nullable, minLength, maxLength, value, copier);

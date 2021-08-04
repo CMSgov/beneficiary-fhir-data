@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
@@ -31,21 +32,27 @@ public class FissClaimTransformer {
           FissClaim::getCurrStatusEnum,
           FissClaim::hasCurrStatusUnrecognized,
           FissClaim::getCurrStatusUnrecognized,
-          FissClaimStatus.UNRECOGNIZED);
+          FissClaimStatus.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
   private static final EnumStringExtractor<FissClaim, FissProcessingType> currLoc1 =
       new EnumStringExtractor<>(
           FissClaim::hasCurrLoc1Enum,
           FissClaim::getCurrLoc1Enum,
           FissClaim::hasCurrLoc1Unrecognized,
           FissClaim::getCurrLoc1Unrecognized,
-          FissProcessingType.UNRECOGNIZED);
+          FissProcessingType.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
   private static final EnumStringExtractor<FissClaim, FissCurrentLocation2> currLoc2 =
       new EnumStringExtractor<>(
           FissClaim::hasCurrLoc2Enum,
           FissClaim::getCurrLoc2Enum,
           FissClaim::hasCurrLoc2Unrecognized,
           FissClaim::getCurrLoc2Unrecognized,
-          FissCurrentLocation2.UNRECOGNIZED);
+          FissCurrentLocation2.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
   private static final EnumStringExtractor<
           FissDiagnosisCode, FissDiagnosisPresentOnAdmissionIndicator>
       diagPoaInd =
@@ -54,7 +61,9 @@ public class FissClaimTransformer {
               FissDiagnosisCode::getDiagPoaIndEnum,
               FissDiagnosisCode::hasDiagPoaIndUnrecognized,
               FissDiagnosisCode::getDiagPoaIndUnrecognized,
-              FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED);
+              FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED,
+              ImmutableSet.of(),
+              ImmutableSet.of());
 
   private final Clock clock;
   private final IdHasher idHasher;
