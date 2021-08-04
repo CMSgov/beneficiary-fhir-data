@@ -43,7 +43,7 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
   private final Function<TRecord, String> getUnrecognizedValue;
   private final TEnum invalidValue;
   private final Set<ProtocolMessageEnum> unsupportedEnumValues;
-  private final ImmutableSet<Options> options;
+  private final Set<Options> options;
 
   /**
    * Constructs a value using the provided functions and value.
@@ -70,7 +70,7 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
     this.hasUnrecognizedValue = hasUnrecognizedValue;
     this.getUnrecognizedValue = getUnrecognizedValue;
     this.invalidValue = invalidValue;
-    this.unsupportedEnumValues = unsupportedEnumValues;
+    this.unsupportedEnumValues = ImmutableSet.copyOf(unsupportedEnumValues);
     this.options = ImmutableSet.copyOf(options);
   }
 
