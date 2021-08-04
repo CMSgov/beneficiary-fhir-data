@@ -455,6 +455,27 @@ public class McsClaimTransformerTest {
     }
   }
 
+  @Test
+  public void rejectedStatusCodeEnum() {
+    claimBuilder
+        .setIdrClmHdIcn("123456789012345")
+        .setIdrContrId("12345")
+        .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL)
+        .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_NOT_USED);
+    changeBuilder
+        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
+        .setMcsClaim(claimBuilder.build());
+    try {
+      transformer.transformClaim(changeBuilder.build());
+      fail("should have thrown");
+    } catch (DataTransformer.TransformationException ex) {
+      assertEquals(
+          ImmutableList.of(
+              new DataTransformer.ErrorMessage("idrStatusCode", "unsupported enum value")),
+          ex.getErrors());
+    }
+  }
+
   private void assertChangeMatches(RdaChange.Type changeType) {
     RdaChange<PreAdjMcsClaim> changed = transformer.transformClaim(changeBuilder.build());
     assertEquals(changeType, changed.getType());

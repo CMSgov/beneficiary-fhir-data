@@ -55,8 +55,7 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
    * @param getUnrecognizedValue lambda used to get the value string
    * @param invalidValue enum value (usually TEnum.UNRECOGNIZED) for protobuf's bad enum value
    * @param unsupportedEnumValues set of enum values that should generate an UnsupportedValue Result
-   * @param allowUnrecognizedValue when true causes unrecognized values ot generate an
-   *     UnsupportedValue Result
+   * @param options the (usually empty) set of options to be used while processing
    */
   public EnumStringExtractor(
       Predicate<TRecord> hasEnumValue,
@@ -114,7 +113,7 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
     InvalidValue,
     /** Either the enum was set to a valid value or the unrecognized string value was set. */
     HasValue,
-    /** A vault was present but was rejected as unsupported. */
+    /** A value was present but was rejected as unsupported. */
     UnsupportedValue
   }
 
@@ -142,8 +141,9 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
   }
 
   /**
-   * Additional options that can be used to alter default behavior. Currently, there is only one but
-   * using an enum instead of a boolean improves code clarity.
+   * Additional options that can be used to alter default behavior. Currently, there is only one
+   * option available but using an enum instead of a boolean to enable the option improves code
+   * clarity.
    */
   public enum Options {
     /** Report an unsupported value result if the field has its unrecognized value. */
