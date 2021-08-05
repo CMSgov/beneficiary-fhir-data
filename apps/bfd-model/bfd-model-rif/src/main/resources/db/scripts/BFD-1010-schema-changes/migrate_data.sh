@@ -1,67 +1,113 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -eo pipefail
+export MAX_JOBS="${MAX_JOBS:-1}" # defaults to one, probably max around 4
+export PGHOST="${PGHOST:-}"
+export PGUSER="${PGUSER:-}"
+export PGPASSWORD="${PGPASSWORD:-}"
+export PGPORT="${PGPORT:-5432}"
+export PGDATABASE="${PGDATABASE:-}"
 
-set -o pipefail
-set -e
+# we will process these one by one in order (I do not know which tables are parents, just guessing)
+parent_tables=(beneficiaries beneficiaries_history)
 
-# following must be passed in as either environment variables or as cmd-line args (default)
-PGHOST="${DB_HOST:-$1}"
-PGUSER="${DB_USER:-$2}"
-PGPASSWORD="${DB_PSWD:-$3}"
+# these we will run in background jobs, up to $MAX_JOBS at a time
+child_tables=(
+  beneficiary_monthly
+  beneficiaries_history_invalid
+  loaded_batches
+  medicare_beneficiaryid_history
+  medicare_beneficiaryid_history_invalid
+  carrier_claims
+  carrier_claim_lines
+  dme_claims
+  dme_claim_lines
+  hha_claims
+  hha_claim_lines
+  hospice_claims
+  hospice_claim_lines
+  inpatient_claims
+  inpatient_claim_lines
+  outpatient_claims
+  outpatient_claim_lines
+  partd_events
+  snf_claims
+  snf_claim_lines
+)
 
-# other vars that skirt security (a bit)
-PGDATABASE="${DB_NAME:-fihr}"
-export PGPORT="${DB_PORT:-5432}"
+setup(){
+  if ! [[ -f .env ]]; then
+    printf "Generating .env file.. "
+    echo -e "export PGHOST=\nexport PGPORT=5432\nexport PGUSER=\nexport PGPASSWORD=\nexport PGDATABASE=" > .env
+    echo -e "export MAX_JOBS=1\n" >> .env
+    echo "OK"
+    echo "Please update $(PWD)/.env with the appropriate database credentials and run the script again."
+    exit
+  else
+    # shellcheck disable=SC1091 # tell shellcheck not to worry about checking this .env file
+    source .env
+    if ! psql --quiet --tuples-only -c "select NOW();" >/dev/null 2>&1; then
+      echo "Failed to connect to the database. Did you update the $(PWD)/.env file?"
+      exit 1
+    fi
+  fi
+}
 
-if [ -z "$PGHOST" ] || [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ]; then
-    echo "*****  E r r o r - Missing required variables  *****"
-    echo "$0 requires ENV variable(s) for: DB_HOST, DB_USER, DB_PSWD";
-    echo "or";
-    echo "$0 requires cmd-line args for: <db host> <db username> <db password>";
-    exit 1;
-fi
+# load the given table
+# $1 == table name to process - this assumes all tables have a matching ./insert_${tbl_name}.sql file
+load_file(){
+  # I'm not sure how noisy the output is, but if it's a lot, displaying it will slow down the operation
+  # due to console paging, if it does, either redirect the output to /dev/null or to a file if you want
+  # to review the output later. If you do output to files, and there is a lot of output, be mindful of
+  # the amount of freespace on the host. 
+  tbl_name="$1"
+  psql_cmd="echo psql --quiet --tuples-only -f ./insert_${tbl_name}.sql"
+  #if $psql_cmd; then                            # show the output on the console
+  #if $psql_cmd >/dev/null; then                 # hide the output
+  if $psql_cmd > "insert_${tbl_name}.log"; then  # redirect output to a file
+    # sleep "$(shuf -i 0-1 -n 1)"  # randomly sleep (used for testing background jobs)
+    echo "  -> successfully loaded $tbl_name"
+  else
+    echo "  -x failed to load $tbl_name. Aborting"
+    exit 1
+  fi
+}
 
-echo "Testing db connectivity..."
-now=$(psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" --quiet --tuples-only -c "select NOW();")
-if [[ "$now" == *"2021"* ]]; then
-  echo "db connectivity: OK"
-else
-  echo "db connectivity: FAILED...exiting"
-  exit 1;
-fi
+# processes $MAX_JOBS number of tables (files) in parallel
+# $1 a list of tables ex: "process_tables snf_claims snf_claim_lines"
+process_tables(){
+  while [[ -n "$1" ]]; do
+    # always try to keep the max number of jobs running the background
+    while [[ $(jobs -r | wc -l | tr -d " ") < $((MAX_JOBS+1)) ]]; do
+      load_file "$1" &
+      shift
+    done
+  done
+  wait # waits until all background jobs are finished
+}
 
-sql_files=(
-"./insert_beneficiaries.sql" \
-"./insert_beneficiaries_history.sql" \
-"./insert_beneficiaries_history_invalid.sql" \
-"./insert_beneficiary_monthly.sql" \
-"./insert_loaded_batches.sql" \
-"./insert_medicare_beneficiaryid_history.sql" \
-"./insert_medicare_beneficiaryid_history_invalid.sql" \
-"./insert_carrier_claims.sql" \
-"./insert_carrier_claim_lines.sql" \
-"./insert_dme_claims.sql" \
-"./insert_dme_claim_lines.sql" \
-"./insert_hha_claims.sql" \
-"./insert_hha_claim_lines.sql" \
-"./insert_hospice_claims.sql" \
-"./insert_hospice_claim_lines.sql" \
-"./insert_inpatient_claims.sql" \
-"./insert_inpatient_claim_lines.sql" \
-"./insert_outpatient_claims.sql" \
-"./insert_outpatient_claim_lines.sql" \
-"./insert_partd_events.sql" \
-"./insert_snf_claims.sql" \
-"./insert_snf_claim_lines.sql" )
+# load and parse .env file
+setup
 
-echo "Begin loading database..."
-for SQL in "${sql_files[@]}"
-do
-   : 
-   # do whatever on $i
-   echo "begin processing ${SQL} : $(date +'%T.%31')"
-   psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" --quiet --tuples-only -f "$SQL"
-   echo "finished processing ${SQL} : $(date +'%T.%31')"
+# track overall time
+total_start=$SECONDS
+
+# parent tables
+echo "LOADING PARENT TABLES..."
+parent_start=$SECONDS
+for t in "${parent_tables[@]}"; do
+  load_file "$t"
 done
+parent_end=$SECONDS; duration=$(( parent_end - parent_start ))
+echo "parent tables loaded after ~$((duration / 60)) minutes"
+echo
 
-echo "All DONE at: $(date +'%T.%31')"
-exit 0;
+# process child tables
+echo "LOADING CHILD TABLES..."; child_start=$SECONDS
+process_tables "${child_tables[@]}" # processes all child_tables
+child_end=$SECONDS; duration=$(( child_end - child_start ))
+echo "child tables loaded after ~$((duration / 60)) minutes"
+
+# done
+total_end=$SECONDS; duration=$(( total_end - total_start ))
+echo -e "\nAll DONE"
+echo "Total Time: ~$((duration / 60)) minutes"
