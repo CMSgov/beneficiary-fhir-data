@@ -138,7 +138,7 @@ if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact
 if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
 if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
 
-# Debug server ports file, remove when done!
+# DEBUG
 cat "${serverPortsFile}"
 
 # Read the server port to be used from the ports file.
@@ -191,6 +191,8 @@ endSeconds=$(($startSeconds + $serverTimeoutSeconds))
 while true; do
 	if grep --quiet "Started Jetty." "${serverLog}"; then
 		echo "Server started in $(($SECONDS - $startSeconds)) seconds."
+		# DEBUG
+		ss -ltn
 		break
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
