@@ -6,7 +6,7 @@ import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
@@ -73,8 +73,8 @@ public class FissClaimTransformer {
     this.idHasher = idHasher;
   }
 
-  public RdaChange<PreAdjFissClaim> transformClaim(ClaimChange change) {
-    FissClaim from = change.getFissClaim();
+  public RdaChange<PreAdjFissClaim> transformClaim(FissClaimChange change) {
+    FissClaim from = change.getClaim();
     final DataTransformer transformer = new DataTransformer();
     final PreAdjFissClaim to = transformClaim(from, transformer);
 
@@ -88,6 +88,7 @@ public class FissClaimTransformer {
       throw new DataTransformer.TransformationException(message, errors);
     }
     return new RdaChange<>(
+        change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),
         to,
         transformer.instant(change.getTimestamp()));

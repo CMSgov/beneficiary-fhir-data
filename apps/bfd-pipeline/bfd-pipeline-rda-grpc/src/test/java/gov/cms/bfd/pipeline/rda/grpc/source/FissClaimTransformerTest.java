@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.Assert.*;
@@ -10,7 +11,8 @@ import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.ChangeType;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
@@ -37,13 +39,13 @@ public class FissClaimTransformerTest {
           clock,
           new IdHasher(
               new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8))));
-  private ClaimChange.Builder changeBuilder;
+  private FissClaimChange.Builder changeBuilder;
   private FissClaim.Builder claimBuilder;
   private PreAdjFissClaim claim;
 
   @Before
   public void setUp() {
-    changeBuilder = ClaimChange.newBuilder();
+    changeBuilder = FissClaimChange.newBuilder();
     claimBuilder = FissClaim.newBuilder();
     claim = new PreAdjFissClaim();
   }
@@ -63,8 +65,9 @@ public class FissClaimTransformerTest {
         .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
         .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
     changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-        .setFissClaim(claimBuilder.build());
+        .setSeq(MIN_SEQUENCE_NUM)
+        .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+        .setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
@@ -118,8 +121,9 @@ public class FissClaimTransformerTest {
         .setStmtCovFromCymd("2020-02-03")
         .setStmtCovToCymd("2021-04-05");
     changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
-        .setFissClaim(claimBuilder.build());
+        .setSeq(MIN_SEQUENCE_NUM)
+        .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.UPDATE);
   }
 
@@ -161,8 +165,9 @@ public class FissClaimTransformerTest {
     code.setLastUpdated(claim.getLastUpdated());
     claim.getProcCodes().add(code);
     changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
-        .setFissClaim(claimBuilder.build());
+        .setSeq(MIN_SEQUENCE_NUM)
+        .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+        .setClaim(claimBuilder.build());
     PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
         claim.getProcCodes(), transformed.getProcCodes(), PreAdjFissProcCode::getPriority);
@@ -215,8 +220,9 @@ public class FissClaimTransformerTest {
     code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
     changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
-        .setFissClaim(claimBuilder.build());
+        .setSeq(MIN_SEQUENCE_NUM)
+        .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+        .setClaim(claimBuilder.build());
     PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
@@ -227,8 +233,9 @@ public class FissClaimTransformerTest {
   public void requiredFieldsMissing() {
     try {
       changeBuilder
-          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
-          .setFissClaim(claimBuilder.build());
+          .setSeq(MIN_SEQUENCE_NUM)
+          .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+          .setClaim(claimBuilder.build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
@@ -440,8 +447,9 @@ public class FissClaimTransformerTest {
           .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
       claimUpdate.run();
       changeBuilder
-          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-          .setFissClaim(claimBuilder.build());
+          .setSeq(MIN_SEQUENCE_NUM)
+          .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+          .setClaim(claimBuilder.build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
@@ -470,9 +478,7 @@ public class FissClaimTransformerTest {
           .setCurrStatusUnrecognized("X")
           .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
           .setCurrLoc2Unrecognized("9000");
-      changeBuilder
-          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
-          .setFissClaim(claimBuilder.build());
+      changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_UPDATE).setClaim(claimBuilder.build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {

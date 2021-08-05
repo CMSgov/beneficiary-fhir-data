@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
@@ -17,14 +17,14 @@ import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class StoreRdaJsonApp {
+public class StoreRdaJsonApp<T extends MessageOrBuilder> {
   private enum ClaimType {
     FISS(RDAServiceGrpc::getGetFissClaimsMethod),
     MCS(RDAServiceGrpc::getGetMcsClaimsMethod);
 
-    private final Supplier<MethodDescriptor<Empty, ClaimChange>> methodSource;
+    private final Supplier<MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder>> methodSource;
 
-    ClaimType(Supplier<MethodDescriptor<Empty, ClaimChange>> methodSource) {
+    ClaimType(Supplier<MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder>> methodSource) {
       this.methodSource = methodSource;
     }
   }
@@ -32,18 +32,17 @@ public class StoreRdaJsonApp {
   public static void main(String[] args) throws Exception {
     final String host = option(args, 0, "localhost");
     final int port = Integer.parseInt(option(args, 1, "443"));
-    final ClaimType claimType =
-        ClaimType.valueOf(option(args, 2, ClaimType.FISS.name()).toUpperCase());
+    final ClaimType claimType = ClaimType.valueOf(option(args, 2, "fiss").toUpperCase());
     final int maxToReceive = Integer.parseInt(option(args, 3, "100"));
     final String filename = option(args, 4, claimType.name() + ".ndjson");
 
     final ManagedChannel channel = createChannel(host, port);
     try {
-      final Iterator<ClaimChange> results = callService(claimType, channel);
+      final Iterator<? extends MessageOrBuilder> results = callService(claimType, channel);
       int received = 0;
       try (PrintWriter output = new PrintWriter(new FileWriter(filename))) {
         while (received < maxToReceive && results.hasNext()) {
-          final ClaimChange change = results.next();
+          final MessageOrBuilder change = results.next();
           final String json = convertToJson(change);
           output.println(json);
           output.flush();
@@ -68,14 +67,18 @@ public class StoreRdaJsonApp {
     return channelBuilder.build();
   }
 
-  private static Iterator<ClaimChange> callService(ClaimType claimType, ManagedChannel channel) {
-    final Empty request = Empty.newBuilder().build();
-    final MethodDescriptor<Empty, ClaimChange> method = claimType.methodSource.get();
-    final ClientCall<Empty, ClaimChange> call = channel.newCall(method, CallOptions.DEFAULT);
+  private static Iterator<? extends MessageOrBuilder> callService(
+      ClaimType claimType, ManagedChannel channel) {
+    final ClaimRequest request = ClaimRequest.newBuilder().build();
+    final MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder> method =
+        claimType.methodSource.get();
+    final ClientCall<ClaimRequest, ? extends MessageOrBuilder> call =
+        channel.newCall(method, CallOptions.DEFAULT);
     return ClientCalls.blockingServerStreamingCall(call, request);
   }
 
-  private static String convertToJson(ClaimChange change) throws InvalidProtocolBufferException {
+  private static String convertToJson(MessageOrBuilder change)
+      throws InvalidProtocolBufferException {
     return JsonFormat.printer().omittingInsignificantWhitespace().print(change);
   }
 

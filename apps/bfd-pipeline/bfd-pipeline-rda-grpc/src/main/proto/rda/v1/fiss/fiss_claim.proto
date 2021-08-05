@@ -4,9 +4,13 @@ package gov.cms.mpsm.rda.v1.fiss;
 
 option java_multiple_files = true;
 
+import "rda/v1/fiss/fiss_bill_classification.proto";
+import "rda/v1/fiss/fiss_bill_facility_type.proto";
+import "rda/v1/fiss/fiss_bill_frequency.proto";
 import "rda/v1/fiss/fiss_claim_status.proto";
 import "rda/v1/fiss/fiss_current_location_2.proto";
 import "rda/v1/fiss/fiss_diagnosis_code.proto";
+import "rda/v1/fiss/fiss_payer.proto";
 import "rda/v1/fiss/fiss_procedure_code.proto";
 import "rda/v1/fiss/fiss_processing_type.proto";
 
@@ -152,9 +156,35 @@ message FissClaim {
 
   optional string stmt_cov_to_cymd = 40;
 
+  // Location of Bill
+  oneof lob_cd {
+    FissBillFacilityType lob_cd_enum = 42;
+    string lob_cd_unrecognized = 43;
+  };
+
+  // Bill Classification
+  oneof serv_typ_cd {
+    FissBillClassification serv_type_cd_enum = 44;
+    FissBillClassificationForClinics serv_type_cd_for_clinics_enum = 45;
+    FissBillClassificationForSpecialFacilities serv_type_cd_for_special_facilities_enum = 46;
+    string serv_typ_cd_unrecognized = 47;
+  };
+
+  // Bill Frequency
+  oneof freq_cd {
+    FissBillFrequency freq_cd_enum = 48;
+    string freq_cd_unrecognized = 49;
+  };
+
+  // 3-digit Bill Type Code (concatenation of location of bill, bill classification, and bill frequency).
+  optional string bill_typ_cd = 50;
+
   // FISS Procedure Codes
   repeated FissProcedureCode fiss_proc_codes = 28;
 
   // FISS Diagnosis Codes
   repeated FissDiagnosisCode fiss_diag_codes = 35;
+
+  // FISS Payers
+  repeated FissPayer fiss_payers = 51;
 }
