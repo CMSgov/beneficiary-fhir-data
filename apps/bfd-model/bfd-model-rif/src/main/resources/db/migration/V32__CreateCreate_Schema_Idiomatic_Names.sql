@@ -39,6 +39,7 @@ ${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
 
 create table beneficiaries (
     bene_id                                  bigint not null,                          -- beneficiaryId
+    last_updated                             timestamp with time zone,                 -- lastupdated
     bene_birth_dt                            date not null,                            -- birthDate
     bene_esrd_ind                            character(1),                             -- endStageRenalDiseaseCode
     bene_entlmt_rsn_curr                     character(1),                             -- entitlementCodeCurrent
@@ -243,7 +244,6 @@ create table beneficiaries (
     state_cd                                 character varying(2),                     -- derivedStateCode
     state_cnty_zip_cd                        character varying(9),                     -- derivedZipCode
     bene_link_key                            bigint,                                   -- beneLinkKey
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint beneficiaries_pkey primary key (bene_id)
 )
 
@@ -251,6 +251,7 @@ create table beneficiaries (
 create table beneficiaries_history (
     beneficiary_history_id                   bigint not null,                          -- beneficiaryHistoryId
     bene_id                                  bigint not null,                          -- beneficiaryId
+    last_updated                             timestamp with time zone,                 -- lastupdated
     bene_crnt_hic_num                        character varying(64) not null,           -- hicn
     hicn_unhashed                            character varying(11),                    -- hicnUnhashed
     mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
@@ -259,7 +260,6 @@ create table beneficiaries_history (
     mbi_efctv_end_dt                         date,                                     -- mbiObsoleteDate
     bene_sex_ident_cd                        character(1) not null,                    -- sex
     bene_birth_dt                            date not null,                            -- birthDate
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint beneficiaries_history_pkey primary key (beneficiary_history_id)
 )
 
@@ -316,6 +316,7 @@ create table loaded_files (
 create table medicare_beneficiaryid_history (
     medicare_beneficiaryid_key               bigint not null,                          -- medicareBeneficiaryIdKey
     bene_id                                  bigint,                                   -- beneficiaryId
+    last_updated                             timestamp with time zone,                 -- lastupdated
     bene_clm_acnt_num                        character varying(9),                     -- claimAccountNumber
     bene_ident_cd                            character varying(2),                     -- beneficiaryIdCode
     bene_crnt_rec_ind_id                     integer,                                  -- mbiCrntRecIndId
@@ -330,7 +331,7 @@ create table medicare_beneficiaryid_history (
     creat_ts                                 timestamp without time zone,              -- mbiAddDate
     updt_user_id                             character varying(30),                    -- mbiUpdateUser
     updt_ts                                  timestamp without time zone,              -- mbiUpdateDate
-    last_updated                             timestamp with time zone,                 -- lastupdated
+
     constraint medicare_beneficiaryid_history_pkey primary key (medicare_beneficiaryid_key)
 )
 
@@ -360,11 +361,12 @@ create table carrier_claims (
     clm_id                                   bigint not null,                          -- claimId
 	bene_id                                  bigint not null,                          -- beneficiaryId
 	clm_grp_id                               bigint not null,                          -- claimGroupId
+    last_updated                             timestamp with time zone,                 -- lastupdated
+    clm_from_dt                              date not null,                            -- dateFrom
+	clm_thru_dt                              date not null,                            -- dateThrough
 	clm_clncl_tril_num                       character varying(8),                     -- clinicalTrialNumber
 	clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
 	clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
-	clm_from_dt                              date not null,                            -- dateFrom
-	clm_thru_dt                              date not null,                            -- dateThrough
 	carr_clm_cntl_num                        character varying(23),                    -- claimCarrierControlNumber
 	carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
 	carr_clm_hcpcs_yr_cd                     character(1),                             -- hcpcsYearCode
@@ -410,7 +412,6 @@ create table carrier_claims (
 	icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
 	icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
 	icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-	last_updated                             timestamp with time zone,                 -- lastupdated
     constraint carrier_claims_pkey primary key (clm_id)
 )
 
@@ -471,11 +472,12 @@ create table dme_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
+    last_updated                             timestamp with time zone,                 -- lastupdated
+    clm_from_dt                              date not null,                            -- dateFrom
+    clm_thru_dt                              date not null,                            -- dateThrough
     clm_disp_cd                              character varying(2) not null,            -- claimDispositionCode
     clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
     clm_clncl_tril_num                       character varying(8),                     -- clinicalTrialNumber
-    clm_from_dt                              date not null,                            -- dateFrom
-    clm_thru_dt                              date not null,                            -- dateThrough
     carr_num                                 character varying(5) not null,            -- carrierNumber
     carr_clm_cntl_num                        character varying(23),                    -- claimCarrierControlNumber
     carr_clm_entry_cd                        character(1) not null,                    -- claimEntryCode
@@ -520,7 +522,6 @@ create table dme_claims (
     icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
     icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
     icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint dme_claims_pkey primary key (clm_id)
 )
 
@@ -577,9 +578,10 @@ create table hha_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
-    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
+    last_updated                             timestamp with time zone,                 -- lastupdated
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
+    clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
     clm_admsn_dt                             date,                                     -- careStartDate
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
@@ -684,7 +686,6 @@ create table hha_claims (
     icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
     icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
     icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint hha_claims_pkey primary key (clm_id)
 )
 
@@ -719,10 +720,11 @@ create table hospice_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
-    clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
-    clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
+    last_updated                             timestamp with time zone,                 -- lastupdated
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
+    clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
+    clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
     clm_hospc_start_dt_id                    date,                                     -- claimHospiceStartDate
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
     clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
@@ -826,7 +828,6 @@ create table hospice_claims (
 	icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
 	icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
 	icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint hospice_claims_pkey primary key (clm_id)
 )
 
@@ -859,13 +860,14 @@ create table inpatient_claims (
 	clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
+    last_updated                             timestamp with time zone,                 -- lastupdated
+    clm_from_dt                              date not null,                            -- dateFrom
+	clm_thru_dt                              date not null,                            -- dateThrough
     clm_admsn_dt                             date,                                     -- claimAdmissionDate
     clm_drg_cd                               character varying(3),                     -- diagnosisRelatedGroupCd
     clm_drg_outlier_stay_cd                  character(1) not null,                    -- diagnosisRelatedGroupOutlierStayCd
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_from_dt                              date not null,                            -- dateFrom
-	clm_thru_dt                              date not null,                            -- dateThrough
 	clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
     clm_ip_admsn_type_cd                     character(1) not null,                    -- admissionTypeCd
     clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
@@ -889,7 +891,7 @@ create table inpatient_claims (
     admtg_dgns_vrsn_cd                       character(1),                             -- diagnosisAdmittingCodeVersion
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
-    bene_lrd_used_cnt                        numeric,                                  -- lifetimeReservedDaysUsedCount
+    bene_lrd_used_cnt                        smallint,                                  -- lifetimeReservedDaysUsedCount
     bene_tot_coinsrnc_days_cnt               smallint not null,                        -- coinsuranceDayCount
     claim_query_code                         character(1) not null,                    -- claimQueryCode
     dsh_op_clm_val_amt                       numeric(10,2),                            -- disproportionateShareAmount
@@ -1118,7 +1120,6 @@ create table inpatient_claims (
 	prcdr_dt23                               date,                                     -- procedure23Date
 	prcdr_dt24                               date,                                     -- procedure24Date
 	prcdr_dt25                               date,                                     -- procedure25Date
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint inpatient_claims_pkey primary key (clm_id)
 )
 
@@ -1145,10 +1146,11 @@ create table outpatient_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
-    clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
-    clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
+    last_updated                             timestamp with time zone,                 -- lastupdated
     clm_from_dt                              date not null,                            -- dateFrom
     clm_thru_dt                              date not null,                            -- dateThrough
+    clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
+    clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
     clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
     clm_pmt_amt                              numeric(10,2) not null,                   -- paymentAmount
@@ -1340,7 +1342,6 @@ create table outpatient_claims (
     prcdr_dt23                               date,                                     -- procedure23Date
     prcdr_dt24                               date,                                     -- procedure24Date
     prcdr_dt25                               date,                                     -- procedure25Date    
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint outpatient_claims_pkey primary key (clm_id)
 )
 
@@ -1435,12 +1436,13 @@ create table snf_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
+    last_updated                             timestamp with time zone,                 -- lastupdated
+    clm_from_dt                              date not null,                            -- dateFrom
+    clm_thru_dt                              date not null,                            -- dateThrough
     clm_admsn_dt                             date,                                     -- claimAdmissionDate
     clm_drg_cd                               character varying(3),                     -- diagnosisRelatedGroupCd
     clm_fac_type_cd                          character(1) not null,                    -- claimFacilityTypeCode
     clm_freq_cd                              character(1) not null,                    -- claimFrequencyCode
-    clm_from_dt                              date not null,                            -- dateFrom
-    clm_thru_dt                              date not null,                            -- dateThrough
     clm_ip_admsn_type_cd                     character(1) not null,                    -- admissionTypeCd
     clm_mco_pd_sw                            character(1),                             -- mcoPaidSw
     clm_mdcr_non_pmt_rsn_cd                  character varying(2),                     -- claimNonPaymentReasonCode
@@ -1649,7 +1651,6 @@ create table snf_claims (
     prcdr_dt23                               date,                                     -- procedure23Date
     prcdr_dt24                               date,                                     -- procedure24Date
     prcdr_dt25                               date,                                     -- procedure25Date    
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint snf_claims_pkey primary key (clm_id)
 )
 
