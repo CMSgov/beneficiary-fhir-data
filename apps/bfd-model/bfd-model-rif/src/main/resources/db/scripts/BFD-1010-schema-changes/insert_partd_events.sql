@@ -2,6 +2,7 @@ insert into public.partd_events (
 	clm_id,
 	bene_id,
 	clm_grp_id,
+	last_updated,
 	adjstmt_dltn_cd,
 	brnd_gnrc_cd,
 	cmpnd_cd,
@@ -38,13 +39,13 @@ insert into public.partd_events (
 	srvc_prvdr_id,
 	srvc_prvdr_id_qlfyr_cd,
 	submsn_clr_cd,
-	tot_rx_cst_amt,
-	last_updated
+	tot_rx_cst_amt
 )
 select
 	cast("eventId" as bigint),
 	cast("beneficiaryId" as bigint),
 	cast("claimGroupId" as bigint),
+	"lastupdated"
 	"adjustmentDeletionCode",
 	"brandGenericCode",
 	"compoundCode",
@@ -81,6 +82,9 @@ select
 	"serviceProviderId",
 	"serviceProviderIdQualiferCode",
 	"submissionClarificationCode",
-	"totalPrescriptionCost",
-	"lastupdated"
-from public."PartDEvents";
+	"totalPrescriptionCost"
+from
+	public."PartDEvents"
+on conflict
+	(partd_events_pkey)
+do nothing;

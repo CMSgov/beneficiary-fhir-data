@@ -35,4 +35,8 @@ select
 	"mbiUpdateUser",
 	"mbiUpdateDate",
 	"lastupdated"
-from public."MedicareBeneficiaryIdHistory";
+from
+	public."MedicareBeneficiaryIdHistory"
+on conflict
+	(medicare_beneficiaryid_history_pkey)
+do nothing;

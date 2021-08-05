@@ -2,12 +2,13 @@ insert into public.snf_claims (
 	clm_id,
 	bene_id,
 	clm_grp_id,
+	last_updated,
+	clm_from_dt,
+	clm_thru_dt,
 	clm_admsn_dt,
 	clm_drg_cd,
 	clm_fac_type_cd,
 	clm_freq_cd,
-	clm_from_dt,
-	clm_thru_dt,
 	clm_ip_admsn_type_cd,
 	clm_mco_pd_sw,
 	clm_mdcr_non_pmt_rsn_cd,
@@ -215,19 +216,19 @@ insert into public.snf_claims (
 	prcdr_dt22,
 	prcdr_dt23,
 	prcdr_dt24,
-	prcdr_dt25,
-	last_updated
+	prcdr_dt25
 )
 select
 	cast("claimId" as bigint),
 	cast("beneficiaryId" as bigint),
 	cast("claimGroupId" as bigint),
+	"lastupdated",
+	"dateFrom",
+	"dateThrough",
 	"claimAdmissionDate",
 	"diagnosisRelatedGroupCd",
 	"claimFacilityTypeCode",
 	"claimFrequencyCode",
-	"dateFrom",
-	"dateThrough",
 	"admissionTypeCd",
 	"mcoPaidSw",
 	"claimNonPaymentReasonCode",
@@ -435,6 +436,9 @@ select
 	"procedure22Date",
 	"procedure23Date",
 	"procedure24Date",
-	"procedure25Date",
-	"lastupdated"
-from public."SNFClaims";
+	"procedure25Date"
+from
+	public."SNFClaims"
+on conflict
+	(snf_claims_pkey)
+do nothing;

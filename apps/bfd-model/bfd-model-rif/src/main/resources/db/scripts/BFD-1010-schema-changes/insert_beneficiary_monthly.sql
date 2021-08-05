@@ -32,4 +32,8 @@ select
 	"partDRetireeDrugSubsidyInd",
 	"partDLowIncomeCostShareGroupCode",
 	"medicaidDualEligibilityCode"
-from public."BeneficiaryMonthly";
+from
+	public."BeneficiaryMonthly"
+on conflict
+	(beneficiary_monthly_pkey)
+do nothing;

@@ -27,4 +27,8 @@ select
 	"unitCount",
 	"revenueCenterRenderingPhysicianNPI",
 	"revenueCenterRenderingPhysicianUPIN"
-from public."SNFClaimLines";
+from
+	public."SNFClaimLines"
+on conflict
+	(snf_claim_lines_pkey)
+do nothing;

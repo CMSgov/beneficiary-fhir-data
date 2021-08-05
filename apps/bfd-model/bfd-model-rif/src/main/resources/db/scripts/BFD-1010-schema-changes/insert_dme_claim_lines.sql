@@ -87,4 +87,8 @@ select
 	"providerTaxNumber",
 	"providerParticipatingIndCode",
 	"providerPaymentAmount"
-from   public."DMEClaimLines"
+from
+	public."DMEClaimLines"
+on conflict
+	(dme_claim_lines_pkey)
+do nothing;

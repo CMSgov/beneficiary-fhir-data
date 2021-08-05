@@ -2,10 +2,11 @@ insert into public.outpatient_claims (
 	clm_id,
 	bene_id,
 	clm_grp_id,
-	clm_fac_type_cd,
-	clm_freq_cd,
+	last_updated,
 	clm_from_dt,
 	clm_thru_dt,
+	clm_fac_type_cd,
+	clm_freq_cd,
 	clm_mco_pd_sw,
 	clm_mdcr_non_pmt_rsn_cd,
 	clm_pmt_amt,
@@ -196,17 +197,17 @@ insert into public.outpatient_claims (
 	prcdr_dt22,
 	prcdr_dt23,
 	prcdr_dt24,
-	prcdr_dt25,
-	last_updated
+	prcdr_dt25
 )
 select
 	cast("claimId" as bigint),
 	cast("beneficiaryId" as bigint),
 	cast("claimGroupId" as bigint),
-	"claimFacilityTypeCode",
-	"claimFrequencyCode",
+	"lastupdated",
 	"dateFrom",
 	"dateThrough",
+	"claimFacilityTypeCode",
+	"claimFrequencyCode",
 	"mcoPaidSw",
 	"claimNonPaymentReasonCode",
 	"paymentAmount",
@@ -397,6 +398,9 @@ select
 	"procedure22Date",
 	"procedure23Date",
 	"procedure24Date",
-	"procedure25Date",
-	"lastupdated"
-from  public."OutpatientClaims";
+	"procedure25Date"
+from 
+	public."OutpatientClaims"
+on conflict
+	(outpatient_claims_pkey)
+do nothing;

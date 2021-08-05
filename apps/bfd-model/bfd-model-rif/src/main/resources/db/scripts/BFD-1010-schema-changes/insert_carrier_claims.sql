@@ -2,11 +2,12 @@ insert into public.carrier_claims(
 	clm_id,
 	bene_id,
 	clm_grp_id,
+	last_updated,
+	clm_from_dt,
+	clm_thru_dt,
 	clm_clncl_tril_num,
 	clm_disp_cd,
 	clm_pmt_amt,
-	clm_from_dt,
-	clm_thru_dt,
 	carr_clm_cntl_num,
 	carr_clm_entry_cd,
 	carr_clm_hcpcs_yr_cd,
@@ -51,18 +52,18 @@ insert into public.carrier_claims(
 	icd_dgns_vrsn_cd9,
 	icd_dgns_vrsn_cd10,
 	icd_dgns_vrsn_cd11,
-	icd_dgns_vrsn_cd12,
-	last_updated
+	icd_dgns_vrsn_cd12
 )
 select
     cast("claimId" as bigint),
 	cast("beneficiaryId" as bigint),
 	cast("claimGroupId" as bigint),
+	"lastupdated",
+	"dateFrom",
+	"dateThrough",
 	"clinicalTrialNumber",
 	"claimDispositionCode",
 	"paymentAmount",
-	"dateFrom",
-	"dateThrough",
 	"claimCarrierControlNumber",
 	"claimEntryCode",
 	"hcpcsYearCode",
@@ -107,6 +108,9 @@ select
 	"diagnosis9CodeVersion",
 	"diagnosis10CodeVersion",
 	"diagnosis11CodeVersion",
-	"diagnosis12CodeVersion",
-	"lastupdated"
-from   public."CarrierClaims"; 
+	"diagnosis12CodeVersion"
+from
+	public."CarrierClaims"
+on conflict
+	(carrier_claims_pkey)
+do nothing; 

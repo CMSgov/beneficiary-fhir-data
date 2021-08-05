@@ -93,4 +93,8 @@ select
 	"providerZipCode",
 	"providerTaxNumber",
 	"providerPaymentAmount"
-from public."CarrierClaimLines";
+from
+	public."CarrierClaimLines"
+on conflict
+	(carrier_claim_lines_pkey)
+do nothing;

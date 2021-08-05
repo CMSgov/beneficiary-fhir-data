@@ -1,6 +1,7 @@
 insert into public.beneficiaries_history (
 	beneficiary_history_id, 
-	bene_id, 
+	bene_id,
+	last_updated,
 	bene_crnt_hic_num,
 	hicn_unhashed,
 	mbi_num, 
@@ -8,11 +9,11 @@ insert into public.beneficiaries_history (
 	mbi_efctv_bgn_dt, 
 	mbi_efctv_end_dt,
 	bene_sex_ident_cd, 
-	bene_birth_dt, 
-	last_updated) 
+	bene_birth_dt) 
 select
 	"beneficiaryHistoryId", 
 	Cast("beneficiaryId" as bigint), 
+	"lastupdated",
 	"hicn", 
 	"hicnUnhashed", 
 	"medicareBeneficiaryId", 
@@ -20,6 +21,9 @@ select
 	"mbiEffectiveDate", 
 	"mbiObsoleteDate", 
 	"sex", 
-	"birthDate", 
-	"lastupdated" 
-from   public."BeneficiariesHistory"; 
+	"birthDate"
+from
+	public."BeneficiariesHistory"
+on conflict
+	(beneficiaries_history_pkey)
+do nothing;

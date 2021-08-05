@@ -2,9 +2,10 @@ insert into public.hha_claims (
 	clm_id,
 	bene_id,
 	clm_grp_id,
-	clm_pmt_amt,
+	last_updated,
 	clm_from_dt,
 	clm_thru_dt,
+	clm_pmt_amt,
 	clm_admsn_dt,
 	clm_fac_type_cd,
 	clm_freq_cd,
@@ -108,16 +109,16 @@ insert into public.hha_claims (
 	icd_dgns_vrsn_cd22,
 	icd_dgns_vrsn_cd23,
 	icd_dgns_vrsn_cd24,
-	icd_dgns_vrsn_cd25,
-	last_updated
+	icd_dgns_vrsn_cd25
 )
 select
 	cast("claimId" as bigint), 
 	cast("beneficiaryId" as bigint), 
 	cast("claimGroupId" as bigint),
-	"paymentAmount",
+	"lastupdated",
 	"dateFrom",
 	"dateThrough",
+	"paymentAmount",
 	"careStartDate",
 	"claimFacilityTypeCode",
 	"claimFrequencyCode",
@@ -221,6 +222,9 @@ select
 	"diagnosis22CodeVersion",
 	"diagnosis23CodeVersion",
 	"diagnosis24CodeVersion",
-	"diagnosis25CodeVersion",
-	"lastupdated"
-from public."HHAClaims";
+	"diagnosis25CodeVersion"
+from
+	public."HHAClaims"
+on conflict
+	(hha_claims_pkey)
+do nothing;

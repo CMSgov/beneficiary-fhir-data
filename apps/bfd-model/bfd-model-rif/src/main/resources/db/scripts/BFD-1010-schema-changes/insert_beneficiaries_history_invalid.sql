@@ -14,4 +14,8 @@ select
 	"medicareBeneficiaryId",
 	"sex", 
 	"birthDate"
-from   public."BeneficiariesHistoryInvalidBeneficiaries"; 
+from
+	public."BeneficiariesHistoryInvalidBeneficiaries"
+on conflict
+	(beneficiaries_history_invalid_beneficiaries_pkey)
+do nothing;

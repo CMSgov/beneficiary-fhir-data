@@ -73,4 +73,8 @@ select
 	"totalChargeAmount",
 	"unitCount",
 	"wageAdjustedCoinsuranceAmount"
-from public."OutpatientClaimLines";
+from
+	public."OutpatientClaimLines"
+on conflict
+	(outpatient_claim_lines_pkey)
+do nothing;

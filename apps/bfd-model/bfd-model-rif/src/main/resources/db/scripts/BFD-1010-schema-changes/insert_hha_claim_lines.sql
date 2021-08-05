@@ -43,4 +43,8 @@ select
 	"statusCode",
 	"totalChargeAmount",
 	"unitCount"
-from public."HHAClaimLines";
+from
+	public."HHAClaimLines"
+on conflict
+	(hha_claim_lines_pkey)
+do nothing;

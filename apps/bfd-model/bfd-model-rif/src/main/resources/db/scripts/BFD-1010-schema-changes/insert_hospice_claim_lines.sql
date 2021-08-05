@@ -39,4 +39,8 @@ select
 	"hcpcsSecondModifierCode",
 	"revenueCenterRenderingPhysicianNPI",
 	"revenueCenterRenderingPhysicianUPIN"
-from public."HospiceClaimLines";
+from
+	public."HospiceClaimLines"
+on conflict
+	(hospice_claim_lines_pkey)
+do nothing;

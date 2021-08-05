@@ -2,10 +2,11 @@ insert into public.hospice_claims (
 	clm_id,
 	bene_id,
 	clm_grp_id,
-	clm_fac_type_cd,
-	clm_freq_cd,
+	last_updated,
 	clm_from_dt,
 	clm_thru_dt,
+	clm_fac_type_cd,
+	clm_freq_cd,
 	clm_hospc_start_dt_id,
 	clm_mdcr_non_pmt_rsn_cd,
 	clm_pmt_amt,
@@ -108,17 +109,17 @@ insert into public.hospice_claims (
 	icd_dgns_vrsn_cd22,
 	icd_dgns_vrsn_cd23,
 	icd_dgns_vrsn_cd24,
-	icd_dgns_vrsn_cd25,
-	last_updated
+	icd_dgns_vrsn_cd25
 )
 select
 	cast("claimId" as bigint),
 	cast("beneficiaryId" as bigint),
 	cast("claimGroupId" as bigint),
-	"claimFacilityTypeCode",
-	"claimFrequencyCode",
+	"lastupdated",
 	"dateFrom",
 	"dateThrough",
+	"claimFacilityTypeCode",
+	"claimFrequencyCode",
 	"claimHospiceStartDate",
 	"claimNonPaymentReasonCode",
 	"paymentAmount",
@@ -221,6 +222,9 @@ select
 	"diagnosis22CodeVersion",
 	"diagnosis23CodeVersion",
 	"diagnosis24CodeVersion",
-	"diagnosis25CodeVersion",
-	"lastupdated"
-	from public."HospiceClaims";
+	"diagnosis25CodeVersion"
+from
+	public."HospiceClaims"
+on conflict
+	(hospice_claims_pkey)
+do nothing;

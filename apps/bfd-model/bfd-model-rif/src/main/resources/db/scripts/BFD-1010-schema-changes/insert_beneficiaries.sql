@@ -1,5 +1,6 @@
 insert into public.beneficiaries (
 	bene_id,
+	last_updated,
 	bene_birth_dt,
 	bene_county_cd,
 	bene_esrd_ind,
@@ -203,11 +204,11 @@ insert into public.beneficiaries (
 	state_cnty_zip_cd,
 	mbi_efctv_bgn_dt,
 	mbi_efctv_end_dt,
-	bene_link_key,
-	last_updated
+	bene_link_key
 )
 select
 	Cast("beneficiaryId" as bigint),
+	"lastupdated"
 	"birthDate",
 	"countyCode",
 	"endStageRenalDiseaseCode",
@@ -411,6 +412,9 @@ select
 	"derivedZipCode",
 	"mbiEffectiveDate",
 	"mbiObsoleteDate",
-	"beneLinkKey",
-	"lastupdated"
-from   public."Beneficiaries"; 
+	"beneLinkKey"
+from
+	public."Beneficiaries"
+on conflict
+	(beneficiaries_pkey)
+do nothing;

@@ -9,7 +9,11 @@ select
 	"loadedFileId",
 	"beneficiaries",
 	"created"
-from public."LoadedBatches";
+from
+	public."LoadedBatches"
+on conflict
+	(loaded_batches_pkey)
+do nothing;
 
 insert into public.loaded_files (
     loaded_file_id,
@@ -20,4 +24,8 @@ select
 	"loadedFileId",
 	"rifType",
 	"created"
-from public."LoadedFiles";
+from
+	public."LoadedFiles"
+on conflict
+	(loaded_files_pkey)
+do nothing;

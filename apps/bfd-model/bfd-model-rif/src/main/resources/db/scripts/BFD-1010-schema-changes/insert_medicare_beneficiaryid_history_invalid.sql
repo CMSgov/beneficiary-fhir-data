@@ -33,4 +33,8 @@ select
 	"mbiAddDate",
 	"mbiUpdateUser",
 	"mbiUpdateDate"
-from public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries";
+from
+	public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
+on conflict
+	(medicare_beneficiaryid_history_invalid_beneficiaries_pkey)
+do nothing;

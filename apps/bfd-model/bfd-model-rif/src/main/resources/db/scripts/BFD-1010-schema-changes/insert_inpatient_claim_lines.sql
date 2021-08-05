@@ -27,4 +27,8 @@ select
 	"hcpcsCode",
 	"revenueCenterRenderingPhysicianNPI",
 	"revenueCenterRenderingPhysicianUPIN"
-from public."InpatientClaimLines";
+from
+	public."InpatientClaimLines"
+on conflict
+	(inpatient_claim_lines_pkey)
+do nothing;
