@@ -90,6 +90,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     addRandomFieldValues(claim);
     addRandomProcCodes(claim);
     addRandomDiagnosisCodes(claim);
+    addRandomPayers(claim);
     return claim.build();
   }
 
@@ -129,7 +130,6 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
         () -> claim.setFreqCdEnum(randomEnum(BILL_FREQUENCIES)),
         () -> claim.setFreqCdUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setBillTypCd(randomAlphaNumeric(3, 3)));
-    addRandomPayers(claim);
   }
 
   private void addRandomProcCodes(FissClaim.Builder claim) {
@@ -175,25 +175,25 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     oneOf(
         () -> payer.setPayersIdEnum(randomEnum(PAYER_CODES)),
         () -> payer.setPayersIdUnrecognized(randomAlphaNumeric(1, 1)));
-    optional(() -> payer.setPayersName(randomLetter(1, 1)));
+    optional(() -> payer.setPayersName(randomAlphaNumeric(1, 32)));
     oneOf(
         () -> payer.setRelIndEnum(randomEnum(RELEASE_OF_INFOS)),
         () -> payer.setRelIndUnrecognized(randomLetter(1, 1)));
     oneOf(
         () -> payer.setAssignIndEnum(randomEnum(ASSIGNMENT_OF_BENE_INDICATORS)),
         () -> payer.setAssignIndUnrecognized(randomLetter(1, 1)));
-    optional(() -> payer.setProviderNumber(randomLetter(1, 1)));
-    optional(() -> payer.setAdjDcnIcn(randomLetter(1, 1)));
+    optional(() -> payer.setProviderNumber(randomAlphaNumeric(1, 13)));
+    optional(() -> payer.setAdjDcnIcn(randomAlphaNumeric(1, 23)));
     optional(() -> payer.setPriorPmt(randomAmount()));
     optional(() -> payer.setEstAmtDue(randomAmount()));
     oneOf(
         () -> payer.setBeneRelEnum(randomEnum(PATIENT_REL_CODES)),
-        () -> payer.setBeneRelUnrecognized(randomLetter(1, 1)));
-    optional(() -> payer.setBeneLastName(randomLetter(1, 1)));
-    optional(() -> payer.setBeneFirstName(randomLetter(1, 1)));
+        () -> payer.setBeneRelUnrecognized(randomDigit(2, 2)));
+    optional(() -> payer.setBeneLastName(randomLetter(1, 15)));
+    optional(() -> payer.setBeneFirstName(randomLetter(1, 10)));
     optional(() -> payer.setBeneMidInit(randomLetter(1, 1)));
-    optional(() -> payer.setBeneSsnHic(randomLetter(1, 1)));
-    optional(() -> payer.setInsuredGroupName(randomLetter(1, 1)));
+    optional(() -> payer.setBeneSsnHic(randomAlphaNumeric(1, 19)));
+    optional(() -> payer.setInsuredGroupName(randomLetter(1, 17)));
     optional(() -> payer.setBeneDob(randomDate()));
     oneOf(
         () -> payer.setBeneSexEnum(randomEnum(BENE_SEXES)),
@@ -204,7 +204,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
         () -> payer.setInsuredSexUnrecognized(randomLetter(1, 1)));
     oneOf(
         () -> payer.setInsuredRelX12Enum(randomEnum(PATIENT_REL_CODES)),
-        () -> payer.setInsuredRelX12Unrecognized(randomLetter(1, 1)));
+        () -> payer.setInsuredRelX12Unrecognized(randomDigit(2, 2)));
 
     parent.setBeneZPayer(payer.build());
   }
@@ -215,31 +215,31 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     oneOf(
         () -> payer.setPayersIdEnum(randomEnum(PAYER_CODES)),
         () -> payer.setPayersIdUnrecognized(randomAlphaNumeric(1, 1)));
-    optional(() -> payer.setPayersName(randomLetter(1, 1)));
+    optional(() -> payer.setPayersName(randomLetter(1, 32)));
     oneOf(
         () -> payer.setRelIndEnum(randomEnum(RELEASE_OF_INFOS)),
         () -> payer.setRelIndUnrecognized(randomLetter(1, 1)));
     oneOf(
         () -> payer.setAssignIndEnum(randomEnum(ASSIGNMENT_OF_BENE_INDICATORS)),
         () -> payer.setAssignIndUnrecognized(randomLetter(1, 1)));
-    optional(() -> payer.setProviderNumber(randomLetter(1, 1)));
-    optional(() -> payer.setAdjDcnIcn(randomLetter(1, 1)));
+    optional(() -> payer.setProviderNumber(randomLetter(8, 13)));
+    optional(() -> payer.setAdjDcnIcn(randomLetter(23, 23)));
     optional(() -> payer.setPriorPmt(randomAmount()));
     optional(() -> payer.setEstAmtDue(randomAmount()));
     oneOf(
         () -> payer.setInsuredRelEnum(randomEnum(PATIENT_REL_CODES)),
-        () -> payer.setInsuredRelUnrecognized(randomLetter(1, 1)));
-    optional(() -> payer.setInsuredName(randomLetter(1, 1)));
-    optional(() -> payer.setInsuredSsnHic(randomLetter(1, 1)));
-    optional(() -> payer.setInsuredGroupName(randomLetter(1, 1)));
-    optional(() -> payer.setInsuredGroupNbr(randomLetter(1, 1)));
-    optional(() -> payer.setTreatAuthCd(randomDate()));
+        () -> payer.setInsuredRelUnrecognized(randomDigit(2, 2)));
+    optional(() -> payer.setInsuredName(randomLetter(1, 25)));
+    optional(() -> payer.setInsuredSsnHic(randomLetter(1, 19)));
+    optional(() -> payer.setInsuredGroupName(randomLetter(1, 17)));
+    optional(() -> payer.setInsuredGroupNbr(randomLetter(1, 20)));
+    optional(() -> payer.setTreatAuthCd(randomAlphaNumeric(1, 18)));
     oneOf(
         () -> payer.setInsuredSexEnum(randomEnum(BENE_SEXES)),
         () -> payer.setInsuredSexUnrecognized(randomLetter(1, 1)));
     oneOf(
         () -> payer.setInsuredRelX12Enum(randomEnum(PATIENT_REL_CODES)),
-        () -> payer.setInsuredRelX12Unrecognized(randomLetter(1, 1)));
+        () -> payer.setInsuredRelX12Unrecognized(randomDigit(2, 2)));
     optional(() -> payer.setInsuredDob(randomDate()));
     optional(() -> payer.setInsuredDobText(randomDigit(10, 12)));
 
