@@ -66,17 +66,17 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     claim.setIdrClmHdIcn(idrClmHdIcn);
     claim.setIdrContrId(randomDigit(1, 5));
     optional(() -> claim.setIdrHic(randomDigit(1, 12)));
-    either(
+    oneOf(
         () -> claim.setIdrClaimTypeEnum(randomEnum(CLAIM_TYPES)),
         () -> claim.setIdrClaimTypeUnrecognized(randomLetter(1, 1)));
     claim.setIdrDtlCnt(detailCount);
     optional(() -> claim.setIdrBeneLast16(randomLetter(1, 6)));
     optional(() -> claim.setIdrBeneFirstInit(randomLetter(1, 1)));
     optional(() -> claim.setIdrBeneMidInit(randomLetter(1, 1)));
-    either(
+    oneOf(
         () -> claim.setIdrBeneSexEnum(randomEnum(BENE_SEXES)),
         () -> claim.setIdrBeneSexUnrecognized(randomLetter(1, 1)));
-    either(
+    oneOf(
         () -> claim.setIdrStatusCodeEnum(randomEnum(STATUS_CODES)),
         () -> claim.setIdrStatusCodeUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setIdrStatusDate(randomDate()));
@@ -85,7 +85,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setIdrBillProvEin(randomAlphaNumeric(1, 10)));
     optional(() -> claim.setIdrBillProvType(randomLetter(1, 2)));
     optional(() -> claim.setIdrBillProvSpec(randomAlphaNumeric(1, 2)));
-    either(
+    oneOf(
         () -> claim.setIdrBillProvGroupIndEnum(randomEnum(PROV_INDICATORS)),
         () -> claim.setIdrBillProvGroupIndUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setIdrBillProvPriceSpec(randomAlphaNumeric(1, 2)));
@@ -94,7 +94,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setIdrTotAllowed(randomAmount()));
     optional(() -> claim.setIdrCoinsurance(randomAmount()));
     optional(() -> claim.setIdrDeductible(randomAmount()));
-    either(
+    oneOf(
         () -> claim.setIdrBillProvStatusCdEnum(randomEnum(PROV_STATUS_CODES)),
         () -> claim.setIdrBillProvStatusCdUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setIdrTotBilledAmt(randomAmount()));
@@ -109,7 +109,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     for (int i = 1; i <= count; ++i) {
       final McsDiagnosisCode.Builder code = McsDiagnosisCode.newBuilder();
       code.setIdrClmHdIcn(idrClmHdIcn);
-      either(
+      oneOf(
           () -> code.setIdrDiagIcdTypeEnum(randomEnum(DIAG_ICD_TYPES)),
           () -> code.setIdrDiagIcdTypeEnumUnrecognized(randomLetter(1, 1)));
       optional(() -> code.setIdrDiagCode(randomAlphaNumeric(1, 7)));
@@ -120,7 +120,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
   private void addDetails(McsClaim.Builder claim, int detailCount) {
     for (int i = 1; i <= detailCount; ++i) {
       final McsDetail.Builder detail = McsDetail.newBuilder();
-      either(
+      oneOf(
           () -> detail.setIdrDtlStatusEnum(randomEnum(DETAIL_STATUSES)),
           () -> detail.setIdrDtlStatusUnrecognized(randomLetter(1, 1)));
       optional(
@@ -135,7 +135,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
       optional(() -> detail.setIdrModTwo(randomAlphaNumeric(1, 2)));
       optional(() -> detail.setIdrModThree(randomAlphaNumeric(1, 2)));
       optional(() -> detail.setIdrModFour(randomAlphaNumeric(1, 2)));
-      either(
+      oneOf(
           () -> detail.setIdrDtlDiagIcdTypeEnum(randomEnum(DIAG_ICD_TYPES)),
           () -> detail.setIdrDtlDiagIcdTypeUnrecognized(randomLetter(1, 1)));
       optional(() -> detail.setIdrDtlPrimaryDiagCode(randomAlphaNumeric(1, 7)));

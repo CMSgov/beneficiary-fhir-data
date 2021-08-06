@@ -61,13 +61,13 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
 
   private void addRandomFieldValues(FissClaim.Builder claim) {
     claim.setDcn(randomDigit(5, 8)).setHicNo(randomDigit(12, 12));
-    either(
+    oneOf(
         () -> claim.setCurrStatusEnum(randomEnum(CLAIM_STATUSES)),
         () -> claim.setCurrStatusUnrecognized(randomLetter(1, 1)));
-    either(
+    oneOf(
         () -> claim.setCurrLoc1Enum(randomEnum(PROCESSING_TYPES)),
         () -> claim.setCurrLoc1Unrecognized(randomLetter(1, 1)));
-    either(
+    oneOf(
         () -> claim.setCurrLoc2Enum(randomEnum(CURR_LOC2S)),
         () -> claim.setCurrLoc2Unrecognized(randomLetter(1, 5)));
     optional(() -> claim.setMedaProvId(randomAlphaNumeric(13, 13)));
@@ -107,7 +107,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     for (int i = 1; i <= count; ++i) {
       FissDiagnosisCode.Builder diagCode =
           FissDiagnosisCode.newBuilder().setDiagCd2(randomLetter(1, 7));
-      either(
+      oneOf(
           () -> diagCode.setDiagPoaIndEnum(randomEnum(INDICATORS)),
           () -> diagCode.setDiagPoaIndUnrecognized(randomLetter(1, 1)));
       optional(() -> diagCode.setBitFlags(randomLetter(1, 4)));
