@@ -1390,6 +1390,7 @@ create table partd_events (
     clm_id                                   bigint not null,                          -- eventId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
+    last_updated                             timestamp with time zone,                 -- lastupdated
     adjstmt_dltn_cd                          character(1),                             -- adjustmentDeletionCode
     brnd_gnrc_cd                             character(1),                             -- brandGenericCode
     cmpnd_cd                                 integer not null,                         -- compoundCode
@@ -1427,7 +1428,6 @@ create table partd_events (
     srvc_prvdr_id_qlfyr_cd                   character varying(2) not null,            -- serviceProviderIdQualiferCode
     submsn_clr_cd                            character varying(2),                     -- submissionClarificationCode
     tot_rx_cst_amt                           numeric(10,2) not null,                   -- totalPrescriptionCost
-    last_updated                             timestamp with time zone,                 -- lastupdated
     constraint partd_events_pkey primary key (clm_id)
 )
 
