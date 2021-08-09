@@ -46,7 +46,7 @@ setup(){
   if ! [[ -f .env ]]; then
     printf "Generating .env file.. "
     echo -e "export PGHOST=\nexport PGPORT=5432\nexport PGUSER=\nexport PGPASSWORD=\nexport PGDATABASE=" > .env
-    echo -e "export MAX_JOBS=1\nexport DRY_RUN=true\n" >> .env
+    echo -e "export MAX_JOBS=1\nexport MIN_TABLES=false\nexport DRY_RUN=true\n" >> .env
     echo "OK"
     echo "Please update $(PWD)/.env with the appropriate database credentials and run the script again."
     exit
