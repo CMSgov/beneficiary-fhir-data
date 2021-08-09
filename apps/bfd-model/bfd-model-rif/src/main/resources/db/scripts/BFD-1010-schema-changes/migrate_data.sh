@@ -10,6 +10,9 @@ export PGDATABASE="${PGDATABASE:-}"
 # when DRY_RUN=true (the default), the script will echo the commands it would run against the db
 export DRY_RUN="${DRY_RUN:-true}"
 
+# boolean to limit table data verification (verify_data.sh) to a subset of tables
+export MIN_TABLES="${MIN_TABLES:-false}"
+
 # tables that need to be processed before child tables, these are processed
 # one after the other in order
 parent_tables=(

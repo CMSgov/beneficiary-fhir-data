@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail
 export MAX_JOBS="${MAX_JOBS:-1}" # defaults to one, probably max around 4
-export MIN_TABLES="${MIN_TABLES:false}" # defaults to verify all tables
 export PGHOST="${PGHOST:-}"
 export PGUSER="${PGUSER:-}"
 export PGPASSWORD="${PGPASSWORD:-}"
@@ -10,6 +9,10 @@ export PGDATABASE="${PGDATABASE:-}"
 
 # when DRY_RUN=true (the default), the script will echo the commands it would run against the db
 export DRY_RUN="${DRY_RUN:-true}"
+
+# boolean to limit table data verification (verify_data.sh) to a subset of tables
+# defaults to false which runs a complete verification
+export MIN_TABLES="${MIN_TABLES:-false}"
 
 # these will be run in background jobs, up to $MAX_JOBS at a time
 # not necessarily in order
