@@ -168,6 +168,40 @@ public enum StaticRifResource {
 
   SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 
+  SAMPLE_SYNTHEA_BENES2011(
+      resourceUrl("rif-synthea/beneficiary_2011.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2012(
+      resourceUrl("rif-synthea/beneficiary_2012.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2013(
+      resourceUrl("rif-synthea/beneficiary_2013.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2014(
+      resourceUrl("rif-synthea/beneficiary_2014.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2015(
+      resourceUrl("rif-synthea/beneficiary_2015.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2016(
+      resourceUrl("rif-synthea/beneficiary_2016.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2017(
+      resourceUrl("rif-synthea/beneficiary_2017.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2018(
+      resourceUrl("rif-synthea/beneficiary_2018.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2019(
+      resourceUrl("rif-synthea/beneficiary_2019.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2020(
+      resourceUrl("rif-synthea/beneficiary_2020.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2021(
+      resourceUrl("rif-synthea/beneficiary_2021.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_CARRIER(resourceUrl("rif-synthea/carrier.csv"), RifFileType.CARRIER, 279900),
+  SAMPLE_SYNTHEA_INPATIENT(resourceUrl("rif-synthea/inpatient.csv"), RifFileType.INPATIENT, 36606),
+  SAMPLE_SYNTHEA_OUTPATIENT(
+      resourceUrl("rif-synthea/outpatient.csv"), RifFileType.OUTPATIENT, 328420),
+  SAMPLE_SYNTHEA_SNF(resourceUrl("rif-synthea/snf.csv"), RifFileType.SNF, 2797),
+  SAMPLE_SYNTHEA_HOSPICE(resourceUrl("rif-synthea/hospice.csv"), RifFileType.HOSPICE, 1396),
+  SAMPLE_SYNTHEA_HHA(resourceUrl("rif-synthea/home.csv"), RifFileType.HHA, 14377),
+  SAMPLE_SYNTHEA_DME(resourceUrl("rif-synthea/dme.csv"), RifFileType.DME, 8727),
+  SAMPLE_SYNTHEA_PDE(resourceUrl("rif-synthea/prescription.csv"), RifFileType.PDE, 214157),
+  SAMPLE_SYNTHEA_BENEHISTORY(
+      resourceUrl("rif-synthea/beneficiary_history.csv"), RifFileType.BENEFICIARY_HISTORY, 10000),
+
   SYNTHETIC_BENEFICIARY_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-1999.rif"),
       RifFileType.BENEFICIARY,
