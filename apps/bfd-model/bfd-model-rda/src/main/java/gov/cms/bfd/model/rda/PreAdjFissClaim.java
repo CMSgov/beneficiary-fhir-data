@@ -8,6 +8,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -108,17 +110,19 @@ public class PreAdjFissClaim {
   @Column(name = "`lobCd`", length = 1)
   private String lobCd;
 
-  // null if other servTypeCd variations are set
+  public enum ServTypeCdMapping {
+    Normal,
+    Clinic,
+    SpecialFacility,
+    Unrecognized
+  }
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "`servTypeCdMapping`", length = 20)
+  private ServTypeCdMapping servTypeCdMapping;
+
   @Column(name = "`servTypeCd`", length = 1)
   private String servTypeCd;
-
-  // null if other servTypeCd variations are set
-  @Column(name = "`servTypeCdForClinics`", length = 1)
-  private String servTypeCdForClinics;
-
-  // null if other servTypeCd variations are set
-  @Column(name = "`servTypeCdForSpecialFacilities`", length = 1)
-  private String servTypeCdForSpecialFacilities;
 
   @Column(name = "`freqCd`", length = 1)
   private String freqCd;

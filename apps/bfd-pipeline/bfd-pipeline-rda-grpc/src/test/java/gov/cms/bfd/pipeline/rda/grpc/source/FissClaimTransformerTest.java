@@ -13,6 +13,11 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.fiss.FissBillClassification;
+import gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForClinics;
+import gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForSpecialFacilities;
+import gov.cms.mpsm.rda.v1.fiss.FissBillFacilityType;
+import gov.cms.mpsm.rda.v1.fiss.FissBillFrequency;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
@@ -96,6 +101,11 @@ public class FissClaimTransformerTest {
     claim.setPracLocZip("123456789012345");
     claim.setStmtCovFromDate(LocalDate.of(2020, 2, 3));
     claim.setStmtCovToDate(LocalDate.of(2021, 4, 5));
+    claim.setLobCd("1");
+    claim.setServTypeCd("6");
+    claim.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Clinic);
+    claim.setFreqCd("G");
+    claim.setBillTypCd("ABC");
     claim.setLastUpdated(clock.instant());
     claimBuilder
         .setDcn("dcn")
@@ -119,7 +129,13 @@ public class FissClaimTransformerTest {
         .setPracLocState("ls")
         .setPracLocZip("123456789012345")
         .setStmtCovFromCymd("2020-02-03")
-        .setStmtCovToCymd("2021-04-05");
+        .setStmtCovToCymd("2021-04-05")
+        .setLobCdEnum(FissBillFacilityType.BILL_FACILITY_TYPE_HOSPITAL)
+        .setServTypeCdForClinicsEnum(
+            FissBillClassificationForClinics
+                .BILL_CLASSIFICATION_FOR_CLINICS_COMMUNITY_MENTAL_HEALTH_CENTER)
+        .setFreqCdEnum(FissBillFrequency.BILL_FREQUENCY_ADJUSTMENT_CLAIM_G)
+        .setBillTypCd("ABC");
     changeBuilder
         .setSeq(MIN_SEQUENCE_NUM)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
@@ -414,6 +430,34 @@ public class FissClaimTransformerTest {
   }
 
   @Test
+  public void testBadLobCd() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setLobCdUnrecognized("12"),
+        new DataTransformer.ErrorMessage("lobCd", "invalid length: expected=[1,1] actual=2"));
+  }
+
+  @Test
+  public void testBadServTypCd() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setServTypCdUnrecognized("12"),
+        new DataTransformer.ErrorMessage("servTypeCd", "invalid length: expected=[1,1] actual=2"));
+  }
+
+  @Test
+  public void testBadFreqCd() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setFreqCdUnrecognized("12345"),
+        new DataTransformer.ErrorMessage("", ""));
+  }
+
+  @Test
+  public void testBadBillTypCd() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setBillTypCd("1234"),
+        new DataTransformer.ErrorMessage("billTypCd", "invalid length: expected=[1,3] actual=4"));
+  }
+
+  @Test
   public void testBadProcCodeProcCd() {
     assertProcCodeTransformationError(
         codeBuilder -> codeBuilder.setProcCd("12345678901"),
@@ -487,6 +531,56 @@ public class FissClaimTransformerTest {
               new DataTransformer.ErrorMessage("currStatus", "unsupported enum value")),
           ex.getErrors());
     }
+  }
+
+  @Test
+  public void servTypeCdEnums() {
+    claim.setDcn("dcn");
+    claim.setHicNo("hicn");
+    claim.setCurrStatus('T');
+    claim.setCurrLoc1('M');
+    claim.setCurrLoc2("9000");
+    claim.setLastUpdated(clock.instant());
+    claimBuilder
+        .setDcn("dcn")
+        .setHicNo("hicn")
+        .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
+        .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
+        .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
+    changeBuilder
+        .setSeq(MIN_SEQUENCE_NUM)
+        .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+        .setClaim(claimBuilder.build());
+    assertChangeMatches(RdaChange.Type.INSERT);
+
+    claim.setServTypeCd("2");
+    claim.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Normal);
+    claimBuilder.setServTypeCdEnum(
+        FissBillClassification.BILL_CLASSIFICATION_HOSPITAL_BASED_OR_INPATIENT_PART_B);
+    changeBuilder.setClaim(claimBuilder.build());
+    assertChangeMatches(RdaChange.Type.INSERT);
+
+    claim.setServTypeCd("6");
+    claim.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Clinic);
+    claimBuilder.setServTypeCdForClinicsEnum(
+        FissBillClassificationForClinics
+            .BILL_CLASSIFICATION_FOR_CLINICS_COMMUNITY_MENTAL_HEALTH_CENTER);
+    changeBuilder.setClaim(claimBuilder.build());
+    assertChangeMatches(RdaChange.Type.INSERT);
+
+    claim.setServTypeCd("5");
+    claim.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.SpecialFacility);
+    claimBuilder.setServTypeCdForSpecialFacilitiesEnum(
+        FissBillClassificationForSpecialFacilities
+            .BILL_CLASSIFICATION_FOR_SPECIAL_FACILITIES_CRITICAL_ACCESS_HOSPITALS);
+    changeBuilder.setClaim(claimBuilder.build());
+    assertChangeMatches(RdaChange.Type.INSERT);
+
+    claim.setServTypeCd("Z");
+    claim.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Unrecognized);
+    claimBuilder.setServTypCdUnrecognized("Z");
+    changeBuilder.setClaim(claimBuilder.build());
+    assertChangeMatches(RdaChange.Type.INSERT);
   }
 
   private void assertChangeMatches(RdaChange.Type changeType) {

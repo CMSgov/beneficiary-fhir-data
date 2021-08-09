@@ -7,6 +7,11 @@ import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.fiss.FissBillClassification;
+import gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForClinics;
+import gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForSpecialFacilities;
+import gov.cms.mpsm.rda.v1.fiss.FissBillFacilityType;
+import gov.cms.mpsm.rda.v1.fiss.FissBillFrequency;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
@@ -64,6 +69,53 @@ public class FissClaimTransformer {
               FissDiagnosisPresentOnAdmissionIndicator.UNRECOGNIZED,
               ImmutableSet.of(),
               ImmutableSet.of());
+  private static final EnumStringExtractor<FissClaim, FissBillFacilityType> lobCd =
+      new EnumStringExtractor<>(
+          FissClaim::hasLobCdEnum,
+          FissClaim::getLobCdEnum,
+          FissClaim::hasLobCdUnrecognized,
+          FissClaim::getLobCdUnrecognized,
+          FissBillFacilityType.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
+  private static final EnumStringExtractor<FissClaim, FissBillClassification> servTypeCd =
+      new EnumStringExtractor<>(
+          FissClaim::hasServTypeCdEnum,
+          FissClaim::getServTypeCdEnum,
+          ignored -> false,
+          ignored -> null,
+          FissBillClassification.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
+  private static final EnumStringExtractor<FissClaim, FissBillClassificationForClinics>
+      servTypeCdForClinics =
+          new EnumStringExtractor<>(
+              FissClaim::hasServTypeCdForClinicsEnum,
+              FissClaim::getServTypeCdForClinicsEnum,
+              ignored -> false,
+              ignored -> null,
+              FissBillClassificationForClinics.UNRECOGNIZED,
+              ImmutableSet.of(),
+              ImmutableSet.of());
+  private static final EnumStringExtractor<FissClaim, FissBillClassificationForSpecialFacilities>
+      servTypeCdForSpecialFacilities =
+          new EnumStringExtractor<>(
+              FissClaim::hasServTypeCdForSpecialFacilitiesEnum,
+              FissClaim::getServTypeCdForSpecialFacilitiesEnum,
+              ignored -> false,
+              ignored -> null,
+              FissBillClassificationForSpecialFacilities.UNRECOGNIZED,
+              ImmutableSet.of(),
+              ImmutableSet.of());
+  private static final EnumStringExtractor<FissClaim, FissBillFrequency> freqCd =
+      new EnumStringExtractor<>(
+          FissClaim::hasFreqCdEnum,
+          FissClaim::getFreqCdEnum,
+          FissClaim::hasFreqCdUnrecognized,
+          FissClaim::getFreqCdUnrecognized,
+          FissBillFrequency.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
 
   private final Clock clock;
   private final IdHasher idHasher;
@@ -224,7 +276,58 @@ public class FissClaimTransformer {
             PreAdjFissClaim.Fields.stmtCovToDate,
             from::hasStmtCovToCymd,
             from::getStmtCovToCymd,
-            to::setStmtCovToDate);
+            to::setStmtCovToDate)
+        .copyEnumAsString(
+            PreAdjFissClaim.Fields.lobCd, true, 1, 1, lobCd.getEnumString(from), to::setLobCd)
+        .copyEnumAsString(
+            PreAdjFissClaim.Fields.servTypeCd,
+            true,
+            1,
+            1,
+            servTypeCd.getEnumString(from),
+            value -> {
+              to.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Normal);
+              to.setServTypeCd(value);
+            })
+        .copyEnumAsString(
+            PreAdjFissClaim.Fields.servTypeCd,
+            true,
+            1,
+            1,
+            servTypeCdForClinics.getEnumString(from),
+            value -> {
+              to.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Clinic);
+              to.setServTypeCd(value);
+            })
+        .copyEnumAsString(
+            PreAdjFissClaim.Fields.servTypeCd,
+            true,
+            1,
+            1,
+            servTypeCdForSpecialFacilities.getEnumString(from),
+            value -> {
+              to.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.SpecialFacility);
+              to.setServTypeCd(value);
+            })
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.servTypeCd,
+            1,
+            1,
+            from::hasServTypCdUnrecognized,
+            from::getServTypCdUnrecognized,
+            value -> {
+              to.setServTypeCdMapping(PreAdjFissClaim.ServTypeCdMapping.Unrecognized);
+              to.setServTypeCd(value);
+            })
+        .copyEnumAsString(
+            PreAdjFissClaim.Fields.freqCd, true, 1, 1, freqCd.getEnumString(from), to::setFreqCd)
+        .copyOptionalString(
+            PreAdjFissClaim.Fields.billTypCd,
+            1,
+            3,
+            from::hasBillTypCd,
+            from::getBillTypCd,
+            to::setBillTypCd);
     to.setLastUpdated(clock.instant());
     return to;
   }
