@@ -105,6 +105,27 @@ public class PreAdjFissClaim {
   @Column(name = "`stmtCovToDate`")
   private LocalDate stmtCovToDate;
 
+  @Column(name = "`lobCd`", length = 1)
+  private String lobCd;
+
+  // null if other servTypeCd variations are set
+  @Column(name = "`servTypeCd`", length = 1)
+  private String servTypeCd;
+
+  // null if other servTypeCd variations are set
+  @Column(name = "`servTypeCdForClinics`", length = 1)
+  private String servTypeCdForClinics;
+
+  // null if other servTypeCd variations are set
+  @Column(name = "`servTypeCdForSpecialFacilities`", length = 1)
+  private String servTypeCdForSpecialFacilities;
+
+  @Column(name = "`freqCd`", length = 1)
+  private String freqCd;
+
+  @Column(name = "`billTypCd`", length = 3)
+  private String billTypCd;
+
   @OneToMany(
       mappedBy = "dcn",
       fetch = FetchType.EAGER,
