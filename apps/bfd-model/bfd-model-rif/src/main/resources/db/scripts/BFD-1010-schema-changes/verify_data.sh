@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 export MAX_JOBS="${MAX_JOBS:-1}" # defaults to one, probably max around 4
+export MIN_TABLES="${MIN_TABLES:false}" # defaults to verify all tables
 export PGHOST="${PGHOST:-}"
 export PGUSER="${PGUSER:-}"
 export PGPASSWORD="${PGPASSWORD:-}"
@@ -12,6 +13,14 @@ export DRY_RUN="${DRY_RUN:-true}"
 
 # these will be run in background jobs, up to $MAX_JOBS at a time
 # not necessarily in order
+if [ "$MIN_TABLES" = true ] ; then
+verify_tables=(
+beneficiaries
+beneficiary_monthly
+carrier_claims
+carrier_claim_lines
+)
+else
 verify_tables=(
 beneficiaries
 beneficiaries_history
@@ -35,13 +44,14 @@ partd_events
 snf_claims
 snf_claim_lines
 )
+fi
 
 # generates/loads .env file and tests db connection
 setup(){
   if ! [[ -f .env ]]; then
     printf "Generating .env file.. "
     echo -e "export PGHOST=\nexport PGPORT=5432\nexport PGUSER=\nexport PGPASSWORD=\nexport PGDATABASE=" > .env
-    echo -e "export MAX_JOBS=1\nexport DRY_RUN=true\n" >> .env
+    echo -e "export MAX_JOBS=1\nexport MIN_TABLES=false\nexport DRY_RUN=true\n" >> .env
     echo "OK"
     echo "Please update $(PWD)/.env with the appropriate database credentials and run the script again."
     exit
