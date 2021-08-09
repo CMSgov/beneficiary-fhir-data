@@ -357,27 +357,6 @@ public enum StaticRifResource {
       RifFileType.OUTPATIENT,
       27955),
 
-  SAMPLE_MCT_BENES(
-      resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
-
-  SAMPLE_MCT_PDE(resourceUrl("rif-static-samples/sample-mct-pde.txt"), RifFileType.PDE, 40),
-
-  SAMPLE_MCT_UPDATE_1_BENES(
-      resourceUrl("rif-static-samples/sample-mct-update-1-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      8),
-
-  SAMPLE_MCT_UPDATE_2_PDE(
-      resourceUrl("rif-static-samples/sample-mct-update-2-pde.txt"), RifFileType.PDE, 40),
-
-  SAMPLE_MCT_UPDATE_3_BENES(
-      resourceUrl("rif-static-samples/sample-mct-update-3-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      2),
-
-  SAMPLE_MCT_UPDATE_3_PDE(
-      resourceUrl("rif-static-samples/sample-mct-update-3-pde.txt"), RifFileType.PDE, 7),
-
   SAMPLE_HICN_MULT_BENES(
       resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaries.txt"),
       RifFileType.BENEFICIARY,

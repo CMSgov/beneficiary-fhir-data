@@ -552,20 +552,6 @@ public final class RifLoaderIT {
     loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHETIC_DATA.getResources()));
   }
 
-  /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_MCT} data. */
-  @Test
-  public void loadSampleMctData() {
-    DataSource dataSource =
-        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
-    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2.getResources()));
-    loadSample(
-        dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3.getResources()));
-  }
-
   @Ignore
   @Test
   public void loadSyntheaData() {
