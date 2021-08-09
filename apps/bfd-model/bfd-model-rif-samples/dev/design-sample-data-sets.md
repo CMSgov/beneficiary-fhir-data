@@ -30,7 +30,6 @@ The following table details the key ranges for all known sample and production d
 |`SAMPLE_C`|TODO: `BENE_CRNT_HIC_NUM`s|TODO: `BENE_ID`s|TODO: `CLM_ID`s|TODO: `PDE_ID`s|TODO: `CLM_GRP_ID`s|TODO: notes|
 |`SAMPLE_B`|TODO: `BENE_CRNT_HIC_NUM`s|TODO: `BENE_ID`s|TODO: `CLM_ID`s|TODO: `PDE_ID`s|TODO: `CLM_GRP_ID`s|TODO: notes|
 |Synthetic|TODO: `BENE_CRNT_HIC_NUM`s|`1` - `9999999`|Carrier: `00000002211` - `99999992534`, Inpatient: `-1132194757` - `5024534892`|`-1000004332` - `-999962460`|`68` - `99999991267`|TODO: Notes|
-|`SAMPLE_MCT`|TODO: `BENE_CRNT_HIC_NUM`s|TODO: `BENE_ID`s|TODO: `CLM_ID`s|TODO: `PDE_ID`s|TODO: `CLM_GRP_ID`s|TODO: notes|
 
 This similar table details what those key ranges _should_ be going forwards, to avoid conflicts:
 
@@ -44,7 +43,6 @@ The following table details the ideal/desired key ranges for all known sample an
 |`SAMPLE_U`  |`T00000005A` - `T00000009A`                                           |       `-1` -        `-2`|        `-51` -           `-99`|        `-51` -           `-99`|
 |Random      |`T10000000A` - `T99999999A`                                           |`-10000000` - `-99999999`|`-1000000000` - `-999999999999`|`-1000000000` - `-999999999999`|
 |Synthetic   |`T01000000A` - `T01999999A`                                           | `-1000000` -  `-1999999`| `-100000000` -    `-199999999`| `-100000000` -    `-199999999`|
-|`SAMPLE_MCT`|HICNs: `MBP000201A` - `MBP000210A`, RRBs: `{0099190316`, `B3499290814`|     `-201` -      `-212`|       `-240` -          `-285`|       `-240` -          `-285`|
 
 ## Procedures to Load Data 
 
@@ -462,34 +460,6 @@ It's important to note that the synthetic data set does not yet cover all suppor
 |Inpatient Claims|70212|
 |Part D Events|413347|
 |Outpatient Claims|171144|
-
-### `SAMPLE_MCT`: MCT-Compatible Test Data (Derived from Synthetic)
-
-**Location**: [CMSgov/bluebutton-data-model:bluebutton-data-model-rif-samples/src/main/resources/rif-static-samples/](https://github.com/CMSgov/bluebutton-data-model/tree/master/bluebutton-data-model-rif-samples/src/main/resources/rif-static-samples)
-
-The `SAMPLE_MCT` data set is a small data set created specifically to support the Medicare Coverage Tools (MCT) project (also known as the new "Medicare Plan Finder").
-
-It was created via the following process:
-
-1. Start with the synthetic data set.
-2. Randomly select 8 beneficiaries from the synthetic data set. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://confluence.cms.gov/pages/viewpage.action?pageId=172097602).
-3. For each of those beneficiaries, randomly select Part D events from the synthetic data set to associate with them. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://confluence.cms.gov/pages/viewpage.action?pageId=172097602).
-    * It so happens that MCT wants each beneficiary to have exactly 5 Part D events, but this appears to have been a mostly arbitrary decision.
-4. Adjust all other identifiers (`BENE_ID`, `CLM_ID`, `PDE_ID`, and `CLM_GRP_ID`) so that they don't conflict/collide with any other data sets.
-
-### `SAMPLE_MCT`: MCT-Compatible Test Data (Derived from Synthetic) Added 11 new beneficiaries and associated data with pde's
-
-**Location**: [CMSgov/bluebutton-data-model:bluebutton-data-model-rif-samples/src/main/resources/rif-static-samples/](https://github.com/CMSgov/bluebutton-data-model/tree/master/bluebutton-data-model-rif-samples/src/main/resources/rif-static-samples)
-
-The `SAMPLE_MCT` data set is a small data set created specifically to support the Medicare Coverage Tools (MCT) project (also known as the new "Medicare Plan Finder").
-
-It was created via the following process:
-
-1. Start with the synthetic data set from sample-mct-update-4-beneficiaries.txt.
-2. Randomly select 11 beneficiaries from the synthetic data set. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://jira.cms.gov/browse/BFD-326).  Adjust identifiers `BENE_ID` so that they don't conflict/collide with any other data sets.
-3. For each of those beneficiaries, randomly select Part D events from the synthetic data sample-mct-update-5-pde.txt set to associate with them. Modify their field values (only) as needed to correspond to the values required by MCT, as detailed on [NGD/MBP/BB/MCT Test Case Data](https://jira.cms.gov/browse/BFD-326).
-4. Adjust all other identifiers (`BENE_ID`, `PDE_ID`, and `CLM_GRP_ID`) so that they don't conflict/collide with any other data sets.
-
 
 ### `SAMPLE_A` Uploaded to Different Environments
 As an end user of the BFD, I would like to have access to the most complete representation of a beneficiary and their possible claims as provided by the CCW, so that I am able to more accurately test and develop against that data.
