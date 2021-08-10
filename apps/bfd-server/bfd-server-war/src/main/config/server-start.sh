@@ -140,7 +140,7 @@ if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}");
 
 # DEBUG
 cat "${serverPortsFile}"
-cat "${workDirectory}/server-test-db.properties"
+find . -iname server-test-db.properties
 echo "${dbUrl}"
 
 # Read the server port to be used from the ports file.
