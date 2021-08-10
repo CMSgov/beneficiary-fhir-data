@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the PreAdjFissClaims table */
+/** JPA class for the FissClaims table */
 @Entity
 @Getter
 @Setter
@@ -145,4 +145,12 @@ public class PreAdjFissClaim {
       cascade = CascadeType.ALL)
   @Builder.Default
   private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
+
+  @OneToMany(
+      mappedBy = "dcn",
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @Builder.Default
+  private Set<PreAdjFissPayer> payers = new HashSet<>();
 }

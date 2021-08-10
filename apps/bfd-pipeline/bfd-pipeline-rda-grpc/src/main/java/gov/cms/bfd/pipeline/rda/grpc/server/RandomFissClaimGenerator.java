@@ -96,7 +96,7 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
 
   private void addRandomFieldValues(FissClaim.Builder claim) {
     claim.setDcn(randomDigit(5, 8)).setHicNo(randomDigit(12, 12));
-    optional(() -> claim.setCurrStatusEnum(randomEnum(CLAIM_STATUSES)));
+    claim.setCurrStatusEnum(randomEnum(CLAIM_STATUSES));
     oneOf(
         () -> claim.setCurrLoc1Enum(randomEnum(PROCESSING_TYPES)),
         () -> claim.setCurrLoc1Unrecognized(randomLetter(1, 1)));
@@ -240,8 +240,12 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     oneOf(
         () -> payer.setInsuredRelX12Enum(randomEnum(PATIENT_REL_CODES)),
         () -> payer.setInsuredRelX12Unrecognized(randomDigit(2, 2)));
-    optional(() -> payer.setInsuredDob(randomDate()));
-    optional(() -> payer.setInsuredDobText(randomDigit(10, 12)));
+    optional(
+        () -> {
+          String date = randomDate();
+          payer.setInsuredDob(date);
+          payer.setInsuredDobText(date.replace("-", "").substring(4) + date.substring(0, 4));
+        });
 
     parent.setInsuredPayer(payer.build());
   }
