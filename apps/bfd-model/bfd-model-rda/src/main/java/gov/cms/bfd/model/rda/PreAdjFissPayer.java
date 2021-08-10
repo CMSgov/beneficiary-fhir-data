@@ -2,6 +2,7 @@ package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -137,6 +138,9 @@ public class PreAdjFissPayer {
   // Insured only
   @Column(name = "`insuredDobText`", length = 9)
   private String insuredDobText;
+
+  @Column(name = "`lastUpdated`")
+  private Instant lastUpdated;
 
   @Data
   @NoArgsConstructor
