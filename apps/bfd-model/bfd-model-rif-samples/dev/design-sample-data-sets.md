@@ -529,4 +529,4 @@ exporter.bfd.hicn_start = T01000000A
 exporter.bfd.partd_contract_start = Z0001
 exporter.bfd.partd_contract_count = 10
 
-Ran the synthea utility with the following command: ./run_synthea -s 0 -cs 0 -r 20210810 -p 10000 --exporter.fhir.export=false --exporter.bfd.export=true --exporter.years_of_history=10 --generate.only_alive_patients=true -a 65-80
+Ran the synthea utility with the following command: ./run_synthea -s 0 -cs 0 -r 20210808 -p 10000 --exporter.fhir.export=false --exporter.bfd.export=true --exporter.years_of_history=10 --generate.only_alive_patients=true -a 65-80
