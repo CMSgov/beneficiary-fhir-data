@@ -517,10 +517,10 @@ public enum StaticRifResource {
       Optional.empty());
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StaticRifResource.class);
-  private static Path SYNTHEA_OUTPUT_DIR =
+  private static Optional<Path> SYNTHEA_OUTPUT_DIR =
       System.getenv("SYNTHEA_OUTPUT_DIR") != null
-          ? Paths.get(System.getenv("SYNTHEA_OUTPUT_DIR"))
-          : null;
+          ? Optional.of(Paths.get(System.getenv("SYNTHEA_OUTPUT_DIR")))
+          : Optional.empty();
 
   private final Supplier<URL> resourceUrlSupplier;
   private final RifFileType rifFileType;
@@ -538,26 +538,6 @@ public enum StaticRifResource {
    */
   private StaticRifResource(
       Supplier<URL> resourceUrlSupplier, RifFileType rifFileType, Optional<Integer> recordCount) {
-    this.resourceUrlSupplier = resourceUrlSupplier;
-    this.rifFileType = rifFileType;
-
-    this.resourceUrl = Optional.empty();
-    this.recordCount = recordCount;
-  }
-
-  /**
-   * Enum constant constructor.
-   *
-   * @param resourceUrlSupplier the value to use for {@link #getResourceSupplier()}
-   * @param rifFileType the value to use for {@link #getRifFileType()}
-   * @param recordCount the value to use for {@link #getRecordCount()}, or {@link Optional#empty()}
-   *     if that count is not known in advance
-   */
-  private StaticRifResource(
-      Supplier<URL> resourceUrlSupplier,
-      RifFileType rifFileType,
-      Optional<Integer> recordCount,
-      boolean multiFile) {
     this.resourceUrlSupplier = resourceUrlSupplier;
     this.rifFileType = rifFileType;
 
@@ -756,37 +736,43 @@ public enum StaticRifResource {
        * Run Synthea (only once, per JVM) to generate the output data.
        */
       synchronized (StaticRifResource.class) {
-        if (SYNTHEA_OUTPUT_DIR == null) {
-          SYNTHEA_OUTPUT_DIR = generateSyntheaData();
+        if (!SYNTHEA_OUTPUT_DIR.isPresent()) {
+          SYNTHEA_OUTPUT_DIR = Optional.of(generateSyntheaData());
         }
       }
 
-      // Find all output files that match the specified glob.
-      Set<Path> matchedSyntheaFiles = null;
-      try (Stream<Path> stream = Files.walk(SYNTHEA_OUTPUT_DIR)) {
-        matchedSyntheaFiles =
-            stream
-                .peek(file -> System.out.println(file))
-                .filter(file -> !Files.isDirectory(file))
-                .filter(file -> fileMatcher.matches(file))
-                .collect(Collectors.toSet());
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
+      if (SYNTHEA_OUTPUT_DIR.isPresent()) {
+        // Find all output files that match the specified glob.
+        Set<Path> matchedSyntheaFiles = null;
+        try (Stream<Path> stream = Files.walk(SYNTHEA_OUTPUT_DIR.get())) {
+          matchedSyntheaFiles =
+              stream
+                  .peek(file -> System.out.println(file))
+                  .filter(file -> !Files.isDirectory(file))
+                  .filter(file -> fileMatcher.matches(file))
+                  .collect(Collectors.toSet());
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
 
-      // Verify we got back exactly one match.
-      if (matchedSyntheaFiles.isEmpty()) {
-        throw new BadCodeMonkeyException("Synthea didn't generate any matching files.");
-      } else if (matchedSyntheaFiles.size() > 1) {
-        throw new BadCodeMonkeyException(
-            "Synthea generated too many matching files: " + matchedSyntheaFiles);
-      }
+        // Verify we got back exactly one match.
+        if (matchedSyntheaFiles.isEmpty()) {
+          throw new BadCodeMonkeyException("Synthea didn't generate any matching files.");
+        } else if (matchedSyntheaFiles.size() > 1) {
+          throw new BadCodeMonkeyException(
+              "Synthea generated too many matching files: " + matchedSyntheaFiles);
+        }
 
-      // Return the matched file as a URL.
-      try {
-        return matchedSyntheaFiles.iterator().next().toUri().toURL();
-      } catch (MalformedURLException e) {
-        throw new UncheckedIOException(e);
+        // Return the matched file as a URL.
+        try {
+          return matchedSyntheaFiles.iterator().next().toUri().toURL();
+        } catch (MalformedURLException e) {
+          throw new UncheckedIOException(e);
+        }
+      } else {
+        String error =
+            "Synthea output folder is not defined, or could not be found, or could not be created.";
+        throw new UncheckedIOException(new IOException(error));
       }
     };
   }
