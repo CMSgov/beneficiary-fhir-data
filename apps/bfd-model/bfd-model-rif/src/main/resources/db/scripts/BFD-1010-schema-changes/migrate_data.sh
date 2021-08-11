@@ -15,41 +15,86 @@ export MIN_TABLES="${MIN_TABLES:-false}"
 
 # tables that need to be processed before child tables, these are processed
 # one after the other in order
+if [ "$MIN_TABLES" = true ] ; then
 parent_tables=(
-  carrier_claims
-  dme_claims
-  hha_claims
-  hospice_claims
-  inpatient_claims
-  outpatient_claims
-  snf_claims
+carrier_claims
 )
+else
+parent_tables=(
+carrier_claims
+dme_claims
+hha_claims
+hospice_claims
+inpatient_claims
+outpatient_claims
+snf_claims
+)
+fi
 
 # these will be run in background jobs, up to $MAX_JOBS at a time
 # not necessarily in order
+if [ "$MIN_TABLES" = true ] ; then
 child_tables=(
-  carrier_claim_lines
-  dme_claim_lines
-  hha_claim_lines
-  hospice_claim_lines
-  inpatient_claim_lines
-  outpatient_claim_lines
-  snf_claim_lines
-  partd_events
-  beneficiaries_history
-  beneficiaries_history_invalid
-  beneficiary_monthly
-  loaded_batches
-  medicare_beneficiaryid_history
-  medicare_beneficiaryid_history_invalid
+carrier_claim_lines
 )
+else
+child_tables=(
+carrier_claim_lines
+dme_claim_lines
+hha_claim_lines
+hospice_claim_lines
+inpatient_claim_lines
+outpatient_claim_lines
+snf_claim_lines
+partd_events
+beneficiaries_history
+beneficiaries_history_invalid
+beneficiary_monthly
+loaded_batches
+medicare_beneficiaryid_history
+medicare_beneficiaryid_history_invalid
+)
+fi
+
+setupPg() {
+  # have 2 choices on how psql gets invoked and needing a password:
+  #  1) use a fully-qualified connection URL
+  #  2) use a ~/.pgpass file; format: hostname:port:database:username:password
+  #
+  # using .pgpass
+
+  # if .pgpass exists, move it to side for now
+  if [[ -f ~/.pgpass ]]; then
+    mv ~/.pgpass ~/.pgpass.orig
+  fi
+  # create and protect .pgpass
+  echo "$PGHOST:$PGPORT:$PGDATABASE:$PGUSER:$PGPASSWORD" > ~/.pgpass
+  chmod go-rwx ~/.pgpass
+}
+
+restorePg() {
+  if [[ -f ~/.pgpass.orig ]]; then
+    mv ~/.pgpass.orig ~/.pgpass
+  fi
+}
+
+testDbConnection() {
+  echo "Testing db connectivity..."
+  now=$(psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -c "select NOW();")
+  if [[ "$now" == *"20"* ]]; then
+    echo "db connectivity: OK"
+  else
+    echo "Failed to connect to the database. Did you update the $(PWD)/.env file?"
+    exit 1
+  fi
+}
 
 # generates/loads .env file and tests db connection
 setup(){
   if ! [[ -f .env ]]; then
     printf "Generating .env file.. "
-    echo -e "export PGHOST=\nexport PGPORT=5432\nexport PGUSER=\nexport PGPASSWORD=\nexport PGDATABASE=" > .env
-    echo -e "export MAX_JOBS=1\nexport MIN_TABLES=false\nexport DRY_RUN=true\n" >> .env
+    echo "export PGHOST=\nexport PGPORT=5432\nexport PGUSER=\nexport PGPASSWORD=\nexport PGDATABASE=" > .env
+    echo "export MAX_JOBS=1\nexport MIN_TABLES=false\nexport DRY_RUN=true\n" >> .env
     echo "OK"
     echo "Please update $(PWD)/.env with the appropriate database credentials and run the script again."
     exit
@@ -59,10 +104,8 @@ setup(){
     else
       # shellcheck disable=SC1091 # tell shellcheck not to worry about checking this .env file
       source .env
-      if ! psql --quiet --tuples-only -c "select NOW();" >/dev/null 2>&1; then
-        echo "Failed to connect to the database. Did you update the $(PWD)/.env file?"
-        exit 1
-      fi
+      setupPg
+      testDbConnection
     fi
   fi
 }
@@ -77,7 +120,7 @@ load_file(){
   # to review the output later. If you do output to files, and there is a lot of output, be mindful of
   # the amount of freespace on the host. 
   tbl_name="$1"
-  psql_cmd="psql --quiet --tuples-only -f ./insert_${tbl_name}.sql"
+  psql_cmd="psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -f ./insert_${tbl_name}.sql"
   $DRY_RUN && psql_cmd="echo $psql_cmd"
 
   #if $psql_cmd; then                            # show the output on the console
@@ -140,4 +183,5 @@ echo
 # done
 total_end=$SECONDS; duration=$(( total_end - total_start ))
 echo "All DONE"
+restorePg
 echo "Total Time: ~$((duration / 60)) minutes"
