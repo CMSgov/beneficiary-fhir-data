@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -243,87 +244,221 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void allBadFields() {
+  public void testBadDcn() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setDcn("123456789012345678901234"),
+        new DataTransformer.ErrorMessage("dcn", "invalid length: expected=[1,23] actual=24"));
+  }
+
+  @Test
+  public void testBadHicNo() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setHicNo("1234567890123"),
+        new DataTransformer.ErrorMessage("hicNo", "invalid length: expected=[1,12] actual=13"));
+  }
+
+  @Test
+  public void testBadCurrStatus() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setCurrStatusUnrecognized("ZZZ"),
+        new DataTransformer.ErrorMessage("currStatus", "unsupported enum value"));
+  }
+
+  @Test
+  public void testBadCurrLoc1() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setCurrLoc1Unrecognized("ZZ"),
+        new DataTransformer.ErrorMessage("currLoc1", "invalid length: expected=[1,1] actual=2"));
+  }
+
+  @Test
+  public void testBadCurrLoc2() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setCurrLoc2Unrecognized("123456"),
+        new DataTransformer.ErrorMessage("currLoc2", "invalid length: expected=[1,5] actual=6"));
+  }
+
+  @Test
+  public void testBadMedaProvId() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setMedaProvId("12345678901234"),
+        new DataTransformer.ErrorMessage(
+            "medaProvId", "invalid length: expected=[1,13] actual=14"));
+  }
+
+  @Test
+  public void testBadMedaProv6() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setMedaProv6("1234567"),
+        new DataTransformer.ErrorMessage("medaProv_6", "invalid length: expected=[1,6] actual=7"));
+  }
+
+  @Test
+  public void testBadTotalChargeAmount() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setTotalChargeAmount("not-a-number"),
+        new DataTransformer.ErrorMessage("totalChargeAmount", "invalid amount"));
+  }
+
+  @Test
+  public void testBadRecdDtCymd() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setRecdDtCymd("not-a-date"),
+        new DataTransformer.ErrorMessage("receivedDate", "invalid date"));
+  }
+
+  @Test
+  public void testBadCurrTranDtCymd() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setCurrTranDtCymd("not-a-date"),
+        new DataTransformer.ErrorMessage("currTranDate", "invalid date"));
+  }
+
+  @Test
+  public void testBadAdmDiagCode() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setAdmDiagCode("12345678"),
+        new DataTransformer.ErrorMessage(
+            "admitDiagCode", "invalid length: expected=[1,7] actual=8"));
+  }
+
+  @Test
+  public void testBadPrincipleDiag() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setPrincipleDiag("12345678"),
+        new DataTransformer.ErrorMessage(
+            "principleDiag", "invalid length: expected=[1,7] actual=8"));
+  }
+
+  @Test
+  public void testBadNpiNumber() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setNpiNumber("12345678901"),
+        new DataTransformer.ErrorMessage("npiNumber", "invalid length: expected=[1,10] actual=11"));
+  }
+
+  @Test
+  public void testBadMbi() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setMbi("12345678901234"),
+        new DataTransformer.ErrorMessage("mbi", "invalid length: expected=[1,13] actual=14"));
+  }
+
+  @Test
+  public void testBadFedTaxNb() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setFedTaxNb("12345678901"),
+        new DataTransformer.ErrorMessage(
+            "fedTaxNumber", "invalid length: expected=[1,10] actual=11"));
+  }
+
+  @Test
+  public void testBadPracLocAddr1() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setPracLocAddr1(""),
+        new DataTransformer.ErrorMessage(
+            "pracLocAddr1", "invalid length: expected=[1,2147483647] actual=0"));
+  }
+
+  @Test
+  public void testBadPracLocAddr2() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setPracLocAddr2(""),
+        new DataTransformer.ErrorMessage(
+            "pracLocAddr2", "invalid length: expected=[1,2147483647] actual=0"));
+  }
+
+  @Test
+  public void testBadPracLocCity() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setPracLocCity(""),
+        new DataTransformer.ErrorMessage(
+            "pracLocCity", "invalid length: expected=[1,2147483647] actual=0"));
+  }
+
+  @Test
+  public void testBadPracLocState() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setPracLocState("123"),
+        new DataTransformer.ErrorMessage(
+            "pracLocState", "invalid length: expected=[1,2] actual=3"));
+  }
+
+  @Test
+  public void testBadPracLocZip() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setPracLocZip("1234567890123456"),
+        new DataTransformer.ErrorMessage(
+            "pracLocZip", "invalid length: expected=[1,15] actual=16"));
+  }
+
+  @Test
+  public void testBadStmtCovFromCymd() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setStmtCovFromCymd("not-a-date"),
+        new DataTransformer.ErrorMessage("stmtCovFromDate", "invalid date"));
+  }
+
+  @Test
+  public void testBadStmtCovToCymd() {
+    assertClaimTransformationError(
+        () -> claimBuilder.setStmtCovToCymd("not-a-date"),
+        new DataTransformer.ErrorMessage("stmtCovToDate", "invalid date"));
+  }
+
+  @Test
+  public void testBadProcCodeProcCd() {
+    assertProcCodeTransformationError(
+        codeBuilder -> codeBuilder.setProcCd("12345678901"),
+        new DataTransformer.ErrorMessage(
+            "procCode-0-procCode", "invalid length: expected=[1,10] actual=11"));
+  }
+
+  @Test
+  public void testBadProcCodeProcFlag() {
+    assertProcCodeTransformationError(
+        codeBuilder -> codeBuilder.setProcFlag("12345"),
+        new DataTransformer.ErrorMessage(
+            "procCode-0-procFlag", "invalid length: expected=[1,4] actual=5"));
+  }
+
+  @Test
+  public void testBadProcCodeProcDt() {
+    assertProcCodeTransformationError(
+        codeBuilder -> codeBuilder.setProcDt("not-a-date"),
+        new DataTransformer.ErrorMessage("procCode-0-procDate", "invalid date"));
+  }
+
+  private void assertClaimTransformationError(
+      Runnable claimUpdate, DataTransformer.ErrorMessage... expectedErrors) {
     try {
       claimBuilder
-          .setDcn("123456789012345678901234")
-          .setHicNo("1234567890123")
-          .setCurrStatusEnumValue(-1)
-          .setCurrLoc1EnumValue(-1)
-          .setCurrLoc2Unrecognized("123456")
-          .setMedaProvId("12345678901234")
-          .setMedaProv6("1234567")
-          .setTotalChargeAmount("not-a-number")
-          .setRecdDtCymd("not-a-date")
-          .setCurrTranDtCymd("not-a-date")
-          .setAdmDiagCode("12345678")
-          .setPrincipleDiag("12345678")
-          .setNpiNumber("12345678901")
-          .setMbi("12345678901234")
-          .setFedTaxNb("12345678901")
-          .setPracLocAddr1("")
-          .setPracLocAddr2("")
-          .setPracLocCity("")
-          .setPracLocState("123")
-          .setPracLocZip("1234567890123456")
-          .setStmtCovFromCymd("not-a-date")
-          .setStmtCovToCymd("not-a-date")
-          .addFissProcCodes(
-              FissProcedureCode.newBuilder()
-                  .setProcCd("12345678901")
-                  .setProcFlag("12345")
-                  .setProcDt("not-a-date")
-                  .build());
+          .setDcn("dcn")
+          .setHicNo("hicn")
+          .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
+          .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
+          .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
+      claimUpdate.run();
       changeBuilder
-          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
           .setFissClaim(claimBuilder.build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
-      assertEquals(
-          Arrays.asList(
-              new DataTransformer.ErrorMessage("dcn", "invalid length: expected=[1,23] actual=24"),
-              new DataTransformer.ErrorMessage(
-                  "hicNo", "invalid length: expected=[1,12] actual=13"),
-              new DataTransformer.ErrorMessage("currStatus", "unrecognized enum value"),
-              new DataTransformer.ErrorMessage("currLoc1", "unrecognized enum value"),
-              new DataTransformer.ErrorMessage(
-                  "currLoc2", "invalid length: expected=[1,5] actual=6"),
-              new DataTransformer.ErrorMessage(
-                  "medaProvId", "invalid length: expected=[1,13] actual=14"),
-              new DataTransformer.ErrorMessage(
-                  "medaProv_6", "invalid length: expected=[1,6] actual=7"),
-              new DataTransformer.ErrorMessage("totalChargeAmount", "invalid amount"),
-              new DataTransformer.ErrorMessage("receivedDate", "invalid date"),
-              new DataTransformer.ErrorMessage("currTranDate", "invalid date"),
-              new DataTransformer.ErrorMessage(
-                  "admitDiagCode", "invalid length: expected=[1,7] actual=8"),
-              new DataTransformer.ErrorMessage(
-                  "principleDiag", "invalid length: expected=[1,7] actual=8"),
-              new DataTransformer.ErrorMessage(
-                  "npiNumber", "invalid length: expected=[1,10] actual=11"),
-              new DataTransformer.ErrorMessage(
-                  "pracLocAddr1", "invalid length: expected=[1,2147483647] actual=0"),
-              new DataTransformer.ErrorMessage(
-                  "pracLocAddr2", "invalid length: expected=[1,2147483647] actual=0"),
-              new DataTransformer.ErrorMessage(
-                  "pracLocCity", "invalid length: expected=[1,2147483647] actual=0"),
-              new DataTransformer.ErrorMessage(
-                  "pracLocState", "invalid length: expected=[1,2] actual=3"),
-              new DataTransformer.ErrorMessage(
-                  "pracLocZip", "invalid length: expected=[1,15] actual=16"),
-              new DataTransformer.ErrorMessage("mbi", "invalid length: expected=[1,13] actual=14"),
-              new DataTransformer.ErrorMessage(
-                  "fedTaxNumber", "invalid length: expected=[1,10] actual=11"),
-              new DataTransformer.ErrorMessage("stmtCovFromDate", "invalid date"),
-              new DataTransformer.ErrorMessage("stmtCovToDate", "invalid date"),
-              new DataTransformer.ErrorMessage(
-                  "procCode-0-procCode", "invalid length: expected=[1,10] actual=11"),
-              new DataTransformer.ErrorMessage(
-                  "procCode-0-procFlag", "invalid length: expected=[1,4] actual=5"),
-              new DataTransformer.ErrorMessage("procCode-0-procDate", "invalid date")),
-          ex.getErrors());
+      assertEquals(ImmutableList.copyOf(expectedErrors), ex.getErrors());
     }
+  }
+
+  private void assertProcCodeTransformationError(
+      Consumer<FissProcedureCode.Builder> updater, DataTransformer.ErrorMessage... expectedErrors) {
+    assertClaimTransformationError(
+        () -> {
+          final FissProcedureCode.Builder codeBuilder = FissProcedureCode.newBuilder();
+          codeBuilder.setProcCd("1234567890");
+          updater.accept(codeBuilder);
+          claimBuilder.addFissProcCodes(codeBuilder.build());
+        },
+        expectedErrors);
   }
 
   @Test
