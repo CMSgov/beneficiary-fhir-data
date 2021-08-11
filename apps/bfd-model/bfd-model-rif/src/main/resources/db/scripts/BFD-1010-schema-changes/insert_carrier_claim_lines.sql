@@ -95,6 +95,6 @@ select
 	"providerPaymentAmount"
 from
 	public."CarrierClaimLines"
-on conflict
-	(carrier_claim_lines_pkey)
+on conflict on constraint
+	carrier_claim_lines_pkey
 do nothing;

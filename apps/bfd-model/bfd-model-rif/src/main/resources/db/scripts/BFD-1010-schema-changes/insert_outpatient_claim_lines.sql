@@ -75,6 +75,6 @@ select
 	"wageAdjustedCoinsuranceAmount"
 from
 	public."OutpatientClaimLines"
-on conflict
-	(outpatient_claim_lines_pkey)
+on conflict on constraint
+	outpatient_claim_lines_pkey
 do nothing;

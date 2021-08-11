@@ -111,6 +111,6 @@ select
 	"diagnosis12CodeVersion"
 from
 	public."CarrierClaims"
-on conflict
-	(carrier_claims_pkey)
+on conflict on constraint
+	carrier_claims_pkey
 do nothing; 

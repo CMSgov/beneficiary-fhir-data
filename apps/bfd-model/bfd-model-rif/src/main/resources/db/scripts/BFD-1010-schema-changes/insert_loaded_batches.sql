@@ -11,8 +11,8 @@ select
 	"created"
 from
 	public."LoadedBatches"
-on conflict
-	(loaded_batches_pkey)
+on conflict on constraint
+	loaded_batches_pkey
 do nothing;
 
 insert into public.loaded_files (
@@ -26,6 +26,6 @@ select
 	"created"
 from
 	public."LoadedFiles"
-on conflict
-	(loaded_files_pkey)
+on conflict on constraint
+	loaded_files_pkey
 do nothing;

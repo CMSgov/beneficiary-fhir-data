@@ -85,6 +85,6 @@ select
 	"totalPrescriptionCost"
 from
 	public."PartDEvents"
-on conflict
-	(partd_events_pkey)
+on conflict on constraint
+	partd_events_pkey
 do nothing;

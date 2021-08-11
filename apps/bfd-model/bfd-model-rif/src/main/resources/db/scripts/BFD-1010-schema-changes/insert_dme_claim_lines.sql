@@ -89,6 +89,6 @@ select
 	"providerPaymentAmount"
 from
 	public."DMEClaimLines"
-on conflict
-	(dme_claim_lines_pkey)
+on conflict on constraint
+	dme_claim_lines_pkey
 do nothing;

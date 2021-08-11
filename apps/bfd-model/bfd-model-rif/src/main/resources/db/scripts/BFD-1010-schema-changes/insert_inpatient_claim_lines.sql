@@ -29,6 +29,6 @@ select
 	"revenueCenterRenderingPhysicianUPIN"
 from
 	public."InpatientClaimLines"
-on conflict
-	(inpatient_claim_lines_pkey)
+on conflict on constraint
+	inpatient_claim_lines_pkey
 do nothing;

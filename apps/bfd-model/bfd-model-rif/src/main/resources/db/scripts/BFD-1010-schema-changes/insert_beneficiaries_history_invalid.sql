@@ -16,6 +16,6 @@ select
 	"birthDate"
 from
 	public."BeneficiariesHistoryInvalidBeneficiaries"
-on conflict
-	(beneficiaries_history_invalid_beneficiaries_pkey)
+on conflict on constraint
+	beneficiaries_history_invalid_beneficiaries_pkey
 do nothing;

@@ -37,6 +37,6 @@ select
 	"lastupdated"
 from
 	public."MedicareBeneficiaryIdHistory"
-on conflict
-	(medicare_beneficiaryid_history_pkey)
+on conflict on constraint
+	medicare_beneficiaryid_history_pkey
 do nothing;

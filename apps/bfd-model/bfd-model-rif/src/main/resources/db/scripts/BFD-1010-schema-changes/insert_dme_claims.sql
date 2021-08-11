@@ -109,6 +109,6 @@ select
 	"diagnosis12CodeVersion"
 from
 	public."DMEClaims"
-on conflict
-	(dme_claims_pkey)
+on conflict on constraint
+	dme_claims_pkey
 do nothing;

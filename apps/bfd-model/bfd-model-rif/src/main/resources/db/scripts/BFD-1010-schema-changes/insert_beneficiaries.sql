@@ -415,6 +415,6 @@ select
 	"beneLinkKey"
 from
 	public."Beneficiaries"
-on conflict
-	(beneficiaries_pkey)
+on conflict on constraint
+	beneficiaries_pkey
 do nothing;

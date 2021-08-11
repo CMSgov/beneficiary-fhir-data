@@ -225,6 +225,6 @@ select
 	"diagnosis25CodeVersion"
 from
 	public."HHAClaims"
-on conflict
-	(hha_claims_pkey)
+on conflict on constraint
+	hha_claims_pkey
 do nothing;

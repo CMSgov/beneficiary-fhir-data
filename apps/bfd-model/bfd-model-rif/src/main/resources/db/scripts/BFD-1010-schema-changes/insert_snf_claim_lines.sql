@@ -29,6 +29,6 @@ select
 	"revenueCenterRenderingPhysicianUPIN"
 from
 	public."SNFClaimLines"
-on conflict
-	(snf_claim_lines_pkey)
+on conflict on constraint
+	snf_claim_lines_pkey
 do nothing;

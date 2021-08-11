@@ -225,6 +225,6 @@ select
 	"diagnosis25CodeVersion"
 from
 	public."HospiceClaims"
-on conflict
-	(hospice_claims_pkey)
+on conflict on constraint
+	hospice_claims_pkey
 do nothing;

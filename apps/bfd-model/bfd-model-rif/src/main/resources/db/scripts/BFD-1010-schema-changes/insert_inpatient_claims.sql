@@ -529,6 +529,6 @@ select
 	"procedure25Date"
 from
 	public."InpatientClaims"
-on conflict
-	(inpatient_claims_pkey)
+on conflict on constraint
+	inpatient_claims_pkey
 do nothing;

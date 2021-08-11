@@ -439,6 +439,6 @@ select
 	"procedure25Date"
 from
 	public."SNFClaims"
-on conflict
-	(snf_claims_pkey)
+on conflict on constraint
+	snf_claims_pkey
 do nothing;

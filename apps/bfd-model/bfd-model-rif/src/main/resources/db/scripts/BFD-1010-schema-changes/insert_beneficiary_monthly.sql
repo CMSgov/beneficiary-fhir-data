@@ -34,6 +34,6 @@ select
 	"medicaidDualEligibilityCode"
 from
 	public."BeneficiaryMonthly"
-on conflict
-	(beneficiary_monthly_pkey)
+on conflict on constraint
+	beneficiary_monthly_pkey
 do nothing;

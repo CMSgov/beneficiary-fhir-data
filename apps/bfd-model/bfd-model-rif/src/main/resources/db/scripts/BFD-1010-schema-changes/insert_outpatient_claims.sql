@@ -401,6 +401,6 @@ select
 	"procedure25Date"
 from 
 	public."OutpatientClaims"
-on conflict
-	(outpatient_claims_pkey)
+on conflict on constraint
+	outpatient_claims_pkey
 do nothing;

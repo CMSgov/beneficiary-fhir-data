@@ -45,6 +45,6 @@ select
 	"unitCount"
 from
 	public."HHAClaimLines"
-on conflict
-	(hha_claim_lines_pkey)
+on conflict on constraint
+	hha_claim_lines_pkey
 do nothing;
