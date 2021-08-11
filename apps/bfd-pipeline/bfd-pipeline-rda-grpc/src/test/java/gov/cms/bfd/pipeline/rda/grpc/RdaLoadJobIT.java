@@ -72,7 +72,8 @@ public class RdaLoadJobIT {
     final HikariDataSource dataSource =
         PipelineApplicationState.createPooledDataSource(dbOptions, appMetrics);
     DatabaseSchemaManager.createOrUpdateSchema(dataSource);
-    appState = new PipelineApplicationState(appMetrics, dataSource, RDA_PERSISTENCE_UNIT_NAME);
+    appState =
+        new PipelineApplicationState(appMetrics, dataSource, RDA_PERSISTENCE_UNIT_NAME, clock);
   }
 
   @After
@@ -96,7 +97,7 @@ public class RdaLoadJobIT {
         EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final PipelineJob<?> job = config.createFissClaimsLoadJob(appState, clock);
+          final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
           job.call();
         });
     runHibernateAssertions(
@@ -137,7 +138,7 @@ public class RdaLoadJobIT {
         EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState, clock);
+          final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState);
           try {
             job.callRdaServiceAndStoreRecords();
             fail("expected an exception to be thrown");
@@ -161,7 +162,7 @@ public class RdaLoadJobIT {
         jsonSource(mcsClaimJson),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState, clock);
+          final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
           job.call();
         });
     runHibernateAssertions(
@@ -201,7 +202,7 @@ public class RdaLoadJobIT {
                 () -> new IOException("oops")),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
-          final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState, clock);
+          final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState);
           try {
             job.callRdaServiceAndStoreRecords();
             fail("expected an exception to be thrown");

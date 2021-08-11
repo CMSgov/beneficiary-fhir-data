@@ -49,8 +49,8 @@ public class JpaClaimRdaSinkTest {
     doReturn(transaction).when(entityManager).getTransaction();
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
-        new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory);
-    sink = new JpaClaimRdaSink<>("fiss", appState, clock);
+        new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
+    sink = new JpaClaimRdaSink<>("fiss", appState);
   }
 
   @Test

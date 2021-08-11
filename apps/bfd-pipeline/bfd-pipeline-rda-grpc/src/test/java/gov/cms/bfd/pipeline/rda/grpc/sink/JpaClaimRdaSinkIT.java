@@ -36,7 +36,8 @@ public class JpaClaimRdaSinkIT {
         PipelineApplicationState.createPooledDataSource(dbOptiona, appMetrics);
     DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
     appState =
-        new PipelineApplicationState(appMetrics, pooledDataSource, RDA_PERSISTENCE_UNIT_NAME);
+        new PipelineApplicationState(
+            appMetrics, pooledDataSource, RDA_PERSISTENCE_UNIT_NAME, Clock.systemUTC());
     entityManager = appState.getEntityManagerFactory().createEntityManager();
   }
 
@@ -54,8 +55,7 @@ public class JpaClaimRdaSinkIT {
 
   @Test
   public void fissClaim() throws Exception {
-    final JpaClaimRdaSink<PreAdjFissClaim> sink =
-        new JpaClaimRdaSink<>("fiss", appState, Clock.systemUTC());
+    final JpaClaimRdaSink<PreAdjFissClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
 
     final PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn("1");
@@ -98,8 +98,7 @@ public class JpaClaimRdaSinkIT {
 
   @Test
   public void mcsClaim() throws Exception {
-    final JpaClaimRdaSink<PreAdjMcsClaim> sink =
-        new JpaClaimRdaSink<>("fiss", appState, Clock.systemUTC());
+    final JpaClaimRdaSink<PreAdjMcsClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
 
     final PreAdjMcsClaim claim = new PreAdjMcsClaim();
     claim.setIdrClmHdIcn("3");

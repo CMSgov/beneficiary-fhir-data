@@ -29,10 +29,10 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
   private final Metrics metrics;
   private final Clock clock;
 
-  public JpaClaimRdaSink(String claimType, PipelineApplicationState appState, Clock clock) {
+  public JpaClaimRdaSink(String claimType, PipelineApplicationState appState) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
     metrics = new Metrics(appState.getMetrics(), claimType);
-    this.clock = clock;
+    clock = appState.getClock();
   }
 
   @Override

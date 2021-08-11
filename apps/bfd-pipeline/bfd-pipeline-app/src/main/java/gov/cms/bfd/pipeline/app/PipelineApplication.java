@@ -142,7 +142,10 @@ public final class PipelineApplication {
       // persistence unit.
       final PipelineApplicationState appState =
           new PipelineApplicationState(
-              appMetrics, pooledDataSource, PipelineApplicationState.PERSISTENCE_UNIT_NAME);
+              appMetrics,
+              pooledDataSource,
+              PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+              Clock.systemUTC());
 
       pipelineManager.registerJob(
           createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
@@ -154,16 +157,17 @@ public final class PipelineApplication {
       // persistence unit.
       final PipelineApplicationState rdaAppState =
           new PipelineApplicationState(
-              appMetrics, pooledDataSource, PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME);
+              appMetrics,
+              pooledDataSource,
+              PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+              Clock.systemUTC());
 
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
 
-      pipelineManager.registerJob(
-          rdaLoadOptions.createFissClaimsLoadJob(rdaAppState, Clock.systemUTC()));
+      pipelineManager.registerJob(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
       LOGGER.info("Registered RdaFissClaimLoadJob.");
 
-      pipelineManager.registerJob(
-          rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState, Clock.systemUTC()));
+      pipelineManager.registerJob(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
       LOGGER.info("Registered RdaMcsClaimLoadJob.");
     } else {
       LOGGER.info("RDA API jobs are not enabled in app configuration.");

@@ -11,7 +11,6 @@ import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.Serializable;
-import java.time.Clock;
 import java.util.Objects;
 
 /**
@@ -52,18 +51,17 @@ public class RdaLoadOptions implements Serializable {
    * @param appState the shared {@link PipelineApplicationState}
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
-  public RdaFissClaimLoadJob createFissClaimsLoadJob(
-      PipelineApplicationState appState, Clock clock) {
+  public RdaFissClaimLoadJob createFissClaimsLoadJob(PipelineApplicationState appState) {
     return new RdaFissClaimLoadJob(
         jobConfig,
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
                 new FissClaimStreamCaller(
-                    new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
+                    new FissClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
                 appState.getMetrics(),
                 "fiss"),
-        () -> new JpaClaimRdaSink<>("fiss", appState, clock),
+        () -> new JpaClaimRdaSink<>("fiss", appState),
         appState.getMetrics());
   }
 
@@ -74,17 +72,17 @@ public class RdaLoadOptions implements Serializable {
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
-  public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState, Clock clock) {
+  public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState) {
     return new RdaMcsClaimLoadJob(
         jobConfig,
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
                 new McsClaimStreamCaller(
-                    new McsClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
+                    new McsClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
                 appState.getMetrics(),
                 "mcs"),
-        () -> new JpaClaimRdaSink<>("mcs", appState, clock),
+        () -> new JpaClaimRdaSink<>("mcs", appState),
         appState.getMetrics());
   }
 

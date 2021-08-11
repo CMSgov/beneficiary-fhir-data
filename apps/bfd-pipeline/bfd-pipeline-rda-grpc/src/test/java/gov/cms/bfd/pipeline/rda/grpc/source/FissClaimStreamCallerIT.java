@@ -68,8 +68,7 @@ public class FissClaimStreamCallerIT {
       final ManagedChannel channel = InProcessChannelBuilder.forName("test").build();
       try {
         final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-        final FissClaimTransformer transformer =
-            new FissClaimTransformer(Clock.systemUTC(), hasher);
+        final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
         final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
         final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results = caller.callService(channel);
         assertEquals(true, results.hasNext());
