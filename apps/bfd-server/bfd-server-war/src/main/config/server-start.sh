@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# DEBUG
+set -x
+
 # Check to see if we are running in Cygwin.
 uname="$(uname 2>/dev/null)"
 if [[ -z "${uname}" ]]; then uname="$(/usr/bin/uname 2>/dev/null)"; fi
@@ -137,11 +140,6 @@ done
 if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact}"); warArtifact="${warArtifact//\\/\\\\}"; fi
 if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
 if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
-
-# DEBUG
-cat "${serverPortsFile}"
-find . -iname server-test-db.properties
-echo "${dbUrl}"
 
 # Read the server port to be used from the ports file.
 #serverPortHttps=${BFD_PORT:-$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)}
