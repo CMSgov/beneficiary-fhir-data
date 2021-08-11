@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import javax.annotation.Nullable;
+
 /**
  * Wrapper for exceptions thrown during batch processing. Intended to capture the number of objects
  * that were successfully processed before the exception was thrown.
@@ -23,13 +25,18 @@ public class ProcessingException extends Exception {
   }
 
   /**
-   * The actual underlying exception that terminated batch processing.
+   * Navigates the cause stack from this exception looking for the first cause that isn't a
+   * ProcessingException.
    *
    * @return the actual exception that terminated batch processing
    */
-  @Override
-  public Exception getCause() {
-    return (Exception) super.getCause();
+  @Nullable
+  public Exception getOriginalCause() {
+    Throwable cause = getCause();
+    while (cause instanceof ProcessingException) {
+      cause = cause.getCause();
+    }
+    return (Exception) cause;
   }
 
   /**

@@ -50,7 +50,8 @@ public interface RdaSink<T> extends AutoCloseable {
       try {
         processedCount += writeObject(object);
       } catch (ProcessingException ex) {
-        throw new ProcessingException(ex.getCause(), processedCount + ex.getProcessedCount());
+        throw new ProcessingException(
+            (Exception) ex.getCause(), processedCount + ex.getProcessedCount());
       } catch (Exception ex) {
         throw new ProcessingException(ex, processedCount);
       }

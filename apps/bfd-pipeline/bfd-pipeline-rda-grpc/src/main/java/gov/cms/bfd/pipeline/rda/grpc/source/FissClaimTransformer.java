@@ -87,7 +87,10 @@ public class FissClaimTransformer {
               "failed with %d errors: dcn=%s errors=%s", errors.size(), from.getDcn(), errors);
       throw new DataTransformer.TransformationException(message, errors);
     }
-    return new RdaChange<>(RdaApiUtils.mapApiChangeType(change.getChangeType()), to);
+    return new RdaChange<>(
+        RdaApiUtils.mapApiChangeType(change.getChangeType()),
+        to,
+        transformer.instant(change.getTimestamp()));
   }
 
   private PreAdjFissClaim transformClaim(FissClaim from, DataTransformer transformer) {
