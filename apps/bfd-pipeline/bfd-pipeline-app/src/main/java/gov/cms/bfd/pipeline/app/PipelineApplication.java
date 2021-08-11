@@ -149,6 +149,9 @@ public final class PipelineApplication {
 
       pipelineManager.registerJob(
           createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
+      LOGGER.info("Registered CcwRifLoadJob.");
+    } else {
+      LOGGER.warn("CcwRifLoadJob is disabled in app configuration.");
     }
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
