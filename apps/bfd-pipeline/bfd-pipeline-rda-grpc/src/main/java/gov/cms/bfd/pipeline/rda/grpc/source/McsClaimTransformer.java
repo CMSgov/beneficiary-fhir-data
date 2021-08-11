@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
@@ -27,21 +28,27 @@ public class McsClaimTransformer {
           McsClaim::getIdrClaimTypeEnum,
           McsClaim::hasIdrClaimTypeUnrecognized,
           McsClaim::getIdrClaimTypeUnrecognized,
-          McsClaimType.UNRECOGNIZED);
+          McsClaimType.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
   private static final EnumStringExtractor<McsClaim, McsBeneficiarySex> idrBeneSex =
       new EnumStringExtractor<>(
           McsClaim::hasIdrBeneSexEnum,
           McsClaim::getIdrBeneSexEnum,
           McsClaim::hasIdrBeneSexUnrecognized,
           McsClaim::getIdrBeneSexUnrecognized,
-          McsBeneficiarySex.UNRECOGNIZED);
+          McsBeneficiarySex.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
   private static final EnumStringExtractor<McsClaim, McsStatusCode> idrStatusCode =
       new EnumStringExtractor<>(
           McsClaim::hasIdrStatusCodeEnum,
           McsClaim::getIdrStatusCodeEnum,
           McsClaim::hasIdrStatusCodeUnrecognized,
           McsClaim::getIdrStatusCodeUnrecognized,
-          McsStatusCode.UNRECOGNIZED);
+          McsStatusCode.UNRECOGNIZED,
+          ImmutableSet.of(McsStatusCode.STATUS_CODE_NOT_USED),
+          ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
   private static final EnumStringExtractor<McsClaim, McsBillingProviderIndicator>
       idrBillProvGroupInd =
           new EnumStringExtractor<>(
@@ -49,7 +56,9 @@ public class McsClaimTransformer {
               McsClaim::getIdrBillProvGroupIndEnum,
               McsClaim::hasIdrBillProvGroupIndUnrecognized,
               McsClaim::getIdrBillProvGroupIndUnrecognized,
-              McsBillingProviderIndicator.UNRECOGNIZED);
+              McsBillingProviderIndicator.UNRECOGNIZED,
+              ImmutableSet.of(),
+              ImmutableSet.of());
   private static final EnumStringExtractor<McsClaim, McsBillingProviderStatusCode>
       idrBillProvStatusCd =
           new EnumStringExtractor<>(
@@ -57,28 +66,36 @@ public class McsClaimTransformer {
               McsClaim::getIdrBillProvStatusCdEnum,
               McsClaim::hasIdrBillProvStatusCdUnrecognized,
               McsClaim::getIdrBillProvStatusCdUnrecognized,
-              McsBillingProviderStatusCode.UNRECOGNIZED);
+              McsBillingProviderStatusCode.UNRECOGNIZED,
+              ImmutableSet.of(),
+              ImmutableSet.of());
   private static final EnumStringExtractor<McsDiagnosisCode, McsDiagnosisIcdType> idrDiagIcdType =
       new EnumStringExtractor<>(
           McsDiagnosisCode::hasIdrDiagIcdTypeEnum,
           McsDiagnosisCode::getIdrDiagIcdTypeEnum,
           McsDiagnosisCode::hasIdrDiagIcdTypeEnumUnrecognized,
           McsDiagnosisCode::getIdrDiagIcdTypeEnumUnrecognized,
-          McsDiagnosisIcdType.UNRECOGNIZED);
+          McsDiagnosisIcdType.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
   private static final EnumStringExtractor<McsDetail, McsDetailStatus> idrDtlStatus =
       new EnumStringExtractor<>(
           McsDetail::hasIdrDtlStatusEnum,
           McsDetail::getIdrDtlStatusEnum,
           McsDetail::hasIdrDtlStatusUnrecognized,
           McsDetail::getIdrDtlStatusUnrecognized,
-          McsDetailStatus.UNRECOGNIZED);
+          McsDetailStatus.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
   private static final EnumStringExtractor<McsDetail, McsDiagnosisIcdType> idrDtlDiagIcdType =
       new EnumStringExtractor<>(
           McsDetail::hasIdrDtlDiagIcdTypeEnum,
           McsDetail::getIdrDtlDiagIcdTypeEnum,
           McsDetail::hasIdrDtlDiagIcdTypeUnrecognized,
           McsDetail::getIdrDtlDiagIcdTypeUnrecognized,
-          McsDiagnosisIcdType.UNRECOGNIZED);
+          McsDiagnosisIcdType.UNRECOGNIZED,
+          ImmutableSet.of(),
+          ImmutableSet.of());
 
   private final Clock clock;
   private final IdHasher idHasher;
@@ -192,27 +209,6 @@ public class McsClaimTransformer {
             from::hasIdrBillProvEin,
             from::getIdrBillProvEin,
             to::setIdrBillProvEin)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvType,
-            1,
-            2,
-            from::hasIdrBillProvType,
-            from::getIdrBillProvType,
-            to::setIdrBillProvType)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvSpec,
-            1,
-            2,
-            from::hasIdrBillProvSpec,
-            from::getIdrBillProvSpec,
-            to::setIdrBillProvSpec)
-        .copyEnumAsString(
-            PreAdjMcsClaim.Fields.idrBillProvGroupInd,
-            true,
-            1,
-            1,
-            idrBillProvGroupInd.getEnumString(from),
-            to::setIdrBillProvGroupInd)
         .copyOptionalString(
             PreAdjMcsClaim.Fields.idrBillProvType,
             1,
