@@ -228,27 +228,6 @@ public class McsClaimTransformer {
             idrBillProvGroupInd.getEnumString(from),
             to::setIdrBillProvGroupInd)
         .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvType,
-            1,
-            2,
-            from::hasIdrBillProvType,
-            from::getIdrBillProvType,
-            to::setIdrBillProvType)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvSpec,
-            1,
-            2,
-            from::hasIdrBillProvSpec,
-            from::getIdrBillProvSpec,
-            to::setIdrBillProvSpec)
-        .copyEnumAsString(
-            PreAdjMcsClaim.Fields.idrBillProvGroupInd,
-            true,
-            1,
-            1,
-            idrBillProvGroupInd.getEnumString(from),
-            to::setIdrBillProvGroupInd)
-        .copyOptionalString(
             PreAdjMcsClaim.Fields.idrBillProvPriceSpec,
             1,
             2,
