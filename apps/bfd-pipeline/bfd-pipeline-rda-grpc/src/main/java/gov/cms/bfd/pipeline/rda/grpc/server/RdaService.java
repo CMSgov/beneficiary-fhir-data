@@ -49,13 +49,16 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   private static class Responder<TChange> {
     private final ServerCallStreamObserver<TChange> responseObserver;
     private final MessageSource<TChange> generator;
+    private final AtomicBoolean cancelled;
     private final AtomicBoolean running;
 
     private Responder(StreamObserver<TChange> responseObserver, MessageSource<TChange> generator) {
       this.generator = generator;
+      this.cancelled = new AtomicBoolean(false);
       this.running = new AtomicBoolean(true);
       this.responseObserver = (ServerCallStreamObserver<TChange>) responseObserver;
       this.responseObserver.setOnReadyHandler(this::sendResponses);
+      this.responseObserver.setOnCancelHandler(() -> cancelled.set(true));
     }
 
     private void sendResponses() {
@@ -63,10 +66,11 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
         try {
           while (responseObserver.isReady()
               && !responseObserver.isCancelled()
+              && !cancelled.get()
               && generator.hasNext()) {
             responseObserver.onNext(generator.next());
           }
-          if (responseObserver.isCancelled()) {
+          if (responseObserver.isCancelled() || cancelled.get()) {
             running.set(false);
             responseObserver.onCompleted();
             generator.close();

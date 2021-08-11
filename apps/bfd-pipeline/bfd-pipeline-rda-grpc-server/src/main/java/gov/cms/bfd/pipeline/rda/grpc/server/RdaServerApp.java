@@ -89,7 +89,7 @@ public class RdaServerApp {
         return new JsonMessageSource<>(fissClaimFile, JsonMessageSource::parseFissClaimChange);
       } else {
         LOGGER.info(
-            "serving no more than {} FissClaims using RandomMcsClaimSource with seed {}",
+            "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
             maxToSend,
             seed);
         return new RandomFissClaimSource(seed, maxToSend).toClaimChanges();

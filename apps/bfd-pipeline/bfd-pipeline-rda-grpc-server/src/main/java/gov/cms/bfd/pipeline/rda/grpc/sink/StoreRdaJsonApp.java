@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.CallOptions;
@@ -38,7 +39,8 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
 
     final ManagedChannel channel = createChannel(host, port);
     try {
-      final Iterator<? extends MessageOrBuilder> results = callService(claimType, channel);
+      final GrpcResponseStream<? extends MessageOrBuilder> results =
+          callService(claimType, channel);
       int received = 0;
       try (PrintWriter output = new PrintWriter(new FileWriter(filename))) {
         while (received < maxToReceive && results.hasNext()) {
@@ -53,9 +55,11 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
         }
       }
       System.out.printf("received %d claims%n", received);
+      System.out.println("cancelling stream...");
+      results.cancelStream("finished reading");
     } finally {
       channel.shutdown();
-      channel.awaitTermination(5, TimeUnit.SECONDS);
+      channel.awaitTermination(60, TimeUnit.SECONDS);
     }
   }
 
@@ -67,14 +71,16 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
     return channelBuilder.build();
   }
 
-  private static Iterator<? extends MessageOrBuilder> callService(
+  private static GrpcResponseStream<? extends MessageOrBuilder> callService(
       ClaimType claimType, ManagedChannel channel) {
     final ClaimRequest request = ClaimRequest.newBuilder().build();
     final MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder> method =
         claimType.methodSource.get();
     final ClientCall<ClaimRequest, ? extends MessageOrBuilder> call =
         channel.newCall(method, CallOptions.DEFAULT);
-    return ClientCalls.blockingServerStreamingCall(call, request);
+    Iterator<? extends MessageOrBuilder> iterator =
+        ClientCalls.blockingServerStreamingCall(call, request);
+    return new GrpcResponseStream<>(call, iterator);
   }
 
   private static String convertToJson(MessageOrBuilder change)
