@@ -75,7 +75,7 @@ public class LoadRdaJsonApp {
     }
   }
 
-  static class Config {
+  private static class Config {
     private final String hashPepper;
     private final int hashIterations;
     private final String dbUrl;

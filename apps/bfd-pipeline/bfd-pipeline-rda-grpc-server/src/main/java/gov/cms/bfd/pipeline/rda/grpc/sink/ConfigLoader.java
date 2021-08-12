@@ -116,7 +116,7 @@ public class ConfigLoader {
       if (!file.canWrite()) {
         throw new ConfigException(name, "file is not writeable");
       }
-    } else if (!file.getParentFile().canWrite()) {
+    } else if (!file.getAbsoluteFile().getParentFile().canWrite()) {
       throw new ConfigException(name, "file does not exist and parent is not writeable");
     }
     return file;
