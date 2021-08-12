@@ -67,6 +67,9 @@
 
 	<!-- At 'trace', Hibernate will log SQL parameter values. -->
 	<!-- <logger name="org.hibernate.type" level="trace" /> -->
+
+	<!-- At 'debug', HSQL's log output will be captured. -->
+	<logger name="gov.cms.bfd.model.rif.schema.DatabaseTestUtils" level="debug" />
 	
 	<root level="info">
 		<appender-ref ref="STDOUT" />
