@@ -131,6 +131,13 @@ public class DataTransformerTest {
     transformer
         .copyEnumAsString(
             "no-value",
+            false,
+            0,
+            10,
+            new EnumStringExtractor.Result(EnumStringExtractor.Status.NoValue),
+            copied::add)
+        .copyEnumAsString(
+            "no-value-ok",
             true,
             0,
             10,
@@ -158,13 +165,21 @@ public class DataTransformerTest {
             new EnumStringExtractor.Result((String) null),
             copied::add)
         .copyEnumAsString(
+            "unsupported-value-bad",
+            false,
+            0,
+            10,
+            new EnumStringExtractor.Result(EnumStringExtractor.Status.UnsupportedValue, "boo!"),
+            copied::add)
+        .copyEnumAsString(
             "good-value", false, 0, 10, new EnumStringExtractor.Result("boo!"), copied::add);
     assertEquals(ImmutableList.of("boo!"), copied);
     assertEquals(
         ImmutableList.of(
             new DataTransformer.ErrorMessage("no-value", "no value set"),
             new DataTransformer.ErrorMessage("invalid-value", "unrecognized enum value"),
-            new DataTransformer.ErrorMessage("null-value-bad", "is null")),
+            new DataTransformer.ErrorMessage("null-value-bad", "is null"),
+            new DataTransformer.ErrorMessage("unsupported-value-bad", "unsupported enum value")),
         transformer.getErrors());
   }
 

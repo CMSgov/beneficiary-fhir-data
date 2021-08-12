@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ProtocolMessageEnum;
 import gov.cms.mpsm.rda.v1.EnumOptions;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -40,6 +42,8 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
   private final Predicate<TRecord> hasUnrecognizedValue;
   private final Function<TRecord, String> getUnrecognizedValue;
   private final TEnum invalidValue;
+  private final Set<ProtocolMessageEnum> unsupportedEnumValues;
+  private final Set<Options> options;
 
   /**
    * Constructs a value using the provided functions and value.
@@ -50,18 +54,24 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
    *     string
    * @param getUnrecognizedValue lambda used to get the value string
    * @param invalidValue enum value (usually TEnum.UNRECOGNIZED) for protobuf's bad enum value
+   * @param unsupportedEnumValues set of enum values that should generate an UnsupportedValue Result
+   * @param options the (usually empty) set of options to be used while processing
    */
   public EnumStringExtractor(
       Predicate<TRecord> hasEnumValue,
       Function<TRecord, ProtocolMessageEnum> getEnumValue,
       Predicate<TRecord> hasUnrecognizedValue,
       Function<TRecord, String> getUnrecognizedValue,
-      TEnum invalidValue) {
+      TEnum invalidValue,
+      Set<ProtocolMessageEnum> unsupportedEnumValues,
+      Set<Options> options) {
     this.hasEnumValue = hasEnumValue;
     this.getEnumValue = getEnumValue;
     this.hasUnrecognizedValue = hasUnrecognizedValue;
     this.getUnrecognizedValue = getUnrecognizedValue;
     this.invalidValue = invalidValue;
+    this.unsupportedEnumValues = ImmutableSet.copyOf(unsupportedEnumValues);
+    this.options = ImmutableSet.copyOf(options);
   }
 
   /**
@@ -77,11 +87,17 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
       if (value == invalidValue) {
         return INVALID_VALUE_RESULT;
       }
-      return new Result(
-          value.getValueDescriptor().getOptions().getExtension(EnumOptions.stringValue));
+      final String strValue =
+          value.getValueDescriptor().getOptions().getExtension(EnumOptions.stringValue);
+      final Status status =
+          unsupportedEnumValues.contains(value) ? Status.UnsupportedValue : Status.HasValue;
+      return new Result(status, strValue);
     }
     if (hasUnrecognizedValue.test(record)) {
-      return new Result(getUnrecognizedValue.apply(record));
+      final String strValue = getUnrecognizedValue.apply(record);
+      final Status status =
+          options.contains(Options.RejectUnrecognized) ? Status.UnsupportedValue : Status.HasValue;
+      return new Result(status, strValue);
     }
     return NO_VALUE_RESULT;
   }
@@ -96,7 +112,9 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
      */
     InvalidValue,
     /** Either the enum was set to a valid value or the unrecognized string value was set. */
-    HasValue
+    HasValue,
+    /** A value was present but was rejected as unsupported. */
+    UnsupportedValue
   }
 
   @Getter
@@ -115,5 +133,20 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
       status = Status.HasValue;
       this.value = value;
     }
+
+    public Result(Status status, @Nullable String value) {
+      this.status = status;
+      this.value = value;
+    }
+  }
+
+  /**
+   * Additional options that can be used to alter default behavior. Currently, there is only one
+   * option available but using an enum instead of a boolean to enable the option improves code
+   * clarity.
+   */
+  public enum Options {
+    /** Report an unsupported value result if the field has its unrecognized value. */
+    RejectUnrecognized
   }
 }

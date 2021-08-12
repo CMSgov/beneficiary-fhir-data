@@ -41,7 +41,7 @@ resource "aws_db_subnet_group" "aurora_cluster" {
 }
 
 resource "aws_db_parameter_group" "aurora_node" {
-  name        = "bfd-${var.env_config.env}-aurora-node"
+  name_prefix = "bfd-${var.env_config.env}-aurora-node"
   family      = var.aurora_config.param_version
   description = "Sets node parameters for ${var.aurora_config.param_version}"
 
