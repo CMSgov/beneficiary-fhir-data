@@ -60,6 +60,18 @@ public class ConfigLoader {
     return Strings.isNullOrEmpty(value) ? Optional.empty() : Optional.of(value);
   }
 
+  public int intValue(String name) {
+    final String value = source.apply(name);
+    if (Strings.isNullOrEmpty(value)) {
+      throw new ConfigException(name, "required option not provided");
+    }
+    try {
+      return Integer.parseInt(value);
+    } catch (Exception ex) {
+      throw new ConfigException(name, "not a valid integer", ex);
+    }
+  }
+
   public int intValue(String name, int defaultValue) {
     final String value = source.apply(name);
     if (Strings.isNullOrEmpty(value)) {
