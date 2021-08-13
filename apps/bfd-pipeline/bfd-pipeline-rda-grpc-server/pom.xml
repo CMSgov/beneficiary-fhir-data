@@ -29,7 +29,7 @@
         <slf4j.version>1.7.7</slf4j.version>
         <hikari.version>4.0.3</hikari.version>
         <!-- Default values for loader command line arguments -->
-        <loader.config>load-config.properties</loader.config>
+        <loader.config></loader.config>
         <loader.fiss></loader.fiss>
         <loader.mcs></loader.mcs>
     </properties>
@@ -244,16 +244,15 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                         <configuration>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-classpath</argument>
-                                <classpath/>
-                                <argument>-Dfile.fiss=${loader.fiss}</argument>
-                                <argument>-Dfile.mcs=${loader.mcs}</argument>
-                                <argument>gov.cms.bfd.pipeline.rda.grpc.sink.LoadRdaJsonApp</argument>
-                                <argument>${loader.config}</argument>
-                            </arguments>
+                            <mainClass>gov.cms.bfd.pipeline.rda.grpc.sink.LoadRdaJsonApp</mainClass>
                         </configuration>
                     </plugin>
                 </plugins>

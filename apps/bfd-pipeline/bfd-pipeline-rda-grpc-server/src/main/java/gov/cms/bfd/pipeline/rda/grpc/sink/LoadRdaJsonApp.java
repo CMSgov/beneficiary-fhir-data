@@ -43,13 +43,14 @@ public class LoadRdaJsonApp {
   private static final Logger logger = LoggerFactory.getLogger(LoadRdaJsonApp.class);
 
   public static void main(String[] args) throws Exception {
-    if (args.length != 1) {
-      System.err.printf("usage: %s configfile%n", LoadRdaJsonApp.class.getSimpleName());
-      System.exit(1);
+    final ConfigLoader.Builder options = ConfigLoader.builder();
+    if (args.length == 1) {
+      options.addPropertiesFile(new File(args[0]));
+    } else if (System.getProperty("config.properties", "").length() > 0) {
+      options.addPropertiesFile(new File(System.getProperty("config.properties")));
     }
-    final ConfigLoader options =
-        ConfigLoader.builder().addPropertiesFile(new File(args[0])).addSystemProperties().build();
-    final Config config = new Config(options);
+    options.addSystemProperties();
+    final Config config = new Config(options.build());
 
     final MetricRegistry metrics = new MetricRegistry();
     final Slf4jReporter reporter =
@@ -73,20 +74,22 @@ public class LoadRdaJsonApp {
               logger.info("running database migration");
               DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
             }
-            final PipelineApplicationState appState =
+            try (PipelineApplicationState appState =
                 new PipelineApplicationState(
                     metrics,
                     pooledDataSource,
                     PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
-                    Clock.systemUTC());
-            final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
-            for (PipelineJob<?> job : jobs) {
-              logger.info("starting job {}", job.getClass().getSimpleName());
-              job.call();
+                    Clock.systemUTC())) {
+              final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
+              for (PipelineJob<?> job : jobs) {
+                logger.info("starting job {}", job.getClass().getSimpleName());
+                job.call();
+              }
             }
           });
     } finally {
       reporter.report();
+      reporter.close();
     }
   }
 
