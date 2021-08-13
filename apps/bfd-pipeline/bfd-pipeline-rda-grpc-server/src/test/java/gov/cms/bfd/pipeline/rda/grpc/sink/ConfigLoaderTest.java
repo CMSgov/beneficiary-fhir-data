@@ -185,7 +185,7 @@ public class ConfigLoaderTest {
     final List<String> names = new ArrayList<>(System.getenv().keySet());
     final ConfigLoader config = ConfigLoader.builder().addEnvironmentVariables().build();
     for (String name : names) {
-      assertTrue("mismatch for " + name, System.getenv(name).equals(config.stringValue(name)));
+      assertTrue("mismatch for " + name, System.getenv(name).equals(config.stringValue(name, "")));
     }
   }
 
