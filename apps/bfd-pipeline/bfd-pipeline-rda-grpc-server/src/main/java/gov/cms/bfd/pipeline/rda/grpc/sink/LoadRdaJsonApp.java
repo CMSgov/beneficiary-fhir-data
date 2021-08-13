@@ -31,21 +31,24 @@ import org.slf4j.LoggerFactory;
  * ClaimChange record per line and the underlying claim within the JSON must match the type of claim
  * expected by the program (i.e. FISS or MCS each have their own property to specify a data file).
  * Configuration is through a combination of a properties file and system properties. Any settings
- * in a system property override those in the configuration file. The following settings are
- * supported provided: hash.pepper, hash.iterations, database.url, database.user, database.password,
- * job.batchSize, job.migration, file.fiss, file.mcs. job.migration (defaults to false) is a boolean
- * value indicating whether to run flyway migrations (true runs the migrations, false does not). The
- * file.fiss and file.mcs each default to loading no data so either or both can be provided as
- * needed.
+ * in a system property override those in the configuration file.
+ *
+ * <p>The following settings are supported provided: hash.pepper, hash.iterations, database.url,
+ * database.user, database.password, job.batchSize, job.migration, file.fiss, file.mcs.
+ * job.migration (defaults to false) is a boolean value indicating whether to run flyway migrations
+ * (true runs the migrations, false does not). The file.fiss and file.mcs each default to loading no
+ * data so either or both can be provided as needed.
  */
 public class LoadRdaJsonApp {
   private static final Logger logger = LoggerFactory.getLogger(LoadRdaJsonApp.class);
 
-  public static void main(String[] argv) throws Exception {
+  public static void main(String[] args) throws Exception {
+    if (args.length != 1) {
+      System.err.printf("usage: %s configfile%n", LoadRdaJsonApp.class.getSimpleName());
+      System.exit(1);
+    }
     final ConfigLoader options =
-        (argv.length == 1)
-            ? ConfigLoader.fromPropertiesFile(new File(argv[0]))
-            : ConfigLoader.fromSystemProperties();
+        ConfigLoader.builder().addPropertiesFile(new File(args[0])).addSystemProperties().build();
     final Config config = new Config(options);
 
     final MetricRegistry metrics = new MetricRegistry();

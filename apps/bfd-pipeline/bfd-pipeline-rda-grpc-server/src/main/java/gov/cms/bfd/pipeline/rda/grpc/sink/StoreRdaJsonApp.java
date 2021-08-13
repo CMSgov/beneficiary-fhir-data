@@ -36,8 +36,7 @@ public class StoreRdaJsonApp {
       System.exit(1);
     }
     final ConfigLoader loader =
-        ConfigLoader.fromPropertiesFile(new File(args[0]))
-            .withFallback(ConfigLoader.fromSystemProperties());
+        ConfigLoader.builder().addPropertiesFile(new File(args[0])).addSystemProperties().build();
     final Config config = new Config(loader);
 
     final ManagedChannel channel = createChannel(config.apiHost, config.apiPort);

@@ -36,7 +36,8 @@ public class DirectRdaLoadApp {
       System.err.printf("usage: %s configfile claimType%n", DirectRdaLoadApp.class.getSimpleName());
       System.exit(1);
     }
-    final ConfigLoader options = ConfigLoader.fromPropertiesFile(new File(args[0]));
+    final ConfigLoader options =
+        ConfigLoader.builder().addPropertiesFile(new File(args[0])).addSystemProperties().build();
     final String claimType = Strings.nullToEmpty(args[1]);
 
     final MetricRegistry metrics = new MetricRegistry();

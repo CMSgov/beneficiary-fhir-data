@@ -175,7 +175,7 @@ public class ConfigLoaderTest {
           try (Writer out = new FileWriter(propFile)) {
             p.store(out, "");
           }
-          ConfigLoader config = ConfigLoader.fromPropertiesFile(propFile);
+          ConfigLoader config = ConfigLoader.builder().addPropertiesFile(propFile).build();
           assertEquals("A", config.stringValue("a"));
         });
   }
@@ -183,7 +183,7 @@ public class ConfigLoaderTest {
   @Test
   public void fromEnvironmentVariables() {
     final List<String> names = new ArrayList<>(System.getenv().keySet());
-    final ConfigLoader config = ConfigLoader.fromEnvironmentVariables();
+    final ConfigLoader config = ConfigLoader.builder().addEnvironmentVariables().build();
     for (String name : names) {
       assertTrue("mismatch for " + name, System.getenv(name).equals(config.stringValue(name)));
     }
@@ -192,7 +192,7 @@ public class ConfigLoaderTest {
   @Test
   public void fromSystemProperties() {
     final Iterable<String> names = System.getProperties().stringPropertyNames();
-    final ConfigLoader config = ConfigLoader.fromSystemProperties();
+    final ConfigLoader config = ConfigLoader.builder().addSystemProperties().build();
     for (String name : names) {
       assertTrue(
           "mismatch for " + name,
@@ -205,8 +205,7 @@ public class ConfigLoaderTest {
     final Map<String, String> primary = ImmutableMap.of("in-primary", "A");
     final Map<String, String> fallback =
         ImmutableMap.of("in-primary", "hidden", "in-fallback", "B");
-    final ConfigLoader config =
-        new ConfigLoader(primary::get).withFallback(new ConfigLoader(fallback::get));
+    final ConfigLoader config = ConfigLoader.builder().add(fallback::get).add(primary::get).build();
     assertEquals("A", config.stringValue("in-primary"));
     assertEquals("B", config.stringValue("in-fallback"));
   }
