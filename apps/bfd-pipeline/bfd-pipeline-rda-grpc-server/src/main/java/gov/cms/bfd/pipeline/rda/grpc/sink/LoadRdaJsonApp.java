@@ -26,6 +26,18 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Program to load RDA API NDJSON data files into a database. The NDJSON files must contain one
+ * ClaimChange record per line and the underlying claim within the JSON must match the type of claim
+ * expected by the program (i.e. FISS or MCS each have their own property to specify a data file).
+ * Configuration is through a combination of a properties file and system properties. Any settings
+ * in a system property override those in the configuration file. The following settings are
+ * supported provided: hash.pepper, hash.iterations, database.url, database.user, database.password,
+ * job.batchSize, job.migration, file.fiss, file.mcs. job.migration (defaults to false) is a boolean
+ * value indicating whether to run flyway migrations (true runs the migrations, false does not). The
+ * file.fiss and file.mcs each default to loading no data so either or both can be provided as
+ * needed.
+ */
 public class LoadRdaJsonApp {
   private static final Logger logger = LoggerFactory.getLogger(LoadRdaJsonApp.class);
 

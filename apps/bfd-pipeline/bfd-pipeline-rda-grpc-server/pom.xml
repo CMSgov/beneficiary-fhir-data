@@ -28,6 +28,10 @@
         <junit.version>4.13.2</junit.version>
         <slf4j.version>1.7.7</slf4j.version>
         <hikari.version>4.0.3</hikari.version>
+        <!-- Default values for loader command line arguments -->
+        <loader.config>load-config.properties</loader.config>
+        <loader.fiss></loader.fiss>
+        <loader.mcs></loader.mcs>
     </properties>
 
     <dependencies>
@@ -220,5 +224,41 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Runs the LoadRdaJsonApp to set up a test database with pre-adjudicated (RDA API) data from JSON files.
+        The JSON files can be specified by setting the loader.fiss and/or loader.mcs properties on the command line.
+        Also must specify the loader.config property to tell the program where to find its config file.
+        Finally, also specify the json-to-db property (no value needed) to activate this profile.
+        Sample command line: mvn -pl :bfd-pipeline-rda-grpc-server exec:exec -Djson-to-db -Dloader.config=load-json.properties -Dloader.fiss=FISS.ndjson
+        -->
+        <profile>
+            <id>json-to-db</id>
+            <activation>
+                <property>
+                    <name>json-to-db</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>-Dfile.fiss=${loader.fiss}</argument>
+                                <argument>-Dfile.mcs=${loader.mcs}</argument>
+                                <argument>gov.cms.bfd.pipeline.rda.grpc.sink.LoadRdaJsonApp</argument>
+                                <argument>${loader.config}</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
