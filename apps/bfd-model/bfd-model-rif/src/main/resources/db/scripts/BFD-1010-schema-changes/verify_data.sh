@@ -78,7 +78,7 @@ testDbConnection() {
   if [[ "$now" == *"20"* ]]; then
     echo "db connectivity: OK"
   else
-    echo "Failed to connect to the database. Did you update the $(PWD)/.env file?"
+    echo "Failed to connect to the database. Did you update the ${PWD}/.env file?"
     exit 1
   fi
 }
@@ -95,7 +95,7 @@ setup(){
     echo -e "export MAX_JOBS=1" >> .env
     echo -e "export DRY_RUN=true" >> .env
     echo "OK"
-    echo "Please update $(PWD)/.env with the appropriate database credentials and run the script again."
+    echo "Please update ${PWD}/.env with the appropriate database credentials and run the script again."
     exit
   else
     if $DRY_RUN; then
