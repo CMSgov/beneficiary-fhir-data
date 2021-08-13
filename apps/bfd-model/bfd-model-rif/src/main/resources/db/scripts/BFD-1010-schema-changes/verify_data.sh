@@ -10,20 +10,14 @@ export PGDATABASE="${PGDATABASE:-}"
 # when DRY_RUN=true (the default), the script will echo the commands it would run against the db
 export DRY_RUN="${DRY_RUN:-true}"
 
-# boolean to limit table data verification (verify_data.sh) to a subset of tables
+# boolean to limit table data verification to a subset of tables
 # defaults to false which runs a complete verification
-export MIN_TABLES="${MIN_TABLES:-false}"
+# boolean to limit table processing to a subset of tables
+export MIN_TABLES=${1:-false}
 
 # these will be run in background jobs, up to $MAX_JOBS at a time
 # not necessarily in order
-if [ "$MIN_TABLES" = true ] ; then
-verify_tables=(
-beneficiaries
-beneficiary_monthly
-carrier_claims
-carrier_claim_lines
-)
-else
+if ! [ "${MIN_TABLES}" = true ] ; then
 verify_tables=(
 beneficiaries
 beneficiaries_history
@@ -47,6 +41,14 @@ partd_events
 snf_claims
 snf_claim_lines
 )
+else
+verify_tables=(
+beneficiaries
+beneficiary_monthly
+carrier_claims
+carrier_claim_lines
+)
+echo "Will be running using a subset of db tables..."
 fi
 
 setupPg() {
@@ -85,8 +87,13 @@ testDbConnection() {
 setup(){
   if ! [[ -f .env ]]; then
     printf "Generating .env file.. "
-    echo -e "export PGHOST=\nexport PGPORT=5432\nexport PGUSER=\nexport PGPASSWORD=\nexport PGDATABASE=" > .env
-    echo -e "export MAX_JOBS=1\nexport MIN_TABLES=false\nexport DRY_RUN=true\n" >> .env
+    echo -e "export PGHOST=" > .env
+    echo -e "export PGPORT=5432" >> .env
+    echo -e "export PGUSER=" >> .env
+    echo -e "export PGPASSWORD=" >> .env
+    echo -e "export PGDATABASE=" >> .env
+    echo -e "export MAX_JOBS=1" >> .env
+    echo -e "export DRY_RUN=true" >> .env
     echo "OK"
     echo "Please update $(PWD)/.env with the appropriate database credentials and run the script again."
     exit
@@ -115,15 +122,16 @@ load_file(){
   psql_cmd="psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -f ./verify_${tbl_name}.sql"
   $DRY_RUN && psql_cmd="echo $psql_cmd"
 
+  echo "  -> start processing table ${tbl_name} at: $(date +'%T')"
   #if $psql_cmd; then                            # show the output on the console
   #if $psql_cmd >/dev/null; then                 # hide the output
   if $psql_cmd > "verify_${tbl_name}.log"; then  # redirect command output to a file
     $DRY_RUN && sleep "$(shuf -i 0-2 -n 1)"      # randomly sleep to simulate background jobs
     end=$SECONDS; duration=$(( end - start ))
-    echo "  -> successfully verifed $tbl_name (took $((duration / 60)) minutes)"
+    echo "  -> successfully verifed $tbl_name at: $(date +'%T'); (took $((duration / 60)) minutes)"
   else
     end=$SECONDS; duration=$(( end - start ))
-    echo "  -x failed to verify $tbl_name (after $((duration / 60)) minutes)"
+    echo "  -x failed to verify $tbl_name at: $(date +'%T'); (after $((duration / 60)) minutes)"
     exit 1
   fi
 }

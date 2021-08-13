@@ -8,18 +8,14 @@ export PGPORT="${PGPORT:-5432}"
 export PGDATABASE="${PGDATABASE:-}"
 
 # when DRY_RUN=true (the default), the script will echo the commands it would run against the db
-export DRY_RUN="${DRY_RUN:-true}"
+export DRY_RUN="${DRY_RUN:-false}"
 
-# boolean to limit table data verification (verify_data.sh) to a subset of tables
-export MIN_TABLES="${MIN_TABLES:-false}"
+# boolean to limit table processing to a subset of tables
+export MIN_TABLES=${1:-false}
 
 # tables that need to be processed before child tables, these are processed
 # one after the other in order
-if [ "$MIN_TABLES" = true ] ; then
-parent_tables=(
-carrier_claims
-)
-else
+if ! [ "${MIN_TABLES}" = true ] ; then
 parent_tables=(
 carrier_claims
 dme_claims
@@ -29,15 +25,16 @@ inpatient_claims
 outpatient_claims
 snf_claims
 )
+else
+echo "Will be running using a subset of db tables..."
+parent_tables=(
+carrier_claims
+)
 fi
 
 # these will be run in background jobs, up to $MAX_JOBS at a time
 # not necessarily in order
-if [ "$MIN_TABLES" = true ] ; then
-child_tables=(
-carrier_claim_lines
-)
-else
+if ! [ "${MIN_TABLES}" = true ] ; then
 child_tables=(
 carrier_claim_lines
 dme_claim_lines
@@ -54,6 +51,10 @@ loaded_batches
 medicare_beneficiaryid_history
 medicare_beneficiaryid_history_invalid
 )
+else
+child_tables=(
+carrier_claim_lines
+)
 fi
 
 setupPg() {
@@ -68,7 +69,7 @@ setupPg() {
     mv ~/.pgpass ~/.pgpass.orig
   fi
   # create and protect .pgpass
-  echo "$PGHOST:$PGPORT:$PGDATABASE:$PGUSER:$PGPASSWORD" > ~/.pgpass
+  echo -e "${PGHOST}:${PGPORT}:${PGDATABASE}:${PGUSER}:${PGPASSWORD}" > ~/.pgpass
   chmod go-rwx ~/.pgpass
 }
 
@@ -93,13 +94,18 @@ testDbConnection() {
 setup(){
   if ! [[ -f .env ]]; then
     printf "Generating .env file.. "
-    echo "export PGHOST=\nexport PGPORT=5432\nexport PGUSER=\nexport PGPASSWORD=\nexport PGDATABASE=" > .env
-    echo "export MAX_JOBS=1\nexport MIN_TABLES=false\nexport DRY_RUN=true\n" >> .env
+    echo -e "export PGHOST=" > .env
+    echo -e "export PGPORT=5432" >> .env
+    echo -e "export PGUSER=" >> .env
+    echo -e "export PGPASSWORD=" >> .env
+    echo -e "export PGDATABASE=" >> .env
+    echo -e "export MAX_JOBS=1" >> .env
+    echo -e "export DRY_RUN=true" >> .env
     echo "OK"
     echo "Please update $(PWD)/.env with the appropriate database credentials and run the script again."
     exit
   else
-    if $DRY_RUN; then
+    if [ "${DRY_RUN}" = true ] ; then
       echo "DRY_RUN=true.. skipping db connection check"
     else
       # shellcheck disable=SC1091 # tell shellcheck not to worry about checking this .env file
@@ -123,15 +129,16 @@ load_file(){
   psql_cmd="psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -f ./insert_${tbl_name}.sql"
   $DRY_RUN && psql_cmd="echo $psql_cmd"
 
+  echo "  -> start processing table ${tbl_name} at: $(date +'%T')"
   #if $psql_cmd; then                            # show the output on the console
   #if $psql_cmd >/dev/null; then                 # hide the output
   if $psql_cmd > "insert_${tbl_name}.log"; then  # redirect command output to a file
     $DRY_RUN && sleep "$(shuf -i 0-2 -n 1)"      # randomly sleep to simulate background jobs
     end=$SECONDS; duration=$(( end - start ))
-    echo "  -> successfully loaded $tbl_name (took $((duration / 60)) minutes)"
+    echo "  -> successfully loaded $tbl_name at: $(date +'%T'); (took $((duration / 60)) minutes)"
   else
     end=$SECONDS; duration=$(( end - start ))
-    echo "  -x failed to load $tbl_name (after $((duration / 60)) minutes)"
+    echo "  -x failed to load $tbl_name at: $(date +'%T'); (after $((duration / 60)) minutes)"
     exit 1
   fi
 }
