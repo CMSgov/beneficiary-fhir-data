@@ -448,7 +448,7 @@ create table carrier_claim_lines (
     carr_line_rdcd_pmt_phys_astn_c           character(1) not null,                    -- reducedPaymentPhysicianAsstCode
     carr_line_rx_num                         character varying(30),                    -- rxNumber
     carr_prfrng_pin_num                      character varying(15) not null,           -- performingProviderIdNumber
-    dmerc_line_mtus_cnt                      smallint not null,                        -- mtusCount
+    dmerc_line_mtus_cnt                      integer not null,                         -- mtusCount
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
@@ -558,7 +558,7 @@ create table dme_claim_lines (
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     hcpcs_3rd_mdfr_cd                        character varying(5),                     -- hcpcsThirdModifierCode
     dmerc_line_mtus_cd                       character(1),                             -- mtusCode
-    dmerc_line_mtus_cnt                      smallint not null,                        -- mtusCount
+    dmerc_line_mtus_cnt                      integer not null,                         -- mtusCount
     dmerc_line_prcng_state_cd                character varying(2),                     -- pricingStateCode
     dmerc_line_scrn_svgs_amt                 numeric(10,2),                            -- screenSavingsAmount
     dmerc_line_supplr_type_cd                character(1),                             -- supplierTypeCode
@@ -704,7 +704,7 @@ create table hha_claim_lines (
     rev_cntr_apc_hipps_cd                    character varying(5),                     -- apcOrHippsCode
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         integer,                                  -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
     rev_cntr_pmt_mthd_ind_cd                 character varying(2),                     -- paymentMethodCode
     rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
@@ -843,7 +843,7 @@ create table hospice_claim_lines (
     rev_cntr_bene_pmt_amt                    numeric(10,2) not null,                   -- benficiaryPaymentAmount
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         integer,                                  -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2),                            -- nonCoveredChargeAmount
     rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
     rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
@@ -1129,7 +1129,7 @@ create table inpatient_claim_lines (
     clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         integer,                                  -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
     rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
     rev_cntr                                 character varying(4) not null,            -- revenueCenter
@@ -1365,7 +1365,7 @@ create table outpatient_claim_lines (
     rev_cntr_dscnt_ind_cd                    character(1),                             -- discountCode
     rev_cntr_1st_msp_pd_amt                  numeric(10,2) not null,                   -- firstMspPaidAmount
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         integer,                                  -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
     rev_cntr_otaf_pmt_cd                     character(1),                             -- obligationToAcceptAsFullPaymentCode
     rev_cntr_packg_ind_cd                    character(1),                             -- packagingCode
@@ -1661,7 +1661,7 @@ create table snf_claim_lines (
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     rev_cntr                                 character varying(4) not null,            -- revenueCenter
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
-    rev_cntr_ndc_qty                         smallint,                                 -- nationalDrugCodeQuantity
+    rev_cntr_ndc_qty                         integer,                                  -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
     rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
     rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
