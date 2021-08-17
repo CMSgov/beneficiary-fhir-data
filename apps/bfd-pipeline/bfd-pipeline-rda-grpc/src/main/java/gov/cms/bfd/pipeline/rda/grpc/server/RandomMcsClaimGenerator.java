@@ -12,17 +12,20 @@ import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
   private static final int MAX_DETAILS = 4;
   private static final int MAX_DIAG_CODES = 7;
   private static final List<McsClaimType> CLAIM_TYPES = enumValues(McsClaimType.values());
   private static final List<McsBeneficiarySex> BENE_SEXES = enumValues(McsBeneficiarySex.values());
-  private static final List<McsStatusCode> STATUS_CODES = enumValues(McsStatusCode.values());
+  private static final List<McsStatusCode> STATUS_CODES;
   private static final List<McsBillingProviderIndicator> PROV_INDICATORS =
       enumValues(McsBillingProviderIndicator.values());
   private static final List<McsBillingProviderStatusCode> PROV_STATUS_CODES =
@@ -30,6 +33,15 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
   private static final List<McsDiagnosisIcdType> DIAG_ICD_TYPES =
       enumValues(McsDiagnosisIcdType.values());
   private static final List<McsDetailStatus> DETAIL_STATUSES = enumValues(McsDetailStatus.values());
+
+  static {
+    // MCS status codes are special since the STATUS_CODE_NOT_USED is considered invalid by the
+    // transformer. This block preserves the natural ordering of the enum values while removing the
+    // bad value.
+    Set<McsStatusCode> statusCodes = new LinkedHashSet<>(Arrays.asList(McsStatusCode.values()));
+    statusCodes.remove(McsStatusCode.STATUS_CODE_NOT_USED);
+    STATUS_CODES = enumValues(new ArrayList<>(statusCodes).toArray(new McsStatusCode[0]));
+  }
 
   /**
    * Creates an instance with the specified seed.
@@ -76,9 +88,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     oneOf(
         () -> claim.setIdrBeneSexEnum(randomEnum(BENE_SEXES)),
         () -> claim.setIdrBeneSexUnrecognized(randomLetter(1, 1)));
-    oneOf(
-        () -> claim.setIdrStatusCodeEnum(randomEnum(STATUS_CODES)),
-        () -> claim.setIdrStatusCodeUnrecognized(randomLetter(1, 1)));
+    claim.setIdrStatusCodeEnum(randomEnum(STATUS_CODES));
     optional(() -> claim.setIdrStatusDate(randomDate()));
     optional(() -> claim.setIdrBillProvNpi(randomAlphaNumeric(1, 10)));
     optional(() -> claim.setIdrBillProvNum(randomDigit(1, 10)));
