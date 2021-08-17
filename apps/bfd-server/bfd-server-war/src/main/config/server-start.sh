@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # DEBUG
-set -x
+#set -x
 
 # Check to see if we are running in Cygwin.
 uname="$(uname 2>/dev/null)"
@@ -202,3 +202,7 @@ while true; do
 	fi
 	sleep 1
 done
+
+# DEBUG
+echo "Wait additional 60 seconds for debugging"
+sleep 60
