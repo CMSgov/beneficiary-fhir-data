@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -42,11 +41,7 @@ public class RDATestUtils {
   }
 
   public void seedData(Collection<?> entities) {
-    Iterator<?> i = entities.iterator();
-
-    while (i.hasNext()) {
-      doTransaction(em -> em.persist(i.next()));
-    }
+    doTransaction(em -> entities.forEach(em::persist));
   }
 
   public void truncate(Class<?> entityClass) {
