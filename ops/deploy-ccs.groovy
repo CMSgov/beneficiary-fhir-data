@@ -134,7 +134,8 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
  
 			// both packer builds expect additional variables in a file called `extra_vars.json` in the current directory
-			def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
+			//def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
+			sh "touch ${workspace}/ops/ansible/playbooks-ccs/extra_vars.json"
 
 			varsFile.write(JsonOutput.toJson([
 				data_server_launcher: "${workspace}/${appBuildResults.dataServerLauncher}",
