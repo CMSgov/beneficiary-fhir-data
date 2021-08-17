@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
  *
  * @param <T>
  */
-public class EmptyClaimSource<T> implements ClaimSource<T> {
+public class EmptyMessageSource<T> implements MessageSource<T> {
   @Override
   public boolean hasNext() throws Exception {
     return false;

@@ -13,6 +13,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.MethodDescriptor;
 import io.grpc.stub.ClientCalls;
 import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * GrpcStreamCaller implementation that calls the RDA McsClaim service. At this stage in RDA API
@@ -20,6 +22,8 @@ import java.util.Iterator;
  * service is called it sends all of its values.
  */
 public class McsClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjMcsClaim>> {
+  static final Logger LOGGER = LoggerFactory.getLogger(McsClaimStreamCaller.class);
+
   private final McsClaimTransformer transformer;
 
   public McsClaimStreamCaller(McsClaimTransformer transformer) {
@@ -37,6 +41,7 @@ public class McsClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjMc
   @Override
   public GrpcResponseStream<RdaChange<PreAdjMcsClaim>> callService(ManagedChannel channel)
       throws Exception {
+    LOGGER.info("calling service");
     Preconditions.checkNotNull(channel);
     final Empty request = Empty.newBuilder().build();
     final MethodDescriptor<Empty, ClaimChange> method = RDAServiceGrpc.getGetMcsClaimsMethod();

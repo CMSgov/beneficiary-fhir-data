@@ -411,13 +411,13 @@ public final class TransformerUtilsV2 {
       throw new NoSuchElementException();
     }
     try {
-      String stringDate = dateYear.get().toString();
+      String stringDate = String.format("%04d", dateYear.get().intValue());
       DateType dateYearValue = new DateType(stringDate);
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
     } catch (DataFormatException e) {
       throw new InvalidRifValueException(
-          String.format("Unable to create DateYear with reference year: '%s'.", dateYear.get()), e);
+          String.format("Unable to create DateType with reference year: '%s'.", dateYear.get()), e);
     }
     return extension;
   }

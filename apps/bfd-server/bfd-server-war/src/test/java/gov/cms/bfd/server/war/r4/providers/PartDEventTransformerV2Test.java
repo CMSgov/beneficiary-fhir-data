@@ -572,8 +572,8 @@ public final class PartDEventTransformerV2Test {
                 Arrays.asList(
                     new Coding(
                         "http://hl7.org/fhir/sid/ndc",
-                        "667159747",
-                        "TYLENOL EXTRA STRENGTH - ACETAMINOPHEN")));
+                        "495800192",
+                        "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE")));
 
     Assert.assertTrue(compare.equalsDeep(pos));
   }

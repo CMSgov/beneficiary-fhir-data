@@ -44,7 +44,7 @@ public class RandomFissClaimSourceTest {
     assertNextPastEndOfDataThrowsException(source);
   }
 
-  private void assertNextPastEndOfDataThrowsException(ClaimSource source) throws Exception {
+  private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {
     try {
       source.next();
       fail("expected exception");

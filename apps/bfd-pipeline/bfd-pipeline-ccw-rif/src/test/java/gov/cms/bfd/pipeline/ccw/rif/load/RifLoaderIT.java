@@ -566,6 +566,14 @@ public final class RifLoaderIT {
         dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3.getResources()));
   }
 
+  @Ignore
+  @Test
+  public void loadSyntheaData() {
+    DataSource dataSource =
+        PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
+    loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SYNTHEA_DATA.getResources()));
+  }
+
   /**
    * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
