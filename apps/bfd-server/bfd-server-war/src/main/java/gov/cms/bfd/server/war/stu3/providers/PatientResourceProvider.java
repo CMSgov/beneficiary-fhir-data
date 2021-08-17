@@ -524,11 +524,12 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                     "bene_ids_by_year_month_part_d_contract_id"))
             .time();
     try {
+      // Set the max query results to one more than the pagesize so that the caller
+      // can figure out whether there is another page.
+      final int maxResults = paging.getPageSize() + 1;
+
       matchingBeneIds =
-          entityManager
-              .createQuery(beneIdCriteria)
-              .setMaxResults(paging.getPageSize() + 1)
-              .getResultList();
+          entityManager.createQuery(beneIdCriteria).setMaxResults(maxResults).getResultList();
       return matchingBeneIds;
     } finally {
       beneHistoryMatchesTimerQueryNanoSeconds = beneIdMatchesTimer.stop();
