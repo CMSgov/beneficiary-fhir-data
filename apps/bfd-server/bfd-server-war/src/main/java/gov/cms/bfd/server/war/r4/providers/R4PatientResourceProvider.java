@@ -24,7 +24,6 @@ import gov.cms.bfd.model.rif.BeneficiaryHistory_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
-import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
@@ -292,7 +291,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
-    checkPageSize(paging);
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
     operation.setOption("by", "coverageContract");
@@ -894,16 +892,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           "Unsupported query parameter value: " + coverageId.getValueNotNull());
   }
 
-  /**
-   * Check that the page size is valid
-   *
-   * @param paging to check
-   */
-  public static void checkPageSize(LinkBuilder paging) {
-    if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
-    if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
-  }
-
   private static LocalDate getFormattedYearMonth(String contractYear, String contractMonth) {
     if (Strings.isNullOrEmpty(contractYear))
       throw new InvalidRequestException("A null or empty year is not supported");
@@ -1067,7 +1055,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
-    checkPageSize(paging);
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
     operation.setOption("by", "coverageContract");
