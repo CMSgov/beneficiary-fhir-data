@@ -125,7 +125,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 
 // begin pipeline
 try {
-	podTemplate(containers: [containerTemplate(name: 'bfd-cbc-build', image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk8-an29-tf12', command: 'cat', ttyEnabled: true, alwaysPullImage: true)], serviceAccount: 'bfd') {
+	podTemplate(containers: [containerTemplate(name: 'bfd-cbc-build', image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk8-an29-tf12', command: 'cat', ttyEnabled: true, alwaysPullImage: true)], serviceAccount: 'bfd', hostNetwork: true) {
 		node(POD_LABEL) {
 			stage('Prepare') {
 				currentStage = "${env.STAGE_NAME}"
