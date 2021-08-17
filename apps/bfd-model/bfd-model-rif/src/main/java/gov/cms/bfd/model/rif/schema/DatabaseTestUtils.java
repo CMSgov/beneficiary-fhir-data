@@ -200,7 +200,7 @@ public final class DatabaseTestUtils {
         String.format(
             "mem:test-embedded;user=%s;password=%s", HSQL_SERVER_USERNAME, HSQL_SERVER_PASSWORD));
     hsqlProperties.setProperty("server.dbname.0", "test-embedded");
-    hsqlProperties.setProperty("server.address", "0.0.0.0");
+    hsqlProperties.setProperty("server.address", "127.0.0.1");
     hsqlProperties.setProperty("server.port", "" + hsqldbPort);
     hsqlProperties.setProperty("hsqldb.tx", "mvcc");
     org.hsqldb.server.Server server = new org.hsqldb.server.Server();

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# DEBUG
-#set -x
-
 # Check to see if we are running in Cygwin.
 uname="$(uname 2>/dev/null)"
 if [[ -z "${uname}" ]]; then uname="$(/usr/bin/uname 2>/dev/null)"; fi
@@ -191,8 +188,6 @@ endSeconds=$(($startSeconds + $serverTimeoutSeconds))
 while true; do
 	if grep --quiet "Started Jetty." "${serverLog}"; then
 		echo "Server started in $(($SECONDS - $startSeconds)) seconds."
-		# DEBUG
-		ss -ltn
 		break
 	fi
 	if [[ $SECONDS -gt $endSeconds ]]; then
@@ -202,7 +197,3 @@ while true; do
 	fi
 	sleep 1
 done
-
-# DEBUG
-echo "Wait additional 60 seconds for debugging"
-sleep 60

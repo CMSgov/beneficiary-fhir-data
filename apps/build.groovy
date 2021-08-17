@@ -29,9 +29,6 @@ def build(String build_env) {
 
 		sh "mvn --update-snapshots -Dmaven.test.failure.ignore clean verify"
 
-		// DEBUG
-		sh "ls -la bfd-server/bfd-server-war/target/server-work"
-
 		/*
 		 * Fingerprint the output artifacts and archive the test results.
 		 *
@@ -39,7 +36,7 @@ def build(String build_env) {
 		 */
 		fingerprint '**/target/*.jar,**/target/*.war,**/target/*.zip'
 		junit testResults: '**/target/*-reports/TEST-*.xml', keepLongStdio: true
-		archiveArtifacts artifacts: '**/target/*.jar,**/target/*.war,**/target/*.zip,**/target/*-reports/*.txt,**/server-work/*.properties,**/server-work/*.txt,**/server-work/*.log,**/server-work/*.json', allowEmptyArchive: true
+		archiveArtifacts artifacts: '**/target/*.jar,**/target/*.war,**/target/*.zip,**/target/*-reports/*.txt', allowEmptyArchive: true
 	}
 
 	return new AppBuildResults(
