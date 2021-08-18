@@ -132,16 +132,13 @@ def deployManagement(AmiIds amiIds) {
 def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBuildResults appBuildResults) {
 	dir('ops/ansible/playbooks-ccs'){
 		withCredentials([file(credentialsId: 'bfd-vault-password', variable: 'vaultPasswordFile')]) {
- 
-			// both packer builds expect additional variables in a file called `extra_vars.json` in the current directory
-			def varsFile = new File("${workspace}/ops/ansible/playbooks-ccs/extra_vars.json")
-			varsFile.createNewFile()
 
-			varsFile.write(JsonOutput.toJson([
-				data_server_launcher: "${workspace}/${appBuildResults.dataServerLauncher}",
-				data_server_war: "${workspace}/${appBuildResults.dataServerWar}",
-				data_pipeline_jar: "${workspace}/${appBuildResults.dataPipelineUberJar}",
-			]))
+			writeFile file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", text: """{
+    "data_server_launcher": "${workspace}/${appBuildResults.dataServerLauncher}",
+    "data_server_war": "${workspace}/${appBuildResults.dataServerWar}",
+    "data_pipeline_jar": "${workspace}/${appBuildResults.dataPipelineUberJar}"
+}
+"""
 
 			// build AMIs in parallel
 			sh "packer build -color=false \
