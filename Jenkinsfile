@@ -228,72 +228,72 @@ try {
 				}
 			}
 
-			stage('Deploy to TEST') {
-				currentStage = "${env.STAGE_NAME}"
-				lock(resource: 'env_test', inversePrecendence: true) {
-					milestone(label: 'stage_deploy_test_start')
+			// stage('Deploy to TEST') {
+			// 	currentStage = "${env.STAGE_NAME}"
+			// 	lock(resource: 'env_test', inversePrecendence: true) {
+			// 		milestone(label: 'stage_deploy_test_start')
 
-					container('bfd-cbc-build') {
-						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
-					}
-				}
-			}
+			// 		container('bfd-cbc-build') {
+			// 			scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			// 		}
+			// 	}
+			// }
 
-			stage('Manual Approval') {
-				currentStage = "${env.STAGE_NAME}"
-				if (canDeployToProdEnvs) {
-					/*
-					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
-					* deploying to production environments.
-					*/
-					if (!params.deploy_prod_skip_confirm) {
-						/*
-						* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-						* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-						* an exception will be thrown.
-						*/
-						try {
-							input 'Deploy to production environments (prod-sbx, prod)?'
-							willDeployToProdEnvs = true
-						} catch(err) {
-							willDeployToProdEnvs = false
-							echo 'User opted not to deploy to prod-like envs.'
-						}
-					}
-				} else {
-					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
-				}
-			}
+			// stage('Manual Approval') {
+			// 	currentStage = "${env.STAGE_NAME}"
+			// 	if (canDeployToProdEnvs) {
+			// 		/*
+			// 		* Unless it was explicitly requested at the start of the build, prompt for confirmation before
+			// 		* deploying to production environments.
+			// 		*/
+			// 		if (!params.deploy_prod_skip_confirm) {
+			// 			/*
+			// 			* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
+			// 			* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
+			// 			* an exception will be thrown.
+			// 			*/
+			// 			try {
+			// 				input 'Deploy to production environments (prod-sbx, prod)?'
+			// 				willDeployToProdEnvs = true
+			// 			} catch(err) {
+			// 				willDeployToProdEnvs = false
+			// 				echo 'User opted not to deploy to prod-like envs.'
+			// 			}
+			// 		}
+			// 	} else {
+			// 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
+			// 	}
+			// }
 
-			stage('Deploy to PROD-SBX') {
-				currentStage = "${env.STAGE_NAME}"
-				if (willDeployToProdEnvs) {
-					lock(resource: 'env_prod_sbx', inversePrecendence: true) {
-						milestone(label: 'stage_deploy_prod_sbx_start')
+			// stage('Deploy to PROD-SBX') {
+			// 	currentStage = "${env.STAGE_NAME}"
+			// 	if (willDeployToProdEnvs) {
+			// 		lock(resource: 'env_prod_sbx', inversePrecendence: true) {
+			// 			milestone(label: 'stage_deploy_prod_sbx_start')
 
-						container('bfd-cbc-build') {
-							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
-						}
-					}
-				} else {
-					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
-				}
-			}
+			// 			container('bfd-cbc-build') {
+			// 				scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			// 			}
+			// 		}
+			// 	} else {
+			// 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+			// 	}
+			// }
 
-			stage('Deploy to PROD') {
-				currentStage = "${env.STAGE_NAME}"
-				if (willDeployToProdEnvs) {
-					lock(resource: 'env_prod', inversePrecendence: true) {
-						milestone(label: 'stage_deploy_prod_start')
+			// stage('Deploy to PROD') {
+			// 	currentStage = "${env.STAGE_NAME}"
+			// 	if (willDeployToProdEnvs) {
+			// 		lock(resource: 'env_prod', inversePrecendence: true) {
+			// 			milestone(label: 'stage_deploy_prod_start')
 
-						container('bfd-cbc-build') {
-							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
-						}
-					}
-				} else {
-					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
-				}
-			}
+			// 			container('bfd-cbc-build') {
+			// 				scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+			// 			}
+			// 		}
+			// 	} else {
+			// 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+			// 	}
+			// }
 		}
 	}
 } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
