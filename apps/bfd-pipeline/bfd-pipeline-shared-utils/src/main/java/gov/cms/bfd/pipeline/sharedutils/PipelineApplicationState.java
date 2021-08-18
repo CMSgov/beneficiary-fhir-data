@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.sharedutils;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
@@ -15,69 +17,17 @@ import org.hibernate.tool.schema.Action;
  * #getPooledDataSource()}.
  */
 public final class PipelineApplicationState implements AutoCloseable {
-  private static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+  public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd";
+  public static final String RDA_PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   private final MetricRegistry metrics;
   private final HikariDataSource pooledDataSource;
   private final EntityManagerFactory entityManagerFactory;
+  private final Clock clock;
 
   /**
-   * Constructs a new {@link PipelineApplicationState} instance.
-   *
-   * @param metrics the value to use for {@link #getMetrics()}
-   * @param dbOptions the {@link DatabaseOptions} for the application's DB (which this will use to
-   *     create {@link #getPooledDataSource()})
-   */
-  public PipelineApplicationState(MetricRegistry metrics, DatabaseOptions dbOptions) {
-    this(metrics, dbOptions, PERSISTENCE_UNIT_NAME);
-  }
-
-  /**
-   * Constructs a new {@link PipelineApplicationState} instance.
-   *
-   * @param metrics the value to use for {@link #getMetrics()}
-   * @param dbOptions the {@link DatabaseOptions} for the application's DB (which this will use to
-   *     create {@link #getPooledDataSource()})
-   * @param persistenceUnitName allows for use of an alternative persistence unit in RDA tests
-   */
-  public PipelineApplicationState(
-      MetricRegistry metrics, DatabaseOptions dbOptions, String persistenceUnitName) {
-    this.metrics = metrics;
-    this.pooledDataSource = createPooledDataSource(dbOptions, metrics);
-    this.entityManagerFactory = createEntityManagerFactory(pooledDataSource, persistenceUnitName);
-  }
-
-  /**
-   * Constructs a new {@link PipelineApplicationState} instance.
-   *
-   * @param metrics the value to use for {@link #getMetrics()}
-   * @param dataSource the {@link DatabaseOptions} for the application's DB (which this will use to
-   *     create {@link #getPooledDataSource()})
-   * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
-   */
-  public PipelineApplicationState(MetricRegistry metrics, DataSource dataSource, int maxPoolSize) {
-    this(metrics, dataSource, maxPoolSize, PERSISTENCE_UNIT_NAME);
-  }
-
-  /**
-   * Constructs a new {@link PipelineApplicationState} instance with an alternative persistence unit
-   * name.
-   *
-   * @param metrics the value to use for {@link #getMetrics()}
-   * @param dataSource the {@link DatabaseOptions} for the application's DB (which this will use to
-   *     create {@link #getPooledDataSource()})
-   * @param persistenceUnitName allows for use of an alternative persistence unit in RDA tests
-   * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
-   */
-  public PipelineApplicationState(
-      MetricRegistry metrics, DataSource dataSource, int maxPoolSize, String persistenceUnitName) {
-    this.metrics = metrics;
-    this.pooledDataSource = createPooledDataSource(dataSource, maxPoolSize, metrics);
-    this.entityManagerFactory = createEntityManagerFactory(pooledDataSource, persistenceUnitName);
-  }
-
-  /**
-   * Constructs a new {@link PipelineApplicationState} instance.
+   * Constructs a new {@link PipelineApplicationState} instance using a pre-existing pooled data
+   * DataSource. This is the standard constructor used by PipelineApplication.
    *
    * @param metrics the value to use for {@link #getMetrics()}
    * @param pooledDataSource the value to use for {@link #getPooledDataSource()}
@@ -86,10 +36,58 @@ public final class PipelineApplicationState implements AutoCloseable {
   public PipelineApplicationState(
       MetricRegistry metrics,
       HikariDataSource pooledDataSource,
-      EntityManagerFactory entityManagerFactory) {
+      String persistenceUnitName,
+      Clock clock) {
+    this(
+        metrics,
+        pooledDataSource,
+        createEntityManagerFactory(pooledDataSource, persistenceUnitName),
+        clock);
+  }
+
+  /**
+   * Constructs a new {@link PipelineApplicationState} instance using a pre-existing non-pooled
+   * DataSource. Intended for use by PipelineTestUtils.
+   *
+   * @param metrics the value to use for {@link #getMetrics()}
+   * @param dataSource the {@link DatabaseOptions} for the application's DB (which this will use to
+   *     create {@link #getPooledDataSource()})
+   * @param persistenceUnitName allows for use of an alternative persistence unit in RDA tests
+   * @param maxPoolSize the {@link DatabaseOptions#getMaxPoolSize()} value to use
+   */
+  @VisibleForTesting
+  public PipelineApplicationState(
+      MetricRegistry metrics,
+      DataSource dataSource,
+      int maxPoolSize,
+      String persistenceUnitName,
+      Clock clock) {
+    this(
+        metrics,
+        createPooledDataSource(dataSource, maxPoolSize, metrics),
+        persistenceUnitName,
+        clock);
+  }
+
+  /**
+   * Constructs a new {@link PipelineApplicationState} instance using pre-existing DataSource and
+   * EntityManagerFactory. This constructor is intended for use by other constructors and specific
+   * unit tests.
+   *
+   * @param metrics the value to use for {@link #getMetrics()}
+   * @param pooledDataSource the value to use for {@link #getPooledDataSource()}
+   * @param entityManagerFactory the value to use for {@link #getEntityManagerFactory()}
+   */
+  @VisibleForTesting
+  public PipelineApplicationState(
+      MetricRegistry metrics,
+      HikariDataSource pooledDataSource,
+      EntityManagerFactory entityManagerFactory,
+      Clock clock) {
     this.metrics = metrics;
     this.pooledDataSource = pooledDataSource;
     this.entityManagerFactory = entityManagerFactory;
+    this.clock = clock;
   }
 
   /**
@@ -98,7 +96,7 @@ public final class PipelineApplicationState implements AutoCloseable {
    * @param metrics the {@link MetricRegistry} to use
    * @return a {@link HikariDataSource} for the BFD database
    */
-  private static HikariDataSource createPooledDataSource(
+  public static HikariDataSource createPooledDataSource(
       DatabaseOptions dbOptions, MetricRegistry metrics) {
     HikariDataSource pooledDataSource = new HikariDataSource();
 
@@ -169,6 +167,11 @@ public final class PipelineApplicationState implements AutoCloseable {
   /** @return the {@link EntityManagerFactory} for the application */
   public EntityManagerFactory getEntityManagerFactory() {
     return entityManagerFactory;
+  }
+
+  /** @return the Clock to use within the application */
+  public Clock getClock() {
+    return clock;
   }
 
   /** @see java.lang.AutoCloseable#close() */

@@ -36,6 +36,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -83,7 +84,11 @@ public final class PipelineTestUtils {
     DatabaseTestUtils.get().createOrUpdateSchemaForDataSource();
     this.pipelineApplicationState =
         new PipelineApplicationState(
-            testMetrics, DatabaseTestUtils.get().getUnpooledDataSource(), DEFAULT_MAX_POOL_SIZE);
+            testMetrics,
+            DatabaseTestUtils.get().getUnpooledDataSource(),
+            DEFAULT_MAX_POOL_SIZE,
+            PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+            Clock.systemUTC());
   }
 
   /** @return the singleton {@link PipelineTestUtils} instance to use everywhere */

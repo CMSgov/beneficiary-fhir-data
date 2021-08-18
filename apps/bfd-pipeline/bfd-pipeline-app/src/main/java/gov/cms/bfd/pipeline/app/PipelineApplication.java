@@ -10,7 +10,9 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
+import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
+import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
@@ -23,6 +25,7 @@ import gov.cms.bfd.pipeline.sharedutils.databaseschema.DatabaseSchemaUpdateJob;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.time.Clock;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,10 +107,6 @@ public final class PipelineApplication {
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
 
-    // Create the application state.
-    PipelineApplicationState appState =
-        new PipelineApplicationState(appMetrics, appConfig.getDatabaseOptions());
-
     /*
      * Create the PipelineManager that will be responsible for running and managing the various
      * jobs.
@@ -117,33 +116,64 @@ public final class PipelineApplication {
     registerShutdownHook(appMetrics, pipelineManager);
     LOGGER.info("Job processing started.");
 
+    // Create a pooled data source for use by the DatabaseSchemaUpdateJob.
+    final HikariDataSource pooledDataSource =
+        PipelineApplicationState.createPooledDataSource(appConfig.getDatabaseOptions(), appMetrics);
+
     /*
      * Register and wait for the database schema job to run, so that we don't have to worry about
      * declaring it as a dependency (since it is for pretty much everything right now).
      */
-    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(appState.getPooledDataSource()));
+    pipelineManager.registerJob(new DatabaseSchemaUpdateJob(pooledDataSource));
     PipelineJobRecord<NullPipelineJobArguments> dbSchemaJobRecord =
         jobRecordStore.submitPendingJob(DatabaseSchemaUpdateJob.JOB_TYPE, null);
     try {
       jobRecordStore.waitForJobs(dbSchemaJobRecord);
     } catch (InterruptedException e) {
-      appState.close();
+      pooledDataSource.close();
       throw new InterruptedException();
     }
 
     /*
      * Create and register the other jobs.
      */
-    pipelineManager.registerJob(createCcwRifLoadJob(appConfig, appState));
+    if (appConfig.getCcwRifLoadOptions().isPresent()) {
+      // Create an application state that reuses the existing pooled data source with the ccw/rif
+      // persistence unit.
+      final PipelineApplicationState appState =
+          new PipelineApplicationState(
+              appMetrics,
+              pooledDataSource,
+              PipelineApplicationState.PERSISTENCE_UNIT_NAME,
+              Clock.systemUTC());
+
+      pipelineManager.registerJob(
+          createCcwRifLoadJob(appConfig.getCcwRifLoadOptions().get(), appState));
+      LOGGER.info("Registered CcwRifLoadJob.");
+    } else {
+      LOGGER.warn("CcwRifLoadJob is disabled in app configuration.");
+    }
 
     if (appConfig.getRdaLoadOptions().isPresent()) {
+      LOGGER.info("RDA API jobs are enabled in app configuration.");
+      // Create an application state that reuses the existing pooled data source with the rda
+      // persistence unit.
+      final PipelineApplicationState rdaAppState =
+          new PipelineApplicationState(
+              appMetrics,
+              pooledDataSource,
+              PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+              Clock.systemUTC());
+
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
-      final PipelineJob<NullPipelineJobArguments> fissLoadJob =
-          rdaLoadOptions.createFissClaimsLoadJob(appState);
-      final PipelineJob<NullPipelineJobArguments> mcsLoadJob =
-          rdaLoadOptions.createMcsClaimsLoadJob(appState);
-      pipelineManager.registerJob(fissLoadJob);
-      pipelineManager.registerJob(mcsLoadJob);
+
+      pipelineManager.registerJob(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
+      LOGGER.info("Registered RdaFissClaimLoadJob.");
+
+      pipelineManager.registerJob(rdaLoadOptions.createMcsClaimsLoadJob(rdaAppState));
+      LOGGER.info("Registered RdaMcsClaimLoadJob.");
+    } else {
+      LOGGER.info("RDA API jobs are not enabled in app configuration.");
     }
 
     /*
@@ -156,22 +186,20 @@ public final class PipelineApplication {
   }
 
   /**
-   * @param appConfig the {@link AppConfiguration} to use
+   * @param loadOptions the {@link CcwRifLoadOptions} to use
    * @param appState the {@link PipelineApplicationState} to use
    * @return a {@link CcwRifLoadJob} instance for the application to use
    */
   private static PipelineJob<?> createCcwRifLoadJob(
-      AppConfiguration appConfig, PipelineApplicationState appState) {
+      CcwRifLoadOptions loadOptions, PipelineApplicationState appState) {
     /*
      * Create the services that will be used to handle each stage in the extract, transform, and
      * load process.
      */
     S3TaskManager s3TaskManager =
-        new S3TaskManager(
-            appState.getMetrics(), appConfig.getCcwRifLoadOptions().getExtractionOptions());
+        new S3TaskManager(appState.getMetrics(), loadOptions.getExtractionOptions());
     RifFilesProcessor rifProcessor = new RifFilesProcessor();
-    RifLoader rifLoader =
-        new RifLoader(appConfig.getCcwRifLoadOptions().getLoadOptions(), appState);
+    RifLoader rifLoader = new RifLoader(loadOptions.getLoadOptions(), appState);
 
     /*
      * Create the DataSetMonitorListener that will glue those stages together and run them all for
@@ -186,7 +214,7 @@ public final class PipelineApplication {
     CcwRifLoadJob ccwRifLoadJob =
         new CcwRifLoadJob(
             appState.getMetrics(),
-            appConfig.getCcwRifLoadOptions().getExtractionOptions(),
+            loadOptions.getExtractionOptions(),
             s3TaskManager,
             dataSetMonitorListener);
 
