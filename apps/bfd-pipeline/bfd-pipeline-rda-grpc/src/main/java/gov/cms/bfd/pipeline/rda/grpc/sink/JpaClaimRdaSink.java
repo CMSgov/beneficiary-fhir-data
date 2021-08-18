@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -8,6 +9,7 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import java.time.Clock;
 import java.util.Collection;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -25,10 +27,12 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
 
   private final EntityManager entityManager;
   private final Metrics metrics;
+  private final Clock clock;
 
   public JpaClaimRdaSink(String claimType, PipelineApplicationState appState) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
     metrics = new Metrics(appState.getMetrics(), claimType);
+    clock = appState.getClock();
   }
 
   @Override
@@ -42,6 +46,7 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
     try {
       metrics.calls.mark();
       try {
+        updateLatencyMetric(claims);
         persistBatch(claims);
         metrics.objectsPersisted.mark(claims.size());
         LOGGER.info("wrote batch of {} claims using persist()", claims.size());
@@ -62,6 +67,7 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
       metrics.failures.mark();
       throw new ProcessingException(error, 0);
     }
+    metrics.successes.mark();
     metrics.objectsWritten.mark(claims.size());
     return claims.size();
   }
@@ -121,6 +127,15 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
     }
   }
 
+  private void updateLatencyMetric(Collection<RdaChange<TClaim>> claims) {
+    for (RdaChange<TClaim> claim : claims) {
+      final long nowMillis = clock.millis();
+      final long changeMillis = claim.getTimestamp().toEpochMilli();
+      final long age = Math.max(0L, nowMillis - changeMillis);
+      metrics.changeAgeMillis.update(age);
+    }
+  }
+
   @VisibleForTesting
   static boolean isDuplicateKeyException(Throwable error) {
     while (error != null) {
@@ -144,19 +159,31 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
   @Getter
   @VisibleForTesting
   static class Metrics {
+    /** Number of times the sink has been called to store objects. */
     private final Meter calls;
+    /** Number of calls that successfully stored the objects. */
+    private final Meter successes;
+    /** Number of calls that failed to store the objects. */
     private final Meter failures;
+    /** Number of objects written. */
     private final Meter objectsWritten;
+    /** Number of objects stored using <code>persist()</code>. */
     private final Meter objectsPersisted;
+    /** Number of objects stored using <code>merge()</code> */
     private final Meter objectsMerged;
+    /** Milliseconds between change timestamp and current time. */
+    private final Histogram changeAgeMillis;
 
-    public Metrics(MetricRegistry appMetrics, String claimType) {
+    private Metrics(MetricRegistry appMetrics, String claimType) {
       final String base = MetricRegistry.name(JpaClaimRdaSink.class.getSimpleName(), claimType);
       calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
       failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
       objectsWritten = appMetrics.meter(MetricRegistry.name(base, "writes", "total"));
       objectsPersisted = appMetrics.meter(MetricRegistry.name(base, "writes", "persisted"));
       objectsMerged = appMetrics.meter(MetricRegistry.name(base, "writes", "merged"));
+      changeAgeMillis =
+          appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
     }
   }
 }
