@@ -17,7 +17,7 @@
       "source_ami": "{{user `source_ami`}}",
       "security_group_filter": {
         "filters": {
-          "tag:Name": "bfd-test-vpn-private"
+          "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
       "ami_name": "bfd-etl-{{isotime \"20060102030405\"}}",
@@ -44,7 +44,7 @@
       "source_ami": "{{user `source_ami`}}",
       "security_group_filter": {
         "filters": {
-          "tag:Name": "bfd-test-vpn-private"
+          "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
       "ami_name": "bfd-fhir-{{isotime \"20060102030405\"}}",
