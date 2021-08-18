@@ -1,2 +1,4 @@
 ---
-stunnel_version: '5.59'
+# stunnel project deletes previous version downloads so builds will fail when building ami's
+# bump version here and redeploy
+stunnel_version: '5.60'
