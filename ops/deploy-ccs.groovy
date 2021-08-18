@@ -137,8 +137,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
     "data_server_launcher": "${workspace}/${appBuildResults.dataServerLauncher}",
     "data_server_war": "${workspace}/${appBuildResults.dataServerWar}",
     "data_pipeline_jar": "${workspace}/${appBuildResults.dataPipelineUberJar}"
-}
-"""
+}"""
 
 			// build AMIs in parallel
 			sh "packer build -color=false \
