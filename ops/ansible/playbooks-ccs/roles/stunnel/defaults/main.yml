@@ -1,4 +1,7 @@
 ---
 # stunnel project deletes previous version downloads so builds will fail when building ami's
-# bump version here and redeploy
+# to update: bump the version and update the sha256 checksum. Example for 5.60:
+# $> wget -O- -q https://www.stunnel.org/downloads/stunnel-5.60.tar.gz.sha256 | cut -d' ' -f1
+# c45d765b1521861fea9b03b425b9dd7d48b3055128c0aec673bba5ef9b8f787d
 stunnel_version: '5.60'
+stunnel_sha256: c45d765b1521861fea9b03b425b9dd7d48b3055128c0aec673bba5ef9b8f787d

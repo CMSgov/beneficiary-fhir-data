@@ -26,7 +26,7 @@
   get_url: 
     url: https://www.stunnel.org/downloads/stunnel-{{ stunnel_version }}.tar.gz
     dest: /tmp/stunnel/stunnel-{{ stunnel_version }}.tar.gz
-    checksum: sha256:137776df6be8f1701f1cd590b7779932e123479fb91e5192171c16798815ce9f
+    checksum: sha256:{{ stunnel_sha256 }}
 
 - name: Build fips enabled stunnel
   become: yes
