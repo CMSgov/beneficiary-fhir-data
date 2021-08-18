@@ -143,7 +143,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 			sh "packer build -color=false \
 				-var vault_password_file=${vaultPasswordFile} \
 				-var 'source_ami=${amiIds.platinumAmiId}' \
-				-var 'subnet_id=subnet-0cbdab7839e606191' \
+				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
 				../../packer/build_bfd-all.json"
