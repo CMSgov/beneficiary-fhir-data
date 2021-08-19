@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import org.junit.Test;
@@ -26,5 +25,14 @@ public class ProcessingExceptionTest {
 
     error = new IOException(error);
     assertTrue(ProcessingException.isInterrupted(error));
+  }
+
+  @Test
+  public void testOriginalCause() {
+    IOException cause = new IOException();
+    ProcessingException root = new ProcessingException(cause, 3);
+    ProcessingException parent = new ProcessingException(root, 5);
+    assertSame(cause, root.getOriginalCause());
+    assertSame(cause, parent.getOriginalCause());
   }
 }

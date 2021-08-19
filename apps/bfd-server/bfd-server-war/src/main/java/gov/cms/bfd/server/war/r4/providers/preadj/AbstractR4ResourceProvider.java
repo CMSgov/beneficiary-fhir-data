@@ -221,9 +221,11 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
 
       if (types != null) {
-        bundleResource = createBundleFor(parseClaimTypes(types), mbiString, isHashed, lastUpdated);
+        bundleResource =
+            createBundleFor(parseClaimTypes(types), mbiString, isHashed, lastUpdated, serviceDate);
       } else {
-        bundleResource = createBundleFor(getResourceTypes(), mbiString, isHashed, lastUpdated);
+        bundleResource =
+            createBundleFor(getResourceTypes(), mbiString, isHashed, lastUpdated, serviceDate);
       }
 
       return bundleResource;
@@ -239,6 +241,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param mbi The mbi to look up associated data for.
    * @param isHashed Denotes if the given mbi is hashed.
    * @param lastUpdated Date range of desired lastUpdate values to retrieve data for.
+   * @param serviceDate Date range of the desired service date to retrieve data for.
    * @return A Bundle with data found using the provided parameters.
    */
   @VisibleForTesting
@@ -246,7 +249,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Set<ResourceTypeV2<T>> resourceTypes,
       String mbi,
       boolean isHashed,
-      DateRangeParam lastUpdated) {
+      DateRangeParam lastUpdated,
+      DateRangeParam serviceDate) {
     List<T> resources = new ArrayList<>();
 
     for (ResourceTypeV2<T> type : resourceTypes) {
@@ -255,9 +259,14 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       String attributeName =
           isHashed ? type.getEntityMbiHashAttribute() : type.getEntityMbiAttribute();
 
-      // TODO: [DCGEO-117] Implement additional search by service date range
       entities =
-          claimDao.findAllByAttribute(type.getEntityClass(), attributeName, mbi, lastUpdated);
+          claimDao.findAllByAttribute(
+              type.getEntityClass(),
+              attributeName,
+              mbi,
+              lastUpdated,
+              serviceDate,
+              type.getEntityEndDateAttribute());
 
       resources.addAll(
           entities.stream()

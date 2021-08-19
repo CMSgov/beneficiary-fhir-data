@@ -130,6 +130,10 @@ abstract class AbstractRandomClaimGenerator {
     }
   }
 
+  protected Clock getClock() {
+    return clock;
+  }
+
   private char randomChar(String characters) {
     return characters.charAt(random.nextInt(characters.length()));
   }

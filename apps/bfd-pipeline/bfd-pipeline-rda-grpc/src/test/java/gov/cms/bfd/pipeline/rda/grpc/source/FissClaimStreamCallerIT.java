@@ -4,14 +4,17 @@ import static org.junit.Assert.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.server.EmptyClaimSource;
-import gov.cms.bfd.pipeline.rda.grpc.server.JsonClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
@@ -49,19 +52,23 @@ public class FissClaimStreamCallerIT {
 
   @Test
   public void test() throws Exception {
+    // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
+    final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
     final Server server =
         RdaServer.startInProcess(
             "test",
             () ->
-                new JsonClaimSource<>(
-                    CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonClaimSource::parseFissClaim),
-            EmptyClaimSource::new);
+                WrappedClaimSource.wrapFissClaims(
+                    new JsonMessageSource<>(
+                        CLAIM_1 + System.lineSeparator() + CLAIM_2,
+                        JsonMessageSource::parseFissClaim),
+                    clock),
+            EmptyMessageSource::new);
     try {
       final ManagedChannel channel = InProcessChannelBuilder.forName("test").build();
       try {
         final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-        final FissClaimTransformer transformer =
-            new FissClaimTransformer(Clock.systemUTC(), hasher);
+        final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
         final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
         final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results = caller.callService(channel);
         assertEquals(true, results.hasNext());
