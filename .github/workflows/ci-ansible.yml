@@ -2,7 +2,6 @@ name: 'CI - Ansible'
 on: pull_request
 jobs:
   ansible-role-bfd-pipeline:
-    runs-on: macos-latest
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
