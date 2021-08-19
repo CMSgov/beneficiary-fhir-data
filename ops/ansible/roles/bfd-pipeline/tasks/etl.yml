@@ -53,28 +53,20 @@
   tags: 
     - pre-ami
 
-- name: Copy Pipeline Application
-  copy:
-    src: "{{ data_pipeline_jar }}"
-    dest: "{{ data_pipeline_dir }}/{{ data_pipeline_jar | basename }}"
-  become: true
-  tags: 
-    - pre-ami
-    
-- name: Configure Pipeline Application Permissions
-  file:
-    path: "{{ data_pipeline_dir }}/{{ data_pipeline_jar | basename }}"
+- name: Copy and Unzip Pipeline Application
+  unarchive:
+    src: "{{ data_pipeline_zip }}"
+    dest: "{{ data_pipeline_dir }}"
     owner: "{{ data_pipeline_user }}"
     group: "{{ data_pipeline_user }}"
-    mode: u=rwx,g=rx,o=rx
   become: true
-  tags: 
+  tags:
     - pre-ami
 
 - name: Create Pipeline Service Wrapper Script
   template:
-    src: bluebutton-data-pipeline.sh.j2
-    dest: "{{ data_pipeline_dir }}/bluebutton-data-pipeline.sh"
+    src: bfd-pipeline-service.sh.j2
+    dest: "{{ data_pipeline_dir }}/bfd-pipeline-service.sh"
     owner: "{{ data_pipeline_user }}"
     group: "{{ data_pipeline_user }}"
     mode: u=rwx,g=rx,o=rx
@@ -86,8 +78,8 @@
 
 - name: Create Pipeline Service Definition
   template:
-    src: bluebutton-data-pipeline.service.j2
-    dest: /etc/systemd/system/bluebutton-data-pipeline.service
+    src: bfd-pipeline.service.j2
+    dest: /etc/systemd/system/bfd-pipeline.service
     owner: root
     group: root
     mode: u=rw,g=r,o=r

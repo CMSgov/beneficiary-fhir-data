@@ -43,10 +43,12 @@
   become: true
   when: data_server_tmp_dir is defined and stat_tmp.stat.exists == false
 
-- name: Copy BFD Server Launcher
-  copy:
+- name: Copy and Unzip BFD Server Launcher
+  unarchive:
     src: "{{ data_server_launcher }}"
-    dest: "{{ data_server_dir }}/{{ data_server_launcher | basename }}"
+    dest: "{{ data_server_dir }}"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
   become: true
 
 - name: Copy BFD Server WAR
@@ -115,13 +117,20 @@
     dest: /etc/logrotate.d/bfd-server
   become: true
 
+- name: Check SELinux Status
+  command: /usr/sbin/selinuxenabled
+  failed_when: false
+  register: selinux_status
+
 - name: Add selinux file context to allow log rotation
   sefcontext:
     target: "{{ data_server_dir }}(/.*json|/.*log)?"
     setype: var_log_t
     state: present
+  when: selinux_status.rc == 0
   become: true
 
 - name: Apply selinux file context
   command: "restorecon -rv {{ data_server_dir }}"
+  when: selinux_status.rc == 0
   become: true

@@ -1,0 +1,24 @@
+name: 'CI - Ansible'
+on: pull_request
+jobs:
+  ansible-role-bfd-pipeline:
+    runs-on: macos-latest
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v2
+      # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
+      # images that we're building and using for the tests. See here for a project to copy from:
+      # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
+      - name: 'Run Tests for bfd-pipeline Role'
+        run: ops/ansible/roles/bfd-pipeline/test/run-tests.sh
+
+  ansible-role-bfd-server:
+    runs-on: macos-latest
+    steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@v2
+      # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
+      # images that we're building and using for the tests. See here for a project to copy from:
+      # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
+      - name: 'Run Tests for bfd-server Role'
+        run: ops/ansible/roles/bfd-server/test/run-tests.sh

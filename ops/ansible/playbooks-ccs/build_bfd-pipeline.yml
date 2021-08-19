@@ -9,6 +9,7 @@
   gather_facts: yes
   vars:
     ansible_ssh_pipelining: no
+    bfd_pipeline_dir: '/usr/local/bfd-pipeline'
     env: "test"
 
   tasks:
@@ -30,14 +31,19 @@
       import_role:
         name: base_patch
 
+    - name: Configure EFT EFS file systems
+      import_tasks: tasks/eft_efs.yml
+      tags:
+        - pre-ami
+
     - name: Apply Blue Button Data Pipeline Role
       import_role:
         name: bfd-pipeline
       vars:
-        data_pipeline_dir: '/bluebutton-data-pipeline'
-        # Note: The `data_pipeline_jar` variable should have been provided by `--extra-vars` on the command line.
+        data_pipeline_dir: "{{ bfd_pipeline_dir }}"
+        # Note: The `data_pipeline_zip` variable should have been provided by `--extra-vars` on the command line.
         data_pipeline_jvm_args: "-Xmx{{ ((data_pipeline_ec2_instance_type_mem_mib | int) * 0.80) | int }}m -XX:+PreserveFramePointer"
-        data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
+        data_pipeline_tmp_dir: "{{ bfd_pipeline_dir }}/tmp"
         data_pipeline_loader_threads: "{{ data_pipeline_ec2_instance_type_vcpu * 25 }}"
         data_pipeline_hicn_hash_iterations: "{{ vault_data_pipeline_hicn_hash_iterations }}"
         data_pipeline_hicn_hash_pepper: "{{ vault_data_pipeline_hicn_hash_pepper }}"
