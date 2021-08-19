@@ -6,6 +6,16 @@ jobs:
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
+
+      # The test will SSH into a Docker container, so first we need an SSH key to be available.
+      - name: Create SSH Key and Add it to SSH Agent
+        run: |
+          ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N '' -q
+          eval `ssh-agent`
+          ssh-add ~/.ssh/id_ed25519
+          export SSH_AUTH_SOCK
+          export SSH_AGENT_PID
+
       # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
       # images that we're building and using for the tests. See here for a project to copy from:
       # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
@@ -17,6 +27,16 @@ jobs:
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
+
+      # The test will SSH into a Docker container, so first we need an SSH key to be available.
+      - name: Create SSH Key and Add it to SSH Agent
+        run: |
+          ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N '' -q
+          eval `ssh-agent`
+          ssh-add ~/.ssh/id_ed25519
+          export SSH_AUTH_SOCK
+          export SSH_AGENT_PID
+
       # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
       # images that we're building and using for the tests. See here for a project to copy from:
       # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
