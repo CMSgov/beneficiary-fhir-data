@@ -69,6 +69,7 @@
     {
       "only": ["bfd-pipeline"],
       "type": "ansible",
+      "user": "ec2-user",
       "playbook_file": "./build_bfd-pipeline.yml",
       "extra_arguments": [
         "-e ansible_python_interpreter=/usr/bin/python",
@@ -85,6 +86,7 @@
     {
       "only": ["bfd-server"],
       "type": "ansible",
+      "user": "ec2-user",
       "playbook_file": "./build_bfd-server.yml",
       "extra_arguments": [
         "-e ansible_python_interpreter=/usr/bin/python",
