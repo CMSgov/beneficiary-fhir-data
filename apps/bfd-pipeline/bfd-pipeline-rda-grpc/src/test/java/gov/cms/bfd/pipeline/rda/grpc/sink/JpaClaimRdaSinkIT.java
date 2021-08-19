@@ -59,6 +59,7 @@ public class JpaClaimRdaSinkIT {
     final JpaClaimRdaSink<PreAdjFissClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
 
     final PreAdjFissClaim claim = new PreAdjFissClaim();
+    claim.setSequenceNumber(3L);
     claim.setDcn("1");
     claim.setHicNo("h1");
     claim.setCurrStatus('1');
@@ -93,6 +94,7 @@ public class JpaClaimRdaSinkIT {
             .getResultList();
     assertEquals(1, claims.size());
     PreAdjFissClaim resultClaim = claims.get(0);
+    assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("h1", resultClaim.getHicNo());
     assertEquals("city name can be very long indeed", resultClaim.getPracLocCity());
     assertEquals(1, resultClaim.getProcCodes().size());
@@ -104,6 +106,7 @@ public class JpaClaimRdaSinkIT {
     final JpaClaimRdaSink<PreAdjMcsClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
 
     final PreAdjMcsClaim claim = new PreAdjMcsClaim();
+    claim.setSequenceNumber(7L);
     claim.setIdrClmHdIcn("3");
     claim.setIdrContrId("c1");
     claim.setIdrHic("hc");
@@ -132,6 +135,7 @@ public class JpaClaimRdaSinkIT {
             .getResultList();
     assertEquals(1, resultClaims.size());
     PreAdjMcsClaim resultClaim = resultClaims.get(0);
+    assertEquals(Long.valueOf(7), resultClaim.getSequenceNumber());
     assertEquals("hc", resultClaim.getIdrHic());
     assertEquals(1, resultClaim.getDetails().size());
     assertEquals(1, resultClaim.getDiagCodes().size());

@@ -127,6 +127,7 @@ public class GrpcRdaSourceIT {
       assertEquals(
           "{\n"
               + "  \"dcn\" : \"63843470\",\n"
+              + "  \"sequenceNumber\" : 0,\n"
               + "  \"hicNo\" : \"916689703543\",\n"
               + "  \"currStatus\" : \"P\",\n"
               + "  \"currLoc1\" : \"M\",\n"
@@ -171,6 +172,7 @@ public class GrpcRdaSourceIT {
       assertEquals(
           "{\n"
               + "  \"dcn\" : \"2643602\",\n"
+              + "  \"sequenceNumber\" : 1,\n"
               + "  \"hicNo\" : \"640930211775\",\n"
               + "  \"currStatus\" : \"R\",\n"
               + "  \"currLoc1\" : \"O\",\n"
