@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.utils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
@@ -9,6 +10,10 @@ import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -23,6 +28,14 @@ import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
 public class RDATestUtils {
+
+  private static final List<Class<?>> TABLE_ENTITIES =
+      ImmutableList.of(
+          PreAdjFissProcCode.class,
+          PreAdjFissClaim.class,
+          PreAdjMcsDetail.class,
+          PreAdjMcsDiagnosisCode.class,
+          PreAdjMcsClaim.class);
 
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
@@ -44,10 +57,11 @@ public class RDATestUtils {
     doTransaction(em -> entities.forEach(em::persist));
   }
 
-  public void truncate(Class<?> entityClass) {
+  public void truncateTables() {
     doTransaction(
         em -> {
-          em.createQuery("delete from " + entityClass.getSimpleName() + " f").executeUpdate();
+          TABLE_ENTITIES.forEach(
+              e -> em.createQuery("delete from " + e.getSimpleName() + " f").executeUpdate());
         });
   }
 
@@ -55,6 +69,28 @@ public class RDATestUtils {
     entityManager.getTransaction().begin();
     transaction.accept(entityManager);
     entityManager.getTransaction().commit();
+  }
+
+  public String expectedResponseFor(String requestId) {
+    StringBuilder expectedResponse = new StringBuilder();
+    InputStream fileStream =
+        this.getClass()
+            .getClassLoader()
+            .getResourceAsStream("endpoint-responses/v2/" + requestId + ".json");
+
+    if (fileStream != null) {
+      try (BufferedReader br = new BufferedReader(new InputStreamReader(fileStream))) {
+
+        String line;
+        while ((line = br.readLine()) != null) {
+          expectedResponse.append(line.trim());
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    return expectedResponse.toString();
   }
 
   public List<PreAdjFissClaim> fissTestData() {
