@@ -57,13 +57,14 @@ public class FissClaimStreamCallerIT {
     final Server server =
         RdaServer.startInProcess(
             "test",
-            () ->
+            sequenceNumber ->
                 WrappedClaimSource.wrapFissClaims(
                     new JsonMessageSource<>(
                         CLAIM_1 + System.lineSeparator() + CLAIM_2,
                         JsonMessageSource::parseFissClaim),
-                    clock),
-            EmptyMessageSource::new);
+                    clock,
+                    sequenceNumber),
+            EmptyMessageSource.factory());
     try {
       final ManagedChannel channel = InProcessChannelBuilder.forName("test").build();
       try {

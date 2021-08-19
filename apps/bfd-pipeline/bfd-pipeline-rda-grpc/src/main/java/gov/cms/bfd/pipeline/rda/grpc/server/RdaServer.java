@@ -8,7 +8,6 @@ import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 public class RdaServer {
   /**
@@ -18,8 +17,8 @@ public class RdaServer {
    * @return a running RDA API Server object
    */
   public static Server startLocal(
-      Supplier<MessageSource<FissClaimChange>> fissSourceFactory,
-      Supplier<MessageSource<McsClaimChange>> mcsSourceFactory)
+      MessageSource.Factory<FissClaimChange> fissSourceFactory,
+      MessageSource.Factory<McsClaimChange> mcsSourceFactory)
       throws IOException {
     return startLocal(0, fissSourceFactory, mcsSourceFactory);
   }
@@ -32,8 +31,8 @@ public class RdaServer {
    */
   public static Server startLocal(
       int port,
-      Supplier<MessageSource<FissClaimChange>> fissSourceFactory,
-      Supplier<MessageSource<McsClaimChange>> mcsSourceFactory)
+      MessageSource.Factory<FissClaimChange> fissSourceFactory,
+      MessageSource.Factory<McsClaimChange> mcsSourceFactory)
       throws IOException {
     return ServerBuilder.forPort(port)
         .addService(new RdaService(fissSourceFactory, mcsSourceFactory))
@@ -50,8 +49,8 @@ public class RdaServer {
    */
   public static Server startInProcess(
       String name,
-      Supplier<MessageSource<FissClaimChange>> fissSourceFactory,
-      Supplier<MessageSource<McsClaimChange>> mcsSourceFactory)
+      MessageSource.Factory<FissClaimChange> fissSourceFactory,
+      MessageSource.Factory<McsClaimChange> mcsSourceFactory)
       throws IOException {
     return InProcessServerBuilder.forName(name)
         .addService(new RdaService(fissSourceFactory, mcsSourceFactory))
@@ -69,8 +68,8 @@ public class RdaServer {
    * @throws Exception any exception is passed through to the caller
    */
   public static void runWithLocalServer(
-      Supplier<MessageSource<FissClaimChange>> fissClaims,
-      Supplier<MessageSource<McsClaimChange>> mcsClaims,
+      MessageSource.Factory<FissClaimChange> fissClaims,
+      MessageSource.Factory<McsClaimChange> mcsClaims,
       ThrowableConsumer<Integer> test)
       throws Exception {
     final Server server = startLocal(fissClaims, mcsClaims);

@@ -103,11 +103,12 @@ public class GrpcRdaSourceIT {
       final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
       server =
           RdaServer.startLocal(
-              () ->
+              sequenceNumber ->
                   WrappedClaimSource.wrapFissClaims(
                       new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim),
-                      clock),
-              EmptyMessageSource::new);
+                      clock,
+                      sequenceNumber),
+              EmptyMessageSource.factory());
       final ManagedChannel channel =
           ManagedChannelBuilder.forAddress("localhost", server.getPort())
               .usePlaintext()

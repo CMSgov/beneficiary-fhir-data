@@ -37,7 +37,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import org.junit.After;
@@ -95,7 +94,7 @@ public class RdaLoadJobIT {
     assertTablesAreEmpty();
     runWithLocalServer(
         fissJsonSource(fissClaimJson),
-        EmptyMessageSource::new,
+        EmptyMessageSource.factory(),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
           final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
@@ -136,7 +135,7 @@ public class RdaLoadJobIT {
             .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
     runWithLocalServer(
         fissJsonSource(badFissClaimJson),
-        EmptyMessageSource::new,
+        EmptyMessageSource.factory(),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
           final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState);
@@ -159,7 +158,7 @@ public class RdaLoadJobIT {
   public void mcsClaimsTest() throws Exception {
     assertTablesAreEmpty();
     runWithLocalServer(
-        EmptyMessageSource::new,
+        EmptyMessageSource.factory(),
         mcsJsonSource(mcsClaimJson),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
@@ -195,8 +194,8 @@ public class RdaLoadJobIT {
     final int fullBatchSize = claimsToSendBeforeThrowing - claimsToSendBeforeThrowing % BATCH_SIZE;
     assertEquals(true, fullBatchSize > 0);
     runWithLocalServer(
-        EmptyMessageSource::new,
-        () ->
+        EmptyMessageSource.factory(),
+        ignored ->
             new ExceptionMessageSource<>(
                 new JsonMessageSource<>(mcsClaimJson, JsonMessageSource::parseMcsClaimChange),
                 claimsToSendBeforeThrowing,
@@ -266,12 +265,16 @@ public class RdaLoadJobIT {
         new IdHasher.Config(100, "thisisjustatest"));
   }
 
-  private Supplier<MessageSource<FissClaimChange>> fissJsonSource(List<String> claimJson) {
-    return () -> new JsonMessageSource<>(claimJson, JsonMessageSource::parseFissClaimChange);
+  private MessageSource.Factory<FissClaimChange> fissJsonSource(List<String> claimJson) {
+    return sequenceNumber ->
+        new JsonMessageSource<>(claimJson, JsonMessageSource::parseFissClaimChange)
+            .skip(sequenceNumber);
   }
 
-  private Supplier<MessageSource<McsClaimChange>> mcsJsonSource(List<String> claimJson) {
-    return () -> new JsonMessageSource<>(claimJson, JsonMessageSource::parseMcsClaimChange);
+  private MessageSource.Factory<McsClaimChange> mcsJsonSource(List<String> claimJson) {
+    return sequenceNumber ->
+        new JsonMessageSource<>(claimJson, JsonMessageSource::parseMcsClaimChange)
+            .skip(sequenceNumber);
   }
 
   /**
