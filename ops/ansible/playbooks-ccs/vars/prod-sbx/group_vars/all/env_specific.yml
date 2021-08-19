@@ -77,4 +77,5 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_sbx_certificate.pem') }}"
   - alias: client_ab2d_imp
     certificate: "{{ lookup('file', 'files/client_data_server_ab2d_imp_certificate.pem') }}"
-
+  - alias: client_data_server_ispss_pentest
+    certificate: "{{ lookup('file', 'files/client_data_server_ispss_pentest_certificate.pem') }}"
