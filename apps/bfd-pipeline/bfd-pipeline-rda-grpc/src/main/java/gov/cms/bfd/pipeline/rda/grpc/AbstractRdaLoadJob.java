@@ -4,6 +4,7 @@ import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -32,19 +33,11 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractRdaLoadJob<TResponse>
     implements PipelineJob<NullPipelineJobArguments> {
-  public static final String CALLS_METER_NAME = "calls";
-  public static final String FAILURES_METER_NAME = "failures";
-  public static final String SUCCESSES_METER_NAME = "successes";
-  public static final String PROCESSED_METER_NAME = "processed";
-
   private final Config config;
   private final Callable<RdaSource<TResponse>> sourceFactory;
   private final Callable<RdaSink<TResponse>> sinkFactory;
   private final Logger logger; // each subclass provides its own logger
-  private final Meter callsMeter;
-  private final Meter failuresMeter;
-  private final Meter successesMeter;
-  private final Meter processedMeter;
+  private final Metrics metrics;
   // This is used to enforce that this job can only be executed by a single thread at any given
   // time. If multiple threads call the job at the same time only the first will do any work.
   private final Semaphore runningSemaphore;
@@ -59,13 +52,16 @@ public abstract class AbstractRdaLoadJob<TResponse>
     this.sourceFactory = Preconditions.checkNotNull(sourceFactory);
     this.sinkFactory = Preconditions.checkNotNull(sinkFactory);
     this.logger = logger;
-    callsMeter = appMetrics.meter(metricName(CALLS_METER_NAME));
-    failuresMeter = appMetrics.meter(metricName(FAILURES_METER_NAME));
-    successesMeter = appMetrics.meter(metricName(SUCCESSES_METER_NAME));
-    processedMeter = appMetrics.meter(metricName(PROCESSED_METER_NAME));
+    metrics = new Metrics(appMetrics, getClass());
     runningSemaphore = new Semaphore(1);
   }
 
+  /**
+   * Invokes the RDA API to download data and store it in the database. Since errors during the call
+   * are not exceptional (RDA API downtime for upgrade, network hiccups, etc) we catch any
+   * exceptions and return normally. If we let the exception pass through the scheduler will no
+   * re-schedule us.
+   */
   @Override
   public PipelineJobOutcome call() throws Exception {
     // We only allow one outstanding call at a time.  If this job is already running any other
@@ -75,35 +71,53 @@ public abstract class AbstractRdaLoadJob<TResponse>
       return NOTHING_TO_DO;
     }
     try {
-      logger.info("processing begins");
-      final long startMillis = System.currentTimeMillis();
-      int processedCount = 0;
-      Exception error = null;
+      int processedCount;
       try {
-        callsMeter.mark();
-        try (RdaSource<TResponse> source = sourceFactory.call();
-            RdaSink<TResponse> sink = sinkFactory.call()) {
-          processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
-        }
+        processedCount = callRdaServiceAndStoreRecords();
       } catch (ProcessingException ex) {
-        processedCount += ex.getProcessedCount();
-        error = ex;
-      } catch (Exception ex) {
-        error = ex;
+        processedCount = ex.getProcessedCount();
       }
-      processedMeter.mark(processedCount);
-      final long stopMillis = System.currentTimeMillis();
-      logger.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
-      if (error != null) {
-        failuresMeter.mark();
-        logger.error("processing aborted by an exception: message={}", error.getMessage(), error);
-        throw new ProcessingException(error, processedCount);
-      }
-      successesMeter.mark();
       return processedCount == 0 ? NOTHING_TO_DO : PipelineJobOutcome.WORK_DONE;
     } finally {
       runningSemaphore.release();
     }
+  }
+
+  /**
+   * Invokes the RdaSource and RdaSink objects to download data from the RDA API and store it into
+   * the database.
+   *
+   * @return the number of objects written to the sink
+   * @throws ProcessingException any error that terminated processing
+   */
+  @VisibleForTesting
+  int callRdaServiceAndStoreRecords() throws ProcessingException {
+    logger.info("processing begins");
+    final long startMillis = System.currentTimeMillis();
+    int processedCount = 0;
+    Exception error = null;
+    try {
+      metrics.calls.mark();
+      try (RdaSource<TResponse> source = sourceFactory.call();
+          RdaSink<TResponse> sink = sinkFactory.call()) {
+        processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
+      }
+    } catch (ProcessingException ex) {
+      processedCount += ex.getProcessedCount();
+      error = ex;
+    } catch (Exception ex) {
+      error = ex;
+    }
+    metrics.processed.mark(processedCount);
+    final long stopMillis = System.currentTimeMillis();
+    logger.info("processed {} objects in {} ms", processedCount, stopMillis - startMillis);
+    if (error != null) {
+      metrics.failures.mark();
+      logger.error("processing aborted by an exception: message={}", error.getMessage(), error);
+      throw new ProcessingException(error, processedCount);
+    }
+    metrics.successes.mark();
+    return processedCount;
   }
 
   /**
@@ -124,8 +138,9 @@ public abstract class AbstractRdaLoadJob<TResponse>
     return true;
   }
 
-  protected String metricName(String detail) {
-    return MetricRegistry.name(getClass().getSimpleName(), detail);
+  @VisibleForTesting
+  Metrics getMetrics() {
+    return metrics;
   }
 
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
@@ -152,6 +167,32 @@ public abstract class AbstractRdaLoadJob<TResponse>
       this.batchSize = batchSize;
       Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s");
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
+    }
+  }
+
+  /**
+   * Metrics are tested in unit tests so they need to be easily accessible from tests. Also this
+   * class is used to write both MCS and FISS claims so the metric names need to include a claim
+   * type to distinguish them.
+   */
+  @Getter
+  @VisibleForTesting
+  static class Metrics {
+    /** Number of times the job has been called. */
+    private final Meter calls;
+    /** Number of calls that completed successfully. */
+    private final Meter successes;
+    /** Number of calls that ended in some sort of failure. */
+    private final Meter failures;
+    /** Number of objects that have been successfully processed. */
+    private final Meter processed;
+
+    private Metrics(MetricRegistry appMetrics, Class<?> jobClass) {
+      final String base = jobClass.getSimpleName();
+      calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
+      successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
+      failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
+      processed = appMetrics.meter(MetricRegistry.name(base, "processed"));
     }
   }
 }

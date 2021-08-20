@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.NoSuchElementException;
 import org.junit.Test;
 
-public class JsonClaimSourceTest {
+public class JsonMessageSourceTest {
   private static final String CLAIM_1 =
       "{"
           + "  \"dcn\": \"63843470\","
@@ -77,8 +77,8 @@ public class JsonClaimSourceTest {
 
   @Test
   public void singleClaimString() throws Exception {
-    JsonClaimSource<FissClaim> source =
-        new JsonClaimSource<>(CLAIM_1, JsonClaimSource::parseFissClaim);
+    JsonMessageSource<FissClaim> source =
+        new JsonMessageSource<>(CLAIM_1, JsonMessageSource::parseFissClaim);
     assertEquals(true, source.hasNext());
     FissClaim claim = source.next();
     assertEquals("63843470", claim.getDcn());
@@ -89,9 +89,9 @@ public class JsonClaimSourceTest {
 
   @Test
   public void twoClaimsString() throws Exception {
-    JsonClaimSource<FissClaim> source =
-        new JsonClaimSource<>(
-            CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonClaimSource::parseFissClaim);
+    JsonMessageSource<FissClaim> source =
+        new JsonMessageSource<>(
+            CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource::parseFissClaim);
     assertEquals(true, source.hasNext());
     FissClaim claim = source.next();
     assertEquals("63843470", claim.getDcn());
@@ -105,8 +105,9 @@ public class JsonClaimSourceTest {
 
   @Test
   public void claimsList() throws Exception {
-    JsonClaimSource<FissClaim> source =
-        new JsonClaimSource<>(ImmutableList.of(CLAIM_1, CLAIM_2), JsonClaimSource::parseFissClaim);
+    JsonMessageSource<FissClaim> source =
+        new JsonMessageSource<>(
+            ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource::parseFissClaim);
     assertEquals(true, source.hasNext());
     FissClaim claim = source.next();
     assertEquals("63843470", claim.getDcn());
@@ -127,8 +128,8 @@ public class JsonClaimSourceTest {
         writer.write(System.lineSeparator());
         writer.write(CLAIM_2);
       }
-      try (JsonClaimSource<FissClaim> source =
-          new JsonClaimSource<>(jsonFile, JsonClaimSource::parseFissClaim)) {
+      try (JsonMessageSource<FissClaim> source =
+          new JsonMessageSource<>(jsonFile, JsonMessageSource::parseFissClaim)) {
         assertEquals(true, source.hasNext());
         FissClaim claim = source.next();
         assertEquals("63843470", claim.getDcn());
@@ -144,7 +145,8 @@ public class JsonClaimSourceTest {
     }
   }
 
-  private void assertNextPastEndOfDataThrowsException(JsonClaimSource<?> source) throws Exception {
+  private void assertNextPastEndOfDataThrowsException(JsonMessageSource<?> source)
+      throws Exception {
     try {
       source.next();
       fail("expected exception");
@@ -156,7 +158,7 @@ public class JsonClaimSourceTest {
     assertEquals(false, source.hasNext());
   }
 
-  private void assertMultipleCallsToCloseOk(JsonClaimSource<?> source) throws Exception {
+  private void assertMultipleCallsToCloseOk(JsonMessageSource<?> source) throws Exception {
     source.close();
     source.close();
   }

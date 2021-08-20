@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.sharedutils;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.zaxxer.hikari.HikariDataSource;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
@@ -22,6 +23,7 @@ public final class PipelineApplicationState implements AutoCloseable {
   private final MetricRegistry metrics;
   private final HikariDataSource pooledDataSource;
   private final EntityManagerFactory entityManagerFactory;
+  private final Clock clock;
 
   /**
    * Constructs a new {@link PipelineApplicationState} instance using a pre-existing pooled data
@@ -32,11 +34,15 @@ public final class PipelineApplicationState implements AutoCloseable {
    * @param entityManagerFactory the value to use for {@link #getEntityManagerFactory()}
    */
   public PipelineApplicationState(
-      MetricRegistry metrics, HikariDataSource pooledDataSource, String persistenceUnitName) {
+      MetricRegistry metrics,
+      HikariDataSource pooledDataSource,
+      String persistenceUnitName,
+      Clock clock) {
     this(
         metrics,
         pooledDataSource,
-        createEntityManagerFactory(pooledDataSource, persistenceUnitName));
+        createEntityManagerFactory(pooledDataSource, persistenceUnitName),
+        clock);
   }
 
   /**
@@ -51,8 +57,16 @@ public final class PipelineApplicationState implements AutoCloseable {
    */
   @VisibleForTesting
   public PipelineApplicationState(
-      MetricRegistry metrics, DataSource dataSource, int maxPoolSize, String persistenceUnitName) {
-    this(metrics, createPooledDataSource(dataSource, maxPoolSize, metrics), persistenceUnitName);
+      MetricRegistry metrics,
+      DataSource dataSource,
+      int maxPoolSize,
+      String persistenceUnitName,
+      Clock clock) {
+    this(
+        metrics,
+        createPooledDataSource(dataSource, maxPoolSize, metrics),
+        persistenceUnitName,
+        clock);
   }
 
   /**
@@ -68,10 +82,12 @@ public final class PipelineApplicationState implements AutoCloseable {
   public PipelineApplicationState(
       MetricRegistry metrics,
       HikariDataSource pooledDataSource,
-      EntityManagerFactory entityManagerFactory) {
+      EntityManagerFactory entityManagerFactory,
+      Clock clock) {
     this.metrics = metrics;
     this.pooledDataSource = pooledDataSource;
     this.entityManagerFactory = entityManagerFactory;
+    this.clock = clock;
   }
 
   /**
@@ -151,6 +167,11 @@ public final class PipelineApplicationState implements AutoCloseable {
   /** @return the {@link EntityManagerFactory} for the application */
   public EntityManagerFactory getEntityManagerFactory() {
     return entityManagerFactory;
+  }
+
+  /** @return the Clock to use within the application */
+  public Clock getClock() {
+    return clock;
   }
 
   /** @see java.lang.AutoCloseable#close() */
