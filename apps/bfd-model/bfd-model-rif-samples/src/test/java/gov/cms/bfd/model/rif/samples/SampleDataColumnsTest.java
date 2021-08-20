@@ -60,6 +60,18 @@ public final class SampleDataColumnsTest {
   }
 
   /**
+   * Checks our code's columns against the {@link
+   * gov.cms.bfd.model.rif.samples.StaticRifResourceGroup#SAMPLE_MCT} data file headers.
+   */
+  @Test
+  public void verifySampleMCTColumns() {
+    verifyColumns(StaticRifResourceGroup.SAMPLE_MCT);
+    verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_1);
+    verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_2);
+    verifyColumns(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3);
+  }
+
+  /**
    * Verifies that our code's column {@link Enum}s match the headers in the specified sample files.
    *
    * @param sampleGroup the sample data files to check the headers of
