@@ -1,10 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.ChangeType;
 
 public class RdaApiUtils {
-  public static RdaChange.Type mapApiChangeType(ClaimChange.ChangeType apiType) {
+  public static RdaChange.Type mapApiChangeType(ChangeType apiType) {
     switch (apiType) {
       case CHANGE_TYPE_INSERT:
         return RdaChange.Type.INSERT;

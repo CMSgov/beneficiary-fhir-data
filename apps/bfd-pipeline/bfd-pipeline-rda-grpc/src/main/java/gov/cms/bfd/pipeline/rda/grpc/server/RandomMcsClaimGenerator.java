@@ -12,17 +12,20 @@ import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
   private static final int MAX_DETAILS = 4;
   private static final int MAX_DIAG_CODES = 7;
   private static final List<McsClaimType> CLAIM_TYPES = enumValues(McsClaimType.values());
   private static final List<McsBeneficiarySex> BENE_SEXES = enumValues(McsBeneficiarySex.values());
-  private static final List<McsStatusCode> STATUS_CODES = enumValues(McsStatusCode.values());
+  private static final List<McsStatusCode> STATUS_CODES;
   private static final List<McsBillingProviderIndicator> PROV_INDICATORS =
       enumValues(McsBillingProviderIndicator.values());
   private static final List<McsBillingProviderStatusCode> PROV_STATUS_CODES =
@@ -30,6 +33,15 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
   private static final List<McsDiagnosisIcdType> DIAG_ICD_TYPES =
       enumValues(McsDiagnosisIcdType.values());
   private static final List<McsDetailStatus> DETAIL_STATUSES = enumValues(McsDetailStatus.values());
+
+  static {
+    // MCS status codes are special since the STATUS_CODE_NOT_USED is considered invalid by the
+    // transformer. This block preserves the natural ordering of the enum values while removing the
+    // bad value.
+    Set<McsStatusCode> statusCodes = new LinkedHashSet<>(Arrays.asList(McsStatusCode.values()));
+    statusCodes.remove(McsStatusCode.STATUS_CODE_NOT_USED);
+    STATUS_CODES = enumValues(new ArrayList<>(statusCodes).toArray(new McsStatusCode[0]));
+  }
 
   /**
    * Creates an instance with the specified seed.
@@ -66,26 +78,24 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     claim.setIdrClmHdIcn(idrClmHdIcn);
     claim.setIdrContrId(randomDigit(1, 5));
     optional(() -> claim.setIdrHic(randomDigit(1, 12)));
-    either(
+    oneOf(
         () -> claim.setIdrClaimTypeEnum(randomEnum(CLAIM_TYPES)),
         () -> claim.setIdrClaimTypeUnrecognized(randomLetter(1, 1)));
     claim.setIdrDtlCnt(detailCount);
     optional(() -> claim.setIdrBeneLast16(randomLetter(1, 6)));
     optional(() -> claim.setIdrBeneFirstInit(randomLetter(1, 1)));
     optional(() -> claim.setIdrBeneMidInit(randomLetter(1, 1)));
-    either(
+    oneOf(
         () -> claim.setIdrBeneSexEnum(randomEnum(BENE_SEXES)),
         () -> claim.setIdrBeneSexUnrecognized(randomLetter(1, 1)));
-    either(
-        () -> claim.setIdrStatusCodeEnum(randomEnum(STATUS_CODES)),
-        () -> claim.setIdrStatusCodeUnrecognized(randomLetter(1, 1)));
+    claim.setIdrStatusCodeEnum(randomEnum(STATUS_CODES));
     optional(() -> claim.setIdrStatusDate(randomDate()));
     optional(() -> claim.setIdrBillProvNpi(randomAlphaNumeric(1, 10)));
     optional(() -> claim.setIdrBillProvNum(randomDigit(1, 10)));
     optional(() -> claim.setIdrBillProvEin(randomAlphaNumeric(1, 10)));
     optional(() -> claim.setIdrBillProvType(randomLetter(1, 2)));
     optional(() -> claim.setIdrBillProvSpec(randomAlphaNumeric(1, 2)));
-    either(
+    oneOf(
         () -> claim.setIdrBillProvGroupIndEnum(randomEnum(PROV_INDICATORS)),
         () -> claim.setIdrBillProvGroupIndUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setIdrBillProvPriceSpec(randomAlphaNumeric(1, 2)));
@@ -94,7 +104,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setIdrTotAllowed(randomAmount()));
     optional(() -> claim.setIdrCoinsurance(randomAmount()));
     optional(() -> claim.setIdrDeductible(randomAmount()));
-    either(
+    oneOf(
         () -> claim.setIdrBillProvStatusCdEnum(randomEnum(PROV_STATUS_CODES)),
         () -> claim.setIdrBillProvStatusCdUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setIdrTotBilledAmt(randomAmount()));
@@ -109,7 +119,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
     for (int i = 1; i <= count; ++i) {
       final McsDiagnosisCode.Builder code = McsDiagnosisCode.newBuilder();
       code.setIdrClmHdIcn(idrClmHdIcn);
-      either(
+      oneOf(
           () -> code.setIdrDiagIcdTypeEnum(randomEnum(DIAG_ICD_TYPES)),
           () -> code.setIdrDiagIcdTypeEnumUnrecognized(randomLetter(1, 1)));
       optional(() -> code.setIdrDiagCode(randomAlphaNumeric(1, 7)));
@@ -120,7 +130,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
   private void addDetails(McsClaim.Builder claim, int detailCount) {
     for (int i = 1; i <= detailCount; ++i) {
       final McsDetail.Builder detail = McsDetail.newBuilder();
-      either(
+      oneOf(
           () -> detail.setIdrDtlStatusEnum(randomEnum(DETAIL_STATUSES)),
           () -> detail.setIdrDtlStatusUnrecognized(randomLetter(1, 1)));
       optional(
@@ -135,7 +145,7 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
       optional(() -> detail.setIdrModTwo(randomAlphaNumeric(1, 2)));
       optional(() -> detail.setIdrModThree(randomAlphaNumeric(1, 2)));
       optional(() -> detail.setIdrModFour(randomAlphaNumeric(1, 2)));
-      either(
+      oneOf(
           () -> detail.setIdrDtlDiagIcdTypeEnum(randomEnum(DIAG_ICD_TYPES)),
           () -> detail.setIdrDtlDiagIcdTypeUnrecognized(randomLetter(1, 1)));
       optional(() -> detail.setIdrDtlPrimaryDiagCode(randomAlphaNumeric(1, 7)));
