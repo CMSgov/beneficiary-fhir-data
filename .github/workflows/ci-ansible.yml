@@ -22,13 +22,53 @@ jobs:
         with:
           java-version: 1.8.0.292
 
+      # GH Registry doesn't allow unauthenticated read access to packages, as of 2021-08-20.
+      - name: 'Generate Maven Config'
+        run: |
+          cat << EOF > ~/.m2/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                http://maven.apache.org/xsd/settings-1.0.0.xsd">
+          
+            <activeProfiles>
+              <activeProfile>github</activeProfile>
+            </activeProfiles>
+          
+            <profiles>
+              <profile>
+                <id>github</id>
+                <repositories>
+                  <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2</url>
+                  </repository>
+                  <repository>
+                    <id>github</id>
+                    <url>https://maven.pkg.github.com/CMSgov/*</url>
+                    <snapshots>
+                      <enabled>true</enabled>
+                    </snapshots>
+                  </repository>
+                </repositories>
+              </profile>
+            </profiles>
+          
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${{ secrets.GH_REGISTRY_USER }}</username>
+                <password>${{ secrets.GH_REGISTRY_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
       # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
       # images that we're building and using for the tests. See here for a project to copy from:
       # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
       - name: 'Run Tests for bfd-pipeline Role'
         run: ops/ansible/roles/bfd-pipeline/test/run-tests.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   ansible-role-bfd-server:
     runs-on: ubuntu-latest
@@ -51,10 +91,50 @@ jobs:
         with:
           java-version: 1.8.0.292
 
+      # GH Registry doesn't allow unauthenticated read access to packages, as of 2021-08-20.
+      - name: 'Generate Maven Config'
+        run: |
+          cat << EOF > ~/.m2/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                http://maven.apache.org/xsd/settings-1.0.0.xsd">
+          
+            <activeProfiles>
+              <activeProfile>github</activeProfile>
+            </activeProfiles>
+          
+            <profiles>
+              <profile>
+                <id>github</id>
+                <repositories>
+                  <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2</url>
+                  </repository>
+                  <repository>
+                    <id>github</id>
+                    <url>https://maven.pkg.github.com/CMSgov/*</url>
+                    <snapshots>
+                      <enabled>true</enabled>
+                    </snapshots>
+                  </repository>
+                </repositories>
+              </profile>
+            </profiles>
+          
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${{ secrets.GH_REGISTRY_USER }}</username>
+                <password>${{ secrets.GH_REGISTRY_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
       # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
       # images that we're building and using for the tests. See here for a project to copy from:
       # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
       - name: 'Run Tests for bfd-server Role'
         run: ops/ansible/roles/bfd-server/test/run-tests.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
