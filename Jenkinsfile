@@ -228,16 +228,16 @@ try {
 				}
 			}
 
-			// stage('Deploy to TEST') {
-			// 	currentStage = "${env.STAGE_NAME}"
-			// 	lock(resource: 'env_test', inversePrecendence: true) {
-			// 		milestone(label: 'stage_deploy_test_start')
+			stage('Deploy to TEST') {
+				currentStage = "${env.STAGE_NAME}"
+				lock(resource: 'env_test', inversePrecendence: true) {
+					milestone(label: 'stage_deploy_test_start')
 
-			// 		container('bfd-cbc-build') {
-			// 			scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
-			// 		}
-			// 	}
-			// }
+					container('bfd-cbc-build') {
+						scriptForDeploys.deploy('test', gitBranchName, gitCommitId, amiIds, appBuildResults)
+					}
+				}
+			}
 
 			// stage('Manual Approval') {
 			// 	currentStage = "${env.STAGE_NAME}"
