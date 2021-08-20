@@ -5,16 +5,13 @@
 
 - hosts: localhost
   tasks:
-    - name: Download BFD Pipeline JAR
-      # FIXME: Not actually available in Maven Central right now.
-      #maven_artifact:
-      #  group_id: 'gov.cms.bfd'
-      #  artifact_id: 'bfd-pipeline-app'
-      #  version: '1.0.0-SNAPSHOT'
-      #  extension: 'zip'
-      #  dest: /tmp/bfd-pipeline-app.zip
-      copy:
-        src: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-pipeline-app/1.0.0-SNAPSHOT/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
+    - name: Download BFD Pipeline ZIP
+      maven_artifact:
+        repository_url: 'https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data'
+        group_id: 'gov.cms.bfd'
+        artifact_id: 'bfd-pipeline-app'
+        version: '1.0.0-SNAPSHOT'
+        extension: 'zip'
         dest: /tmp/bfd-pipeline-app.zip
 
 # Apply the role.

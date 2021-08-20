@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8.0.292
-      - name: 'Generate maven toolchain config'
+      - name: 'Generate Maven Config'
         run: |
           cat << EOF > ~/.m2/toolchains.xml
           <toolchains>
@@ -62,9 +62,16 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
-      - name: 'Run maven ${{ matrix.mvn_commmand }}'
-        run: mvn verify
+      - name: 'Run Maven Build'
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            mvn --batch-mode verify
+          else
+            mvn --batch-mode deploy
+          fi
         working-directory: ./apps
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 'Upload test artifacts'
         uses: actions/upload-artifact@v2
         if: always()

@@ -6,12 +6,20 @@
 - hosts: localhost
   tasks:
     - name: Download BFD Server Launcher
-      copy:
-        src: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
+      maven_artifact:
+        repository_url: 'https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data'
+        group_id: 'gov.cms.bfd'
+        artifact_id: 'bfd-server-launcher'
+        version: '1.0.0-SNAPSHOT'
+        extension: 'zip'
         dest: /tmp/bfd-server-launcher.zip
     - name: Download BFD Server WAR
-      copy:
-        src: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
+      maven_artifact:
+        repository_url: 'https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data'
+        group_id: 'gov.cms.bfd'
+        artifact_id: 'bfd-server-was'
+        version: '1.0.0-SNAPSHOT'
+        extension: 'war'
         dest: /tmp/bfd-server-war.war
 
 # Apply the role.
