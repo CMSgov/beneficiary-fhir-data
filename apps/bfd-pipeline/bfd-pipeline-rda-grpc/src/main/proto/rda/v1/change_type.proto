@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+enum ChangeType {
+  CHANGE_TYPE_INSERT = 0 [(string_value) = "INSERT"];
+  CHANGE_TYPE_UPDATE = 1 [(string_value) = "UPDATE"];
+  CHANGE_TYPE_DELETE = 2 [(string_value) = "DELETE"];
+}
