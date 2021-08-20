@@ -6,16 +6,13 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import io.grpc.ManagedChannel;
-import io.grpc.Server;
-import io.grpc.inprocess.InProcessChannelBuilder;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 public class FissClaimStreamCallerIT {
@@ -50,46 +47,57 @@ public class FissClaimStreamCallerIT {
           + "  \"fissProcCodes\": []"
           + "}";
 
+  // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
+  private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+  private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
+  private final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
+
   @Test
-  public void test() throws Exception {
-    // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
-    final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-    final Server server =
-        RdaServer.startInProcess(
-            "test",
-            sequenceNumber ->
-                WrappedClaimSource.wrapFissClaims(
-                    new JsonMessageSource<>(
-                        CLAIM_1 + System.lineSeparator() + CLAIM_2,
-                        JsonMessageSource::parseFissClaim),
-                    clock,
-                    sequenceNumber),
-            EmptyMessageSource.factory());
-    try {
-      final ManagedChannel channel = InProcessChannelBuilder.forName("test").build();
-      try {
-        final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-        final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
-        final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
-        final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results = caller.callService(channel);
-        assertEquals(true, results.hasNext());
+  public void basicCall() throws Exception {
+    RdaServer.runWithInProcessServer(
+        getClass().getSimpleName(),
+        sequenceNumber ->
+            WrappedClaimSource.wrapFissClaims(
+                new JsonMessageSource<>(
+                    CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource::parseFissClaim),
+                clock,
+                sequenceNumber),
+        EmptyMessageSource.factory(),
+        channel -> {
+          final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
+          final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
+              caller.callService(channel, 0L);
+          assertEquals(true, results.hasNext());
 
-        PreAdjFissClaim claim = results.next().getClaim();
-        assertEquals("63843470", claim.getDcn());
-        assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-        assertEquals(true, results.hasNext());
+          PreAdjFissClaim claim = results.next().getClaim();
+          assertEquals("63843470", claim.getDcn());
+          assertEquals(Long.valueOf(0), claim.getSequenceNumber());
+          assertEquals(true, results.hasNext());
 
-        claim = results.next().getClaim();
-        assertEquals("2643602", claim.getDcn());
-        assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-        assertEquals(false, results.hasNext());
-      } finally {
-        channel.shutdown();
-        channel.awaitTermination(5, TimeUnit.SECONDS);
-      }
-    } finally {
-      server.shutdown();
-      server.awaitTermination(5, TimeUnit.SECONDS);
-    }
+          claim = results.next().getClaim();
+          assertEquals("2643602", claim.getDcn());
+          assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+          assertEquals(false, results.hasNext());
+        });
+  }
+
+  @Test
+  public void sequenceNumbers() throws Exception {
+    RdaServer.runWithInProcessServer(
+        getClass().getSimpleName(),
+        sequenceNumber ->
+            new RandomFissClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber),
+        EmptyMessageSource.factory(),
+        channel -> {
+          final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
+          final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
+              caller.callService(channel, 10L);
+          assertEquals(10L, results.next().getSequenceNumber());
+          assertEquals(11L, results.next().getSequenceNumber());
+          assertEquals(12L, results.next().getSequenceNumber());
+          assertEquals(13L, results.next().getSequenceNumber());
+          assertEquals(14L, results.next().getSequenceNumber());
+          assertEquals(false, results.hasNext());
+        });
   }
 }

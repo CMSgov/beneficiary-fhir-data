@@ -68,7 +68,9 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
-    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3)).when(caller).callService(channel);
+    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3))
+        .when(caller)
+        .callService(same(channel), anyLong());
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
 
@@ -85,6 +87,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 0L);
   }
 
   @Test
@@ -92,7 +95,7 @@ public class GrpcRdaSourceTest {
     final Exception error = new IOException("oops");
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
-        .callService(channel);
+        .callService(same(channel), anyLong());
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     doThrow(new ProcessingException(error, 1))
@@ -118,6 +121,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 0L);
   }
 
   @Test
@@ -127,7 +131,7 @@ public class GrpcRdaSourceTest {
         spy(
             new GrpcRdaSource<>(
                 channel,
-                c -> {
+                (channel, sequenceNumber) -> {
                   throw error;
                 },
                 appMetrics,
@@ -155,7 +159,7 @@ public class GrpcRdaSourceTest {
   public void testHandlesRuntimeExceptionFromSink() throws Exception {
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
-        .callService(channel);
+        .callService(same(channel), anyLong());
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     final Exception error = new RuntimeException("oops");
@@ -179,6 +183,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 0L);
   }
 
   @Test
@@ -190,7 +195,7 @@ public class GrpcRdaSourceTest {
         .thenReturn(true)
         .thenReturn(true)
         .thenThrow(new StreamInterruptedException(new StatusRuntimeException(Status.INTERNAL)));
-    doReturn(response).when(caller).callService(channel);
+    doReturn(response).when(caller).callService(same(channel), anyLong());
 
     // we expect to write a single batch with the first two records
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
@@ -209,6 +214,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(2)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 0L);
   }
 
   @Test

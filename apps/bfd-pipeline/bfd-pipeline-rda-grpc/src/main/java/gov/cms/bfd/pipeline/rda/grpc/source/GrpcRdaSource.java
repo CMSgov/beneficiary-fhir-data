@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.ProcessingException.isInterrupted;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
@@ -96,7 +97,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     int processed = 0;
     try {
       setUptimeToRunning();
-      final GrpcResponseStream<TResponse> responseStream = caller.callService(channel);
+      final GrpcResponseStream<TResponse> responseStream =
+          caller.callService(channel, MIN_SEQUENCE_NUM);
       final List<TResponse> batch = new ArrayList<>();
       try {
         while (responseStream.hasNext()) {
