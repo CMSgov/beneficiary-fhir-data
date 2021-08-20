@@ -150,10 +150,10 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 
 			return new AmiIds(
 				platinumAmiId: amiIds.platinumAmiId,
-				bfdPipelineAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
-				bfdServerAmiId: extractAmiIdFromPackerManifest(new File(
-					"${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
+				bfdPipelineAmiId: extractAmiIdFromPackerManifest(readFile(
+					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-pipeline.json")),
+				bfdServerAmiId: extractAmiIdFromPackerManifest(readFile(
+					file: "${workspace}/ops/ansible/playbooks-ccs/manifest_data-server.json")),
 			)
 		}
 	}
@@ -196,9 +196,9 @@ def deploy(String environmentId, String gitBranchName, String gitCommitId, AmiId
 	}
 }
 
-def extractAmiIdFromPackerManifest(File manifest) {
+def extractAmiIdFromPackerManifest(String manifest) {
 	dir('ops/ansible/playbooks-ccs'){
-		def manifestJson = new JsonSlurper().parseText(manifest.text)
+		def manifestJson = new JsonSlurper().parseText(manifest)
 
 		// artifactId will be of the form $region:$amiId
 		return manifestJson.builds[manifestJson.builds.size() - 1].artifact_id.split(":")[1]
