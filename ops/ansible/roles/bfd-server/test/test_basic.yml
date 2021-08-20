@@ -8,17 +8,17 @@
     - name: Download BFD Server Launcher
       command: >
         mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
-        -DrepoUrl=https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
-        -Dartifact=gov.cms.bfd:bfd-server-launcher:1.0.0-SNAPSHOT:zip
-        -Dtransitive=false
+          -DremoteRepositories=central::default::https://repo.maven.apache.org/maven2,bfd::default::https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
+          -Dartifact=gov.cms.bfd:bfd-server-launcher:1.0.0-SNAPSHOT:zip
+          -Dtransitive=false
       args:
         creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
     - name: Download BFD Server WAR
       command: >
         mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
-        -DrepoUrl=https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
-        -Dartifact=gov.cms.bfd:bfd-server-war:1.0.0-SNAPSHOT:war
-        -Dtransitive=false
+          -DremoteRepositories=central::default::https://repo.maven.apache.org/maven2,bfd::default::https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
+          -Dartifact=gov.cms.bfd:bfd-server-war:1.0.0-SNAPSHOT:war
+          -Dtransitive=false
       args:
         creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
 
