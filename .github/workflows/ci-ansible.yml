@@ -16,6 +16,10 @@ jobs:
           export SSH_AUTH_SOCK
           export SSH_AGENT_PID
 
+      # Make sure Maven is installed, as the tests use it to download stuff.
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v1
+
       # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
       # images that we're building and using for the tests. See here for a project to copy from:
       # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
@@ -36,6 +40,10 @@ jobs:
           ssh-add ~/.ssh/id_ed25519
           export SSH_AUTH_SOCK
           export SSH_AGENT_PID
+
+      # Make sure Maven is installed, as the tests use it to download stuff.
+      - name: 'Setup JDK'
+        uses: actions/setup-java@v1
 
       # TODO: If speed here ends up being a concern, we can use GitHub Registry to cache the Docker
       # images that we're building and using for the tests. See here for a project to copy from:

@@ -6,21 +6,19 @@
 - hosts: localhost
   tasks:
     - name: Download BFD Server Launcher
-      maven_artifact:
-        repository_url: 'https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data'
-        group_id: 'gov.cms.bfd'
-        artifact_id: 'bfd-server-launcher'
-        version: '1.0.0-SNAPSHOT'
-        extension: 'zip'
-        dest: /tmp/bfd-server-launcher.zip
+      command: >
+        mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
+        -DrepoUrl=https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
+        -Dartifact=gov.cms.bfd:bfd-server-launcher:1.0.0-SNAPSHOT:zip
+      args:
+        creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
     - name: Download BFD Server WAR
-      maven_artifact:
-        repository_url: 'https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data'
-        group_id: 'gov.cms.bfd'
-        artifact_id: 'bfd-server-was'
-        version: '1.0.0-SNAPSHOT'
-        extension: 'war'
-        dest: /tmp/bfd-server-war.war
+      command: >
+        mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
+        -DrepoUrl=https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
+        -Dartifact=gov.cms.bfd:bfd-server-war:1.0.0-SNAPSHOT:war
+      args:
+        creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
 
 # Apply the role.
 - hosts: docker_container
@@ -38,8 +36,8 @@
         name: bfd-server
       vars:
         data_server_appserver_https_port: "443"
-        data_server_launcher: '/tmp/bfd-server-launcher.zip'
-        data_server_war: '/tmp/bfd-server-war.war'
+        data_server_launcher: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
+        data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
         data_server_appserver_keystore: 'files/server-fake.pem'
         #data_server_ssl_server_genkeypair_args: '-keyalg RSA -keysize 4096 -dname cn=localhost -validity 3650'
         data_server_ssl_client_certificates:

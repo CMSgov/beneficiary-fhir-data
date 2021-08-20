@@ -6,13 +6,12 @@
 - hosts: localhost
   tasks:
     - name: Download BFD Pipeline ZIP
-      maven_artifact:
-        repository_url: 'https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data'
-        group_id: 'gov.cms.bfd'
-        artifact_id: 'bfd-pipeline-app'
-        version: '1.0.0-SNAPSHOT'
-        extension: 'zip'
-        dest: /tmp/bfd-pipeline-app.zip
+      command: >
+        mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
+        -DrepoUrl=https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
+        -Dartifact=gov.cms.bfd:bfd-pipeline-app:1.0.0-SNAPSHOT:zip
+      args:
+        creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-pipeline-app/1.0.0-SNAPSHOT/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
 
 # Apply the role.
 - hosts: docker_container
@@ -28,7 +27,7 @@
       import_role:
         name: bfd-pipeline
       vars:
-        data_pipeline_zip: /tmp/bfd-pipeline-app.zip
+        data_pipeline_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-pipeline-app/1.0.0-SNAPSHOT/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
         data_pipeline_s3_bucket: 'example-fake'  # Doesn't need to actually exist.
         data_pipeline_hicn_hash_iterations: '42'  # NIST recommends at least 1000
         data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
