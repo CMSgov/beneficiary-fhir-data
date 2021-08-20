@@ -2,6 +2,7 @@
 
 # Stop immediately if any command returns a non-zero result.
 set -e
+set -x
 
 # Determine the directory that this script is in.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
