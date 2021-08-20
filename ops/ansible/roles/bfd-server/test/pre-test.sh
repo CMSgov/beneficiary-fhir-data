@@ -3,9 +3,6 @@
 # Stop immediately if any command returns a non-zero result.
 set -e
 
-# FIXME: remove debugging
-set -x
-
 # Determine the directory that this script is in.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -35,10 +32,6 @@ if [[ -f requirements.txt ]]; then pip install --requirement requirements.txt; f
 # Prep the Ansible roles that the test will use.
 if [[ ! -d roles ]]; then mkdir roles; fi
 if [[ ! -L "roles/${ROLE}" ]]; then ln -s "$(cd .. && pwd)" "roles/${ROLE}"; fi
-
-# FIXME: remove debugging
-ls -la .
-ls -la roles
 
 # Prep the Docker container that will be used (if it's not already running).
 if [[ $(docker ps -f "name=${CONTAINER_PREFIX}.${PLATFORM}" --format '{{.Names}}') != "${CONTAINER_PREFIX}.${PLATFORM}" ]]; then
