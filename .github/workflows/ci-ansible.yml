@@ -27,6 +27,8 @@ jobs:
       # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
       - name: 'Run Tests for bfd-pipeline Role'
         run: ops/ansible/roles/bfd-pipeline/test/run-tests.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   ansible-role-bfd-server:
     runs-on: ubuntu-latest
@@ -54,3 +56,5 @@ jobs:
       # <https://github.com/karlmdavis/fhir-benchmarks/blob/main/.github/workflows/rust_basics.yml>.
       - name: 'Run Tests for bfd-server Role'
         run: ops/ansible/roles/bfd-server/test/run-tests.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
