@@ -103,7 +103,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 			../../packer/build_bfd-platinum.json"
 		}
 	  return new AmiIds(
-			platinumAmiId: extractAmiIdFromPackerManifest(new File("${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
+			platinumAmiId: extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
 			bfdPipelineAmiId: amiIds.bfdPipelineAmiId, 
 			bfdServerAmiId: amiIds.bfdServerAmiId,
 		)
