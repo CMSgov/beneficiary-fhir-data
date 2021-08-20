@@ -10,6 +10,7 @@
         mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
         -DrepoUrl=https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
         -Dartifact=gov.cms.bfd:bfd-pipeline-app:1.0.0-SNAPSHOT:zip
+        -Dtransitive=false
       args:
         creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-pipeline-app/1.0.0-SNAPSHOT/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
 
