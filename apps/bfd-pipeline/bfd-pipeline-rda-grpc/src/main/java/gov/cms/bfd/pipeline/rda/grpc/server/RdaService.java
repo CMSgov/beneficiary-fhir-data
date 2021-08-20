@@ -29,7 +29,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   @Override
   public void getFissClaims(
       ClaimRequest request, StreamObserver<FissClaimChange> responseObserver) {
-    LOGGER.info("start getFissClaims call");
+    LOGGER.info("start getFissClaims call with since={}", request.getSince());
     try {
       MessageSource<FissClaimChange> generator = fissSourceFactory.apply(request.getSince());
       Responder<FissClaimChange> responder = new Responder<>(responseObserver, generator);
@@ -42,7 +42,7 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
 
   @Override
   public void getMcsClaims(ClaimRequest request, StreamObserver<McsClaimChange> responseObserver) {
-    LOGGER.info("start getMcsClaims call");
+    LOGGER.info("start getMcsClaims call with since={}", request.getSince());
     try {
       MessageSource<McsClaimChange> generator = mcsSourceFactory.apply(request.getSince());
       Responder<McsClaimChange> responder = new Responder<>(responseObserver, generator);

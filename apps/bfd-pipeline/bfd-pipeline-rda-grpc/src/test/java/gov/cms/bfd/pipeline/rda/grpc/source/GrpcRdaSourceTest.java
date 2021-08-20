@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,9 +69,8 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
-    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3))
-        .when(caller)
-        .callService(same(channel), anyLong());
+    doReturn(Optional.of(42L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3)).when(caller).callService(channel, 42L);
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
 
@@ -87,11 +87,12 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 0L);
+    verify(caller).callService(channel, 42L);
   }
 
   @Test
   public void testPassesThroughProcessingExceptionFromSink() throws Exception {
+    doReturn(Optional.of(42L)).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
@@ -121,11 +122,12 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 0L);
+    verify(caller).callService(channel, 42L);
   }
 
   @Test
-  public void testHandlesExceptionFromCaller() {
+  public void testHandlesExceptionFromCaller() throws Exception {
+    doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
     source =
         spy(
@@ -157,6 +159,7 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testHandlesRuntimeExceptionFromSink() throws Exception {
+    doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
         .callService(same(channel), anyLong());
@@ -188,6 +191,7 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testHandlesInterruptFromStream() throws Exception {
+    doReturn(Optional.of(42L)).when(sink).readMaxExistingSequenceNumber();
     // Creates a response with 3 valid values followed by an interrupt.
     final GrpcResponseStream<Integer> response = mock(GrpcResponseStream.class);
     when(response.next()).thenReturn(CLAIM_1, CLAIM_2, CLAIM_3);
@@ -214,7 +218,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(2)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 0L);
+    verify(caller).callService(channel, 42L);
   }
 
   @Test

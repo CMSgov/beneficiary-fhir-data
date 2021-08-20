@@ -40,6 +40,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
 
   private final GrpcStreamCaller<TResponse> caller;
+  private final String claimType;
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -75,6 +76,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       MetricRegistry appMetrics,
       String claimType) {
     this.caller = Preconditions.checkNotNull(caller);
+    this.claimType = Preconditions.checkNotNull(claimType);
     this.channel = Preconditions.checkNotNull(channel);
     metrics = new Metrics(appMetrics, claimType);
   }
@@ -97,8 +99,14 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     int processed = 0;
     try {
       setUptimeToRunning();
+      final long startingSequenceNumber =
+          sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
+      LOGGER.info(
+          "calling API for {} claims starting at sequence number {}",
+          claimType,
+          startingSequenceNumber);
       final GrpcResponseStream<TResponse> responseStream =
-          caller.callService(channel, MIN_SEQUENCE_NUM);
+          caller.callService(channel, startingSequenceNumber);
       final List<TResponse> batch = new ArrayList<>();
       try {
         while (responseStream.hasNext()) {
@@ -137,7 +145,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       }
     }
     if (interrupted) {
-      LOGGER.warn("interrupted with processedCount {}", processed);
+      LOGGER.warn("{} claim processing interrupted with processedCount {}", claimType, processed);
     }
     metrics.successes.mark();
     return processed;
@@ -188,9 +196,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
 
   private int submitBatchToSink(RdaSink<TResponse> sink, List<TResponse> batch)
       throws ProcessingException {
-    LOGGER.info("submitting batch to sink: size={}", batch.size());
+    LOGGER.info("submitting batch to sink: type={} size={}", claimType, batch.size());
     int processed = sink.writeBatch(batch);
-    LOGGER.info("submitted batch to sink: size={} processed={}", batch.size(), processed);
+    LOGGER.info(
+        "submitted batch to sink: type={} size={} processed={}",
+        claimType,
+        batch.size(),
+        processed);
     batch.clear();
     metrics.batches.mark();
     metrics.objectsStored.mark(processed);
