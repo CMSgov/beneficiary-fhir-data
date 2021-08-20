@@ -1,7 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.google.common.base.Preconditions;
-import gov.cms.bfd.pipeline.rda.grpc.sink.JpaClaimRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.FissClaimRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.McsClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
@@ -61,7 +62,7 @@ public class RdaLoadOptions implements Serializable {
                     new FissClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
                 appState.getMetrics(),
                 "fiss"),
-        () -> new JpaClaimRdaSink<>("fiss", appState),
+        () -> new FissClaimRdaSink(appState),
         appState.getMetrics());
   }
 
@@ -82,7 +83,7 @@ public class RdaLoadOptions implements Serializable {
                     new McsClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
                 appState.getMetrics(),
                 "mcs"),
-        () -> new JpaClaimRdaSink<>("mcs", appState),
+        () -> new McsClaimRdaSink(appState),
         appState.getMetrics());
   }
 

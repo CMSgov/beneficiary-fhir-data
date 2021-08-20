@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
-import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
 import static org.junit.Assert.assertEquals;
 
@@ -9,9 +8,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsDetail;
-import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
@@ -20,18 +16,20 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JpaClaimRdaSinkIT {
+public class FissClaimRdaSinkIT {
   private PipelineApplicationState appState;
   private EntityManager entityManager;
 
   @Before
   public void setUp() {
-    final DatabaseOptions dbOptiona = new DatabaseOptions("jdbc:hsqldb:mem:unit-tests", "", "", 10);
+    final DatabaseOptions dbOptiona =
+        new DatabaseOptions("jdbc:hsqldb:mem:FissClaimRdaSinkIT", "", "", 10);
     final MetricRegistry appMetrics = new MetricRegistry();
     final HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dbOptiona, appMetrics);
@@ -56,7 +54,9 @@ public class JpaClaimRdaSinkIT {
 
   @Test
   public void fissClaim() throws Exception {
-    final JpaClaimRdaSink<PreAdjFissClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
+    final FissClaimRdaSink sink = new FissClaimRdaSink(appState);
+
+    assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
     final PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setSequenceNumber(3L);
@@ -85,7 +85,8 @@ public class JpaClaimRdaSinkIT {
 
     int count =
         sink.writeObject(
-            new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now()));
+            new RdaChange<>(
+                claim.getSequenceNumber(), RdaChange.Type.INSERT, claim, Instant.now()));
     assertEquals(1, count);
 
     List<PreAdjFissClaim> claims =
@@ -99,45 +100,7 @@ public class JpaClaimRdaSinkIT {
     assertEquals("city name can be very long indeed", resultClaim.getPracLocCity());
     assertEquals(1, resultClaim.getProcCodes().size());
     assertEquals(1, resultClaim.getDiagCodes().size());
-  }
 
-  @Test
-  public void mcsClaim() throws Exception {
-    final JpaClaimRdaSink<PreAdjMcsClaim> sink = new JpaClaimRdaSink<>("fiss", appState);
-
-    final PreAdjMcsClaim claim = new PreAdjMcsClaim();
-    claim.setSequenceNumber(7L);
-    claim.setIdrClmHdIcn("3");
-    claim.setIdrContrId("c1");
-    claim.setIdrHic("hc");
-    claim.setIdrClaimType("c");
-
-    final PreAdjMcsDetail detail = new PreAdjMcsDetail();
-    detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    detail.setPriority((short) 0);
-    detail.setIdrDtlStatus("P");
-    claim.getDetails().add(detail);
-
-    final PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
-    diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    diagCode.setPriority((short) 0);
-    diagCode.setIdrDiagIcdType("T");
-    claim.getDiagCodes().add(diagCode);
-
-    int count =
-        sink.writeObject(
-            new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now()));
-    assertEquals(1, count);
-
-    List<PreAdjMcsClaim> resultClaims =
-        entityManager
-            .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
-            .getResultList();
-    assertEquals(1, resultClaims.size());
-    PreAdjMcsClaim resultClaim = resultClaims.get(0);
-    assertEquals(Long.valueOf(7), resultClaim.getSequenceNumber());
-    assertEquals("hc", resultClaim.getIdrHic());
-    assertEquals(1, resultClaim.getDetails().size());
-    assertEquals(1, resultClaim.getDiagCodes().size());
+    assertEquals(Optional.of(3L), sink.readMaxExistingSequenceNumber());
   }
 }

@@ -22,16 +22,16 @@ import org.slf4j.LoggerFactory;
  *
  * @param <TClaim> type of entity objects written to the database
  */
-public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JpaClaimRdaSink.class);
+abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClaimRdaSink.class);
 
-  private final EntityManager entityManager;
-  private final Metrics metrics;
-  private final Clock clock;
+  protected final EntityManager entityManager;
+  protected final Metrics metrics;
+  protected final Clock clock;
 
-  public JpaClaimRdaSink(String claimType, PipelineApplicationState appState) {
+  protected AbstractClaimRdaSink(PipelineApplicationState appState) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
-    metrics = new Metrics(appState.getMetrics(), claimType);
+    metrics = new Metrics(getClass(), appState.getMetrics());
     clock = appState.getClock();
   }
 
@@ -176,8 +176,8 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
     /** Milliseconds between change timestamp and current time. */
     private final Histogram changeAgeMillis;
 
-    private Metrics(MetricRegistry appMetrics, String claimType) {
-      final String base = MetricRegistry.name(JpaClaimRdaSink.class.getSimpleName(), claimType);
+    private Metrics(Class<?> klass, MetricRegistry appMetrics) {
+      final String base = klass.getSimpleName();
       calls = appMetrics.meter(MetricRegistry.name(base, "calls"));
       successes = appMetrics.meter(MetricRegistry.name(base, "successes"));
       failures = appMetrics.meter(MetricRegistry.name(base, "failures"));
