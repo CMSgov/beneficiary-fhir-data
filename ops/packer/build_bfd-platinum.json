@@ -30,6 +30,7 @@
   ],
   "provisioners": [{
       "type": "ansible",
+      "user": "ec2-user",
       "playbook_file": "./build_bfd-platinum.yml",
       "extra_arguments": [
         "-e ansible_python_interpreter=/usr/bin/python"
