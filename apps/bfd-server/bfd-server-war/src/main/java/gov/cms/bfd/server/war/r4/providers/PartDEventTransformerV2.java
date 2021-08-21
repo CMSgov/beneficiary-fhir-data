@@ -69,6 +69,9 @@ final class PartDEventTransformerV2 {
     //                  => ExplanationOfBenefit.insurance.coverage (reference)
     // BENE_ID          => ExplanationOfBenefit.patient (reference)
     // FINAL_ACTION     => ExplanationOfBenefit.status
+    // SRVC_DT          => ExplanationOfBenefit.billablePeriod.start
+    // SRVC_DT          => ExplanationOfBenefit.billablePeriod.end
+
     TransformerUtilsV2.mapEobCommonClaimHeaderData(
         eob,
         claimGroup.getEventId(),
@@ -76,8 +79,8 @@ final class PartDEventTransformerV2 {
         ClaimTypeV2.PDE,
         claimGroup.getClaimGroupId().toPlainString(),
         MedicareSegment.PART_D,
-        Optional.empty(),
-        Optional.empty(),
+        Optional.of(claimGroup.getPrescriptionFillDate()),
+        Optional.of(claimGroup.getPrescriptionFillDate()),
         Optional.empty(),
         claimGroup.getFinalAction());
 
