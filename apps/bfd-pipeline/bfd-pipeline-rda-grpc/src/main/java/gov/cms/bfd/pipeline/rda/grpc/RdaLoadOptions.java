@@ -61,7 +61,8 @@ public class RdaLoadOptions implements Serializable {
                 new FissClaimStreamCaller(
                     new FissClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
                 appState.getMetrics(),
-                "fiss"),
+                "fiss",
+                jobConfig.getStartingFissSeqNum()),
         () -> new FissClaimRdaSink(appState),
         appState.getMetrics());
   }
@@ -82,7 +83,8 @@ public class RdaLoadOptions implements Serializable {
                 new McsClaimStreamCaller(
                     new McsClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
                 appState.getMetrics(),
-                "mcs"),
+                "mcs",
+                jobConfig.getStartingMcsSeqNum()),
         () -> new McsClaimRdaSink(appState),
         appState.getMetrics());
   }

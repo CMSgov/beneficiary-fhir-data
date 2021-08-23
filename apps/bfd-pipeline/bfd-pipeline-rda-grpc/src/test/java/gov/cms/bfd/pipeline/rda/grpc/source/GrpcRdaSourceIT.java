@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
@@ -119,7 +120,7 @@ public class GrpcRdaSourceIT {
       FissClaimStreamCaller streamCaller =
           new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
       try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source =
-          new GrpcRdaSource<>(channel, streamCaller, appMetrics, "fiss")) {
+          new GrpcRdaSource<>(channel, streamCaller, appMetrics, "fiss", Optional.empty())) {
         count = source.retrieveAndProcessObjects(3, sink);
       }
       assertEquals(2, count);

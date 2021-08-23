@@ -49,7 +49,7 @@ public class GrpcRdaSourceTest {
   @Before
   public void setUp() throws Exception {
     appMetrics = new MetricRegistry();
-    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints"));
+    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints", Optional.empty()));
     metrics = source.getMetrics();
   }
 
@@ -88,6 +88,29 @@ public class GrpcRdaSourceTest {
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
     verify(caller).callService(channel, 42L);
+  }
+
+  @Test
+  public void testUsesHardCodedSequenceNumberWhenProvided() throws Exception {
+    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints", Optional.of(18L)));
+    doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, 18L);
+    doReturn(1).when(sink).writeBatch(Arrays.asList(CLAIM_1));
+
+    final int result = source.retrieveAndProcessObjects(2, sink);
+    assertEquals(1, result);
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(1, "received", metrics.getObjectsReceived());
+    assertMeterReading(1, "stored", metrics.getObjectsStored());
+    assertMeterReading(1, "batches", metrics.getBatches());
+    assertMeterReading(1, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
+    // once at start, once after a batch
+    verify(source, times(2)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(1)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 18L);
+    verify(sink, times(0)).readMaxExistingSequenceNumber();
   }
 
   @Test
@@ -137,7 +160,8 @@ public class GrpcRdaSourceTest {
                   throw error;
                 },
                 appMetrics,
-                "ints"));
+                "ints",
+                Optional.empty()));
 
     try {
       source.retrieveAndProcessObjects(2, sink);

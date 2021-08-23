@@ -107,7 +107,10 @@ public class DirectRdaLoadApp {
             props.getProperty("hash.pepper", "notarealpepper"));
     final AbstractRdaLoadJob.Config jobConfig =
         new AbstractRdaLoadJob.Config(
-            Duration.ofDays(1), getIntOrDefault(props, "job.batchSize", 1));
+            Duration.ofDays(1),
+            getIntOrDefault(props, "job.batchSize", 1),
+            getOptionalLong(props, "job.startingFissSeqNum"),
+            getOptionalLong(props, "job.startingMcsSeqNum"));
     final GrpcRdaSource.Config grpcConfig =
         new GrpcRdaSource.Config(
             props.getProperty("api.host", "localhost"),
@@ -119,5 +122,10 @@ public class DirectRdaLoadApp {
   private static int getIntOrDefault(Properties props, String key, int defaultValue) {
     String strValue = props.getProperty(key);
     return strValue != null ? Integer.parseInt(strValue) : defaultValue;
+  }
+
+  private static Optional<Long> getOptionalLong(Properties props, String key) {
+    String strValue = props.getProperty(key);
+    return strValue != null ? Optional.of(Long.parseLong(strValue)) : Optional.empty();
   }
 }

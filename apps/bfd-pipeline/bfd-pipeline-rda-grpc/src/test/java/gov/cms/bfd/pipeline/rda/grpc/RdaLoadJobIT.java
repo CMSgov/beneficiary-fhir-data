@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import org.junit.Before;
@@ -232,7 +233,8 @@ public class RdaLoadJobIT {
 
   private static RdaLoadOptions createRdaLoadOptions(int serverPort) {
     return new RdaLoadOptions(
-        new AbstractRdaLoadJob.Config(Duration.ofSeconds(1), BATCH_SIZE),
+        new AbstractRdaLoadJob.Config(
+            Duration.ofSeconds(1), BATCH_SIZE, Optional.empty(), Optional.empty()),
         new GrpcRdaSource.Config("localhost", serverPort, Duration.ofMinutes(1)),
         new IdHasher.Config(100, "thisisjustatest"));
   }

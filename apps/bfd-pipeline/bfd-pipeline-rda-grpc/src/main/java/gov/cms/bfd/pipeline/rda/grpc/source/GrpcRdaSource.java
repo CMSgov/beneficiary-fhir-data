@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
@@ -41,6 +42,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
 
   private final GrpcStreamCaller<TResponse> caller;
   private final String claimType;
+  private final Optional<Long> startingSequenceNumber;
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -51,13 +53,15 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @param config the configuration values used to establish the channel
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
+   * @param startingSequenceNumber optional hard coded sequence number
    */
   public GrpcRdaSource(
       Config config,
       GrpcStreamCaller<TResponse> caller,
       MetricRegistry appMetrics,
-      String claimType) {
-    this(config.createChannel(), caller, appMetrics, claimType);
+      String claimType,
+      Optional<Long> startingSequenceNumber) {
+    this(config.createChannel(), caller, appMetrics, claimType, startingSequenceNumber);
   }
 
   /**
@@ -68,16 +72,19 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @param channel channel used to make RPC calls
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
+   * @param startingSequenceNumber optional hard coded sequence number
    */
   @VisibleForTesting
   GrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller<TResponse> caller,
       MetricRegistry appMetrics,
-      String claimType) {
+      String claimType,
+      Optional<Long> startingSequenceNumber) {
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
     this.channel = Preconditions.checkNotNull(channel);
+    this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     metrics = new Metrics(appMetrics, claimType);
   }
 
@@ -99,8 +106,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     int processed = 0;
     try {
       setUptimeToRunning();
-      final long startingSequenceNumber =
-          sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
+      final long startingSequenceNumber = getStartingSequenceNumber(sink);
       LOGGER.info(
           "calling API for {} claims starting at sequence number {}",
           claimType,
@@ -149,6 +155,22 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     }
     metrics.successes.mark();
     return processed;
+  }
+
+  /**
+   * Uses the hard coded starting sequence number if one has been configured. Otherwise asks the
+   * sink to provide its maximum known sequence number as our starting point. When all else fails we
+   * start at the beginning.
+   *
+   * @param sink used to obtain the maximum known sequence number
+   * @return a valid RDA change sequence number
+   */
+  private long getStartingSequenceNumber(RdaSink<TResponse> sink) throws ProcessingException {
+    if (startingSequenceNumber.isPresent()) {
+      return startingSequenceNumber.get();
+    } else {
+      return sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
+    }
   }
 
   /**
