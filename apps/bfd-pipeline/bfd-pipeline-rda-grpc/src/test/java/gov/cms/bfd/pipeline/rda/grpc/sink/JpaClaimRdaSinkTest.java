@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
 import static gov.cms.bfd.pipeline.rda.grpc.sink.JpaClaimRdaSink.isDuplicateKeyException;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -203,6 +204,7 @@ public class JpaClaimRdaSinkTest {
   private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
     PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn(dcn);
-    return new RdaChange<>(RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
+    return new RdaChange<>(
+        MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
   }
 }

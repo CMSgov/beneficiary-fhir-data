@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
 import static org.junit.Assert.assertEquals;
 
@@ -81,7 +82,9 @@ public class JpaClaimRdaSinkIT {
     diagCode0.setDiagPoaInd("Q");
     claim.getDiagCodes().add(diagCode0);
 
-    int count = sink.writeObject(new RdaChange<>(RdaChange.Type.INSERT, claim, Instant.now()));
+    int count =
+        sink.writeObject(
+            new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now()));
     assertEquals(1, count);
 
     List<PreAdjFissClaim> claims =
@@ -118,7 +121,9 @@ public class JpaClaimRdaSinkIT {
     diagCode.setIdrDiagIcdType("T");
     claim.getDiagCodes().add(diagCode);
 
-    int count = sink.writeObject(new RdaChange<>(RdaChange.Type.INSERT, claim, Instant.now()));
+    int count =
+        sink.writeObject(
+            new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now()));
     assertEquals(1, count);
 
     List<PreAdjMcsClaim> resultClaims =
