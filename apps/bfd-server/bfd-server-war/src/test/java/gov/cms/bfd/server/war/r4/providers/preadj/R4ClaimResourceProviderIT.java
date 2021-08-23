@@ -38,6 +38,7 @@ public class R4ClaimResourceProviderIT {
   @AfterClass
   public static void tearDown() {
     testUtils.truncateTables();
+    testUtils.destroy();
   }
 
   @Test

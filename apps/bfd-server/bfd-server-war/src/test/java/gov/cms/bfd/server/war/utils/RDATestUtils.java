@@ -53,6 +53,12 @@ public class RDATestUtils {
             .createEntityManager();
   }
 
+  public void destroy() {
+    if (entityManager != null) {
+      entityManager.close();
+    }
+  }
+
   public void seedData(Collection<?> entities) {
     doTransaction(em -> entities.forEach(em::persist));
   }

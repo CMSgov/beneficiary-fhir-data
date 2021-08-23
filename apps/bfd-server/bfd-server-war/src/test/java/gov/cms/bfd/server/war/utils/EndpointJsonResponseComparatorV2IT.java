@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -160,7 +160,7 @@ public final class EndpointJsonResponseComparatorV2IT {
   private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
 
   private static final Set<String> IGNORED_PATHS =
-      Sets.newHashSet(
+      ImmutableSet.of(
           "\"/id\"",
           "\"/date\"",
           "\"/created\"",
