@@ -37,7 +37,6 @@
 properties([
 	parameters([
 		booleanParam(name: 'deploy_prod_from_non_master', defaultValue: false, description: 'Whether to deploy to prod-like envs for builds of this project\'s non-master branches.'),
-		booleanParam(name: 'deploy_management', description: 'Whether to deploy/redeploy the management environment, which includes Jenkins. May cause the job to end early, if Jenkins is restarted.', defaultValue: false),
 		booleanParam(name: 'deploy_prod_skip_confirm', defaultValue: false, description: 'Whether to prompt for confirmation before deploying to most prod-like envs.'),
 		booleanParam(name: 'build_platinum', description: 'Whether to build/update the "platinum" base AMI.', defaultValue: false)
 	]),
@@ -161,7 +160,7 @@ try {
 					gitRepoUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim().replaceAll(/\.git$/,"")
 
 					// Send notifications that the build has started
-					//sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
+					sendNotifications('STARTED', currentStage, gitCommitId, gitRepoUrl)
 				}
 			}
 
@@ -190,21 +189,6 @@ try {
 					}
 				} else {
 					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Build Platinum AMI')
-				}
-			}
-
-			stage('Deploy mgmt') {
-				currentStage = "${env.STAGE_NAME}"
-				if (canDeployToProdEnvs && params.deploy_management) {
-					lock(resource: 'env_management', inversePrecendence: true) {
-						milestone(label: 'stage_management_jenkins_start')
-
-						container('bfd-cbc-build') {
-							scriptForDeploy.deployManagement(amiIds)
-						}
-					}
-				} else {
-					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy mgmt')
 				}
 			}
 

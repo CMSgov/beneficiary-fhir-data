@@ -111,17 +111,6 @@ def buildPlatinumAmi(AmiIds amiIds) {
 }
 
 /**
- * Deploys/redeploys Jenkins and related systems to the management environment.
- *
- * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that should be used
- * @throws RuntimeException An exception will be bubbled up if the deploy tooling returns a non-zero exit code.
- */
-def deployManagement(AmiIds amiIds) {
-	echo 'Deploy to the CCS mgmt environment is not yet implemented.'
-	throw new UnsupportedOperationException('Deploy to the CCS mgmt environment is not yet implemented.')
-}
-
-/**
  * Builds the BFD Pipeline and BFD Server AMIs.
  *
  * @param amiIds an {@link AmiIds} instance detailing the IDs of the AMIs that already exist
