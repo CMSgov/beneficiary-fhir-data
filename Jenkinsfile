@@ -239,31 +239,31 @@ try {
 				}
 			}
 
-			// stage('Manual Approval') {
-			// 	currentStage = "${env.STAGE_NAME}"
-			// 	if (canDeployToProdEnvs) {
-			// 		/*
-			// 		* Unless it was explicitly requested at the start of the build, prompt for confirmation before
-			// 		* deploying to production environments.
-			// 		*/
-			// 		if (!params.deploy_prod_skip_confirm) {
-			// 			/*
-			// 			* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
-			// 			* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
-			// 			* an exception will be thrown.
-			// 			*/
-			// 			try {
-			// 				input 'Deploy to production environments (prod-sbx, prod)?'
-			// 				willDeployToProdEnvs = true
-			// 			} catch(err) {
-			// 				willDeployToProdEnvs = false
-			// 				echo 'User opted not to deploy to prod-like envs.'
-			// 			}
-			// 		}
-			// 	} else {
-			// 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
-			// 	}
-			// }
+			stage('Manual Approval') {
+				currentStage = "${env.STAGE_NAME}"
+				if (canDeployToProdEnvs) {
+					/*
+					* Unless it was explicitly requested at the start of the build, prompt for confirmation before
+					* deploying to production environments.
+					*/
+					if (!params.deploy_prod_skip_confirm) {
+						/*
+						* The Jenkins UI will prompt with "Proceed" and "Abort" options. If "Proceed" is
+						* chosen, this build will continue merrily on as normal. If "Abort" is chosen,
+						* an exception will be thrown.
+						*/
+						try {
+							input 'Deploy to production environments (prod-sbx, prod)?'
+							willDeployToProdEnvs = true
+						} catch(err) {
+							willDeployToProdEnvs = false
+							echo 'User opted not to deploy to prod-like envs.'
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Manual Approval')
+				}
+			}
 
 			// stage('Deploy to PROD-SBX') {
 			// 	currentStage = "${env.STAGE_NAME}"
