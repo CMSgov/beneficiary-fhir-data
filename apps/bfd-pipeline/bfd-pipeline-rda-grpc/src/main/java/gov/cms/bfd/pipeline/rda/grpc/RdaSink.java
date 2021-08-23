@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public interface RdaSink<T> extends AutoCloseable {
   /**
-   * The pipeline job calls passes a starting sequence number to the RDA API call to get a stream of
+   * The pipeline job passes a starting sequence number to the RDA API call to get a stream of
    * change objects for processing. This method allows the sink to provide the next logical starting
    * sequence number for the call. An Optional is returned to handle the case when no records have
    * been added to the database yet.
