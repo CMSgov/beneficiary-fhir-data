@@ -139,8 +139,8 @@ if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
 if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
 
 # Read the server port to be used from the ports file.
-#serverPortHttps=${BFD_PORT:-$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)}
-serverPortHttps=$(grep -o '[89]\{1\}[0-9]\{3\}' "${serverPortsFile}")
+serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)
+
 if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified in '${serverPortsFile}'."; exit 1; fi
 echo "Configured server to run on HTTPS port '${serverPortHttps}'."
 
