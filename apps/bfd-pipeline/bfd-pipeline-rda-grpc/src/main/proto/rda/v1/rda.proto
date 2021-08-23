@@ -5,14 +5,28 @@ package gov.cms.mpsm.rda.v1;
 option java_multiple_files = true;
 
 import "google/protobuf/empty.proto";
-import "rda/v1/claim_change.proto";
+import "rda/v1/api_version.proto";
+import "rda/v1/fiss/fiss_claim_change.proto";
+import "rda/v1/mcs/mcs_claim_change.proto";
+
+// A request to a method that streams claims.
+message ClaimRequest {
+  // To retrieve updates from the last time a stream was consumed, you can provide the sequence number of the
+  // last claim change record you received. If you do not provide any value here, the server will stream live
+  // changes. If you do provide a sequence number, the server will start by streaming previous updates.
+  // When all historical records are written to the stream, the server will start streaming live changes.
+  optional int64 since = 1;
+}
 
 // RDA API
 service RDAService {
 
   // Gets all the FISS claims data from the database and closes the stream.
-  rpc GetFissClaims(google.protobuf.Empty) returns (stream ClaimChange);
+  rpc GetFissClaims(ClaimRequest) returns (stream FissClaimChange);
 
   // Gets all MCS claims data from the database, and closes the stream.
-  rpc GetMcsClaims(google.protobuf.Empty) returns (stream ClaimChange);
+  rpc GetMcsClaims(ClaimRequest) returns (stream McsClaimChange);
+
+  // Gets the version of RDA API service.
+  rpc GetVersion(google.protobuf.Empty) returns (ApiVersion);
 }

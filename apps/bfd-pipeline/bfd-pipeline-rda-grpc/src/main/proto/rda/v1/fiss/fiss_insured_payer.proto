@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/fiss/fiss_beneficiary_sex.proto";
+import "rda/v1/fiss/fiss_payers_code.proto";
+import "rda/v1/fiss/fiss_release_of_information.proto";
+import "rda/v1/fiss/fiss_assignment_of_benefits_indicator.proto";
+import "rda/v1/fiss/fiss_patient_relationship_code.proto";
+
+message FissInsuredPayer {
+
+  oneof payers_id {
+    FissPayersCode payers_id_enum = 2;
+    string payers_id_unrecognized = 3;
+  };
+
+  optional string payers_name = 4;
+  oneof rel_ind {
+    FissReleaseOfInformation rel_ind_enum = 6;
+    string rel_ind_unrecognized = 7;
+  }
+
+  oneof assign_ind {
+    FissAssignmentOfBenefitsIndicator assign_ind_enum = 8;
+    string assign_ind_unrecognized = 9;
+  }
+
+  optional string provider_number = 10;
+  optional string adj_dcn_icn = 11;
+  optional string prior_pmt = 12;
+  optional string est_amt_due = 13;
+  oneof insured_rel {
+    FissPatientRelationshipCode insured_rel_enum = 14;
+    string insured_rel_unrecognized = 15;
+  }
+  optional string insured_name = 16;
+  optional string insured_ssn_hic = 17;
+  optional string insured_group_name = 18;
+  optional string insured_group_nbr = 19;
+  optional string treat_auth_cd = 20;
+
+  oneof insured_sex {
+    FissBeneficiarySex insured_sex_enum = 21;
+    string insured_sex_unrecognized = 22;
+  }
+
+  oneof insured_rel_x12 {
+    FissPatientRelationshipCode insured_rel_x12_enum = 23;
+    string insured_rel_x12_unrecognized = 24;
+  }
+  optional string insured_dob = 25;
+  optional string insured_dob_text = 26;
+}

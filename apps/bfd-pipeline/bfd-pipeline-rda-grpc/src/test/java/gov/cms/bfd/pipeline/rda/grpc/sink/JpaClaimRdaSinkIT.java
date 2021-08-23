@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
+import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
 import static org.junit.Assert.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
@@ -14,6 +16,7 @@ import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -23,8 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class JpaClaimRdaSinkIT {
-  public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
-
   private PipelineApplicationState appState;
   private EntityManager entityManager;
 
@@ -35,7 +36,9 @@ public class JpaClaimRdaSinkIT {
     final HikariDataSource pooledDataSource =
         PipelineApplicationState.createPooledDataSource(dbOptiona, appMetrics);
     DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
-    appState = new PipelineApplicationState(appMetrics, pooledDataSource, PERSISTENCE_UNIT_NAME);
+    appState =
+        new PipelineApplicationState(
+            appMetrics, pooledDataSource, RDA_PERSISTENCE_UNIT_NAME, Clock.systemUTC());
     entityManager = appState.getEntityManagerFactory().createEntityManager();
   }
 
@@ -79,7 +82,9 @@ public class JpaClaimRdaSinkIT {
     diagCode0.setDiagPoaInd("Q");
     claim.getDiagCodes().add(diagCode0);
 
-    int count = sink.writeObject(new RdaChange<>(RdaChange.Type.INSERT, claim));
+    int count =
+        sink.writeObject(
+            new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now()));
     assertEquals(1, count);
 
     List<PreAdjFissClaim> claims =
@@ -116,7 +121,9 @@ public class JpaClaimRdaSinkIT {
     diagCode.setIdrDiagIcdType("T");
     claim.getDiagCodes().add(diagCode);
 
-    int count = sink.writeObject(new RdaChange<>(RdaChange.Type.INSERT, claim));
+    int count =
+        sink.writeObject(
+            new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now()));
     assertEquals(1, count);
 
     List<PreAdjMcsClaim> resultClaims =
