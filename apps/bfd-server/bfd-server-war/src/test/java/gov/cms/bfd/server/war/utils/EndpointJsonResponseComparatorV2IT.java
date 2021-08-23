@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.flipkart.zjsonpatch.JsonDiff;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -47,6 +47,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -157,6 +158,23 @@ public final class EndpointJsonResponseComparatorV2IT {
   private final String endpointId;
   private final Supplier<String> endpointOperation;
   private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
+
+  private static final Set<String> IGNORED_PATHS =
+      Sets.newHashSet(
+          "\"/id\"",
+          "\"/date\"",
+          "\"/created\"",
+          "\"/link/[0-9]/url\"",
+          "\"/implementation/url\"",
+          "\"/entry/[0-9]/fullUrl\"",
+          "\"/meta\"",
+          "\"/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta\"",
+          "\"/entry/[0-9]/resource/created\"",
+          "\"/procedure/[0-9]/date\"",
+          "\"/entry/[0-9]/resource/procedure/[0-9]/date\"",
+          "\"/software/version\"");
 
   /**
    * Parameterized test constructor: JUnit will construct a new instance of this class for every
@@ -1076,64 +1094,7 @@ public final class EndpointJsonResponseComparatorV2IT {
     String approvedJson = readFile(generateFileName(approvedResponseDir, endpointId));
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
 
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode beforeNode = null;
-    try {
-      beforeNode = mapper.readTree(approvedJson);
-    } catch (IOException e) {
-      throw new UncheckedIOException(
-          "Unable to deserialize the following JSON content as tree: " + approvedJson, e);
-    }
-
-    JsonNode afterNode = null;
-    try {
-      afterNode = mapper.readTree(newJson);
-    } catch (IOException e) {
-      throw new UncheckedIOException(
-          "Unable to deserialize the following JSON content as tree: " + newJson, e);
-    }
-    JsonNode diff = JsonDiff.asJson(beforeNode, afterNode);
-
-    // Filter out diffs that we don't care about (due to changing with each call)
-    // such as "lastUpdated" fields, the port on URLs, etc. ...
-    NodeFilteringConsumer consumer =
-        new NodeFilteringConsumer(
-            new NodeFilter() {
-              @Override
-              public boolean apply(JsonNode node) {
-                Pattern p = getIgnoredPathsRegex();
-                Matcher m = p.matcher(node.get("path").toString());
-                return m.matches();
-              }
-            });
-
-    diff.forEach(consumer);
-    if (diff.size() > 0) {
-      for (int i = 0; i < diff.size(); i++) {
-        Assert.assertEquals("{}", diff.get(i).toString());
-      }
-    }
-  }
-
-  /** @return a regex pattern for ignored JSON paths */
-  private static Pattern getIgnoredPathsRegex() {
-    StringBuilder pattern = new StringBuilder();
-    pattern.append("\"/id\"");
-    pattern.append("|\"/date\"");
-    pattern.append("|\"/created\"");
-    pattern.append("|\"/link/[0-9]/url\"");
-    pattern.append("|\"/implementation/url\"");
-    pattern.append("|\"/entry/[0-9]/fullUrl\"");
-    pattern.append("|\"/meta\"");
-    pattern.append("|\"/meta/lastUpdated\"");
-    pattern.append("|\"/entry/[0-9]/resource/meta/lastUpdated\"");
-    pattern.append("|\"/entry/[0-9]/resource/meta\"");
-    pattern.append("|\"/entry/[0-9]/resource/created\"");
-    pattern.append("|\"/procedure/[0-9]/date\"");
-    pattern.append("|\"/entry/[0-9]/resource/procedure/[0-9]/date\"");
-    pattern.append("|\"/software/version\"");
-
-    return Pattern.compile(pattern.toString());
+    AssertUtils.assertJsonEquals(approvedJson, newJson, IGNORED_PATHS);
   }
 
   /** @return a new {@link IGenericClient} fhirClient after setting the encoding to JSON */

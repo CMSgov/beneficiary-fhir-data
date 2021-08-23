@@ -7,7 +7,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
@@ -16,6 +18,7 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hamcrest.collection.IsEmptyCollection;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
@@ -43,7 +47,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2V2}. */
+/** Unit tests for {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}. */
 public final class BeneficiaryTransformerV2Test {
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -90,7 +94,11 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   private void createPatient(RequestHeaders reqHeaders) {
-    patient = BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders);
+    Patient genPatient =
+        BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genPatient);
+    patient = parser.parseResource(Patient.class, json);
   }
 
   /** Common top level Patient ouput to console */
@@ -112,7 +120,7 @@ public final class BeneficiaryTransformerV2Test {
   /** Common top level Patient values */
   @Test
   public void shouldSetID() {
-    Assert.assertEquals(patient.getId(), beneficiary.getBeneficiaryId());
+    Assert.assertEquals(patient.getId(), "Patient/" + beneficiary.getBeneficiaryId());
   }
 
   @Test
@@ -356,6 +364,26 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   /**
+   * test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2} sets a
+   * valid extension date.
+   */
+  @Test
+  public void shouldSetExtensionDate() {
+
+    IBaseDatatype ex =
+        TransformerUtilsV2.createExtensionDate(
+                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear())
+            .getValue();
+
+    IBaseDatatype compare =
+        TransformerUtilsV2.createExtensionDate(
+                CcwCodebookVariable.RFRNC_YR, Optional.of(new BigDecimal(3)))
+            .getValue();
+
+    Assert.assertEquals(ex.toString().length(), compare.toString().length());
+  }
+
+  /**
    * helper function to test {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}
    * patient Part D attributee.
    */
@@ -488,8 +516,9 @@ public final class BeneficiaryTransformerV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
+   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
   @Ignore
   @Test

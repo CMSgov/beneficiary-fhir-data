@@ -1,28 +1,21 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import static org.junit.Assert.assertEquals;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import com.google.common.collect.ImmutableMap;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsDetail;
-import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ClaimResponse;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,6 +23,9 @@ import org.junit.Test;
 public class R4ClaimResponseResourceProviderIT {
 
   private static final RDATestUtils testUtils = new RDATestUtils();
+
+  private static final Set<String> IGNORE_PATTERNS =
+      ImmutableSet.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
 
   @BeforeClass
   public static void init() {
@@ -41,11 +37,7 @@ public class R4ClaimResponseResourceProviderIT {
 
   @AfterClass
   public static void tearDown() {
-    testUtils.truncate(PreAdjFissProcCode.class);
-    testUtils.truncate(PreAdjFissClaim.class);
-    testUtils.truncate(PreAdjMcsDetail.class);
-    testUtils.truncate(PreAdjMcsDiagnosisCode.class);
-    testUtils.truncate(PreAdjMcsClaim.class);
+    testUtils.truncateTables();
   }
 
   @Test
@@ -55,13 +47,10 @@ public class R4ClaimResponseResourceProviderIT {
     ClaimResponse claimResult =
         fhirClient.read().resource(ClaimResponse.class).withId("f-123456").execute();
 
-    // Created date changes every run, replace it
-    claimResult.setCreated(TestResults.TEST_CREATED_DATE);
-
-    String expected = TestResults.TEST_FISS;
+    String expected = testUtils.expectedResponseFor("claimResponseFissRead");
     String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
 
-    assertEquals(expected, actual);
+    AssertUtils.assertJsonEquals(expected, actual, IGNORE_PATTERNS);
   }
 
   @Test
@@ -71,13 +60,10 @@ public class R4ClaimResponseResourceProviderIT {
     ClaimResponse claimResult =
         fhirClient.read().resource(ClaimResponse.class).withId("m-654321").execute();
 
-    // Created date changes every run, replace it
-    claimResult.setCreated(TestResults.TEST_CREATED_DATE);
-
-    String expected = TestResults.TEST_MCS;
+    String expected = testUtils.expectedResponseFor("claimResponseMcsRead");
     String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
 
-    assertEquals(expected, actual);
+    AssertUtils.assertJsonEquals(expected, actual, IGNORE_PATTERNS);
   }
 
   @Test
@@ -97,48 +83,16 @@ public class R4ClaimResponseResourceProviderIT {
             .returnBundle(Bundle.class)
             .execute();
 
-    // Created date changes every run, replace it
-    claimResult
-        .getEntry()
-        .forEach(
-            e -> {
-              Resource r = e.getResource();
-              if (r instanceof ClaimResponse) {
-                ((ClaimResponse) r).setCreated(TestResults.TEST_CREATED_DATE);
-              }
-            });
-
     // Sort entries for consistent testing results
     claimResult.getEntry().sort(Comparator.comparing(a -> a.getResource().getId()));
 
-    // Set bundle ID for consistent testing results
-    claimResult.setId(TestResults.TEST_BUNDLE_ID);
-
-    // Set bundle lastUpdated for consistent testing results
-    claimResult.setMeta(new Meta().setLastUpdated(TestResults.TEST_CREATED_DATE));
-
-    String expected = TestResults.TEST_SEARCH;
+    String expected = testUtils.expectedResponseFor("claimResponseSearch");
     String actual = FhirContext.forR4().newJsonParser().encodeResourceToString(claimResult);
 
-    // Change random port value for consistent testing
-    actual = actual.replaceAll("localhost:\\d{4}", "localhost:6500");
+    Set<String> ignorePatterns = new HashSet<>(IGNORE_PATTERNS);
+    ignorePatterns.add("\"/id\"");
+    ignorePatterns.add("\"/entry/[0-9]+/resource/created\"");
 
-    assertEquals(expected, actual);
-  }
-
-  private static class TestResults {
-
-    public static final Date TEST_CREATED_DATE = Date.from(Instant.ofEpochMilli(1000));
-    public static final String TEST_BUNDLE_ID = "1856fb88-119e-46b6-a775-ab78ae0f61e9";
-
-    public static final String TEST_FISS =
-        "{\"resourceType\":\"ClaimResponse\",\"id\":\"f-123456\",\"meta\":{\"lastUpdated\":\"1970-01-01T00:00:00.000+00:00\"},\"extension\":[{\"url\":\"https://dcgeo.cms.gov/resources/variables/fiss-status\",\"valueCoding\":{\"system\":\"https://dcgeo.cms.gov/resources/variables/fiss-status\",\"code\":\"a\",\"display\":\"Accepted\"}}],\"identifier\":[{\"type\":{\"coding\":[{\"system\":\"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\"code\":\"uc\",\"display\":\"Unique Claim ID\"}]},\"system\":\"https://dcgeo.cms.gov/resources/variables/dcn\",\"value\":\"123456\"}],\"status\":\"active\",\"type\":{\"coding\":[{\"system\":\"https://dcgeo.cms.gov/resources/codesystem/rda-type\",\"code\":\"FISS\"},{\"system\":\"http://terminology.hl7.org/CodeSystem/claim-type\",\"code\":\"institutional\",\"display\":\"Institutional\"}]},\"use\":\"claim\",\"patient\":{\"identifier\":{\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"MC\",\"display\":\"Patient's Medicare number\"}]},\"system\":\"http://hl7.org/fhir/sid/us-mbi\",\"value\":\"123456MBI\"}},\"created\":\"1970-01-01T00:00:01+00:00\",\"insurer\":{\"identifier\":{\"value\":\"CMS\"}},\"request\":{\"reference\":\"Claim/f-123456\"},\"outcome\":\"queued\"}";
-
-    public static final String TEST_MCS =
-        "{\"resourceType\":\"ClaimResponse\",\"id\":\"m-654321\",\"meta\":{\"lastUpdated\":\"1970-01-01T00:00:04.000+00:00\"},\"extension\":[{\"url\":\"https://dcgeo.cms.gov/resources/variables/mcs-status\",\"valueCoding\":{\"system\":\"https://dcgeo.cms.gov/resources/variables/mcs-status\",\"code\":\"5\",\"display\":\"5\"}}],\"identifier\":[{\"type\":{\"coding\":[{\"system\":\"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\"code\":\"uc\",\"display\":\"Unique Claim ID\"}]},\"system\":\"https://dcgeo.cms.gov/resources/variables/icn\",\"value\":\"654321\"}],\"status\":\"active\",\"type\":{\"coding\":[{\"system\":\"https://dcgeo.cms.gov/resources/codesystem/rda-type\",\"code\":\"MCS\"},{\"system\":\"http://terminology.hl7.org/CodeSystem/claim-type\",\"code\":\"professional\",\"display\":\"Professional\"}]},\"use\":\"claim\",\"patient\":{\"identifier\":{\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"MC\",\"display\":\"Patient's Medicare number\"}]},\"system\":\"http://hl7.org/fhir/sid/us-mbi\",\"value\":\"123456MBI\"}},\"created\":\"1970-01-01T00:00:01+00:00\",\"insurer\":{\"identifier\":{\"value\":\"CMS\"}},\"request\":{\"reference\":\"Claim/m-654321\"},\"outcome\":\"queued\"}";
-
-    // TODO: This will get updated when DCGEO-117 comes in
-    public static final String TEST_SEARCH =
-        "{\"resourceType\":\"Bundle\",\"id\":\"1856fb88-119e-46b6-a775-ab78ae0f61e9\",\"meta\":{\"lastUpdated\":\"1970-01-01T00:00:01.000+00:00\"},\"type\":\"searchset\",\"link\":[{\"relation\":\"self\",\"url\":\"https://localhost:6500/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30\"}],\"entry\":[{\"resource\":{\"resourceType\":\"ClaimResponse\",\"id\":\"f-123456\",\"meta\":{\"lastUpdated\":\"1970-01-01T00:00:00.000+00:00\"},\"extension\":[{\"url\":\"https://dcgeo.cms.gov/resources/variables/fiss-status\",\"valueCoding\":{\"system\":\"https://dcgeo.cms.gov/resources/variables/fiss-status\",\"code\":\"a\",\"display\":\"Accepted\"}}],\"identifier\":[{\"type\":{\"coding\":[{\"system\":\"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\"code\":\"uc\",\"display\":\"Unique Claim ID\"}]},\"system\":\"https://dcgeo.cms.gov/resources/variables/dcn\",\"value\":\"123456\"}],\"status\":\"active\",\"type\":{\"coding\":[{\"system\":\"https://dcgeo.cms.gov/resources/codesystem/rda-type\",\"code\":\"FISS\"},{\"system\":\"http://terminology.hl7.org/CodeSystem/claim-type\",\"code\":\"institutional\",\"display\":\"Institutional\"}]},\"use\":\"claim\",\"patient\":{\"identifier\":{\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"MC\",\"display\":\"Patient's Medicare number\"}]},\"system\":\"http://hl7.org/fhir/sid/us-mbi\",\"value\":\"123456MBI\"}},\"created\":\"1970-01-01T00:00:01+00:00\",\"insurer\":{\"identifier\":{\"value\":\"CMS\"}},\"request\":{\"reference\":\"Claim/f-123456\"},\"outcome\":\"queued\"}},{\"resource\":{\"resourceType\":\"ClaimResponse\",\"id\":\"f-123457\",\"meta\":{\"lastUpdated\":\"1970-01-01T00:00:05.000+00:00\"},\"extension\":[{\"url\":\"https://dcgeo.cms.gov/resources/variables/fiss-status\",\"valueCoding\":{\"system\":\"https://dcgeo.cms.gov/resources/variables/fiss-status\",\"code\":\"t\",\"display\":\"Return To Provider\"}}],\"identifier\":[{\"type\":{\"coding\":[{\"system\":\"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\"code\":\"uc\",\"display\":\"Unique Claim ID\"}]},\"system\":\"https://dcgeo.cms.gov/resources/variables/dcn\",\"value\":\"123457\"}],\"status\":\"active\",\"type\":{\"coding\":[{\"system\":\"https://dcgeo.cms.gov/resources/codesystem/rda-type\",\"code\":\"FISS\"},{\"system\":\"http://terminology.hl7.org/CodeSystem/claim-type\",\"code\":\"institutional\",\"display\":\"Institutional\"}]},\"use\":\"claim\",\"patient\":{\"identifier\":{\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"MC\",\"display\":\"Patient's Medicare number\"}]},\"system\":\"http://hl7.org/fhir/sid/us-mbi\",\"value\":\"123456MBI\"}},\"created\":\"1970-01-01T00:00:01+00:00\",\"insurer\":{\"identifier\":{\"value\":\"CMS\"}},\"request\":{\"reference\":\"Claim/f-123457\"},\"outcome\":\"partial\"}},{\"resource\":{\"resourceType\":\"ClaimResponse\",\"id\":\"m-654321\",\"meta\":{\"lastUpdated\":\"1970-01-01T00:00:04.000+00:00\"},\"extension\":[{\"url\":\"https://dcgeo.cms.gov/resources/variables/mcs-status\",\"valueCoding\":{\"system\":\"https://dcgeo.cms.gov/resources/variables/mcs-status\",\"code\":\"5\",\"display\":\"5\"}}],\"identifier\":[{\"type\":{\"coding\":[{\"system\":\"http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType\",\"code\":\"uc\",\"display\":\"Unique Claim ID\"}]},\"system\":\"https://dcgeo.cms.gov/resources/variables/icn\",\"value\":\"654321\"}],\"status\":\"active\",\"type\":{\"coding\":[{\"system\":\"https://dcgeo.cms.gov/resources/codesystem/rda-type\",\"code\":\"MCS\"},{\"system\":\"http://terminology.hl7.org/CodeSystem/claim-type\",\"code\":\"professional\",\"display\":\"Professional\"}]},\"use\":\"claim\",\"patient\":{\"identifier\":{\"type\":{\"coding\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v2-0203\",\"code\":\"MC\",\"display\":\"Patient's Medicare number\"}]},\"system\":\"http://hl7.org/fhir/sid/us-mbi\",\"value\":\"123456MBI\"}},\"created\":\"1970-01-01T00:00:01+00:00\",\"insurer\":{\"identifier\":{\"value\":\"CMS\"}},\"request\":{\"reference\":\"Claim/m-654321\"},\"outcome\":\"queued\"}}]}";
+    AssertUtils.assertJsonEquals(expected, actual, ignorePatterns);
   }
 }

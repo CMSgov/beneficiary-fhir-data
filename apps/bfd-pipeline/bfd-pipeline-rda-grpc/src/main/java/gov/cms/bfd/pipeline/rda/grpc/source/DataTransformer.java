@@ -1,7 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Timestamp;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -181,10 +183,12 @@ public class DataTransformer {
       EnumStringExtractor.Result enumResult,
       Consumer<String> copier) {
     final EnumStringExtractor.Status status = enumResult.getStatus();
-    if (status == EnumStringExtractor.Status.NoValue) {
+    if (status == EnumStringExtractor.Status.NoValue && !nullable) {
       addError(fieldName, "no value set");
     } else if (status == EnumStringExtractor.Status.InvalidValue) {
       addError(fieldName, "unrecognized enum value");
+    } else if (status == EnumStringExtractor.Status.UnsupportedValue) {
+      addError(fieldName, "unsupported enum value");
     } else {
       final String value = enumResult.getValue();
       copyString(fieldName, nullable, minLength, maxLength, value, copier);
@@ -360,6 +364,10 @@ public class DataTransformer {
   public void addError(String fieldName, String errorFormat, Object... args) {
     final String message = String.format(errorFormat, args);
     errors.add(new ErrorMessage(fieldName, message));
+  }
+
+  public Instant instant(Timestamp timestamp) {
+    return Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
   }
 
   /**
