@@ -265,35 +265,35 @@ try {
 				}
 			}
 
-			// stage('Deploy to PROD-SBX') {
-			// 	currentStage = "${env.STAGE_NAME}"
-			// 	if (willDeployToProdEnvs) {
-			// 		lock(resource: 'env_prod_sbx', inversePrecendence: true) {
-			// 			milestone(label: 'stage_deploy_prod_sbx_start')
+			stage('Deploy to PROD-SBX') {
+				currentStage = "${env.STAGE_NAME}"
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod_sbx', inversePrecendence: true) {
+						milestone(label: 'stage_deploy_prod_sbx_start')
 
-			// 			container('bfd-cbc-build') {
-			// 				scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
-			// 			}
-			// 		}
-			// 	} else {
-			// 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
-			// 	}
-			// }
+						container('bfd-cbc-build') {
+							scriptForDeploys.deploy('prod-sbx', gitBranchName, gitCommitId, amiIds, appBuildResults)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod-sbx')
+				}
+			}
 
-			// stage('Deploy to PROD') {
-			// 	currentStage = "${env.STAGE_NAME}"
-			// 	if (willDeployToProdEnvs) {
-			// 		lock(resource: 'env_prod', inversePrecendence: true) {
-			// 			milestone(label: 'stage_deploy_prod_start')
+			stage('Deploy to PROD') {
+				currentStage = "${env.STAGE_NAME}"
+				if (willDeployToProdEnvs) {
+					lock(resource: 'env_prod', inversePrecendence: true) {
+						milestone(label: 'stage_deploy_prod_start')
 
-			// 			container('bfd-cbc-build') {
-			// 				scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
-			// 			}
-			// 		}
-			// 	} else {
-			// 		org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
-			// 	}
-			// }
+						container('bfd-cbc-build') {
+							scriptForDeploys.deploy('prod', gitBranchName, gitCommitId, amiIds, appBuildResults)
+						}
+					}
+				} else {
+					org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional('Deploy to prod')
+				}
+			}
 		}
 	}
 } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e){
@@ -303,5 +303,5 @@ try {
 	currentBuild.result = "FAILURE"
 	throw ex
 } finally {
-	//sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
+	sendNotifications(currentBuild.currentResult, currentStage, gitCommitId, gitRepoUrl)
 }
