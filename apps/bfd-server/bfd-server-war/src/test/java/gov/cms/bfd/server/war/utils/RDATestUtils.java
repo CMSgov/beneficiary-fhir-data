@@ -104,33 +104,37 @@ public class RDATestUtils {
   }
 
   private PreAdjFissClaim fissTestDataA() {
-    PreAdjFissClaim claim = new PreAdjFissClaim();
-    claim.setDcn("123456");
-    claim.setHicNo("hicnumber");
-    claim.setCurrStatus('a');
-    claim.setCurrLoc1('z');
-    claim.setCurrLoc2("Somda");
-    claim.setMedaProvId("meda12345");
-    claim.setTotalChargeAmount(new BigDecimal("1234.32"));
-    claim.setReceivedDate(LocalDate.ofEpochDay(0));
-    claim.setCurrTranDate(LocalDate.ofEpochDay(1));
-    claim.setAdmitDiagCode("admitcd");
-    claim.setPrincipleDiag("princcd");
-    claim.setNpiNumber("8876543211");
-    claim.setMbi("123456MBI");
-    claim.setMbiHash("a7f8e93f09");
-    claim.setFedTaxNumber("abc123");
-    claim.setLastUpdated(Instant.ofEpochMilli(0));
-    claim.setStmtCovFromDate(LocalDate.ofEpochDay(200));
-    claim.setStmtCovToDate(LocalDate.ofEpochDay(200));
+    PreAdjFissClaim claim =
+        PreAdjFissClaim.builder()
+            .dcn("123456")
+            .hicNo("hicnumber")
+            .currStatus('a')
+            .currLoc1('z')
+            .currLoc2("Somda")
+            .medaProvId("meda12345")
+            .totalChargeAmount(new BigDecimal("1234.32"))
+            .receivedDate(LocalDate.ofEpochDay(0))
+            .currTranDate(LocalDate.ofEpochDay(1))
+            .admitDiagCode("admitcd")
+            .principleDiag("princcd")
+            .npiNumber("8876543211")
+            .mbi("123456MBI")
+            .mbiHash("a7f8e93f09")
+            .fedTaxNumber("abc123")
+            .lastUpdated(Instant.ofEpochMilli(0))
+            .stmtCovFromDate(LocalDate.ofEpochDay(200))
+            .stmtCovToDate(LocalDate.ofEpochDay(200))
+            .build();
 
-    PreAdjFissProcCode code = new PreAdjFissProcCode();
-    code.setDcn("123456");
-    code.setPriority((short) 0);
-    code.setProcCode("CODEABC");
-    code.setProcFlag("FLAG");
-    code.setProcDate(LocalDate.ofEpochDay(200));
-    code.setLastUpdated(Instant.ofEpochMilli(0));
+    PreAdjFissProcCode code =
+        PreAdjFissProcCode.builder()
+            .dcn("123456")
+            .priority((short) 0)
+            .procCode("CODEABC")
+            .procFlag("FLAG")
+            .procDate(LocalDate.ofEpochDay(200))
+            .lastUpdated(Instant.ofEpochMilli(0))
+            .build();
 
     claim.setProcCodes(Collections.singleton(code));
 
@@ -138,33 +142,37 @@ public class RDATestUtils {
   }
 
   private PreAdjFissClaim fissTestDataB() {
-    PreAdjFissClaim claim = new PreAdjFissClaim();
-    claim.setDcn("123457");
-    claim.setHicNo("hicnumbe2");
-    claim.setCurrStatus('t');
-    claim.setCurrLoc1('r');
-    claim.setCurrLoc2("Somdb");
-    claim.setMedaProvId("meda12346");
-    claim.setTotalChargeAmount(new BigDecimal("1235.32"));
-    claim.setReceivedDate(LocalDate.ofEpochDay(8));
-    claim.setCurrTranDate(LocalDate.ofEpochDay(12));
-    claim.setAdmitDiagCode("admitcc");
-    claim.setPrincipleDiag("princcc");
-    claim.setNpiNumber("8876543212");
-    claim.setMbi("123456MBI");
-    claim.setMbiHash("a7f8e93f09");
-    claim.setFedTaxNumber("abc124");
-    claim.setLastUpdated(Instant.ofEpochMilli(5000));
-    claim.setStmtCovFromDate(LocalDate.ofEpochDay(211));
-    claim.setStmtCovToDate(LocalDate.ofEpochDay(211));
+    PreAdjFissClaim claim =
+        PreAdjFissClaim.builder()
+            .dcn("123457")
+            .hicNo("hicnumbe2")
+            .currStatus('t')
+            .currLoc1('r')
+            .currLoc2("Somdb")
+            .medaProvId("meda12346")
+            .totalChargeAmount(new BigDecimal("1235.32"))
+            .receivedDate(LocalDate.ofEpochDay(8))
+            .currTranDate(LocalDate.ofEpochDay(12))
+            .admitDiagCode("admitcc")
+            .principleDiag("princcc")
+            .npiNumber("8876543212")
+            .mbi("123456MBI")
+            .mbiHash("a7f8e93f09")
+            .fedTaxNumber("abc124")
+            .lastUpdated(Instant.ofEpochMilli(5000))
+            .stmtCovFromDate(LocalDate.ofEpochDay(211))
+            .stmtCovToDate(LocalDate.ofEpochDay(211))
+            .build();
 
-    PreAdjFissProcCode code = new PreAdjFissProcCode();
-    code.setDcn("123457");
-    code.setPriority((short) 0);
-    code.setProcCode("CODEABD");
-    code.setProcFlag("FLAC");
-    code.setProcDate(LocalDate.ofEpochDay(211));
-    code.setLastUpdated(Instant.ofEpochMilli(5000));
+    PreAdjFissProcCode code =
+        PreAdjFissProcCode.builder()
+            .dcn("123457")
+            .priority((short) 0)
+            .procCode("CODEABD")
+            .procFlag("FLAC")
+            .procDate(LocalDate.ofEpochDay(211))
+            .lastUpdated(Instant.ofEpochMilli(5000))
+            .build();
 
     claim.setProcCodes(Collections.singleton(code));
 
@@ -176,43 +184,47 @@ public class RDATestUtils {
   }
 
   private PreAdjMcsClaim mcsTestDataA() {
-    PreAdjMcsClaim claim = new PreAdjMcsClaim();
-    claim.setIdrClmHdIcn("654321");
-    claim.setIdrContrId("contr");
-    claim.setIdrHic("HicValue");
-    claim.setIdrClaimType("R");
-    claim.setIdrDtlCnt(56);
-    claim.setIdrBeneLast_1_6("SMITH");
-    claim.setIdrBeneFirstInit("J");
-    claim.setIdrBeneMidInit("D");
-    claim.setIdrBeneSex("M");
-    claim.setIdrStatusCode("5");
-    claim.setIdrStatusDate(LocalDate.ofEpochDay(191));
-    claim.setIdrBillProvNpi("9876789102");
-    claim.setIdrBillProvNum("4444422222");
-    claim.setIdrBillProvEin("1231231231");
-    claim.setIdrBillProvType("AB");
-    claim.setIdrBillProvSpec("BA");
-    claim.setIdrBillProvGroupInd("A");
-    claim.setIdrBillProvPriceSpec("FF");
-    claim.setIdrBillProvCounty("GG");
-    claim.setIdrBillProvLoc("HH");
-    claim.setIdrTotAllowed(new BigDecimal("323.45"));
-    claim.setIdrCoinsurance(new BigDecimal("300.45"));
-    claim.setIdrDeductible(new BigDecimal("23.00"));
-    claim.setIdrBillProvStatusCd("Z");
-    claim.setIdrTotBilledAmt(new BigDecimal("23.00"));
-    claim.setIdrClaimReceiptDate(LocalDate.ofEpochDay(54));
-    claim.setIdrClaimMbi("123456MBI");
-    claim.setIdrClaimMbiHash("a7f8e93f09");
-    claim.setIdrHdrFromDateOfSvc(LocalDate.ofEpochDay(210));
-    claim.setIdrHdrToDateOfSvc(LocalDate.ofEpochDay(210));
-    claim.setLastUpdated(Instant.ofEpochMilli(4000));
+    PreAdjMcsClaim claim =
+        PreAdjMcsClaim.builder()
+            .idrClmHdIcn("654321")
+            .idrContrId("contr")
+            .idrHic("HicValue")
+            .idrClaimType("R")
+            .idrDtlCnt(56)
+            .idrBeneLast_1_6("SMITH")
+            .idrBeneFirstInit("J")
+            .idrBeneMidInit("D")
+            .idrBeneSex("M")
+            .idrStatusCode("5")
+            .idrStatusDate(LocalDate.ofEpochDay(191))
+            .idrBillProvNpi("9876789102")
+            .idrBillProvNum("4444422222")
+            .idrBillProvEin("1231231231")
+            .idrBillProvType("AB")
+            .idrBillProvSpec("BA")
+            .idrBillProvGroupInd("A")
+            .idrBillProvPriceSpec("FF")
+            .idrBillProvCounty("GG")
+            .idrBillProvLoc("HH")
+            .idrTotAllowed(new BigDecimal("323.45"))
+            .idrCoinsurance(new BigDecimal("300.45"))
+            .idrDeductible(new BigDecimal("23.00"))
+            .idrBillProvStatusCd("Z")
+            .idrTotBilledAmt(new BigDecimal("23.00"))
+            .idrClaimReceiptDate(LocalDate.ofEpochDay(54))
+            .idrClaimMbi("123456MBI")
+            .idrClaimMbiHash("a7f8e93f09")
+            .idrHdrFromDateOfSvc(LocalDate.ofEpochDay(210))
+            .idrHdrToDateOfSvc(LocalDate.ofEpochDay(210))
+            .lastUpdated(Instant.ofEpochMilli(4000))
+            .build();
 
-    PreAdjMcsDetail proc = new PreAdjMcsDetail();
-    proc.setIdrClmHdIcn("654321");
-    proc.setIdrDtlToDate(LocalDate.ofEpochDay(208));
-    proc.setIdrProcCode("FDSAE");
+    PreAdjMcsDetail proc =
+        PreAdjMcsDetail.builder()
+            .idrClmHdIcn("654321")
+            .idrDtlToDate(LocalDate.ofEpochDay(208))
+            .idrProcCode("FDSAE")
+            .build();
 
     claim.setDetails(Collections.singleton(proc));
 
