@@ -11,6 +11,8 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.time.Clock;
 import java.util.Collection;
+import java.util.Optional;
+import java.util.OptionalLong;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import lombok.Getter;
@@ -23,16 +25,16 @@ import org.slf4j.LoggerFactory;
  * @param <TClaim> type of entity objects written to the database
  */
 abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClaimRdaSink.class);
-
   protected final EntityManager entityManager;
   protected final Metrics metrics;
   protected final Clock clock;
+  protected final Logger logger;
 
   protected AbstractClaimRdaSink(PipelineApplicationState appState) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
     metrics = new Metrics(getClass(), appState.getMetrics());
     clock = appState.getClock();
+    logger = LoggerFactory.getLogger(getClass());
   }
 
   @Override
@@ -49,21 +51,27 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
         updateLatencyMetric(claims);
         persistBatch(claims);
         metrics.objectsPersisted.mark(claims.size());
-        LOGGER.info("wrote batch of {} claims using persist()", claims.size());
+        logger.info(
+            "wrote batch of {} claims using persist() with maxSeq={}",
+            claims.size(),
+            maxSequenceInBatch(claims));
       } catch (Throwable error) {
         if (isDuplicateKeyException(error)) {
-          LOGGER.info(
+          logger.info(
               "caught duplicate key exception: switching to merge for batch of {} claims",
               claims.size());
           mergeBatch(claims);
           metrics.objectsMerged.mark(claims.size());
-          LOGGER.info("wrote batch of {} claims using merge()", claims.size());
+          logger.info(
+              "wrote batch of {} claims using merge() with maxSeq={}",
+              claims.size(),
+              maxSequenceInBatch(claims));
         } else {
           throw error;
         }
       }
     } catch (Exception error) {
-      LOGGER.error("writeBatch failure: error={}", error.getMessage(), error);
+      logger.error("writeBatch failure: error={}", error.getMessage(), error);
       metrics.failures.mark();
       throw new ProcessingException(error, 0);
     }
@@ -126,6 +134,35 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
         entityManager.getTransaction().rollback();
       }
       entityManager.clear();
+    }
+  }
+
+  private long maxSequenceInBatch(Collection<RdaChange<TClaim>> claims) {
+    OptionalLong value = claims.stream().mapToLong(RdaChange::getSequenceNumber).max();
+    if (!value.isPresent()) {
+      // This should never happen! But if it does, we'll shout about it rather than throw an
+      // exception
+      logger.warn("processed an empty batch!");
+    }
+    return value.orElse(-1L);
+  }
+
+  /**
+   * Used by sub-classes to read the highest known sequenceNumber for claims in the database.
+   *
+   * @param query JPAQL query string
+   * @return result of the query or empty if no records matched
+   */
+  protected Optional<Long> readMaxExistingSequenceNumber(String query) throws ProcessingException {
+    try {
+      logger.info("running query to find max sequence number");
+      Long sequenceNumber = entityManager.createQuery(query, Long.class).getSingleResult();
+      final Optional<Long> answer = Optional.ofNullable(sequenceNumber);
+      logger.info(
+          "max sequence number result is {}", answer.map(n -> Long.toString(n)).orElse("none"));
+      return answer;
+    } catch (Exception ex) {
+      throw new ProcessingException(ex, 0);
     }
   }
 

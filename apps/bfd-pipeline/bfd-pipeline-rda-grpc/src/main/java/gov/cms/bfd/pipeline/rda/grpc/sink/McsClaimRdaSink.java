@@ -12,18 +12,8 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<PreAdjMcsClaim> {
 
   @Override
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
-    try {
-      Long sequenceNumber =
-          entityManager
-              .createQuery(
-                  String.format(
-                      "select max(c.%s) from PreAdjMcsClaim c",
-                      PreAdjMcsClaim.Fields.sequenceNumber),
-                  Long.class)
-              .getSingleResult();
-      return Optional.ofNullable(sequenceNumber);
-    } catch (Exception ex) {
-      throw new ProcessingException(ex, 0);
-    }
+    return readMaxExistingSequenceNumber(
+        String.format(
+            "select max(c.%s) from PreAdjMcsClaim c", PreAdjMcsClaim.Fields.sequenceNumber));
   }
 }
