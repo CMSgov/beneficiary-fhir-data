@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
-import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
-import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.*;
 import static gov.cms.bfd.pipeline.rda.grpc.sink.AbstractClaimRdaSink.isDuplicateKeyException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -43,6 +42,7 @@ public class FissClaimRdaSinkTest {
   @Mock private EntityTransaction transaction;
   private MetricRegistry appMetrics;
   private FissClaimRdaSink sink;
+  private long nextSeq = 0L;
 
   @Before
   public void setUp() {
@@ -53,6 +53,7 @@ public class FissClaimRdaSinkTest {
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
     sink = new FissClaimRdaSink(appState);
+    nextSeq = 0L;
   }
 
   @Test
@@ -62,6 +63,7 @@ public class FissClaimRdaSinkTest {
             "FissClaimRdaSink.calls",
             "FissClaimRdaSink.change.latency.millis",
             "FissClaimRdaSink.failures",
+            "FissClaimRdaSink.lastSeq",
             "FissClaimRdaSink.successes",
             "FissClaimRdaSink.writes.merged",
             "FissClaimRdaSink.writes.persisted",
@@ -91,6 +93,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(3, "writes", metrics.getObjectsWritten());
     assertMeterReading(1, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
+    assertGaugeReading(2, "lastSeq", metrics.getLatestSequenceNumber());
   }
 
   @Test
@@ -121,6 +124,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(3, "writes", metrics.getObjectsWritten());
     assertMeterReading(1, "successes", metrics.getSuccesses());
     assertMeterReading(0, "failures", metrics.getFailures());
+    assertGaugeReading(2, "lastSeq", metrics.getLatestSequenceNumber());
   }
 
   @Test
@@ -156,6 +160,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "writes", metrics.getObjectsWritten());
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(1, "failures", metrics.getFailures());
+    assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
   }
 
   @Test
@@ -187,6 +192,7 @@ public class FissClaimRdaSinkTest {
     assertMeterReading(0, "writes", metrics.getObjectsWritten());
     assertMeterReading(0, "successes", metrics.getSuccesses());
     assertMeterReading(1, "failures", metrics.getFailures());
+    assertGaugeReading(0, "lastSeq", metrics.getLatestSequenceNumber());
   }
 
   @Test
@@ -206,6 +212,6 @@ public class FissClaimRdaSinkTest {
     PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn(dcn);
     return new RdaChange<>(
-        MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
+        nextSeq++, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
   }
 }

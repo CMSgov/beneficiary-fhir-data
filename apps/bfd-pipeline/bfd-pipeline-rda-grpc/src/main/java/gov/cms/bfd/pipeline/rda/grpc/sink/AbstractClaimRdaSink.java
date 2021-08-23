@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -13,6 +14,7 @@ import java.time.Clock;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import lombok.Getter;
@@ -45,33 +47,38 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
   }
 
   public int writeBatch(Collection<RdaChange<TClaim>> claims) throws ProcessingException {
+    final long maxSeq = maxSequenceInBatch(claims);
     try {
       metrics.calls.mark();
       try {
         updateLatencyMetric(claims);
         persistBatch(claims);
         metrics.objectsPersisted.mark(claims.size());
+        metrics.setLatestSequenceNumber(maxSeq);
         logger.info(
-            "wrote batch of {} claims using persist() with maxSeq={}",
-            claims.size(),
-            maxSequenceInBatch(claims));
+            "writeBatch succeeded using persist: size={} maxSeq={} ", claims.size(), maxSeq);
       } catch (Throwable error) {
         if (isDuplicateKeyException(error)) {
           logger.info(
-              "caught duplicate key exception: switching to merge for batch of {} claims",
-              claims.size());
+              "writeBatch switching to merge due to duplicate key exception: size={} maxSeq={}",
+              claims.size(),
+              maxSeq);
           mergeBatch(claims);
           metrics.objectsMerged.mark(claims.size());
+          metrics.setLatestSequenceNumber(maxSeq);
           logger.info(
-              "wrote batch of {} claims using merge() with maxSeq={}",
-              claims.size(),
-              maxSequenceInBatch(claims));
+              "writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
         } else {
           throw error;
         }
       }
     } catch (Exception error) {
-      logger.error("writeBatch failure: error={}", error.getMessage(), error);
+      logger.error(
+          "writeBatch failed: size={} maxSeq={} error={}",
+          claims.size(),
+          maxSeq,
+          error.getMessage(),
+          error);
       metrics.failures.mark();
       throw new ProcessingException(error, 0);
     }
@@ -144,7 +151,7 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
       // exception
       logger.warn("processed an empty batch!");
     }
-    return value.orElse(-1L);
+    return value.orElse(0L);
   }
 
   /**
@@ -212,6 +219,10 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
     private final Meter objectsMerged;
     /** Milliseconds between change timestamp and current time. */
     private final Histogram changeAgeMillis;
+    /** Latest sequnce number from writing a batch. * */
+    private final Gauge<Long> latestSequenceNumber;
+    /** The value returned by the latestSequenceNumber gauge. * */
+    private final AtomicLong latestSequenceNumberValue = new AtomicLong(0L);
 
     private Metrics(Class<?> klass, MetricRegistry appMetrics) {
       final String base = klass.getSimpleName();
@@ -223,6 +234,13 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
       objectsMerged = appMetrics.meter(MetricRegistry.name(base, "writes", "merged"));
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
+      latestSequenceNumber =
+          appMetrics.register(
+              MetricRegistry.name(base, "lastSeq"), latestSequenceNumberValue::longValue);
+    }
+
+    private void setLatestSequenceNumber(long value) {
+      latestSequenceNumberValue.set(value);
     }
   }
 }
