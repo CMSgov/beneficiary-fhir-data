@@ -1643,8 +1643,8 @@ public final class TransformerUtils {
    * @param claimType {@link ClaimType} to process
    * @param claimGroupId CLM_GRP_ID
    * @param coverageType {@link MedicareSegment}
-   * @param dateFrom CLM_FROM_DT || SRVC_DT
-   * @param dateThrough CLM_THRU_DT || SRVC_DT
+   * @param dateFrom CLM_FROM_DT || SRVC_DT (For Part D Events)
+   * @param dateThrough CLM_THRU_DT || SRVC_DT (For Part D Events)
    * @param paymentAmount CLM_PMT_AMT
    * @param finalAction FINAL_ACTION
    */
