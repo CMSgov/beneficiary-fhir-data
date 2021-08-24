@@ -227,6 +227,7 @@
         Also must specify the loader.config property to tell the program where to find its config file.
         Finally, also specify the json-to-db property (no value needed) to activate this profile.
         Sample command line: mvn -pl :bfd-pipeline-rda-grpc-server exec:java -Djson-to-db -Dconfig.properties=load-json.properties -Dfile.fiss=FISS.ndjson
+        Alternatively you can use -P json-to-db instead of using the system property.
         -->
         <profile>
             <id>json-to-db</id>
