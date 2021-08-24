@@ -122,6 +122,17 @@ public class ConfigLoaderTest {
   }
 
   @Test(expected = ConfigException.class)
+  public void readableFileIsNotAFile() throws Exception {
+    runWithTempFile(
+        file -> {
+          file.delete();
+          file.mkdir();
+          values.put("a", file.getPath());
+          assertEquals(file, loader.readableFile("a"));
+        });
+  }
+
+  @Test(expected = ConfigException.class)
   public void writeableFileIsNotAFile() throws Exception {
     runWithTempFile(
         file -> {

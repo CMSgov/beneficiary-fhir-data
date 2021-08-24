@@ -157,6 +157,9 @@ public class ConfigLoader {
     Optional<File> file = stringOption(name).map(File::new);
     file.ifPresent(
         f -> {
+          if (!f.isFile()) {
+            throw new ConfigException(name, "object referenced by path is not a file");
+          }
           if (!f.canRead()) {
             throw new ConfigException(name, "file is not readable");
           }
