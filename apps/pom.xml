@@ -97,7 +97,7 @@
 		<local.v2.enabled>true</local.v2.enabled>
 
 		<!-- Whether the preadj endpoints should be enabled -->
-		<local.preadj.enabled>true</local.preadj.enabled>
+		<local.preadj.enabled>false</local.preadj.enabled>
 	</properties>
 
 	<dependencyManagement>
