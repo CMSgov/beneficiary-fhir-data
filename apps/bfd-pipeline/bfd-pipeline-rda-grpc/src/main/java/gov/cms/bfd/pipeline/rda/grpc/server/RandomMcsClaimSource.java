@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.util.NoSuchElementException;
 
@@ -7,7 +8,7 @@ import java.util.NoSuchElementException;
  * A ClaimSource implementation that generates and returns random McsClaim objects. The random
  * number seed and number of claims to return are specified in the constructor.
  */
-public class RandomMcsClaimSource implements ClaimSource<McsClaim> {
+public class RandomMcsClaimSource implements MessageSource<McsClaim> {
   private final RandomMcsClaimGenerator generator;
   private final int maxToSend;
   private int sent;
@@ -34,4 +35,8 @@ public class RandomMcsClaimSource implements ClaimSource<McsClaim> {
 
   @Override
   public void close() {}
+
+  public MessageSource<McsClaimChange> toClaimChanges() {
+    return WrappedClaimSource.wrapMcsClaims(this, generator.getClock());
+  }
 }

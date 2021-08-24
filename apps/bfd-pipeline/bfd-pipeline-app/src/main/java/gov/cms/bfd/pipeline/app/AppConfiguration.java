@@ -87,6 +87,12 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE = "DATABASE_MAX_POOL_SIZE";
 
   /**
+   * The name of the environment variable that should be used to indicate whether or not to
+   * configure the CCW RIF data load job. Defaults to true to run the job unless disabled.
+   */
+  public static final String ENV_VAR_KEY_CCW_RIF_JOB_ENABLED = "CCW_RIF_JOB_ENABLED";
+
+  /**
    * The name of the environment variable that should be used to provide the {@link
    * #getCcwRifLoadOptions()} {@link LoadAppOptions#getLoaderThreads()} value.
    */
@@ -141,7 +147,7 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to indicate whether or not to
-   * configure the RDA GPC data load job. Defaults to false to mean not to load the job.
+   * configure the RDA GRPC data load job. Defaults to false to not run the job unless enabled.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_ENABLED = "RDA_JOB_ENABLED";
 
@@ -191,7 +197,8 @@ public final class AppConfiguration implements Serializable {
 
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
-  private final CcwRifLoadOptions ccwRifLoadOptions;
+  // this can be null if the RDA job is not configured, Optional is not Serializable
+  @Nullable private final CcwRifLoadOptions ccwRifLoadOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
   @Nullable private final RdaLoadOptions rdaLoadOptions;
 
@@ -203,11 +210,11 @@ public final class AppConfiguration implements Serializable {
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
    */
-  public AppConfiguration(
+  private AppConfiguration(
       MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
-      CcwRifLoadOptions ccwRifLoadOptions,
-      RdaLoadOptions rdaLoadOptions) {
+      @Nullable CcwRifLoadOptions ccwRifLoadOptions,
+      @Nullable RdaLoadOptions rdaLoadOptions) {
     this.metricOptions = metricOptions;
     this.databaseOptions = databaseOptions;
     this.ccwRifLoadOptions = ccwRifLoadOptions;
@@ -225,8 +232,8 @@ public final class AppConfiguration implements Serializable {
   }
 
   /** @return the {@link CcwRifLoadOptions} that the application will use */
-  public CcwRifLoadOptions getCcwRifLoadOptions() {
-    return ccwRifLoadOptions;
+  public Optional<CcwRifLoadOptions> getCcwRifLoadOptions() {
+    return Optional.ofNullable(ccwRifLoadOptions);
   }
 
   /** @return the {@link RdaLoadOptions} that the application will use */
@@ -265,7 +272,6 @@ public final class AppConfiguration implements Serializable {
    *     configuration passed to the application are incomplete or incorrect.
    */
   static AppConfiguration readConfigFromEnvironmentVariables() {
-    String s3BucketName = readEnvStringRequired(ENV_VAR_KEY_BUCKET);
     int hicnHashIterations = readEnvIntPositiveRequired(ENV_VAR_KEY_HICN_HASH_ITERATIONS);
     byte[] hicnHashPepper = readEnvBytesRequired(ENV_VAR_KEY_HICN_HASH_PEPPER);
     String databaseUrl = readEnvStringRequired(ENV_VAR_KEY_DATABASE_URL);
@@ -291,8 +297,49 @@ public final class AppConfiguration implements Serializable {
               ENV_VAR_KEY_DATABASE_MAX_POOL_SIZE, databaseMaxPoolSize));
     if (!databaseMaxPoolSize.isPresent()) databaseMaxPoolSize = Optional.of(loaderThreads * 2);
 
-    Optional<String> rifFilterText = readEnvStringOptional(ENV_VAR_KEY_ALLOWED_RIF_TYPE);
-    Optional<RifFileType> allowedRifFileType;
+    Optional<String> hostname;
+    try {
+      hostname = Optional.of(InetAddress.getLocalHost().getHostName());
+    } catch (UnknownHostException e) {
+      hostname = Optional.empty();
+    }
+
+    MetricOptions metricOptions =
+        new MetricOptions(
+            newRelicMetricKey,
+            newRelicAppName,
+            newRelicMetricHost,
+            newRelicMetricPath,
+            newRelicMetricPeriod,
+            hostname);
+    DatabaseOptions databaseOptions =
+        new DatabaseOptions(
+            databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.get());
+    LoadAppOptions loadOptions =
+        new LoadAppOptions(
+            new IdHasher.Config(hicnHashIterations, hicnHashPepper),
+            loaderThreads,
+            idempotencyRequired);
+
+    CcwRifLoadOptions ccwRifLoadOptions =
+        readCcwRifLoadOptionsFromEnvironmentVariables(loadOptions);
+
+    RdaLoadOptions rdaLoadOptions =
+        readRdaLoadOptionsFromEnvironmentVariables(loadOptions.getIdHasherConfig());
+    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+  }
+
+  @Nullable
+  static CcwRifLoadOptions readCcwRifLoadOptionsFromEnvironmentVariables(
+      LoadAppOptions loadOptions) {
+    final boolean enabled = readEnvBooleanOptional(ENV_VAR_KEY_CCW_RIF_JOB_ENABLED).orElse(true);
+    if (!enabled) {
+      return null;
+    }
+
+    final String s3BucketName = readEnvStringRequired(ENV_VAR_KEY_BUCKET);
+    final Optional<String> rifFilterText = readEnvStringOptional(ENV_VAR_KEY_ALLOWED_RIF_TYPE);
+    final Optional<RifFileType> allowedRifFileType;
     if (rifFilterText.isPresent()) {
       try {
         allowedRifFileType = Optional.of(RifFileType.valueOf(rifFilterText.get()));
@@ -326,36 +373,9 @@ public final class AppConfiguration implements Serializable {
               DefaultAWSCredentialsProviderChain.class.getName()),
           e);
     }
-
-    Optional<String> hostname;
-    try {
-      hostname = Optional.of(InetAddress.getLocalHost().getHostName());
-    } catch (UnknownHostException e) {
-      hostname = Optional.empty();
-    }
-
-    MetricOptions metricOptions =
-        new MetricOptions(
-            newRelicMetricKey,
-            newRelicAppName,
-            newRelicMetricHost,
-            newRelicMetricPath,
-            newRelicMetricPeriod,
-            hostname);
-    DatabaseOptions databaseOptions =
-        new DatabaseOptions(
-            databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.get());
     ExtractionOptions extractionOptions = new ExtractionOptions(s3BucketName, allowedRifFileType);
-    LoadAppOptions loadOptions =
-        new LoadAppOptions(
-            new IdHasher.Config(hicnHashIterations, hicnHashPepper),
-            loaderThreads,
-            idempotencyRequired);
     CcwRifLoadOptions ccwRifLoadOptions = new CcwRifLoadOptions(extractionOptions, loadOptions);
-
-    RdaLoadOptions rdaLoadOptions =
-        readRdaLoadOptionsFromEnvironmentVariables(loadOptions.getIdHasherConfig());
-    return new AppConfiguration(metricOptions, databaseOptions, ccwRifLoadOptions, rdaLoadOptions);
+    return ccwRifLoadOptions;
   }
 
   /**

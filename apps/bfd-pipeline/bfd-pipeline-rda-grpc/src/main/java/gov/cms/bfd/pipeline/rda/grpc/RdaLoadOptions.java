@@ -9,11 +9,8 @@ import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
-import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import java.io.Serializable;
-import java.time.Clock;
 import java.util.Objects;
 
 /**
@@ -54,16 +51,16 @@ public class RdaLoadOptions implements Serializable {
    * @param appState the shared {@link PipelineApplicationState}
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
-  public PipelineJob<NullPipelineJobArguments> createFissClaimsLoadJob(
-      PipelineApplicationState appState) {
+  public RdaFissClaimLoadJob createFissClaimsLoadJob(PipelineApplicationState appState) {
     return new RdaFissClaimLoadJob(
         jobConfig,
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
                 new FissClaimStreamCaller(
-                    new FissClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
-                appState.getMetrics()),
+                    new FissClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
+                appState.getMetrics(),
+                "fiss"),
         () -> new JpaClaimRdaSink<>("fiss", appState),
         appState.getMetrics());
   }
@@ -75,16 +72,16 @@ public class RdaLoadOptions implements Serializable {
    * @param appMetrics MetricRegistry used to track operational metrics
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
-  public PipelineJob<NullPipelineJobArguments> createMcsClaimsLoadJob(
-      PipelineApplicationState appState) {
+  public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState) {
     return new RdaMcsClaimLoadJob(
         jobConfig,
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
                 new McsClaimStreamCaller(
-                    new McsClaimTransformer(Clock.systemUTC(), new IdHasher(idHasherConfig))),
-                appState.getMetrics()),
+                    new McsClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
+                appState.getMetrics(),
+                "mcs"),
         () -> new JpaClaimRdaSink<>("mcs", appState),
         appState.getMetrics());
   }

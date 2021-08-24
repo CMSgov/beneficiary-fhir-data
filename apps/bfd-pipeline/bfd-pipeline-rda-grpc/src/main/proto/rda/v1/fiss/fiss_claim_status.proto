@@ -8,29 +8,29 @@ import "rda/v1/enum_options.proto";
 
 enum FissClaimStatus {
   // ASCII Space
-  CLAIM_STATUS_BLANK = 0    [(gov.cms.mpsm.rda.v1.string_value) = " "];
+  CLAIM_STATUS_BLANK = 0    [(string_value) = " "];
 
   // ASCII A
-  CLAIM_STATUS_ROUTING = 1  [(gov.cms.mpsm.rda.v1.string_value) = "A"];
+  CLAIM_STATUS_ROUTING = 1  [(string_value) = "A"];
 
   //ASCII S
-  CLAIM_STATUS_SUSPEND = 2  [(gov.cms.mpsm.rda.v1.string_value) = "S"];
+  CLAIM_STATUS_SUSPEND = 2  [(string_value) = "S"];
 
   // ASCII P
-  CLAIM_STATUS_PAID = 3     [(gov.cms.mpsm.rda.v1.string_value) = "P"];
+  CLAIM_STATUS_PAID = 3     [(string_value) = "P"];
 
   // ASCII D
-  CLAIM_STATUS_DENIED = 4   [(gov.cms.mpsm.rda.v1.string_value) = "D"];
+  CLAIM_STATUS_DENIED = 4   [(string_value) = "D"];
 
   // ASCII I
-  CLAIM_STATUS_INACTIVE = 5 [(gov.cms.mpsm.rda.v1.string_value) = "I"];
+  CLAIM_STATUS_INACTIVE = 5 [(string_value) = "I"];
 
   // ASCII R
-  CLAIM_STATUS_REJECT = 6   [(gov.cms.mpsm.rda.v1.string_value) = "R"];
+  CLAIM_STATUS_REJECT = 6   [(string_value) = "R"];
 
   // ASCII T
-  CLAIM_STATUS_RTP = 7      [(gov.cms.mpsm.rda.v1.string_value) = "T"];
+  CLAIM_STATUS_RTP = 7      [(string_value) = "T"];
 
   // ASCII M
-  CLAIM_STATUS_MOVE = 8     [(gov.cms.mpsm.rda.v1.string_value) = "M"];
+  CLAIM_STATUS_MOVE = 8     [(string_value) = "M"];
 }
