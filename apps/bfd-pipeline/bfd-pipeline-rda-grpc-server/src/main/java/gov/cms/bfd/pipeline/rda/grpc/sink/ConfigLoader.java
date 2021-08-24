@@ -175,8 +175,10 @@ public class ConfigLoader {
   public File writeableFile(String name) {
     String value = stringValue(name);
     File file = new File(value);
-    if (file.isFile()) {
-      if (!file.canWrite()) {
+    if (file.exists()) {
+      if (!file.isFile()) {
+        throw new ConfigException(name, "object referenced by path is not a file");
+      } else if (!file.canWrite()) {
         throw new ConfigException(name, "file is not writeable");
       }
     } else if (!file.getAbsoluteFile().getParentFile().canWrite()) {
@@ -204,29 +206,6 @@ public class ConfigLoader {
         return false;
       default:
         throw new ConfigException(name, "invalid boolean value: " + value);
-    }
-  }
-
-  public static class ConfigException extends RuntimeException {
-    private final String name;
-
-    public ConfigException(String name, String message) {
-      super(message);
-      this.name = name;
-    }
-
-    public ConfigException(String name, String message, Throwable cause) {
-      super(message, cause);
-      this.name = name;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    @Override
-    public String toString() {
-      return String.format("invalid option: name='%s' message='%s'", name, getMessage());
     }
   }
 

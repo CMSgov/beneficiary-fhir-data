@@ -33,7 +33,7 @@ public class ConfigLoaderTest {
     assertEquals("A", loader.stringValue("a"));
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void requiredStringValueNotFound() {
     loader.stringValue("not-there");
   }
@@ -53,12 +53,12 @@ public class ConfigLoaderTest {
     assertEquals(33, loader.intValue("a"));
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void requiredIntValueNotFound() {
     loader.intValue("not-there");
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void invalidIntValue() {
     values.put("a", "-not-a-number");
     loader.intValue("a");
@@ -79,12 +79,12 @@ public class ConfigLoaderTest {
     assertEquals(TestEnum.First, loader.enumValue("a", TestEnum::valueOf));
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void requiredEnumValueNotFound() {
     loader.enumValue("not-there", TestEnum::valueOf);
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void invalidEnumValue() {
     values.put("a", "-not-a-number");
     loader.enumValue("a", TestEnum::valueOf);
@@ -100,7 +100,7 @@ public class ConfigLoaderTest {
         });
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void readableFileNotReadable() throws Exception {
     runWithTempFile(
         file -> {
@@ -111,13 +111,24 @@ public class ConfigLoaderTest {
         });
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void readableFileMissing() throws Exception {
     runWithTempFile(
         file -> {
           file.delete();
           values.put("a", file.getPath());
           assertEquals(file, loader.readableFile("a"));
+        });
+  }
+
+  @Test(expected = ConfigException.class)
+  public void writeableFileIsNotAFile() throws Exception {
+    runWithTempFile(
+        file -> {
+          file.delete();
+          file.mkdir();
+          values.put("a", file.getPath());
+          assertEquals(file, loader.writeableFile("a"));
         });
   }
 
@@ -131,7 +142,7 @@ public class ConfigLoaderTest {
         });
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void writeableFileNotWriteable() throws Exception {
     runWithTempFile(
         file -> {
@@ -160,7 +171,7 @@ public class ConfigLoaderTest {
     assertEquals(false, loader.booleanValue("z", false));
   }
 
-  @Test(expected = ConfigLoader.ConfigException.class)
+  @Test(expected = ConfigException.class)
   public void invalidBooleanValue() {
     values.put("a", "-not-a-boolean");
     loader.booleanValue("a", false);
