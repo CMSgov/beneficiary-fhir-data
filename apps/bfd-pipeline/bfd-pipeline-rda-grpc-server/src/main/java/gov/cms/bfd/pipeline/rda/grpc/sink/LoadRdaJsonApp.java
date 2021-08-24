@@ -15,7 +15,8 @@ import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.File;
 import java.time.Clock;
 import java.time.Duration;
@@ -130,17 +131,18 @@ public class LoadRdaJsonApp {
       return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
     }
 
-    private MessageSource<ClaimChange> createFissClaimsSource() {
-      return createClaimsSourceForFile(fissFile);
+    private MessageSource<FissClaimChange> createFissClaimsSource() {
+      return createClaimsSourceForFile(fissFile, JsonMessageSource::parseFissClaimChange);
     }
 
-    private MessageSource<ClaimChange> createMcsClaimsSource() {
-      return createClaimsSourceForFile(mcsFile);
+    private MessageSource<McsClaimChange> createMcsClaimsSource() {
+      return createClaimsSourceForFile(mcsFile, JsonMessageSource::parseMcsClaimChange);
     }
 
-    private MessageSource<ClaimChange> createClaimsSourceForFile(Optional<File> jsonFile) {
+    private <T> MessageSource<T> createClaimsSourceForFile(
+        Optional<File> jsonFile, JsonMessageSource.Parser<T> parser) {
       if (jsonFile.isPresent()) {
-        return new JsonMessageSource<>(jsonFile.get(), JsonMessageSource::parseClaimChange);
+        return new JsonMessageSource<>(jsonFile.get(), parser);
       } else {
         return new EmptyMessageSource<>();
       }

@@ -3,6 +3,8 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.google.common.base.Strings;
+import com.zaxxer.hikari.HikariDataSource;
+import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
@@ -51,21 +53,25 @@ public class DirectRdaLoadApp {
 
     final RdaLoadOptions jobConfig = readRdaLoadOptionsFromProperties(options);
     final DatabaseOptions databaseConfig = readDatabaseOptions(options);
-    final PipelineApplicationState appState =
+    HikariDataSource pooledDataSource =
+        PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+    DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
+    try (PipelineApplicationState appState =
         new PipelineApplicationState(
             metrics,
-            PipelineApplicationState.createPooledDataSource(databaseConfig, metrics),
+            pooledDataSource,
             PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
-            Clock.systemUTC());
-    final Optional<PipelineJob<?>> job = createPipelineJob(jobConfig, appState, claimType);
-    if (!job.isPresent()) {
-      System.err.printf("error: invalid claim type: '%s' expected 'fiss' or 'mcs'%n", claimType);
-      System.exit(1);
-    }
-    try {
-      job.get().call();
-    } finally {
-      reporter.report();
+            Clock.systemUTC())) {
+      final Optional<PipelineJob<?>> job = createPipelineJob(jobConfig, appState, claimType);
+      if (!job.isPresent()) {
+        System.err.printf("error: invalid claim type: '%s' expected 'fiss' or 'mcs'%n", claimType);
+        System.exit(1);
+      }
+      try {
+        job.get().call();
+      } finally {
+        reporter.report();
+      }
     }
   }
 

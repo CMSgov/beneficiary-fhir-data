@@ -99,6 +99,17 @@ public final class PartDEventTransformerV2Test {
   }
 
   @Test
+  public void shouldSetBillablePeriod() throws Exception {
+    // We just want to make sure it is set
+    Assert.assertNotNull(eob.getBillablePeriod());
+    Assert.assertEquals(
+        (new SimpleDateFormat("yyy-MM-dd")).parse("2015-05-12"),
+        eob.getBillablePeriod().getStart());
+    Assert.assertEquals(
+        (new SimpleDateFormat("yyy-MM-dd")).parse("2015-05-12"), eob.getBillablePeriod().getEnd());
+  }
+
+  @Test
   public void shouldReferencePatient() {
     Assert.assertNotNull(eob.getPatient());
     Assert.assertEquals("Patient/567834", eob.getPatient().getReference());

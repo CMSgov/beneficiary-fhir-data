@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.util.NoSuchElementException;
@@ -34,11 +34,11 @@ public class RandomFissClaimSourceTest {
 
     assertEquals(true, source.hasNext());
     claim = source.next();
-    assertEquals("12793", claim.getDcn());
+    assertTrue(claim.getDcn().length() > 0);
 
     assertEquals(true, source.hasNext());
     claim = source.next();
-    assertEquals("8099001", claim.getDcn());
+    assertTrue(claim.getDcn().length() > 0);
 
     assertEquals(false, source.hasNext());
     assertNextPastEndOfDataThrowsException(source);

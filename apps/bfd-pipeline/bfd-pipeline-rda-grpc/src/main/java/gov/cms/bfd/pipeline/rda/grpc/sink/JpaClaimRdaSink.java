@@ -102,6 +102,7 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
       } else {
         entityManager.getTransaction().rollback();
       }
+      entityManager.clear();
     }
   }
 
@@ -124,6 +125,7 @@ public class JpaClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
       } else {
         entityManager.getTransaction().rollback();
       }
+      entityManager.clear();
     }
   }
 

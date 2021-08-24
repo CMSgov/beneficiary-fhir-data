@@ -2,7 +2,8 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.util.JsonFormat;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.io.BufferedReader;
@@ -85,14 +86,27 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * This method fits the signature of Parser&lt;ClaimChange&gt;
+   * This method fits the signature of Parser&lt;FissClaimChange&gt;
    *
    * @param jsonString JSON to be parsed
    * @return a ClaimChange object
    * @throws Exception any error caused by invalid JSON
    */
-  public static ClaimChange parseClaimChange(String jsonString) throws Exception {
-    ClaimChange.Builder claim = ClaimChange.newBuilder();
+  public static FissClaimChange parseFissClaimChange(String jsonString) throws Exception {
+    FissClaimChange.Builder claim = FissClaimChange.newBuilder();
+    JsonFormat.parser().merge(jsonString, claim);
+    return claim.build();
+  }
+
+  /**
+   * This method fits the signature of Parser&lt;McsClaimChange&gt;
+   *
+   * @param jsonString JSON to be parsed
+   * @return a ClaimChange object
+   * @throws Exception any error caused by invalid JSON
+   */
+  public static McsClaimChange parseMcsClaimChange(String jsonString) throws Exception {
+    McsClaimChange.Builder claim = McsClaimChange.newBuilder();
     JsonFormat.parser().merge(jsonString, claim);
     return claim.build();
   }
