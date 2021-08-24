@@ -138,8 +138,13 @@ if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact
 if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
 if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
 
-# Read the server port to be used from the ports file.
-serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)
+# If we are running in Jenkins, don't allow BFD_PORT to override port generated from file
+# due to bizzare namespace collision: https://github.com/CMSgov/beneficiary-fhir-data/pull/740#discussion_r694276000
+if [[ ! -z "${JENKINS_HOME}" ]] && [[ ! -z "${JENKINS_URL}" ]]; then
+	serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)
+else
+	serverPortHttps=${BFD_PORT:-$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)}
+fi
 
 if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified in '${serverPortsFile}'."; exit 1; fi
 echo "Configured server to run on HTTPS port '${serverPortHttps}'."
