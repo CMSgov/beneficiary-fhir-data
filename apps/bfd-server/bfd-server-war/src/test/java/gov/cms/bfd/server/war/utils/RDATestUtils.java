@@ -8,7 +8,6 @@ import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
-import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,7 +42,6 @@ public class RDATestUtils {
 
   public void init() {
     final DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
-    DatabaseSchemaManager.createOrUpdateSchema(dataSource);
 
     final Map<String, Object> hibernateProperties =
         ImmutableMap.of(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
