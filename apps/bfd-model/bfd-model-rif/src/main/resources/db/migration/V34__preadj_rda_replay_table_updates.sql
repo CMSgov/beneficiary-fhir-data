@@ -18,3 +18,11 @@ ALTER TABLE "pre_adj"."FissClaims"
     ALTER COLUMN "sequenceNumber" DROP DEFAULT;
 ALTER TABLE "pre_adj"."McsClaims"
     ALTER COLUMN "sequenceNumber" DROP DEFAULT;
+
+/* Index to allow quick determination of where to resume stream in calls to RDA API. */
+create index "FissClaims_sequenceNumber_idx" on "pre_adj"."FissClaims" ("sequenceNumber");
+create index "McsClaims_sequenceNumber_idx" on "pre_adj"."McsClaims" ("sequenceNumber");
+
+/* Index to allow fast query by update time by BFD API. */
+create index "FissClaims_lastUpdated_idx" on "pre_adj"."FissClaims" ("lastUpdated");
+create index "McsClaims_lastUpdated_idx" on "pre_adj"."McsClaims" ("lastUpdated");
