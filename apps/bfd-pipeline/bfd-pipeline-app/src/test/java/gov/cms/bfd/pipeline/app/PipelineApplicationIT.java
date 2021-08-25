@@ -616,7 +616,14 @@ public final class PipelineApplicationIT {
               .findFirst()
               .get();
 
-      return new String[] {javaBin.toString(), "-jar", appJar.toAbsolutePath().toString()};
+      return new String[] {
+        javaBin.toString(),
+        "-Ds3.local=true",
+        "-Ds3.localUser=bfdLocalS3Dev",
+        "-Ds3.localPass=bfdLocalS3Dev",
+        "-jar",
+        appJar.toAbsolutePath().toString()
+      };
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
