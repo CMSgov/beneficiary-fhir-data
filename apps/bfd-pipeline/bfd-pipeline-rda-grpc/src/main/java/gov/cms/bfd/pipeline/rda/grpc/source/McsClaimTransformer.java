@@ -6,7 +6,7 @@ import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsBeneficiarySex;
 import gov.cms.mpsm.rda.v1.mcs.McsBillingProviderIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsBillingProviderStatusCode;
@@ -105,8 +105,8 @@ public class McsClaimTransformer {
     this.idHasher = idHasher;
   }
 
-  public RdaChange<PreAdjMcsClaim> transformClaim(ClaimChange change) {
-    McsClaim from = change.getMcsClaim();
+  public RdaChange<PreAdjMcsClaim> transformClaim(McsClaimChange change) {
+    McsClaim from = change.getClaim();
 
     final DataTransformer transformer = new DataTransformer();
     final PreAdjMcsClaim to = transformClaim(from, transformer);
@@ -120,6 +120,7 @@ public class McsClaimTransformer {
       throw new DataTransformer.TransformationException(message, errors);
     }
     return new RdaChange<>(
+        change.getSeq(),
         RdaApiUtils.mapApiChangeType(change.getChangeType()),
         to,
         transformer.instant(change.getTimestamp()));

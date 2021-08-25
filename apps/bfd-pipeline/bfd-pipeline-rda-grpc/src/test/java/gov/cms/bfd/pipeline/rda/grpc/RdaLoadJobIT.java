@@ -22,7 +22,8 @@ import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import io.grpc.StatusRuntimeException;
@@ -93,7 +94,7 @@ public class RdaLoadJobIT {
   public void fissClaimsTest() throws Exception {
     assertTablesAreEmpty();
     runWithLocalServer(
-        jsonSource(fissClaimJson),
+        fissJsonSource(fissClaimJson),
         EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
@@ -102,8 +103,8 @@ public class RdaLoadJobIT {
         });
     runHibernateAssertions(
         entityManager -> {
-          final ImmutableList<ClaimChange> expectedClaims =
-              JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseClaimChange);
+          final ImmutableList<FissClaimChange> expectedClaims =
+              JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
           List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (PreAdjFissClaim resultClaim : claims) {
@@ -134,7 +135,7 @@ public class RdaLoadJobIT {
             .get(badClaimIndex)
             .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
     runWithLocalServer(
-        jsonSource(badFissClaimJson),
+        fissJsonSource(badFissClaimJson),
         EmptyMessageSource::new,
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
@@ -159,7 +160,7 @@ public class RdaLoadJobIT {
     assertTablesAreEmpty();
     runWithLocalServer(
         EmptyMessageSource::new,
-        jsonSource(mcsClaimJson),
+        mcsJsonSource(mcsClaimJson),
         port -> {
           final RdaLoadOptions config = createRdaLoadOptions(port);
           final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
@@ -167,8 +168,8 @@ public class RdaLoadJobIT {
         });
     runHibernateAssertions(
         entityManager -> {
-          final ImmutableList<ClaimChange> expectedClaims =
-              JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseClaimChange);
+          final ImmutableList<McsClaimChange> expectedClaims =
+              JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
           List<PreAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
           assertEquals(expectedClaims.size(), claims.size());
           for (PreAdjMcsClaim resultClaim : claims) {
@@ -197,7 +198,7 @@ public class RdaLoadJobIT {
         EmptyMessageSource::new,
         () ->
             new ExceptionMessageSource<>(
-                new JsonMessageSource<>(mcsClaimJson, JsonMessageSource::parseClaimChange),
+                new JsonMessageSource<>(mcsClaimJson, JsonMessageSource::parseMcsClaimChange),
                 claimsToSendBeforeThrowing,
                 () -> new IOException("oops")),
         port -> {
@@ -220,9 +221,9 @@ public class RdaLoadJobIT {
 
   @Nullable
   private FissClaim findMatchingFissClaim(
-      ImmutableList<ClaimChange> expectedClaims, PreAdjFissClaim resultClaim) {
+      ImmutableList<FissClaimChange> expectedClaims, PreAdjFissClaim resultClaim) {
     return expectedClaims.stream()
-        .map(ClaimChange::getFissClaim)
+        .map(FissClaimChange::getClaim)
         .filter(claim -> claim.getDcn().equals(resultClaim.getDcn()))
         .findAny()
         .orElse(null);
@@ -230,9 +231,9 @@ public class RdaLoadJobIT {
 
   @Nullable
   private McsClaim findMatchingMcsClaim(
-      ImmutableList<ClaimChange> expectedClaims, PreAdjMcsClaim resultClaim) {
+      ImmutableList<McsClaimChange> expectedClaims, PreAdjMcsClaim resultClaim) {
     return expectedClaims.stream()
-        .map(ClaimChange::getMcsClaim)
+        .map(McsClaimChange::getClaim)
         .filter(claim -> claim.getIdrClmHdIcn().equals(resultClaim.getIdrClmHdIcn()))
         .findAny()
         .orElse(null);
@@ -265,8 +266,12 @@ public class RdaLoadJobIT {
         new IdHasher.Config(100, "thisisjustatest"));
   }
 
-  private Supplier<MessageSource<ClaimChange>> jsonSource(List<String> claimJson) {
-    return () -> new JsonMessageSource<>(claimJson, JsonMessageSource::parseClaimChange);
+  private Supplier<MessageSource<FissClaimChange>> fissJsonSource(List<String> claimJson) {
+    return () -> new JsonMessageSource<>(claimJson, JsonMessageSource::parseFissClaimChange);
+  }
+
+  private Supplier<MessageSource<McsClaimChange>> mcsJsonSource(List<String> claimJson) {
+    return () -> new JsonMessageSource<>(claimJson, JsonMessageSource::parseMcsClaimChange);
   }
 
   /**

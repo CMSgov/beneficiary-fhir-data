@@ -116,18 +116,25 @@ abstract class AbstractRandomClaimGenerator {
   }
 
   /**
-   * When one of two possible values should be generated. Usually used for enums. The two
+   * Used when one of several possible values should be generated. Usually used for enums. The
    * possibilities are triggered with equal probability.
    *
-   * @param action1 first possible action
-   * @param action2 second possible action
+   * @param actions variadic list of possible actions to trigger
    */
-  protected void either(Runnable action1, Runnable action2) {
-    if (random.nextBoolean()) {
-      action1.run();
-    } else {
-      action2.run();
-    }
+  protected void oneOf(Runnable... actions) {
+    final int index = random.nextInt(actions.length);
+    actions[index].run();
+  }
+
+  /**
+   * Used when an optional field can have one of several possible values. Usually used for enums. A
+   * value will be triggered 50% of the time. When a value is triggered the possibilities are
+   * selected with equal probability.
+   *
+   * @param actions variadic list of possible actions to trigger
+   */
+  protected void optionalOneOf(Runnable... actions) {
+    optional(() -> oneOf(actions));
   }
 
   protected Clock getClock() {
