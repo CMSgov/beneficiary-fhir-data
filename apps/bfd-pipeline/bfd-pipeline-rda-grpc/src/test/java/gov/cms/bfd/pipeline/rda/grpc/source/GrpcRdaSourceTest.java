@@ -69,7 +69,7 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
-    doReturn(Optional.of(42L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3)).when(caller).callService(channel, 42L);
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
@@ -115,7 +115,7 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testPassesThroughProcessingExceptionFromSink() throws Exception {
-    doReturn(Optional.of(42L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
@@ -215,7 +215,7 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testHandlesInterruptFromStream() throws Exception {
-    doReturn(Optional.of(42L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
     // Creates a response with 3 valid values followed by an interrupt.
     final GrpcResponseStream<Integer> response = mock(GrpcResponseStream.class);
     when(response.next()).thenReturn(CLAIM_1, CLAIM_2, CLAIM_3);

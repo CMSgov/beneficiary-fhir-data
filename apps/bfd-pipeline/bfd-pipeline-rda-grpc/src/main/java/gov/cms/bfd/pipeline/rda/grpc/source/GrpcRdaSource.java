@@ -169,7 +169,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     if (startingSequenceNumber.isPresent()) {
       return startingSequenceNumber.get();
     } else {
-      return sink.readMaxExistingSequenceNumber().orElse(MIN_SEQUENCE_NUM);
+      return sink.readMaxExistingSequenceNumber().map(seqNo -> seqNo + 1).orElse(MIN_SEQUENCE_NUM);
     }
   }
 
