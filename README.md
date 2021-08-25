@@ -100,7 +100,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
       -p '5432:5432' \
       -v 'bfd_pgdata:/var/lib/postgresql/data' \
-      postgres:12
+      postgres:12 -c max_connections=200
     ```
 1. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
     ```
