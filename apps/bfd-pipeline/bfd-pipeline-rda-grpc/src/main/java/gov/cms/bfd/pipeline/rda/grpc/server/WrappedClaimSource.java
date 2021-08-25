@@ -1,11 +1,12 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.protobuf.Timestamp;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.ChangeType;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.time.Clock;
-import java.util.function.BiConsumer;
 
 /**
  * Wrapper for a FissClaim or McsClaim source that promotes it to return a ClaimChange containing
@@ -13,10 +14,10 @@ import java.util.function.BiConsumer;
  *
  * @param <T> either FissClaim or McsClaim
  */
-public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
-  private final MessageSource<T> source;
+public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChange> {
+  private final MessageSource<TClaim> source;
   private final Clock clock;
-  private final BiConsumer<ClaimChange.Builder, T> setter;
+  private final ChangeFactory<TChange, TClaim> changeFactory;
 
   /**
    * Creates a wrapper object to promote each claim from source into a ClaimChange object with
@@ -26,10 +27,10 @@ public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
    * @param setter lambda to add the claim to the appropriate field in the ClaimChange builder
    */
   private WrappedClaimSource(
-      MessageSource<T> source, Clock clock, BiConsumer<ClaimChange.Builder, T> setter) {
+      MessageSource<TClaim> source, Clock clock, ChangeFactory<TChange, TClaim> changeFactory) {
     this.source = source;
     this.clock = clock;
-    this.setter = setter;
+    this.changeFactory = changeFactory;
   }
 
   @Override
@@ -38,14 +39,10 @@ public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
   }
 
   @Override
-  public ClaimChange next() throws Exception {
+  public TChange next() throws Exception {
     final Timestamp timestamp =
         Timestamp.newBuilder().setSeconds(clock.instant().getEpochSecond()).build();
-    final ClaimChange.Builder builder = ClaimChange.newBuilder();
-    builder.setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE);
-    builder.setTimestamp(timestamp);
-    setter.accept(builder, source.next());
-    return builder.build();
+    return changeFactory.create(timestamp, ChangeType.CHANGE_TYPE_UPDATE, source.next());
   }
 
   @Override
@@ -53,13 +50,34 @@ public class WrappedClaimSource<T> implements MessageSource<ClaimChange> {
     source.close();
   }
 
-  public static WrappedClaimSource<FissClaim> wrapFissClaims(
+  public static MessageSource<FissClaimChange> wrapFissClaims(
       MessageSource<FissClaim> source, Clock clock) {
-    return new WrappedClaimSource<>(source, clock, ClaimChange.Builder::setFissClaim);
+    return new WrappedClaimSource<>(
+        source,
+        clock,
+        (timestamp, type, claim) ->
+            FissClaimChange.newBuilder()
+                .setTimestamp(timestamp)
+                .setChangeType(type)
+                .setClaim(claim)
+                .build());
   }
 
-  public static WrappedClaimSource<McsClaim> wrapMcsClaims(
+  public static MessageSource<McsClaimChange> wrapMcsClaims(
       MessageSource<McsClaim> source, Clock clock) {
-    return new WrappedClaimSource<>(source, clock, ClaimChange.Builder::setMcsClaim);
+    return new WrappedClaimSource<>(
+        source,
+        clock,
+        (timestamp, type, claim) ->
+            McsClaimChange.newBuilder()
+                .setTimestamp(timestamp)
+                .setChangeType(type)
+                .setClaim(claim)
+                .build());
+  }
+
+  @FunctionalInterface
+  public interface ChangeFactory<TChange, TClaim> {
+    public TChange create(Timestamp timestamp, ChangeType type, TClaim claim);
   }
 }

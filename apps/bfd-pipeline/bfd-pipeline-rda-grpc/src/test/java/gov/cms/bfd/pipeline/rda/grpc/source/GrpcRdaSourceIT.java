@@ -163,7 +163,8 @@ public class GrpcRdaSourceIT {
               + "    \"procFlag\" : \"nli\",\n"
               + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
               + "  } ],\n"
-              + "  \"diagCodes\" : [ ]\n"
+              + "  \"diagCodes\" : [ ],\n"
+              + "  \"payers\" : [ ]\n"
               + "}",
           sink.getValues().get(0));
       assertEquals(
@@ -201,7 +202,8 @@ public class GrpcRdaSourceIT {
               + "    \"procDate\" : \"2021-05-13\",\n"
               + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
               + "  } ],\n"
-              + "  \"diagCodes\" : [ ]\n"
+              + "  \"diagCodes\" : [ ],\n"
+              + "  \"payers\" : [ ]\n"
               + "}",
           sink.getValues().get(1));
     } finally {

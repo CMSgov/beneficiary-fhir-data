@@ -1,7 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import gov.cms.bfd.pipeline.rda.grpc.ThrowableConsumer;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
@@ -17,8 +18,8 @@ public class RdaServer {
    * @return a running RDA API Server object
    */
   public static Server startLocal(
-      Supplier<MessageSource<ClaimChange>> fissSourceFactory,
-      Supplier<MessageSource<ClaimChange>> mcsSourceFactory)
+      Supplier<MessageSource<FissClaimChange>> fissSourceFactory,
+      Supplier<MessageSource<McsClaimChange>> mcsSourceFactory)
       throws IOException {
     return startLocal(0, fissSourceFactory, mcsSourceFactory);
   }
@@ -31,8 +32,8 @@ public class RdaServer {
    */
   public static Server startLocal(
       int port,
-      Supplier<MessageSource<ClaimChange>> fissSourceFactory,
-      Supplier<MessageSource<ClaimChange>> mcsSourceFactory)
+      Supplier<MessageSource<FissClaimChange>> fissSourceFactory,
+      Supplier<MessageSource<McsClaimChange>> mcsSourceFactory)
       throws IOException {
     return ServerBuilder.forPort(port)
         .addService(new RdaService(fissSourceFactory, mcsSourceFactory))
@@ -49,8 +50,8 @@ public class RdaServer {
    */
   public static Server startInProcess(
       String name,
-      Supplier<MessageSource<ClaimChange>> fissSourceFactory,
-      Supplier<MessageSource<ClaimChange>> mcsSourceFactory)
+      Supplier<MessageSource<FissClaimChange>> fissSourceFactory,
+      Supplier<MessageSource<McsClaimChange>> mcsSourceFactory)
       throws IOException {
     return InProcessServerBuilder.forName(name)
         .addService(new RdaService(fissSourceFactory, mcsSourceFactory))
@@ -68,8 +69,8 @@ public class RdaServer {
    * @throws Exception any exception is passed through to the caller
    */
   public static void runWithLocalServer(
-      Supplier<MessageSource<ClaimChange>> fissClaims,
-      Supplier<MessageSource<ClaimChange>> mcsClaims,
+      Supplier<MessageSource<FissClaimChange>> fissClaims,
+      Supplier<MessageSource<McsClaimChange>> mcsClaims,
       ThrowableConsumer<Integer> test)
       throws Exception {
     final Server server = startLocal(fissClaims, mcsClaims);
