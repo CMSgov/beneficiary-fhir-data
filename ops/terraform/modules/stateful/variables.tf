@@ -37,3 +37,8 @@ variable "partner_subnets" {
 variable "module_features" {
   type = map(bool)
 }
+
+variable "cloudbees_jenkins_subnets" {
+  description = "List of subnets where traffic from cloudbees initiates"
+  type        = list(string)
+}

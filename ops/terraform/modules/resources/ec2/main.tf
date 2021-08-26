@@ -29,11 +29,10 @@ data "aws_caller_identity" "current" {}
 # Base security includes management VPC access
 resource "aws_security_group" "base" {
   name        = "bfd-${var.env_config.env}-${var.role}-base"
-  description = "Allow CI access to app servers"
+  description = "Base security group"
   vpc_id      = var.env_config.vpc_id
   tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-base" }, local.tags)
 
-  # Note: If we want to allow Jenkins to SSH into boxes, that would go here.
   egress {
     from_port   = 0
     protocol    = "-1"
@@ -57,7 +56,7 @@ resource "aws_instance" "main" {
   tenancy                     = local.is_prod ? "dedicated" : "default"
   ebs_optimized               = true
 
-  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg], var.sg_ids)
+  vpc_security_group_ids = concat([aws_security_group.base.id, var.mgmt_config.vpn_sg, var.mgmt_config.ci_sg], var.sg_ids)
   subnet_id              = data.aws_subnet.main.id
 
   root_block_device {
