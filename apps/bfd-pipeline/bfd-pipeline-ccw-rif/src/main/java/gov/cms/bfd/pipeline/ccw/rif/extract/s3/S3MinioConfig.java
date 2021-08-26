@@ -21,7 +21,7 @@ public class S3MinioConfig {
 
   // Method
   // Static method to create instance of Singleton class
-  public static S3MinioConfig Singleton() {
+  synchronized public static S3MinioConfig Singleton() {
     // To ensure only one instance is created
     if (single_instance == null) {
       single_instance = new S3MinioConfig();
