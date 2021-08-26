@@ -4,6 +4,7 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static org.junit.Assert.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaimJson;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -25,23 +26,21 @@ public class McsClaimRdaSinkIT {
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
-          final PreAdjMcsClaim claim = new PreAdjMcsClaim();
-          claim.setSequenceNumber(7L);
-          claim.setIdrClmHdIcn("3");
-          claim.setIdrContrId("c1");
-          claim.setIdrHic("hc");
-          claim.setIdrClaimType("c");
+          final PreAdjMcsClaim claim =
+              PreAdjMcsClaim.builder()
+                  .sequenceNumber(7L)
+                  .lastUpdated(Instant.now())
+                  .idrClmHdIcn("3")
+                  .idrContrId("c1")
+                  .idrHic("hc")
+                  .idrClaimType("c")
+                  .build();
 
-          final PreAdjMcsDetail detail = new PreAdjMcsDetail();
-          detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          detail.setPriority((short) 0);
-          detail.setIdrDtlStatus("P");
+          final PreAdjMcsDetail detail = PreAdjMcsDetail.builder().idrDtlStatus("P").build();
           claim.getDetails().add(detail);
 
-          final PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
-          diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-          diagCode.setPriority((short) 0);
-          diagCode.setIdrDiagIcdType("T");
+          final PreAdjMcsDiagnosisCode diagCode =
+              PreAdjMcsDiagnosisCode.builder().idrDiagIcdType("T").build();
           claim.getDiagCodes().add(diagCode);
 
           int count =
@@ -49,12 +48,12 @@ public class McsClaimRdaSinkIT {
                   new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now()));
           assertEquals(1, count);
 
-          List<PreAdjMcsClaim> resultClaims =
+          List<PreAdjMcsClaimJson> resultClaims =
               entityManager
-                  .createQuery("select c from PreAdjMcsClaim c", PreAdjMcsClaim.class)
+                  .createQuery("select c from PreAdjMcsClaimJson c", PreAdjMcsClaimJson.class)
                   .getResultList();
           assertEquals(1, resultClaims.size());
-          PreAdjMcsClaim resultClaim = resultClaims.get(0);
+          PreAdjMcsClaim resultClaim = resultClaims.get(0).getClaim();
           assertEquals(Long.valueOf(7), resultClaim.getSequenceNumber());
           assertEquals("hc", resultClaim.getIdrHic());
           assertEquals(1, resultClaim.getDetails().size());

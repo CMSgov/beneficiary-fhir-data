@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import static org.junit.Assert.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissClaimJson;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -34,18 +35,19 @@ public class FissClaimRdaSinkIT {
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
-          final PreAdjFissClaim claim = new PreAdjFissClaim();
-          claim.setSequenceNumber(3L);
-          claim.setDcn("1");
-          claim.setHicNo("h1");
-          claim.setCurrStatus('1');
-          claim.setCurrLoc1('A');
-          claim.setCurrLoc2("1A");
-          claim.setPracLocCity("city name can be very long indeed");
+          final PreAdjFissClaim claim =
+              PreAdjFissClaim.builder()
+                  .lastUpdated(Instant.now())
+                  .sequenceNumber(3L)
+                  .dcn("1")
+                  .hicNo("h1")
+                  .currStatus('1')
+                  .currLoc1('A')
+                  .currLoc2("1A")
+                  .pracLocCity("city name can be very long indeed")
+                  .build();
 
           final PreAdjFissProcCode procCode0 = new PreAdjFissProcCode();
-          procCode0.setDcn(claim.getDcn());
-          procCode0.setPriority((short) 0);
           procCode0.setProcCode("P");
           procCode0.setProcFlag("F");
           procCode0.setProcDate(LocalDate.now());
@@ -53,8 +55,6 @@ public class FissClaimRdaSinkIT {
           claim.getProcCodes().add(procCode0);
 
           final PreAdjFissDiagnosisCode diagCode0 = new PreAdjFissDiagnosisCode();
-          diagCode0.setDcn(claim.getDcn());
-          diagCode0.setPriority((short) 0);
           diagCode0.setDiagCd2("cd2");
           diagCode0.setDiagPoaInd("Q");
           claim.getDiagCodes().add(diagCode0);
@@ -67,8 +67,10 @@ public class FissClaimRdaSinkIT {
 
           List<PreAdjFissClaim> claims =
               entityManager
-                  .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
-                  .getResultList();
+                  .createQuery("select c from PreAdjFissClaimJson c", PreAdjFissClaimJson.class)
+                  .getResultList().stream()
+                  .map(PreAdjFissClaimJson::getClaim)
+                  .collect(Collectors.toList());
           assertEquals(1, claims.size());
           PreAdjFissClaim resultClaim = claims.get(0);
           assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
@@ -82,7 +84,7 @@ public class FissClaimRdaSinkIT {
   }
 
   /**
-   * Tests that a single batch can safely contains multiple objects with the same claim id and that
+   * Tests that a single batch can safely contain multiple objects with the same claim id and that
    * when this happens the version written to the database has the correct detail records in the
    * database. Verifies that {@code dedupChanges()} is working as expected.
    */
@@ -131,8 +133,10 @@ public class FissClaimRdaSinkIT {
           assertEquals(numberOfUniqueClaims, count);
 
           List<PreAdjFissClaim> dbClaims =
-              entityManager.createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+              entityManager
+                  .createQuery("select c from PreAdjFissClaimJson c", PreAdjFissClaimJson.class)
                   .getResultList().stream()
+                  .map(PreAdjFissClaimJson::getClaim)
                   .sorted(Comparator.comparingLong(PreAdjFissClaim::getSequenceNumber))
                   .collect(Collectors.toList());
           assertEquals(numberOfUniqueClaims, dbClaims.size());

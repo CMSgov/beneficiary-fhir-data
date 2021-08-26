@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaimJson;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
@@ -13,7 +14,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -44,12 +44,12 @@ public class McsClaimTransformerV2 {
    */
   @Trace
   static Claim transform(MetricRegistry metricRegistry, Object claimEntity) {
-    if (!(claimEntity instanceof PreAdjMcsClaim)) {
+    if (!(claimEntity instanceof PreAdjMcsClaimJson)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((PreAdjMcsClaim) claimEntity);
+      return transformClaim(((PreAdjMcsClaimJson) claimEntity).getClaim());
     }
   }
 
@@ -175,9 +175,7 @@ public class McsClaimTransformerV2 {
   private static List<Claim.DiagnosisComponent> getDiagnosis(PreAdjMcsClaim claimGroup) {
     List<Claim.DiagnosisComponent> diagnosisComponents = new ArrayList<>();
 
-    // Sort diagnosis codes by priority prior to building resource
-    List<PreAdjMcsDiagnosisCode> dxCodes = new ArrayList<>(claimGroup.getDiagCodes());
-    dxCodes.sort(Comparator.comparingInt(PreAdjMcsDiagnosisCode::getPriority));
+    List<PreAdjMcsDiagnosisCode> dxCodes = claimGroup.getDiagCodes();
 
     for (int i = 0; i < dxCodes.size(); ++i) {
       diagnosisComponents.add(getDiagnosis(dxCodes.get(i), i + 1));
@@ -204,9 +202,7 @@ public class McsClaimTransformerV2 {
   private static List<Claim.ProcedureComponent> getProcedure(PreAdjMcsClaim claimGroup) {
     List<Claim.ProcedureComponent> procedure = new ArrayList<>();
 
-    // Sort proc codes by priority prior to building resource
-    List<PreAdjMcsDetail> procCodes = new ArrayList<>(claimGroup.getDetails());
-    procCodes.sort(Comparator.comparingInt(PreAdjMcsDetail::getPriority));
+    List<PreAdjMcsDetail> procCodes = claimGroup.getDetails();
 
     for (int i = 0; i < procCodes.size(); ++i) {
       procedure.add(getProcedure(procCodes.get(i), i + 1));

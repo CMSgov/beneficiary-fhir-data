@@ -517,8 +517,6 @@ public class FissClaimTransformer {
       FissProcedureCode fromCode,
       String fieldPrefix) {
     PreAdjFissProcCode toCode = new PreAdjFissProcCode();
-    toCode.setDcn(to.getDcn());
-    toCode.setPriority(priority);
     transformer
         .copyString(
             fieldPrefix + PreAdjFissProcCode.Fields.procCode,
@@ -550,8 +548,6 @@ public class FissClaimTransformer {
       FissDiagnosisCode fromCode,
       String fieldPrefix) {
     PreAdjFissDiagnosisCode toCode = new PreAdjFissDiagnosisCode();
-    toCode.setDcn(to.getDcn());
-    toCode.setPriority(priority);
     transformer
         .copyString(
             fieldPrefix + PreAdjFissDiagnosisCode.Fields.diagCd2,
@@ -585,8 +581,6 @@ public class FissClaimTransformer {
       FissInsuredPayer fromPayer,
       String fieldPrefix) {
     PreAdjFissPayer toPayer = new PreAdjFissPayer();
-    toPayer.setDcn(to.getDcn());
-    toPayer.setPriority(priority);
     toPayer.setPayerType(PreAdjFissPayer.PayerType.Insured);
     transformer
         .copyEnumAsString(
@@ -720,8 +714,6 @@ public class FissClaimTransformer {
       FissBeneZPayer fromPayer,
       String fieldPrefix) {
     PreAdjFissPayer toPayer = new PreAdjFissPayer();
-    toPayer.setDcn(to.getDcn());
-    toPayer.setPriority(priority);
     toPayer.setPayerType(PreAdjFissPayer.PayerType.BeneZ);
     transformer
         .copyEnumAsString(

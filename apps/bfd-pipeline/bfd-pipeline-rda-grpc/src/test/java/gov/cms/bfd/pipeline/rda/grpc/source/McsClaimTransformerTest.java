@@ -145,8 +145,6 @@ public class McsClaimTransformerTest {
     claim.setIdrClaimType("3");
     claim.setLastUpdated(clock.instant());
     final PreAdjMcsDetail detail = new PreAdjMcsDetail();
-    detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    detail.setPriority((short) 0);
     detail.setIdrDtlStatus("F");
     detail.setIdrDtlFromDate(LocalDate.of(2020, 1, 9));
     detail.setIdrDtlToDate(LocalDate.of(2020, 1, 10));
@@ -197,8 +195,7 @@ public class McsClaimTransformerTest {
     changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
     PreAdjMcsClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
-    assertListContentsHaveSamePropertyValues(
-        claim.getDetails(), transformed.getDetails(), PreAdjMcsDetail::getPriority);
+    assertListContentsHaveSamePropertyValues(claim.getDetails(), transformed.getDetails());
   }
 
   @Test
@@ -208,15 +205,11 @@ public class McsClaimTransformerTest {
     claim.setIdrClaimType("3");
     claim.setLastUpdated(clock.instant());
     PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
-    diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    diagCode.setPriority((short) 0);
     diagCode.setIdrDiagIcdType("9");
     diagCode.setIdrDiagCode("1234567");
     diagCode.setLastUpdated(clock.instant());
     claim.getDiagCodes().add(diagCode);
     diagCode = new PreAdjMcsDiagnosisCode();
-    diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
-    diagCode.setPriority((short) 1);
     diagCode.setIdrDiagIcdType("0");
     diagCode.setIdrDiagCode("jdsyejs");
     diagCode.setLastUpdated(clock.instant());
@@ -240,8 +233,7 @@ public class McsClaimTransformerTest {
     changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
     PreAdjMcsClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
-    assertListContentsHaveSamePropertyValues(
-        claim.getDetails(), transformed.getDetails(), PreAdjMcsDetail::getPriority);
+    assertListContentsHaveSamePropertyValues(claim.getDetails(), transformed.getDetails());
   }
 
   @Test
@@ -263,9 +255,7 @@ public class McsClaimTransformerTest {
                   "idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
               new DataTransformer.ErrorMessage(
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
-              new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
-              new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrClmHdIcn", "invalid length: expected=[1,15] actual=0")),
+              new DataTransformer.ErrorMessage("idrClaimType", "no value set")),
           ex.getErrors());
     }
   }
@@ -480,14 +470,6 @@ public class McsClaimTransformerTest {
     assertClaimTransformationError(
         () -> claimBuilder.setIdrHdrToDos("2020-01-14---"),
         new DataTransformer.ErrorMessage("idrHdrToDateOfSvc", "invalid date"));
-  }
-
-  @Test
-  public void testBadDiagnosisCodeIdrClmHdIcn() {
-    assertDiagnosisCodeTransformationError(
-        codeBuilder -> codeBuilder.setIdrClmHdIcn("123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "diagCode-0-idrClmHdIcn", "invalid length: expected=[1,15] actual=18"));
   }
 
   @Test

@@ -74,6 +74,7 @@ public final class DatabaseSchemaManager {
     try (Connection connection = dataSource.getConnection()) {
       if (DatabaseUtils.isHsqlConnection(connection)) {
         placeholders.put("type.int4", "integer");
+        placeholders.put("type.jsonb", "longvarchar");
         placeholders.put("type.text", "longvarchar");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "--");
@@ -82,8 +83,10 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.sequence-start", "start with");
         placeholders.put("logic.sequence-increment", "increment by");
         placeholders.put("logic.perms", "--");
+        placeholders.put("logic.hsql", "");
       } else if (DatabaseUtils.isPostgresConnection(connection)) {
         placeholders.put("type.int4", "int4");
+        placeholders.put("type.jsonb", "jsonb");
         placeholders.put("type.text", "text");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "");
@@ -92,6 +95,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.sequence-start", "start");
         placeholders.put("logic.sequence-increment", "increment");
         placeholders.put("logic.perms", "");
+        placeholders.put("logic.hsql", "--");
       } else {
         throw new BadCodeMonkeyException(
             String.format(

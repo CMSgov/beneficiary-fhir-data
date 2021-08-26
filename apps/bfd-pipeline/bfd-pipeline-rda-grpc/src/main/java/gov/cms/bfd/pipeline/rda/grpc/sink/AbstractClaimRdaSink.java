@@ -96,6 +96,8 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
     return metrics;
   }
 
+  protected abstract Object convertClaimToEntity(TClaim claim);
+
   private void persistBatch(Iterable<RdaChange<TClaim>> changes) {
     boolean commit = false;
     try {
@@ -103,10 +105,10 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
       for (RdaChange<TClaim> change : changes) {
         switch (change.getType()) {
           case INSERT:
-            entityManager.persist(change.getClaim());
+            entityManager.persist(convertClaimToEntity(change.getClaim()));
             break;
           case UPDATE:
-            entityManager.merge(change.getClaim());
+            entityManager.merge(convertClaimToEntity(change.getClaim()));
             break;
           case DELETE:
             // TODO: [DCGEO-131] accept DELETE changes from RDA API
@@ -131,7 +133,7 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
       entityManager.getTransaction().begin();
       for (RdaChange<TClaim> change : changes) {
         if (change.getType() != RdaChange.Type.DELETE) {
-          entityManager.merge(change.getClaim());
+          entityManager.merge(convertClaimToEntity(change.getClaim()));
         } else {
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
           throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
@@ -215,9 +217,9 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
     // Build a map of changes keyed on the primary key.
     // Only the last object will be retained for each key.
     // Can't use a Set here because that would keep the first version.
-    final Map<TClaim, RdaChange<TClaim>> dedupMap = new LinkedHashMap<>();
+    final Map<Object, RdaChange<TClaim>> dedupMap = new LinkedHashMap<>();
     for (RdaChange<TClaim> claim : changes) {
-      dedupMap.put(claim.getClaim(), claim);
+      dedupMap.put(convertClaimToEntity(claim.getClaim()), claim);
     }
     final Collection<RdaChange<TClaim>> newChanges = ImmutableList.copyOf(dedupMap.values());
     if (logger.isDebugEnabled()) {

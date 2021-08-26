@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaimJson;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.util.Optional;
@@ -18,6 +19,12 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<PreAdjMcsClaim> {
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     return readMaxExistingSequenceNumber(
         String.format(
-            "select max(c.%s) from PreAdjMcsClaim c", PreAdjMcsClaim.Fields.sequenceNumber));
+            "select max(c.%s) from PreAdjMcsClaimJson c",
+            PreAdjMcsClaimJson.Fields.sequenceNumber));
+  }
+
+  @Override
+  protected Object convertClaimToEntity(PreAdjMcsClaim claim) {
+    return new PreAdjMcsClaimJson(claim);
   }
 }

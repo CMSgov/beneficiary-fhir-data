@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissClaimJson;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
@@ -13,7 +14,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -45,12 +45,12 @@ public class FissClaimTransformerV2 {
    */
   @Trace
   static Claim transform(MetricRegistry metricRegistry, Object claimEntity) {
-    if (!(claimEntity instanceof PreAdjFissClaim)) {
+    if (!(claimEntity instanceof PreAdjFissClaimJson)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((PreAdjFissClaim) claimEntity);
+      return transformClaim(((PreAdjFissClaimJson) claimEntity).getClaim());
     }
   }
 
@@ -212,9 +212,7 @@ public class FissClaimTransformerV2 {
   private static List<Claim.ProcedureComponent> getProcedure(PreAdjFissClaim claimGroup) {
     List<Claim.ProcedureComponent> procedure = new ArrayList<>();
 
-    // Sort proc codes by priority prior to building resource
-    List<PreAdjFissProcCode> procCodes = new ArrayList<>(claimGroup.getProcCodes());
-    procCodes.sort(Comparator.comparingInt(PreAdjFissProcCode::getPriority));
+    List<PreAdjFissProcCode> procCodes = claimGroup.getProcCodes();
 
     for (int i = 0; i < procCodes.size(); ++i) {
       PreAdjFissProcCode procCode = procCodes.get(i);

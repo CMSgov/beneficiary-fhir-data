@@ -323,30 +323,16 @@ public class McsClaimTransformer {
     for (McsDiagnosisCode fromDiagnosisCode : from.getMcsDiagnosisCodesList()) {
       String fieldPrefix = "diagCode-" + priority + "-";
       PreAdjMcsDiagnosisCode toDiagnosisCode =
-          transformDiagnosisCode(
-              transformer, now, fromDiagnosisCode, from.getIdrClmHdIcn(), priority, fieldPrefix);
+          transformDiagnosisCode(transformer, now, fromDiagnosisCode, fieldPrefix);
       to.getDiagCodes().add(toDiagnosisCode);
       priority += 1;
     }
   }
 
   private PreAdjMcsDiagnosisCode transformDiagnosisCode(
-      DataTransformer transformer,
-      Instant now,
-      McsDiagnosisCode from,
-      String idrClmHdIcn,
-      short priority,
-      String fieldPrefix) {
+      DataTransformer transformer, Instant now, McsDiagnosisCode from, String fieldPrefix) {
     final PreAdjMcsDiagnosisCode to = new PreAdjMcsDiagnosisCode();
     transformer
-        .copyStringWithExpectedValue(
-            fieldPrefix + PreAdjMcsDiagnosisCode.Fields.idrClmHdIcn,
-            false,
-            1,
-            15,
-            idrClmHdIcn,
-            from.getIdrClmHdIcn(),
-            to::setIdrClmHdIcn)
         .copyEnumAsString(
             fieldPrefix + PreAdjMcsDiagnosisCode.Fields.idrDiagIcdType,
             true,
@@ -361,7 +347,6 @@ public class McsClaimTransformer {
             from::hasIdrDiagCode,
             from::getIdrDiagCode,
             to::setIdrDiagCode);
-    to.setPriority(priority);
     to.setLastUpdated(now);
     return to;
   }
@@ -371,21 +356,14 @@ public class McsClaimTransformer {
     short priority = 0;
     for (McsDetail fromDetail : from.getMcsDetailsList()) {
       String fieldPrefix = "detail-" + priority + "-";
-      PreAdjMcsDetail toDetail =
-          transformDetail(
-              transformer, now, from.getIdrClmHdIcn(), fromDetail, priority, fieldPrefix);
+      PreAdjMcsDetail toDetail = transformDetail(transformer, now, fromDetail, fieldPrefix);
       to.getDetails().add(toDetail);
       priority += 1;
     }
   }
 
   private PreAdjMcsDetail transformDetail(
-      DataTransformer transformer,
-      Instant now,
-      String idrClmHdIcn,
-      McsDetail from,
-      short priority,
-      String fieldPrefix) {
+      DataTransformer transformer, Instant now, McsDetail from, String fieldPrefix) {
     final PreAdjMcsDetail to = new PreAdjMcsDetail();
     transformer
         .copyEnumAsString(
@@ -518,8 +496,6 @@ public class McsClaimTransformer {
             from::getIdrKPosZip,
             to::setIdrKPosZip);
 
-    to.setIdrClmHdIcn(idrClmHdIcn);
-    to.setPriority(priority);
     to.setLastUpdated(now);
     return to;
   }

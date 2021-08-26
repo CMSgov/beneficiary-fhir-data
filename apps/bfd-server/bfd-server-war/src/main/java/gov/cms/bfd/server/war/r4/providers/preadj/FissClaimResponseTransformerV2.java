@@ -5,6 +5,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissClaimJson;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.Arrays;
@@ -70,12 +71,12 @@ public class FissClaimResponseTransformerV2 {
    */
   @Trace
   static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
-    if (!(claimEntity instanceof PreAdjFissClaim)) {
+    if (!(claimEntity instanceof PreAdjFissClaimJson)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((PreAdjFissClaim) claimEntity);
+      return transformClaim(((PreAdjFissClaimJson) claimEntity).getClaim());
     }
   }
 

@@ -11,6 +11,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaimJson;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -80,7 +81,7 @@ public class McsClaimRdaSinkTest {
     assertEquals(3, count);
 
     for (RdaChange<PreAdjMcsClaim> change : batch) {
-      verify(entityManager).persist(change.getClaim());
+      verify(entityManager).persist(new PreAdjMcsClaimJson(change.getClaim()));
     }
     verify(entityManager, times(0))
         .merge(any()); // no calls made to merge since all the persist succeeded
@@ -100,17 +101,19 @@ public class McsClaimRdaSinkTest {
   public void mergeSuccessful() throws Exception {
     final List<RdaChange<PreAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
-    doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(1).getClaim());
+    doThrow(new EntityExistsException())
+        .when(entityManager)
+        .persist(new PreAdjMcsClaimJson(batch.get(1).getClaim()));
 
     final int count = sink.writeBatch(batch);
     assertEquals(3, count);
 
-    verify(entityManager).persist(batch.get(0).getClaim());
-    verify(entityManager).persist(batch.get(1).getClaim());
+    verify(entityManager).persist(new PreAdjMcsClaimJson(batch.get(0).getClaim()));
+    verify(entityManager).persist(new PreAdjMcsClaimJson(batch.get(1).getClaim()));
     verify(entityManager, times(0))
         .persist(batch.get(2).getClaim()); // not called once a persist fails
     for (RdaChange<PreAdjMcsClaim> change : batch) {
-      verify(entityManager).merge(change.getClaim());
+      verify(entityManager).merge(new PreAdjMcsClaimJson(change.getClaim()));
     }
     // the persist transaction will be rolled back
     verify(transaction).rollback();
@@ -131,8 +134,12 @@ public class McsClaimRdaSinkTest {
   public void persistAndMergeFail() {
     final List<RdaChange<PreAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
-    doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(0).getClaim());
-    doThrow(new EntityNotFoundException()).when(entityManager).merge(batch.get(1).getClaim());
+    doThrow(new EntityExistsException())
+        .when(entityManager)
+        .persist(new PreAdjMcsClaimJson(batch.get(0).getClaim()));
+    doThrow(new EntityNotFoundException())
+        .when(entityManager)
+        .merge(new PreAdjMcsClaimJson(batch.get(1).getClaim()));
 
     try {
       sink.writeBatch(batch);
@@ -142,15 +149,17 @@ public class McsClaimRdaSinkTest {
       assertThat(error.getCause(), CoreMatchers.instanceOf(EntityNotFoundException.class));
     }
 
-    verify(entityManager).persist(batch.get(0).getClaim());
+    verify(entityManager).persist(new PreAdjMcsClaimJson(batch.get(0).getClaim()));
     verify(entityManager, times(0))
-        .persist(batch.get(1).getClaim()); // not called once a persist fails
+        .persist(
+            new PreAdjMcsClaimJson(batch.get(1).getClaim())); // not called once a persist fails
     verify(entityManager, times(0))
-        .persist(batch.get(2).getClaim()); // not called once a persist fails
-    verify(entityManager).merge(batch.get(0).getClaim());
-    verify(entityManager).merge(batch.get(1).getClaim());
+        .persist(
+            new PreAdjMcsClaimJson(batch.get(2).getClaim())); // not called once a persist fails
+    verify(entityManager).merge(new PreAdjMcsClaimJson(batch.get(0).getClaim()));
+    verify(entityManager).merge(new PreAdjMcsClaimJson(batch.get(1).getClaim()));
     verify(entityManager, times(0))
-        .persist(batch.get(2).getClaim()); // not called once a merge fails
+        .persist(new PreAdjMcsClaimJson(batch.get(2).getClaim())); // not called once a merge fails
     verify(transaction, times(2)).rollback(); // both persist and merge transactions are rolled back
 
     final AbstractClaimRdaSink.Metrics metrics = sink.getMetrics();
@@ -167,7 +176,9 @@ public class McsClaimRdaSinkTest {
   public void persistFatalError() {
     final List<RdaChange<PreAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
-    doThrow(new RuntimeException("oops")).when(entityManager).persist(batch.get(1).getClaim());
+    doThrow(new RuntimeException("oops"))
+        .when(entityManager)
+        .persist(new PreAdjMcsClaimJson(batch.get(1).getClaim()));
 
     try {
       sink.writeBatch(batch);
@@ -177,10 +188,11 @@ public class McsClaimRdaSinkTest {
       assertThat(error.getCause(), CoreMatchers.instanceOf(RuntimeException.class));
     }
 
-    verify(entityManager).persist(batch.get(0).getClaim());
-    verify(entityManager).persist(batch.get(1).getClaim());
+    verify(entityManager).persist(new PreAdjMcsClaimJson(batch.get(0).getClaim()));
+    verify(entityManager).persist(new PreAdjMcsClaimJson(batch.get(1).getClaim()));
     verify(entityManager, times(0))
-        .persist(batch.get(2).getClaim()); // not called once a persist fails
+        .persist(
+            new PreAdjMcsClaimJson(batch.get(2).getClaim())); // not called once a persist fails
     verify(entityManager, times(0))
         .merge(any()); // non-duplicate key error prevents any calls to merge
     verify(transaction).rollback();

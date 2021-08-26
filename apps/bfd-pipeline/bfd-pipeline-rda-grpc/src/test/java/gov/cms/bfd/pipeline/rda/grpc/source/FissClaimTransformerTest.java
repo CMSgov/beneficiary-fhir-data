@@ -177,15 +177,11 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("2");
     claim.setLastUpdated(clock.instant());
     PreAdjFissProcCode code = new PreAdjFissProcCode();
-    code.setDcn("dcn");
-    code.setPriority((short) 0);
     code.setProcCode("code-1");
     code.setProcFlag("fl-1");
     code.setLastUpdated(claim.getLastUpdated());
     claim.getProcCodes().add(code);
     code = new PreAdjFissProcCode();
-    code.setDcn("dcn");
-    code.setPriority((short) 1);
     code.setProcCode("code-2");
     code.setProcFlag("fl-2");
     code.setProcDate(LocalDate.of(2021, 7, 6));
@@ -197,7 +193,7 @@ public class FissClaimTransformerTest {
         .setClaim(claimBuilder.build());
     PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getProcCodes(), transformed.getProcCodes(), PreAdjFissProcCode::getPriority);
+        claim.getProcCodes(), transformed.getProcCodes());
   }
 
   @Test
@@ -231,16 +227,12 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     PreAdjFissDiagnosisCode code = new PreAdjFissDiagnosisCode();
-    code.setDcn("dcn");
-    code.setPriority((short) 0);
     code.setDiagCd2("code-1");
     code.setDiagPoaInd("W");
     code.setBitFlags("1234");
     code.setLastUpdated(claim.getLastUpdated());
     claim.getDiagCodes().add(code);
     code = new PreAdjFissDiagnosisCode();
-    code.setDcn("dcn");
-    code.setPriority((short) 1);
     code.setDiagCd2("code-2");
     code.setDiagPoaInd("N");
     code.setBitFlags("4321");
@@ -253,7 +245,7 @@ public class FissClaimTransformerTest {
     PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getDiagCodes(), transformed.getDiagCodes(), PreAdjFissDiagnosisCode::getPriority);
+        claim.getDiagCodes(), transformed.getDiagCodes());
   }
 
   @Test
@@ -300,8 +292,6 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     PreAdjFissPayer payer = new PreAdjFissPayer();
-    payer.setDcn("dcn");
-    payer.setPriority((short) 0);
     payer.setPayerType(PreAdjFissPayer.PayerType.Insured);
     payer.setPayersId("H");
     payer.setPayersName("payers-name");
@@ -330,7 +320,7 @@ public class FissClaimTransformerTest {
     PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getPayers(), transformed.getPayers(), PreAdjFissPayer::getPriority);
+        claim.getPayers(), transformed.getPayers());
   }
 
   @Test
@@ -378,8 +368,6 @@ public class FissClaimTransformerTest {
     claim.setCurrLoc2("9997");
     claim.setLastUpdated(clock.instant());
     PreAdjFissPayer payer = new PreAdjFissPayer();
-    payer.setDcn("dcn");
-    payer.setPriority((short) 0);
     payer.setPayerType(PreAdjFissPayer.PayerType.BeneZ);
     payer.setPayersId("H");
     payer.setPayersName("payers-name");
@@ -409,7 +397,7 @@ public class FissClaimTransformerTest {
     PreAdjFissClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertThat(transformed, samePropertyValuesAs(claim));
     TransformerTestUtils.assertListContentsHaveSamePropertyValues(
-        claim.getPayers(), transformed.getPayers(), PreAdjFissPayer::getPriority);
+        claim.getPayers(), transformed.getPayers());
   }
 
   @Test
