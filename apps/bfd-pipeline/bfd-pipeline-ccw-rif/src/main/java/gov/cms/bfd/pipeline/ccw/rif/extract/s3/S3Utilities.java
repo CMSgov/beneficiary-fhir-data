@@ -9,7 +9,6 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
 
 /** Contains utility/helper methods for AWS S3 that can be used in application and test code. */
@@ -22,8 +21,9 @@ public final class S3Utilities {
    * @return the {@link AmazonS3} client to use
    */
   public static AmazonS3 createS3Client(ExtractionOptions options) {
+    Boolean s3LocalDev = Boolean.parseBoolean(System.getProperty("s3.local", "false"));
 
-    if (!Strings.isNullOrEmpty(System.getProperty("s3.local"))) {
+    if (s3LocalDev) {
       return createS3MinioClient(options.getS3Region());
     }
 
@@ -35,8 +35,9 @@ public final class S3Utilities {
    * @return the {@link AmazonS3} client to use
    */
   public static AmazonS3 createS3Client(Regions awsS3Region) {
+    Boolean s3LocalDev = Boolean.parseBoolean(System.getProperty("s3.local", "false"));
 
-    if (!Strings.isNullOrEmpty(System.getProperty("s3.local"))) {
+    if (s3LocalDev) {
       return createS3MinioClient(awsS3Region);
     }
 
@@ -49,34 +50,18 @@ public final class S3Utilities {
    * @return the {@link AmazonS3} minio client to use
    */
   public static AmazonS3 createS3MinioClient(Regions awsS3Region) {
-    // default username
-    String minioUserName = "bfdLocalS3Dev";
-    // default password
-    String minioPassword = "bfdLocalS3Dev";
+    S3MinioConfig minioConfig = S3MinioConfig.Singleton();
 
-    if (!Strings.isNullOrEmpty(System.getProperty("s3.localUser"))) {
-      minioUserName = System.getProperty("s3.localUser");
-    }
-
-    if (!Strings.isNullOrEmpty(System.getProperty("s3.localPass"))) {
-      minioPassword = System.getProperty("s3.localPass");
-    }
-
-    // Default minioEndpoint address
-    String minioEndpointAddress = "http://localhost:9000";
-
-    if (!Strings.isNullOrEmpty(System.getProperty("s3.localAddress"))) {
-      minioEndpointAddress = System.getProperty("s3.localAddress");
-    }
-
-    AWSCredentials credentials = new BasicAWSCredentials(minioUserName, minioPassword);
+    AWSCredentials credentials =
+        new BasicAWSCredentials(minioConfig.minioUserName, minioConfig.minioPassword);
 
     ClientConfiguration clientConfiguration = new ClientConfiguration();
     clientConfiguration.setSignerOverride("AWSS3V4SignerType");
 
     return AmazonS3ClientBuilder.standard()
         .withEndpointConfiguration(
-            new AwsClientBuilder.EndpointConfiguration(minioEndpointAddress, awsS3Region.name()))
+            new AwsClientBuilder.EndpointConfiguration(
+                minioConfig.minioEndpointAddress, awsS3Region.name()))
         .withPathStyleAccessEnabled(true)
         .withClientConfiguration(clientConfiguration)
         .withCredentials(new AWSStaticCredentialsProvider(credentials))

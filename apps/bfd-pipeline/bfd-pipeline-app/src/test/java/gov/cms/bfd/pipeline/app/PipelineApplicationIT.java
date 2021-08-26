@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
+import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3MinioConfig;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
@@ -135,6 +136,7 @@ public final class PipelineApplicationIT {
     skipOnUnsupportedOs();
 
     AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
+
     Bucket bucket = null;
     Process appProcess = null;
     try {
@@ -615,6 +617,19 @@ public final class PipelineApplicationIT {
               .filter(f -> f.getFileName().toString().endsWith("-capsule-fat.jar"))
               .findFirst()
               .get();
+
+      S3MinioConfig minioConfig = S3MinioConfig.Singleton();
+      if (minioConfig.useMinio) {
+        return new String[] {
+          javaBin.toString(),
+          "-Ds3.local=true",
+          String.format("-Ds3.localUser=%s", minioConfig.minioUserName),
+          String.format("-Ds3.localPass=%s", minioConfig.minioPassword),
+          String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress),
+          "-jar",
+          appJar.toAbsolutePath().toString()
+        };
+      }
 
       return new String[] {javaBin.toString(), "-jar", appJar.toAbsolutePath().toString()};
     } catch (IOException e) {
