@@ -84,14 +84,14 @@
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
 		<metrics.version>4.1.2</metrics.version>
-		<hibernate.version>5.2.10.Final</hibernate.version>
+		<hibernate.version>5.4.24.Final</hibernate.version>
 		
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
 			on the default 'jdbc:bfd-test:' URL here. -->
 		<its.db.url>jdbc:bfd-test:hsqldb:mem</its.db.url>
-		<its.db.username></its.db.username>
-		<its.db.password></its.db.password>
+		<its.db.username/>
+		<its.db.password/>
 
 		<!-- Whether the V2 endpoints should be enabled -->
 		<local.v2.enabled>true</local.v2.enabled>
@@ -666,7 +666,7 @@ checkJavaFormat
 											<action>
 												<!-- Don't run this plugin inside m2e; necessary to disable a 
 													POM warning in Eclipse. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>
@@ -681,7 +681,7 @@ checkJavaFormat
 											<action>
 												<!-- Don't run this plugin inside m2e; necessary to disable a 
 													POM warning in Eclipse. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>
@@ -696,7 +696,7 @@ checkJavaFormat
 											<action>
 												<!-- Don't run this plugin inside m2e; necessary to disable a 
 													POM warning in Eclipse. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>
@@ -710,7 +710,7 @@ checkJavaFormat
 											</pluginExecutionFilter>
 											<action>
 												<!-- Don't run this plugin automatically on every build inside m2e. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>
@@ -724,7 +724,7 @@ checkJavaFormat
 											</pluginExecutionFilter>
 											<action>
 												<!-- Don't run this plugin automatically on every build inside m2e. -->
-												<ignore />
+												<ignore/>
 											</action>
 										</pluginExecution>
 									</pluginExecutions>
