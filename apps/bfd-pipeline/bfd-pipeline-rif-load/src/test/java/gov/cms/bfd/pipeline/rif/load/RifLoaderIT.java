@@ -557,10 +557,9 @@ public final class RifLoaderIT {
 
     // Verify that the expected number of records were run successfully.
     Assert.assertEquals(0, failureCount.get());
-    Assert.assertEquals(
-        "Unexpected number of loaded records.",
-        sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
-        loadCount.get());
+    Assert.assertTrue(
+        "The number of loaded records should meet or exceed the number of expected records. The expected records can be exceeded because of line items.",
+        (loadCount.get() >= sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum()));
 
     /*
      * Run the extraction an extra time and verify that each record can now
