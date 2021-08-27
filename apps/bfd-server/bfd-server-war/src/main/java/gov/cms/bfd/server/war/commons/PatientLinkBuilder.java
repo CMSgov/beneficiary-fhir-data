@@ -13,13 +13,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /** A link builder for Patient resources using bene-id cursors */
 public final class PatientLinkBuilder implements LinkBuilder {
-  /**
-   * Page size if unspecified is set to one less than the maximum integer value to allow clients to
-   * request one more than the page size as a means to see if an additional page is necessary
-   * without having an integer overflow.
-   */
-  public static final int DEFAULT_PAGE_SIZE = Integer.MAX_VALUE - 1;
-
   private final UriComponents components;
   private final Integer count;
   private final String cursor;
@@ -32,7 +25,6 @@ public final class PatientLinkBuilder implements LinkBuilder {
     count = extractCountParam(components);
     cursor = extractCursorParam(components);
     hasAnotherPage = false; // Don't really know, so default to false
-    check();
   }
 
   public PatientLinkBuilder(PatientLinkBuilder prev, boolean hasAnotherPage) {
@@ -40,15 +32,6 @@ public final class PatientLinkBuilder implements LinkBuilder {
     count = prev.count;
     cursor = prev.cursor;
     this.hasAnotherPage = hasAnotherPage;
-    check();
-  }
-
-  /** Check that the page size is valid */
-  private void check() {
-    if (getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
-    if (getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
-    if (!(getPageSize() < Integer.MAX_VALUE))
-      throw new InvalidRequestException("Page size must be less than " + Integer.MAX_VALUE);
   }
 
   @Override
@@ -58,7 +41,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
 
   @Override
   public int getPageSize() {
-    return isPagingRequested() ? count : DEFAULT_PAGE_SIZE;
+    return isPagingRequested() ? count : Integer.MAX_VALUE;
   }
 
   @Override

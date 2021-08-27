@@ -53,6 +53,7 @@ visualVm=""
 targetDirectory=
 dbUrl="jdbc:bfd-test:hsqldb:mem"
 v2Enabled="true"
+preAdjEnabled="true"
 while true; do
 	case "$1" in
 		-j )
@@ -179,6 +180,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \
+	"-DbfdServer.preadj.enabled=${preAdjEnabled}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \

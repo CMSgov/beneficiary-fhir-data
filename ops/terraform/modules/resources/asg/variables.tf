@@ -29,7 +29,7 @@ variable "lb_config" {
 }
 
 variable "mgmt_config" {
-  type = object({ vpn_sg = string, tool_sg = string, remote_sg = string, ci_sg = string })
+  type = object({ vpn_sg = string, tool_sg = string, remote_sg = string, ci_cidrs = list(string) })
 }
 
 variable "launch_config" {
