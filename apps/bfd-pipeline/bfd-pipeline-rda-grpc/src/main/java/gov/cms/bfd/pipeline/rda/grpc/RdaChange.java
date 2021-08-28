@@ -12,17 +12,21 @@ import lombok.Getter;
  */
 @Getter
 public class RdaChange<T> {
+  public static final long MIN_SEQUENCE_NUM = 0;
+
   public enum Type {
     INSERT,
     UPDATE,
     DELETE
   }
 
+  private final long sequenceNumber;
   private final Type type;
   private final T claim;
   private final Instant timestamp;
 
-  public RdaChange(Type type, T claim, Instant timestamp) {
+  public RdaChange(long sequenceNumber, Type type, T claim, Instant timestamp) {
+    this.sequenceNumber = sequenceNumber;
     this.type = type;
     this.claim = claim;
     this.timestamp = timestamp;
