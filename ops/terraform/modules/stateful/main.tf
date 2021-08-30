@@ -57,30 +57,6 @@ data "aws_security_group" "management" {
   }
 }
 
-# Create CBJ SG here to keep subnets in private vars file
-#
-resource "aws_security_group" "ci" {
-  name        = "bfd-${var.env_config.env}-cloudbees-jenkins"
-  description = "Allow all traffic from cloudbees jenkins subnets"
-  vpc_id      = data.aws_vpc.main.id
-  tags        = merge({ Name = "bfd-${var.env_config.env}-cloudbees-jenkins" }, var.env_config.tags)
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = var.cloudbees_jenkins_subnets
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-}
-
 
 ## VPC Private Local Zone for CNAME Records
 #

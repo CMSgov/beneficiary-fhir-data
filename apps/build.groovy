@@ -8,29 +8,6 @@
  * </p>
  */
 
-
-/**
- * Runs Maven with the specified arguments.
- *
- * @param args the arguments to pass to <code>mvn</code>
- * @throws RuntimeException An exception will be bubbled up if the Maven build returns a non-zero exit code.
- */
-def mvn(args) {
-	// This tool must be setup and named correctly in the Jenkins config.
-
-	def mvnHome = tool 'maven-3'
-
-	// Run the build, using Maven, with the appropriate config.
-	configFileProvider(
-			[
-				configFile(fileId: 'bluebutton:settings.xml', variable: 'MAVEN_SETTINGS'),
-				configFile(fileId: 'bluebutton:toolchains.xml', variable: 'MAVEN_TOOLCHAINS')
-			]
-	) {
-		sh "${mvnHome}/bin/mvn --settings $MAVEN_SETTINGS --toolchains $MAVEN_TOOLCHAINS ${args}"
-	}
-}
-
 /**
  * Models the results of a call to {@link #build}: contains the paths to the artifacts that were built.
  */
@@ -50,9 +27,8 @@ class AppBuildResults implements Serializable {
 def build(String build_env) {
 	dir ('apps') {
 
-		mvn "--update-snapshots -Dmaven.test.failure.ignore clean verify"
+		sh "mvn --update-snapshots -Dmaven.test.failure.ignore clean verify"
 
-	
 		/*
 		 * Fingerprint the output artifacts and archive the test results.
 		 *

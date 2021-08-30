@@ -288,7 +288,7 @@ module "ec2_instance" {
     vpn_sg    = var.mgmt_config.vpn_sg
     tool_sg   = var.mgmt_config.tool_sg
     remote_sg = var.mgmt_config.remote_sg
-    ci_sg     = var.mgmt_config.ci_sg
+    ci_cidrs  = var.mgmt_config.ci_cidrs
   }
 
   sg_ids = [aws_security_group.app.id]
