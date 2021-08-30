@@ -23,11 +23,11 @@ public final class S3Utilities {
   public static AmazonS3 createS3Client(ExtractionOptions options) {
     S3MinioConfig minioConfig = S3MinioConfig.Singleton();
 
-    // if (minioConfig.useMinio) {
-    return createS3MinioClient(options.getS3Region(), minioConfig);
-    // }
+    if (minioConfig.useMinio) {
+      return createS3MinioClient(options.getS3Region(), minioConfig);
+    }
 
-    // return createS3Client(options.getS3Region());
+    return createS3Client(options.getS3Region());
   }
 
   /**
