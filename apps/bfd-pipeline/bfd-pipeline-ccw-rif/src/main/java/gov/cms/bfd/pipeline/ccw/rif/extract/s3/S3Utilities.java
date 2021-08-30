@@ -21,13 +21,13 @@ public final class S3Utilities {
    * @return the {@link AmazonS3} client to use
    */
   public static AmazonS3 createS3Client(ExtractionOptions options) {
-    Boolean s3LocalDev = Boolean.parseBoolean(System.getProperty("s3.local", "false"));
+    S3MinioConfig minioConfig = S3MinioConfig.Singleton();
 
-    if (s3LocalDev) {
-      return createS3MinioClient(options.getS3Region());
-    }
+    // if (minioConfig.useMinio) {
+    return createS3MinioClient(options.getS3Region(), minioConfig);
+    // }
 
-    return createS3Client(options.getS3Region());
+    // return createS3Client(options.getS3Region());
   }
 
   /**
@@ -35,23 +35,23 @@ public final class S3Utilities {
    * @return the {@link AmazonS3} client to use
    */
   public static AmazonS3 createS3Client(Regions awsS3Region) {
-    Boolean s3LocalDev = Boolean.parseBoolean(System.getProperty("s3.local", "false"));
+    S3MinioConfig minioConfig = S3MinioConfig.Singleton();
 
-    if (s3LocalDev) {
-      return createS3MinioClient(awsS3Region);
+    if (minioConfig.useMinio) {
+      return createS3MinioClient(awsS3Region, minioConfig);
     }
-
     AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(awsS3Region).build();
     return s3Client;
   }
 
   /**
    * @param awsS3Region the AWS {@link Regions} that should be used when interacting with S3
+   * @param minioConfig passes the minioConfig to use
    * @return the {@link AmazonS3} minio client to use
    */
-  public static AmazonS3 createS3MinioClient(Regions awsS3Region) {
-    S3MinioConfig minioConfig = S3MinioConfig.Singleton();
-
+  public static AmazonS3 createS3MinioClient(Regions awsS3Region, S3MinioConfig minioConfig) {
+    // Uses BasicCredentials to connect to the minio client and gets the username,password, and
+    // address from the minioconfig
     AWSCredentials credentials =
         new BasicAWSCredentials(minioConfig.minioUserName, minioConfig.minioPassword);
 

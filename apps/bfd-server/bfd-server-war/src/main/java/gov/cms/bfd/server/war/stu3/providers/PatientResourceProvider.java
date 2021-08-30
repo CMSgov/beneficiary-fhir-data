@@ -26,6 +26,7 @@ import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
@@ -328,6 +329,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
 
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
+    checkPageSize(paging);
 
     Operation operation = new Operation(Operation.Endpoint.V1_PATIENT);
     operation.setOption("by", "coverageContractForYearMonth");
@@ -524,12 +526,11 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
                     "bene_ids_by_year_month_part_d_contract_id"))
             .time();
     try {
-      // Set the max query results to one more than the pagesize so that the caller
-      // can figure out whether there is another page.
-      final int maxResults = paging.getPageSize() + 1;
-
       matchingBeneIds =
-          entityManager.createQuery(beneIdCriteria).setMaxResults(maxResults).getResultList();
+          entityManager
+              .createQuery(beneIdCriteria)
+              .setMaxResults(paging.getPageSize() + 1)
+              .getResultList();
       return matchingBeneIds;
     } finally {
       beneHistoryMatchesTimerQueryNanoSeconds = beneIdMatchesTimer.stop();
@@ -961,5 +962,15 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     if (coverageId.getValueNotNull().length() != 5)
       throw new InvalidRequestException(
           "Unsupported query parameter value: " + coverageId.getValueNotNull());
+  }
+
+  /**
+   * Check that the page size is valid
+   *
+   * @param paging to check
+   */
+  public static void checkPageSize(LinkBuilder paging) {
+    if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
+    if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
   }
 }

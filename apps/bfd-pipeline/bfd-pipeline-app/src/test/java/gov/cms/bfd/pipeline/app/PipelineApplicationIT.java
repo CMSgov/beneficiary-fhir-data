@@ -82,7 +82,6 @@ public final class PipelineApplicationIT {
     // Wait for it to exit with an error.
     appProcess.waitFor(1, TimeUnit.MINUTES);
     appRunConsumerThread.join();
-
     // Verify that the application exited as expected.
     Assert.assertEquals(PipelineApplication.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
   }
@@ -630,8 +629,7 @@ public final class PipelineApplicationIT {
           appJar.toAbsolutePath().toString()
         };
       }
-
-      return new String[] {javaBin.toString(), "-jar", appJar.toAbsolutePath().toString()};
+     return new String[] {javaBin.toString(), "-jar", appJar.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
