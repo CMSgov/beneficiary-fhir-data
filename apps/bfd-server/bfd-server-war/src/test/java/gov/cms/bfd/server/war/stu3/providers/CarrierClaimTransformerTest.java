@@ -84,7 +84,8 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit eobWithLastUpdated =
-        CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(includeTaxNumbers));
+        CarrierClaimTransformer.transform(
+            new MetricRegistry(), claim, Optional.of(includeTaxNumbers));
     assertMatches(claim, eobWithLastUpdated, Optional.of(includeTaxNumbers));
 
     claim.setLastUpdated(null);
@@ -110,7 +111,7 @@ public final class CarrierClaimTransformerTest {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit eobWithLastUpdated =
         CarrierClaimTransformer.transform(
             new MetricRegistry(), claim, Optional.of(includeTaxNumbers));
