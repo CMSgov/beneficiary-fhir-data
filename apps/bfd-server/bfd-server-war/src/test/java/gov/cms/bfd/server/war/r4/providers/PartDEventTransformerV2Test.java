@@ -10,8 +10,8 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -55,7 +55,7 @@ public final class PartDEventTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(new Date());
+    claim.setLastUpdated(Instant.now());
 
     return claim;
   }
@@ -96,6 +96,17 @@ public final class PartDEventTransformerV2Test {
   @Test
   public void shouldSetFinalAction() {
     Assert.assertEquals(ExplanationOfBenefitStatus.ACTIVE, eob.getStatus());
+  }
+
+  @Test
+  public void shouldSetBillablePeriod() throws Exception {
+    // We just want to make sure it is set
+    Assert.assertNotNull(eob.getBillablePeriod());
+    Assert.assertEquals(
+        (new SimpleDateFormat("yyy-MM-dd")).parse("2015-05-12"),
+        eob.getBillablePeriod().getStart());
+    Assert.assertEquals(
+        (new SimpleDateFormat("yyy-MM-dd")).parse("2015-05-12"), eob.getBillablePeriod().getEnd());
   }
 
   @Test

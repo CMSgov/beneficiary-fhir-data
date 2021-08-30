@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
 import static gov.cms.bfd.pipeline.rda.grpc.sink.JpaClaimRdaSink.isDuplicateKeyException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -13,6 +15,9 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +35,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JpaClaimRdaSinkTest {
+  private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   @Mock private HikariDataSource dataSource;
   @Mock private EntityManagerFactory entityManagerFactory;
   @Mock private EntityManager entityManager;
@@ -44,7 +50,7 @@ public class JpaClaimRdaSinkTest {
     doReturn(transaction).when(entityManager).getTransaction();
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
-        new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory);
+        new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
     sink = new JpaClaimRdaSink<>("fiss", appState);
   }
 
@@ -53,7 +59,9 @@ public class JpaClaimRdaSinkTest {
     assertEquals(
         Arrays.asList(
             "JpaClaimRdaSink.fiss.calls",
+            "JpaClaimRdaSink.fiss.change.latency.millis",
             "JpaClaimRdaSink.fiss.failures",
+            "JpaClaimRdaSink.fiss.successes",
             "JpaClaimRdaSink.fiss.writes.merged",
             "JpaClaimRdaSink.fiss.writes.persisted",
             "JpaClaimRdaSink.fiss.writes.total"),
@@ -76,11 +84,12 @@ public class JpaClaimRdaSinkTest {
     verify(transaction).commit();
 
     final JpaClaimRdaSink.Metrics metrics = sink.getMetrics();
-    assertMeterReading("calls", 1, metrics.getCalls().getCount());
-    assertMeterReading("persists", 3, metrics.getObjectsPersisted().getCount());
-    assertMeterReading("merges", 0, metrics.getObjectsMerged().getCount());
-    assertMeterReading("writes", 3, metrics.getObjectsWritten().getCount());
-    assertMeterReading("failures", 0, metrics.getFailures().getCount());
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(3, "persists", metrics.getObjectsPersisted());
+    assertMeterReading(0, "merges", metrics.getObjectsMerged());
+    assertMeterReading(3, "writes", metrics.getObjectsWritten());
+    assertMeterReading(1, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
   }
 
   @Test
@@ -105,11 +114,12 @@ public class JpaClaimRdaSinkTest {
     verify(transaction).commit();
 
     final JpaClaimRdaSink.Metrics metrics = sink.getMetrics();
-    assertMeterReading("calls", 1, metrics.getCalls().getCount());
-    assertMeterReading("persists", 0, metrics.getObjectsPersisted().getCount());
-    assertMeterReading("merges", 3, metrics.getObjectsMerged().getCount());
-    assertMeterReading("writes", 3, metrics.getObjectsWritten().getCount());
-    assertMeterReading("failures", 0, metrics.getFailures().getCount());
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(0, "persists", metrics.getObjectsPersisted());
+    assertMeterReading(3, "merges", metrics.getObjectsMerged());
+    assertMeterReading(3, "writes", metrics.getObjectsWritten());
+    assertMeterReading(1, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
   }
 
   @Test
@@ -139,11 +149,12 @@ public class JpaClaimRdaSinkTest {
     verify(transaction, times(2)).rollback(); // both persist and merge transactions are rolled back
 
     final JpaClaimRdaSink.Metrics metrics = sink.getMetrics();
-    assertMeterReading("calls", 1, metrics.getCalls().getCount());
-    assertMeterReading("persists", 0, metrics.getObjectsPersisted().getCount());
-    assertMeterReading("merges", 0, metrics.getObjectsMerged().getCount());
-    assertMeterReading("writes", 0, metrics.getObjectsWritten().getCount());
-    assertMeterReading("failures", 1, metrics.getFailures().getCount());
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(0, "persists", metrics.getObjectsPersisted());
+    assertMeterReading(0, "merges", metrics.getObjectsMerged());
+    assertMeterReading(0, "writes", metrics.getObjectsWritten());
+    assertMeterReading(0, "successes", metrics.getSuccesses());
+    assertMeterReading(1, "failures", metrics.getFailures());
   }
 
   @Test
@@ -169,11 +180,12 @@ public class JpaClaimRdaSinkTest {
     verify(transaction).rollback();
 
     final JpaClaimRdaSink.Metrics metrics = sink.getMetrics();
-    assertMeterReading("calls", 1, metrics.getCalls().getCount());
-    assertMeterReading("persists", 0, metrics.getObjectsPersisted().getCount());
-    assertMeterReading("merges", 0, metrics.getObjectsMerged().getCount());
-    assertMeterReading("writes", 0, metrics.getObjectsWritten().getCount());
-    assertMeterReading("failures", 1, metrics.getFailures().getCount());
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(0, "persists", metrics.getObjectsPersisted());
+    assertMeterReading(0, "merges", metrics.getObjectsMerged());
+    assertMeterReading(0, "writes", metrics.getObjectsWritten());
+    assertMeterReading(0, "successes", metrics.getSuccesses());
+    assertMeterReading(1, "failures", metrics.getFailures());
   }
 
   @Test
@@ -189,13 +201,10 @@ public class JpaClaimRdaSinkTest {
     assertEquals(false, isDuplicateKeyException(new IOException("nothing to see here")));
   }
 
-  private void assertMeterReading(String meterName, long expected, long actual) {
-    assertEquals("Meter " + meterName, expected, actual);
-  }
-
   private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
     PreAdjFissClaim claim = new PreAdjFissClaim();
     claim.setDcn(dcn);
-    return new RdaChange<>(RdaChange.Type.INSERT, claim);
+    return new RdaChange<>(
+        MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
   }
 }

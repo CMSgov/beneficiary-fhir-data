@@ -1,11 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
-import com.google.protobuf.Empty;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.ClaimRequest;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
@@ -13,6 +15,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.MethodDescriptor;
 import io.grpc.stub.ClientCalls;
 import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * GrpcStreamCaller implementation that calls the RDA McsClaim service. At this stage in RDA API
@@ -20,6 +24,8 @@ import java.util.Iterator;
  * service is called it sends all of its values.
  */
 public class McsClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjMcsClaim>> {
+  static final Logger LOGGER = LoggerFactory.getLogger(McsClaimStreamCaller.class);
+
   private final McsClaimTransformer transformer;
 
   public McsClaimStreamCaller(McsClaimTransformer transformer) {
@@ -37,11 +43,15 @@ public class McsClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjMc
   @Override
   public GrpcResponseStream<RdaChange<PreAdjMcsClaim>> callService(ManagedChannel channel)
       throws Exception {
+    LOGGER.info("calling service");
     Preconditions.checkNotNull(channel);
-    final Empty request = Empty.newBuilder().build();
-    final MethodDescriptor<Empty, ClaimChange> method = RDAServiceGrpc.getGetMcsClaimsMethod();
-    final ClientCall<Empty, ClaimChange> call = channel.newCall(method, CallOptions.DEFAULT);
-    final Iterator<ClaimChange> apiResults = ClientCalls.blockingServerStreamingCall(call, request);
+    final ClaimRequest request = ClaimRequest.newBuilder().setSince(MIN_SEQUENCE_NUM).build();
+    final MethodDescriptor<ClaimRequest, McsClaimChange> method =
+        RDAServiceGrpc.getGetMcsClaimsMethod();
+    final ClientCall<ClaimRequest, McsClaimChange> call =
+        channel.newCall(method, CallOptions.DEFAULT);
+    final Iterator<McsClaimChange> apiResults =
+        ClientCalls.blockingServerStreamingCall(call, request);
     final Iterator<RdaChange<PreAdjMcsClaim>> transformedResults =
         Iterators.transform(apiResults, transformer::transformClaim);
     return new GrpcResponseStream<>(call, transformedResults);

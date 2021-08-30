@@ -8,8 +8,8 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Coverage;
@@ -38,7 +38,7 @@ public final class CoverageTransformerTest {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
-    beneficiary.setLastUpdated(new Date());
+    beneficiary.setLastUpdated(Instant.now());
 
     Coverage partACoverage =
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);

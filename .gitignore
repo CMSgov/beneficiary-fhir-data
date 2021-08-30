@@ -4,6 +4,7 @@
 !.gitignore
 !.gitattributes
 !.github
+!.secrets
 
 # OSX system files
 .DS_Store

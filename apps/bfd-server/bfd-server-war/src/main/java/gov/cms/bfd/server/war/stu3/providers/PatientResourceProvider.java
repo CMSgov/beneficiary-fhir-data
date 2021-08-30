@@ -281,7 +281,9 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       try {
         patients =
             Optional.of(read(new IdType(logicalId.getValue()), requestDetails))
-                .filter(p -> QueryUtils.isInRange(p.getMeta().getLastUpdated(), lastUpdated))
+                .filter(
+                    p ->
+                        QueryUtils.isInRange(p.getMeta().getLastUpdated().toInstant(), lastUpdated))
                 .map(p -> Collections.singletonList((IBaseResource) p))
                 .orElse(Collections.emptyList());
       } catch (ResourceNotFoundException e) {
@@ -651,7 +653,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
       }
 
       patients =
-          QueryUtils.isInRange(patient.getMeta().getLastUpdated(), lastUpdated)
+          QueryUtils.isInRange(patient.getMeta().getLastUpdated().toInstant(), lastUpdated)
               ? Collections.singletonList(patient)
               : Collections.emptyList();
     } catch (NoResultException e) {
