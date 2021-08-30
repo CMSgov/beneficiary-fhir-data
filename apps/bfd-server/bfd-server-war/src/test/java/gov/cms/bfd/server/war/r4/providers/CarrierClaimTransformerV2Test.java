@@ -37,7 +37,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -63,7 +62,6 @@ public class CarrierClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     return claim;
-
   }
 
   @Before
