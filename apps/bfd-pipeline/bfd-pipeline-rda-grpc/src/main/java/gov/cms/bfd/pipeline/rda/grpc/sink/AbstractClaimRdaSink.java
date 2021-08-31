@@ -220,7 +220,7 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
     /** Milliseconds between change timestamp and current time. */
     private final Histogram changeAgeMillis;
     /** Latest sequnce number from writing a batch. * */
-    private final Gauge<Long> latestSequenceNumber;
+    private final Gauge<?> latestSequenceNumber;
     /** The value returned by the latestSequenceNumber gauge. * */
     private final AtomicLong latestSequenceNumberValue = new AtomicLong(0L);
 
@@ -235,8 +235,8 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
       changeAgeMillis =
           appMetrics.histogram(MetricRegistry.name(base, "change", "latency", "millis"));
       latestSequenceNumber =
-          appMetrics.register(
-              MetricRegistry.name(base, "lastSeq"), latestSequenceNumberValue::longValue);
+          appMetrics.gauge(
+              MetricRegistry.name(base, "lastSeq"), () -> latestSequenceNumberValue::longValue);
     }
 
     private void setLatestSequenceNumber(long value) {

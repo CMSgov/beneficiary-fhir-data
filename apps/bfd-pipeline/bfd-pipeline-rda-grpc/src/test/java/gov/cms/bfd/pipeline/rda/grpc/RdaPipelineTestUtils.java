@@ -20,7 +20,7 @@ public class RdaPipelineTestUtils {
     assertEquals("Meter " + meterName, expected, meter.getCount());
   }
 
-  public static void assertGaugeReading(long expected, String gaugeName, Gauge<Long> gauge) {
+  public static void assertGaugeReading(long expected, String gaugeName, Gauge<?> gauge) {
     assertEquals("Gauge " + gaugeName, Long.valueOf(expected), gauge.getValue());
   }
 
