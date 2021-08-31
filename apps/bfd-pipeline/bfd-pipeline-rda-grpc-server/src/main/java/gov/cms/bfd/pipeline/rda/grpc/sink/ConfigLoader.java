@@ -10,15 +10,34 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
 
-/** Simple class to abstract loading configuration values from multiple sources. */
+/**
+ * Abstracts loading configuration values from one or more sources of key/value pairs. Provides
+ * commonly needed methods to pull in configuration data and parse it various ways. A lambda
+ * function or method reference can be used as the source of data (e.g. System::getenv or
+ * myMap::get) or the Builder object can be used to construct chained sources that can use a basic
+ * set of defaults but allow something else to override them selectively. For example using a Map of
+ * default values but allow environment variables to override anything in the Map.
+ */
 public class ConfigLoader {
   private final Function<String, String> source;
 
+  /**
+   * Constructs a ConfigLoader that uses the provided Function as the source of key/value
+   * configuration data. The function will be called whenever a specific configuration value is
+   * needed. It can return null to indicate that no value is available for the requested key.
+   *
+   * @param source function used to obtain key/value configuration data
+   */
   public ConfigLoader(Function<String, String> source) {
     this.source = source;
   }
 
-  /** @return a Builder object for creating ConfigLoader objects */
+  /**
+   * Creates a Builder that can be used to combine multiple sources of configuration data into a
+   * prioritized chain.
+   *
+   * @return a Builder object for creating ConfigLoader objects.
+   */
   public static ConfigLoader.Builder builder() {
     return new Builder();
   }
@@ -215,7 +234,8 @@ public class ConfigLoader {
   /**
    * Builder to construct ConfigLoader instances. Each call to add a source inserts the specified
    * source as the primary source and any old source becomes a fallback if the new one has no value.
-   * Multiple calls can chain any number of sources in this way.
+   * Multiple calls can chain any number of sources in this way. All methods return the Builder so
+   * that calls can be chained.
    */
   public static class Builder {
     private Function<String, String> source = ignored -> null;
@@ -234,14 +254,23 @@ public class ConfigLoader {
       return this;
     }
 
+    /** Adds a source that pulls values from environment variables. */
     public Builder addEnvironmentVariables() {
       return add(System::getenv);
     }
 
+    /** Adds a source that pulls values from system properties. */
     public Builder addSystemProperties() {
       return add(System::getProperty);
     }
 
+    /**
+     * Reads properties from the specified file and adds the resulting Properties object as a
+     * source. The file must exist and must be a valid Properties file.
+     *
+     * @param propertiesFile normal java Properties file
+     * @throws IOException if reading the file failed
+     */
     public Builder addPropertiesFile(File propertiesFile) throws IOException {
       Properties props = new Properties();
       try (Reader in = new BufferedReader(new FileReader(propertiesFile))) {
