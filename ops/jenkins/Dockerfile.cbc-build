@@ -1,0 +1,22 @@
+ARG JAVA_VERSION
+ARG MAVEN_VERSION
+
+FROM maven:${MAVEN_VERSION}-openjdk-${JAVA_VERSION}
+
+ARG JAVA_VERSION
+
+COPY jdk${JAVA_VERSION}.toolchains.xml /root/.m2/toolchains.xml
+
+ARG ANSIBLE_VERSION
+ARG PACKER_VERSION
+ARG TERRAFORM_VERSION
+
+RUN apt -y update && \
+    apt -y install python3-pip jq && \
+    pip3 install ansible==${ANSIBLE_VERSION} awscli boto && \
+    curl -L -o packer.zip https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip && \
+    unzip packer.zip -d /usr/local/bin && \
+    rm packer.zip && \
+    curl -L -o terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    unzip terraform.zip -d /usr/local/bin && \
+    rm terraform.zip
