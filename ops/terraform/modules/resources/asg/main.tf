@@ -94,7 +94,7 @@ resource "aws_launch_template" "main" {
   }
 
   block_device_mappings {
-    device_name = "/dev/sda1"
+    device_name = "/dev/xvda"
     ebs {
       volume_type           = "gp2"
       volume_size           = var.launch_config.volume_size
