@@ -2,7 +2,7 @@ name: 'CI - Java'
 on: pull_request
 jobs:
   mvn-fmt-maven-plugin:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: 'Checkout repo'
         uses: actions/checkout@v2
@@ -31,7 +31,7 @@ jobs:
         run: mvn com.coveo:fmt-maven-plugin:check
         working-directory: ./apps
   mvn-verify:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: 'Configure AWS credentials'
         uses: aws-actions/configure-aws-credentials@v1
