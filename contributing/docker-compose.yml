@@ -41,3 +41,4 @@ services:
       - "1337:${BFD_PORT}"
     depends_on:
       - local_bfddb
+      
