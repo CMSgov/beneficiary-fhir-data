@@ -82,7 +82,7 @@
 		<project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
 
 		<!-- The version of Java that we'll use for everything. -->
-		<javaSourceVersion>1.8</javaSourceVersion>
+		<javaSourceVersion>11</javaSourceVersion>
 
 		<!-- Configure Sonar such that projects evaluated by it against it will 
 			use JaCoCo to compute the code coverage of any unit and integration tests. -->
@@ -299,7 +299,7 @@
 						<toolchains>
 							<jdk>
 								<!-- Use a Java 8 JDK, by default. -->
-								<version>1.8</version>
+								<version>11</version>
 							</jdk>
 						</toolchains>
 					</configuration>
@@ -395,7 +395,7 @@ checkJavaFormat
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.6.1</version>
 					<configuration>
-						<!-- Set the Java source version used by the compiler. -->
+					<!-- Set the Java source version used by the compiler. -->
 						<source>${javaSourceVersion}</source>
 						<target>${javaSourceVersion}</target>
 					</configuration>

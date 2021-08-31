@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<jetty.version>9.4.43.v20210629</jetty.version>
+		<jetty.version>11.0.6</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -120,6 +120,18 @@
 					<groupId>commons-logging</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<!-- API, java.xml.bind module -->
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+		<!-- Runtime, com.sun.xml.bind module -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>2.3.2</version>
 		</dependency>
 		<dependency>
 			<!-- Used in tests to help with managing asynchronous behavior. Reference:
