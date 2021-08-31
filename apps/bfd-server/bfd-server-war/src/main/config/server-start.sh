@@ -53,7 +53,7 @@ visualVm=""
 targetDirectory=
 dbUrl="jdbc:bfd-test:hsqldb:mem"
 v2Enabled="true"
-preAdjEnabled="true"
+preadjEnabled="true"
 while true; do
 	case "$1" in
 		-j )
