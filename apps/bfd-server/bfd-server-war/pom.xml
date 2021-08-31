@@ -199,7 +199,7 @@
 			<!-- Provides sample data used in tests. -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rif-samples</artifactId>
-			<scope>compile</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<!-- Used to load sample data in tests. -->

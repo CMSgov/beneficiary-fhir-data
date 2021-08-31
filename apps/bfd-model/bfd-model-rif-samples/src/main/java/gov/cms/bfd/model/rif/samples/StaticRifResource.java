@@ -505,15 +505,6 @@ public enum StaticRifResource {
   SYNTHEA_BENE_HISTORY(
       syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_history.csv")),
       RifFileType.BENEFICIARY_HISTORY,
-      Optional.empty()),
-
-  /**
-   * The NPIs produced by {@link #generateSyntheaData()}, the amount of which will vary across
-   * Synthea runs.
-   */
-  SYNTHEA_NPIS(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/npi.tsv")),
-      null,
       Optional.empty());
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StaticRifResource.class);

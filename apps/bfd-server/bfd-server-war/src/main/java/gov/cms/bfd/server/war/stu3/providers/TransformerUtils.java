@@ -2785,8 +2785,8 @@ public final class TransformerUtils {
   }
 
   /**
-   * Reads ALL the NPI codes and display values from the NPI_Coded_Display_Values_Tab.txt file and,
-   * if present, the Synthea NPI file. Refer to the README file in the src/main/resources directory
+   * Reads ALL the NPI codes and display values from the NPI_Coded_Display_Values_Tab.txt file.
+   * Refer to the README file in the src/main/resources directory
    */
   private static Map<String, String> readNpiCodeFiles() {
     Map<String, String> npiCodeMap = new HashMap<>();
@@ -2800,21 +2800,6 @@ public final class TransformerUtils {
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NPI code data.", e);
     }
-    // Merge Synthea generated NPIs if present. This block is commented out pending discussions
-    // on how to proceed with synthetic vs real NPIs.
-    /*
-    try {
-      URL syntheaNPIFile =
-          gov.cms.bfd.model.rif.samples.StaticRifResource.SYNTHEA_NPIS.getResourceUrl();
-      BufferedReader syntheaNpiCodesIn =
-          new BufferedReader(new InputStreamReader(syntheaNPIFile.openStream()));
-      Map<String, String> syntheaNpiCodes = readNpiCodeFile(syntheaNpiCodesIn);
-      npiCodeMap.putAll(syntheaNpiCodes);
-    } catch (IOException e) {
-      // Ignore, Synthea may not be used here
-      LOGGER.info("SYNTHEA NPI codes were not loaded");
-    }
-    */
     return npiCodeMap;
   }
 
