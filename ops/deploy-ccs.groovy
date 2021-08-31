@@ -90,7 +90,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 		def goldAmi = sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --filters \
-			'Name=name,Values=\"EAST-RH 7-? Gold Image V.1.?? (HVM) ??-??-??\"' \
+			'Name=name,Values=\"amzn2legacy*\"' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
 			).trim()
@@ -100,7 +100,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 			sh "packer build -color=false -var vault_password_file=${vaultPasswordFile} \
 			-var source_ami=${goldAmi} \
 			-var subnet_id=subnet-092c2a68bd18b34d1 \
-			../../packer/build_bfd-platinum.json"
+			../../packer/build_bfd-platinum-amzn2.json"
 		}
 	  return new AmiIds(
 			platinumAmiId: extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
