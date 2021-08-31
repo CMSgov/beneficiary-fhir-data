@@ -10,6 +10,18 @@ services:
       POSTGRES_PASSWORD: InsecureLocalDev
     ports:
       - "5433:5432"
+  local_minio:
+    image: minio/minio 
+    environment:
+      MINIO_ROOT_USER: bfdLocalS3Dev
+      MINIO_ROOT_PASSWORD: bfdLocalS3Dev
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    expose:
+      - "9000"
+      - "9001"
   bfd:
     build:
       context: ./docker

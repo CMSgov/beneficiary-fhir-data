@@ -1,9 +1,9 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
-/// S3MinioConfig is an object for configuring
-/// minio to use as a S3 bucket for local development
-/// Username, password, and minioaddress can be passed in
-/// as maven parameters
+/**
+ * S3MinioConfig is an object for configuring minio to use as a S3 bucket for local development
+ * Username, password, and minioaddress can be passed in as maven parameters
+ */
 public class S3MinioConfig {
 
   public String minioUserName;
@@ -19,10 +19,11 @@ public class S3MinioConfig {
     minioEndpointAddress = System.getProperty("s3.localAddress", "http://localhost:9000");
     useMinio = Boolean.parseBoolean(System.getProperty("s3.local"));
   }
-  /// Singleton method makes sure there is one instance and
-  /// one instance only of the S3MinioConfig Class
+  /**
+   * Singleton method makes sure there is one instance and one instance only of the S3MinioConfig
+   * Class
+   */
   public static synchronized S3MinioConfig Singleton() {
-    // To ensure only one instance is created
     if (single_instance == null) {
       single_instance = new S3MinioConfig();
     }
