@@ -135,7 +135,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
-				../../packer/build_bfd-all.json"
+				../../packer/build_bfd-all-amzn2.json"
 
 			return new AmiIds(
 				platinumAmiId: amiIds.platinumAmiId,
