@@ -60,6 +60,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -198,7 +199,7 @@ public final class EndpointJsonResponseComparatorIT {
    * Generates the "golden" files, i.e. the approved responses to compare to. Run by commenting out
    * the <code>@Ignore</code> annotation and running this method as JUnit.
    */
-  // @Ignore
+  @Ignore
   @Test
   public void generateApprovedResponseFiles() {
     Path approvedResponseDir = getApprovedResponseDir();
