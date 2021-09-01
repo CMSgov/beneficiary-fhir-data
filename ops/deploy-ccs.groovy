@@ -100,7 +100,7 @@ def buildPlatinumAmi(AmiIds amiIds) {
 			sh "packer build -color=false -var vault_password_file=${vaultPasswordFile} \
 			-var source_ami=${goldAmi} \
 			-var subnet_id=subnet-092c2a68bd18b34d1 \
-			../../packer/build_bfd-platinum-amzn2.json"
+			../../packer/build_bfd-platinum.json"
 		}
 	  return new AmiIds(
 			platinumAmiId: extractAmiIdFromPackerManifest(readFile(file: "${workspace}/ops/ansible/playbooks-ccs/manifest_platinum.json")),
@@ -135,7 +135,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
-				../../packer/build_bfd-all-amzn2.json"
+				../../packer/build_bfd-all.json"
 
 			return new AmiIds(
 				platinumAmiId: amiIds.platinumAmiId,
