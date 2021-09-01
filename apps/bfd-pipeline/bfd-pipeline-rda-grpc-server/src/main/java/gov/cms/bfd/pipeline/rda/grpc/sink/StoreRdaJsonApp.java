@@ -12,6 +12,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.MethodDescriptor;
 import io.grpc.stub.ClientCalls;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Iterator;
@@ -31,19 +32,21 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
   }
 
   public static void main(String[] args) throws Exception {
-    final String host = option(args, 0, "localhost");
-    final int port = Integer.parseInt(option(args, 1, "443"));
-    final ClaimType claimType = ClaimType.valueOf(option(args, 2, "fiss").toUpperCase());
-    final int maxToReceive = Integer.parseInt(option(args, 3, "100"));
-    final String filename = option(args, 4, claimType.name() + ".ndjson");
+    if (args.length != 1) {
+      System.err.println("usage: DownloadRdaJsonApp config");
+      System.exit(1);
+    }
+    final ConfigLoader loader =
+        ConfigLoader.builder().addPropertiesFile(new File(args[0])).addSystemProperties().build();
+    final Config config = new Config(loader);
 
-    final ManagedChannel channel = createChannel(host, port);
+    final ManagedChannel channel = createChannel(config.apiHost, config.apiPort);
     try {
       final GrpcResponseStream<? extends MessageOrBuilder> results =
-          callService(claimType, channel);
+          callService(config.claimType, channel);
       int received = 0;
-      try (PrintWriter output = new PrintWriter(new FileWriter(filename))) {
-        while (received < maxToReceive && results.hasNext()) {
+      try (PrintWriter output = new PrintWriter(new FileWriter(config.outputFile))) {
+        while (received < config.maxToReceive && results.hasNext()) {
           final MessageOrBuilder change = results.next();
           final String json = convertToJson(change);
           output.println(json);
@@ -88,7 +91,19 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
     return JsonFormat.printer().omittingInsignificantWhitespace().print(change);
   }
 
-  private static String option(String[] args, int index, String defaultValue) {
-    return args.length > index ? args[index] : defaultValue;
+  private static class Config {
+    private final String apiHost;
+    private final int apiPort;
+    private final ClaimType claimType;
+    private final int maxToReceive;
+    private final File outputFile;
+
+    private Config(ConfigLoader options) {
+      apiHost = options.stringValue("api.host", "localhost");
+      apiPort = options.intValue("api.port", 443);
+      claimType = options.enumValue("output.type", ClaimType::valueOf);
+      maxToReceive = options.intValue("output.maxCount", Integer.MAX_VALUE);
+      outputFile = options.writeableFile("output.file");
+    }
   }
 }
