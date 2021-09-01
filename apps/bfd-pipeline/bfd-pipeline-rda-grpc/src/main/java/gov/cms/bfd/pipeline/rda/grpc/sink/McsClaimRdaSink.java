@@ -5,6 +5,10 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.util.Optional;
 
+/**
+ * Implementation of AbstractClaimRdaSink that adds the appropriate query to obtain maximum sequence
+ * number for MCS claims.
+ */
 public class McsClaimRdaSink extends AbstractClaimRdaSink<PreAdjMcsClaim> {
   public McsClaimRdaSink(PipelineApplicationState appState) {
     super(appState);
