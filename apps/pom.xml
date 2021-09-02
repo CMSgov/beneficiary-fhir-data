@@ -95,6 +95,9 @@
 
 		<!-- Whether the V2 endpoints should be enabled -->
 		<local.v2.enabled>true</local.v2.enabled>
+
+		<!-- Whether the preadj endpoints should be enabled -->
+		<local.preadj.enabled>true</local.preadj.enabled>
 	</properties>
 
 	<dependencyManagement>
