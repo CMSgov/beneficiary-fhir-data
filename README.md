@@ -105,12 +105,11 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 3. Set up a local S3 using Minio Docker Container
     ```sh
     docker run \
-      -d \
       -p 9000:9000 \
-      -p 9001:9001 \
+      -p 9001:9001 -d  --name 'minio' \
       -e "MINIO_ROOT_USER=bfdLocalS3Dev" \
       -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
-      /minio server /data --console-address ":9001"
+      minio/minio server /data --console-address ":9001"
     ```
 4. Run mvn install with the following 
     ```
