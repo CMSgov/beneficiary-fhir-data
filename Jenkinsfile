@@ -138,7 +138,7 @@ try {
 
 					// Set global AWS environment variables from role assumption
 					withCredentials([string(credentialsId: 'bfd-aws-assume-role', variable: 'awsAssumeRole')]) {
-						awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --output text --query Credentials").trim().split(/\s+/)
+						awsCredentials = sh(returnStdout: true, script: "aws sts assume-role --role-arn ${awsAssumeRole} --role-session-name session --duration-seconds 43200 --output text --query Credentials").trim().split(/\s+/)
 						env.AWS_DEFAULT_REGION = 'us-east-1'
 						env.AWS_ACCESS_KEY_ID = awsCredentials[0]
 						env.AWS_SECRET_ACCESS_KEY = awsCredentials[2]

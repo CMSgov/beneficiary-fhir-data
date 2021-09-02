@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.io.BufferedReader;
 import java.io.File;
@@ -193,15 +194,7 @@ public class ConfigLoader {
    */
   public Optional<File> readableFileOption(String name) {
     Optional<File> file = stringOption(name).map(File::new);
-    file.ifPresent(
-        f -> {
-          if (!f.isFile()) {
-            throw new ConfigException(name, "object referenced by path is not a file");
-          }
-          if (!f.canRead()) {
-            throw new ConfigException(name, "file is not readable");
-          }
-        });
+    file.ifPresent(f -> validateReadableFile(name, f));
     return file;
   }
 
@@ -216,16 +209,7 @@ public class ConfigLoader {
   public File writeableFile(String name) {
     String value = stringValue(name);
     File file = new File(value);
-    if (file.exists()) {
-      if (!file.isFile()) {
-        throw new ConfigException(name, "object referenced by path is not a file");
-      } else if (!file.canWrite()) {
-        throw new ConfigException(name, "file is not writeable");
-      }
-    } else if (!file.getAbsoluteFile().getParentFile().canWrite()) {
-      throw new ConfigException(name, "file does not exist and parent is not writeable");
-    }
-    return file;
+    return validateWriteableFile(name, file);
   }
 
   /**
@@ -248,6 +232,65 @@ public class ConfigLoader {
       default:
         throw new ConfigException(name, "invalid boolean value: " + value);
     }
+  }
+
+  /**
+   * Verifies that the specified file is readable. Returns the file if the file is readable.
+   * Otherwise, throws a ConfigException.
+   *
+   * @param name name of configuration value that created this file
+   * @param file the file object to be validated
+   * @return the original File object
+   * @throws ConfigException if the file is not readable
+   */
+  @VisibleForTesting
+  File validateReadableFile(String name, File file) throws ConfigException {
+    try {
+      if (!file.isFile()) {
+        throw new ConfigException(name, "object referenced by path is not a file");
+      }
+      if (!file.canRead()) {
+        throw new ConfigException(name, "file is not readable");
+      }
+    } catch (ConfigException ex) {
+      // pass our own exception through
+      throw ex;
+    } catch (Exception ex) {
+      // wrap any other exception
+      throw new ConfigException(name, "attempt to validate the file failed with an exception", ex);
+    }
+    return file;
+  }
+
+  /**
+   * Verifies that the specified file is writeable. Either the file must exist and be writeable or
+   * else its parent directory must exist and be writeable. Returns the file if the file is
+   * writeable. Otherwise, throws a ConfigException.
+   *
+   * @param name name of configuration value that created this file
+   * @param file the file object to be validated
+   * @return the original File object
+   * @throws ConfigException if the file/parent is not writeable
+   */
+  @VisibleForTesting
+  File validateWriteableFile(String name, File file) throws ConfigException {
+    try {
+      if (file.exists()) {
+        if (!file.isFile()) {
+          throw new ConfigException(name, "object referenced by path is not a file");
+        } else if (!file.canWrite()) {
+          throw new ConfigException(name, "file is not writeable");
+        }
+      } else if (!file.getAbsoluteFile().getParentFile().canWrite()) {
+        throw new ConfigException(name, "file does not exist and parent is not writeable");
+      }
+    } catch (ConfigException ex) {
+      // pass our own exception through
+      throw ex;
+    } catch (Exception ex) {
+      throw new ConfigException(name, "attempt to validate the file failed with an exception", ex);
+    }
+    return file;
   }
 
   /**
@@ -284,6 +327,15 @@ public class ConfigLoader {
     }
 
     /**
+     * Adds a source that pulls values from the specified properties object.
+     *
+     * @param properties source of properties
+     */
+    public Builder addProperties(Properties properties) {
+      return add(properties::getProperty);
+    }
+
+    /**
      * Reads properties from the specified file and adds the resulting Properties object as a
      * source. The file must exist and must be a valid Properties file.
      *
@@ -295,7 +347,7 @@ public class ConfigLoader {
       try (Reader in = new BufferedReader(new FileReader(propertiesFile))) {
         props.load(in);
       }
-      return add(props::getProperty);
+      return addProperties(props);
     }
   }
 }
