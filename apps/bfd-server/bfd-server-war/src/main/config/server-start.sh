@@ -30,7 +30,7 @@ if [[ "${cygwin}" = true ]]; then
 fi
 
 # Constants.
-serverTimeoutSeconds=120
+serverTimeoutSeconds=${SERVER_START_TIMEOUT:-120}
 dbUsername=""
 dbPassword=""
 
@@ -39,7 +39,7 @@ scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Use GNU getopt to parse the options passed to this script.
 TEMP=`getopt \
-	j:m:v:t:u:e: \
+	j:m:v:t:u:e:p: \
 	$*`
 if [ $? != 0 ] ; then echo "Terminating." >&2 ; exit 1 ; fi
 
@@ -53,7 +53,7 @@ visualVm=""
 targetDirectory=
 dbUrl="jdbc:bfd-test:hsqldb:mem"
 v2Enabled="true"
-preAdjEnabled="true"
+preadjEnabled="true"
 while true; do
 	case "$1" in
 		-j )
@@ -68,6 +68,8 @@ while true; do
 			dbUrl="$2"; shift 2 ;;
 		-e )
 			v2Enabled="$2"; shift 2 ;;
+		-p )
+			preadjEnabled="$2"; shift 2 ;;
 		-- ) shift; break ;;
 		* ) break ;;
 	esac
@@ -139,8 +141,14 @@ if [[ "${cygwin}" = true ]]; then warArtifact=$(cygpath --windows "${warArtifact
 if [[ "${cygwin}" = true ]]; then keyStore=$(cygpath --mixed "${keyStore}"); fi
 if [[ "${cygwin}" = true ]]; then trustStore=$(cygpath --mixed "${trustStore}"); fi
 
-# Read the server port to be used from the ports file.
-serverPortHttps=${BFD_PORT:-$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)}
+# If we are running in Jenkins, don't allow BFD_PORT to override port generated from file
+# due to bizzare namespace collision: https://github.com/CMSgov/beneficiary-fhir-data/pull/740#discussion_r694276000
+if [[ ! -z "${JENKINS_HOME}" ]] && [[ ! -z "${JENKINS_URL}" ]]; then
+	serverPortHttps=$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)
+else
+	serverPortHttps=${BFD_PORT:-$(grep "^server.port.https=" "${serverPortsFile}" | tr -d '\r' | cut -d'=' -f2)}
+fi
+
 if [[ -z "${serverPortHttps}" ]]; then >&2 echo "Server HTTPS port not specified in '${serverPortsFile}'."; exit 1; fi
 echo "Configured server to run on HTTPS port '${serverPortHttps}'."
 
@@ -174,7 +182,7 @@ BFD_PORT="${serverPortHttps}" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \
-	"-DbfdServer.preadj.enabled=${preAdjEnabled}" \
+	"-DbfdServer.preadj.enabled=${preadjEnabled}" \
 	"-DbfdServer.db.username=" \
 	"-DbfdServer.db.password=" \
 	"-DbfdServer.db.schema.apply=true" \
