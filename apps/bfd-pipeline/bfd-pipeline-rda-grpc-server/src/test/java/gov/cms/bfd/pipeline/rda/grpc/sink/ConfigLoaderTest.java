@@ -1,30 +1,33 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Files;
-import gov.cms.bfd.pipeline.rda.grpc.ThrowableConsumer;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigLoaderTest {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigLoaderTest.class);
+
   private Map<String, String> values;
   private ConfigLoader loader;
 
   @Before
   public void setUp() {
     values = new HashMap<>();
-    loader = new ConfigLoader(values::get);
+    loader = spy(new ConfigLoader(values::get));
   }
 
   @Test
@@ -91,88 +94,137 @@ public class ConfigLoaderTest {
   }
 
   @Test
-  public void readableFileExists() throws Exception {
-    runWithTempFile(
-        file -> {
-          Files.touch(file);
-          values.put("a", file.getPath());
-          assertEquals(file, loader.readableFile("a"));
-        });
-  }
-
-  @Test(expected = ConfigException.class)
-  public void readableFileNotReadable() throws Exception {
-    runWithTempFile(
-        file -> {
-          Files.touch(file);
-          file.setReadable(false);
-          values.put("a", file.getPath());
-          assertEquals(file, loader.readableFile("a"));
-        });
-  }
-
-  @Test(expected = ConfigException.class)
-  public void readableFileMissing() throws Exception {
-    runWithTempFile(
-        file -> {
-          file.delete();
-          values.put("a", file.getPath());
-          assertEquals(file, loader.readableFile("a"));
-        });
-  }
-
-  @Test(expected = ConfigException.class)
-  public void readableFileIsNotAFile() throws Exception {
-    runWithTempFile(
-        file -> {
-          file.delete();
-          file.mkdir();
-          values.put("a", file.getPath());
-          assertEquals(file, loader.readableFile("a"));
-        });
-  }
-
-  @Test(expected = ConfigException.class)
-  public void writeableFileIsNotAFile() throws Exception {
-    runWithTempFile(
-        file -> {
-          file.delete();
-          file.mkdir();
-          values.put("a", file.getPath());
-          assertEquals(file, loader.writeableFile("a"));
-        });
+  public void readableFileSuccess() {
+    // configure the mock to accept any file with the expected path
+    doAnswer(invocation -> invocation.getArgument(1))
+        .when(loader)
+        .validateReadableFile(eq("f"), eq(new File("path")));
+    values.put("f", "path");
+    assertEquals(new File("path"), loader.readableFile("f"));
   }
 
   @Test
-  public void writeableFileExists() throws Exception {
-    runWithTempFile(
-        file -> {
-          Files.touch(file);
-          values.put("a", file.getPath());
-          assertEquals(file, loader.writeableFile("a"));
-        });
-  }
-
-  @Test(expected = ConfigException.class)
-  public void writeableFileNotWriteable() throws Exception {
-    runWithTempFile(
-        file -> {
-          Files.touch(file);
-          file.setWritable(false);
-          values.put("a", file.getPath());
-          assertEquals(file, loader.writeableFile("a"));
-        });
+  public void readableFileFailure() throws Exception {
+    // configure the mock to reject any file with the expected path
+    doThrow(new ConfigException("f", "not readable"))
+        .when(loader)
+        .validateReadableFile(eq("f"), eq(new File("path")));
+    values.put("f", "path");
+    assertException("f", "not readable", () -> loader.readableFile("f"));
   }
 
   @Test
-  public void writeableFileMissing() throws Exception {
-    runWithTempFile(
-        file -> {
-          file.delete();
-          values.put("a", file.getPath());
-          // passes because the parent directory is writeable
-          assertEquals(file, loader.writeableFile("a"));
-        });
+  public void validateReadableFileIsReadable() {
+    File file = mock(File.class);
+    doReturn(true).when(file).isFile();
+    doReturn(true).when(file).canRead();
+    assertSame(file, loader.validateReadableFile("a", file));
+  }
+
+  @Test
+  public void validateReadableFileIsNotReadable() throws Exception {
+    File file = mock(File.class);
+    doReturn(true).when(file).isFile();
+    doReturn(false).when(file).canRead();
+    assertException("a", "file is not readable", () -> loader.validateReadableFile("a", file));
+  }
+
+  @Test
+  public void validateReadableFileIsNotAFile() throws Exception {
+    File file = mock(File.class);
+    doReturn(false).when(file).isFile();
+    assertException(
+        "a",
+        "object referenced by path is not a file",
+        () -> loader.validateReadableFile("a", file));
+  }
+
+  @Test
+  public void validateReadableFileThrows() throws Exception {
+    File file = mock(File.class);
+    doThrow(new ConfigException("a", "oops", new IOException())).when(file).isFile();
+    assertException("a", "oops", () -> loader.validateReadableFile("a", file));
+  }
+
+  @Test
+  public void writeableFileSuccess() {
+    // configure the mock to accept any file with the expected path
+    doAnswer(invocation -> invocation.getArgument(1))
+        .when(loader)
+        .validateWriteableFile(eq("f"), eq(new File("path")));
+    values.put("f", "path");
+    assertEquals(new File("path"), loader.writeableFile("f"));
+  }
+
+  @Test
+  public void writeableFileFailure() throws Exception {
+    // configure the mock to reject any file with the expected path
+    doThrow(new ConfigException("f", "not readable"))
+        .when(loader)
+        .validateWriteableFile(eq("f"), eq(new File("path")));
+    values.put("f", "path");
+    assertException("f", "not readable", () -> loader.writeableFile("f"));
+  }
+
+  @Test
+  public void validateWriteableFileIsNotAFile() throws Exception {
+    File file = mock(File.class);
+    doReturn(true).when(file).exists();
+    doReturn(false).when(file).isFile();
+    assertException(
+        "a",
+        "object referenced by path is not a file",
+        () -> loader.validateWriteableFile("a", file));
+  }
+
+  @Test
+  public void validateWriteableFileExists() throws Exception {
+    File file = mock(File.class);
+    doReturn(true).when(file).exists();
+    doReturn(true).when(file).isFile();
+    doReturn(true).when(file).canWrite();
+    assertSame(file, loader.validateWriteableFile("a", file));
+  }
+
+  @Test
+  public void validateWriteableFileIsNotWriteable() throws Exception {
+    File file = mock(File.class);
+    doReturn(true).when(file).exists();
+    doReturn(true).when(file).isFile();
+    doReturn(false).when(file).canWrite();
+    assertException("a", "file is not writeable", () -> loader.validateWriteableFile("a", file));
+  }
+
+  @Test
+  public void validateWriteableFileIsMissingAndParentIsNotWriteable() throws Exception {
+    File file = mock(File.class);
+    File parent = mock(File.class);
+    doReturn(file).when(file).getAbsoluteFile();
+    doReturn(parent).when(file).getParentFile();
+    doReturn(false).when(file).exists();
+    doReturn(false).when(parent).canWrite();
+    assertException(
+        "a",
+        "file does not exist and parent is not writeable",
+        () -> loader.validateWriteableFile("a", file));
+  }
+
+  @Test
+  public void validateWriteableFileIsMissingButParentIsWriteable() {
+    File file = mock(File.class);
+    File parent = mock(File.class);
+    doReturn(file).when(file).getAbsoluteFile();
+    doReturn(parent).when(file).getParentFile();
+    doReturn(false).when(file).exists();
+    doReturn(true).when(parent).canWrite();
+    assertSame(file, loader.validateWriteableFile("a", file));
+  }
+
+  @Test
+  public void validateWriteableFileThrows() throws Exception {
+    File file = mock(File.class);
+    doThrow(new ConfigException("a", "oops", new IOException())).when(file).exists();
+    assertException("a", "oops", () -> loader.validateWriteableFile("a", file));
   }
 
   @Test
@@ -189,17 +241,11 @@ public class ConfigLoaderTest {
   }
 
   @Test
-  public void fromPropertiesFile() throws Exception {
-    runWithTempFile(
-        propFile -> {
-          Properties p = new Properties();
-          p.setProperty("a", "A");
-          try (Writer out = new FileWriter(propFile)) {
-            p.store(out, "");
-          }
-          ConfigLoader config = ConfigLoader.builder().addPropertiesFile(propFile).build();
-          assertEquals("A", config.stringValue("a"));
-        });
+  public void fromProperties() throws Exception {
+    Properties p = new Properties();
+    p.setProperty("a", "A");
+    ConfigLoader config = ConfigLoader.builder().addProperties(p).build();
+    assertEquals("A", config.stringValue("a"));
   }
 
   @Test
@@ -232,12 +278,18 @@ public class ConfigLoaderTest {
     assertEquals("B", config.stringValue("in-fallback"));
   }
 
-  private void runWithTempFile(ThrowableConsumer<File> test) throws Exception {
-    final File tempFile = File.createTempFile("ConfigLoaderTest", ".properties");
+  private void assertException(String expectedName, String expectedMessage, Callable<?> test)
+      throws Exception {
     try {
-      test.accept(tempFile);
-    } finally {
-      tempFile.delete();
+      test.call();
+      fail(
+          "expected a ConfigException with name "
+              + expectedName
+              + " and message "
+              + expectedMessage);
+    } catch (ConfigException ex) {
+      assertEquals(expectedName, ex.getName());
+      assertEquals(expectedMessage, ex.getMessage());
     }
   }
 
