@@ -26,7 +26,6 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
@@ -557,20 +556,22 @@ public enum StaticRifResource {
 
   /** @return the number of records in this {@link StaticRifResource} */
   private Integer countRecords() {
-    /*
-     * We can't just count the number of lines, as that won't account for there being multiple claim
-     * lines per claim, for some record types.
-     */
     RifFile rifFile = new StaticRifFile(this);
     try (CSVParser csvParser = RifParsingUtils.createCsvParser(rifFile)) {
-      Enum<?> idColumn = rifFile.getFileType().getIdColumn();
-      Set<String> uniqueIds = new HashSet<String>();
+      Optional<Enum<?>> idColumn = rifFile.getFileType().getIdColumn();
+      Set<String> uniqueIds = new HashSet<>();
       csvParser.forEach(
           csvRecord -> {
-            String id = idColumn == null ? UUID.randomUUID().toString() : csvRecord.get(idColumn);
-            uniqueIds.add(id);
+            if (idColumn.isPresent()) {
+              // We can't just count the number of lines, as that won't account for there being
+              // multiple claim lines per claim.
+              String id = csvRecord.get(idColumn.get());
+              uniqueIds.add(id);
+            } else {
+              // Just count the number of lines
+              uniqueIds.add("" + csvRecord.getRecordNumber());
+            }
           });
-
       return uniqueIds.size();
     } catch (IOException e) {
       throw new UncheckedIOException(e);
@@ -917,8 +918,8 @@ public enum StaticRifResource {
                 RifParsingUtils.CSV_FORMAT, tempDownloadStream, StandardCharsets.UTF_8);
         parser.forEach(
             r -> {
-              if (resource.getRifFileType().getIdColumn() != null)
-                uniqueIds.add(r.get(resource.getRifFileType().getIdColumn()));
+              if (resource.getRifFileType().getIdColumn().isPresent())
+                uniqueIds.add(r.get(resource.getRifFileType().getIdColumn().get()));
               else uniqueIds.add("" + r.getRecordNumber());
             });
       } finally {
