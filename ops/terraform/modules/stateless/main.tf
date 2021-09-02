@@ -9,13 +9,12 @@ locals {
   cw_period       = 60 # Seconds
   cw_eval_periods = 3
 
-  # add new peerings here (#TODO: add dcgeo)
+  # add new peerings here
   vpc_peerings_by_env = {
     test = [
       "bfd-test-vpc-to-bluebutton-test"
     ],
     prod = [
-      "bfd-prod-vpc-to-mct-prod-vpc", "bfd-prod-vpc-to-mct-prod-dr-vpc",
       "bfd-prod-vpc-to-dpc-prod-vpc",
       "bfd-prod-vpc-to-bluebutton-prod",
       "bfd-prod-vpc-to-bcda-prod-vpc",
@@ -25,8 +24,7 @@ locals {
       "bfd-prod-sbx-to-ab2d-dev", "bfd-prod-sbx-to-ab2d-impl", "bfd-prod-sbx-to-ab2d-sbx",
       "bfd-prod-sbx-to-bcda-dev", "bfd-prod-sbx-to-bcda-test", "bfd-prod-sbx-to-bcda-sbx", "bfd-prod-sbx-to-bcda-opensbx",
       "bfd-prod-sbx-vpc-to-bluebutton-impl", "bfd-prod-sbx-vpc-to-bluebutton-test",
-      "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc",
-      "bfd-prod-sbx-vpc-to-mct-imp-vpc", "bfd-prod-sbx-vpc-to-mct-test-vpc", "bfd-prod-sbx-to-mpm-rda-dev"
+      "bfd-prod-sbx-vpc-to-dpc-prod-sbx-vpc", "bfd-prod-sbx-vpc-to-dpc-test-vpc", "bfd-prod-sbx-vpc-to-dpc-dev-vpc"
     ]
   }
   vpc_peerings = local.vpc_peerings_by_env[var.env_config.env]
@@ -110,14 +108,6 @@ data "aws_security_group" "remote" {
   filter {
     name   = "tag:Name"
     values = ["bfd-${var.env_config.env}-remote-management"]
-  }
-}
-
-# ci security group
-data "aws_security_group" "ci" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-cloudbees-jenkins"]
   }
 }
 
@@ -236,7 +226,7 @@ module "fhir_asg" {
     vpn_sg    = data.aws_security_group.vpn.id
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
-    ci_sg     = data.aws_security_group.ci.id
+    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
   }
 }
 
@@ -277,18 +267,6 @@ module "bfd_server_metrics_bcda" {
   metric_config = {
     partner_name  = "bcda"
     partner_regex = "*bcda*"
-  }
-}
-
-# mct
-module "bfd_server_metrics_mct" {
-  source = "../resources/bfd_server_metrics"
-
-  env = var.env_config.env
-
-  metric_config = {
-    partner_name  = "mct"
-    partner_regex = "*mct*"
   }
 }
 
@@ -362,27 +340,6 @@ module "bfd_server_alarm_all_eob_6s-p95" {
   }
 }
 
-module "bfd_server_alarm_mct_eob_3s_p95" {
-  source = "../resources/bfd_server_alarm"
-
-  env = var.env_config.env
-
-  alarm_config = {
-    alarm_name       = "mct-eob-3s-p95"
-    partner_name     = "mct"
-    metric_prefix    = "http-requests/latency/eobAll"
-    eval_periods     = "15"
-    period           = "60"
-    datapoints       = "15"
-    statistic        = null
-    ext_statistic    = "p95"
-    threshold        = "3000.0"
-    alarm_notify_arn = data.aws_sns_topic.cloudwatch_alarms.arn
-    ok_notify_arn    = data.aws_sns_topic.cloudwatch_ok.arn
-  }
-}
-
-
 ## ETL server
 #
 module "bfd_pipeline" {
@@ -407,7 +364,7 @@ module "bfd_pipeline" {
     vpn_sg    = data.aws_security_group.vpn.id
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
-    ci_sg     = data.aws_security_group.ci.id
+    ci_cidrs  = [data.aws_vpc.mgmt.cidr_block]
   }
 
   alarm_notification_arn = data.aws_sns_topic.cloudwatch_alarms.arn
