@@ -395,6 +395,8 @@
 								<argument>${its.db.url}</argument>
 								<argument>-e</argument>
 								<argument>${local.v2.enabled}</argument>
+								<argument>-p</argument>
+								<argument>${local.preadj.enabled}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
