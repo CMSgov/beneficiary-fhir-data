@@ -115,11 +115,10 @@ public final class SyntheaDataToFhirIT {
                 .execute();
         Assert.assertNotNull(eobBundle);
         writeToFile(eobBundle, String.format("eobs-%s.json", patientId));
-        Assert.assertEquals(
-            loadedRecords.stream()
-                .filter(r -> filterToClaimsForBeneficiary(beneficiary, r))
-                .count(),
-            eobBundle.getTotal());
+        Assert.assertTrue(
+            "More EOB resources than records (expected one or more records per EOB)",
+            loadedRecords.stream().filter(r -> filterToClaimsForBeneficiary(beneficiary, r)).count()
+                >= eobBundle.getTotal());
         eobs.addAll(
             eobBundle.getEntry().stream()
                 .map(r -> ((ExplanationOfBenefit) r.getResource()))
