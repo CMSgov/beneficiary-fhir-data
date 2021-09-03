@@ -95,6 +95,28 @@ public enum StaticRifResourceGroup {
   SAMPLE_MCT_UPDATE_3(
       StaticRifResource.SAMPLE_MCT_UPDATE_3_BENES, StaticRifResource.SAMPLE_MCT_UPDATE_3_PDE),
 
+  SYNTHEA_DATA(
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2011,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2012,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2013,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2014,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2015,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2016,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2017,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2018,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2019,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2020,
+      StaticRifResource.SAMPLE_SYNTHEA_BENES2021,
+      StaticRifResource.SAMPLE_SYNTHEA_CARRIER,
+      StaticRifResource.SAMPLE_SYNTHEA_INPATIENT,
+      StaticRifResource.SAMPLE_SYNTHEA_OUTPATIENT,
+      StaticRifResource.SAMPLE_SYNTHEA_SNF,
+      StaticRifResource.SAMPLE_SYNTHEA_HOSPICE,
+      StaticRifResource.SAMPLE_SYNTHEA_HHA,
+      StaticRifResource.SAMPLE_SYNTHEA_DME,
+      StaticRifResource.SAMPLE_SYNTHEA_PDE,
+      StaticRifResource.SAMPLE_SYNTHEA_BENEHISTORY),
+
   SAMPLE_HICN_MULT_BENES(
       StaticRifResource.SAMPLE_HICN_MULT_BENES,
       StaticRifResource.SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY);

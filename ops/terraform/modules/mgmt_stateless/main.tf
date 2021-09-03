@@ -1,6 +1,4 @@
-#
-# Build the stateless resources for an environment. This includes the autoscale groups and 
-# associated networking.
+## Builds stateless resources for an environment including ASG's, security groups, etc.
 #
 
 locals {
@@ -10,11 +8,7 @@ locals {
   cw_eval_periods = 3
 }
 
-# Find resources defined outside this script 
-# 
-
-# VPC
-#
+# vpc
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
@@ -22,29 +16,26 @@ data "aws_vpc" "main" {
   }
 }
 
-# DNS
-#
+# dns
 data "aws_route53_zone" "local_zone" {
   name         = "bfd-${var.env_config.env}.local"
   private_zone = true
 }
 
-# S3 Buckets
-#
+# account
 data "aws_caller_identity" "current" {}
 
+# admin bucket
 data "aws_s3_bucket" "admin" {
   bucket = "bfd-${var.env_config.env}-admin-${data.aws_caller_identity.current.account_id}"
 }
 
+# log bucket
 data "aws_s3_bucket" "logs" {
   bucket = "bfd-${var.env_config.env}-logs-${data.aws_caller_identity.current.account_id}"
 }
 
-# Other Security Groups
-#
-# Find the security group for the Cisco VPN
-#
+# vpc security group
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
@@ -52,8 +43,7 @@ data "aws_security_group" "vpn" {
   }
 }
 
-# Find the management group
-#
+# tools security group
 data "aws_security_group" "tools" {
   filter {
     name   = "tag:Name"
@@ -61,8 +51,7 @@ data "aws_security_group" "tools" {
   }
 }
 
-# Find the tools group 
-#
+# remote security group
 data "aws_security_group" "remote" {
   filter {
     name   = "tag:Name"
@@ -70,11 +59,9 @@ data "aws_security_group" "remote" {
   }
 }
 
-// #
-// # Start to build stuff
-// #
-// # LB for the Jenkins Server
-// #
+
+## LB for the Jenkins Server
+#
 
 module "jenkins_lb" {
   source = "../resources/lb"
@@ -101,6 +88,10 @@ module "jenkins_lb" {
     cidr_blocks = [data.aws_vpc.main.cidr_block]
   }
 }
+
+
+## Jenkins
+#
 
 module "jenkins" {
   source                = "../resources/jenkins"
@@ -133,6 +124,6 @@ module "jenkins" {
     vpn_sg    = data.aws_security_group.vpn.id
     tool_sg   = data.aws_security_group.tools.id
     remote_sg = data.aws_security_group.remote.id
-    ci_cidrs  = [var.mgmt_network_ci_cidrs]
+    ci_cidrs  = [data.aws_vpc.main.cidr_block]
   }
 }

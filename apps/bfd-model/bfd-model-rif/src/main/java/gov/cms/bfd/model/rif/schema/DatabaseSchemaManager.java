@@ -1,5 +1,7 @@
 package gov.cms.bfd.model.rif.schema;
 
+import gov.cms.bfd.sharedutils.database.DatabaseUtils;
+import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.bfd.sharedutils.exceptions.UncheckedSqlException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -7,12 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.internal.dbsupport.DbSupport;
-import org.flywaydb.core.internal.dbsupport.DbSupportFactory;
-import org.flywaydb.core.internal.dbsupport.SqlScript;
-import org.flywaydb.core.internal.util.PlaceholderReplacer;
-import org.flywaydb.core.internal.util.jdbc.JdbcUtils;
-import org.flywaydb.core.internal.util.scanner.classpath.ClassPathResource;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +18,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>This uses <a href="http://www.liquibase.org/">Liquibase</a> to manage the schema. The main
  * Liquibase changelog is in <code>src/main/resources/db-schema.xml</code>.
+ *
+ * <p>TODO This is no longer only used by the CCW job, and so should be moved to a different module
+ * & package
  */
 public final class DatabaseSchemaManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);
@@ -36,41 +36,32 @@ public final class DatabaseSchemaManager {
   public static void createOrUpdateSchema(DataSource dataSource) {
     LOGGER.info("Schema create/upgrade: running...");
 
-    Flyway flyway = new Flyway();
-
-    // Trying to prevent career-limiting mistakes.
-    flyway.setCleanDisabled(true);
-
-    flyway.setDataSource(dataSource);
-    flyway.setPlaceholders(createScriptPlaceholdersMap(dataSource));
+    Flyway flyway = createFlyway(dataSource);
     flyway.migrate();
 
     LOGGER.info("Schema create/upgrade: complete.");
   }
 
   /**
-   * <strong>WARNING:</strong> This method should never be run against a production database that is
-   * in-service. Any queries against the database will take over ten minutes to complete. This
-   * method is only intended for (very careful) use when initially loading an empty database. Drops
-   * all indexes in the specified database.
-   *
-   * @param dataSource the JDBC {@link DataSource} for the database whose schema should be modified
+   * @param dataSource the {@link DataSource} to run {@link Flyway} against
+   * @return a {@link Flyway} instance that can be used for the specified {@link DataSource}
    */
-  public static void dropIndexes(DataSource dataSource) {
-    Connection connectionMetaDataTable = JdbcUtils.openConnection(dataSource);
-    DbSupport dbSupport = DbSupportFactory.createDbSupport(connectionMetaDataTable, true);
+  private static Flyway createFlyway(DataSource dataSource) {
+    FluentConfiguration flywayBuilder = Flyway.configure().dataSource(dataSource);
+    flywayBuilder.placeholders(createScriptPlaceholdersMap(dataSource));
 
-    String source =
-        new ClassPathResource(
-                "db/scripts/Drop_all_constraints.sql", DatabaseSchemaManager.class.getClassLoader())
-            .loadAsString("UTF-8");
-    source =
-        new PlaceholderReplacer(createScriptPlaceholdersMap(dataSource), "${", "}")
-            .replacePlaceholders(source);
+    // Seems to be required in our tests for some reason that I couldn't debug.
+    flywayBuilder.connectRetries(5);
 
-    SqlScript disableConstraintsScript = new SqlScript(source, dbSupport);
+    // Trying to prevent career-limiting mistakes.
+    flywayBuilder.cleanDisabled(true);
 
-    disableConstraintsScript.execute(dbSupport.getJdbcTemplate());
+    // The default name for the schema table changed in Flyway 5.
+    // We need to specify the original table name for backwards compatibility.
+    flywayBuilder.table("schema_version");
+
+    Flyway flyway = flywayBuilder.load();
+    return flyway;
   }
 
   /**
@@ -81,22 +72,30 @@ public final class DatabaseSchemaManager {
   private static Map<String, String> createScriptPlaceholdersMap(DataSource dataSource) {
     Map<String, String> placeholders = new HashMap<>();
     try (Connection connection = dataSource.getConnection()) {
-      if (connection.getMetaData().getDatabaseProductName().equals("HSQL Database Engine")) {
+      if (DatabaseUtils.isHsqlConnection(connection)) {
         placeholders.put("type.int4", "integer");
+        placeholders.put("type.text", "longvarchar");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "--");
         placeholders.put("logic.alter-column-type", "");
         placeholders.put("logic.index-create-concurrently", "");
         placeholders.put("logic.sequence-start", "start with");
         placeholders.put("logic.sequence-increment", "increment by");
-      } else {
+        placeholders.put("logic.perms", "--");
+      } else if (DatabaseUtils.isPostgresConnection(connection)) {
         placeholders.put("type.int4", "int4");
+        placeholders.put("type.text", "text");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "");
         placeholders.put("logic.alter-column-type", "type");
         placeholders.put("logic.index-create-concurrently", "concurrently");
         placeholders.put("logic.sequence-start", "start");
         placeholders.put("logic.sequence-increment", "increment");
+        placeholders.put("logic.perms", "");
+      } else {
+        throw new BadCodeMonkeyException(
+            String.format(
+                "Unknown database vendor: %s", DatabaseUtils.extractVendorName(connection)));
       }
     } catch (SQLException e) {
       throw new UncheckedSqlException(e);

@@ -22,17 +22,16 @@ import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.server.war.Operation;
-import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -73,6 +72,8 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
    * application, e.g. <code>pde-1234</code> or <code>pde--1234</code> (for negative IDs).
    */
   private static final Pattern EOB_ID_PATTERN = Pattern.compile("(\\p{Alpha}+)-(-?\\p{Alnum}+)");
+
+  public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -406,15 +407,21 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     }
 
     if (claimEntities != null && serviceDate != null && !serviceDate.isEmpty()) {
-      final Date lowerBound = serviceDate.getLowerBoundAsInstant();
-      final Date upperBound = serviceDate.getUpperBoundAsInstant();
+      final Instant lowerBound =
+          serviceDate.getLowerBoundAsInstant() != null
+              ? serviceDate.getLowerBoundAsInstant().toInstant()
+              : null;
+      final Instant upperBound =
+          serviceDate.getUpperBoundAsInstant() != null
+              ? serviceDate.getUpperBoundAsInstant().toInstant()
+              : null;
       final java.util.function.Predicate<LocalDate> lowerBoundCheck =
           lowerBound == null
               ? (date) -> true
               : (date) ->
                   compareLocalDate(
                       date,
-                      lowerBound.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                      lowerBound.atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.getLowerBound().getPrefix());
       final java.util.function.Predicate<LocalDate> upperBoundCheck =
           upperBound == null
@@ -422,7 +429,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
               : (date) ->
                   compareLocalDate(
                       date,
-                      upperBound.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                      upperBound.atZone(ZoneId.systemDefault()).toLocalDate(),
                       serviceDate.getUpperBound().getPrefix());
       return claimEntities.stream()
           .filter(
@@ -564,8 +571,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
      * Note: headers can be multi-valued and so calling the enticing-looking `getHeader(...)` method
      * is often a bad idea, as it will often do the wrong thing.
      */
-    List<String> headerValues =
-        requestDetails.getHeaders(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS);
+    List<String> headerValues = requestDetails.getHeaders(HEADER_NAME_INCLUDE_TAX_NUMBERS);
 
     if (headerValues == null || headerValues.isEmpty()) {
       return false;
@@ -579,9 +585,6 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     }
 
     throw new InvalidRequestException(
-        "Unsupported "
-            + CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS
-            + " header value: "
-            + headerValues);
+        "Unsupported " + HEADER_NAME_INCLUDE_TAX_NUMBERS + " header value: " + headerValues);
   }
 }

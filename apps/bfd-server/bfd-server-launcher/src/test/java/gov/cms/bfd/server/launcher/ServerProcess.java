@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -150,11 +149,12 @@ public final class ServerProcess implements AutoCloseable {
    * @return a {@link ProcessBuilder} that can be used to launch the application
    */
   static ProcessBuilder createAppProcessBuilder(Path warPath, JvmDebugOptions jvmDebugOptions) {
-    String[] command = createCommandForCapsule(jvmDebugOptions);
+    String[] command = createCommandForLauncher(jvmDebugOptions);
     LOGGER.debug("About to launch server with command: {}", Arrays.toString(command));
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
 
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_HOST, "127.0.0.1");
     appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_PORT, "0");
     appRunBuilder
         .environment()
@@ -178,27 +178,22 @@ public final class ServerProcess implements AutoCloseable {
   /**
    * @param jvmDebugOptions the {@link JvmDebugOptions} to use
    * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
-   *     the application via its <code>.x</code> capsule executable
+   *     the application via its <code>.x</code> executable wrapper script
    */
-  static String[] createCommandForCapsule(JvmDebugOptions jvmDebugOptions) {
+  static String[] createCommandForLauncher(JvmDebugOptions jvmDebugOptions) {
     try {
-      Path javaBinDir = Paths.get(System.getProperty("java.home")).resolve("bin");
-      Path javaBin = javaBinDir.resolve("java");
-
-      Path buildTargetDir = Paths.get(".", "target");
-      Path appJar =
-          Files.list(buildTargetDir)
+      Path assemblyDirectory =
+          Files.list(Paths.get(".", "target", "server-work"))
               .filter(f -> f.getFileName().toString().startsWith("bfd-server-launcher-"))
-              .filter(f -> f.getFileName().toString().endsWith("-capsule-fat.jar"))
+              .findFirst()
+              .get();
+      Path serverLauncherScript =
+          Files.list(assemblyDirectory)
+              .filter(f -> f.getFileName().toString().equals("bfd-server-launcher.sh"))
               .findFirst()
               .get();
 
-      List<List<String>> commandTokens =
-          Arrays.asList(
-              Arrays.asList(javaBin.toString()),
-              Arrays.asList(jvmDebugOptions.buildJvmOptions()),
-              Arrays.asList("-jar", appJar.toAbsolutePath().toString()));
-      return commandTokens.stream().flatMap(List::stream).toArray(String[]::new);
+      return new String[] {serverLauncherScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

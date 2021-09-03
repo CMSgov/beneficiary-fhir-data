@@ -1,11 +1,15 @@
 package gov.cms.bfd.server.war.r4.providers;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
 import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
@@ -14,10 +18,18 @@ import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.hamcrest.collection.IsEmptyCollection;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
@@ -28,14 +40,14 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-/** Unit tests for {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2V2}. */
+/** Unit tests for {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2}. */
 public final class BeneficiaryTransformerV2Test {
 
   private static final FhirContext fhirContext = FhirContext.forR4();
@@ -55,7 +67,7 @@ public final class BeneficiaryTransformerV2Test {
             .findFirst()
             .get();
 
-    beneficiary.setLastUpdated(new Date());
+    beneficiary.setLastUpdated(Instant.now());
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
     // Add the history records to the Beneficiary, but nill out the HICN fields.
@@ -82,19 +94,33 @@ public final class BeneficiaryTransformerV2Test {
   }
 
   private void createPatient(RequestHeaders reqHeaders) {
-    patient = BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders);
+    Patient genPatient =
+        BeneficiaryTransformerV2.transform(new MetricRegistry(), beneficiary, reqHeaders);
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genPatient);
+    patient = parser.parseResource(Patient.class, json);
   }
 
-  @After
-  public void tearDown() {
-    beneficiary = null;
-    patient = null;
+  /** Common top level Patient ouput to console */
+  @Ignore
+  @Test
+  public void shouldOutputJSON() {
+    Assert.assertNotNull(patient);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
+  }
+
+  @Ignore
+  @Test
+  public void shouldOutputMbiHistory() {
+    createPatient(getRHwithIncldIdentityHdr("mbi"));
+    Assert.assertNotNull(patient);
+    System.out.println(fhirContext.newJsonParser().encodeResourceToString(patient));
   }
 
   /** Common top level Patient values */
   @Test
   public void shouldSetID() {
-    Assert.assertEquals(patient.getId(), beneficiary.getBeneficiaryId());
+    Assert.assertEquals(patient.getId(), "Patient/" + beneficiary.getBeneficiaryId());
   }
 
   @Test
@@ -113,25 +139,151 @@ public final class BeneficiaryTransformerV2Test {
 
   /** Top level Identifiers */
   @Test
-  public void shouldHaveKnownIdentifiers() {
-    Assert.assertEquals(1, patient.getIdentifier().size());
+  public void shouldHaveKnownIdentifiersNoMbiHistory() {
+    Assert.assertEquals(2, patient.getIdentifier().size());
+  }
+
+  /** Sample_A data */
+  @Test
+  public void shouldHaveKnownIdentifiersWithMbiHistory() {
+    createPatient(getRHwithIncldIdentityHdr("mbi"));
+    Assert.assertEquals(2, patient.getIdentifier().size());
   }
 
   @Test
   public void shouldIncludeMemberIdentifier() {
     Identifier mbId =
         TransformerTestUtilsV2.findIdentifierBySystem(
-            "http://terminology.hl7.org/CodeSystem/v2-0203", patient.getIdentifier());
+            "https://bluebutton.cms.gov/resources/variables/bene_id", patient.getIdentifier());
 
     Identifier compare =
         TransformerTestUtilsV2.createIdentifier(
-            "http://terminology.hl7.org/CodeSystem/v2-0203",
-            "3456789",
+            "https://bluebutton.cms.gov/resources/variables/bene_id",
+            "567834",
             "http://terminology.hl7.org/CodeSystem/v2-0203",
             "MB",
-            "");
+            "Member Number");
 
     Assert.assertTrue(compare.equalsDeep(mbId));
+  }
+
+  @Test
+  public void shouldIncludeMedicareExtensionIdentifierCurrent() {
+    Identifier mcId =
+        TransformerTestUtilsV2.findIdentifierBySystem(
+            "http://hl7.org/fhir/sid/us-mbi", patient.getIdentifier());
+
+    Extension extension =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "current",
+                "Current"));
+
+    Period period = new Period();
+    try {
+      Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
+      period.setStart(start, TemporalPrecisionEnum.DAY);
+    } catch (Exception e) {
+    }
+
+    Identifier compare = new Identifier();
+    compare
+        .setValue("3456789")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .setPeriod(period)
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+
+    Assert.assertTrue(compare.equalsDeep(mcId));
+  }
+
+  @Test
+  public void shouldIncludeMedicareExtensionIdentifierWithHistory() {
+    createPatient(getRHwithIncldIdentityHdr("mbi"));
+
+    List<Identifier> patientIdentList = patient.getIdentifier();
+    Assert.assertEquals(2, patientIdentList.size());
+
+    ArrayList<Identifier> compareIdentList = new ArrayList<Identifier>();
+
+    Identifier ident =
+        TransformerTestUtilsV2.createIdentifier(
+            "https://bluebutton.cms.gov/resources/variables/bene_id",
+            "567834",
+            "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "MB",
+            "Member Number");
+
+    compareIdentList.add(ident);
+
+    Extension extension =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "current",
+                "Current"));
+
+    Period period = new Period();
+    try {
+      Date start = (new SimpleDateFormat("yyyy-MM-dd")).parse("2020-07-30");
+      period.setStart(start, TemporalPrecisionEnum.DAY);
+    } catch (Exception e) {
+    }
+
+    ident = new Identifier();
+    ident
+        .setValue("3456789")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .setPeriod(period)
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+
+    compareIdentList.add(ident);
+
+    /**
+     * We have implemented a rule that for a valid MBI history record it has to have an end date; if
+     * no end date then the MBI has probably been provided by the CURRENT MBI extension. the
+     * following code is therefore commented out until the current Sample_A rif data provides a
+     * valid MedicareBeneficiaryIdHistory record.
+     */
+
+    /*
+    extension =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/codesystem/identifier-currency",
+                "historic",
+                "Historic"));
+
+    ident = new Identifier();
+    ident
+        .setValue("9AB2WW3GR44")
+        .setSystem("http://hl7.org/fhir/sid/us-mbi")
+        .getType()
+        .addCoding()
+        .setCode("MC")
+        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+        .setDisplay("Patient's Medicare number")
+        .addExtension(extension);
+    compareIdentList.add(ident);
+    */
+
+    Assert.assertEquals(compareIdentList.size(), patientIdentList.size());
+    for (int i = 0; i < compareIdentList.size(); i++) {
+      Assert.assertTrue(compareIdentList.get(i).equalsDeep(patientIdentList.get(i)));
+    }
   }
 
   /** Top level Extension(s) */
@@ -209,6 +361,26 @@ public final class BeneficiaryTransformerV2Test {
             .setUrl("https://bluebutton.cms.gov/resources/variables/rfrnc_yr");
 
     Assert.assertTrue(compare.equalsDeep(ex));
+  }
+
+  /**
+   * test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2} sets a
+   * valid extension date.
+   */
+  @Test
+  public void shouldSetExtensionDate() {
+
+    IBaseDatatype ex =
+        TransformerUtilsV2.createExtensionDate(
+                CcwCodebookVariable.RFRNC_YR, beneficiary.getBeneEnrollmentReferenceYear())
+            .getValue();
+
+    IBaseDatatype compare =
+        TransformerUtilsV2.createExtensionDate(
+                CcwCodebookVariable.RFRNC_YR, Optional.of(new BigDecimal(3)))
+            .getValue();
+
+    Assert.assertEquals(ex.toString().length(), compare.toString().length());
   }
 
   /**
@@ -344,8 +516,9 @@ public final class BeneficiaryTransformerV2Test {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(Beneficiary)} works as
-   * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
+   * gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2#transform(MetricRegistry,
+   * Beneficiary, RequestHeaders)} works as expected when run against the {@link
+   * StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary}.
    */
   @Ignore
   @Test

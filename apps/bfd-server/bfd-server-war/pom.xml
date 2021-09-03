@@ -58,6 +58,11 @@
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-rif</artifactId>
 		</dependency>
+		<dependency>
+			<!-- Provides the JPA entities used to represent the RDA BFD data in the database. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-rda</artifactId>
+		</dependency>
 		
 		<dependency>
 			<!-- At least one "structures" JAR must also be included -->
@@ -209,6 +214,21 @@
                 </exclusion>
             </exclusions>
         </dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.10.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Hibernate brings in an older version of byte-buddy which seems
+		to conflict with mockito, which wants version 1.11.0.  Bringing it
+		in as a first class dependency to resolve the issue. -->
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.11.0</version>
+			<scope>test</scope>
+		</dependency>
         <!-- This will get hamcrest-core automatically -->
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -245,7 +265,7 @@
 		<dependency>
    			 <groupId>commons-io</groupId>
   			  <artifactId>commons-io</artifactId>
-  			  <version>2.5</version>
+  			  <version>2.7</version>
 		</dependency>
 		<dependency>
 			<!-- Used for Bloom filters -->
@@ -267,22 +287,20 @@
 					<version>1.12</version>
 				</plugin>
 				<plugin>
-					<!-- Configure the dependency plugin such that it can be used to grab 
-						the test dependency artifacts, for manual testing or for use in integration 
-						tests. -->
+					<!-- Use the dependency plugin to copy the test dependency artifacts, 
+						for use in ITs. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.10</version>
 					<configuration>
 						<artifactItems>
 							<artifactItem>
-								<!-- Copy the BFD Server Launcher (whitelabeled Jetty) capsule JAR into
+								<!-- Unpack the BFD Server Launcher (whitelabeled Jetty) assembly zip into
 									this project's build directory, for use in ITs. -->
 								<groupId>${project.groupId}</groupId>
 								<artifactId>bfd-server-launcher</artifactId>
 								<version>${project.version}</version>
-								<classifier>capsule-fat</classifier>
-								<type>jar</type>
+								<type>zip</type>
 								<outputDirectory>${project.build.directory}/server-work</outputDirectory>
 							</artifactItem>
 						</artifactItems>
@@ -308,7 +326,7 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Use the dependency plugin to copy the test dependency artifacts, 
+				<!-- Use the dependency plugin to copy and unpack the test dependency artifacts, 
 					for use in ITs. -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -317,7 +335,7 @@
 						<id>server-copy-artifacts</id>
 						<phase>pre-integration-test</phase>
 						<goals>
-							<goal>copy</goal>
+							<goal>unpack</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -379,6 +397,10 @@
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
+
+                                                        <environmentVariables>
+                                                                <TZ>UTC</TZ>
+                                                        </environmentVariables>
 						</configuration>
 					</execution>
 					<execution>
@@ -398,22 +420,6 @@
 							<!-- Don't start/stop the server if the ITs are being skipped. -->
 							<skip>${skipITs}</skip>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- This is to run the integration tests -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -456,6 +462,9 @@
 									<value>${http.nonProxyHosts}</value>
 								</systemProperty>
 							</systemProperties>
+                                                        <environmentVariables>
+                                                                <TZ>UTC</TZ>
+                                                        </environmentVariables>
 						</configuration>
 					</execution>
 				</executions>
@@ -495,7 +504,7 @@
 												</goals>
 											</pluginExecutionFilter>
 											<action>
-												<ignore></ignore>
+												<ignore/>
 											</action>
 										</pluginExecution>
 										<pluginExecution>

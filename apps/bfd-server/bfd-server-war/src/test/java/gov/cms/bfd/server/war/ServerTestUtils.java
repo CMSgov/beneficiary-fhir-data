@@ -3,19 +3,16 @@ package gov.cms.bfd.server.war;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
-import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
 import gov.cms.bfd.pipeline.ccw.rif.extract.RifFilesProcessor;
+import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderIdleTasks;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.stu3.providers.ExtraParamsInterceptor;
 import java.io.FileReader;
@@ -34,7 +31,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -46,11 +42,7 @@ import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.net.ssl.SSLContext;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.sql.DataSource;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
@@ -68,11 +60,74 @@ import org.slf4j.LoggerFactory;
 public final class ServerTestUtils {
   private static final Logger LOGGER = LoggerFactory.getLogger(ServerTestUtils.class);
 
+  /** The singleton {@link ServerTestUtils} instance to use everywhere. */
+  private static ServerTestUtils SINGLETON;
+
+  private final String serverBaseUrl;
+
+  /**
+   * Constructs a new {@link ServerTestUtils} instance. Marked <code>private</code>; use {@link
+   * #get()}, instead.
+   */
+  private ServerTestUtils() {
+    this.serverBaseUrl = initServerBaseUrl();
+  }
+
+  /** @return the singleton {@link ServerTestUtils} instance to use everywhere */
+  public static synchronized ServerTestUtils get() {
+    /*
+     * Why are we using a singleton and caching all of these fields? Because creating some of the
+     * fields stored in the PipelineApplicationState is EXPENSIVE (it maintains a DB connection
+     * pool), so we don't want to have to re-create it for every test.
+     */
+
+    if (SINGLETON == null) {
+      SINGLETON = new ServerTestUtils();
+    }
+
+    return SINGLETON;
+  }
+
+  /** @return the value to use for {@link #getServerBaseUrl()} */
+  private static String initServerBaseUrl() {
+    Properties testServerPorts = initTestServerPortsProperties();
+    int httpsPort = Integer.parseInt(testServerPorts.getProperty("server.port.https"));
+    String serverBaseUrl = String.format("https://localhost:%d", httpsPort);
+    return serverBaseUrl;
+  }
+
+  /**
+   * @return the {@link Properties} from the <code>server-ports.properties</code> that should have
+   *     been written out by the integration tests' <code>server-start.sh</code> script
+   */
+  private static Properties initTestServerPortsProperties() {
+    /*
+     * The working directory for tests will either be the module directory or their parent
+     * directory. With that knowledge, we're searching for the target/server-work directory.
+     */
+    Path serverRunDir = Paths.get("target", "server-work");
+    if (!Files.isDirectory(serverRunDir))
+      serverRunDir = Paths.get("bfd-server-war", "target", "server-work");
+    if (!Files.isDirectory(serverRunDir))
+      throw new IllegalStateException(
+          "Unable to find server-work directory from current working directory: "
+              + Paths.get(".").toAbsolutePath());
+
+    Properties serverPortsProps = new Properties();
+    try {
+      serverPortsProps.load(
+          new FileReader(serverRunDir.resolve("server-ports.properties").toFile()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    return serverPortsProps;
+  }
+
   /**
    * @return a new FHIR {@link IGenericClient} for use, configured to use the {@link
    *     ClientSslIdentity#TRUSTED} login
    */
-  public static IGenericClient createFhirClient() {
+  public IGenericClient createFhirClient() {
     return createFhirClient(Optional.of(ClientSslIdentity.TRUSTED));
   }
 
@@ -80,7 +135,7 @@ public final class ServerTestUtils {
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FHIR server
    * @return a new FHIR {@link IGenericClient} for use
    */
-  public static IGenericClient createFhirClient(Optional<ClientSslIdentity> clientSslIdentity) {
+  public IGenericClient createFhirClient(Optional<ClientSslIdentity> clientSslIdentity) {
     return createFhirClient("v1", clientSslIdentity);
   }
 
@@ -88,7 +143,7 @@ public final class ServerTestUtils {
    * @return a new FHIR {@link IGenericClient} for use, configured to use the {@link
    *     ClientSslIdentity#TRUSTED} login for FIHR v2 server
    */
-  public static IGenericClient createFhirClientV2() {
+  public IGenericClient createFhirClientV2() {
     return createFhirClientV2(Optional.of(ClientSslIdentity.TRUSTED));
   }
 
@@ -96,8 +151,8 @@ public final class ServerTestUtils {
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FV2 HIR server
    * @return a new FHIR {@link IGenericClient} for use
    */
-  public static IGenericClient createFhirClientV2(Optional<ClientSslIdentity> clientSslIdentity) {
-    return createFhirClient("v2", clientSslIdentity);
+  public IGenericClient createFhirClientV2(Optional<ClientSslIdentity> clientSslIdentity) {
+    return createFhirClient("v2", clientSslIdentity, FhirContext.forR4());
   }
 
   /**
@@ -105,8 +160,19 @@ public final class ServerTestUtils {
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FHIR server
    * @return a new FHIR {@link IGenericClient} for use
    */
-  private static IGenericClient createFhirClient(
+  private IGenericClient createFhirClient(
       String versionId, Optional<ClientSslIdentity> clientSslIdentity) {
+    // Default behavor before was to spawn a DSTU3 context, so retain that
+    return createFhirClient(versionId, clientSslIdentity, FhirContext.forDstu3());
+  }
+
+  /**
+   * @param versionId the {@link v1 or v2 identifier to use as a part of the URL for the FHIR server
+   * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the FHIR server
+   * @return a new FHIR {@link IGenericClient} for use
+   */
+  private IGenericClient createFhirClient(
+      String versionId, Optional<ClientSslIdentity> clientSslIdentity, FhirContext ctx) {
     // Figure out where the test server is running.
     String fhirBaseUrl = String.format("%s/%s/fhir", getServerBaseUrl(), versionId);
 
@@ -124,7 +190,6 @@ public final class ServerTestUtils {
      * mostly mapped, so batches were cut to 10, which ran at 12s or so,
      * each.
      */
-    FhirContext ctx = FhirContext.forDstu3();
     ctx.getRestfulClientFactory().setSocketTimeout((int) TimeUnit.MINUTES.toMillis(5));
     PoolingHttpClientConnectionManager connectionManager =
         new PoolingHttpClientConnectionManager(
@@ -176,7 +241,7 @@ public final class ServerTestUtils {
    * @param clientSslIdentity the {@link ClientSslIdentity} to use as a login for the server
    * @return a new {@link SSLContext} for HTTP clients connecting to the server to use
    */
-  public static SSLContext createSslContext(Optional<ClientSslIdentity> clientSslIdentity) {
+  public SSLContext createSslContext(Optional<ClientSslIdentity> clientSslIdentity) {
     SSLContext sslContext;
     try {
       SSLContextBuilder sslContextBuilder = SSLContexts.custom();
@@ -206,10 +271,7 @@ public final class ServerTestUtils {
   }
 
   /** @return the base URL for the server (not for the FHIR servlet, but just the server itself) */
-  public static String getServerBaseUrl() {
-    Properties testServerPorts = readTestServerPortsProperties();
-    int httpsPort = Integer.parseInt(testServerPorts.getProperty("server.port.https"));
-    String serverBaseUrl = String.format("https://localhost:%d", httpsPort);
+  public String getServerBaseUrl() {
     return serverBaseUrl;
   }
 
@@ -255,35 +317,34 @@ public final class ServerTestUtils {
    * @param sampleResources the sample RIF resources to load
    * @return the {@link List} of RIF records that were loaded (e.g. {@link Beneficiary}s, etc.)
    */
-  public static List<Object> loadData(List<StaticRifResource> sampleResources) {
-    LoadAppOptions loadOptions = createRifLoaderOptions();
+  public List<Object> loadData(List<StaticRifResource> sampleResources) {
+    LoadAppOptions loadOptions = CcwRifLoadTestUtils.getLoadOptions();
     RifFilesEvent rifFilesEvent =
         new RifFilesEvent(
             Instant.now(),
             sampleResources.stream().map(r -> r.toRifFile()).collect(Collectors.toList()));
 
     // Create the processors that will handle each stage of the pipeline.
-    MetricRegistry loadAppMetrics = new MetricRegistry();
     RifFilesProcessor processor = new RifFilesProcessor();
 
-    try (RifLoader loader = new RifLoader(loadAppMetrics, loadOptions); ) {
-      // Link up the pipeline and run it.
-      LOGGER.info("Loading RIF records...");
-      List<Object> recordsLoaded = new ArrayList<>();
-      for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
-        RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
-        loader.process(
-            rifFileRecords,
-            error -> {
-              LOGGER.warn("Record(s) failed to load.", error);
-            },
-            result -> {
-              recordsLoaded.add(result.getRifRecordEvent().getRecord());
-            });
-      }
-      LOGGER.info("Loaded RIF records: '{}'.", recordsLoaded.size());
-      return recordsLoaded;
+    // Link up the pipeline and run it.
+    RifLoader loader =
+        new RifLoader(loadOptions, PipelineTestUtils.get().getPipelineApplicationState());
+    LOGGER.info("Loading RIF records...");
+    List<Object> recordsLoaded = new ArrayList<>();
+    for (RifFileEvent rifFileEvent : rifFilesEvent.getFileEvents()) {
+      RifFileRecords rifFileRecords = processor.produceRecords(rifFileEvent);
+      loader.process(
+          rifFileRecords,
+          error -> {
+            LOGGER.warn("Record(s) failed to load.", error);
+          },
+          result -> {
+            recordsLoaded.add(result.getRifRecordEvent().getRecord());
+          });
     }
+    LOGGER.info("Loaded RIF records: '{}'.", recordsLoaded.size());
+    return recordsLoaded;
   }
 
   /**
@@ -291,12 +352,15 @@ public final class ServerTestUtils {
    *
    * @param executor to call with an entity manager.
    */
-  public static void doTransaction(Consumer<EntityManager> executor) {
-    final EntityManagerFactory entityManagerFactory = createEntityManagerFactory();
+  public void doTransaction(Consumer<EntityManager> executor) {
     EntityManager em = null;
     EntityTransaction tx = null;
     try {
-      em = entityManagerFactory.createEntityManager();
+      em =
+          PipelineTestUtils.get()
+              .getPipelineApplicationState()
+              .getEntityManagerFactory()
+              .createEntityManager();
       tx = em.getTransaction();
       tx.begin();
       executor.accept(em);
@@ -307,150 +371,6 @@ public final class ServerTestUtils {
         LOGGER.info("Rolling back a transaction");
       }
       if (em != null && em.isOpen()) em.close();
-      if (entityManagerFactory != null) entityManagerFactory.close();
-    }
-  }
-
-  /** Cleans the test DB by running a bunch of <cod. */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public static void cleanDatabaseServer() {
-    EntityManagerFactory entityManagerFactory = null;
-    EntityManager entityManager = null;
-    EntityTransaction transaction = null;
-    try {
-      entityManagerFactory = createEntityManagerFactory();
-      entityManager = entityManagerFactory.createEntityManager();
-
-      // Determine the entity types to delete, and the order to do so in.
-      Comparator<Class<?>> entityDeletionSorter =
-          (t1, t2) -> {
-            if (t1.equals(Beneficiary.class)) return 1;
-            if (t2.equals(Beneficiary.class)) return -1;
-            if (t1.getSimpleName().endsWith("Line")) return -1;
-            if (t2.getSimpleName().endsWith("Line")) return 1;
-            if (t1.equals(LoadedFile.class)) return 1;
-            if (t2.equals(LoadedFile.class)) return -1;
-            return 0;
-          };
-      List<Class<?>> entityTypesInDeletionOrder =
-          entityManagerFactory.getMetamodel().getEntities().stream()
-              .map(t -> t.getJavaType())
-              .sorted(entityDeletionSorter)
-              .collect(Collectors.toList());
-
-      LOGGER.info("Deleting all resources...");
-      transaction = entityManager.getTransaction();
-      transaction.begin();
-      for (Class<?> entityClass : entityTypesInDeletionOrder) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaDelete query = builder.createCriteriaDelete(entityClass);
-        query.from(entityClass);
-        entityManager.createQuery(query).executeUpdate();
-      }
-
-      /*
-       * To be complete, we should also be resetting our sequences here. However, there isn't a
-       * simple way to do that without hardcoding the sequence names, so I'm going to lean into my
-       * laziness and not implement it: it's unlikely to cause issues with our tests.
-       */
-
-      transaction.commit();
-      LOGGER.info("Deleted all resources.");
-    } finally {
-      if (transaction != null && transaction.isActive()) transaction.rollback();
-      if (entityManager != null) entityManager.close();
-      if (entityManagerFactory != null) entityManagerFactory.close();
-    }
-  }
-
-  /** @return a {@link DataSource} for the test DB */
-  private static final DataSource createDataSource() {
-    String jdbcUrl, jdbcUsername, jdbcPassword;
-
-    /*
-     * In our tests, we either get the DB connection details from the system properties (for a
-     * "normal" DB that was created outside of the tests), or from the test Properties file that was
-     * created by the WAR when it launched (for HSQL DBs).
-     */
-
-    Properties testDbProps = readTestDatabaseProperties();
-    if (testDbProps != null) {
-      jdbcUrl = testDbProps.getProperty(SpringConfiguration.PROP_DB_URL);
-      jdbcUsername = testDbProps.getProperty(SpringConfiguration.PROP_DB_USERNAME, null);
-      jdbcPassword = testDbProps.getProperty(SpringConfiguration.PROP_DB_PASSWORD, null);
-    } else {
-      jdbcUrl = System.getProperty("its.db.url", null);
-      jdbcUsername = System.getProperty("its.db.username", null);
-      jdbcPassword = System.getProperty("its.db.password", null);
-    }
-
-    if (jdbcUsername != null && jdbcUsername.isEmpty()) jdbcUsername = null;
-    if (jdbcPassword != null && jdbcPassword.isEmpty()) jdbcPassword = null;
-
-    DataSource dataSource = DatabaseTestHelper.getTestDatabase(jdbcUrl, jdbcUsername, jdbcPassword);
-
-    return dataSource;
-  }
-
-  /** @return an {@link EntityManagerFactory} for the test DB */
-  private static EntityManagerFactory createEntityManagerFactory() {
-    DataSource dataSource = createDataSource();
-    return RifLoader.createEntityManagerFactory(dataSource);
-  }
-
-  /** @return the {@link LoadAppOptions} to use with {@link RifLoader} in integration tests */
-  public static LoadAppOptions createRifLoaderOptions() {
-    DataSource dataSource = createDataSource();
-    return new LoadAppOptions(
-        RifLoaderTestUtils.HICN_HASH_ITERATIONS,
-        RifLoaderTestUtils.HICN_HASH_PEPPER,
-        dataSource,
-        LoadAppOptions.DEFAULT_LOADER_THREADS,
-        RifLoaderTestUtils.IDEMPOTENCY_REQUIRED,
-        RifLoaderTestUtils.FIXUPS_ENABLED,
-        RifLoaderIdleTasks.DEFAULT_PARTITION_COUNT);
-  }
-
-  /**
-   * @return the {@link Properties} from the <code>server-ports.properties</code> that should have
-   *     been written out by the integration tests' <code>server-start.sh</code> script
-   */
-  private static Properties readTestServerPortsProperties() {
-    /*
-     * The working directory for tests will either be the module directory
-     * or their parent directory. With that knowledge, we're searching for
-     * the target/server-work directory.
-     */
-    Path serverRunDir = Paths.get("target", "server-work");
-    if (!Files.isDirectory(serverRunDir))
-      serverRunDir = Paths.get("bfd-server-war", "target", "server-work");
-    if (!Files.isDirectory(serverRunDir)) throw new IllegalStateException();
-
-    Properties serverPortsProps = new Properties();
-    try {
-      serverPortsProps.load(
-          new FileReader(serverRunDir.resolve("server-ports.properties").toFile()));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-    return serverPortsProps;
-  }
-
-  /**
-   * @return the {@link Properties} file created by {@link
-   *     gov.cms.bfd.server.war.SpringConfiguration#findTestDatabaseProperties()}, or <code>null
-   *     </code> if it's not present (indicating that just a regular DB connection is being used)
-   */
-  private static Properties readTestDatabaseProperties() {
-    Path testDatabasePropertiesPath = SpringConfiguration.findTestDatabaseProperties();
-    if (!Files.isRegularFile(testDatabasePropertiesPath)) return null;
-
-    try {
-      Properties testDbProps = new Properties();
-      testDbProps.load(new FileReader(testDatabasePropertiesPath.toFile()));
-      return testDbProps;
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
     }
   }
 
@@ -498,8 +418,23 @@ public final class ServerTestUtils {
    *
    * @return the client with extra params registered
    */
-  public static IGenericClient createFhirClientWithHeaders(RequestHeaders requestHeader) {
-    IGenericClient fhirClient = ServerTestUtils.createFhirClient();
+  public IGenericClient createFhirClientWithHeaders(RequestHeaders requestHeader) {
+    IGenericClient fhirClient = createFhirClient();
+    if (requestHeader != null) {
+      ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
+      extraParamsInterceptor.setHeaders(requestHeader);
+      fhirClient.registerInterceptor(extraParamsInterceptor);
+    }
+    return fhirClient;
+  }
+
+  /**
+   * helper
+   *
+   * @return the client with extra params registered
+   */
+  public IGenericClient createFhirClientWithHeadersV2(RequestHeaders requestHeader) {
+    IGenericClient fhirClient = createFhirClientV2();
     if (requestHeader != null) {
       ExtraParamsInterceptor extraParamsInterceptor = new ExtraParamsInterceptor();
       extraParamsInterceptor.setHeaders(requestHeader);

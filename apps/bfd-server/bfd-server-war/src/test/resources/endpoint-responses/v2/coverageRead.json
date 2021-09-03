@@ -1,0 +1,264 @@
+{
+  "resourceType" : "Coverage",
+  "id" : "part-a-567834",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage" ]
+  },
+  "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
+      "code" : "20",
+      "display" : "Disabled without ESRD"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/orec",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/orec",
+      "code" : "1",
+      "display" : "Disability insurance benefits (DIB)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/crec",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/crec",
+      "code" : "1",
+      "display" : "Disability insurance benefits (DIB)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/esrd_ind",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/esrd_ind",
+      "code" : "N"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
+      "code" : "0",
+      "display" : "Not Terminated"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/rfrnc_yr",
+    "valueDate" : "2018"
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_01",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_02",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_03",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_04",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_05",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_06",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_07",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_08",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_09",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_10",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_11",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/dual_12",
+      "code" : "**",
+      "display" : "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary. (This status was indicated as 'XX' for 2006-2009)"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin01",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin01",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin02",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin02",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin03",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin03",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin04",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin04",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin05",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin05",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin06",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin06",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin07",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin07",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin08",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin08",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin09",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin09",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin10",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin10",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin11",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin11",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  }, {
+    "url" : "https://bluebutton.cms.gov/resources/variables/buyin12",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/buyin12",
+      "code" : "C",
+      "display" : "Part A and Part B state buy-in"
+    }
+  } ],
+  "status" : "active",
+  "type" : {
+    "coding" : [ {
+      "system" : "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+      "code" : "SUBSIDIZ"
+    } ]
+  },
+  "subscriberId" : "3456789",
+  "beneficiary" : {
+    "reference" : "Patient/567834"
+  },
+  "relationship" : {
+    "coding" : [ {
+      "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+      "code" : "self",
+      "display" : "Self"
+    } ]
+  },
+  "period" : {
+    "start" : "1963-10-03"
+  },
+  "payor" : [ {
+    "identifier" : {
+      "value" : "Centers for Medicare and Medicaid Services"
+    }
+  } ],
+  "class" : [ {
+    "type" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class",
+        "code" : "group",
+        "display" : "Group"
+      } ]
+    },
+    "value" : "Medicare"
+  }, {
+    "type" : {
+      "coding" : [ {
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class",
+        "code" : "plan",
+        "display" : "Plan"
+      } ]
+    },
+    "value" : "Part A"
+  } ],
+  "contract" : [ {
+    "id" : "contract1"
+  }, {
+    "reference" : "Coverage/part-a-contract1"
+  } ]
+}

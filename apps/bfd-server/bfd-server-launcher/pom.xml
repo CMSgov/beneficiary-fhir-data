@@ -12,7 +12,7 @@
 	<packaging>jar</packaging>
 
 	<description>
-		A Java Capsule JAR application that packages up a Jetty runtime/launcher for the BFD Server WAR.
+		A Java JAR and assembly zip that packages up a Jetty runtime/launcher for the BFD Server WAR.
 	</description>
 
 	<properties>
@@ -122,6 +122,18 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<!-- API, java.xml.bind module -->
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+		<!-- Runtime, com.sun.xml.bind module -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+		<dependency>
 			<!-- Used in tests to help with managing asynchronous behavior. Reference:
 				https://github.com/awaitility/awaitility -->
 			<groupId>org.awaitility</groupId>
@@ -135,6 +147,17 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.3.0</version>
+					<configuration>
+						<appendAssemblyId>false</appendAssemblyId>
+						<descriptors>
+							<descriptor>src/main/assembly/zip.xml</descriptor>
+						</descriptors>
+					</configuration>
+				</plugin>
+				<plugin>
 					<!-- Configure the dependency plugin such that it can be used to grab
 						the test dependency artifacts, for manual testing or for use in integration
 						tests. -->
@@ -142,46 +165,8 @@
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.10</version>
 					<configuration>
-						<artifactItems>
-							<artifactItem>
-								<groupId>${project.groupId}</groupId>
-								<artifactId>${project.artifactId}-sample</artifactId>
-								<version>${project.version}</version>
-								<type>war</type>
-								<outputDirectory>${project.build.directory}/sample</outputDirectory>
-							</artifactItem>
-						</artifactItems>
 						<overWriteReleases>false</overWriteReleases>
 						<overWriteSnapshots>true</overWriteSnapshots>
-					</configuration>
-				</plugin>
-				<plugin>
-					<!-- Used to build executable JARs, with all dependencies included in
-						them. -->
-					<groupId>com.github.chrischristo</groupId>
-					<artifactId>capsule-maven-plugin</artifactId>
-					<version>1.0.1</version>
-					<configuration>
-						<appClass>gov.cms.bfd.server.launcher.DataServerLauncherApp</appClass>
-
-						<!-- Building the "really executable" .x files is tempting, but ultimately
-							not very useful, as there's no way to pass JVM args into such launchers,
-							which prevents customizing the heap size at runtime. -->
-						<chmod>false</chmod>
-
-						<types>fat</types>
-						<manifest>
-							<entry>
-								<!-- This will almost certainly be overridden on the command line;
-									think of this as a bare-minimum default. -->
-								<key>JVM-Args</key>
-								<value>-Xmx1g</value>
-							</entry>
-							<entry>
-								<key>Min-Java-Version</key>
-								<value>1.8.0</value>
-							</entry>
-						</manifest>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -189,42 +174,57 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>build-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<!-- Use the dependency plugin to copy the test dependency artifacts,
-							for use in ITs. -->
-						<id>server-copy-artifacts</id>
+						<!-- Copy the BFD war file dependency for use in ITs. -->
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}-sample</artifactId>
+									<version>${project.version}</version>
+									<type>war</type>
+									<outputDirectory>${project.build.directory}/sample</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+						<id>server-copy-war</id>
 						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
 					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Used to build executable JARs, with all dependencies included in
-					them. -->
-				<groupId>com.github.chrischristo</groupId>
-				<artifactId>capsule-maven-plugin</artifactId>
-				<executions>
 					<execution>
+						<!-- Unpack the assembly for use in ITs. -->
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}</version>
+									<type>zip</type>
+									<outputDirectory>${project.build.directory}/server-work</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+						<id>server-unpack-assembly</id>
+						<phase>pre-integration-test</phase>
 						<goals>
-							<goal>build</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Will run the `*IT.java` integration tests in this project, as part
-					of the build. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
+							<goal>unpack</goal>
 						</goals>
 					</execution>
 				</executions>

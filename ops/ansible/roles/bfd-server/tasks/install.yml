@@ -24,10 +24,31 @@
     mode: u=rwx,g=rx,o=rx
   become: true
 
-- name: Copy BFD Server Launcher
-  copy:
+# Create the temp directory iff it's missing. (Don't want to accidentally
+# change the permissions on /tmp.)
+- name: Check for Custom Temp Directory
+  stat:
+    path: "{{ data_server_tmp_dir }}"
+  become: true
+  register: stat_tmp
+  when: data_server_tmp_dir is defined
+
+- name: Create Custom Temp Directory
+  file:
+    path: "{{ data_server_tmp_dir }}"
+    state: directory
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rwx,g=rx,o=rx
+  become: true
+  when: data_server_tmp_dir is defined and stat_tmp.stat.exists == false
+
+- name: Copy and Unzip BFD Server Launcher
+  unarchive:
     src: "{{ data_server_launcher }}"
-    dest: "{{ data_server_dir }}/{{ data_server_launcher | basename }}"
+    dest: "{{ data_server_dir }}"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
   become: true
 
 - name: Copy BFD Server WAR
@@ -71,6 +92,15 @@
     mode: u=rw,g=r,o=r
   become: true
 
+- name: Copy New Relic Java Agent Config
+  template:
+    src: 'newrelic.yml.j2'
+    dest: "{{ data_server_dir }}/newrelic/newrelic.yml"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
+    mode: u=rw,g=r
+  become: true
+
 - name: Configure New Relic Extensions
   template:
     src: 'newrelic_tracing.xml.j2'
@@ -87,13 +117,20 @@
     dest: /etc/logrotate.d/bfd-server
   become: true
 
+- name: Check SELinux Status
+  command: /usr/sbin/selinuxenabled
+  failed_when: false
+  register: selinux_status
+
 - name: Add selinux file context to allow log rotation
   sefcontext:
     target: "{{ data_server_dir }}(/.*json|/.*log)?"
     setype: var_log_t
     state: present
+  when: selinux_status.rc == 0
   become: true
 
 - name: Apply selinux file context
   command: "restorecon -rv {{ data_server_dir }}"
+  when: selinux_status.rc == 0
   become: true

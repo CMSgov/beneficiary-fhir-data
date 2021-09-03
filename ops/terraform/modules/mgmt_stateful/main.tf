@@ -3,13 +3,11 @@
 #
 # This script also builds the associated KMS needed by the stateful and stateless resources
 #
-
 locals {
   env_config = { env = var.env_config.env, tags = var.env_config.tags, vpc_id = data.aws_vpc.main.id, zone_id = aws_route53_zone.local_zone.id, azs = var.env_config.azs }
 }
 
-# VPC
-#
+# vpc
 data "aws_vpc" "main" {
   filter {
     name   = "tag:Name"
@@ -17,7 +15,7 @@ data "aws_vpc" "main" {
   }
 }
 
-# Subnets for App
+# subnets for app
 data "aws_subnet_ids" "app_subnets" {
   vpc_id = data.aws_vpc.main.id
 
@@ -26,21 +24,12 @@ data "aws_subnet_ids" "app_subnets" {
   }
 }
 
-#
-# KMS 
-#
-# The customer master key is created outside of this script
-#
-
+# kms
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
-# Other Security Groups
-#
-# Find the security group for the Cisco VPN
-#
-
+# vpn
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
@@ -48,9 +37,7 @@ data "aws_security_group" "vpn" {
   }
 }
 
-# Find the management group
-#
-
+# management security group
 data "aws_security_group" "tools" {
   filter {
     name   = "tag:Name"
@@ -58,9 +45,7 @@ data "aws_security_group" "tools" {
   }
 }
 
-# Find the tools group 
-#
-
+# tools security group 
 data "aws_security_group" "management" {
   filter {
     name   = "tag:Name"
@@ -68,15 +53,9 @@ data "aws_security_group" "management" {
   }
 }
 
-#
-# Start to build things
-#
 
-# DNS
+## VPC Private Local Zone for CNAME Records
 #
-# Build a VPC private local zone for CNAME records
-#
-
 resource "aws_route53_zone" "local_zone" {
   name = "bfd-${var.env_config.env}.local"
   vpc {
@@ -84,9 +63,9 @@ resource "aws_route53_zone" "local_zone" {
   }
 }
 
-# IAM policy to allow read access to ansible vault password
-#
 
+## IAM policy to allow read access to ansible vault password
+#
 resource "aws_iam_policy" "ansible_vault_pw_ro_s3" {
   name        = "bfd-${var.env_config.env}-ansible-vault-pw-ro-s3"
   description = "ansible vault pw read only S3 policy"
@@ -112,9 +91,9 @@ resource "aws_iam_policy" "ansible_vault_pw_ro_s3" {
 EOF
 }
 
-# S3 Admin bucket for adminstrative stuff
-#
 
+## S3 Admin Bucket
+#
 module "admin" {
   source     = "../resources/s3"
   role       = "admin"
@@ -123,9 +102,9 @@ module "admin" {
   log_bucket = module.logs.id
 }
 
-# S3 bucket for logs 
-#
 
+## S3 bucket for logs 
+#
 module "logs" {
   source     = "../resources/s3"
   role       = "logs"
@@ -134,8 +113,9 @@ module "logs" {
   kms_key_id = null                 # Use AWS encryption to support AWS Agents writing to this bucket
 }
 
-# EFS Resource, Mount and Security Group for Jenkins 
 
+## Jenkins EFS Resources, Mounts, and Security Groups
+#
 module "efs" {
   source     = "../resources/efs"
   env_config = local.env_config
@@ -156,8 +136,9 @@ resource "aws_ebs_volume" "jenkins_data" {
   }
 }
 
-# IAM Roles, Profiles and Policies for Packer
 
+## IAM Roles, Profiles and Policies for Packer
+#
 resource "aws_iam_role" "packer" {
   name = "bfd-${var.env_config.env}-packer"
 
@@ -204,14 +185,13 @@ resource "aws_iam_policy" "packer_s3" {
                 "s3:GetObjectVersion"
             ],
             "Resource": [
-                "arn:aws:s3:::bfd-packages/*",
-                "arn:aws:s3:::bfd-packages"
+                "arn:aws:s3:::${var.bfd_packages_bucket}/*",
+                "arn:aws:s3:::${var.bfd_packages_bucket}"
             ]
         }
     ]
 }
 EOF
-
 }
 
 resource "aws_iam_role_policy_attachment" "packer_S3" {
@@ -224,18 +204,11 @@ resource "aws_iam_role_policy_attachment" "packer_EFS" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess"
 }
 
-# IAM policy, user, and attachment to allow GitHub Actions
-# to perform app integration testing against S3
 
-resource "aws_iam_user" "github_actions" {
-  name = "bfd-${var.env_config.env}-github-actions"
-}
+## GitHub Actions IAM Roles and Policies
+#
 
-resource "aws_iam_user_policy_attachment" "github_actions_s3its" {
-  user       = aws_iam_user.github_actions.name
-  policy_arn = aws_iam_policy.github_actions_s3its.arn
-}
-
+# policy to allow gh actions to manage s3 buckets for integration tests
 resource "aws_iam_policy" "github_actions_s3its" {
   name        = "bfd-${var.env_config.env}-github-actions-s3its"
   description = "GitHub Actions policy for S3 integration tests"
@@ -276,4 +249,13 @@ resource "aws_iam_policy" "github_actions_s3its" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_user" "github_actions" {
+  name = "bfd-${var.env_config.env}-github-actions"
+}
+
+resource "aws_iam_user_policy_attachment" "github_actions_s3its" {
+  user       = aws_iam_user.github_actions.name
+  policy_arn = aws_iam_policy.github_actions_s3its.arn
 }

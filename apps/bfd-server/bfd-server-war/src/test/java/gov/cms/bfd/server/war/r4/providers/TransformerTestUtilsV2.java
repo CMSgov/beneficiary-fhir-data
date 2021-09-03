@@ -11,13 +11,12 @@ import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -326,8 +325,7 @@ public final class TransformerTestUtilsV2 {
    * @param actual the actual {@link BaseDateTimeType} to verify
    */
   static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
-    Assert.assertEquals(
-        Date.from(expected.atStartOfDay(ZoneId.systemDefault()).toInstant()), actual.getValue());
+    Assert.assertEquals(TransformerUtilsV2.convertToDate(expected), actual.getValue());
     Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
   }
 
@@ -342,7 +340,24 @@ public final class TransformerTestUtilsV2 {
   static CareTeamComponent findCareTeamEntryForProviderIdentifier(
       String expectedProviderNpi, List<CareTeamComponent> careTeam) {
     return findCareTeamEntryForProviderIdentifier(
-        TransformerConstants.CODING_NPI_US, expectedProviderNpi, null, careTeam);
+        Optional.of(TransformerConstants.CODING_NPI_US), expectedProviderNpi, null, careTeam);
+  }
+
+  /**
+   * @param expectedProviderTaxNumber the {@link Identifier#getValue()} of the provider to find a
+   *     matching {@link CareTeamComponent} for
+   * @param careTeam the {@link List} of {@link CareTeamComponent}s to search
+   * @return the {@link CareTeamComponent} whose {@link CareTeamComponent#getProvider()} is an
+   *     {@link Identifier} with the specified provider tax number, or else <code>null</code> if no
+   *     such {@link CareTeamComponent} was found
+   */
+  static CareTeamComponent findCareTeamEntryForProviderTaxNumber(
+      String expectedProviderTaxNumber, List<CareTeamComponent> careTeam) {
+    return findCareTeamEntryForProviderIdentifier(
+        Optional.empty(),
+        expectedProviderTaxNumber,
+        C4BBClaimProfessionalAndNonClinicianCareTeamRole.OTHER,
+        careTeam);
   }
 
   /**
@@ -355,8 +370,8 @@ public final class TransformerTestUtilsV2 {
    *     {@link Identifier} with the specified provider NPI, or else <code>null</code> if no such
    *     {@link CareTeamComponent} was found
    */
-  private static CareTeamComponent findCareTeamEntryForProviderIdentifier(
-      String expectedIdentifierSystem,
+  public static CareTeamComponent findCareTeamEntryForProviderIdentifier(
+      Optional<String> expectedIdentifierSystem,
       String expectedIdentifierValue,
       C4BBClaimProfessionalAndNonClinicianCareTeamRole expectedRole,
       List<CareTeamComponent> careTeam) {
@@ -379,10 +394,17 @@ public final class TransformerTestUtilsV2 {
    *     Identifier}
    */
   private static boolean doesReferenceMatchIdentifier(
-      String expectedIdentifierSystem, String expectedIdentifierValue, Reference actualReference) {
+      Optional<String> expectedIdentifierSystem,
+      String expectedIdentifierValue,
+      Reference actualReference) {
     if (!actualReference.hasIdentifier()) return false;
-    return expectedIdentifierSystem.equals(actualReference.getIdentifier().getSystem())
-        && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+
+    if (expectedIdentifierSystem.isPresent()) {
+      return expectedIdentifierSystem.get().equals(actualReference.getIdentifier().getSystem())
+          && expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    } else {
+      return expectedIdentifierValue.equals(actualReference.getIdentifier().getValue());
+    }
   }
 
   /**
@@ -912,7 +934,7 @@ public final class TransformerTestUtilsV2 {
    * @param actualResource that is being created by the transform
    */
   static void assertLastUpdatedEquals(
-      Optional<Date> expectedDateTime, IAnyResource actualResource) {
+      Optional<Instant> expectedDateTime, IAnyResource actualResource) {
     if (expectedDateTime.isPresent()) {
       /* Dev Note: We often run our tests in parallel, so there is subtle race condition because we
        * use one instance of an IT DB with the same resources for most tests.
@@ -920,17 +942,17 @@ public final class TransformerTestUtilsV2 {
        * because another test over wrote the same resource.
        * To handle this case, dates that are within a second of each other match.
        */
-      final Instant expectedLastUpdated = expectedDateTime.get().toInstant();
+      final Instant expectedLastUpdated = expectedDateTime.get();
       final Instant actualLastUpdated = actualResource.getMeta().getLastUpdated().toInstant();
       final Duration diff = Duration.between(expectedLastUpdated, actualLastUpdated);
       Assert.assertTrue(
           "Expect the actual lastUpdated to be equal or after the loaded resources",
-          diff.compareTo(Duration.ofSeconds(1)) <= 0);
+          diff.compareTo(Duration.ofSeconds(10)) <= 0);
     } else {
       Assert.assertEquals(
           "Expect lastUpdated to be the fallback value",
           TransformerConstants.FALLBACK_LAST_UPDATED,
-          actualResource.getMeta().getLastUpdated());
+          actualResource.getMeta().getLastUpdated().toInstant());
     }
   }
 
@@ -1294,6 +1316,34 @@ public final class TransformerTestUtilsV2 {
       String code, List<AdjudicationComponent> components) {
     Optional<AdjudicationComponent> adjudication =
         components.stream()
+            .filter(
+                cmp ->
+                    cmp.getCategory().getCoding().stream()
+                            .filter(c -> code.equals(c.getCode()))
+                            .count()
+                        > 0)
+            .findFirst();
+
+    Assert.assertTrue(adjudication.isPresent());
+
+    return adjudication.get();
+  }
+
+  /**
+   * Finds an {@link AdjudicationComponent} using a code in the category and value in amount
+   *
+   * @param code
+   * @param amount
+   * @param components
+   * @return
+   */
+  static AdjudicationComponent findAdjudicationByCategoryAndAmount(
+      String code, BigDecimal amount, List<AdjudicationComponent> components) {
+    final BigDecimal amt = amount.setScale(2, RoundingMode.HALF_DOWN);
+
+    Optional<AdjudicationComponent> adjudication =
+        components.stream()
+            .filter(cmp -> (amt.equals(cmp.getAmount().getValue())))
             .filter(
                 cmp ->
                     cmp.getCategory().getCoding().stream()

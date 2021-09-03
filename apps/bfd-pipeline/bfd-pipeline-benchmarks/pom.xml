@@ -112,35 +112,23 @@
 						<id>benchmarks-copy-artifacts</id>
 						<phase>pre-integration-test</phase>
 						<goals>
-							<goal>copy</goal>
+							<goal>unpack</goal>
 						</goals>
 						<configuration>
 							<artifactItems>
 								<artifactItem>
+									<!-- Unpack the BFD Server Launcher (whitelabeled Jetty) assembly zip into
+                                        this project's build directory, for use in ITs. -->
 									<groupId>${project.groupId}</groupId>
 									<artifactId>bfd-pipeline-app</artifactId>
 									<version>${project.version}</version>
-									<classifier>capsule-fat</classifier>
-									<type>jar</type>
+									<type>zip</type>
 									<outputDirectory>${project.build.directory}/pipeline-app</outputDirectory>
-									<destFileName>bfd-pipeline-app-capsule-fat.jar</destFileName>
 								</artifactItem>
 							</artifactItems>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- Will run the `*Benchmark.java` integration tests in this project, 
-					as part of the build. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>

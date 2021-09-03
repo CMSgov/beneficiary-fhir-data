@@ -4,15 +4,22 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper;
-import gov.cms.bfd.model.rif.schema.DatabaseTestHelper.DataSourceComponents;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
+import gov.cms.bfd.model.rif.schema.DatabaseTestUtils.DataSourceComponents;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
-import gov.cms.bfd.pipeline.ccw.rif.load.RifLoaderTestUtils;
+import gov.cms.bfd.pipeline.rda.grpc.RdaFissClaimLoadJob;
+import gov.cms.bfd.pipeline.rda.grpc.RdaMcsClaimLoadJob;
+import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,11 +30,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.AssumptionViolatedException;
@@ -36,9 +49,9 @@ import org.junit.Test;
 /**
  * Integration tests for {@link PipelineApplication}.
  *
- * <p>These tests require the application capsule JAR to be built and available. Accordingly, they
- * may not run correctly in Eclipse: if the capsule isn't built yet, they'll just fail, but if an
- * older capsule exists (because you haven't rebuilt it), it'll run using the old code, which
+ * <p>These tests require the application pipeline assembly to be built and available. Accordingly,
+ * they may not run correctly in Eclipse: if the assembly isn't built yet, they'll just fail, but if
+ * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
 public final class PipelineApplicationIT {
@@ -55,7 +68,7 @@ public final class PipelineApplicationIT {
   @Test
   public void missingConfig() throws IOException, InterruptedException {
     // Start the app with no config env vars.
-    ProcessBuilder appRunBuilder = createAppProcessBuilder(new Bucket("foo"));
+    ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
     appRunBuilder.environment().clear();
     appRunBuilder.redirectErrorStream(true);
     Process appProcess = appRunBuilder.start();
@@ -74,10 +87,10 @@ public final class PipelineApplicationIT {
   }
 
   /**
-   * Verifies that {@link PipelineApplication} exits as expected when asked to run against an S3
+   * Verifies that {@link PipelineApplication} works as expected when asked to run against an S3
    * bucket that doesn't exist. This test case isn't so much needed to test that one specific
-   * failure case, but to instead verify that the application dies as expected when something goes
-   * sideways.
+   * failure case, but to instead verify that the application logs and keeps running as expected
+   * when a job fails.
    *
    * @throws IOException (indicates a test error)
    * @throws InterruptedException (indicates a test error)
@@ -87,7 +100,7 @@ public final class PipelineApplicationIT {
     Process appProcess = null;
     try {
       // Start the app.
-      ProcessBuilder appRunBuilder = createAppProcessBuilder(new Bucket("foo"));
+      ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
       appRunBuilder.redirectErrorStream(true);
       appProcess = appRunBuilder.start();
 
@@ -96,15 +109,15 @@ public final class PipelineApplicationIT {
       Thread appRunConsumerThread = new Thread(appRunConsumer);
       appRunConsumerThread.start();
 
-      // Wait for it to exit with an error.
+      // Wait for it to start scanning.
+      Awaitility.await()
+          .atMost(Duration.ONE_MINUTE)
+          .until(() -> hasCcwRifLoadJobFailed(appRunConsumer));
+
+      // Stop the application.
+      sendSigterm(appProcess);
       appProcess.waitFor(1, TimeUnit.MINUTES);
       appRunConsumerThread.join();
-
-      // Verify that the application exited as expected.
-      Assert.assertEquals(
-          String.format("Wrong exit code. Output [\n%s]\n", appRunConsumer.getStdoutContents()),
-          PipelineApplication.EXIT_CODE_MONITOR_ERROR,
-          appProcess.exitValue());
     } finally {
       if (appProcess != null) appProcess.destroyForcibly();
     }
@@ -129,7 +142,7 @@ public final class PipelineApplicationIT {
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
 
       // Start the app.
-      ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
+      ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(bucket);
       appRunBuilder.redirectErrorStream(true);
       appProcess = appRunBuilder.start();
 
@@ -139,9 +152,16 @@ public final class PipelineApplicationIT {
       appRunConsumerThread.start();
 
       // Wait for it to start scanning.
-      Awaitility.await()
-          .atMost(Duration.ONE_MINUTE)
-          .until(() -> hasScanningStarted(appRunConsumer));
+      try {
+        Awaitility.await()
+            .atMost(Duration.ONE_MINUTE)
+            .until(() -> hasCcwRifLoadJobCompleted(appRunConsumer));
+      } catch (ConditionTimeoutException e) {
+        throw new RuntimeException(
+            "Pipeline application failed to start scanning within timeout, STDOUT:\n"
+                + appRunConsumer.getStdoutContents(),
+            e);
+      }
 
       // Stop the application.
       sendSigterm(appProcess);
@@ -199,7 +219,7 @@ public final class PipelineApplicationIT {
               StaticRifResource.SAMPLE_A_CARRIER.getResourceUrl()));
 
       // Start the app.
-      ProcessBuilder appRunBuilder = createAppProcessBuilder(bucket);
+      ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(bucket);
       appRunBuilder.redirectErrorStream(true);
       appProcess = appRunBuilder.start();
       appProcess.getOutputStream().close();
@@ -227,6 +247,106 @@ public final class PipelineApplicationIT {
     }
   }
 
+  @Test
+  public void rdaPipeline() throws Exception {
+    skipOnUnsupportedOs();
+
+    final AtomicReference<Process> appProcess = new AtomicReference<>();
+    try {
+      RdaServer.runWithLocalServer(
+          () -> new RandomFissClaimSource(12345, 100).toClaimChanges(),
+          () -> new RandomMcsClaimSource(12345, 100).toClaimChanges(),
+          port -> {
+            // Start the app.
+            ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
+            appRunBuilder.redirectErrorStream(true);
+            appProcess.set(appRunBuilder.start());
+
+            // Read the app's output.
+            ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess.get());
+            Thread appRunConsumerThread = new Thread(appRunConsumer);
+            appRunConsumerThread.start();
+
+            // Wait for it to start scanning.
+            try {
+              Awaitility.await()
+                  .atMost(Duration.ONE_MINUTE)
+                  .until(
+                      () ->
+                          hasRdaFissLoadJobCompleted(appRunConsumer)
+                              && hasRdaMcsLoadJobCompleted(appRunConsumer));
+            } catch (ConditionTimeoutException e) {
+              throw new RuntimeException(
+                  "Pipeline application failed to start scanning within timeout, STDOUT:\n"
+                      + appRunConsumer.getStdoutContents(),
+                  e);
+            }
+
+            // Stop the application.
+            sendSigterm(appProcess.get());
+            appProcess.get().waitFor(1, TimeUnit.MINUTES);
+            appRunConsumerThread.join();
+
+            // Verify that the application exited as expected.
+            verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
+          });
+    } finally {
+      if (appProcess.get() != null) appProcess.get().destroyForcibly();
+    }
+  }
+
+  @Test
+  public void rdaPipelineServerFailure() throws Exception {
+    skipOnUnsupportedOs();
+
+    final AtomicReference<Process> appProcess = new AtomicReference<>();
+    try {
+      RdaServer.runWithLocalServer(
+          () ->
+              new ExceptionMessageSource<>(
+                  new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
+          () ->
+              new ExceptionMessageSource<>(
+                  new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
+          port -> {
+            // Start the app.
+            ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
+            appRunBuilder.redirectErrorStream(true);
+            appProcess.set(appRunBuilder.start());
+
+            // Read the app's output.
+            ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess.get());
+            Thread appRunConsumerThread = new Thread(appRunConsumer);
+            appRunConsumerThread.start();
+
+            // Wait for it to start scanning.
+            try {
+              Awaitility.await()
+                  .atMost(Duration.ONE_MINUTE)
+                  .until(
+                      () ->
+                          hasRdaFissLoadJobCompleted(appRunConsumer)
+                              && hasRdaMcsLoadJobCompleted(appRunConsumer));
+            } catch (ConditionTimeoutException e) {
+              throw new RuntimeException(
+                  "Pipeline application failed to start scanning within timeout, STDOUT:\n"
+                      + appRunConsumer.getStdoutContents(),
+                  e);
+            }
+
+            // Stop the application.
+            sendSigterm(appProcess.get());
+            appProcess.get().waitFor(1, TimeUnit.MINUTES);
+            appRunConsumerThread.join();
+
+            // Verify that the application exited as expected.
+            verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
+          });
+    } finally {
+      if (appProcess.get() != null) appProcess.get().destroyForcibly();
+    }
+  }
+
   /**
    * Throws an {@link AssumptionViolatedException} if the OS doesn't support
    * <strong>graceful</strong> shutdowns via {@link Process#destroy()}.
@@ -245,7 +365,8 @@ public final class PipelineApplicationIT {
      */
 
     Assume.assumeTrue(
-        "Unsupported OS for this test case.", "Linux".equals(System.getProperty("os.name")));
+        "Unsupported OS for this test case.",
+        Arrays.asList("Linux", "Mac OS X").contains(System.getProperty("os.name")));
   }
 
   /**
@@ -253,11 +374,75 @@ public final class PipelineApplicationIT {
    * @return <code>true</code> if the application output indicates that data set scanning has
    *     started, <code>false</code> if not
    */
-  private static boolean hasScanningStarted(ProcessOutputConsumer appRunConsumer) {
-    return appRunConsumer
-        .getStdoutContents()
-        .toString()
-        .contains(PipelineManager.LOG_MESSAGE_STARTING_WORKER);
+  private static boolean hasCcwRifLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
+    return hasJobRecordMatching(
+        appRunConsumer,
+        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_COMPLETED,
+        CcwRifLoadJob.class);
+  }
+
+  /**
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
+   */
+  private static boolean hasRdaFissLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
+    return hasJobRecordMatching(
+        appRunConsumer,
+        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_COMPLETED,
+        RdaFissClaimLoadJob.class);
+  }
+
+  /**
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
+   */
+  private static boolean hasRdaMcsLoadJobCompleted(ProcessOutputConsumer appRunConsumer) {
+    return hasJobRecordMatching(
+        appRunConsumer,
+        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_COMPLETED,
+        RdaMcsClaimLoadJob.class);
+  }
+
+  /**
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that the {@link CcwRifLoadJob}
+   *     failed, <code>false</code> if not
+   */
+  private static boolean hasCcwRifLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
+    return hasJobRecordMatching(
+        appRunConsumer, PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED, CcwRifLoadJob.class);
+  }
+
+  /**
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
+   */
+  private static boolean hasRdaFissLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
+    return hasJobRecordMatching(
+        appRunConsumer,
+        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED,
+        RdaFissClaimLoadJob.class);
+  }
+
+  /**
+   * @param appRunConsumer the {@link ProcessOutputConsumer} whose output should be checked
+   * @return <code>true</code> if the application output indicates that data set scanning has
+   *     started, <code>false</code> if not
+   */
+  private static boolean hasRdaMcsLoadJobFailed(ProcessOutputConsumer appRunConsumer) {
+    return hasJobRecordMatching(
+        appRunConsumer,
+        PipelineJobRecordStore.LOG_MESSAGE_PREFIX_JOB_FAILED,
+        RdaMcsClaimLoadJob.class);
+  }
+
+  private static boolean hasJobRecordMatching(
+      ProcessOutputConsumer appRunConsumer, String prefix, Class<?> klass) {
+    return appRunConsumer.matches(
+        line -> line.contains(prefix) && line.contains(klass.getSimpleName()));
   }
 
   /**
@@ -266,10 +451,8 @@ public final class PipelineApplicationIT {
    *     processed, <code>false</code> if not
    */
   private static boolean hasADataSetBeenProcessed(ProcessOutputConsumer appRunConsumer) {
-    return appRunConsumer
-        .getStdoutContents()
-        .toString()
-        .contains(CcwRifLoadJob.LOG_MESSAGE_DATA_SET_COMPLETE);
+    return appRunConsumer.matches(
+        line -> line.contains(CcwRifLoadJob.LOG_MESSAGE_DATA_SET_COMPLETE));
   }
 
   /**
@@ -334,29 +517,28 @@ public final class PipelineApplicationIT {
   }
 
   /**
-   * @param bucket the S3 {@link Bucket} that the application will be configured to pull RIF data
-   *     from
-   * @return a {@link ProcessBuilder} that can be used to launch the application
+   * Creates a ProcessBuilder with the common settings used by CCW/RIF and RDA tests.
+   *
+   * @return ProcessBuilder ready for more env vars to be added
    */
-  private static ProcessBuilder createAppProcessBuilder(Bucket bucket) {
-    String[] command = createCommandForCapsule();
+  private static ProcessBuilder createAppProcessBuilder() {
+    String[] command = createCommandForPipelineApp();
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
 
-    DataSource dataSource = DatabaseTestHelper.getTestDatabaseAfterClean();
+    DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
     DataSourceComponents dataSourceComponents = new DataSourceComponents(dataSource);
 
-    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
     appRunBuilder
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_HICN_HASH_ITERATIONS,
-            String.valueOf(RifLoaderTestUtils.HICN_HASH_ITERATIONS));
+            String.valueOf(CcwRifLoadTestUtils.HICN_HASH_ITERATIONS));
     appRunBuilder
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_HICN_HASH_PEPPER,
-            Hex.encodeHexString(RifLoaderTestUtils.HICN_HASH_PEPPER));
+            Hex.encodeHexString(CcwRifLoadTestUtils.HICN_HASH_PEPPER));
     appRunBuilder
         .environment()
         .put(AppConfiguration.ENV_VAR_KEY_DATABASE_URL, dataSourceComponents.getUrl());
@@ -375,7 +557,7 @@ public final class PipelineApplicationIT {
         .environment()
         .put(
             AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
-            String.valueOf(RifLoaderTestUtils.IDEMPOTENCY_REQUIRED));
+            String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
     /*
      * Note: Not explicitly providing AWS credentials here, as the child
      * process will inherit any that are present in this build/test process.
@@ -384,23 +566,57 @@ public final class PipelineApplicationIT {
   }
 
   /**
-   * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
-   *     the application via its <code>.x</code> capsule executable
+   * Creates a ProcessBuilder configured for an CCS/RIF pipeline test.
+   *
+   * @param bucket the S3 {@link Bucket} that the application will be configured to pull RIF data
+   *     from
+   * @return a {@link ProcessBuilder} that can be used to launch the application
    */
-  private static String[] createCommandForCapsule() {
-    try {
-      Path javaBinDir = Paths.get(System.getProperty("java.home")).resolve("bin");
-      Path javaBin = javaBinDir.resolve("java");
+  private static ProcessBuilder createCcwRifAppProcessBuilder(Bucket bucket) {
+    ProcessBuilder appRunBuilder = createAppProcessBuilder();
 
-      Path buildTargetDir = Paths.get(".", "target");
-      Path appJar =
-          Files.list(buildTargetDir)
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_BUCKET, bucket.getName());
+
+    return appRunBuilder;
+  }
+
+  /**
+   * Creates a ProcessBuilder configured for an RDA pipeline test.
+   *
+   * @param port the TCP/IP port that the RDA mock server is listening on
+   * @return a {@link ProcessBuilder} that can be used to launch the application
+   */
+  private static ProcessBuilder createRdaAppProcessBuilder(int port) {
+    ProcessBuilder appRunBuilder = createAppProcessBuilder();
+
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_CCW_RIF_JOB_ENABLED, "false");
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_ENABLED, "true");
+    appRunBuilder.environment().put(AppConfiguration.ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, "10");
+    appRunBuilder
+        .environment()
+        .put(AppConfiguration.ENV_VAR_KEY_RDA_GRPC_PORT, String.valueOf(port));
+
+    return appRunBuilder;
+  }
+
+  /**
+   * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
+   *     the application via its <code>.x</code> assembly executable script
+   */
+  private static String[] createCommandForPipelineApp() {
+    try {
+      Path assemblyDirectory =
+          Files.list(Paths.get(".", "target", "pipeline-app"))
               .filter(f -> f.getFileName().toString().startsWith("bfd-pipeline-app-"))
-              .filter(f -> f.getFileName().toString().endsWith("-capsule-fat.jar"))
+              .findFirst()
+              .get();
+      Path pipelineAppScript =
+          Files.list(assemblyDirectory)
+              .filter(f -> f.getFileName().toString().equals("bfd-pipeline-app.sh"))
               .findFirst()
               .get();
 
-      return new String[] {javaBin.toString(), "-jar", appJar.toAbsolutePath().toString()};
+      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -414,7 +630,7 @@ public final class PipelineApplicationIT {
    */
   private static final class ProcessOutputConsumer implements Runnable {
     private final BufferedReader stdoutReader;
-    private final StringBuffer stdoutContents;
+    private final List<String> stdoutContents;
 
     /**
      * Constructs a new {@link ProcessOutputConsumer} instance.
@@ -430,7 +646,7 @@ public final class PipelineApplicationIT {
 
       InputStream stdout = process.getInputStream();
       this.stdoutReader = new BufferedReader(new InputStreamReader(stdout));
-      this.stdoutContents = new StringBuffer();
+      this.stdoutContents = new ArrayList<>();
     }
 
     /** @see java.lang.Runnable#run() */
@@ -444,8 +660,7 @@ public final class PipelineApplicationIT {
       try {
         String line;
         while ((line = stdoutReader.readLine()) != null) {
-          stdoutContents.append(line);
-          stdoutContents.append('\n');
+          addLine(line);
         }
       } catch (IOException e) {
         e.printStackTrace();
@@ -453,9 +668,30 @@ public final class PipelineApplicationIT {
       }
     }
 
-    /** @return a {@link StringBuffer} that contains the <code>STDOUT</code> contents so far */
-    public StringBuffer getStdoutContents() {
-      return stdoutContents;
+    /** @return a {@link String} that contains the <code>STDOUT</code> contents so far */
+    public synchronized String getStdoutContents() {
+      return String.join("\n", stdoutContents);
+    }
+
+    /**
+     * Matches every line in the current <code>STDOUT</code> contents looking for one that matches
+     * the given predicate. This has to be synchronized to avoid potential
+     * ConcurrentModificationExceptions.
+     *
+     * @param predicate used to test each line of the output
+     * @return true if any line matches the predicate
+     */
+    public synchronized boolean matches(Predicate<String> predicate) {
+      return stdoutContents.stream().anyMatch(predicate);
+    }
+
+    /**
+     * Used internally to add a line of output to the stdoutContents with proper synchronization.
+     *
+     * @param line text to add to the output
+     */
+    private synchronized void addLine(String line) {
+      stdoutContents.add(line);
     }
   }
 }

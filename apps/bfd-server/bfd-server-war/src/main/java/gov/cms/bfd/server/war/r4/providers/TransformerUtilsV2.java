@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
@@ -40,8 +41,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -406,18 +407,18 @@ public final class TransformerUtilsV2 {
       CcwCodebookInterface ccwVariable, Optional<BigDecimal> dateYear) {
 
     Extension extension = null;
+    if (!dateYear.isPresent()) {
+      throw new NoSuchElementException();
+    }
     try {
-      String stringDate = dateYear.get().toString() + "-01-01";
-      Date date1 = new SimpleDateFormat("yyyy-MM-dd").parse(stringDate);
-      DateType dateYearValue = new DateType(date1, TemporalPrecisionEnum.YEAR);
+      String stringDate = String.format("%04d", dateYear.get().intValue());
+      DateType dateYearValue = new DateType(stringDate);
       String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
-
-    } catch (ParseException e) {
+    } catch (DataFormatException e) {
       throw new InvalidRifValueException(
-          String.format("Unable to parse reference year: '%s'.", dateYear.get()), e);
+          String.format("Unable to create DateType with reference year: '%s'.", dateYear.get()), e);
     }
-
     return extension;
   }
 
@@ -639,7 +640,7 @@ public final class TransformerUtilsV2 {
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
-  private static Coding createCoding(
+  public static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Object code) {
     /*
      * The code parameter is an Object to avoid needing multiple copies of this and related methods.
@@ -667,7 +668,7 @@ public final class TransformerUtilsV2 {
    * @param code the value to use for {@link Coding#getCode()}
    * @return the output {@link Coding} for the specified input values
    */
-  private static Coding createCoding(
+  public static Coding createCoding(
       IAnyResource rootResource, CcwCodebookInterface ccwVariable, Optional<?> code) {
     return createCoding(rootResource, ccwVariable, code.get());
   }
@@ -1155,9 +1156,7 @@ public final class TransformerUtilsV2 {
    * @param date the {@link LocalDate} to set the {@link Period#getEnd()} value with/to
    */
   static void setPeriodEnd(Period period, LocalDate date) {
-    period.setEnd(
-        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-        TemporalPrecisionEnum.DAY);
+    period.setEnd(convertToDate(date), TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -1173,9 +1172,7 @@ public final class TransformerUtilsV2 {
    * @param date the {@link LocalDate} to set the {@link Period#getStart()} value with/to
    */
   static void setPeriodStart(Period period, LocalDate date) {
-    period.setStart(
-        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-        TemporalPrecisionEnum.DAY);
+    period.setStart(convertToDate(date), TemporalPrecisionEnum.DAY);
   }
 
   /**
@@ -1446,20 +1443,24 @@ public final class TransformerUtilsV2 {
       ndcProductsIn.readLine();
       while ((line = ndcProductsIn.readLine()) != null) {
         String ndcProductColumns[] = line.split("\t");
-        String nationalDrugCodeManufacturer =
-            StringUtils.leftPad(
-                ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
-        String nationalDrugCodeIngredient =
-            StringUtils.leftPad(
-                ndcProductColumns[1].substring(
-                    ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
-                4,
-                '0');
-        // ndcProductColumns[3] - Proprietary Name
-        // ndcProductColumns[13] - Substance Name
-        ndcProductHashMap.put(
-            String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
-            ndcProductColumns[3] + " - " + ndcProductColumns[13]);
+        try {
+          String nationalDrugCodeManufacturer =
+              StringUtils.leftPad(
+                  ndcProductColumns[1].substring(0, ndcProductColumns[1].indexOf("-")), 5, '0');
+          String nationalDrugCodeIngredient =
+              StringUtils.leftPad(
+                  ndcProductColumns[1].substring(
+                      ndcProductColumns[1].indexOf("-") + 1, ndcProductColumns[1].length()),
+                  4,
+                  '0');
+          // ndcProductColumns[3] - Proprietary Name
+          // ndcProductColumns[13] - Substance Name
+          ndcProductHashMap.put(
+              String.format("%s-%s", nationalDrugCodeManufacturer, nationalDrugCodeIngredient),
+              ndcProductColumns[3] + " - " + ndcProductColumns[13]);
+        } catch (StringIndexOutOfBoundsException e) {
+          continue;
+        }
       }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NDC code data.", e);
@@ -1478,7 +1479,7 @@ public final class TransformerUtilsV2 {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      OffsetLinkBuilder paging, List<IBaseResource> resources, Date transactionTime) {
+      OffsetLinkBuilder paging, List<IBaseResource> resources, Instant transactionTime) {
     Bundle bundle = new Bundle();
     if (paging.isPagingRequested()) {
       /*
@@ -1500,18 +1501,18 @@ public final class TransformerUtilsV2 {
      * performance reason, the resources of the bundle may be after the filter manager's version of
      * the timestamp.
      */
-    Date maxBundleDate =
+    Instant maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
+            .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
-            .max(Date::compareTo)
+            .max(Instant::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
         .setLastUpdated(
-            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
-                ? transactionTime
-                : maxBundleDate);
+            transactionTime.isAfter(maxBundleDate)
+                ? Date.from(transactionTime)
+                : Date.from(maxBundleDate));
     bundle.setTotal(resources.size());
     return bundle;
   }
@@ -1527,7 +1528,7 @@ public final class TransformerUtilsV2 {
    *     {@link Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle createBundle(
-      List<IBaseResource> resources, LinkBuilder paging, Date transactionTime) {
+      List<IBaseResource> resources, LinkBuilder paging, Instant transactionTime) {
     Bundle bundle = new Bundle();
     TransformerUtilsV2.addResourcesToBundle(bundle, resources);
     paging.addLinks(bundle);
@@ -1540,18 +1541,18 @@ public final class TransformerUtilsV2 {
      * performance reason, the resources of the bundle may be after the filter manager's version of
      * the timestamp.
      */
-    Date maxBundleDate =
+    Instant maxBundleDate =
         resources.stream()
-            .map(r -> r.getMeta().getLastUpdated())
+            .map(r -> r.getMeta().getLastUpdated().toInstant())
             .filter(Objects::nonNull)
-            .max(Date::compareTo)
+            .max(Instant::compareTo)
             .orElse(transactionTime);
     bundle
         .getMeta()
         .setLastUpdated(
-            transactionTime.toInstant().isAfter(maxBundleDate.toInstant())
-                ? transactionTime
-                : maxBundleDate);
+            transactionTime.isAfter(maxBundleDate)
+                ? Date.from(transactionTime)
+                : Date.from(maxBundleDate));
     return bundle;
   }
 
@@ -1616,10 +1617,10 @@ public final class TransformerUtilsV2 {
    * @param resource is the FHIR resource to set lastUpdate
    * @param lastUpdated is the lastUpdated value set. If not present, set the fallback lastUpdated.
    */
-  public static void setLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+  public static void setLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     resource
         .getMeta()
-        .setLastUpdated(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED));
+        .setLastUpdated(Date.from(lastUpdated.orElse(TransformerConstants.FALLBACK_LAST_UPDATED)));
   }
 
   /**
@@ -1629,12 +1630,15 @@ public final class TransformerUtilsV2 {
    * @param resource is the FHIR resource to update
    * @param lastUpdated is the lastUpdated value from the entity
    */
-  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Date> lastUpdated) {
+  public static void updateMaxLastUpdated(IAnyResource resource, Optional<Instant> lastUpdated) {
     lastUpdated.ifPresent(
         newDate -> {
-          Date currentDate = resource.getMeta().getLastUpdated();
-          if (currentDate != null && newDate.after(currentDate)) {
-            resource.getMeta().setLastUpdated(newDate);
+          Instant currentDate =
+              resource.getMeta().getLastUpdated() != null
+                  ? resource.getMeta().getLastUpdated().toInstant()
+                  : null;
+          if (currentDate != null && newDate.isAfter(currentDate)) {
+            resource.getMeta().setLastUpdated(Date.from(newDate));
           }
         });
   }
@@ -2935,7 +2939,7 @@ public final class TransformerUtilsV2 {
       BigDecimal totalChargeAmount,
       BigDecimal primaryPayerPaidAmount,
       Optional<String> fiscalIntermediaryNumber,
-      Optional<Date> lastUpdated) {
+      Optional<Instant> lastUpdated) {
 
     // ORG_NPI_NUM => ExplanationOfBenefit.provider
     addProviderSlice(eob, C4BBOrganizationIdentifierType.NPI, organizationNpi, lastUpdated);
@@ -3180,7 +3184,8 @@ public final class TransformerUtilsV2 {
     // LINE_HCT_HGB_TYPE_CD => Observation.code
     // LINE_HCT_HGB_RSLT_NUM => Observation.value
     if (hctHgbTestTypeCode.isPresent()) {
-      String observationRef = "#line-observation-" + sequence;
+      String observationId = "line-observation-" + sequence;
+      String observationRef = "#" + observationId;
 
       // The `item` will link to a `supportingInfo` that references the embedded Observation
       SupportingInformationComponent comp =
@@ -3188,7 +3193,7 @@ public final class TransformerUtilsV2 {
       comp.setValue(new Reference(observationRef));
 
       // Create embedded Observation in ExplanationOfBenefit.contained
-      Observation hctHgbObservation = findOrCreateContainedObservation(eob, observationRef);
+      Observation hctHgbObservation = findOrCreateContainedObservation(eob, observationId);
       hctHgbObservation.setStatus(ObservationStatus.UNKNOWN);
       hctHgbObservation.setCode(
           createCodeableConcept(eob, CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode));
@@ -3332,7 +3337,7 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       Optional<String> value,
-      Optional<Date> lastUpdated) {
+      Optional<Instant> lastUpdated) {
     if (value.isPresent()) {
       Resource providerResource = findOrCreateContainedOrg(eob, PROVIDER_ORG_ID);
 
@@ -3371,7 +3376,7 @@ public final class TransformerUtilsV2 {
       ExplanationOfBenefit eob,
       C4BBOrganizationIdentifierType type,
       String value,
-      Optional<Date> lastupdated) {
+      Optional<Instant> lastupdated) {
     addProviderSlice(eob, type, Optional.of(value), lastupdated);
   }
 
@@ -3479,12 +3484,14 @@ public final class TransformerUtilsV2 {
             totalChargeAmount));
 
     // REV_CNTR_NCVRD_CHRG_AMT => ExplanationOfBenefit.item.adjudication
-    addAdjudication(
-        item,
-        createAdjudicationAmtSlice(
-            CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT,
-            C4BBAdjudication.NONCOVERED,
-            nonCoveredChargeAmount));
+    if (nonCoveredChargeAmount.isPresent()) {
+      addAdjudication(
+          item,
+          createAdjudicationAmtSlice(
+              CcwCodebookVariable.REV_CNTR_NCVRD_CHRG_AMT,
+              C4BBAdjudication.NONCOVERED,
+              nonCoveredChargeAmount));
+    }
 
     // REV_CNTR_NDC_QTY_QLFR_CD => ExplanationOfBenefit.item.modifier
     if (nationalDrugCodeQualifierCode.isPresent()) {
@@ -3497,10 +3504,12 @@ public final class TransformerUtilsV2 {
     }
 
     // REV_CNTR_NDC_QTY => ExplanationOfBenefit.item.quantity
-    Extension drugQuantityExtension =
-        createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
-    Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
-    item.setQuantity(drugQuantity);
+    if (nationalDrugCodeQuantity.isPresent()) {
+      Extension drugQuantityExtension =
+          createExtensionQuantity(CcwCodebookVariable.REV_CNTR_NDC_QTY, nationalDrugCodeQuantity);
+      Quantity drugQuantity = (Quantity) drugQuantityExtension.getValue();
+      item.setQuantity(drugQuantity);
+    }
 
     return item;
   }

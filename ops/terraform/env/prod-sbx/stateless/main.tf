@@ -1,11 +1,9 @@
 terraform {
-  required_version = "~> 0.12"
+  required_version = "> 0.12.30, < 0.13"
 }
 
 provider "aws" {
-  # FIXME BFD-211: Revert once this is fixed: https://github.com/terraform-providers/terraform-provider-aws/issues/13236
-  # version = "~> 2.25"
-  version = "<= 2.60.0"
+  version = "~> 3.44.0"
   region  = "us-east-1"
 }
 
@@ -23,4 +21,6 @@ module "stateless" {
   git_branch_name = var.git_branch_name
   git_commit_id   = var.git_commit_id
   is_public       = true
+
+  mpm_rda_cidr_block = var.mpm_rda_cidr_block
 }

@@ -2,7 +2,6 @@ package gov.cms.bfd.pipeline.ccw.rif;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
-import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -12,8 +11,10 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.MockDataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
+import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -43,9 +44,15 @@ public final class CcwRifLoadJobIT {
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
-          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3TaskManager,
+              listener);
       ccwJob.call();
 
       // Verify that no data sets were generated.
@@ -99,9 +106,15 @@ public final class CcwRifLoadJobIT {
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
-          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3TaskManager,
+              listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -145,7 +158,8 @@ public final class CcwRifLoadJobIT {
        * two data sets.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName(), null, 1);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket.getName(), Optional.empty(), Optional.of(1));
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
@@ -187,9 +201,15 @@ public final class CcwRifLoadJobIT {
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
-          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3TaskManager,
+              listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
@@ -237,7 +257,8 @@ public final class CcwRifLoadJobIT {
        * data set.
        */
       bucket = DataSetTestUtilities.createTestBucket(s3Client);
-      ExtractionOptions options = new ExtractionOptions(bucket.getName(), RifFileType.PDE);
+      ExtractionOptions options =
+          new ExtractionOptions(bucket.getName(), Optional.of(RifFileType.PDE));
       LOGGER.info(
           "Bucket created: '{}:{}'",
           s3Client.getS3AccountOwner().getDisplayName(),
@@ -264,9 +285,15 @@ public final class CcwRifLoadJobIT {
 
       // Run the job.
       MockDataSetMonitorListener listener = new MockDataSetMonitorListener();
-      S3TaskManager s3TaskManager = new S3TaskManager(new MetricRegistry(), options);
+      S3TaskManager s3TaskManager =
+          new S3TaskManager(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), options);
       CcwRifLoadJob ccwJob =
-          new CcwRifLoadJob(new MetricRegistry(), options, s3TaskManager, listener);
+          new CcwRifLoadJob(
+              PipelineTestUtils.get().getPipelineApplicationState().getMetrics(),
+              options,
+              s3TaskManager,
+              listener);
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.

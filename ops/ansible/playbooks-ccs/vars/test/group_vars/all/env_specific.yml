@@ -3,12 +3,6 @@
 # Version of the ETL Jar to deploy 
 data_pipeline_version: '0.1.0-SNAPSHOT'
 
-# Bucket where deployment artifacts are located. 
-s3_bucket_deployment: 'bfd-mgmt-artifacts-577373831711'
-
-# Name of ETL Staging Bucket 
-s3_bucket_etl_staging: 'bfd-test-etl-577373831711'
-
 # The abbreviated name for this environment, per the naming conventions used by HealthAPT.
 env_name: 'ts'
 
@@ -25,6 +19,9 @@ data_pipeline_idempotency_required: false
 
 # Whether to enable BFD API V2
 data_server_v2_enabled: true
+
+# Whether to enable BFD PreAdj Resources
+pre_adj_resources_enabled: true
 
 # New Relic Metric API
 data_server_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
@@ -53,3 +50,7 @@ data_server_ssl_client_certificates:
     certificate: "{{ lookup('file', 'files/client_data_server_bluebutton_frontend_test_certificate.pem') }}"
   - alias: client_performance_tester
     certificate: "{{ lookup('file', 'files/client_data_server_performance_tester_certificate.pem') }}"
+
+# Enables the RDA API data pipline with a 1 hour retry interval.
+data_pipeline_rda_job_enabled: true
+data_pipeline_rda_job_interval_seconds: 3600

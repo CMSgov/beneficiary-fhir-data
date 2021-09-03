@@ -20,6 +20,7 @@
 		<module>bfd-model-codebook-data</module>
 		<module>bfd-model-codegen-annotations</module>
 		<module>bfd-model-codegen</module>
+		<module>bfd-model-rda</module>
 		<module>bfd-model-rif</module>
 		<module>bfd-model-rif-samples</module>
 	</modules>
@@ -39,13 +40,6 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.13.1</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<!-- In-memory database that is used in some tests to speed things up. -->
-				<groupId>org.hsqldb</groupId>
-				<artifactId>hsqldb</artifactId>
-				<version>2.2.4</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -71,14 +65,6 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<!-- Can be used to run any `*IT.java` integration tests in a project. -->
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<configuration>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-					</configuration>
-				</plugin>
 				<plugin>
 					<artifactId>maven-scm-plugin</artifactId>
 					<configuration>

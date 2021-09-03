@@ -1,5 +1,5 @@
 ---
-data_pipeline_dir: /usr/local/bluebutton-data-pipeline
+data_pipeline_dir: /usr/local/bfd-pipeline
 data_pipeline_user: bb-etl
 data_pipeline_loader_threads: 200
 data_pipeline_jvm_args: -Xmx64g
@@ -7,3 +7,38 @@ data_pipeline_tmp_dir: /tmp
 data_pipeline_idempotency_required: true
 data_pipeline_new_relic_metric_host: 'https://gov-metric-api.newrelic.com'
 data_pipeline_new_relic_metric_path: '/metric/v1'
+
+## RDA API Pipeline
+# Used to download FISS/MCS pre-adjudicated claims data.
+#
+# Set to true to enable the RDA pipeline jobs.
+data_pipeline_rda_job_enabled: false
+
+# Communication settings for RDA API server.
+# These are defined in the vault rather than plain text.
+data_pipeline_rda_grpc_host: undefined
+data_pipeline_rda_grpc_port: 443
+
+# Interval at which the PipelineManager should ensure the jobs are running.
+data_pipeline_rda_job_interval_seconds: 300
+
+# How many claims to store per transaction.
+data_pipeline_rda_job_batch_size: 20
+
+# How long to allow the RDA API stream to be idle before closing the connection.
+data_pipeline_rda_grpc_max_idle_seconds: 600
+
+
+## EFT EFS 
+#
+# EFT base directory - partners file systems will be mounted in this directory (no trailing /)
+eft_efs_base_dir: /mnt/eft
+
+# Partner EFT EFS mount points. Each partner should be matched to the posix user and group
+# id's defined in their respective eft efs declaration in `ops/terraform/modules/stateful/main.tf`.
+# EFS file systems will be mounted under the eft_efs_base_dir variable, e.g., /mnt/eft/bcda
+eft_efs_mounts:
+  - { name: 'bcda',
+      posix_uid: '1500',
+      posix_gid: '1500',
+    }

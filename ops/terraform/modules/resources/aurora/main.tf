@@ -1,11 +1,13 @@
 locals {
+  # note: this captures both prod and prod-sbx
   is_prod = substr(var.env_config.env, 0, 4) == "prod"
 
   # see https://github.com/CMSgov/beneficiary-fhir-data/pull/476 for reference
+  # on why prod's naming is different
   node_identifier = {
-    "prod" = "bfd-prod-aurora-cluster",
+    "prod"     = "bfd-prod-aurora-cluster",
     "prod-sbx" = "bfd-prod-sbx-aurora",
-    "test" = "bfd-test-aurora"
+    "test"     = "bfd-test-aurora"
   }
 }
 
@@ -39,7 +41,7 @@ resource "aws_db_subnet_group" "aurora_cluster" {
 }
 
 resource "aws_db_parameter_group" "aurora_node" {
-  name        = "bfd-${var.env_config.env}-aurora-node"
+  name_prefix = "bfd-${var.env_config.env}-aurora-node"
   family      = var.aurora_config.param_version
   description = "Sets node parameters for ${var.aurora_config.param_version}"
 
@@ -90,7 +92,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   copy_tags_to_snapshot = true
 
   lifecycle {
-    ignore_changes = ["master_password"]
+    ignore_changes = [master_password]
   }
 }
 
@@ -101,7 +103,8 @@ resource "aws_rds_cluster_instance" "aurora_nodes" {
   identifier         = "${lookup(local.node_identifier, var.env_config.env)}-node-${count.index}"
   cluster_identifier = aws_rds_cluster.aurora_cluster.id
 
-  availability_zone       = var.stateful_config.azs[count.index]
+  # note: element(list,index) function wraps. e.g., element([az1,az2,az3],3) == az1
+  availability_zone       = element(var.stateful_config.azs, count.index)
   db_subnet_group_name    = aws_db_subnet_group.aurora_cluster.name
   db_parameter_group_name = aws_db_parameter_group.aurora_node.name
 
@@ -136,4 +139,40 @@ resource "aws_route53_record" "aurora_reader" {
   ttl     = "300"
 
   records = [aws_rds_cluster.aurora_cluster.reader_endpoint]
+}
+
+# If beta_reader toggle is true, it means we have added an extra reader node
+# to the cluster for testing purposes (e.g., so we can test against prod without
+# impacting prod performance). This means we want to create two custom reader
+# endpoints: one for normal traffic (containing all but one reader node) and
+# a "beta", aka test, reader node containing one reader node only. This assume
+# we have adjusted the number of cluster nodes accordingly (which is defined
+# within each environments aurora_config.cluster_nodes variable.
+
+# this endpoint contains all but one reader node (the last node) and is behind a feature toggle
+resource "aws_rds_cluster_endpoint" "readers" {
+  count = var.module_features.beta_reader ? 1 : 0
+
+  cluster_identifier          = aws_rds_cluster.aurora_cluster.id
+  cluster_endpoint_identifier = "bfd-${var.env_config.env}-ro"
+  custom_endpoint_type        = "READER"
+
+  # assign all but the last reader node to this endpoint
+  excluded_members = [
+    element(aws_rds_cluster_instance.aurora_nodes, length(aws_rds_cluster_instance.aurora_nodes) - 1).id
+  ]
+}
+
+# this endpoint only contains one reader node (the last node) and is behind a feature toggle
+resource "aws_rds_cluster_endpoint" "beta_reader" {
+  count = var.module_features.beta_reader ? 1 : 0
+
+  cluster_identifier          = aws_rds_cluster.aurora_cluster.id
+  cluster_endpoint_identifier = "bfd-${var.env_config.env}-beta-reader"
+  custom_endpoint_type        = "READER"
+
+  # assign the last reader node to this endpoint
+  static_members = [
+    element(aws_rds_cluster_instance.aurora_nodes, length(aws_rds_cluster_instance.aurora_nodes) - 1).id
+  ]
 }

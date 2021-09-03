@@ -1,11 +1,11 @@
 variable "vpc_name" {
   description = "Name of the VPC these alarms are for."
-  type        = "string"
+  type        = string
 }
 
 variable "load_balancer_name" {
   description = "Name of the ELB these alarms are for."
-  type        = "string"
+  type        = string
 }
 
 variable "app" {}
