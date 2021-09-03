@@ -1,11 +1,11 @@
 package gov.cms.bfd.server.launcher.sample;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public final class SampleServlet extends HttpServlet {
   private static final Logger LOGGER_MISC = LoggerFactory.getLogger(SampleServlet.class);
   private static final Logger LOGGER_ACCESS = LoggerFactory.getLogger("HTTP_ACCESS");
 
-  /** @see javax.servlet.GenericServlet#init() */
+  /** @see jakarta.servlet.GenericServlet#init() */
   @Override
   public void init() throws ServletException {
     // We'll use this log entry to verify that the servlet is running as expected.
@@ -31,8 +31,8 @@ public final class SampleServlet extends HttpServlet {
   }
 
   /**
-   * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-   *     javax.servlet.http.HttpServletResponse)
+   * @see jakarta.servlet.http.HttpServlet#doGet(jakarta.servlet.http.HttpServletRequest,
+   *     jakarta.servlet.http.HttpServletResponse)
    */
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)

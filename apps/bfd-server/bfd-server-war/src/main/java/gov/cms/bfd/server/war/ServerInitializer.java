@@ -6,10 +6,10 @@ import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.codahale.metrics.servlets.MetricsServlet;
 import com.google.common.base.Strings;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
+import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -39,7 +39,8 @@ public final class ServerInitializer implements WebApplicationInitializer {
   }
 
   /**
-   * @see org.springframework.web.WebApplicationInitializer#onStartup(javax.servlet.ServletContext)
+   * @see
+   *     org.springframework.web.WebApplicationInitializer#onStartup(jakarta.servlet.ServletContext)
    */
   @Override
   public void onStartup(ServletContext servletContext) throws ServletException {

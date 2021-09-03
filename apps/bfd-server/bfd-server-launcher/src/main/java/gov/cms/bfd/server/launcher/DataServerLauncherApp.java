@@ -8,6 +8,7 @@ import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
+import java.util.EventListener;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
@@ -27,6 +28,7 @@ import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.webapp.ClassMatcher;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
@@ -165,8 +167,7 @@ public final class DataServerLauncherApp {
         });
 
     // Allow webapps to see but not override SLF4J (prevents LinkageErrors).
-    webapp.getSystemClasspathPattern().add("org.slf4j.");
-
+    webapp.addSystemClassMatcher(new ClassMatcher("org.slf4j."));
     /*
      * Disable Logback's builtin shutdown hook, so that OUR shutdown hook can still use the loggers
      * (and then shut Logback down itself).
@@ -332,5 +333,15 @@ public final class DataServerLauncherApp {
 
   /** Needed to workaround the issue detailed in https://github.com/qos-ch/logback/pull/269. */
   private static final class JettyLogbackRequestLogImpl extends RequestLogImpl
-      implements LifeCycle {}
+      implements LifeCycle {
+    @Override
+    public boolean addEventListener(EventListener eventListener) {
+      return false;
+    }
+
+    @Override
+    public boolean removeEventListener(EventListener eventListener) {
+      return false;
+    }
+  }
 }

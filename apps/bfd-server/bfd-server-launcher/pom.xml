@@ -16,7 +16,7 @@
 	</description>
 
 	<properties>
-		<jetty.version>11.0.1</jetty.version>
+		<jetty.version>11.0.6</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -133,6 +133,11 @@
 			<artifactId>jaxb-runtime</artifactId>
 			<version>2.3.2</version>
 		</dependency>
+		<dependency>
+		<groupId>jakarta.servlet</groupId>
+    <artifactId>jakarta.servlet-api</artifactId>
+    <version>5.0.0</version>
+	</dependency>
 		<dependency>
 			<!-- Used in tests to help with managing asynchronous behavior. Reference:
 				https://github.com/awaitility/awaitility -->
