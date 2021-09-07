@@ -4,7 +4,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -61,7 +61,7 @@ public final class ExtractionOptions implements Serializable {
      * and add a new constructor param here for it.
      */
 
-    return S3Utilities.REGION_DEFAULT;
+    return SharedS3Utilities.REGION_DEFAULT;
   }
 
   /** @return the name of the AWS S3 bucket to monitor */

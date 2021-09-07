@@ -26,6 +26,19 @@
 		</dependency>
 
 		<dependency>
+			<!-- Used to interact with AWS' S3 service, which is where RIF files
+				from the CCW will arrive, when an ETL pipeline is running in production. -->
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
 			<!-- Used to provide DB connection pooling. See https://github.com/brettwooldridge/HikariCP
                     for details. -->
 			<groupId>com.zaxxer</groupId>
