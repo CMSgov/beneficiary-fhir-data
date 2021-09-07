@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import java.io.Closeable;
+import java.util.function.Predicate;
 
 /**
  * Interface for objects that produce FissClaim objects from some source (e.g. a file, an array, a
@@ -42,6 +43,16 @@ public interface MessageSource<T> extends Closeable {
       next();
     }
     return this;
+  }
+
+  /**
+   * Filters objects from this source to only include objects for which the predicate returns true.
+   *
+   * @param predicate returns true for objects to keep and false for objects to skip
+   * @return filtered version of this source
+   */
+  default MessageSource<T> filter(Predicate<T> predicate) {
+    return new FilteredMessageSource<>(this, predicate);
   }
 
   @FunctionalInterface

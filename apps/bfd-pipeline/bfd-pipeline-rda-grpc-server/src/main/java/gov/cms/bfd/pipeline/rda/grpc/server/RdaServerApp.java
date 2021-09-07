@@ -112,11 +112,14 @@ public class RdaServerApp {
         LOGGER.info(
             "serving FissClaims using JsonClaimSource with data from file {}",
             fissClaimFile.getAbsolutePath());
-        return new JsonMessageSource<>(fissClaimFile, JsonMessageSource::parseFissClaimChange);
+        return new JsonMessageSource<>(fissClaimFile, JsonMessageSource::parseFissClaimChange)
+            .filter(change -> change.getSeq() >= sequenceNumber);
       } else if (fissS3ObjectKey != null && s3Sources != null) {
         LOGGER.info(
             "serving FissClaims using JsonClaimSource with data from S3 Key {}", fissS3ObjectKey);
-        return s3Sources.readFissClaimChanges(fissS3ObjectKey);
+        return s3Sources
+            .readFissClaimChanges(fissS3ObjectKey)
+            .filter(change -> change.getSeq() >= sequenceNumber);
       } else {
         LOGGER.info(
             "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
@@ -131,11 +134,14 @@ public class RdaServerApp {
         LOGGER.info(
             "serving McsClaims using JsonClaimSource with data from file {}",
             mcsClaimFile.getAbsolutePath());
-        return new JsonMessageSource<>(mcsClaimFile, JsonMessageSource::parseMcsClaimChange);
+        return new JsonMessageSource<>(mcsClaimFile, JsonMessageSource::parseMcsClaimChange)
+            .filter(change -> change.getSeq() >= sequenceNumber);
       } else if (mcsS3ObjectKey != null && s3Sources != null) {
         LOGGER.info(
             "serving McsClaims using JsonClaimSource with data from S3 Key {}", mcsS3ObjectKey);
-        return s3Sources.readMcsClaimChanges(mcsS3ObjectKey);
+        return s3Sources
+            .readMcsClaimChanges(mcsS3ObjectKey)
+            .filter(change -> change.getSeq() >= sequenceNumber);
       } else {
         LOGGER.info(
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
