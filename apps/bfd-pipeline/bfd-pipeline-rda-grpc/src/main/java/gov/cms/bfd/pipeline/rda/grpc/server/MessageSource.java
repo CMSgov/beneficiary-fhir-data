@@ -1,11 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import java.io.Closeable;
+
 /**
  * Interface for objects that produce FissClaim objects from some source (e.g. a file, an array, a
  * database, etc). Mirrors the Iterator protocol but allows for unwrapped exceptions to be passed
  * through to the caller and adds a close() method for proper cleanup.
  */
-public interface MessageSource<T> extends AutoCloseable {
+public interface MessageSource<T> extends Closeable {
   /**
    * Checks to determine if there is another object available. Always call this before calling
    * next(). A true value here indicates that there is data remaining to be consumed but does not

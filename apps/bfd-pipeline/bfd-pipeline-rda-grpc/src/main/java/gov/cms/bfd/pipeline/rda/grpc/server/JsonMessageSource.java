@@ -26,9 +26,10 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   private String line;
 
   /**
-   * Produce a JsonFissClaimSource that parses the provided NDJSON data.
+   * Produce a JsonMessageSource that parses the provided NDJSON data.
    *
    * @param json String containing one or more lines of NDJSON data
+   * @param parser the parser to convert a line of JSON into an object
    */
   public JsonMessageSource(String json, Parser<T> parser) {
     reader = new BufferedReader(new StringReader(json));
@@ -36,19 +37,21 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * Produce a JsonFissClaimSource that parses all of the provided NDJSON data. Each value in the
-   * list can contain one or more lines of NDJSON data.
+   * Produce a JsonMessageSource that parses all of the provided NDJSON data. Each value in the list
+   * can contain one or more lines of NDJSON data.
    *
    * @param lines List of NDJSON data to be concatenated and parsed.
+   * @param parser the parser to convert a line of JSON into an object
    */
   public JsonMessageSource(List<String> lines, Parser<T> parser) {
     this(String.join(System.lineSeparator(), lines), parser);
   }
 
   /**
-   * Produce a JsonFissClaimSource that parses the NDJSON contents of the specified File.
+   * Produce a JsonMessageSource that parses the NDJSON contents of the specified File.
    *
    * @param filename identifies a NDJSON file containing message objects
+   * @param parser the parser to convert a line of JSON into an object
    */
   public JsonMessageSource(File filename, Parser<T> parser) {
     try {
@@ -56,6 +59,18 @@ public class JsonMessageSource<T> implements MessageSource<T> {
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
+    this.parser = parser;
+  }
+
+  /**
+   * Produce a JsonMessageSource that parses the NDJSON contents of the reader. The reader will be
+   * closed when this MessageSource is closed.
+   *
+   * @param reader a reader that returns NDJSON text containing message objects
+   * @param parser the parser to convert a line of JSON into an object
+   */
+  public JsonMessageSource(BufferedReader reader, Parser<T> parser) {
+    this.reader = reader;
     this.parser = parser;
   }
 
@@ -145,7 +160,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() throws IOException {
     reader.close();
   }
 

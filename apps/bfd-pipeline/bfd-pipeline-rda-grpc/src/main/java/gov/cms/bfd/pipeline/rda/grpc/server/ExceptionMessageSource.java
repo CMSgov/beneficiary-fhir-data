@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import java.io.IOException;
 import java.util.function.Supplier;
 
 /**
@@ -43,7 +44,7 @@ public class ExceptionMessageSource<T> implements MessageSource<T> {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() throws IOException {
     source.close();
   }
 }

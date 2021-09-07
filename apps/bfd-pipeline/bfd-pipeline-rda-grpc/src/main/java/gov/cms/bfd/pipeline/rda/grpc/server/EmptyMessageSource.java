@@ -32,5 +32,5 @@ public class EmptyMessageSource<T> implements MessageSource<T> {
   }
 
   @Override
-  public void close() throws Exception {}
+  public void close() {}
 }

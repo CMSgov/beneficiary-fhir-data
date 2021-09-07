@@ -43,6 +43,19 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <!-- Used to interact with AWS' S3 service so that the mock RDA API server
+            can download data files from an S3 bucket. -->
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
         <dependency>
             <groupId>io.grpc</groupId>

@@ -6,6 +6,7 @@ import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
+import java.io.IOException;
 import java.time.Clock;
 
 /**
@@ -52,7 +53,7 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() throws IOException {
     source.close();
   }
 
