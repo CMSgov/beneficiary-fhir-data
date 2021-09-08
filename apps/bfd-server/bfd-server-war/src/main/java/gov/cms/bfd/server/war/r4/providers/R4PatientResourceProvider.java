@@ -37,6 +37,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -139,6 +140,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
+
     operation.setOption("by", "id");
     // there is another method with exclude list: requestHeader.getNVPairs(<excludeHeaders>)
     requestHeader.getNVPairs().forEach((n, v) -> operation.setOption(n, v.toString()));
@@ -148,9 +150,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
 
-    // commented out as in V2 code;  keep it that way for now
-    // if (requestHeader.isMBIinIncludeIdentifiers())
-    root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    if (requestHeader.isHICNinIncludeIdentifiers())
+      root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
+
+    if (requestHeader.isMBIinIncludeIdentifiers())
+      root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
@@ -179,6 +183,16 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     // Add bene_id to MDC logs
     MDC.put("bene_id", beneIdText);
+
+    // Null out the unhashed HICNs if we're not supposed to be returning them
+    if (!requestHeader.isHICNinIncludeIdentifiers()) {
+      beneficiary.setHicnUnhashed(Optional.empty());
+    }
+
+    // Null out the unhashed MBIs if we're not supposed to be returning
+    if (!requestHeader.isMBIinIncludeIdentifiers()) {
+      beneficiary.setMedicareBeneficiaryId(Optional.empty());
+    }
 
     return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
@@ -263,6 +277,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   @Search
+  @Trace
   public Bundle searchByCoverageContract(
       // This is very explicit as a place holder until this kind
       // of relational search is more common.
@@ -276,7 +291,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           @Description(shortDefinition = "The cursor used for result pagination")
           String cursor,
       RequestDetails requestDetails) {
-    // Figure out what month they're searching for.
+
     String contractMonth =
         coverageId.getSystem().substring(coverageId.getSystem().lastIndexOf('/') + 1);
     CcwCodebookVariable partDContractMonth = partDCwVariableFor(contractMonth);
@@ -295,8 +310,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
         throw new InvalidRequestException("Invalid contract year specified", e);
       }
     }
-    YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
 
+    YearMonth ym = YearMonth.of(year, Integer.valueOf(contractMonthValue));
     return searchByCoverageContractAndYearMonth(coverageId, ym.atDay(1), requestDetails);
   }
 
@@ -910,138 +925,44 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Check that the page size is valid
+   * Query the DB for and return the matching {@link Beneficiary}s
    *
-   * @param paging to check
+   * @param ids the {@link Beneficiary#getBeneficiaryId()} values to match against
+   * @return the matching {@link Beneficiary}s
    */
-  public static void checkPageSize(LinkBuilder paging) {
-    if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
-    if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
-  }
+  @Trace
+  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<String> ids) {
 
-  private static LocalDate getFormattedYearMonth(String contractYear, String contractMonth) {
-    if (Strings.isNullOrEmpty(contractYear))
-      throw new InvalidRequestException("A null or empty year is not supported");
-    if (Strings.isNullOrEmpty(contractMonth))
-      throw new InvalidRequestException("A null or empty month is not supported");
-    if (contractYear.length() != 4)
-      throw new InvalidRequestException("A invalid year is not supported");
+    // Create the query to run.
+    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
+    Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
+    beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+    beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
 
-    String localDateString = String.format("%s-%s-%s", contractYear, contractMonth, "01");
-    return LocalDate.parse(localDateString);
-  }
-
-  /**
-   * Build a criteria for a general Beneficiary query
-   *
-   * @param field to match on
-   * @param value to match on
-   * @param paging to use for the result set
-   * @param identifiers to add for many-to-one relations
-   * @return the criteria
-   */
-  private TypedQuery<Beneficiary> queryBeneficiariesByPartDContractCodeAndYearMonth(
-      String contractCode,
-      LocalDate yearMonth,
-      PatientLinkBuilder paging,
-      RequestHeaders requestHeader) {
-    String joinsClause = "inner join b.beneficiaryMonthlys bm ";
-    boolean passDistinctThrough = false;
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
+    // Run the query and return the results.
+    List<Beneficiary> matchingBenes = null;
+    Long beneMatchesTimerQueryNanoSeconds = null;
+    Timer.Context beneIdTimer =
+        metricRegistry
+            .timer(
+                MetricRegistry.name(
+                    getClass().getSimpleName(), "query", "benes_by_year_month_part_d_contract_id"))
+            .time();
+    try {
+      matchingBenes =
+          entityManager
+              .createQuery(beneCriteria)
+              .setHint(QueryHints.HINT_PASS_DISTINCT_THROUGH, false)
+              .getResultList();
+      return matchingBenes;
+    } finally {
+      beneMatchesTimerQueryNanoSeconds = beneIdTimer.stop();
+      TransformerUtilsV2.recordQueryInMdc(
+          "benes_by_year_month_part_d_contract_id",
+          beneMatchesTimerQueryNanoSeconds,
+          matchingBenes == null ? 0 : matchingBenes.size());
     }
-
-    if (paging.isPagingRequested() && !paging.isFirstPage()) {
-      String query =
-          "select distinct b from Beneficiary b "
-              + joinsClause
-              + "where bm.partDContractNumberId = :contractCode and "
-              + "bm.yearMonth = :yearMonth "
-              + "and b.beneficiaryId > :cursor "
-              + "order by b.beneficiaryId asc";
-
-      return entityManager
-          .createQuery(query, Beneficiary.class)
-          .setParameter("contractCode", contractCode)
-          .setParameter("yearMonth", yearMonth)
-          .setParameter("cursor", paging.getCursor())
-          .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
-    } else {
-      String query =
-          "select distinct b from Beneficiary b "
-              + joinsClause
-              + "where bm.partDContractNumberId = :contractCode and "
-              + "bm.yearMonth = :yearMonth "
-              + "order by b.beneficiaryId asc";
-
-      return entityManager
-          .createQuery(query, Beneficiary.class)
-          .setParameter("contractCode", contractCode)
-          .setParameter("yearMonth", yearMonth)
-          .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
-    }
-  }
-
-  /**
-   * Build a criteria for a general beneficiaryId query
-   *
-   * @param field to match on
-   * @param value to match on
-   * @param paging to use for the result set
-   * @return the criteria
-   */
-  private TypedQuery<String> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
-      String contractCode, LocalDate yearMonth, PatientLinkBuilder paging) {
-    if (paging.isPagingRequested() && !paging.isFirstPage()) {
-      String query =
-          "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
-              + "where bm.partDContractNumberId = :contractCode and "
-              + "bm.yearMonth = :yearMonth and b.beneficiaryId > :cursor "
-              + "order by b.beneficiaryId asc";
-
-      return entityManager
-          .createQuery(query, String.class)
-          .setParameter("contractCode", contractCode)
-          .setParameter("yearMonth", yearMonth)
-          .setParameter("cursor", paging.getCursor());
-    } else {
-      String query =
-          "select b.beneficiaryId from Beneficiary b inner join b.beneficiaryMonthlys bm "
-              + "where bm.partDContractNumberId = :contractCode and "
-              + "bm.yearMonth = :yearMonth "
-              + "order by b.beneficiaryId asc";
-
-      return entityManager
-          .createQuery(query, String.class)
-          .setParameter("contractCode", contractCode)
-          .setParameter("yearMonth", yearMonth);
-    }
-  }
-
-  /**
-   * Build a criteria for a beneficiary query using the passed in list of ids
-   *
-   * @param ids to use
-   * @param identifiers to add for many-to-one relations
-   * @return the criteria
-   */
-  private TypedQuery<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(
-      List<String> ids, RequestHeaders requestHeader) {
-    String joinsClause = "inner join b.beneficiaryMonthlys bm ";
-    boolean passDistinctThrough = false;
-    if (requestHeader.isMBIinIncludeIdentifiers()) {
-      joinsClause += "left join fetch b.medicareBeneficiaryIdHistories ";
-    }
-
-    String query =
-        "select distinct b from Beneficiary b "
-            + joinsClause
-            + "where b.beneficiaryId in :ids "
-            + "order by b.beneficiaryId asc";
-    return entityManager
-        .createQuery(query, Beneficiary.class)
-        .setParameter("ids", ids)
-        .setHint("hibernate.query.passDistinctThrough", passDistinctThrough);
   }
 
   private String partDFieldByMonth(CcwCodebookVariable month) {
@@ -1067,6 +988,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     if (mapOfMonth.containsKey(month)) {
       return mapOfMonth.get(month);
     }
+
     throw new InvalidRequestException(
         "Unsupported extension system: " + month.getVariable().getId().toLowerCase());
   }
@@ -1106,7 +1028,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     List<IBaseResource> patients =
         matchingBeneficiaries.stream()
-            .map(b -> BeneficiaryTransformer.transform(metricRegistry, b, requestHeader))
+            .map(b -> BeneficiaryTransformerV2.transform(metricRegistry, b, requestHeader))
             .collect(Collectors.toList());
 
     Bundle bundle =
@@ -1267,42 +1189,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
   }
 
   /**
-   * Query the DB for and return the matching {@link Beneficiary}s
+   * Check that the page size is valid
    *
-   * @param ids the {@link Beneficiary#getBeneficiaryId()} values to match against
-   * @return the matching {@link Beneficiary}s
+   * @param paging to check
    */
-  @Trace
-  private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<String> ids) {
-    // Create the query to run.
-    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<Beneficiary> beneCriteria = builder.createQuery(Beneficiary.class).distinct(true);
-    Root<Beneficiary> beneRoot = beneCriteria.from(Beneficiary.class);
-    beneRoot.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
-    beneCriteria.where(beneRoot.get(Beneficiary_.beneficiaryId).in(ids));
-
-    // Run the query and return the results.
-    List<Beneficiary> matchingBenes = null;
-    Long beneMatchesTimerQueryNanoSeconds = null;
-    Timer.Context beneIdTimer =
-        metricRegistry
-            .timer(
-                MetricRegistry.name(
-                    getClass().getSimpleName(), "query", "benes_by_year_month_part_d_contract_id"))
-            .time();
-    try {
-      matchingBenes =
-          entityManager
-              .createQuery(beneCriteria)
-              .setHint(QueryHints.HINT_PASS_DISTINCT_THROUGH, false)
-              .getResultList();
-      return matchingBenes;
-    } finally {
-      beneMatchesTimerQueryNanoSeconds = beneIdTimer.stop();
-      TransformerUtilsV2.recordQueryInMdc(
-          "benes_by_year_month_part_d_contract_id",
-          beneMatchesTimerQueryNanoSeconds,
-          matchingBenes == null ? 0 : matchingBenes.size());
-    }
+  public static void checkPageSize(LinkBuilder paging) {
+    if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
+    if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
   }
 }

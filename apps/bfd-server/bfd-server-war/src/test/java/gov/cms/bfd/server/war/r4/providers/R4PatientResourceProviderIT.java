@@ -853,7 +853,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByPartDContractNum() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -878,7 +878,7 @@ public final class R4PatientResourceProviderIT {
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersTrue() {
     List<Object> loadedRecords =
         ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("true", "true");
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -935,7 +935,7 @@ public final class R4PatientResourceProviderIT {
                 StaticRifResource.SAMPLE_A_BENES,
                 StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY,
                 StaticRifResource.SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA));
-    IGenericClient fhirClient = createFhirClient("mbi", "true");
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -1020,7 +1020,7 @@ public final class R4PatientResourceProviderIT {
   public void searchForExistingPatientByPartDContractNumIncludeIdentifiersFalse() {
     List<Object> loadedRecords =
         ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = createFhirClient("false", "true");
+    IGenericClient fhirClient = createFhirClient("mbi, false", "true");
 
     // Should return a single match
     Bundle searchResults =
@@ -1066,7 +1066,7 @@ public final class R4PatientResourceProviderIT {
   public void searchForPatientByPartDContractNumWithPaging() {
 
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -1097,7 +1097,7 @@ public final class R4PatientResourceProviderIT {
 
   @Test
   public void searchForMissingPatientByPartDContractNum() {
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // No data is loaded, so this should return 0 matches.
     Bundle searchResults =
@@ -1153,7 +1153,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForExistingPatientByPartDContractNumAndYear() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -1184,7 +1184,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForNonExistingPatientByPartDContractNumAndYear() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -1215,7 +1215,7 @@ public final class R4PatientResourceProviderIT {
   @Test
   public void searchForPatientByPartDContractNumWithAInvalidContract() {
     ServerTestUtils.get().loadData(Arrays.asList(StaticRifResource.SAMPLE_A_BENES));
-    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+    IGenericClient fhirClient = createFhirClientWithIncludeIdentifiersMbi();
 
     // Should return a single match
     Bundle searchResults =
@@ -1508,6 +1508,13 @@ public final class R4PatientResourceProviderIT {
     patient.getMeta().setLastUpdatedElement(expected.getMeta().getLastUpdatedElement());
 
     Assert.assertTrue(expected.equalsDeep(patient));
+  }
+
+  public static IGenericClient createFhirClientWithIncludeIdentifiersMbi() {
+    RequestHeaders requestHeader =
+        RequestHeaders.getHeaderWrapper(
+            R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, "mbi");
+    return createFhirClient(requestHeader);
   }
 
   /**
