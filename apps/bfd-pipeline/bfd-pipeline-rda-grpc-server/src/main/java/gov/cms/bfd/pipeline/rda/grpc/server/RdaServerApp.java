@@ -1,13 +1,14 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.amazonaws.regions.Regions;
+import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
-import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,53 +55,31 @@ public class RdaServerApp {
     @Nullable private final String mcsS3ObjectKey;
 
     private Config(String[] args) throws Exception {
-      int port = 5003;
-      long seed = System.currentTimeMillis();
-      int maxToSend = 5_000;
-      Regions s3Region = SharedS3Utilities.REGION_DEFAULT;
-      S3JsonMessageSources s3Sources = null;
-      File fissClaimFile = null;
-      File mcsClaimFile = null;
-      String fissS3ObjectKey = null;
-      String mcsS3ObjectKey = null;
-      for (String arg : args) {
-        if (arg.startsWith("port:")) {
-          port = Integer.parseInt(argValue(arg));
-        } else if (arg.startsWith("maxToSend:")) {
-          maxToSend = Integer.parseInt(argValue(arg));
-        } else if (arg.startsWith("seed:") || arg.startsWith("random:")) {
-          seed = Long.parseLong(argValue(arg));
-        } else if (arg.startsWith("fissFile:")) {
-          fissClaimFile = new File(argValue(arg));
-        } else if (arg.startsWith("mcsFile:")) {
-          mcsClaimFile = new File(argValue(arg));
-        } else if (arg.startsWith("s3Region:")) {
-          s3Region = Regions.fromName(argValue(arg));
-          if (s3Sources != null) {
-            throw new IOException("s3Region must be defined before s3Bucket");
-          }
-        } else if (arg.startsWith("s3Bucket:")) {
-          s3Sources =
-              new S3JsonMessageSources(SharedS3Utilities.createS3Client(s3Region), argValue(arg));
-        } else if (arg.startsWith("fissS3Key:")) {
-          fissS3ObjectKey = argValue(arg);
-        } else if (arg.startsWith("mcsS3Key:")) {
-          mcsS3ObjectKey = argValue(arg);
-        } else {
-          throw new IOException("invalid argument: " + arg);
+      final ConfigLoader config =
+          ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
+      port = config.intValue("port", 5003);
+      seed = config.longOption("seed").orElseGet(System::currentTimeMillis);
+      maxToSend = config.intValue("maxToSend", 5_000);
+      fissClaimFile = config.readableFileOption("fissFile").orElse(null);
+      mcsClaimFile = config.readableFileOption("mcsFile").orElse(null);
+      final Optional<String> s3Bucket = config.stringOption("s3Bucket");
+      if (s3Bucket.isPresent()) {
+        final Regions s3Region =
+            config
+                .enumOption("s3Region", Regions::fromName)
+                .orElse(SharedS3Utilities.REGION_DEFAULT);
+        s3Sources =
+            new S3JsonMessageSources(SharedS3Utilities.createS3Client(s3Region), s3Bucket.get());
+        fissS3ObjectKey = config.stringValue("fissS3Key", null);
+        mcsS3ObjectKey = config.stringValue("mcsS3Key", null);
+        if (fissS3ObjectKey == null && mcsS3ObjectKey == null) {
+          throw new IOException("either fissS3Key or mcsS3Key must be specified when using S3");
         }
+      } else {
+        s3Sources = null;
+        fissS3ObjectKey = null;
+        mcsS3ObjectKey = null;
       }
-      if (s3Sources == null && (fissS3ObjectKey != null || mcsS3ObjectKey != null)) {
-        throw new IOException("either fissS3Key or mcsS3Key must be specified when using S3");
-      }
-      this.port = port;
-      this.seed = seed;
-      this.maxToSend = maxToSend;
-      this.fissClaimFile = fissClaimFile;
-      this.mcsClaimFile = mcsClaimFile;
-      this.s3Sources = s3Sources;
-      this.fissS3ObjectKey = fissS3ObjectKey;
-      this.mcsS3ObjectKey = mcsS3ObjectKey;
     }
 
     private int getPort() {
@@ -149,21 +128,6 @@ public class RdaServerApp {
             seed);
         return new RandomMcsClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
       }
-    }
-
-    /**
-     * Removes the prefix from a command line argument.
-     *
-     * @param arg command line argument of the form "prefix:value"
-     * @return the value portion of the value
-     */
-    private String argValue(String arg) {
-      final int prefixEnd = arg.indexOf(":");
-      if (prefixEnd < 0) {
-        // the caller should have ensured we had a : in the argument
-        throw new BadCodeMonkeyException();
-      }
-      return arg.substring(prefixEnd + 1);
     }
   }
 }

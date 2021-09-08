@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.shared;
 
 /**
  * These exceptions are thrown by the ConfigLoader class when it encounters a requirement that is
