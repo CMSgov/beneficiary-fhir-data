@@ -32,8 +32,8 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
     closer = Closer.create();
     s3InputStream = s3Object.getObjectContent();
     // The S3 stream would normally download all the data from the object before closing.
-    // Registering this method as a Closeable ensure that the abort method can be called on the
-    // stream if we are closing before all the data has been read.
+    // Registering this method as a Closeable ensures that the abort method can be called on the
+    // stream if our close method is called before all the data has been read.
     closer.register(this::abortUnfinishedS3Stream);
     BufferedReader reader =
         new BufferedReader(new InputStreamReader(s3InputStream, StandardCharsets.UTF_8));
