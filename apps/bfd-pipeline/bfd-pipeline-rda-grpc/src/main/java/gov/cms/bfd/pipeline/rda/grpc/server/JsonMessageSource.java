@@ -160,7 +160,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() throws Exception {
     reader.close();
   }
 

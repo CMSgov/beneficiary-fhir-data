@@ -72,7 +72,7 @@ public class S3JsonMessageSourceTest {
     try {
       source.close();
       fail("should have thrown");
-    } catch (IOException ex) {
+    } catch (Exception ex) {
       List<String> messages =
           Stream.concat(Stream.of(ex), Stream.of(ex.getSuppressed()))
               .map(Throwable::getMessage)

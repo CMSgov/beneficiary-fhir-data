@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import java.io.Closeable;
 import java.util.function.Predicate;
 
 /**
@@ -8,7 +7,7 @@ import java.util.function.Predicate;
  * database, etc). Mirrors the Iterator protocol but allows for unwrapped exceptions to be passed
  * through to the caller and adds a close() method for proper cleanup.
  */
-public interface MessageSource<T> extends Closeable {
+public interface MessageSource<T> extends AutoCloseable {
   /**
    * Checks to determine if there is another object available. Always call this before calling
    * next(). A true value here indicates that there is data remaining to be consumed but does not

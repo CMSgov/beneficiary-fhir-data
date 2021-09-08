@@ -80,7 +80,7 @@ public class WrappedClaimSourceTest {
       }
 
       @Override
-      public void close() {}
+      public void close() throws Exception {}
     };
   }
 }

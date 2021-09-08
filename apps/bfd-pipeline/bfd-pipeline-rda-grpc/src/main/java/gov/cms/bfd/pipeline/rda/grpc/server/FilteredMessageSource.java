@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
@@ -54,7 +53,7 @@ public class FilteredMessageSource<T> implements MessageSource<T> {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() throws Exception {
     source.close();
   }
 }
