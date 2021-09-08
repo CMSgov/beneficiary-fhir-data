@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
@@ -43,7 +44,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
     final ManagedChannel channel = createChannel(config.apiHost, config.apiPort);
     try {
       final GrpcResponseStream<? extends MessageOrBuilder> results =
-          callService(config.claimType, channel);
+          callService(config.claimType, config.startingSequenceNumber, channel);
       int received = 0;
       try (PrintWriter output = new PrintWriter(new FileWriter(config.outputFile))) {
         while (received < config.maxToReceive && results.hasNext()) {
@@ -75,8 +76,8 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
   }
 
   private static GrpcResponseStream<? extends MessageOrBuilder> callService(
-      ClaimType claimType, ManagedChannel channel) {
-    final ClaimRequest request = ClaimRequest.newBuilder().build();
+      ClaimType claimType, long startingSequenceNumber, ManagedChannel channel) {
+    final ClaimRequest request = ClaimRequest.newBuilder().setSince(startingSequenceNumber).build();
     final MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder> method =
         claimType.methodSource.get();
     final ClientCall<ClaimRequest, ? extends MessageOrBuilder> call =
@@ -97,6 +98,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
     private final ClaimType claimType;
     private final int maxToReceive;
     private final File outputFile;
+    private final long startingSequenceNumber;
 
     private Config(ConfigLoader options) {
       apiHost = options.stringValue("api.host", "localhost");
@@ -104,6 +106,7 @@ public class StoreRdaJsonApp<T extends MessageOrBuilder> {
       claimType = options.enumValue("output.type", ClaimType::valueOf);
       maxToReceive = options.intValue("output.maxCount", Integer.MAX_VALUE);
       outputFile = options.writeableFile("output.file");
+      startingSequenceNumber = options.longOption("output.seq").orElse(RdaChange.MIN_SEQUENCE_NUM);
     }
   }
 }
