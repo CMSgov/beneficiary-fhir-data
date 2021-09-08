@@ -1,8 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.shared;
 
 /**
- * These exceptions are thrown by the ConfigLoader class when it encounters a requirement that is
- * not met. For example a file doesn't exist or an integer setting isn't a valid integer string.
+ * These exceptions are thrown by the {@link ConfigLoader} class when it encounters a requirement
+ * that is not met. For example a file doesn't exist or an integer setting isn't a valid integer
+ * string.
  */
 public class ConfigException extends RuntimeException {
   private final String name;

@@ -10,11 +10,15 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
+/** Contains utility/helper methods for AWS S3 that can be used in application and test code. */
 public final class SharedS3Utilities {
   /** The default AWS {@link Region} to interact with. */
   public static final Regions REGION_DEFAULT = Regions.US_EAST_1;
 
   /**
+   * Creates a AmazonS3 that connects to either a local Minio or real Amazon S3 based on the
+   * MinioConfig singleton's useMinio value.
+   *
    * @param awsS3Region the AWS {@link Regions} that should be used when interacting with S3
    * @return the {@link AmazonS3} client to use
    */

@@ -6,8 +6,8 @@ import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 
 /**
  * Contains utility/helper methods for AWS S3 that are specific to the RIF load process. Implemented
- * using the shared code in S3Utilities but pulls the configuration from RIF specific
- * ExtractionOptions.
+ * using the shared code in {@link SharedS3Utilities} but pulls the configuration from RIF specific
+ * {@link ExtractionOptions}.
  */
 public final class S3Utilities {
   /**

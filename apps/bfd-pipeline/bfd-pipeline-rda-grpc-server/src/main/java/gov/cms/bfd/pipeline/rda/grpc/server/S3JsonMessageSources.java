@@ -5,8 +5,8 @@ import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 
 /**
- * Uses an AmazonS3 client and a bucket name to simplify creation of MessageSources that ready FISS
- * or MCS claims from the bucket.
+ * Uses an AmazonS3 client and a bucket name to simplify creation of {@link MessageSource}s that
+ * read FISS or MCS claims from the bucket.
  */
 public class S3JsonMessageSources {
   private final AmazonS3 s3Client;
@@ -18,7 +18,8 @@ public class S3JsonMessageSources {
   }
 
   /**
-   * Creates a MessageSource that reads FissClaimChanges from an object in the bucket.
+   * Creates a {@link MessageSource} that reads {@link FissClaimChange} from an object in the
+   * bucket.
    *
    * @param ndjsonObjectKey identifies the object containing our NDJSON data
    * @return a MessageSource that reads and parses the data
@@ -28,7 +29,7 @@ public class S3JsonMessageSources {
   }
 
   /**
-   * Creates a MessageSource that reads McsClaimChanges from an object in the bucket.
+   * Creates a {@link MessageSource} that reads {@link McsClaimChange} from an object in the bucket.
    *
    * @param ndjsonObjectKey identifies the object containing our NDJSON data
    * @return a MessageSource that reads and parses the data

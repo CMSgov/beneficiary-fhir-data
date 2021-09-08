@@ -7,13 +7,14 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Implementation of MessageSource that reads and serves NDJSON data from an object in an S3 bucket.
- * The object will be closed when the message source is closed. A JsonMessageSource.Parser object is
- * used to parse the NDJSON data into an appropriate object. Uses a Guava Closer to reliably close
- * all resources and abort the S3 stream if we are closed before all data has been consumed.
+ * Implementation of {@link MessageSource} that reads and serves NDJSON data from an object in an S3
+ * bucket. The object will be closed when the message source is closed. A JsonMessageSource.Parser
+ * object is used to parse the NDJSON data into an appropriate object. Uses a Guava Closer to
+ * reliably close all resources and abort the S3 stream if we are closed before all data has been
+ * consumed.
  *
  * <p>Design note: Mock servers only manage a small number of clients and generally only run for a
- * fixed period of time. To simplify the design the data os streamed to the client directly from S3.
+ * fixed period of time. To simplify the design the data is streamed to the client directly from S3.
  * This could create issues if the clients stall and never close their streams, etc. Since this
  * would only impact a test this isn't considered a problem worth solving through complicated logic
  * to download and cache files locally, etc.

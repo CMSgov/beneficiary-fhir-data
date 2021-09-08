@@ -4,8 +4,8 @@ import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 /**
- * Wrapper around a MessageSource to allow the values to be filtered using some condition. Generally
- * the filter will be a minimum sequence number.
+ * Wrapper around a {@link MessageSource} to allow the values to be filtered using some condition.
+ * Generally the filter will be a minimum sequence number.
  *
  * @param <T> type of objects being returned by the source.
  */

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * A FissClaimSource implementation that produces FissClaim objects from NDJSON data. The grpc-java
+ * A {@link MessageSource} implementation that produces objects from NDJSON data. The grpc-java
  * library includes a JsonFormat class that can be used to convert gRPC message objects into JSON
  * strings and vice versa. The NDJSON data must contain one valid message object JSON per line.
  */
@@ -37,7 +37,7 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * Produce a JsonMessageSource that parses all of the provided NDJSON data. Each value in the list
+   * Produce a JsonMessageSource that parses all the provided NDJSON data. Each value in the list
    * can contain one or more lines of NDJSON data.
    *
    * @param lines List of NDJSON data to be concatenated and parsed.
