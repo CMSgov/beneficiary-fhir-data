@@ -255,8 +255,8 @@ public final class PipelineApplicationIT {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.runWithLocalServer(
-          () -> new RandomFissClaimSource(12345, 100).toClaimChanges(),
-          () -> new RandomMcsClaimSource(12345, 100).toClaimChanges(),
+          ignored -> new RandomFissClaimSource(12345, 100).toClaimChanges(),
+          ignored -> new RandomMcsClaimSource(12345, 100).toClaimChanges(),
           port -> {
             // Start the app.
             ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
@@ -303,10 +303,10 @@ public final class PipelineApplicationIT {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.runWithLocalServer(
-          () ->
+          ignored ->
               new ExceptionMessageSource<>(
                   new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
-          () ->
+          ignored ->
               new ExceptionMessageSource<>(
                   new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
           port -> {

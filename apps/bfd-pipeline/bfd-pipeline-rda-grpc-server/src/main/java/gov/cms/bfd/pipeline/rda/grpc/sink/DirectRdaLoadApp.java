@@ -101,7 +101,10 @@ public class DirectRdaLoadApp {
             options.intValue("hash.iterations", 100),
             options.stringValue("hash.pepper", "notarealpepper"));
     final AbstractRdaLoadJob.Config jobConfig =
-        new AbstractRdaLoadJob.Config(Duration.ofDays(1), options.intValue("job.batchSize", 1));
+        new AbstractRdaLoadJob.Config(
+            Duration.ofDays(1), options.intValue("job.batchSize", 1),
+            options.longOption("job.startingFissSeqNum"),
+                options.longOption("job.startingMcsSeqNum"));
     final GrpcRdaSource.Config grpcConfig =
         new GrpcRdaSource.Config(
             options.stringValue("api.host", "localhost"),

@@ -139,6 +139,25 @@ public class ConfigLoader {
   }
 
   /**
+   * Gets an Optional for the specified long configuration value.
+   *
+   * @param name name of configuration value
+   * @return empty Option if there is no value, otherwise Option holding the value
+   * @throws ConfigException if a value existed but was not a valid long
+   */
+  public Optional<Long> longOption(String name) {
+    final String value = source.apply(name);
+    if (Strings.isNullOrEmpty(value)) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(Long.parseLong(value));
+    } catch (Exception ex) {
+      throw new ConfigException(name, "not a valid long", ex);
+    }
+  }
+
+  /**
    * Gets a required enum configuration value.
    *
    * @param name name of configuration value

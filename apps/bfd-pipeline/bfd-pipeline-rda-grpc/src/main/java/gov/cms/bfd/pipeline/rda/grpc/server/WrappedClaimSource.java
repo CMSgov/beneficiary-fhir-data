@@ -17,6 +17,7 @@ import java.time.Clock;
 public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChange> {
   private final MessageSource<TClaim> source;
   private final Clock clock;
+  private long sequenceNumber;
   private final ChangeFactory<TChange, TClaim> changeFactory;
 
   /**
@@ -27,9 +28,13 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
    * @param setter lambda to add the claim to the appropriate field in the ClaimChange builder
    */
   private WrappedClaimSource(
-      MessageSource<TClaim> source, Clock clock, ChangeFactory<TChange, TClaim> changeFactory) {
+      MessageSource<TClaim> source,
+      Clock clock,
+      long sequenceNumber,
+      ChangeFactory<TChange, TClaim> changeFactory) {
     this.source = source;
     this.clock = clock;
+    this.sequenceNumber = sequenceNumber;
     this.changeFactory = changeFactory;
   }
 
@@ -42,7 +47,8 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
   public TChange next() throws Exception {
     final Timestamp timestamp =
         Timestamp.newBuilder().setSeconds(clock.instant().getEpochSecond()).build();
-    return changeFactory.create(timestamp, ChangeType.CHANGE_TYPE_UPDATE, source.next());
+    return changeFactory.create(
+        timestamp, ChangeType.CHANGE_TYPE_UPDATE, sequenceNumber++, source.next());
   }
 
   @Override
@@ -51,33 +57,37 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
   }
 
   public static MessageSource<FissClaimChange> wrapFissClaims(
-      MessageSource<FissClaim> source, Clock clock) {
+      MessageSource<FissClaim> source, Clock clock, long startingSequenceNumber) {
     return new WrappedClaimSource<>(
         source,
         clock,
-        (timestamp, type, claim) ->
+        startingSequenceNumber,
+        (timestamp, type, seq, claim) ->
             FissClaimChange.newBuilder()
                 .setTimestamp(timestamp)
                 .setChangeType(type)
+                .setSeq(seq)
                 .setClaim(claim)
                 .build());
   }
 
   public static MessageSource<McsClaimChange> wrapMcsClaims(
-      MessageSource<McsClaim> source, Clock clock) {
+      MessageSource<McsClaim> source, Clock clock, long startingSequenceNumber) {
     return new WrappedClaimSource<>(
         source,
         clock,
-        (timestamp, type, claim) ->
+        startingSequenceNumber,
+        (timestamp, type, seq, claim) ->
             McsClaimChange.newBuilder()
                 .setTimestamp(timestamp)
                 .setChangeType(type)
+                .setSeq(seq)
                 .setClaim(claim)
                 .build());
   }
 
   @FunctionalInterface
   public interface ChangeFactory<TChange, TClaim> {
-    public TChange create(Timestamp timestamp, ChangeType type, TClaim claim);
+    TChange create(Timestamp timestamp, ChangeType type, long sequenceNumber, TClaim claim);
   }
 }

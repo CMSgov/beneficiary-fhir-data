@@ -49,6 +49,7 @@ public class McsClaimTransformerTest {
     changeBuilder = McsClaimChange.newBuilder();
     claimBuilder = McsClaim.newBuilder();
     claim = new PreAdjMcsClaim();
+    claim.setSequenceNumber(0L);
   }
 
   @Test
@@ -67,6 +68,7 @@ public class McsClaimTransformerTest {
 
   @Test
   public void allFields() {
+    claim.setSequenceNumber(42L);
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
     claim.setIdrHic("123456789012");
@@ -129,7 +131,10 @@ public class McsClaimTransformerTest {
         .setIdrClaimMbi("5467891245678")
         .setIdrHdrFromDos("2020-01-07")
         .setIdrHdrToDos("2020-01-14");
-    changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
+    changeBuilder
+        .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+        .setSeq(42)
+        .setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 

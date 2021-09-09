@@ -195,6 +195,20 @@ public final class AppConfiguration implements Serializable {
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
   public static final int DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS = Integer.MAX_VALUE;
 
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getStartingFissSeqNum()} ()} value.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM =
+      "RDA_JOB_STARTING_FISS_SEQ_NUM";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getStartingMcsSeqNum()} ()} value.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM =
+      "RDA_JOB_STARTING_MCS_SEQ_NUM";
+
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
@@ -396,7 +410,9 @@ public final class AppConfiguration implements Serializable {
             Duration.ofSeconds(
                 readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)
                     .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)),
-            readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE).orElse(DEFAULT_RDA_JOB_BATCH_SIZE));
+            readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE).orElse(DEFAULT_RDA_JOB_BATCH_SIZE),
+            readEnvLongOptional(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM),
+            readEnvLongOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM));
     final GrpcRdaSource.Config grpcConfig =
         new GrpcRdaSource.Config(
             readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST).orElse(DEFAULT_RDA_GRPC_HOST),
@@ -458,6 +474,30 @@ public final class AppConfiguration implements Serializable {
 
     try {
       return Optional.of(Integer.valueOf(environmentVariableValueText.get()));
+    } catch (NumberFormatException e) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              environmentVariableName, environmentVariableValueText.get()));
+    }
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
+   *     not set
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value cannot be parsed.
+   */
+  static Optional<Long> readEnvLongOptional(String environmentVariableName) {
+    Optional<String> environmentVariableValueText =
+        Optional.ofNullable(System.getenv(environmentVariableName));
+    if (!environmentVariableValueText.isPresent()) {
+      return Optional.empty();
+    }
+
+    try {
+      return Optional.of(Long.valueOf(environmentVariableValueText.get()));
     } catch (NumberFormatException e) {
       throw new AppConfigurationException(
           String.format(

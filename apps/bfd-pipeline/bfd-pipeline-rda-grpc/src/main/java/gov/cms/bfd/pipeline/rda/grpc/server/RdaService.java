@@ -7,7 +7,6 @@ import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +16,12 @@ import org.slf4j.LoggerFactory;
  */
 public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaService.class);
-  private final Supplier<MessageSource<FissClaimChange>> fissSourceFactory;
-  private final Supplier<MessageSource<McsClaimChange>> mcsSourceFactory;
+  private final MessageSource.Factory<FissClaimChange> fissSourceFactory;
+  private final MessageSource.Factory<McsClaimChange> mcsSourceFactory;
 
   public RdaService(
-      Supplier<MessageSource<FissClaimChange>> fissSourceFactory,
-      Supplier<MessageSource<McsClaimChange>> mcsSourceFactory) {
+      MessageSource.Factory<FissClaimChange> fissSourceFactory,
+      MessageSource.Factory<McsClaimChange> mcsSourceFactory) {
     this.fissSourceFactory = fissSourceFactory;
     this.mcsSourceFactory = mcsSourceFactory;
   }
@@ -30,19 +29,27 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   @Override
   public void getFissClaims(
       ClaimRequest request, StreamObserver<FissClaimChange> responseObserver) {
-    LOGGER.info("start getFissClaims call");
-    MessageSource<FissClaimChange> generator = fissSourceFactory.get();
-    Responder responder = new Responder(responseObserver, generator);
-    responder.sendResponses();
+    LOGGER.info("start getFissClaims call with since={}", request.getSince());
+    try {
+      MessageSource<FissClaimChange> generator = fissSourceFactory.apply(request.getSince());
+      Responder<FissClaimChange> responder = new Responder<>(responseObserver, generator);
+      responder.sendResponses();
+    } catch (Exception ex) {
+      responseObserver.onError(ex);
+    }
     LOGGER.info("end getFissClaims call");
   }
 
   @Override
   public void getMcsClaims(ClaimRequest request, StreamObserver<McsClaimChange> responseObserver) {
-    LOGGER.info("start getMcsClaims call");
-    MessageSource<McsClaimChange> generator = mcsSourceFactory.get();
-    Responder responder = new Responder(responseObserver, generator);
-    responder.sendResponses();
+    LOGGER.info("start getMcsClaims call with since={}", request.getSince());
+    try {
+      MessageSource<McsClaimChange> generator = mcsSourceFactory.apply(request.getSince());
+      Responder<McsClaimChange> responder = new Responder<>(responseObserver, generator);
+      responder.sendResponses();
+    } catch (Exception ex) {
+      responseObserver.onError(ex);
+    }
     LOGGER.info("end getMcsClaims call");
   }
 

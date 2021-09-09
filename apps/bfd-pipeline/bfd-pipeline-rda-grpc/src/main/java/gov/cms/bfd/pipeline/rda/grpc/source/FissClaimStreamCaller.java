@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
@@ -37,15 +35,16 @@ public class FissClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjF
    * Iterator that converts the API FissClaim objects into database PreAdjFissClaim entity objects.
    *
    * @param channel an already open channel to the service being called
+   * @param startingSequenceNumber specifies the sequence number to send to the RDA API server
    * @return a blocking GrpcResponseStream of PreAdjFissClaim entity objects
    * @throws Exception passes through any gRPC framework exceptions
    */
   @Override
-  public GrpcResponseStream<RdaChange<PreAdjFissClaim>> callService(ManagedChannel channel)
-      throws Exception {
+  public GrpcResponseStream<RdaChange<PreAdjFissClaim>> callService(
+      ManagedChannel channel, long startingSequenceNumber) throws Exception {
     LOGGER.info("calling service");
     Preconditions.checkNotNull(channel);
-    final ClaimRequest request = ClaimRequest.newBuilder().setSince(MIN_SEQUENCE_NUM).build();
+    final ClaimRequest request = ClaimRequest.newBuilder().setSince(startingSequenceNumber).build();
     final MethodDescriptor<ClaimRequest, FissClaimChange> method =
         RDAServiceGrpc.getGetFissClaimsMethod();
     final ClientCall<ClaimRequest, FissClaimChange> call =

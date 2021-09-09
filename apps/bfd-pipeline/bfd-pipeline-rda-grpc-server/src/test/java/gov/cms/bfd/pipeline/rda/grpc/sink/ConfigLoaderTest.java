@@ -77,6 +77,13 @@ public class ConfigLoaderTest {
   }
 
   @Test
+  public void optionalLongValue() {
+    values.put("a", "33");
+    assertEquals(Optional.of(33L), loader.longOption("a"));
+    assertEquals(Optional.empty(), loader.longOption("z"));
+  }
+
+  @Test
   public void requiredEnumValueFound() {
     values.put("a", "First");
     assertEquals(TestEnum.First, loader.enumValue("a", TestEnum::valueOf));
