@@ -150,6 +150,8 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     CriteriaQuery<Beneficiary> criteria = builder.createQuery(Beneficiary.class);
     Root<Beneficiary> root = criteria.from(Beneficiary.class);
 
+    root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
+
     if (requestHeader.isHICNinIncludeIdentifiers())
       root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
 
@@ -183,16 +185,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     // Add bene_id to MDC logs
     MDC.put("bene_id", beneIdText);
-
-    // Null out the unhashed HICNs if we're not supposed to be returning them
-    if (!requestHeader.isHICNinIncludeIdentifiers()) {
-      beneficiary.setHicnUnhashed(Optional.empty());
-    }
-
-    // Null out the unhashed MBIs if we're not supposed to be returning
-    if (!requestHeader.isMBIinIncludeIdentifiers()) {
-      beneficiary.setMedicareBeneficiaryId(Optional.empty());
-    }
 
     return BeneficiaryTransformerV2.transform(metricRegistry, beneficiary, requestHeader);
   }
