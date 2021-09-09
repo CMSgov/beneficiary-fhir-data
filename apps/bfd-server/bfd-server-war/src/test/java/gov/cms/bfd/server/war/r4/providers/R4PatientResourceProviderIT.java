@@ -867,6 +867,13 @@ public final class R4PatientResourceProviderIT {
                         TransformerUtilsV2.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtilsV2.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -892,6 +899,13 @@ public final class R4PatientResourceProviderIT {
                         TransformerUtilsV2.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtilsV2.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -949,6 +963,13 @@ public final class R4PatientResourceProviderIT {
                         TransformerUtilsV2.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtilsV2.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
             .count(1)
             .returnBundle(Bundle.class)
             .execute();
@@ -997,6 +1018,13 @@ public final class R4PatientResourceProviderIT {
                         TransformerUtilsV2.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtilsV2.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -1034,6 +1062,13 @@ public final class R4PatientResourceProviderIT {
                         TransformerUtilsV2.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtilsV2.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
             .returnBundle(Bundle.class)
             .execute();
 
@@ -1080,6 +1115,13 @@ public final class R4PatientResourceProviderIT {
                         TransformerUtilsV2.calculateVariableReferenceUrl(
                             CcwCodebookVariable.PTDCNTRCT01),
                         "S4607"))
+            .where(
+                new TokenClientParam("_has:Coverage.rfrncyr")
+                    .exactly()
+                    .systemAndIdentifier(
+                        TransformerUtilsV2.calculateVariableReferenceUrl(
+                            CcwCodebookVariable.RFRNC_YR),
+                        "2018"))
             .count(10)
             .returnBundle(Bundle.class)
             .execute();
