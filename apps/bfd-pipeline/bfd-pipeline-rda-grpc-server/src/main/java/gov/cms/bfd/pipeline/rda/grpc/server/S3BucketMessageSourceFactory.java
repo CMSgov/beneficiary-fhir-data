@@ -107,8 +107,8 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
 
   /**
    * Compound {@link MessageSource} implementation that pulls records from a sequence of other
-   * sources in the order those sequences are defined. At any given time only one source is being
-   * consumed and sources are closed as they are completed.
+   * MessageSource. At any given time only one MessageSource is being consumed. MessageSources are
+   * closed as they are completed.
    */
   private class MultiS3MessageSource implements MessageSource<T> {
     private final List<FileEntry> remaining;
