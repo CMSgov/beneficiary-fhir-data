@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
@@ -124,17 +125,25 @@ public class RDATestUtils {
             .stmtCovToDate(LocalDate.ofEpochDay(200))
             .build();
 
-    PreAdjFissProcCode code =
-        PreAdjFissProcCode.builder()
-            .dcn("123456")
-            .priority((short) 0)
-            .procCode("CODEABC")
-            .procFlag("FLAG")
-            .procDate(LocalDate.ofEpochDay(200))
-            .lastUpdated(Instant.ofEpochMilli(0))
-            .build();
+    Set<PreAdjFissProcCode> codes =
+        Sets.newHashSet(
+            PreAdjFissProcCode.builder()
+                .dcn("123456")
+                .priority((short) 0)
+                .procCode("CODEABC")
+                .procFlag("FLAG")
+                .procDate(LocalDate.ofEpochDay(200))
+                .lastUpdated(Instant.ofEpochMilli(0))
+                .build(),
+            PreAdjFissProcCode.builder()
+                .dcn("123456")
+                .priority((short) 1)
+                .procCode("CODECBA")
+                .procFlag("FLA2")
+                .lastUpdated(Instant.ofEpochMilli(0))
+                .build());
 
-    claim.setProcCodes(Collections.singleton(code));
+    claim.setProcCodes(codes);
 
     return claim;
   }
@@ -217,14 +226,21 @@ public class RDATestUtils {
             .lastUpdated(Instant.ofEpochMilli(4000))
             .build();
 
-    PreAdjMcsDetail proc =
-        PreAdjMcsDetail.builder()
-            .idrClmHdIcn("654321")
-            .idrDtlToDate(LocalDate.ofEpochDay(208))
-            .idrProcCode("FDSAE")
-            .build();
+    Set<PreAdjMcsDetail> procCodes =
+        Sets.newHashSet(
+            PreAdjMcsDetail.builder()
+                .priority((short) 0)
+                .idrClmHdIcn("654321")
+                .idrDtlToDate(LocalDate.ofEpochDay(208))
+                .idrProcCode("FDSAE")
+                .build(),
+            PreAdjMcsDetail.builder()
+                .priority((short) 1)
+                .idrClmHdIcn("654321")
+                .idrProcCode("FDAAA")
+                .build());
 
-    claim.setDetails(Collections.singleton(proc));
+    claim.setDetails(procCodes);
 
     claim.setDiagCodes(
         Sets.newHashSet(

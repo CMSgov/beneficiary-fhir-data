@@ -158,6 +158,17 @@
           }
         ]
       }
+    },
+    {
+      "sequence": 2,
+      "procedureCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/icd-10",
+            "code": "CODECBA"
+          }
+        ]
+      }
     }
   ],
   "total": {
