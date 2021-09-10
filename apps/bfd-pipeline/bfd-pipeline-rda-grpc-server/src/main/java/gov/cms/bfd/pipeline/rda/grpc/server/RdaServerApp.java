@@ -1,13 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
 import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
 import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
@@ -51,8 +51,6 @@ public class RdaServerApp {
     @Nullable private final File fissClaimFile;
     @Nullable private final File mcsClaimFile;
     @Nullable private final S3JsonMessageSources s3Sources;
-    @Nullable private final String fissS3ObjectKey;
-    @Nullable private final String mcsS3ObjectKey;
 
     private Config(String[] args) throws Exception {
       final ConfigLoader config =
@@ -68,17 +66,10 @@ public class RdaServerApp {
             config
                 .enumOption("s3Region", Regions::fromName)
                 .orElse(SharedS3Utilities.REGION_DEFAULT);
-        s3Sources =
-            new S3JsonMessageSources(SharedS3Utilities.createS3Client(s3Region), s3Bucket.get());
-        fissS3ObjectKey = config.stringValue("fissS3Key", null);
-        mcsS3ObjectKey = config.stringValue("mcsS3Key", null);
-        if (fissS3ObjectKey == null && mcsS3ObjectKey == null) {
-          throw new IOException("either fissS3Key or mcsS3Key must be specified when using S3");
-        }
+        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(s3Region);
+        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get());
       } else {
         s3Sources = null;
-        fissS3ObjectKey = null;
-        mcsS3ObjectKey = null;
       }
     }
 
@@ -93,12 +84,11 @@ public class RdaServerApp {
             fissClaimFile.getAbsolutePath());
         return new JsonMessageSource<>(fissClaimFile, JsonMessageSource::parseFissClaimChange)
             .filter(change -> change.getSeq() >= sequenceNumber);
-      } else if (fissS3ObjectKey != null && s3Sources != null) {
+      } else if (s3Sources != null) {
         LOGGER.info(
-            "serving FissClaims using JsonClaimSource with data from S3 Key {}", fissS3ObjectKey);
-        return s3Sources
-            .readFissClaimChanges(fissS3ObjectKey)
-            .filter(change -> change.getSeq() >= sequenceNumber);
+            "serving FissClaims using JsonClaimSource with data from S3 bucket {}",
+            s3Sources.getBucketName());
+        return s3Sources.fissClaimChangeFactory().apply(sequenceNumber);
       } else {
         LOGGER.info(
             "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
@@ -115,12 +105,11 @@ public class RdaServerApp {
             mcsClaimFile.getAbsolutePath());
         return new JsonMessageSource<>(mcsClaimFile, JsonMessageSource::parseMcsClaimChange)
             .filter(change -> change.getSeq() >= sequenceNumber);
-      } else if (mcsS3ObjectKey != null && s3Sources != null) {
+      } else if (s3Sources != null) {
         LOGGER.info(
-            "serving McsClaims using JsonClaimSource with data from S3 Key {}", mcsS3ObjectKey);
-        return s3Sources
-            .readMcsClaimChanges(mcsS3ObjectKey)
-            .filter(change -> change.getSeq() >= sequenceNumber);
+            "serving McsClaims using JsonClaimSource with data from S3 bucket {}",
+            s3Sources.getBucketName());
+        return s3Sources.mcsClaimChangeFactory().apply(sequenceNumber);
       } else {
         LOGGER.info(
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
