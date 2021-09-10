@@ -19,8 +19,8 @@ public interface MessageSource<T> extends AutoCloseable {
   boolean hasNext() throws Exception;
 
   /**
-   * Returns the next available claim. Calling this method when hasNext() would return true throws a
-   * NoSuchElementException. An exception could be thrown if the underlying source of data has an
+   * Returns the next available claim. Calling this method when hasNext() would return false throws
+   * a NoSuchElementException. An exception could be thrown if the underlying source of data has an
    * error.
    *
    * @return the next claim in the sequence

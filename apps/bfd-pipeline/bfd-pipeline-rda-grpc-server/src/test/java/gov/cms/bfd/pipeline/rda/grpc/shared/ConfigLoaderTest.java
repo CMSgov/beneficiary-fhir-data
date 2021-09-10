@@ -283,6 +283,7 @@ public class ConfigLoaderTest {
             .build();
     assertEquals(Optional.of("1"), config.stringOption("a"));
     assertEquals(Optional.of(222), config.intOption("bbb"));
+    assertEquals(Optional.empty(), config.intOption("ignored"));
   }
 
   @Test

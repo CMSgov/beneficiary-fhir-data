@@ -27,7 +27,7 @@ public class FilteredMessageSourceTest {
   }
 
   @Test
-  public void multipleHashNextOk() throws Exception {
+  public void multipleHasNextOk() throws Exception {
     MessageSource<Integer> source = createSource();
     MessageSource<Integer> filtered = new FilteredMessageSource<>(source, i -> i < 10);
     assertTrue(filtered.hasNext());
@@ -45,6 +45,14 @@ public class FilteredMessageSourceTest {
   public void nextWithoutHasNextFails() throws Exception {
     MessageSource<Integer> source = createSource();
     MessageSource<Integer> filtered = new FilteredMessageSource<>(source, i -> i < 10);
+    filtered.next();
+  }
+
+  @Test(expected = NoSuchElementException.class)
+  public void nextPastTheEndFails() throws Exception {
+    MessageSource<Integer> source = createSource();
+    MessageSource<Integer> filtered = new FilteredMessageSource<>(source, i -> i < 10).skip(10);
+    assertFalse(filtered.hasNext());
     filtered.next();
   }
 
