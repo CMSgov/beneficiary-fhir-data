@@ -1186,7 +1186,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
    * @param paging to check
    */
   public static void checkPageSize(LinkBuilder paging) {
-    if (paging.getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
-    if (paging.getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
+    if (paging.getPageSize() <= 0)
+      throw new InvalidRequestException("A zero or negative count is unsupported");
   }
 }
