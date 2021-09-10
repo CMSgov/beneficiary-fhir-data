@@ -268,6 +268,7 @@ public class FissClaimTransformer {
     FissClaim from = change.getClaim();
     final DataTransformer transformer = new DataTransformer();
     final PreAdjFissClaim to = transformClaim(from, transformer);
+    to.setSequenceNumber(change.getSeq());
 
     transformProcCodes(from, transformer, to);
     transformDiagCodes(from, transformer, to);

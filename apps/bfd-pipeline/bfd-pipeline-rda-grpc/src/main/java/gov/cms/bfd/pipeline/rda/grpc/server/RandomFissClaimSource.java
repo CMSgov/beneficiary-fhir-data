@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.util.NoSuchElementException;
@@ -37,6 +38,7 @@ public class RandomFissClaimSource implements MessageSource<FissClaim> {
   public void close() {}
 
   public MessageSource<FissClaimChange> toClaimChanges() {
-    return WrappedClaimSource.wrapFissClaims(this, generator.getClock());
+    return WrappedClaimSource.wrapFissClaims(
+        this, generator.getClock(), RdaChange.MIN_SEQUENCE_NUM);
   }
 }

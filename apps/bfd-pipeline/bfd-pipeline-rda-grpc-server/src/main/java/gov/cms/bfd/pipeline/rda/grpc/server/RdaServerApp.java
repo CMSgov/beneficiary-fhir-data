@@ -81,7 +81,7 @@ public class RdaServerApp {
       return port;
     }
 
-    private MessageSource<FissClaimChange> createFissClaims() {
+    private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {
       if (fissClaimFile != null) {
         LOGGER.info(
             "serving FissClaims using JsonClaimSource with data from file {}",
@@ -92,11 +92,11 @@ public class RdaServerApp {
             "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
             maxToSend,
             seed);
-        return new RandomFissClaimSource(seed, maxToSend).toClaimChanges();
+        return new RandomFissClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
       }
     }
 
-    private MessageSource<McsClaimChange> createMcsClaims() {
+    private MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber) throws Exception {
       if (mcsClaimFile != null) {
         LOGGER.info(
             "serving McsClaims using JsonClaimSource with data from file {}",
@@ -107,7 +107,7 @@ public class RdaServerApp {
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
             seed);
-        return new RandomMcsClaimSource(seed, maxToSend).toClaimChanges();
+        return new RandomMcsClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
       }
     }
   }
