@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Uses an AmazonS3 client and a bucket name to simplify creation of {@link MessageSource}s that
- * read FISS or MCS claims from the bucket.
+ * Uses an {@link AmazonS3} client and a bucket name to simplify creation of {@link MessageSource}s
+ * that read FISS or MCS claims from the bucket.
  */
 public class S3JsonMessageSources {
   private static final Logger LOGGER = LoggerFactory.getLogger(S3JsonMessageSources.class);

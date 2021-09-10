@@ -7,17 +7,13 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Implementation of {@link MessageSource} that reads and serves NDJSON data from an object in an S3
- * bucket. The object will be closed when the message source is closed. A JsonMessageSource.Parser
- * object is used to parse the NDJSON data into an appropriate object. Uses a Guava Closer to
- * reliably close all resources and abort the S3 stream if we are closed before all data has been
- * consumed.
+ * Implementation of {@link MessageSource} that reads and serves NDJSON data from a single {@link
+ * S3Object}. The S3Object will be closed when the message source is closed. A {@link
+ * JsonMessageSource.Parser} object is used to parse the NDJSON data.
  *
- * <p>Design note: Mock servers only manage a small number of clients and generally only run for a
- * fixed period of time. To simplify the design the data is streamed to the client directly from S3.
- * This could create issues if the clients stall and never close their streams, etc. Since this
- * would only impact a test this isn't considered a problem worth solving through complicated logic
- * to download and cache files locally, etc.
+ * <p>Design note: Mock servers only manage a small number of clients. To simplify the design the
+ * data is streamed to the client directly from S3 rather than downloading and caching the data
+ * locally.
  *
  * @param <T>
  */
@@ -55,7 +51,7 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
 
   /**
    * According to the S3 SDK docs, when an S3 stream is closed all the data remaining in the stream
-   * will be downloaded before closing the stream. Obviously that is wasteful of resources and
+   * will still be downloaded before closing the stream. Obviously that is wasteful of resources and
    * potentially very slow if the amount of remaining data is large. To prevent that from happening,
    * this method calls abort on the stream if we are closing before we have retrieved all the data
    * from the stream.
@@ -75,7 +71,7 @@ public class S3JsonMessageSource<T> implements MessageSource<T> {
    *
    * @param closeables the things to close
    * @throws Exception if any closeable throws the first exception is thrown and others are added to
-   *     it using addSuppressed
+   *     it using {@link Throwable#addSuppressed(Throwable)}
    */
   private static void closeAll(AutoCloseable... closeables) throws Exception {
     Exception exception = null;

@@ -16,10 +16,10 @@ import lombok.ToString;
 
 /**
  * To save on the number of unnecessary calls to S3 to retrieve files and to allow the incremental
- * addition of files over time this implementation of {@code MessageSource.Factory} checks an S3
- * bucket for files matching a pattern that contains the claim type and the range of sequence
- * numbers in the file. If no files matching this pattern are found but a file has a name equal to
- * the claim type plus the ndjson suffix then that file is considered to hold all valid claims. When
+ * addition of files over time this implementation of {@link MessageSource.Factory} checks an S3
+ * bucket for files matching a pattern that consists of a prefix, the range of sequence numbers in
+ * the file, and a suffix. If no files matching this pattern are found but a file has a name equal
+ * to the prefix followed by the suffix then that file is considered to hold all valid claims. When
  * one or more files match they are sorted by range and only those files containing sequence numbers
  * greater than or equal to the desired starting number are read. The matching files are then served
  * one after another in sequence number order.
@@ -28,7 +28,7 @@ import lombok.ToString;
  * correspond to the values in the object key. No effort is made to compensate for configuration
  * errors. As a consequence if the files contain data that differs from their file names or if they
  * have records out of order within the file the resulting stream of records might not be in
- * monotonically increasing order by sequence number.
+ * increasing order by sequence number.
  */
 public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T> {
 
@@ -71,7 +71,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
 
   /**
    * Searches the S3 bucket for objects whose key matches our regular expression. Only files whose
-   * maximum sequence number is greater than or equal to our starting sequence number of retained.
+   * maximum sequence number is greater than or equal to our starting sequence number are retained.
    * The resulting list of entries is sorted by sequence number order.
    *
    * @param startingSequenceNumber smallest sequence number that the caller is interested in
@@ -127,7 +127,8 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
 
     /**
      * Checks the current source for more records. If the current source has no more records it
-     * closes that source and finds the next available source that does have a record.
+     * closes that source and finds the next available source that does have a record. Sources are
+     * closed along the way to ensure only the current source is open at any given time.
      *
      * @return true if next can be called successfully
      * @throws Exception if any operation fails
