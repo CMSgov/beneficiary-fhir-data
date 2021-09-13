@@ -105,6 +105,7 @@ public class RDATestUtils {
   private PreAdjFissClaim fissTestDataA() {
     PreAdjFissClaim claim =
         PreAdjFissClaim.builder()
+            .sequenceNumber(1L)
             .dcn("123456")
             .hicNo("hicnumber")
             .currStatus('a')
@@ -151,6 +152,7 @@ public class RDATestUtils {
   private PreAdjFissClaim fissTestDataB() {
     PreAdjFissClaim claim =
         PreAdjFissClaim.builder()
+            .sequenceNumber(2L)
             .dcn("123457")
             .hicNo("hicnumbe2")
             .currStatus('t')
@@ -193,6 +195,7 @@ public class RDATestUtils {
   private PreAdjMcsClaim mcsTestDataA() {
     PreAdjMcsClaim claim =
         PreAdjMcsClaim.builder()
+            .sequenceNumber(1L)
             .idrClmHdIcn("654321")
             .idrContrId("contr")
             .idrHic("HicValue")

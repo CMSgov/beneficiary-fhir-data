@@ -35,6 +35,9 @@ public class PreAdjMcsClaim {
   @EqualsAndHashCode.Include
   private String idrClmHdIcn;
 
+  @Column(name = "`sequenceNumber`", nullable = false)
+  private Long sequenceNumber;
+
   @Column(name = "`idrContrId`", length = 5, nullable = false)
   private String idrContrId;
 

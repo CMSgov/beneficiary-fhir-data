@@ -145,6 +145,18 @@ public class JsonMessageSourceTest {
     }
   }
 
+  @Test
+  public void skip() throws Exception {
+    MessageSource<FissClaim> source =
+        new JsonMessageSource<>(
+                ImmutableList.of(CLAIM_1, CLAIM_2), JsonMessageSource::parseFissClaim)
+            .skip(1);
+    assertEquals(true, source.hasNext());
+    FissClaim claim = source.next();
+    assertEquals("2643602", claim.getDcn());
+    assertEquals(false, source.hasNext());
+  }
+
   private void assertNextPastEndOfDataThrowsException(JsonMessageSource<?> source)
       throws Exception {
     try {

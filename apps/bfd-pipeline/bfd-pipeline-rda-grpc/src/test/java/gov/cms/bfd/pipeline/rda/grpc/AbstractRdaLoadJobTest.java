@@ -15,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -43,7 +44,7 @@ public class AbstractRdaLoadJobTest {
 
   @Before
   public void setUp() {
-    config = new Config(Duration.ofSeconds(10), 3);
+    config = new Config(Duration.ofSeconds(10), 3, Optional.empty(), Optional.empty());
     appMetrics = new MetricRegistry();
     job = new TestingLoadJob(config, sourceFactory, sinkFactory, appMetrics);
   }
@@ -209,7 +210,8 @@ public class AbstractRdaLoadJobTest {
 
   @Test
   public void configIsSerializable() throws Exception {
-    final AbstractRdaLoadJob.Config original = new Config(Duration.ofMillis(1000), 45);
+    final AbstractRdaLoadJob.Config original =
+        new Config(Duration.ofMillis(1000), 45, Optional.empty(), Optional.empty());
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
       out.writeObject(original);
