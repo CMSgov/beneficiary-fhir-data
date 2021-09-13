@@ -152,12 +152,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
 
     root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
 
-    if (requestHeader.isHICNinIncludeIdentifiers())
-      root.fetch(Beneficiary_.beneficiaryHistories, JoinType.LEFT);
-
-    if (requestHeader.isMBIinIncludeIdentifiers())
-      root.fetch(Beneficiary_.medicareBeneficiaryIdHistories, JoinType.LEFT);
-
     criteria.select(root);
     criteria.where(builder.equal(root.get(Beneficiary_.beneficiaryId), beneIdText));
 
