@@ -136,6 +136,17 @@
           }
         ]
       }
+    },
+    {
+      "sequence": 2,
+      "procedureCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://www.ama-assn.org/go/cpt",
+            "code": "FDAAA"
+          }
+        ]
+      }
     }
   ],
   "total": {
