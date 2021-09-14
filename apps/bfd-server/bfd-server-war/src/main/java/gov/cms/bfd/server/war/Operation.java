@@ -10,9 +10,9 @@ import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.CoverageResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import javax.servlet.http.HttpServletRequest;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.slf4j.MDC;
 
