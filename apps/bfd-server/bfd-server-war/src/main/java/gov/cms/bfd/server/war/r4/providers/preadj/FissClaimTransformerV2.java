@@ -218,16 +218,22 @@ public class FissClaimTransformerV2 {
 
     for (int i = 0; i < procCodes.size(); ++i) {
       PreAdjFissProcCode procCode = procCodes.get(i);
-      Claim.ProcedureComponent component = new Claim.ProcedureComponent();
-
-      component.setSequence((i + 1));
-      component.setDate(
-          Date.from(procCode.getProcDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-      component.setProcedure(
-          new CodeableConcept()
-              .setCoding(
-                  Collections.singletonList(
-                      new Coding("http://hl7.org/fhir/sid/icd-10", procCode.getProcCode(), null))));
+      Claim.ProcedureComponent component =
+          new Claim.ProcedureComponent()
+              .setSequence((i + 1))
+              .setDate(
+                  procCode.getProcDate() == null
+                      ? null
+                      : Date.from(
+                          procCode.getProcDate().atStartOfDay(ZoneId.systemDefault()).toInstant()))
+              .setProcedure(
+                  new CodeableConcept()
+                      .setCoding(
+                          Collections.singletonList(
+                              new Coding(
+                                  "http://hl7.org/fhir/sid/icd-10",
+                                  procCode.getProcCode(),
+                                  null))));
 
       procedure.add(component);
     }
