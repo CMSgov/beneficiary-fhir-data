@@ -38,6 +38,9 @@ public class PreAdjFissClaim {
   @EqualsAndHashCode.Include
   private String dcn;
 
+  @Column(name = "`sequenceNumber`", nullable = false)
+  private Long sequenceNumber;
+
   @Column(name = "`hicNo`", length = 12, nullable = false)
   private String hicNo;
 

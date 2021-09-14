@@ -55,6 +55,7 @@ public class SchemaMigrationIT {
             .currLoc1('A')
             .currLoc2("1A")
             .pracLocCity("city name can be very long indeed")
+            .sequenceNumber(3L)
             .build();
 
     final PreAdjFissProcCode procCode0 =
@@ -129,6 +130,7 @@ public class SchemaMigrationIT {
 
     PreAdjFissClaim resultClaim = claims.get(0);
     assertEquals("h1", resultClaim.getHicNo());
+    assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("city name can be very long indeed", resultClaim.getPracLocCity());
 
     assertEquals("0:F,1:G", summarizeFissProcCodes(resultClaim));
@@ -168,6 +170,7 @@ public class SchemaMigrationIT {
             .idrContrId("c1")
             .idrHic("hc")
             .idrClaimType("c")
+            .sequenceNumber(3L)
             .build();
 
     claim.getDetails().add(quickMcsDetail(claim, 0, "P"));
@@ -214,6 +217,7 @@ public class SchemaMigrationIT {
             .getResultList();
     assertEquals(1, resultClaims.size());
     resultClaim = resultClaims.get(0);
+    assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("0:P,2:S", summarizeMcsDetails(resultClaim));
     assertEquals("0:W,1:U", summarizeMcsDiagCodes(resultClaim));
   }

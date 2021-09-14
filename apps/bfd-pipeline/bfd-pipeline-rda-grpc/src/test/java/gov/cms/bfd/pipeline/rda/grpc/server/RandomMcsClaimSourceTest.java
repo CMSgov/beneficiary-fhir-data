@@ -3,43 +3,43 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
-import gov.cms.mpsm.rda.v1.FissClaimChange;
-import gov.cms.mpsm.rda.v1.fiss.FissClaim;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.util.NoSuchElementException;
 import org.junit.Test;
 
-public class RandomFissClaimSourceTest {
+public class RandomMcsClaimSourceTest {
   @Test
   public void zeroMaxToReturn() throws Exception {
-    RandomFissClaimSource source = new RandomFissClaimSource(0, 0);
+    RandomMcsClaimSource source = new RandomMcsClaimSource(0, 0);
     assertEquals(false, source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
   @Test
   public void oneMaxToReturn() throws Exception {
-    RandomFissClaimSource source = new RandomFissClaimSource(0, 1);
+    RandomMcsClaimSource source = new RandomMcsClaimSource(0, 1);
     assertEquals(true, source.hasNext());
-    FissClaim claim = source.next();
-    assertEquals("9086422", claim.getDcn());
+    McsClaim claim = source.next();
+    assertEquals("08642205", claim.getIdrClmHdIcn());
     assertEquals(false, source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
   @Test
   public void threeMaxToReturn() throws Exception {
-    RandomFissClaimSource source = new RandomFissClaimSource(0, 3);
+    RandomMcsClaimSource source = new RandomMcsClaimSource(0, 3);
     assertEquals(true, source.hasNext());
-    FissClaim claim = source.next();
-    assertEquals("9086422", claim.getDcn());
+    McsClaim claim = source.next();
+    assertEquals("08642205", claim.getIdrClmHdIcn());
 
     assertEquals(true, source.hasNext());
     claim = source.next();
-    assertTrue(claim.getDcn().length() > 0);
+    assertTrue(claim.getIdrClmHdIcn().length() > 0);
 
     assertEquals(true, source.hasNext());
     claim = source.next();
-    assertTrue(claim.getDcn().length() > 0);
+    assertTrue(claim.getIdrClmHdIcn().length() > 0);
 
     assertEquals(false, source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
@@ -47,11 +47,10 @@ public class RandomFissClaimSourceTest {
 
   @Test
   public void sequenceNumbers() throws Exception {
-    MessageSource<FissClaimChange> source =
-        new RandomFissClaimSource(0, 7).toClaimChanges().skip(4);
+    MessageSource<McsClaimChange> source = new RandomMcsClaimSource(0, 6).toClaimChanges().skip(3);
+    assertEquals(3L, source.next().getSeq());
     assertEquals(4L, source.next().getSeq());
     assertEquals(5L, source.next().getSeq());
-    assertEquals(6L, source.next().getSeq());
     assertEquals(false, source.hasNext());
   }
 
