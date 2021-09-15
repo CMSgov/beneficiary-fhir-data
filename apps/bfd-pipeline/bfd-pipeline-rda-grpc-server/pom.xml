@@ -43,6 +43,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
         <dependency>
             <groupId>io.grpc</groupId>
