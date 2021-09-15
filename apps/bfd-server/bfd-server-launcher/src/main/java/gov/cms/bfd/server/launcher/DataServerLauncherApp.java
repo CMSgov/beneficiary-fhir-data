@@ -33,6 +33,7 @@ import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
 import org.eclipse.jetty.webapp.MetaInfConfiguration;
+import org.eclipse.jetty.webapp.WebAppConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
@@ -160,6 +161,7 @@ public final class DataServerLauncherApp {
         new Configuration[] {
           new WebInfConfiguration(),
           new WebXmlConfiguration(),
+          new WebAppConfiguration(),
           new MetaInfConfiguration(),
           new FragmentConfiguration(),
           new JettyWebXmlConfiguration(),
