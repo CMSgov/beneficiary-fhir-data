@@ -110,6 +110,7 @@ public class McsClaimTransformer {
 
     final DataTransformer transformer = new DataTransformer();
     final PreAdjMcsClaim to = transformClaim(from, transformer);
+    to.setSequenceNumber(change.getSeq());
 
     List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
     if (errors.size() > 0) {

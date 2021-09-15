@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
+package gov.cms.bfd.pipeline.sharedutils.s3;
 
 /**
  * S3MinioConfig is an object for configuring minio to use as a S3 bucket for local development

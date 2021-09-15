@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * A FissClaimSource implementation that produces FissClaim objects from NDJSON data. The grpc-java
+ * A {@link MessageSource} implementation that produces objects from NDJSON data. The grpc-java
  * library includes a JsonFormat class that can be used to convert gRPC message objects into JSON
  * strings and vice versa. The NDJSON data must contain one valid message object JSON per line.
  */
@@ -26,9 +26,10 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   private String line;
 
   /**
-   * Produce a JsonFissClaimSource that parses the provided NDJSON data.
+   * Produce a JsonMessageSource that parses the provided NDJSON data.
    *
    * @param json String containing one or more lines of NDJSON data
+   * @param parser the parser to convert a line of JSON into an object
    */
   public JsonMessageSource(String json, Parser<T> parser) {
     reader = new BufferedReader(new StringReader(json));
@@ -36,19 +37,21 @@ public class JsonMessageSource<T> implements MessageSource<T> {
   }
 
   /**
-   * Produce a JsonFissClaimSource that parses all of the provided NDJSON data. Each value in the
-   * list can contain one or more lines of NDJSON data.
+   * Produce a JsonMessageSource that parses all the provided NDJSON data. Each value in the list
+   * can contain one or more lines of NDJSON data.
    *
    * @param lines List of NDJSON data to be concatenated and parsed.
+   * @param parser the parser to convert a line of JSON into an object
    */
   public JsonMessageSource(List<String> lines, Parser<T> parser) {
     this(String.join(System.lineSeparator(), lines), parser);
   }
 
   /**
-   * Produce a JsonFissClaimSource that parses the NDJSON contents of the specified File.
+   * Produce a JsonMessageSource that parses the NDJSON contents of the specified File.
    *
    * @param filename identifies a NDJSON file containing message objects
+   * @param parser the parser to convert a line of JSON into an object
    */
   public JsonMessageSource(File filename, Parser<T> parser) {
     try {
@@ -56,6 +59,18 @@ public class JsonMessageSource<T> implements MessageSource<T> {
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
+    this.parser = parser;
+  }
+
+  /**
+   * Produce a JsonMessageSource that parses the NDJSON contents of the reader. The reader will be
+   * closed when this MessageSource is closed.
+   *
+   * @param reader a reader that returns NDJSON text containing message objects
+   * @param parser the parser to convert a line of JSON into an object
+   */
+  public JsonMessageSource(BufferedReader reader, Parser<T> parser) {
+    this.reader = reader;
     this.parser = parser;
   }
 

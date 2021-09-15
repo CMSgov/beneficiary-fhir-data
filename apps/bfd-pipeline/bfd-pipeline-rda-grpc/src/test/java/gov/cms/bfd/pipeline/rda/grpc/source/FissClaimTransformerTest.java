@@ -62,6 +62,7 @@ public class FissClaimTransformerTest {
     changeBuilder = FissClaimChange.newBuilder();
     claimBuilder = FissClaim.newBuilder();
     claim = new PreAdjFissClaim();
+    claim.setSequenceNumber(0L);
   }
 
   @Test
@@ -88,6 +89,7 @@ public class FissClaimTransformerTest {
   @Test
   public void allFields() {
     claim.setDcn("dcn");
+    claim.setSequenceNumber(42L);
     claim.setHicNo("hicn");
     claim.setCurrStatus('M');
     claim.setCurrLoc1('M');
@@ -146,7 +148,7 @@ public class FissClaimTransformerTest {
         .setFreqCdEnum(FissBillFrequency.BILL_FREQUENCY_ADJUSTMENT_CLAIM_G)
         .setBillTypCd("ABC");
     changeBuilder
-        .setSeq(MIN_SEQUENCE_NUM)
+        .setSeq(42)
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.UPDATE);

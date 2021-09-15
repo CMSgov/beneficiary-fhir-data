@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,7 +49,7 @@ public class GrpcRdaSourceTest {
   @Before
   public void setUp() throws Exception {
     appMetrics = new MetricRegistry();
-    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints"));
+    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints", Optional.empty()));
     metrics = source.getMetrics();
   }
 
@@ -68,7 +69,8 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
-    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3)).when(caller).callService(channel);
+    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
+    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3)).when(caller).callService(channel, 42L);
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
 
@@ -85,14 +87,39 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 42L);
+  }
+
+  @Test
+  public void testUsesHardCodedSequenceNumberWhenProvided() throws Exception {
+    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints", Optional.of(18L)));
+    doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, 18L);
+    doReturn(1).when(sink).writeBatch(Arrays.asList(CLAIM_1));
+
+    final int result = source.retrieveAndProcessObjects(2, sink);
+    assertEquals(1, result);
+    assertMeterReading(1, "calls", metrics.getCalls());
+    assertMeterReading(1, "received", metrics.getObjectsReceived());
+    assertMeterReading(1, "stored", metrics.getObjectsStored());
+    assertMeterReading(1, "batches", metrics.getBatches());
+    assertMeterReading(1, "successes", metrics.getSuccesses());
+    assertMeterReading(0, "failures", metrics.getFailures());
+    // once at start, once after a batch
+    verify(source, times(2)).setUptimeToRunning();
+    // once per object received
+    verify(source, times(1)).setUptimeToReceiving();
+    verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 18L);
+    verify(sink, times(0)).readMaxExistingSequenceNumber();
   }
 
   @Test
   public void testPassesThroughProcessingExceptionFromSink() throws Exception {
+    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
-        .callService(channel);
+        .callService(same(channel), anyLong());
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     doThrow(new ProcessingException(error, 1))
@@ -118,20 +145,23 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 42L);
   }
 
   @Test
-  public void testHandlesExceptionFromCaller() {
+  public void testHandlesExceptionFromCaller() throws Exception {
+    doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
     source =
         spy(
             new GrpcRdaSource<>(
                 channel,
-                c -> {
+                (channel, sequenceNumber) -> {
                   throw error;
                 },
                 appMetrics,
-                "ints"));
+                "ints",
+                Optional.empty()));
 
     try {
       source.retrieveAndProcessObjects(2, sink);
@@ -153,9 +183,10 @@ public class GrpcRdaSourceTest {
 
   @Test
   public void testHandlesRuntimeExceptionFromSink() throws Exception {
+    doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
-        .callService(channel);
+        .callService(same(channel), anyLong());
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     final Exception error = new RuntimeException("oops");
@@ -179,10 +210,12 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 0L);
   }
 
   @Test
   public void testHandlesInterruptFromStream() throws Exception {
+    doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
     // Creates a response with 3 valid values followed by an interrupt.
     final GrpcResponseStream<Integer> response = mock(GrpcResponseStream.class);
     when(response.next()).thenReturn(CLAIM_1, CLAIM_2, CLAIM_3);
@@ -190,7 +223,7 @@ public class GrpcRdaSourceTest {
         .thenReturn(true)
         .thenReturn(true)
         .thenThrow(new StreamInterruptedException(new StatusRuntimeException(Status.INTERNAL)));
-    doReturn(response).when(caller).callService(channel);
+    doReturn(response).when(caller).callService(same(channel), anyLong());
 
     // we expect to write a single batch with the first two records
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
@@ -209,6 +242,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(2)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
+    verify(caller).callService(channel, 42L);
   }
 
   @Test

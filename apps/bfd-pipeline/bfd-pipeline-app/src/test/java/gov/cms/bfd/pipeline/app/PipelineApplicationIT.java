@@ -10,8 +10,6 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3MinioConfig;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
 import gov.cms.bfd.pipeline.ccw.rif.load.CcwRifLoadTestUtils;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.RdaFissClaimLoadJob;
@@ -21,6 +19,8 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
+import gov.cms.bfd.pipeline.sharedutils.s3.S3MinioConfig;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,7 +134,7 @@ public final class PipelineApplicationIT {
   public void noRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
+    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
 
     Bucket bucket = null;
     Process appProcess = null;
@@ -190,7 +190,7 @@ public final class PipelineApplicationIT {
   public void smallAmountOfRifData() throws IOException, InterruptedException {
     skipOnUnsupportedOs();
 
-    AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
+    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
     Bucket bucket = null;
     Process appProcess = null;
     try {
@@ -255,8 +255,8 @@ public final class PipelineApplicationIT {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.runWithLocalServer(
-          () -> new RandomFissClaimSource(12345, 100).toClaimChanges(),
-          () -> new RandomMcsClaimSource(12345, 100).toClaimChanges(),
+          ignored -> new RandomFissClaimSource(12345, 100).toClaimChanges(),
+          ignored -> new RandomMcsClaimSource(12345, 100).toClaimChanges(),
           port -> {
             // Start the app.
             ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
@@ -303,10 +303,10 @@ public final class PipelineApplicationIT {
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
       RdaServer.runWithLocalServer(
-          () ->
+          ignored ->
               new ExceptionMessageSource<>(
                   new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
-          () ->
+          ignored ->
               new ExceptionMessageSource<>(
                   new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
           port -> {

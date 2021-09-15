@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
@@ -103,11 +104,12 @@ public class GrpcRdaSourceIT {
       final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
       server =
           RdaServer.startLocal(
-              () ->
+              sequenceNumber ->
                   WrappedClaimSource.wrapFissClaims(
                       new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim),
-                      clock),
-              EmptyMessageSource::new);
+                      clock,
+                      sequenceNumber),
+              EmptyMessageSource.factory());
       final ManagedChannel channel =
           ManagedChannelBuilder.forAddress("localhost", server.getPort())
               .usePlaintext()
@@ -118,7 +120,7 @@ public class GrpcRdaSourceIT {
       FissClaimStreamCaller streamCaller =
           new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
       try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source =
-          new GrpcRdaSource<>(channel, streamCaller, appMetrics, "fiss")) {
+          new GrpcRdaSource<>(channel, streamCaller, appMetrics, "fiss", Optional.empty())) {
         count = source.retrieveAndProcessObjects(3, sink);
       }
       assertEquals(2, count);
@@ -126,6 +128,7 @@ public class GrpcRdaSourceIT {
       assertEquals(
           "{\n"
               + "  \"dcn\" : \"63843470\",\n"
+              + "  \"sequenceNumber\" : 0,\n"
               + "  \"hicNo\" : \"916689703543\",\n"
               + "  \"currStatus\" : \"P\",\n"
               + "  \"currLoc1\" : \"M\",\n"
@@ -170,6 +173,7 @@ public class GrpcRdaSourceIT {
       assertEquals(
           "{\n"
               + "  \"dcn\" : \"2643602\",\n"
+              + "  \"sequenceNumber\" : 1,\n"
               + "  \"hicNo\" : \"640930211775\",\n"
               + "  \"currStatus\" : \"R\",\n"
               + "  \"currLoc1\" : \"O\",\n"

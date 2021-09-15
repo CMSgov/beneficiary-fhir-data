@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.util.NoSuchElementException;
 import org.junit.Test;
@@ -42,6 +43,16 @@ public class RandomFissClaimSourceTest {
 
     assertEquals(false, source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
+  }
+
+  @Test
+  public void sequenceNumbers() throws Exception {
+    MessageSource<FissClaimChange> source =
+        new RandomFissClaimSource(0, 7).toClaimChanges().skip(4);
+    assertEquals(4L, source.next().getSeq());
+    assertEquals(5L, source.next().getSeq());
+    assertEquals(6L, source.next().getSeq());
+    assertEquals(false, source.hasNext());
   }
 
   private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {

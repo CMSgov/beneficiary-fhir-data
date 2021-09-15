@@ -1,10 +1,14 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
 import java.io.File;
-import java.io.IOException;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,68 +50,72 @@ public class RdaServerApp {
     private final int maxToSend;
     @Nullable private final File fissClaimFile;
     @Nullable private final File mcsClaimFile;
+    @Nullable private final S3JsonMessageSources s3Sources;
 
     private Config(String[] args) throws Exception {
-      int port = 5003;
-      long seed = System.currentTimeMillis();
-      int maxToSend = 5_000;
-      File fissClaimFile = null;
-      File mcsClaimFile = null;
-      for (String arg : args) {
-        if (arg.startsWith("port:")) {
-          port = Integer.parseInt(arg.substring(5));
-        } else if (arg.startsWith("maxToSend:")) {
-          maxToSend = Integer.parseInt(arg.substring(10));
-        } else if (arg.startsWith("seed:")) {
-          seed = Long.parseLong(arg.substring(5));
-        } else if (arg.equals("random")) {
-          seed = Long.parseLong(arg.substring(5));
-        } else if (arg.startsWith("fissFile:")) {
-          fissClaimFile = new File(arg.substring(9));
-        } else if (arg.startsWith("mcsFile:")) {
-          mcsClaimFile = new File(arg.substring(8));
-        } else {
-          throw new IOException("invalid argument: " + arg);
-        }
+      final ConfigLoader config =
+          ConfigLoader.builder().addKeyValueCommandLineArguments(args).build();
+      port = config.intValue("port", 5003);
+      seed = config.longOption("seed").orElseGet(System::currentTimeMillis);
+      maxToSend = config.intValue("maxToSend", 5_000);
+      fissClaimFile = config.readableFileOption("fissFile").orElse(null);
+      mcsClaimFile = config.readableFileOption("mcsFile").orElse(null);
+      final Optional<String> s3Bucket = config.stringOption("s3Bucket");
+      if (s3Bucket.isPresent()) {
+        final Regions s3Region =
+            config
+                .enumOption("s3Region", Regions::fromName)
+                .orElse(SharedS3Utilities.REGION_DEFAULT);
+        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(s3Region);
+        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get());
+      } else {
+        s3Sources = null;
       }
-      this.port = port;
-      this.seed = seed;
-      this.maxToSend = maxToSend;
-      this.fissClaimFile = fissClaimFile;
-      this.mcsClaimFile = mcsClaimFile;
     }
 
     private int getPort() {
       return port;
     }
 
-    private MessageSource<FissClaimChange> createFissClaims() {
+    private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {
       if (fissClaimFile != null) {
         LOGGER.info(
             "serving FissClaims using JsonClaimSource with data from file {}",
             fissClaimFile.getAbsolutePath());
-        return new JsonMessageSource<>(fissClaimFile, JsonMessageSource::parseFissClaimChange);
+        return new JsonMessageSource<>(fissClaimFile, JsonMessageSource::parseFissClaimChange)
+            .filter(change -> change.getSeq() >= sequenceNumber);
+      } else if (s3Sources != null) {
+        LOGGER.info(
+            "serving FissClaims using JsonClaimSource with data from S3 bucket {}",
+            s3Sources.getBucketName());
+        return s3Sources.fissClaimChangeFactory().apply(sequenceNumber);
       } else {
         LOGGER.info(
             "serving no more than {} FissClaims using RandomFissClaimSource with seed {}",
             maxToSend,
             seed);
-        return new RandomFissClaimSource(seed, maxToSend).toClaimChanges();
+        return new RandomFissClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
       }
     }
 
-    private MessageSource<McsClaimChange> createMcsClaims() {
+    private MessageSource<McsClaimChange> createMcsClaims(long sequenceNumber) throws Exception {
       if (mcsClaimFile != null) {
         LOGGER.info(
             "serving McsClaims using JsonClaimSource with data from file {}",
             mcsClaimFile.getAbsolutePath());
-        return new JsonMessageSource<>(mcsClaimFile, JsonMessageSource::parseMcsClaimChange);
+        return new JsonMessageSource<>(mcsClaimFile, JsonMessageSource::parseMcsClaimChange)
+            .filter(change -> change.getSeq() >= sequenceNumber);
+      } else if (s3Sources != null) {
+        LOGGER.info(
+            "serving McsClaims using JsonClaimSource with data from S3 bucket {}",
+            s3Sources.getBucketName());
+        return s3Sources.mcsClaimChangeFactory().apply(sequenceNumber);
       } else {
         LOGGER.info(
             "serving no more than {} McsClaims using RandomMcsClaimSource with seed {}",
             maxToSend,
             seed);
-        return new RandomMcsClaimSource(seed, maxToSend).toClaimChanges();
+        return new RandomMcsClaimSource(seed, maxToSend).toClaimChanges().skip(sequenceNumber);
       }
     }
   }
