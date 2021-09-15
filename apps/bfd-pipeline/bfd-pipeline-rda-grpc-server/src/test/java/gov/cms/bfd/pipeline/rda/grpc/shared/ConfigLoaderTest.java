@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.shared;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -273,6 +273,17 @@ public class ConfigLoaderTest {
           "mismatch for " + name,
           System.getProperty(name, "").equals(config.stringValue(name, "")));
     }
+  }
+
+  @Test
+  public void fromCommandLineArguments() {
+    final ConfigLoader config =
+        ConfigLoader.builder()
+            .addKeyValueCommandLineArguments(new String[] {"a:1", "ignored", "bbb:222"})
+            .build();
+    assertEquals(Optional.of("1"), config.stringOption("a"));
+    assertEquals(Optional.of(222), config.intOption("bbb"));
+    assertEquals(Optional.empty(), config.intOption("ignored"));
   }
 
   @Test
