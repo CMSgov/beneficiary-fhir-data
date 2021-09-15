@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.launcher;
 
-import ch.qos.logback.access.jetty.RequestLogImpl;
 import ch.qos.logback.classic.LoggerContext;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
@@ -8,7 +7,6 @@ import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Duration;
-import java.util.EventListener;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.http.HttpVersion;
@@ -16,6 +14,7 @@ import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -24,7 +23,6 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
-import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -177,16 +175,15 @@ public final class DataServerLauncherApp {
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
     /*
-     * Configure the NCSA-style flat access/request log. This picks up its configuration from this
-     * project's logback-access.xml resource. Please note that the logback-access library it uses is
-     * only half-supported anymore and will miss a number of things, e.g. async requests. See
-     * https://github.com/qos-ch/logback/pull/269 for details.
+     * Logback access does not seem to be supported any longer with jetty 10 so switching to
+     * a custom format request log. Need to evaluate if we still need this at all and fill in
+     * the format string to match what we had before or find a new approach entirely or
+     * somehow hack the logback-access to make it work again.
      */
     RequestLogHandler requestLogHandler = new RequestLogHandler();
-    JettyLogbackRequestLogImpl requestLog = new JettyLogbackRequestLogImpl();
-    requestLog.setName("access.log");
-    requestLog.setResource("/logback-access.xml");
-    requestLog.setQuiet(true);
+    final String accessLogFileName =
+        System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
+    CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName);
     requestLogHandler.setRequestLog(requestLog);
 
     /*
@@ -331,19 +328,5 @@ public final class DataServerLauncherApp {
             LOGGER.error("Uncaught exception on non-main thread. Stopping.", e);
           }
         });
-  }
-
-  /** Needed to workaround the issue detailed in https://github.com/qos-ch/logback/pull/269. */
-  private static final class JettyLogbackRequestLogImpl extends RequestLogImpl
-      implements LifeCycle {
-    @Override
-    public boolean addEventListener(EventListener eventListener) {
-      return false;
-    }
-
-    @Override
-    public boolean removeEventListener(EventListener eventListener) {
-      return false;
-    }
   }
 }
