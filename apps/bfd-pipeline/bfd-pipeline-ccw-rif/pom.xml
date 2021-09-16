@@ -34,18 +34,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Used to poll interact with AWS' S3 service, which is where RIF files 
-				from the CCW will arrive, when this ETL pipeline is running in production. -->
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<!-- Delegates all JCL logging (typically from dependencies) to SLF4J. -->
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>

@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.shared;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
@@ -165,9 +167,20 @@ public class ConfigLoader {
    * @throws ConfigException if there is no valid enum value
    */
   public <T extends Enum<T>> T enumValue(String name, Function<String, T> parser) {
-    String value = stringValue(name);
+    return enumOption(name, parser)
+        .orElseThrow(() -> new ConfigException(name, "required enum not provided"));
+  }
+
+  /**
+   * Gets an optional enum configuration value.
+   *
+   * @param name name of configuration value
+   * @return Optional enum value
+   * @throws ConfigException if there is no valid enum value
+   */
+  public <T extends Enum<T>> Optional<T> enumOption(String name, Function<String, T> parser) {
     try {
-      return parser.apply(value);
+      return stringOption(name).map(parser);
     } catch (Exception ex) {
       throw new ConfigException(name, "not a valid enum value: " + ex.getMessage(), ex);
     }
@@ -348,6 +361,24 @@ public class ConfigLoader {
         props.load(in);
       }
       return addProperties(props);
+    }
+
+    /**
+     * Adds key value pairs from an array of strings. Used with command line arguments array to pull
+     * in options like key:value. Puts them into a Map and adds the Map's get method as a source.
+     *
+     * @param args command line arguments of the form key:value
+     * @return the builder with the arguments mapped
+     */
+    public Builder addKeyValueCommandLineArguments(String[] args) {
+      Map<String, String> map = new HashMap<>();
+      for (String arg : args) {
+        int prefixEnd = arg.indexOf(":");
+        if (prefixEnd > 0) {
+          map.put(arg.substring(0, prefixEnd), arg.substring(prefixEnd + 1));
+        }
+      }
+      return add(map::get);
     }
   }
 }
