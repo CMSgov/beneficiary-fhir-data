@@ -13,14 +13,12 @@
 
   tasks:
     - import_role:
-        name: rhel_prep
-    - import_role:
         name: base_patch
-    - import_role: 
-        name: rhel_python_pip
-    - import_role: 
-        name: install_java
-    - import_role: 
-        name: ops_tools
-    - import_role:
-        name: platinum_post
+    - name: Install dependencies
+      yum:
+        name:
+          - java-1.8.0-openjdk-devel
+          - git
+          - ansible
+          - amazon-cloudwatch-agent
+          - amazon-efs-utils

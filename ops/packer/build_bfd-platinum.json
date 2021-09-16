@@ -18,10 +18,18 @@
           "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
-      "ami_name": "bfd-platinum-{{isotime \"20060102030405\"}}",
+      "ami_name": "bfd-amzn2-platinum-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/xvda",
+          "volume_type": "gp2",
+          "volume_size": 30,
+          "delete_on_termination": true
+        }
+      ],
       "tags": {
-        "Name": "bfd-platinum-{{isotime \"20060102030405\"}}",
+        "Name": "bfd-amzn2-platinum-{{isotime \"20060102030405\"}}",
         "Application": "bfd-platinum"
       },
       "encrypt_boot": true,
@@ -30,6 +38,7 @@
   ],
   "provisioners": [{
       "type": "ansible",
+      "user": "ec2-user",
       "playbook_file": "./build_bfd-platinum.yml",
       "extra_arguments": [
         "-e ansible_python_interpreter=/usr/bin/python"

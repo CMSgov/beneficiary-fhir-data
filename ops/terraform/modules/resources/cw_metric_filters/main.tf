@@ -8,19 +8,6 @@ locals {
   }
 }
 
-resource "aws_cloudwatch_log_metric_filter" "mct_query_time" {
-  name           = "bfd-${var.env}/bfd-server/http-requests/latency/mct"
-  pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user=*mct*, timestamp, request, query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"
-  log_group_name = local.log_groups.access
-
-  metric_transformation {
-    name          = "http-requests/latency/mct"
-    namespace     = "bfd-${var.env}/bfd-server"
-    value         = "$duration_milliseconds"
-    default_value = null
-  }
-}
-
 resource "aws_cloudwatch_log_metric_filter" "http-requests-count" {
   name           = "bfd-${var.env}/bfd-server/http-requests/count"
   pattern        = "[remote_host_name, remote_logical_username, remote_authenticated_user, timestamp, request, query_string, status_code, bytes, duration_milliseconds, original_query_id, original_query_counter, original_query_timestamp, developer, developer_name, application_id, application, user_id, user, beneficiary_id]"

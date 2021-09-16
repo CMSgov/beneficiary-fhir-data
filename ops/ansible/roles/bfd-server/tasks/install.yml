@@ -1,14 +1,5 @@
 ---
 
-- name: Install Pre-requisites
-  yum:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    # Needed to supply `keytool` and also to run the app server.
-    - java-1.8.0-openjdk-devel
-  become: true
-
 - name: Create Server User
   user:
     name: "{{ data_server_user }}"
@@ -116,6 +107,7 @@
     src: 'bfd-server.j2'
     dest: /etc/logrotate.d/bfd-server
   become: true
+<<<<<<< HEAD
 
 - name: Check SELinux Status
   command: /usr/sbin/selinuxenabled
@@ -134,3 +126,5 @@
   command: "restorecon -rv {{ data_server_dir }}"
   when: selinux_status.rc == 0
   become: true
+=======
+>>>>>>> fb51a958cc05b0911fbd96117b60ff144b4c4204

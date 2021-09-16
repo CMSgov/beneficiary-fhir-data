@@ -9,18 +9,6 @@
 # who owns what files and ensure these user and groups are locked
 # down.
 
-- name: Install fips compatible amazon-efs-utils
-  import_role:
-    name: ../../playbooks-ccs/roles/amazon-efs-utils
-  tags:
-    - pre-ami
-
-- name: Build fips compatible stunnel from source
-  import_role:
-    name: ../../playbooks-ccs/roles/stunnel
-  tags:
-    - pre-ami
-
 - name: Ensure partner EFT EFS groups are present
   become: true
   group:

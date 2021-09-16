@@ -1,9 +1,12 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
+import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
+import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
@@ -11,39 +14,42 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.MethodDescriptor;
 import io.grpc.stub.ClientCalls;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class StoreRdaJsonApp {
+public class StoreRdaJsonApp<T extends MessageOrBuilder> {
   private enum ClaimType {
     FISS(RDAServiceGrpc::getGetFissClaimsMethod),
     MCS(RDAServiceGrpc::getGetMcsClaimsMethod);
 
-    private final Supplier<MethodDescriptor<Empty, ClaimChange>> methodSource;
+    private final Supplier<MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder>> methodSource;
 
-    ClaimType(Supplier<MethodDescriptor<Empty, ClaimChange>> methodSource) {
+    ClaimType(Supplier<MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder>> methodSource) {
       this.methodSource = methodSource;
     }
   }
 
   public static void main(String[] args) throws Exception {
-    final String host = option(args, 0, "localhost");
-    final int port = Integer.parseInt(option(args, 1, "443"));
-    final ClaimType claimType =
-        ClaimType.valueOf(option(args, 2, ClaimType.FISS.name()).toUpperCase());
-    final int maxToReceive = Integer.parseInt(option(args, 3, "100"));
-    final String filename = option(args, 4, claimType.name() + ".ndjson");
+    if (args.length != 1) {
+      System.err.println("usage: DownloadRdaJsonApp config");
+      System.exit(1);
+    }
+    final ConfigLoader loader =
+        ConfigLoader.builder().addPropertiesFile(new File(args[0])).addSystemProperties().build();
+    final Config config = new Config(loader);
 
-    final ManagedChannel channel = createChannel(host, port);
+    final ManagedChannel channel = createChannel(config.apiHost, config.apiPort);
     try {
-      final Iterator<ClaimChange> results = callService(claimType, channel);
+      final GrpcResponseStream<? extends MessageOrBuilder> results =
+          callService(config.claimType, config.startingSequenceNumber, channel);
       int received = 0;
-      try (PrintWriter output = new PrintWriter(new FileWriter(filename))) {
-        while (received < maxToReceive && results.hasNext()) {
-          final ClaimChange change = results.next();
+      try (PrintWriter output = new PrintWriter(new FileWriter(config.outputFile))) {
+        while (received < config.maxToReceive && results.hasNext()) {
+          final MessageOrBuilder change = results.next();
           final String json = convertToJson(change);
           output.println(json);
           output.flush();
@@ -54,9 +60,11 @@ public class StoreRdaJsonApp {
         }
       }
       System.out.printf("received %d claims%n", received);
+      System.out.println("cancelling stream...");
+      results.cancelStream("finished reading");
     } finally {
       channel.shutdown();
-      channel.awaitTermination(5, TimeUnit.SECONDS);
+      channel.awaitTermination(60, TimeUnit.SECONDS);
     }
   }
 
@@ -68,18 +76,38 @@ public class StoreRdaJsonApp {
     return channelBuilder.build();
   }
 
-  private static Iterator<ClaimChange> callService(ClaimType claimType, ManagedChannel channel) {
-    final Empty request = Empty.newBuilder().build();
-    final MethodDescriptor<Empty, ClaimChange> method = claimType.methodSource.get();
-    final ClientCall<Empty, ClaimChange> call = channel.newCall(method, CallOptions.DEFAULT);
-    return ClientCalls.blockingServerStreamingCall(call, request);
+  private static GrpcResponseStream<? extends MessageOrBuilder> callService(
+      ClaimType claimType, long startingSequenceNumber, ManagedChannel channel) {
+    final ClaimRequest request = ClaimRequest.newBuilder().setSince(startingSequenceNumber).build();
+    final MethodDescriptor<ClaimRequest, ? extends MessageOrBuilder> method =
+        claimType.methodSource.get();
+    final ClientCall<ClaimRequest, ? extends MessageOrBuilder> call =
+        channel.newCall(method, CallOptions.DEFAULT);
+    Iterator<? extends MessageOrBuilder> iterator =
+        ClientCalls.blockingServerStreamingCall(call, request);
+    return new GrpcResponseStream<>(call, iterator);
   }
 
-  private static String convertToJson(ClaimChange change) throws InvalidProtocolBufferException {
+  private static String convertToJson(MessageOrBuilder change)
+      throws InvalidProtocolBufferException {
     return JsonFormat.printer().omittingInsignificantWhitespace().print(change);
   }
 
-  private static String option(String[] args, int index, String defaultValue) {
-    return args.length > index ? args[index] : defaultValue;
+  private static class Config {
+    private final String apiHost;
+    private final int apiPort;
+    private final ClaimType claimType;
+    private final int maxToReceive;
+    private final File outputFile;
+    private final long startingSequenceNumber;
+
+    private Config(ConfigLoader options) {
+      apiHost = options.stringValue("api.host", "localhost");
+      apiPort = options.intValue("api.port", 443);
+      claimType = options.enumValue("output.type", ClaimType::valueOf);
+      maxToReceive = options.intValue("output.maxCount", Integer.MAX_VALUE);
+      outputFile = options.writeableFile("output.file");
+      startingSequenceNumber = options.longOption("output.seq").orElse(RdaChange.MIN_SEQUENCE_NUM);
+    }
   }
 }
