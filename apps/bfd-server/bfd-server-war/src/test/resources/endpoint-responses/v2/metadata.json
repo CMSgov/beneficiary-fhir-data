@@ -17,6 +17,64 @@
   "rest" : [ {
     "mode" : "server",
     "resource" : [ {
+      "type" : "Claim",
+      "profile" : "http://hl7.org/fhir/StructureDefinition/Claim",
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchParam" : [ {
+        "name" : "mbi",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
+      }, {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "isHashed",
+        "type" : "string",
+        "documentation" : "A boolean indicating whether or not the MBI is hashed"
+      }, {
+        "name" : "service-date",
+        "type" : "date",
+        "documentation" : "Include resources that completed in the given range"
+      }, {
+        "name" : "type",
+        "type" : "token",
+        "documentation" : "A list of claim types to include"
+      } ]
+    }, {
+      "type" : "ClaimResponse",
+      "profile" : "http://hl7.org/fhir/StructureDefinition/ClaimResponse",
+      "interaction" : [ {
+        "code" : "read"
+      }, {
+        "code" : "search-type"
+      } ],
+      "searchParam" : [ {
+        "name" : "mbi",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
+      }, {
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "isHashed",
+        "type" : "string",
+        "documentation" : "A boolean indicating whether or not the MBI is hashed"
+      }, {
+        "name" : "service-date",
+        "type" : "date",
+        "documentation" : "Include resources that completed in the given range"
+      }, {
+        "name" : "type",
+        "type" : "token",
+        "documentation" : "A list of claim types to include"
+      } ]
+    }, {
       "type" : "Coverage",
       "profile" : "http://hl7.org/fhir/StructureDefinition/Coverage",
       "interaction" : [ {
@@ -46,10 +104,6 @@
         "code" : "search-type"
       } ],
       "searchParam" : [ {
-        "name" : "patient",
-        "type" : "reference",
-        "documentation" : "The patient identifier to search for"
-      }, {
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
@@ -57,6 +111,10 @@
         "name" : "excludeSAMHSA",
         "type" : "string",
         "documentation" : "If true, exclude all SAMHSA-related resources"
+      }, {
+        "name" : "patient",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
       }, {
         "name" : "service-date",
         "type" : "date",
@@ -93,6 +151,10 @@
         "type" : "token",
         "documentation" : "Part D reference year"
       }, {
+        "name" : "cursor",
+        "type" : "string",
+        "documentation" : "The cursor used for result pagination"
+      }, {
         "name" : "_id",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
@@ -101,21 +163,17 @@
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
       }, {
-        "name" : "_lastUpdated",
-        "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
-      }, {
-        "name" : "cursor",
+        "name" : "startIndex",
         "type" : "string",
-        "documentation" : "The cursor used for result pagination"
+        "documentation" : "The offset used for result pagination"
       }, {
         "name" : "identifier",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
       }, {
-        "name" : "startIndex",
-        "type" : "string",
-        "documentation" : "The offset used for result pagination"
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
       }, {
         "name" : "startIndex",
         "type" : "string",

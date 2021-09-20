@@ -90,7 +90,7 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
 
 ### Native Setup
 1. Change to the `apps/` directory and `mvn clean install -DskipITs`. The flag to skip the integration tests is important here. You will need to have AWS access for the integration tests to work correctly.
-1. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
+2. Set up a Postgres 12 database with the following command. Data will be persisted between starts and stops in the `bfd_pgdata` volume.
     ```sh
     docker run \
       -d \
@@ -100,8 +100,24 @@ git clone git@github.com:CMSgov/beneficiary-fhir-data.git ~/workspaces/bfd/benef
       -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
       -p '5432:5432' \
       -v 'bfd_pgdata:/var/lib/postgresql/data' \
-      postgres:12
+      postgres:12 -c max_connections=200
     ```
+3. Set up a local S3 using Minio Docker Container
+    ```sh
+    docker run \
+      -p 9000:9000 \
+      -p 9001:9001 -d  --name 'minio' \
+      -e "MINIO_ROOT_USER=bfdLocalS3Dev" \
+      -e "MINIO_ROOT_PASSWORD=bfdLocalS3Dev" \
+      minio/minio server /data --console-address ":9001"
+    ```
+4. Run mvn install with the following 
+    ```
+     mvn -Ds3.local=true -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev clean install 
+    ```
+   You can leave off the -Ds3.localUser=bfdLocalS3Dev -Ds3.localPass=bfdLocalS3Dev if you use the docker run command from above.  You only need these if the User name or the password are different in the docker run command.
+
+### Loading Beneficiary
 1. To load one test beneficiary, with your database running, change directories into `apps/bfd-pipeline/bfd-pipeline-ccw-rif` and run:
     ```
     mvn -Dits.db.url="jdbc:postgresql://localhost:5432/bfd" -Dits.db.username=bfd -Dits.db.password=InsecureLocalDev -Dit.test=RifLoaderIT#loadSampleA clean verify

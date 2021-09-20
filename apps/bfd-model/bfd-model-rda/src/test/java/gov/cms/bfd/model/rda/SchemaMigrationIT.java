@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -54,6 +55,7 @@ public class SchemaMigrationIT {
             .currLoc1('A')
             .currLoc2("1A")
             .pracLocCity("city name can be very long indeed")
+            .sequenceNumber(3L)
             .build();
 
     final PreAdjFissProcCode procCode0 =
@@ -96,6 +98,24 @@ public class SchemaMigrationIT {
             .build();
     claim.getDiagCodes().add(diagCode1);
 
+    final PreAdjFissPayer payer0 =
+        PreAdjFissPayer.builder()
+            .dcn(claim.getDcn())
+            .priority((short) 0)
+            .payerType(PreAdjFissPayer.PayerType.BeneZ)
+            .estAmtDue(new BigDecimal("1.23"))
+            .build();
+    claim.getPayers().add(payer0);
+
+    final PreAdjFissPayer payer1 =
+        PreAdjFissPayer.builder()
+            .dcn(claim.getDcn())
+            .priority((short) 1)
+            .payerType(PreAdjFissPayer.PayerType.Insured)
+            .estAmtDue(new BigDecimal("4.56"))
+            .build();
+    claim.getPayers().add(payer1);
+
     // Insert a record and read it back to verify some columns and that the detail records were
     // written
     entityManager.getTransaction().begin();
@@ -110,17 +130,21 @@ public class SchemaMigrationIT {
 
     PreAdjFissClaim resultClaim = claims.get(0);
     assertEquals("h1", resultClaim.getHicNo());
+    assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("city name can be very long indeed", resultClaim.getPracLocCity());
 
     assertEquals("0:F,1:G", summarizeFissProcCodes(resultClaim));
     assertEquals("0:Q,1:R", summarizeFissDiagCodes(resultClaim));
+    assertEquals("0:BeneZ:1.23,1:Insured:4.56", summarizeFissPayers(resultClaim));
 
     // Remove a procCode and diagCode and modify the remaining ones, update, and read back to verify
     // all records updated correctly.
     claim.getProcCodes().remove(procCode1);
     claim.getDiagCodes().remove(diagCode0);
+    claim.getPayers().remove(payer0);
     procCode0.setProcFlag("H");
     diagCode1.setDiagPoaInd("S");
+    payer1.setEstAmtDue(new BigDecimal("7.89"));
     entityManager.getTransaction().begin();
     entityManager.persist(claim);
     entityManager.getTransaction().commit();
@@ -131,6 +155,7 @@ public class SchemaMigrationIT {
             .get(0);
     assertEquals("0:H", summarizeFissProcCodes(resultClaim));
     assertEquals("1:S", summarizeFissDiagCodes(resultClaim));
+    assertEquals("1:Insured:7.89", summarizeFissPayers(resultClaim));
   }
 
   /**
@@ -145,6 +170,7 @@ public class SchemaMigrationIT {
             .idrContrId("c1")
             .idrHic("hc")
             .idrClaimType("c")
+            .sequenceNumber(3L)
             .build();
 
     claim.getDetails().add(quickMcsDetail(claim, 0, "P"));
@@ -191,6 +217,7 @@ public class SchemaMigrationIT {
             .getResultList();
     assertEquals(1, resultClaims.size());
     resultClaim = resultClaims.get(0);
+    assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("0:P,2:S", summarizeMcsDetails(resultClaim));
     assertEquals("0:W,1:U", summarizeMcsDiagCodes(resultClaim));
   }
@@ -222,6 +249,12 @@ public class SchemaMigrationIT {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
         d -> format("%d:%s", d.getPriority(), d.getDiagPoaInd()));
+  }
+
+  private String summarizeFissPayers(PreAdjFissClaim resultClaim) {
+    return summarizeObjects(
+        resultClaim.getPayers().stream(),
+        d -> format("%d:%s:%s", d.getPriority(), d.getPayerType(), d.getEstAmtDue()));
   }
 
   private String summarizeMcsDetails(PreAdjMcsClaim resultClaim) {
@@ -256,7 +289,7 @@ public class SchemaMigrationIT {
 
   private JDBCDataSource createInMemoryDataSource() {
     JDBCDataSource dataSource = new JDBCDataSource();
-    dataSource.setUrl("jdbc:hsqldb:mem:unit-tests");
+    dataSource.setUrl("jdbc:hsqldb:mem:" + getClass().getSimpleName());
     return dataSource;
   }
 }

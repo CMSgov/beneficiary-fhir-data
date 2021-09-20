@@ -21,7 +21,7 @@ import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.io.BufferedReader;
 import java.io.File;
@@ -165,7 +165,7 @@ public final class PipelineApplicationBenchmark {
           String.format("Ansible initialization failed with exit code '%d'.", ansibleInitExitCode));
 
     // Upload the benchmark file resources to S3.
-    AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
+    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
     Bucket dataSetBucket = null;
     List<BenchmarkResult> benchmarkResults;
     try {
@@ -622,7 +622,7 @@ public final class PipelineApplicationBenchmark {
      * that processing to complete. Will throw a {@link BenchmarkError} if any of that fails.
      */
     private void runBenchmark() {
-      AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
+      AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
       Bucket bucket = null;
       try {
         bucket =

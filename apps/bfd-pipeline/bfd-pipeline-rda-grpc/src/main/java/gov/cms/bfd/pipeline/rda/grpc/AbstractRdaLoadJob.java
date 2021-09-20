@@ -16,6 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
+import javax.annotation.Nullable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -145,7 +146,6 @@ public abstract class AbstractRdaLoadJob<TResponse>
 
   /** Immutable class containing configuration settings used by the DcGeoRDALoadJob class. */
   @EqualsAndHashCode
-  @Getter
   public static final class Config implements Serializable {
     private static final long serialVersionUID = 1823137784819917L;
 
@@ -153,20 +153,46 @@ public abstract class AbstractRdaLoadJob<TResponse>
      * runInterval specifies how often the job should be scheduled. It is used to create a return
      * value for the PipelineJob.getSchedule() method.
      */
-    private final Duration runInterval;
+    @Getter private final Duration runInterval;
 
     /**
      * batchSize specifies the number of records per batch sent to the RdaSink for processing. This
      * value will likely be tuned for a specific type of sink object and for performance tuning
      * purposes (i.e. finding most efficient transaction size for a specific database).
      */
-    private final int batchSize;
+    @Getter private final int batchSize;
 
-    public Config(Duration runInterval, int batchSize) {
+    /**
+     * Optional hard coded starting sequence number for FISS claims. Optional is not Serializable,
+     * so we have to store this as a nullable value. *
+     */
+    @Nullable private final Long startingFissSeqNum;
+
+    /**
+     * Optional hard coded starting sequence number for MCS claims. Optional is not Serializable, so
+     * we have to store this as a nullable value. *
+     */
+    @Nullable private final Long startingMcsSeqNum;
+
+    public Config(
+        Duration runInterval,
+        int batchSize,
+        Optional<Long> startingFissSeqNum,
+        Optional<Long> startingMcsSeqNum) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
+      this.startingFissSeqNum = startingFissSeqNum.orElse(null);
+      this.startingMcsSeqNum = startingMcsSeqNum.orElse(null);
       Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s");
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
+    }
+
+    public Optional<Long> getStartingFissSeqNum() {
+      return Optional.ofNullable(startingFissSeqNum);
+    }
+
+    public Optional<Long> getStartingMcsSeqNum() {
+      return Optional.ofNullable(startingMcsSeqNum);
     }
   }
 

@@ -11,7 +11,8 @@ import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.ChangeType;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsBeneficiarySex;
 import gov.cms.mpsm.rda.v1.mcs.McsBillingProviderStatusCode;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
@@ -39,15 +40,16 @@ public class McsClaimTransformerTest {
           clock,
           new IdHasher(
               new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8))));
-  private ClaimChange.Builder changeBuilder;
+  private McsClaimChange.Builder changeBuilder;
   private McsClaim.Builder claimBuilder;
   private PreAdjMcsClaim claim;
 
   @Before
   public void setUp() {
-    changeBuilder = ClaimChange.newBuilder();
+    changeBuilder = McsClaimChange.newBuilder();
     claimBuilder = McsClaim.newBuilder();
     claim = new PreAdjMcsClaim();
+    claim.setSequenceNumber(0L);
   }
 
   @Test
@@ -60,14 +62,13 @@ public class McsClaimTransformerTest {
         .setIdrClmHdIcn("123456789012345")
         .setIdrContrId("12345")
         .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL);
-    changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-        .setMcsClaim(claimBuilder.build());
+    changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
   @Test
   public void allFields() {
+    claim.setSequenceNumber(42L);
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
     claim.setIdrHic("123456789012");
@@ -131,8 +132,9 @@ public class McsClaimTransformerTest {
         .setIdrHdrFromDos("2020-01-07")
         .setIdrHdrToDos("2020-01-14");
     changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-        .setMcsClaim(claimBuilder.build());
+        .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+        .setSeq(42)
+        .setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
@@ -192,9 +194,7 @@ public class McsClaimTransformerTest {
                 .setIdrKPosState("12")
                 .setIdrKPosZip("123456789012345")
                 .build());
-    changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-        .setMcsClaim(claimBuilder.build());
+    changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
     PreAdjMcsClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertListContentsHaveSamePropertyValues(
@@ -237,9 +237,7 @@ public class McsClaimTransformerTest {
                 .setIdrDiagCode("jdsyejs")
                 .setIdrDiagIcdTypeEnum(McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10)
                 .build());
-    changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-        .setMcsClaim(claimBuilder.build());
+    changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     assertChangeMatches(RdaChange.Type.INSERT);
     PreAdjMcsClaim transformed = transformer.transformClaim(changeBuilder.build()).getClaim();
     assertListContentsHaveSamePropertyValues(
@@ -250,8 +248,8 @@ public class McsClaimTransformerTest {
   public void requiredFieldsMissing() {
     try {
       changeBuilder
-          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
-          .setMcsClaim(
+          .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
+          .setClaim(
               claimBuilder
                   .addMcsDetails(McsDetail.newBuilder().build())
                   .addMcsDiagnosisCodes(McsDiagnosisCode.newBuilder().build())
@@ -672,9 +670,7 @@ public class McsClaimTransformerTest {
           .setIdrContrId("12345")
           .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL);
       claimUpdate.run();
-      changeBuilder
-          .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-          .setMcsClaim(claimBuilder.build());
+      changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
     } catch (DataTransformer.TransformationException ex) {
@@ -712,9 +708,7 @@ public class McsClaimTransformerTest {
         .setIdrContrId("12345")
         .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL)
         .setIdrStatusCodeUnrecognized("X");
-    changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-        .setMcsClaim(claimBuilder.build());
+    changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     try {
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");
@@ -733,9 +727,7 @@ public class McsClaimTransformerTest {
         .setIdrContrId("12345")
         .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL)
         .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_NOT_USED);
-    changeBuilder
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_INSERT)
-        .setMcsClaim(claimBuilder.build());
+    changeBuilder.setChangeType(ChangeType.CHANGE_TYPE_INSERT).setClaim(claimBuilder.build());
     try {
       transformer.transformClaim(changeBuilder.build());
       fail("should have thrown");

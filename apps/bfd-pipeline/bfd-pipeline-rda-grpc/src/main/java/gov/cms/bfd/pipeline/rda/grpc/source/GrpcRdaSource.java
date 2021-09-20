@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.ProcessingException.isInterrupted;
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
@@ -17,6 +18,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
@@ -39,6 +41,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
 
   private final GrpcStreamCaller<TResponse> caller;
+  private final String claimType;
+  private final Optional<Long> startingSequenceNumber;
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -49,13 +53,15 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @param config the configuration values used to establish the channel
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
+   * @param startingSequenceNumber optional hard coded sequence number
    */
   public GrpcRdaSource(
       Config config,
       GrpcStreamCaller<TResponse> caller,
       MetricRegistry appMetrics,
-      String claimType) {
-    this(config.createChannel(), caller, appMetrics, claimType);
+      String claimType,
+      Optional<Long> startingSequenceNumber) {
+    this(config.createChannel(), caller, appMetrics, claimType, startingSequenceNumber);
   }
 
   /**
@@ -66,15 +72,19 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @param channel channel used to make RPC calls
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
+   * @param startingSequenceNumber optional hard coded sequence number
    */
   @VisibleForTesting
   GrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller<TResponse> caller,
       MetricRegistry appMetrics,
-      String claimType) {
+      String claimType,
+      Optional<Long> startingSequenceNumber) {
     this.caller = Preconditions.checkNotNull(caller);
+    this.claimType = Preconditions.checkNotNull(claimType);
     this.channel = Preconditions.checkNotNull(channel);
+    this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     metrics = new Metrics(appMetrics, claimType);
   }
 
@@ -96,7 +106,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     int processed = 0;
     try {
       setUptimeToRunning();
-      final GrpcResponseStream<TResponse> responseStream = caller.callService(channel);
+      final long startingSequenceNumber = getStartingSequenceNumber(sink);
+      LOGGER.info(
+          "calling API for {} claims starting at sequence number {}",
+          claimType,
+          startingSequenceNumber);
+      final GrpcResponseStream<TResponse> responseStream =
+          caller.callService(channel, startingSequenceNumber);
       final List<TResponse> batch = new ArrayList<>();
       try {
         while (responseStream.hasNext()) {
@@ -135,10 +151,26 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       }
     }
     if (interrupted) {
-      LOGGER.warn("interrupted with processedCount {}", processed);
+      LOGGER.warn("{} claim processing interrupted with processedCount {}", claimType, processed);
     }
     metrics.successes.mark();
     return processed;
+  }
+
+  /**
+   * Uses the hard coded starting sequence number if one has been configured. Otherwise asks the
+   * sink to provide its maximum known sequence number as our starting point. When all else fails we
+   * start at the beginning.
+   *
+   * @param sink used to obtain the maximum known sequence number
+   * @return a valid RDA change sequence number
+   */
+  private long getStartingSequenceNumber(RdaSink<TResponse> sink) throws ProcessingException {
+    if (startingSequenceNumber.isPresent()) {
+      return startingSequenceNumber.get();
+    } else {
+      return sink.readMaxExistingSequenceNumber().map(seqNo -> seqNo + 1).orElse(MIN_SEQUENCE_NUM);
+    }
   }
 
   /**
@@ -186,9 +218,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
 
   private int submitBatchToSink(RdaSink<TResponse> sink, List<TResponse> batch)
       throws ProcessingException {
-    LOGGER.info("submitting batch to sink: size={}", batch.size());
+    LOGGER.info("submitting batch to sink: type={} size={}", claimType, batch.size());
     int processed = sink.writeBatch(batch);
-    LOGGER.info("submitted batch to sink: size={} processed={}", batch.size(), processed);
+    LOGGER.info(
+        "submitted batch to sink: type={} size={} processed={}",
+        claimType,
+        batch.size(),
+        processed);
     batch.clear();
     metrics.batches.mark();
     metrics.objectsStored.mark(processed);

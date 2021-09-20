@@ -1741,8 +1741,8 @@ public final class TransformerUtilsV2 {
    * @param claimType {@link ClaimTypeV2} to process
    * @param claimGroupId CLM_GRP_ID
    * @param coverageType {@link MedicareSegment}
-   * @param dateFrom CLM_FROM_DT
-   * @param dateThrough CLM_THRU_DT
+   * @param dateFrom CLM_FROM_DT || SRVC_DT (For Part D Events)
+   * @param dateThrough CLM_THRU_DT || SRVC_DT (For Part D Events)
    * @param paymentAmount CLM_PMT_AMT
    * @param finalAction FINAL_ACTION
    */
@@ -1808,8 +1808,8 @@ public final class TransformerUtilsV2 {
         throw new BadCodeMonkeyException();
     }
 
-    // CLM_FROM_DT => ExplanationOfBenefit.billablePeriod.start
-    // CLM_THRU_DT => ExplanationOfBenefit.billablePeriod.end
+    // CLM_FROM_DT || SRVC_DT (For Part D Events) => ExplanationOfBenefit.billablePeriod.start
+    // CLM_THRU_DT || SRVC_DT (For Part D Events) => ExplanationOfBenefit.billablePeriod.end
     if (dateFrom.isPresent()) {
       validatePeriodDates(dateFrom, dateThrough);
       setPeriodStart(eob.getBillablePeriod(), dateFrom.get());

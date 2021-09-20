@@ -39,7 +39,7 @@ public class GrpcResponseStream<TResponse> {
    * @throws StreamInterruptedException if the stream threw an InterruptedException
    * @throws StatusRuntimeException if the stream threw an exception
    */
-  boolean hasNext() throws StreamInterruptedException {
+  public boolean hasNext() throws StreamInterruptedException {
     try {
       return resultsIterator.hasNext();
     } catch (StatusRuntimeException ex) {
@@ -60,7 +60,7 @@ public class GrpcResponseStream<TResponse> {
    * @throws StreamInterruptedException if the stream threw an InterruptedException
    * @throws StatusRuntimeException if the stream threw an exception
    */
-  TResponse next() throws StreamInterruptedException {
+  public TResponse next() throws StreamInterruptedException {
     try {
       return resultsIterator.next();
     } catch (StatusRuntimeException ex) {
@@ -78,7 +78,7 @@ public class GrpcResponseStream<TResponse> {
    *
    * @param reason a description of why the stream is being cancelled
    */
-  void cancelStream(String reason) {
+  public void cancelStream(String reason) {
     // the null cause is safe because the gRPC considers it optional
     clientCall.cancel(reason, null);
   }

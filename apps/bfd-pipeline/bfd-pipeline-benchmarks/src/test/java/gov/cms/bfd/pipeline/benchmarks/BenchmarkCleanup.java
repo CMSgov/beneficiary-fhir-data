@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetTestUtilities;
-import gov.cms.bfd.pipeline.ccw.rif.extract.s3.S3Utilities;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
@@ -25,7 +25,7 @@ public final class BenchmarkCleanup {
   public static void main(String[] args) throws Exception {
     Path ec2KeyFile = BenchmarkUtilities.findEc2KeyFile();
     Path benchmarksWorkDir = BenchmarkUtilities.findBenchmarksWorkDir();
-    AmazonS3 s3Client = S3Utilities.createS3Client(S3Utilities.REGION_DEFAULT);
+    AmazonS3 s3Client = SharedS3Utilities.createS3Client(SharedS3Utilities.REGION_DEFAULT);
 
     Set<Integer> iterationIndices =
         Files.list(benchmarksWorkDir)
