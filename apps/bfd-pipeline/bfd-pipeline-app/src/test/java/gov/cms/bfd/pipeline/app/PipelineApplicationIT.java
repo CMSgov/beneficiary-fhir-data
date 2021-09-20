@@ -620,16 +620,14 @@ public final class PipelineApplicationIT {
       S3MinioConfig minioConfig = S3MinioConfig.Singleton();
       if (minioConfig.useMinio) {
         return new String[] {
-          javaBin.toString(),
+          pipelineAppScript.toAbsolutePath().toString(),
           "-Ds3.local=true",
           String.format("-Ds3.localUser=%s", minioConfig.minioUserName),
           String.format("-Ds3.localPass=%s", minioConfig.minioPassword),
-          String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress),
-          "-jar",
-          appJar.toAbsolutePath().toString()
+          String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress)
         };
       }
-      return new String[] {javaBin.toString(), "-jar", appJar.toAbsolutePath().toString()};
+      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -107,24 +107,3 @@
     src: 'bfd-server.j2'
     dest: /etc/logrotate.d/bfd-server
   become: true
-<<<<<<< HEAD
-
-- name: Check SELinux Status
-  command: /usr/sbin/selinuxenabled
-  failed_when: false
-  register: selinux_status
-
-- name: Add selinux file context to allow log rotation
-  sefcontext:
-    target: "{{ data_server_dir }}(/.*json|/.*log)?"
-    setype: var_log_t
-    state: present
-  when: selinux_status.rc == 0
-  become: true
-
-- name: Apply selinux file context
-  command: "restorecon -rv {{ data_server_dir }}"
-  when: selinux_status.rc == 0
-  become: true
-=======
->>>>>>> fb51a958cc05b0911fbd96117b60ff144b4c4204
