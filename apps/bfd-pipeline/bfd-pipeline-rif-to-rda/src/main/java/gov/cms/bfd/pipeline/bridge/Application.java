@@ -1,13 +1,13 @@
 package gov.cms.bfd.pipeline.bridge;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.util.JsonFormat;
 import gov.cms.bfd.pipeline.bridge.etl.DelimitedStringExtractor;
 import gov.cms.bfd.pipeline.bridge.etl.ETLJob;
 import gov.cms.bfd.pipeline.bridge.etl.QueueLoader;
 import gov.cms.bfd.pipeline.bridge.etl.RifFissTransformer;
 import gov.cms.bfd.pipeline.bridge.etl.RifMcsTransformer;
-import gov.cms.mpsm.rda.v1.ClaimChange;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -82,9 +82,9 @@ public class Application {
       if ((line = rifFileReader.readLine()) != null) {
         Map<String, Integer> headerIndexMap = createHeaderIndexMap(line, DELIMITER);
 
-        ETLJob.Transformer<String[], ClaimChange> transformer =
+        ETLJob.Transformer<String[], MessageOrBuilder> transformer =
             createTransformer(sourceType, headerIndexMap, mbiMap);
-        ETLJob.Loader<ClaimChange> loader =
+        ETLJob.Loader<MessageOrBuilder> loader =
             new QueueLoader<>(
                 writer,
                 claimChange ->
@@ -108,7 +108,7 @@ public class Application {
   }
 
   @VisibleForTesting
-  ETLJob.Transformer<String[], ClaimChange> createTransformer(
+  ETLJob.Transformer<String[], MessageOrBuilder> createTransformer(
       String type, Map<String, Integer> headerIndexMap, Map<String, String> mbiMap) {
     if (type.equals("fiss")) {
       return new RifFissTransformer(headerIndexMap, mbiMap);

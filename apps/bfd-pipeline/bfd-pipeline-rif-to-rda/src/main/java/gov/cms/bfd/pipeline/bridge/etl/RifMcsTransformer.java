@@ -1,8 +1,10 @@
 package gov.cms.bfd.pipeline.bridge.etl;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.model.Carrier;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.ChangeType;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
@@ -14,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.Data;
 
-public class RifMcsTransformer implements ETLJob.Transformer<String[], ClaimChange> {
+public class RifMcsTransformer implements ETLJob.Transformer<String[], MessageOrBuilder> {
 
   private static final AtomicLong icnCounter = new AtomicLong();
   private static final AtomicInteger mpnCounter = new AtomicInteger();
@@ -30,7 +32,7 @@ public class RifMcsTransformer implements ETLJob.Transformer<String[], ClaimChan
   }
 
   @Override
-  public ClaimChange transform(String[] rowData) {
+  public MessageOrBuilder transform(String[] rowData) {
     TransformHelper helper = new TransformHelper(headerIndexMap, rowData);
 
     String beneId = helper.get(Carrier.BENE_ID);
@@ -68,9 +70,9 @@ public class RifMcsTransformer implements ETLJob.Transformer<String[], ClaimChan
       ++i;
     }
 
-    return ClaimChange.newBuilder()
-        .setMcsClaim(claimBuilder)
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+    return McsClaimChange.newBuilder()
+        .setClaim(claimBuilder)
+        .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .build();
   }
 

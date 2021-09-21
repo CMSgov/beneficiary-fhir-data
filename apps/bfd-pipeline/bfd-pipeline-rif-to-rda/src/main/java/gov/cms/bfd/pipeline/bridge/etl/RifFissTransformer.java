@@ -1,8 +1,10 @@
 package gov.cms.bfd.pipeline.bridge.etl;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.model.Inpatient;
-import gov.cms.mpsm.rda.v1.ClaimChange;
+import gov.cms.mpsm.rda.v1.ChangeType;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.util.Map;
@@ -14,7 +16,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class RifFissTransformer implements ETLJob.Transformer<String[], ClaimChange> {
+public class RifFissTransformer implements ETLJob.Transformer<String[], MessageOrBuilder> {
 
   private static final AtomicLong dcnCounter = new AtomicLong();
   private static final AtomicInteger mpnCounter = new AtomicInteger();
@@ -30,7 +32,7 @@ public class RifFissTransformer implements ETLJob.Transformer<String[], ClaimCha
   }
 
   @Override
-  public ClaimChange transform(String[] rowData) {
+  public MessageOrBuilder transform(String[] rowData) {
     TransformHelper helper = new TransformHelper(headerIndexMap, rowData);
 
     String beneId = helper.get(Inpatient.BENE_ID);
@@ -66,9 +68,9 @@ public class RifFissTransformer implements ETLJob.Transformer<String[], ClaimCha
       ++i;
     }
 
-    return ClaimChange.newBuilder()
-        .setFissClaim(claimBuilder.build())
-        .setChangeType(ClaimChange.ChangeType.CHANGE_TYPE_UPDATE)
+    return FissClaimChange.newBuilder()
+        .setClaim(claimBuilder.build())
+        .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .build();
   }
 
