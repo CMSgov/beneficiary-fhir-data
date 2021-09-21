@@ -322,31 +322,13 @@ public final class EndpointJsonResponseComparatorV2IT {
 
     // This returns the searchParam node for the resource type='Patient' from
     // metadata.json
-    JsonNode searchParamsArray = parsedJson.at("/rest/0/resource/3/searchParam");
+    JsonNode resources = parsedJson.at("/rest/0/resource");
 
-    Iterator<JsonNode> searchParamsArrayIterator = searchParamsArray.elements();
-    List<JsonNode> searchParams = new ArrayList<JsonNode>();
-    while (searchParamsArrayIterator.hasNext()) {
-      searchParams.add(searchParamsArrayIterator.next());
+    for (JsonNode resource : resources) {
+      sortMetaDataSearchParamArray(resource);
     }
 
-    Collections.sort(
-        searchParams,
-        new Comparator<JsonNode>() {
-          @Override
-          public int compare(JsonNode node1, JsonNode node2) {
-            String name1 = node1.get("name").toString();
-            String name2 = node2.get("name").toString();
-            return name1.compareTo(name2);
-          }
-        });
-
-    ((ArrayNode) searchParamsArray).removeAll();
-    for (int i = 0; i < searchParams.size(); i++) {
-      ((ArrayNode) searchParamsArray).add(searchParams.get(i));
-    }
-
-    String jsonResponse = null;
+    String jsonResponse;
     try {
       jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
     } catch (JsonProcessingException e) {
@@ -354,6 +336,28 @@ public final class EndpointJsonResponseComparatorV2IT {
           "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
     }
     return jsonResponse;
+  }
+
+  static void sortMetaDataSearchParamArray(JsonNode resource) {
+    if (resource.has("searchParam")) {
+      JsonNode searchParamsArray = resource.at("/searchParam");
+
+      Iterator<JsonNode> searchParamsArrayIterator = searchParamsArray.elements();
+      List<JsonNode> searchParams = new ArrayList<>();
+      while (searchParamsArrayIterator.hasNext()) {
+        searchParams.add(searchParamsArrayIterator.next());
+      }
+
+      searchParams.sort(
+          (node1, node2) -> {
+            String name1 = node1.get("name").toString();
+            String name2 = node2.get("name").toString();
+            return name1.compareTo(name2);
+          });
+
+      ((ArrayNode) searchParamsArray).removeAll();
+      searchParams.forEach(((ArrayNode) searchParamsArray)::add);
+    }
   }
 
   /**
