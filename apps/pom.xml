@@ -84,7 +84,7 @@
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
 		<metrics.version>4.1.2</metrics.version>
-		<hibernate.version>5.4.24.Final</hibernate.version>
+		<hibernate.version>5.5.7.Final</hibernate.version>
 		
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
