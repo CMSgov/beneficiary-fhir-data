@@ -9,5 +9,4 @@ module gov.cms.bfd.model.codegen {
       CodebookVariablesEnumProcessor;
 
   requires static java.compiler;
-// requires javax.xml.bind;
 }
