@@ -26,7 +26,6 @@ import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.webapp.ClassMatcher;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.FragmentConfiguration;
 import org.eclipse.jetty.webapp.JettyWebXmlConfiguration;
@@ -167,7 +166,8 @@ public final class DataServerLauncherApp {
         });
 
     // Allow webapps to see but not override SLF4J (prevents LinkageErrors).
-    webapp.addSystemClassMatcher(new ClassMatcher("org.slf4j."));
+    webapp.getSystemClassMatcher().add("org.slf4j.");
+
     /*
      * Disable Logback's builtin shutdown hook, so that OUR shutdown hook can still use the loggers
      * (and then shut Logback down itself).
