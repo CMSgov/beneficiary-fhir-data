@@ -33,6 +33,15 @@ data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
 }
 
+# The network interface dedicated for ConnectDirect access. This interface is assigned a reserved
+# ip address and given to the EFT team so they can connect and send us files.
+data "aws_network_interface" "connect_direct" {
+  filter {
+    name   = "tag:Name"
+    values = ["${var.env_config.env}-connect-direct-iface"]
+  }
+}
+
 # CloudWatch metric filters
 resource "aws_cloudwatch_log_metric_filter" "pipeline-messages-error-count" {
   name           = "bfd-${var.env_config.env}/bfd-pipeline/messages/count/error"
@@ -136,8 +145,8 @@ resource "aws_network_acl" "rda" {
   # only create the NACL if the CIDR block has been defined
   count = var.mpm_rda_cidr_block != null ? 1 : 0
 
-  vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${var.env_config.env}-etl-app" }, var.env_config.tags)
+  vpc_id = var.env_config.vpc_id
+  tags   = merge({ Name = "bfd-${var.env_config.env}-etl-app" }, var.env_config.tags)
 }
 
 resource "aws_network_acl_rule" "rda_known" {
@@ -295,4 +304,12 @@ module "ec2_instance" {
 
   # Ensure that the DB is accessible before the BFD Pipeline is launched.
   ec2_depends_on_1 = "aws_security_group_rule.allow_db_primary_access"
+}
+
+# Attach the ConnectDirect interface to the etl instance
+resource "aws_network_interface_attachment" "connect_direct" {
+  subnet_id            = data.aws_network_interface.connect_direct.subnet_id
+  device_index         = 1 # make this the second interface
+  instance_id          = module.ec2_instance.instance_id
+  network_interface_id = data.aws_network_interface.connect_direct.id
 }

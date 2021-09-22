@@ -33,6 +33,16 @@ data "aws_subnet" "data_subnets" {
   }
 }
 
+data "aws_subnet" "etl_data_subnet" {
+  vpc_id            = data.aws_vpc.main.id
+  availability_zone = "us-east-1b"
+  filter {
+    name   = "tag:Name"
+    values = ["bfd-${var.env_config.env}-az2-data"]
+  }
+}
+
+
 # vpn
 data "aws_security_group" "vpn" {
   filter {
@@ -279,3 +289,15 @@ module "bcda_eft_efs" {
   role       = "etl"
   layer      = "data"
 }
+
+# Elastic Network Interface assigned the reserved ip for ConnectDirect access)
+module "eft_eni" {
+  source = "../resources/eni"
+
+  name        = "${var.env_config.env}-connect-direct-iface"
+  env_config  = local.env_config
+  subnet_id   = data.aws_subnet.etl_data_subnet.id
+  private_ips = [var.connect_direct_reserved_ip]
+}
+
+# TODO: security group rule and attachment to allow connectdirect comms

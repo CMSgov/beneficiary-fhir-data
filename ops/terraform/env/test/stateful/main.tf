@@ -47,4 +47,6 @@ module "stateful" {
   partner_subnets   = var.partner_subnets
 
   medicare_opt_out_config = var.medicare_opt_out_config
+
+  connect_direct_reserved_ip = var.connect_direct_reserved_ip
 }

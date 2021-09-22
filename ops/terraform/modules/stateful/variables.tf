@@ -33,6 +33,11 @@ variable "partner_subnets" {
   type        = map(map(list(string)))
 }
 
+variable "connect_direct_reserved_ip" {
+  description = "IP address to assign to the connect direct service."
+  type        = string
+}
+
 # add module feature toggles here
 variable "module_features" {
   type = map(bool)
