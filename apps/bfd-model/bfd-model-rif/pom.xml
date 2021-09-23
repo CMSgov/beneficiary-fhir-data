@@ -72,11 +72,9 @@
 
 			<scope>provided</scope>
 		</dependency>
-			<!-- Used for annotations in the generated code. -->
 		<dependency>
-		<groupId>jakarta.annotation</groupId>
-		<artifactId>jakarta.annotation-api</artifactId>
-		<version>1.3.5</version>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
 		<dependency>
