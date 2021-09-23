@@ -41,7 +41,8 @@ public class FissClaimRdaSinkIT {
           claim.setCurrLoc1('A');
           claim.setCurrLoc2("1A");
           claim.setPracLocCity("city name can be very long indeed");
-          claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
+          claim.setMbiRecord(
+              new Mbi(1L, "12345678901", "hash-of-12345678901", null, Instant.now()));
 
           final PreAdjFissProcCode procCode0 = new PreAdjFissProcCode();
           procCode0.setDcn(claim.getDcn());
@@ -81,7 +82,7 @@ public class FissClaimRdaSinkIT {
                   .setPracLocCity("city name can be very long indeed")
                   .addFissProcCodes(0, procCodeMessage)
                   .addFissDiagCodes(0, diagCodeMessage)
-                  .setMbi(claim.getMbi())
+                  .setMbi(claim.getMbiRecord().getMbi())
                   .build();
 
           final FissClaimChange message =
@@ -95,7 +96,8 @@ public class FissClaimRdaSinkIT {
           final FissClaimTransformer transformer =
               new FissClaimTransformer(clock, MbiCache.computedCache(defaultIdHasher.getConfig()));
           final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
-          final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
+          final String expectedMbiHash =
+              defaultIdHasher.computeIdentifierHash(claim.getMbiRecord().getMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
@@ -111,8 +113,8 @@ public class FissClaimRdaSinkIT {
           assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
           assertEquals(claim.getHicNo(), resultClaim.getHicNo());
           assertEquals(claim.getPracLocCity(), resultClaim.getPracLocCity());
-          assertEquals(claim.getMbi(), resultClaim.getMbi());
-          assertEquals(expectedMbiHash, resultClaim.getMbiHash());
+          assertEquals(claim.getMbiRecord().getMbi(), resultClaim.getMbiRecord().getMbi());
+          assertEquals(expectedMbiHash, resultClaim.getMbiRecord().getHash());
           assertEquals(claim.getProcCodes().size(), resultClaim.getProcCodes().size());
           assertEquals(claim.getDiagCodes().size(), resultClaim.getDiagCodes().size());
 
@@ -122,7 +124,7 @@ public class FissClaimRdaSinkIT {
           Mbi databaseMbiEntity =
               RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getMbi());
           assertNotNull(databaseMbiEntity);
-          assertEquals(claim.getMbi(), databaseMbiEntity.getMbi());
+          assertEquals(claim.getMbiRecord().getMbi(), databaseMbiEntity.getMbi());
           assertEquals(expectedMbiHash, databaseMbiEntity.getHash());
         });
   }

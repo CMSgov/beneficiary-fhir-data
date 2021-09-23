@@ -6,10 +6,6 @@ import gov.cms.mpsm.rda.v1.EnumOptions;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 
 /**
  * The RDA API uses a combination of oneof and custom options for their enum values. Specifically
@@ -31,12 +27,8 @@ import lombok.ToString;
  * @param <TRecord> the protobuf object class
  * @param <TEnum> the protobuf field's enum class
  */
-public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
-  /** Single Result instance for any missing value. */
-  private static final Result NO_VALUE_RESULT = new Result(Status.NoValue);
-  /** Single Result instance for any invalid value. */
-  private static final Result INVALID_VALUE_RESULT = new Result(Status.InvalidValue);
-
+public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum>
+    implements gov.cms.model.rda.codegen.library.EnumStringExtractor<TRecord, TEnum> {
   private final Predicate<TRecord> hasEnumValue;
   private final Function<TRecord, ProtocolMessageEnum> getEnumValue;
   private final Predicate<TRecord> hasUnrecognizedValue;
@@ -100,53 +92,5 @@ public class EnumStringExtractor<TRecord, TEnum extends ProtocolMessageEnum> {
       return new Result(status, strValue);
     }
     return NO_VALUE_RESULT;
-  }
-
-  /** Used to indicate the outcome of the value lookup in a Result object. */
-  public enum Status {
-    /** Neither the enum nor the unrecognized value string were set in the protobuf field. */
-    NoValue,
-    /**
-     * The server set an invalid ordinal value in the enum field and protobuf mapped this to the
-     * unrecognizedValue.
-     */
-    InvalidValue,
-    /** Either the enum was set to a valid value or the unrecognized string value was set. */
-    HasValue,
-    /** A value was present but was rejected as unsupported. */
-    UnsupportedValue
-  }
-
-  @Getter
-  @EqualsAndHashCode
-  @ToString
-  public static class Result {
-    private final Status status;
-    @Nullable private final String value;
-
-    public Result(Status status) {
-      this.status = status;
-      value = null;
-    }
-
-    public Result(@Nullable String value) {
-      status = Status.HasValue;
-      this.value = value;
-    }
-
-    public Result(Status status, @Nullable String value) {
-      this.status = status;
-      this.value = value;
-    }
-  }
-
-  /**
-   * Additional options that can be used to alter default behavior. Currently, there is only one
-   * option available but using an enum instead of a boolean to enable the option improves code
-   * clarity.
-   */
-  public enum Options {
-    /** Report an unsupported value result if the field has its unrecognized value. */
-    RejectUnrecognized
   }
 }

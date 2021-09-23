@@ -40,7 +40,8 @@ public class McsClaimRdaSinkIT {
           claim.setIdrHic("hc");
           claim.setIdrClaimType("c");
           claim.setIdrStatusCode("A");
-          claim.setMbiRecord(new Mbi(1L, "12345678901", "hash-of-12345678901"));
+          claim.setMbiRecord(
+              new Mbi(1L, "12345678901", "hash-of-12345678901", null, Instant.now()));
 
           final PreAdjMcsDetail detail = new PreAdjMcsDetail();
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
@@ -68,7 +69,7 @@ public class McsClaimRdaSinkIT {
               McsClaim.newBuilder()
                   .setIdrClmHdIcn(claim.getIdrClmHdIcn())
                   .setIdrContrId(claim.getIdrContrId())
-                  .setIdrClaimMbi(claim.getIdrClaimMbi())
+                  .setIdrClaimMbi(claim.getMbiRecord().getMbi())
                   .setIdrHic(claim.getIdrHic())
                   .setIdrClaimTypeUnrecognized(claim.getIdrClaimType())
                   .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A)
@@ -87,7 +88,8 @@ public class McsClaimRdaSinkIT {
           final McsClaimTransformer transformer =
               new McsClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
           final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
-          final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
+          final String expectedMbiHash =
+              hasher.computeIdentifierHash(claim.getMbiRecord().getMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
@@ -102,8 +104,8 @@ public class McsClaimRdaSinkIT {
           PreAdjMcsClaim resultClaim = resultClaims.get(0);
           assertEquals(Long.valueOf(7), resultClaim.getSequenceNumber());
           assertEquals(claim.getIdrHic(), resultClaim.getIdrHic());
-          assertEquals(claim.getIdrClaimMbi(), resultClaim.getIdrClaimMbi());
-          assertEquals(expectedMbiHash, resultClaim.getIdrClaimMbiHash());
+          assertEquals(claim.getMbiRecord().getMbi(), resultClaim.getMbiRecord().getMbi());
+          assertEquals(expectedMbiHash, resultClaim.getMbiRecord().getHash());
           assertEquals(claim.getDetails().size(), resultClaim.getDetails().size());
           assertEquals(claim.getDiagCodes().size(), resultClaim.getDiagCodes().size());
 
@@ -113,7 +115,7 @@ public class McsClaimRdaSinkIT {
           Mbi databaseMbiEntity =
               RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getIdrClaimMbi());
           assertNotNull(databaseMbiEntity);
-          assertEquals(claim.getIdrClaimMbi(), databaseMbiEntity.getMbi());
+          assertEquals(claim.getMbiRecord().getMbi(), databaseMbiEntity.getMbi());
           assertEquals(expectedMbiHash, databaseMbiEntity.getHash());
         });
   }

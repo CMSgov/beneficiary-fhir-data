@@ -15,6 +15,7 @@ import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.rda.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
@@ -134,8 +135,12 @@ public class FissClaimTransformerTest {
     claim.setPrincipleDiag("7654321");
     claim.setNpiNumber("npi-123456");
     claim.setMbiRecord(
-        new Mbi(
-            1L, "12345678901", "3cf7b310f8fd6e7b275ddbdc6c3cd5b4eec0ea10bc9a504d471b086bd5d9b888"));
+        Mbi.builder()
+            .mbiId(1L)
+            .mbi("12345678901")
+            .hash("3cf7b310f8fd6e7b275ddbdc6c3cd5b4eec0ea10bc9a504d471b086bd5d9b888")
+            .lastUpdated(clock.instant())
+            .build());
     claim.setFedTaxNumber("1234567890");
     claim.setPracLocAddr1("loc-address-1");
     claim.setPracLocAddr2("loc-address-2");
@@ -719,9 +724,9 @@ public class FissClaimTransformerTest {
   public void testClaimMbi() {
     new ClaimFieldTester()
         .verifyStringFieldCopiedCorrectly(
-            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbi, PreAdjFissClaim.Fields.mbi, 11)
+            FissClaim.Builder::setMbi, claim -> claim.getMbiRecord().getMbi(), Mbi.Fields.mbi, 11)
         .verifyIdHashFieldPopulatedCorrectly(
-            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbiHash, 11, idHasher);
+            FissClaim.Builder::setMbi, claim -> claim.getMbiRecord().getHash(), 11, idHasher);
   }
 
   @Test

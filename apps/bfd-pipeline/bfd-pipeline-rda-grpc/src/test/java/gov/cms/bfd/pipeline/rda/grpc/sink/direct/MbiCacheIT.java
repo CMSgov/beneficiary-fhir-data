@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
+import static gov.cms.bfd.model.rda.MbiUtil.newMbi;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -7,6 +8,7 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.time.Clock;
+import java.time.Instant;
 import javax.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +60,7 @@ public class MbiCacheIT {
 
           // preload our fake hash code
           entityManager.getTransaction().begin();
-          entityManager.persist(new Mbi(mbi1, fakeHash1));
+          entityManager.persist(newMbi(mbi1, fakeHash1));
           entityManager.getTransaction().commit();
 
           // verify our fake is used instead of a computed correct one
@@ -115,7 +117,7 @@ public class MbiCacheIT {
               spy(new MbiCache.DatabaseLookupFunction(entityManager, normalHasher));
           final MbiCache mbiCache = new MbiCache(lookupFunction, normalHasher);
           doThrow(error, error, error, error, error)
-              .doReturn(new Mbi(1L, mbi1, hash1))
+              .doReturn(new Mbi(1L, mbi1, hash1, null, Instant.now()))
               .when(lookupFunction)
               .readOrInsertIfMissing(mbi1);
 

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.rda.MbiUtil;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
@@ -205,7 +206,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
 
       patient =
           getContainedPatient(
-              claimGroup.getMbi(),
+              MbiUtil.nonNull(claimGroup.getMbiRecord()).getMbi(),
               new PatientInfo(
                   benePayer.getBeneFirstName(),
                   benePayer.getBeneLastName(),
@@ -213,7 +214,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                   benePayer.getBeneDob(),
                   benePayer.getBeneSex()));
     } else {
-      patient = getContainedPatient(claimGroup.getMbi(), null);
+      patient = getContainedPatient(MbiUtil.nonNull(claimGroup.getMbiRecord()).getMbi(), null);
     }
 
     return patient;

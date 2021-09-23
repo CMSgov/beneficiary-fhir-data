@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.model.rda.Mbi;
+import gov.cms.bfd.model.rda.MbiUtil;
 import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
 import gov.cms.bfd.model.rda.PreAdjMcsAudit;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
@@ -17,6 +18,7 @@ import gov.cms.bfd.model.rda.PreAdjMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.model.rda.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
@@ -135,8 +137,12 @@ public class McsClaimTransformerTest {
     claim.setIdrTotBilledAmt(new BigDecimal("67591.96"));
     claim.setIdrClaimReceiptDate(LocalDate.of(2020, 2, 1));
     claim.setMbiRecord(
-        new Mbi(
-            1L, "54678912456", "717ac79ed263a61100f92f7ca67df9249501d52ee4d1af49ea43b457fcabf0d1"));
+        Mbi.builder()
+            .mbiId(1L)
+            .mbi("54678912456")
+            .hash("717ac79ed263a61100f92f7ca67df9249501d52ee4d1af49ea43b457fcabf0d1")
+            .lastUpdated(clock.instant())
+            .build());
     claim.setIdrHdrFromDateOfSvc(LocalDate.of(2020, 1, 7));
     claim.setIdrHdrToDateOfSvc(LocalDate.of(2020, 1, 14));
     claim.setLastUpdated(clock.instant());
@@ -611,11 +617,14 @@ public class McsClaimTransformerTest {
     new McsClaimTransformerTest.ClaimFieldTester()
         .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrClaimMbi,
-            PreAdjMcsClaim::getIdrClaimMbi,
-            PreAdjMcsClaim.Fields.idrClaimMbi,
+            claim -> claim.getMbiRecord().getMbi(),
+            MbiUtil.McsFields.mbi,
             11)
         .verifyIdHashFieldPopulatedCorrectly(
-            McsClaim.Builder::setIdrClaimMbi, PreAdjMcsClaim::getIdrClaimMbiHash, 11, idHasher);
+            McsClaim.Builder::setIdrClaimMbi,
+            claim -> claim.getMbiRecord().getHash(),
+            11,
+            idHasher);
   }
 
   @Test

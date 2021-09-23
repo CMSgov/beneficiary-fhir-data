@@ -65,4 +65,25 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-rda-codegen-plugin</artifactId>
+                <version>${project.version}</version>
+                <configuration>
+                    <mappingFile>${project.basedir}/mapping.yaml</mappingFile>
+                    <outputDirectory>${project.build.directory}/generated-sources/entities</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>entities</goal>
+                            <goal>sql</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

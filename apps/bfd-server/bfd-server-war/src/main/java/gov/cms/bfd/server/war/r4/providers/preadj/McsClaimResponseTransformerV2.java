@@ -3,6 +3,7 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.rda.MbiUtil;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
@@ -155,7 +156,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
             null, // MCS claims don't contain dob
             claimGroup.getIdrBeneSex());
 
-    return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
+    return getContainedPatient(MbiUtil.nonNull(claimGroup.getMbiRecord()).getMbi(), patientInfo);
   }
 
   private static List<Extension> getExtension(PreAdjMcsClaim claimGroup) {

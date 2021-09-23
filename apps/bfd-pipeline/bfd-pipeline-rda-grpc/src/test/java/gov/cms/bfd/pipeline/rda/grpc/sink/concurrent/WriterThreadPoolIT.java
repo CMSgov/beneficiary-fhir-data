@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 import static org.junit.jupiter.api.Assertions.*;
 
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
+import gov.cms.model.rda.codegen.library.DataTransformer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;

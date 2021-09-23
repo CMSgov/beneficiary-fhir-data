@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
+import gov.cms.bfd.model.rda.MbiUtil;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
@@ -13,12 +14,12 @@ import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
-import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.model.rda.codegen.library.DataTransformer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
@@ -195,7 +196,8 @@ public class RdaLoadJobIT {
             assertNotNull(expected);
             assertEquals(expected.getIdrHic(), Strings.nullToEmpty(resultClaim.getIdrHic()));
             assertEquals(
-                expected.getIdrClaimMbi(), Strings.nullToEmpty(resultClaim.getIdrClaimMbi()));
+                expected.getIdrClaimMbi(),
+                Strings.nullToEmpty(MbiUtil.nonNull(resultClaim.getMbiRecord()).getMbi()));
             assertEquals(expected.getMcsDetailsCount(), resultClaim.getDetails().size());
             assertEquals(expected.getMcsDiagnosisCodesCount(), resultClaim.getDiagCodes().size());
           }
