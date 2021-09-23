@@ -127,8 +127,8 @@
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
-		<!-- Runtime, com.sun.xml.bind module -->
 		<dependency>
+			<!-- Runtime, com.sun.xml.bind module -->
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
