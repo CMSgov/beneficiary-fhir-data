@@ -15,10 +15,6 @@
 		Converts the CCW Data Dictionary codebook PDFs to XML.
 	</description>
 
-	<properties>
-		<generatedSources>${project.build.directory}/generated-sources/java</generatedSources>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<!-- Provides the XML codebook data that this module's libraries use. -->
