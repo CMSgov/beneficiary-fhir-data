@@ -1,3 +1,0 @@
-module gov.cms.bfd.shared.utils {
-  requires java.sql;
-}
