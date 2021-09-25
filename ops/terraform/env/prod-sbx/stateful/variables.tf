@@ -17,3 +17,8 @@ variable "medicare_opt_out_config" {
   description = "Config for medicare opt out S3 bucket"
   type        = object({ read_roles = list(string), write_accts = list(string), admin_users = list(string) })
 }
+
+variable "connect_direct_reserved_ip" {
+  description = "IP address to assign to the connect direct service."
+  type        = string
+}
