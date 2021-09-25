@@ -308,8 +308,7 @@ module "ec2_instance" {
 
 # Attach the ConnectDirect interface to the etl instance
 resource "aws_network_interface_attachment" "connect_direct" {
-  subnet_id            = data.aws_network_interface.connect_direct.subnet_id
-  device_index         = 1 # make this the second interface
   instance_id          = module.ec2_instance.instance_id
   network_interface_id = data.aws_network_interface.connect_direct.id
+  device_index         = 1 # second interface
 }
