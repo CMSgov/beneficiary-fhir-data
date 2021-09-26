@@ -52,4 +52,5 @@ module "stateful" {
   medicare_opt_out_config = var.medicare_opt_out_config
 
   connect_direct_reserved_ip = var.connect_direct_reserved_ip
+  eft_connect_direct_cidr    = var.eft_connect_direct_cidr
 }

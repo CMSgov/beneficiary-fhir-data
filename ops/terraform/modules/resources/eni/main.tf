@@ -8,4 +8,5 @@ resource "aws_network_interface" "main" {
   private_ips       = var.private_ips
   source_dest_check = var.source_dest_check
   tags              = local.tags
+  security_groups   = var.security_groups
 }

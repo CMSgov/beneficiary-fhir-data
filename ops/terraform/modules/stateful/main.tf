@@ -290,14 +290,52 @@ module "bcda_eft_efs" {
   layer      = "data"
 }
 
-# Elastic Network Interface assigned the reserved ip for ConnectDirect access)
+# security group that will be attached to the eft_eni (connect direct interface) defined below
+resource "aws_security_group" "eft_eni" {
+  name = "${var.env_config.env}-connect-direct-iface"
+  description = "Security Group for ${var.env_config.env}-connect-direct-iface"
+  vpc_id = data.aws_vpc.main.id
+}
+
+# sg rule to allow connect direct traffic from the EFT team
+# TODO: verify/update which port we need to allow
+resource "aws_security_group_rule" "eft_eni_ingress" {
+  type              = "ingress"
+
+  description       = "Allow Connect Direct traffic FROM EFT team"
+  from_port         = 1363
+  to_port           = 1364
+  protocol          = "tcp"
+  cidr_blocks       = [var.eft_connect_direct_cidr]
+  security_group_id = aws_security_group.eft_eni.id
+}
+
+# allow egress back to the EFT team
+# TODO: I hope the connect direct client will return traffic using the same
+# interface it received it on. If it tries to use the default eth0, we may
+# need to add a static route on the etl server as well. E.g.:
+#   > ip route add $EFT_CIDR via $IFACE_IP dev $DEVNAME
+# Unable to test until I can see how Connect Direct is configured.
+resource "aws_security_group_rule" "eft_eni_egress" {
+  type              = "egress"
+
+  description       = "Allow return traffic TO eft team"
+  from_port         = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.eft_eni.id
+  to_port           = 0
+  cidr_blocks       = [var.eft_connect_direct_cidr]
+}
+
+# Elastic Network Interface with static (reserved) IP for the ConnectDirect service)
+# The connect direct host (currently the etl pipeline) will be assigned this as a
+# secondary interface, allowing us to easily move it to another host if/when needed.
 module "eft_eni" {
   source = "../resources/eni"
 
-  name        = "${var.env_config.env}-connect-direct-iface"
-  env_config  = local.env_config
-  subnet_id   = data.aws_subnet.etl_data_subnet.id
-  private_ips = [var.connect_direct_reserved_ip]
+  name            = "${var.env_config.env}-connect-direct-iface"
+  env_config      = local.env_config
+  subnet_id       = data.aws_subnet.etl_data_subnet.id
+  private_ips     = [var.connect_direct_reserved_ip]
+  security_groups = [aws_security_group.eft_eni.id]
 }
-
-# TODO: security group rule and attachment to allow connectdirect comms

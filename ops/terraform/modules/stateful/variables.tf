@@ -38,6 +38,12 @@ variable "connect_direct_reserved_ip" {
   type        = string
 }
 
+variable "eft_connect_direct_cidr" {
+  description = "CIDR block of the EFT connect direct server (used in security group rules)"
+  type        = string
+  default     = null
+}
+
 # add module feature toggles here
 variable "module_features" {
   type = map(bool)

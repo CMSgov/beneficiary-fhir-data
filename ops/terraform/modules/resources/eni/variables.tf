@@ -30,3 +30,9 @@ variable "env_config" {
   description = "All high-level info for the whole vpc"
   type        = object({ env = string, tags = map(string), vpc_id = string, zone_id = string })
 }
+
+variable "security_groups" {
+  description = "List of security group IDs to assign to the ENI."
+  type        = list(string)
+  default     = []
+}

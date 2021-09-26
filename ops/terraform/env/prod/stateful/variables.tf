@@ -22,3 +22,8 @@ variable "connect_direct_reserved_ip" {
   description = "IP address to assign to the connect direct service."
   type        = string
 }
+
+variable "eft_connect_direct_cidr" {
+  description = "CIDR block of the EFT connect direct server (used in security group rules)"
+  type        = string
+}
