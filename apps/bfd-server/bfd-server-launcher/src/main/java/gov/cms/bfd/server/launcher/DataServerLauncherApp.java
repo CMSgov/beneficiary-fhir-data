@@ -184,7 +184,7 @@ public final class DataServerLauncherApp {
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
     String requestLogFormat =
-        "%{local}a - \"%u\" [%t] \"%r\" \"%q\" %s %{CLF}S %D %{BlueButton-OriginalQueryId}i %{BlueButton-OriginalQueryCounter}i [%{BlueButton-OriginalQueryTimestamp}i] %{BlueButton-DeveloperId}i \"%{BlueButton-Developer}i\" %{BlueButton-ApplicationId}i \"%{BlueButton-Application}i\" %{BlueButton-UserId}i \"%{BlueButton-User}i\" %{BlueButton-BeneficiaryId}i";
+        "%{remote}a - \"%u\" [%t] \"%r\" \"%q\" %s %{CLF}S %D %{BlueButton-OriginalQueryId}i %{BlueButton-OriginalQueryCounter}i [%{BlueButton-OriginalQueryTimestamp}i] %{BlueButton-DeveloperId}i \"%{BlueButton-Developer}i\" %{BlueButton-ApplicationId}i \"%{BlueButton-Application}i\" %{BlueButton-UserId}i \"%{BlueButton-User}i\" %{BlueButton-BeneficiaryId}i";
     CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
 
     server.setRequestLog(requestLog);
