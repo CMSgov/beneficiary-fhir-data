@@ -20,7 +20,6 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.Slf4jRequestLogWriter;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.RequestLogHandler;
@@ -184,11 +183,10 @@ public final class DataServerLauncherApp {
     RequestLogHandler requestLogHandler = new RequestLogHandler();
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
-    Slf4jRequestLogWriter slf4jRequestLogWriter = new Slf4jRequestLogWriter();
-    slf4jRequestLogWriter.setLoggerName(accessLogFileName);
     String requestLogFormat =
-        "%{server}a - \"%u\" [%t] \"%r\" \"%q\" %s %{CLF}S %D %{BlueButton-OriginalQueryId}i %{BlueButton-OriginalQueryCounter}i [%{BlueButton-OriginalQueryTimestamp}i] %{BlueButton-DeveloperId}i \"%{BlueButton-Developer}i\" %{BlueButton-ApplicationId}i \"%{BlueButton-Application}i\" %{BlueButton-UserId}i \"%{BlueButton-User}i\" %{BlueButton-BeneficiaryId}i";
-    CustomRequestLog requestLog = new CustomRequestLog(slf4jRequestLogWriter, requestLogFormat);
+        "%{local}a - \"%u\" [%t] \"%r\" \"%q\" %s %{CLF}S %D %{BlueButton-OriginalQueryId}i %{BlueButton-OriginalQueryCounter}i [%{BlueButton-OriginalQueryTimestamp}i] %{BlueButton-DeveloperId}i \"%{BlueButton-Developer}i\" %{BlueButton-ApplicationId}i \"%{BlueButton-Application}i\" %{BlueButton-UserId}i \"%{BlueButton-User}i\" %{BlueButton-BeneficiaryId}i";
+    CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
+
     server.setRequestLog(requestLog);
 
     /*

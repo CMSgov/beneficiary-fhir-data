@@ -16,10 +16,6 @@
 		file format.
 	</description>
 
-	<properties>
-		<generatedSources>${project.build.directory}/generated-sources/java</generatedSources>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<!-- Provides an enum of all the CCW variables. -->
