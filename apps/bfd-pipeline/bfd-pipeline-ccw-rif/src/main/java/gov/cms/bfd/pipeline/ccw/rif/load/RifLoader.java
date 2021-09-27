@@ -937,35 +937,46 @@ public final class RifLoader {
   }
 
   /**
-   * Ensures that a {@link Beneficiary} records for old and new benificiaries are equal or not
-   * equal.
+   * Ensures that a {@link Beneficiary} records for old vs. new Benificiarie record(s) are equal.
+   * Implemented using a 'fail fast' paradigm; it is best to put those tests that have a higher
+   * possibility of change at the beginning (i.e., it's hard to change your DOB)
    *
    * @param newBeneficiaryRecord the {@link Beneficiary} new record being processed
    * @param oldBeneficiaryRecord the {@link Beneficiary} old record that was processed
    */
   static boolean isBeneficiaryHistoryEqual(
       Beneficiary newBeneficiaryRecord, Beneficiary oldBeneficiaryRecord) {
-    if (!Objects.equals(newBeneficiaryRecord.getBirthDate(), oldBeneficiaryRecord.getBirthDate()))
-      return false;
-    if (!Objects.equals(newBeneficiaryRecord.getHicn(), oldBeneficiaryRecord.getHicn()))
-      return false;
-    if (!Objects.equals(
-        newBeneficiaryRecord.getHicnUnhashed(), oldBeneficiaryRecord.getHicnUnhashed()))
-      return false;
-    if (!Objects.equals(newBeneficiaryRecord.getSex(), oldBeneficiaryRecord.getSex())) return false;
-    if (!Objects.equals(newBeneficiaryRecord.getMbiHash(), oldBeneficiaryRecord.getMbiHash()))
-      return false;
-    if (!Objects.equals(
-        newBeneficiaryRecord.getMbiEffectiveDate(), oldBeneficiaryRecord.getMbiEffectiveDate()))
-      return false;
-    if (!Objects.equals(
-        newBeneficiaryRecord.getMbiObsoleteDate(), oldBeneficiaryRecord.getMbiObsoleteDate()))
-      return false;
     if (!Objects.equals(
         newBeneficiaryRecord.getMedicareBeneficiaryId(),
-        oldBeneficiaryRecord.getMedicareBeneficiaryId())) return false;
-
-    return true;
+        oldBeneficiaryRecord.getMedicareBeneficiaryId())) {
+      return false;
+    }
+    if (!Objects.equals(newBeneficiaryRecord.getHicn(), oldBeneficiaryRecord.getHicn())) {
+      return false;
+    }
+    if (!Objects.equals(
+        newBeneficiaryRecord.getHicnUnhashed(), oldBeneficiaryRecord.getHicnUnhashed())) {
+      return false;
+    }
+    if (!Objects.equals(newBeneficiaryRecord.getMbiHash(), oldBeneficiaryRecord.getMbiHash())) {
+      return false;
+    }
+    if (newBeneficiaryRecord.getMbiEffectiveDate().isPresent()
+        && !Objects.equals(
+            newBeneficiaryRecord.getMbiEffectiveDate(),
+            oldBeneficiaryRecord.getMbiEffectiveDate())) {
+      return false;
+    }
+    // checking for getMbiObsoleteDate is perfunctory at best; to date there has never been
+    // a RIF record that included an EFCTV_END_DT with a value.
+    if (newBeneficiaryRecord.getMbiObsoleteDate().isPresent()
+        && !Objects.equals(
+            newBeneficiaryRecord.getMbiObsoleteDate(), oldBeneficiaryRecord.getMbiObsoleteDate())) {
+      return false;
+    }
+    // last but not least...these probably won't ever change
+    return (Objects.equals(newBeneficiaryRecord.getBirthDate(), oldBeneficiaryRecord.getBirthDate())
+        && Objects.equals(newBeneficiaryRecord.getSex(), oldBeneficiaryRecord.getSex()));
   }
 
   public static BeneficiaryMonthly getBeneficiaryMonthly(

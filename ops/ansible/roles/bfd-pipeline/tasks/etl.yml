@@ -1,5 +1,16 @@
 ---
 
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # Needed to run the ETL service.
+    - java-1.8.0-openjdk
+  become: true
+  tags:
+    - pre-ami
+
 - name: Create ETL Service User
   user:
     name: "{{ data_pipeline_user }}"
