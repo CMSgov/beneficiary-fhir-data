@@ -1,5 +1,14 @@
 ---
 
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # Needed to supply `keytool` and also to run the app server.
+    - java-1.8.0-openjdk-devel
+  become: true
+
 - name: Create Server User
   user:
     name: "{{ data_server_user }}"
