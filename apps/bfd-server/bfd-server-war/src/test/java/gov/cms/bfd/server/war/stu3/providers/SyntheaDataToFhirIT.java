@@ -115,10 +115,11 @@ public final class SyntheaDataToFhirIT {
                 .execute();
         Assert.assertNotNull(eobBundle);
         writeToFile(eobBundle, String.format("eobs-%s.json", patientId));
-        Assert.assertTrue(
-            "More EOB resources than records (expected one or more records per EOB)",
-            loadedRecords.stream().filter(r -> filterToClaimsForBeneficiary(beneficiary, r)).count()
-                >= eobBundle.getTotal());
+        Assert.assertEquals(
+            loadedRecords.stream()
+                .filter(r -> filterToClaimsForBeneficiary(beneficiary, r))
+                .count(),
+            eobBundle.getTotal());
         eobs.addAll(
             eobBundle.getEntry().stream()
                 .map(r -> ((ExplanationOfBenefit) r.getResource()))
@@ -135,14 +136,13 @@ public final class SyntheaDataToFhirIT {
     /*
      * Verify that at least _some_ of the EOBs have some things that are expected, but won't be
      * there 100% of the time.
+     *
+     * Note that CI runs without Synthea mapping files, this results in Synthea output with missing
+     * diagnoses and procedures so we are unable to check for their presence.
+     *
+     * Synthea exported providers are not loaded so we are unable to check for display names or
+     * other details.
      */
-    // The following test is commented out since CI runs without Synthea code mapping files and that
-    // results in Synthea output with missing diagnoses and procedures.
-    //    Assert.assertTrue(
-    //        "No diagnoses or procedures found.",
-    //        eobs.stream()
-    //            .anyMatch(eob -> !(eob.getDiagnosis().isEmpty() &&
-    // eob.getProcedure().isEmpty())));
     Assert.assertTrue(
         "No line item services found.",
         eobs.stream()

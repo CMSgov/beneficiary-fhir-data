@@ -2764,7 +2764,7 @@ public final class TransformerUtils {
      */
     // read the entire NPI file the first time and put in a Map
     if (npiMap == null) {
-      npiMap = readNpiCodeFiles();
+      npiMap = readNpiCodeFile();
     }
 
     if (npiMap.containsKey(npiCode.toUpperCase())) {
@@ -2788,52 +2788,46 @@ public final class TransformerUtils {
    * Reads ALL the NPI codes and display values from the NPI_Coded_Display_Values_Tab.txt file.
    * Refer to the README file in the src/main/resources directory
    */
-  private static Map<String, String> readNpiCodeFiles() {
-    Map<String, String> npiCodeMap = new HashMap<>();
+  private static Map<String, String> readNpiCodeFile() {
+    Map<String, String> npiCodeMap = new HashMap<String, String>();
     try (final InputStream npiCodeDisplayStream =
             Thread.currentThread()
                 .getContextClassLoader()
                 .getResourceAsStream("NPI_Coded_Display_Values_Tab.txt");
         final BufferedReader npiCodesIn =
             new BufferedReader(new InputStreamReader(npiCodeDisplayStream))) {
-      npiCodeMap.putAll(readNpiCodeFile(npiCodesIn));
+      /*
+       * We want to extract the NPI codes and display values and put in a map for easy retrieval to
+       * get the display value-- npiColumns[0] is the NPI Code, npiColumns[4] is the NPI
+       * Organization Code, npiColumns[8] is the NPI provider name prefix, npiColumns[6] is the NPI
+       * provider first name, npiColumns[7] is the NPI provider middle name, npiColumns[5] is the
+       * NPI provider last name, npiColumns[9] is the NPI provider suffix name, npiColumns[10] is
+       * the NPI provider credential.
+       */
+      String line = "";
+      npiCodesIn.readLine();
+      while ((line = npiCodesIn.readLine()) != null) {
+        String npiColumns[] = line.split("\t");
+        if (npiColumns[4].isEmpty()) {
+          String npiDisplayName =
+              npiColumns[8].trim()
+                  + " "
+                  + npiColumns[6].trim()
+                  + " "
+                  + npiColumns[7].trim()
+                  + " "
+                  + npiColumns[5].trim()
+                  + " "
+                  + npiColumns[9].trim()
+                  + " "
+                  + npiColumns[10].trim();
+          npiCodeMap.put(npiColumns[0], npiDisplayName.replace("  ", " ").trim());
+        } else {
+          npiCodeMap.put(npiColumns[0], npiColumns[4].replace("\"", "").trim());
+        }
+      }
     } catch (IOException e) {
       throw new UncheckedIOException("Unable to read NPI code data.", e);
-    }
-    return npiCodeMap;
-  }
-
-  private static Map<String, String> readNpiCodeFile(BufferedReader npiCodesIn) throws IOException {
-    /*
-     * We want to extract the NPI codes and display values and put in a map for easy retrieval to
-     * get the display value-- npiColumns[0] is the NPI Code, npiColumns[4] is the NPI
-     * Organization Code, npiColumns[8] is the NPI provider name prefix, npiColumns[6] is the NPI
-     * provider first name, npiColumns[7] is the NPI provider middle name, npiColumns[5] is the
-     * NPI provider last name, npiColumns[9] is the NPI provider suffix name, npiColumns[10] is
-     * the NPI provider credential.
-     */
-    Map<String, String> npiCodeMap = new HashMap<>();
-    String line = "";
-    npiCodesIn.readLine();
-    while ((line = npiCodesIn.readLine()) != null) {
-      String npiColumns[] = line.split("\t");
-      if (npiColumns[4].isEmpty()) {
-        String npiDisplayName =
-            npiColumns[8].trim()
-                + " "
-                + npiColumns[6].trim()
-                + " "
-                + npiColumns[7].trim()
-                + " "
-                + npiColumns[5].trim()
-                + " "
-                + npiColumns[9].trim()
-                + " "
-                + npiColumns[10].trim();
-        npiCodeMap.put(npiColumns[0], npiDisplayName.replace("  ", " ").trim());
-      } else {
-        npiCodeMap.put(npiColumns[0], npiColumns[4].replace("\"", "").trim());
-      }
     }
     return npiCodeMap;
   }
