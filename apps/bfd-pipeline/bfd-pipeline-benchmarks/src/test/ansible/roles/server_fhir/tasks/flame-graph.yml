@@ -26,7 +26,7 @@
     - cmake
     - unzip
     - '@development'
-    - java-11.0-openjdk-devel
+    - java-11-openjdk-devel
   become: true
 
 - name: Download perf-map-agent
