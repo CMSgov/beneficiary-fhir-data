@@ -85,6 +85,15 @@ jobs:
             </toolchain>
           </toolchains>
           EOF
+      - name: 'Debug Branch Conditional'
+        run: |
+          echo 'Branch Conditional Test'
+          echo "${{ github.ref }}"
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo master
+          else
+            echo other
+          fi
       - name: 'Run Maven Build'
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
