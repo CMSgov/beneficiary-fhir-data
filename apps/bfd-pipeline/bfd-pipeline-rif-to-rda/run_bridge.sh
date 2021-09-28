@@ -1,8 +1,3 @@
-#!/bin/bash
+#!/bin/sh
 
-if [ -z "$1" ]
-  then
-    echo "usage: run_bridge <Rif Root Directory>"
-else
-  mvn clean install exec:java -DfilePath=$1
-fi
+java -cp target/bfd-pipeline-rif-to-rda-1.0.0-SNAPSHOT.jar:target/dependency/* gov.cms.bfd.pipeline.bridge.Application $@

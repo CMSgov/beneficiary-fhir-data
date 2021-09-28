@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.bridge.model;
 
-public class Carrier {
+/** Static references for MCS RIF file column headers */
+public class Mcs {
 
   public static final String BENE_ID = "BENE_ID";
   public static final String HCPCS_CD = "HCPCS_CD";

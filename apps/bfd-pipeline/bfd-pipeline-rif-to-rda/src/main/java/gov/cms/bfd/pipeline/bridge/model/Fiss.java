@@ -1,8 +1,7 @@
 package gov.cms.bfd.pipeline.bridge.model;
 
-import java.io.Serializable;
-
-public class Inpatient implements Serializable {
+/** Static references for FISS RIF file column headers */
+public class Fiss {
 
   public static final String BENE_ID = "BENE_ID";
   public static final String CLM_TOT_CHRG_AMT = "CLM_TOT_CHRG_AMT";
