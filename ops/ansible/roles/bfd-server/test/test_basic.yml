@@ -66,6 +66,10 @@
       changed_when: false
       register: command_cat_log
 
+    - name: Print out the log
+      ansible.builtin.debug:
+        var: command_cat_log
+
     - name: Verify Log Contents
       action: fail
       when: "'Started Jetty. Server available at' not in command_cat_log.stdout"
