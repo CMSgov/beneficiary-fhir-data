@@ -17,7 +17,7 @@
     - name: Install dependencies
       yum:
         name:
-          - java-1.11.0-openjdk-devel
+          - java-11.0-openjdk-devel
           - git
           - ansible
           - amazon-cloudwatch-agent

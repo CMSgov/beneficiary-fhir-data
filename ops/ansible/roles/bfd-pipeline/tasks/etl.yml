@@ -6,7 +6,7 @@
     state: present
   with_items:
     # Needed to run the ETL service.
-    - java-1.11.0-openjdk
+    - java-11.0-openjdk
   become: true
   tags:
     - pre-ami
