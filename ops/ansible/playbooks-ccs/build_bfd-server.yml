@@ -40,7 +40,7 @@
         data_server_tmp_dir: "{{ data_server_dir }}/tmp"
         data_server_container: 'will_not_be_used'  # The JBoss instance used here is already (manually) installed.
         data_server_container_name: jboss-eap-7.0
-        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:{{ bfd_server_dir }}/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PreserveFramePointer"
+        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc:{{ bfd_server_dir }}/gc.log -Xlog:gc* -XX:+PrintTenuringDistribution -XX:+PreserveFramePointer"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
         data_server_war_name: "bfd-server-war-{{ data_server_version }}.war"
         data_server_war_local_dir: "~/.m2/repository/gov/cms/bfd/bfd-server-war/{{ data_server_version }}"
