@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DOCKER_TAG=${1:-jdk8-mvn3-an29-tf12}
+DOCKER_TAG=${1:-jdk11-mvn3-an29-tf12}
 
 docker build --file Dockerfile.cbc-build \
   --build-arg JAVA_VERSION=${2:-11} \
