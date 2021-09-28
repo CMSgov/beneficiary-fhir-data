@@ -303,7 +303,7 @@ resource "aws_security_group_rule" "eft_eni_ingress" {
   type              = "ingress"
 
   description       = "Allow Connect Direct traffic FROM EFT team"
-  from_port         = 1363
+  from_port         = 1364
   to_port           = 1364
   protocol          = "tcp"
   cidr_blocks       = [var.eft_connect_direct_cidr]
