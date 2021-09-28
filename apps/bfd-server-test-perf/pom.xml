@@ -114,7 +114,7 @@
 						<toolchains>
 							<jdk>
 								<!-- Use a Java 11 JDK. -->
-								<version>1.11</version>
+								<version>11</version>
 							</jdk>
 						</toolchains>
 					</configuration>

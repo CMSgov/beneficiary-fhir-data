@@ -39,7 +39,7 @@ jobs:
             <toolchain>
               <type>jdk</type>
               <provides>
-                <version>1.11</version>
+                <version>11</version>
                 <vendor>OpenJDK</vendor>
               </provides>
               <configuration>
@@ -76,7 +76,7 @@ jobs:
             <toolchain>
               <type>jdk</type>
               <provides>
-                <version>1.11</version>
+                <version>11</version>
                 <vendor>OpenJDK</vendor>
               </provides>
               <configuration>
