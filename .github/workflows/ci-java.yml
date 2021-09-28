@@ -88,9 +88,9 @@ jobs:
       - name: 'Run Maven Build'
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            mvn --batch-mode verify
-          else
             mvn --batch-mode deploy
+          else
+            mvn --batch-mode verify
           fi
         working-directory: ./apps
         env:

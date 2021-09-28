@@ -52,6 +52,11 @@
       changed_when: false
       register: command_cat_pipeline_log
 
+    - name: Log Failed Application Launches
+      ansible.builtin.debug:
+        var: command_cat_pipeline_log
+      when: "'Application starting up!' not in command_cat_pipeline_log.stdout"
+
     - name: Verify Log Contents
       action: fail
       when: "'Application starting up!' not in command_cat_pipeline_log.stdout"
