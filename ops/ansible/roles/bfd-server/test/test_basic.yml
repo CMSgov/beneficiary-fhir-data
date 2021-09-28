@@ -69,7 +69,8 @@
     - name: Print out the log
       ansible.builtin.debug:
         var: command_cat_log
+      when: "'Started Jetty. Server available at' not in command_cat_log.stdout"
 
-    - name: Verify Log Contents
+    - name: Log Failed Application Launches
       action: fail
       when: "'Started Jetty. Server available at' not in command_cat_log.stdout"

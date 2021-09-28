@@ -25,3 +25,28 @@
     timeout: 90
   listen: Restart BFD Server Service
   when: launch_enabled | default(false)
+  register: wait_for_bfd_port
+
+- name: Grab Log Contents
+  command: cat /usr/local/bfd-pipeline/bluebutton-data-pipeline.log
+  listen: Restart BFD Server Service
+  changed_when: false
+  register: command_cat_pipeline_log
+  when: >
+    (launch_enabled | default(false)) and
+    (wait_for_bfd_port.failed == true)
+
+- name: Log Failed Application Launches
+  ansible.builtin.debug:
+    var: command_cat_pipeline_log
+  listen: Restart BFD Server Service
+  when: >
+    (launch_enabled | default(false)) and
+    (wait_for_bfd_port.failed == true)
+
+- name: Fail if BFD Server Not Ready
+  action: fail
+  listen: Restart BFD Server Service
+  when: >
+    (launch_enabled | default(false)) and
+    (wait_for_bfd_port.failed == true)
