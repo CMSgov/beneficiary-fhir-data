@@ -16,6 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -44,6 +47,18 @@ public class Application {
           .argumentCount(1);
       arguments
           .register()
+          .flag("i")
+          .label("-i [icnStart]")
+          .description("The starting ICN value to use for generated MCS claims.")
+          .argumentCount(1);
+      arguments
+          .register()
+          .flag("d")
+          .label("-d [dcnStart]")
+          .description("The starting DCN value to use for generated FISS claims.")
+          .argumentCount(1);
+      arguments
+          .register()
           .argument()
           .label("inputDir")
           .description("The directory containing the files to read from.");
@@ -58,8 +73,10 @@ public class Application {
                         new IllegalArgumentException(
                             "No root directory for RIF files provided.\n" + arguments.getUsage()));
         String outputDir = arguments.getFlagValue("o").orElse(null);
+        long icnStart = arguments.getFlagLongValue("i").orElse(0L);
+        long dcnStart = arguments.getFlagLongValue("d").orElse(0L);
 
-        new Application().run(rifRootDir, outputDir);
+        new Application().run(new GenConfig(rifRootDir, outputDir, icnStart, dcnStart));
       } else {
         log.error("Invalid execution\n" + arguments.getUsage());
       }
@@ -72,25 +89,27 @@ public class Application {
   /**
    * Reads all relevant source files, executing task logic for each claim found.
    *
-   * @param rifRootDir The path for the root directory containing the RIF files.
-   * @param outputDir The path for the desired RDA output directory.
+   * @param config The configurations to use when generating the RDA data.
    * @throws IOException If there was an issue accessing any of the files.
    */
   @VisibleForTesting
-  void run(String rifRootDir, String outputDir) throws IOException {
+  void run(GenConfig config) throws IOException {
     String[] fissSources = {"inpatient", "outpatient", "home", "hospice", "snf"};
     String[] mcsSources = {"carrier"};
 
-    Path path = Paths.get(rifRootDir);
+    Path path = Paths.get(config.getInputDir());
     Map<String, BeneficiaryData> mbiMap = parseMbiNumbers(path);
 
     Path outputPath;
 
-    if (outputDir != null) {
-      outputPath = Paths.get(outputDir);
+    if (config.getOutputDir() != null) {
+      outputPath = Paths.get(config.getOutputDir());
     } else {
       outputPath = Paths.get("output");
     }
+
+    FissTransformer.setStartingDCN(config.getDcnStart());
+    McsTransformer.setStartingICN(config.getIcnStart());
 
     // ResultOfMethodCallIgnored - Don't need to know if it had to be created.
     //noinspection ResultOfMethodCallIgnored
@@ -186,5 +205,16 @@ public class Application {
     }
 
     return mbiMap;
+  }
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class GenConfig {
+
+    private String inputDir;
+    private String outputDir;
+    private long icnStart;
+    private long dcnStart;
   }
 }

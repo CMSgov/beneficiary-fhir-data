@@ -79,6 +79,31 @@ public class CommandArguments {
   }
 
   /**
+   * Get an {@link Optional} of the first flag argument as a long value.
+   *
+   * @param flagName The name of the flag to get an argument value for.
+   * @return An {@link Optional} containing the flag's argument long value, or an empty {@link
+   *     Optional} if there is no flag or if the flag has no valid long arguments.
+   */
+  public Optional<Long> getFlagLongValue(String flagName) {
+    Optional<Long> value;
+
+    Optional<String> stringValue = getFlagValue(flagName, 0);
+
+    if (stringValue.isPresent()) {
+      try {
+        value = Optional.of(Long.parseLong(stringValue.get()));
+      } catch (NumberFormatException e) {
+        value = Optional.empty();
+      }
+    } else {
+      value = Optional.empty();
+    }
+
+    return value;
+  }
+
+  /**
    * Get an {@link Optional} of the first flag argument value.
    *
    * @param flagName The name of the flag to get an argument value for.

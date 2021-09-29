@@ -74,4 +74,8 @@ public class FissTransformer extends AbstractTransformer {
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .build();
   }
+
+  public static void setStartingDCN(long start) {
+    dcnCounter.set(start);
+  }
 }

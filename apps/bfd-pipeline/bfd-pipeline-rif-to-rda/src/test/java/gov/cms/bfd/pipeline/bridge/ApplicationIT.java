@@ -35,7 +35,7 @@ public class ApplicationIT {
     Path outputDir = resourcesDir.resolve("output");
     Path expectedDir = resourcesDir.resolve("expected");
 
-    Application.main(new String[] {"-o", outputDir.toString(), rifDir});
+    Application.main(new String[] {"-o", outputDir.toString(), "-i", "3", "-d", "1", rifDir});
 
     Set<String> ignorePaths =
         ImmutableSet.of(

@@ -85,4 +85,8 @@ public class McsTransformer extends AbstractTransformer {
         .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
         .build();
   }
+
+  public static void setStartingICN(long start) {
+    icnCounter.set(start);
+  }
 }
