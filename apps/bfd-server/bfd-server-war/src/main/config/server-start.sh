@@ -124,6 +124,7 @@ workDirectory="${targetDirectory}/server-work"
 serverLauncher="${workDirectory}/$(ls ${workDirectory} | grep '^bfd-server-launcher-' | grep -v '^bfd-server-launcher-.*\.zip$')/bfd-server-launcher.sh"
 serverPortsFile="${workDirectory}/server-ports.properties"
 serverLog="${workDirectory}/server-console.log"
+gcLog="${workDirectory}/gc.log"
 warArtifact="${targetDirectory}/$(ls ${targetDirectory} | grep '^bfd-server-war-.*\.war$')"
 keyStore="${scriptDirectory}/../../../../dev/ssl-stores/server-keystore.jks"
 trustStore="${scriptDirectory}/../../../../dev/ssl-stores/server-truststore.jks"
@@ -180,6 +181,7 @@ BFD_PORT="${serverPortHttps}" \
 	BFD_JAVA_HOME="${javaHome}" \
 	"${serverLauncher}" \
 	"${maxHeapArg}" \
+        -Xlog:gc*:${gcLog}:time,level,tags \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \

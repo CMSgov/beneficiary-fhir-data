@@ -137,6 +137,7 @@ public final class DataServerLauncherApp {
         "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
         "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
         "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256");
+    sslContextFactory.setSniRequired(false);
 
     // Apply the config.
     ServerConnector serverConnector =
