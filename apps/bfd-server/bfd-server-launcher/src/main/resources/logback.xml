@@ -67,7 +67,9 @@
 
 	<!-- At 'trace', Hibernate will log SQL parameter values. -->
 	<!-- <logger name="org.hibernate.type" level="trace" /> -->
-	
+
+	<logger name="org.eclipse.jetty.server.SecureRequestCustomizer" level="debug" />
+
 	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>
