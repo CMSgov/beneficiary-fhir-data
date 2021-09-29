@@ -116,7 +116,9 @@ public final class DataServerLauncherApp {
 
     // Create the HTTPS config.
     HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
-    httpsConfig.addCustomizer(new SecureRequestCustomizer());
+    SecureRequestCustomizer customizer = new SecureRequestCustomizer();
+    customizer.setSniHostCheck(false);
+    httpsConfig.addCustomizer(customizer);
 
     // Create the SslContextFactory to be used, along with the cert.
     SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
