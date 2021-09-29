@@ -52,7 +52,7 @@ in (
 EOM
 
 DB_ACTION="${1:-count}"
-if [[ $(fgrep -ix $DB_ACTION <<< "delete") ]]; then
+if [[ $(grep -F "${DB_ACTION}" <<< "delete") ]]; then
 	SQL="${DELETE_SQL}"
 else
 	SQL="${COUNT_SQL}"
@@ -67,7 +67,7 @@ PGPASSWORD="${DB_PSWD:-$4}"
 PGDATABASE="${DB_NAME:-fhirdb}"
 export PGPORT="${DB_PORT:-5432}"
 
-if [ -z "$PGHOST" ] || [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ]; then
+if [ -z "${PGHOST}" ] || [ -z "${PGUSER}" ] || [ -z "${PGPASSWORD}" ]; then
     echo "*****  E r r o r - Missing required variables  *****"
     echo "$0 requires ENV variable(s) for: DB_SCRIPT, DB_HOST, DB_USER, DB_PSWD";
     echo "or";
@@ -76,7 +76,7 @@ if [ -z "$PGHOST" ] || [ -z "$PGUSER" ] || [ -z "$PGPASSWORD" ]; then
 fi
 
 echo "Testing db connectivity..."
-now=$(psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" --quiet --tuples-only -c "select NOW();")
+now=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --quiet --tuples-only -c "select NOW();")
 if [[ "$now" == *"202"* ]]; then
   echo "db connectivity: OK"
 else
@@ -85,12 +85,12 @@ else
 fi
 
 echo "Begin processing at: $(date +'%T')"
-CNT=$(psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" --tuples-only -c "$SQL")
+CNT=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --tuples-only -c "${SQL}")
 
 
 echo "All DONE at: $(date +'%T.%31')"
-if [ ! -z "${CNT}" ]; then
-	echo "TOTAL records processed: $CNT";
+if [ -n "${CNT}" ]; then
+	echo "TOTAL records processed: ${CNT}";
 fi
 
 exit 0;
