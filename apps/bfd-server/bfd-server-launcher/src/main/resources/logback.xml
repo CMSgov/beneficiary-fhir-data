@@ -67,7 +67,7 @@
 
 	<!-- At 'trace', Hibernate will log SQL parameter values. -->
 	<!-- <logger name="org.hibernate.type" level="trace" /> -->
-
+	
 	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>
