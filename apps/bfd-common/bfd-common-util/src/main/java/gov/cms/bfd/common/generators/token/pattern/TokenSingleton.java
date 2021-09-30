@@ -1,10 +1,21 @@
 package gov.cms.bfd.common.generators.token.pattern;
 
-import gov.cms.bfd.common.generators.token.TokenPattern;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 
-@Data
-public class TokenSingleton implements TokenPattern {
+@RequiredArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class TokenSingleton extends TokenPattern {
 
   private final char token;
+
+  @Override
+  String generateToken(long seed) {
+    return String.valueOf(token);
+  }
+
+  @Override
+  long calculatePermutations() {
+    return 1;
+  }
 }

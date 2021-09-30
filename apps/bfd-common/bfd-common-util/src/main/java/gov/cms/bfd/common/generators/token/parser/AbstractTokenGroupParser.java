@@ -1,8 +1,8 @@
 package gov.cms.bfd.common.generators.token.parser;
 
-import gov.cms.bfd.common.generators.token.TokenParser;
+import gov.cms.bfd.common.exceptions.ParsingException;
 import gov.cms.bfd.common.generators.token.TokenParserFactory;
-import gov.cms.bfd.common.generators.token.TokenPattern;
+import gov.cms.bfd.common.generators.token.pattern.TokenPattern;
 import gov.cms.bfd.common.generators.token.pattern.TokenRepeat;
 import java.util.Collection;
 import java.util.Queue;
@@ -22,11 +22,12 @@ public abstract class AbstractTokenGroupParser<C extends Collection<TokenPattern
 
       if (pattern instanceof TokenRepeat) {
         if (previousPattern != null) {
-          ((TokenRepeat) (pattern)).setPattern(previousPattern);
+          pattern = new TokenRepeat(previousPattern, (TokenRepeat) pattern);
+          pattern.init();
           patterns.add(pattern);
           previousPattern = null;
         } else {
-          throw new IllegalArgumentException("Repeat definition has no associated preceding token");
+          throw new ParsingException("Repeat definition has no associated preceding token");
         }
       } else {
         if (previousPattern != null) {
@@ -47,7 +48,7 @@ public abstract class AbstractTokenGroupParser<C extends Collection<TokenPattern
       return createTokenPattern(patterns);
     }
 
-    throw new IllegalArgumentException("Illegal empty allOf parser pattern.");
+    throw new ParsingException("Illegal empty allOf parser pattern.");
   }
 
   protected abstract C createCollection();

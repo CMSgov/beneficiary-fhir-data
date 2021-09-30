@@ -1,7 +1,7 @@
 package gov.cms.bfd.common.generators.token.parser;
 
-import gov.cms.bfd.common.generators.token.TokenParser;
-import gov.cms.bfd.common.generators.token.TokenPattern;
+import gov.cms.bfd.common.exceptions.ParsingException;
+import gov.cms.bfd.common.generators.token.pattern.TokenPattern;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -28,9 +28,9 @@ public class TokenBracketParser implements TokenParser {
     }
 
     if (currentToken != ']') {
-      throw new IllegalArgumentException("Unexpected end of bracket group");
+      throw new ParsingException("Unexpected end of bracket group");
     } else if (bracketPatternStream.isEmpty()) {
-      throw new IllegalArgumentException("Empty bracket groups are not allowed.");
+      throw new ParsingException("Empty bracket groups are not allowed.");
     }
 
     return new TokenOneOfParser().parse(bracketPatternStream);

@@ -2,13 +2,17 @@ package gov.cms.bfd.common.generators.token.parser;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import gov.cms.bfd.common.generators.token.TokenParser;
-import gov.cms.bfd.common.generators.token.TokenPattern;
+import gov.cms.bfd.common.exceptions.ParsingException;
+import gov.cms.bfd.common.generators.token.pattern.TokenPattern;
 import gov.cms.bfd.common.generators.token.pattern.TokenRange;
 import gov.cms.bfd.common.generators.token.pattern.TokenSingleton;
 import java.util.Queue;
+import java.util.Set;
 
 public class TokenSingletonParser implements TokenParser {
+
+  private static final Set<Character> VALID_ESCAPE_CHARS =
+      ImmutableSet.of('\\', 'd', '[', ']', '{', '}', '-');
 
   @Override
   public TokenPattern parse(Queue<Character> patternStream) {
@@ -26,20 +30,21 @@ public class TokenSingletonParser implements TokenParser {
             pattern = new TokenSingleton(escapedToken);
           }
         } else {
-          throw new IllegalArgumentException("Invalid escaped character '\\" + escapedToken + "'");
+          throw new ParsingException("Invalid escaped character '\\" + escapedToken + "'");
         }
       } else {
-        throw new IllegalArgumentException("Unexpected end of token pattern.");
+        throw new ParsingException("Unexpected end of token pattern.");
       }
     } else {
       pattern = new TokenSingleton(token);
     }
 
+    pattern.init();
     return pattern;
   }
 
   @VisibleForTesting
   boolean isValidEscapedCharacter(char escapedChar) {
-    return ImmutableSet.of('\\', 'd', '[', ']', '{', '}', '-').contains(escapedChar);
+    return VALID_ESCAPE_CHARS.contains(escapedChar);
   }
 }

@@ -1,8 +1,8 @@
 package gov.cms.bfd.common.generators.token.parser;
 
 import com.google.common.annotations.VisibleForTesting;
-import gov.cms.bfd.common.generators.token.TokenParser;
-import gov.cms.bfd.common.generators.token.TokenPattern;
+import gov.cms.bfd.common.exceptions.ParsingException;
+import gov.cms.bfd.common.generators.token.pattern.TokenPattern;
 import gov.cms.bfd.common.generators.token.pattern.TokenRange;
 import gov.cms.bfd.common.generators.token.pattern.TokenSingleton;
 import java.util.Queue;
@@ -20,6 +20,7 @@ public class TokenRangeParser implements TokenParser {
       pattern = new TokenSingleton(token);
     }
 
+    pattern.init();
     return pattern;
   }
 
@@ -39,7 +40,7 @@ public class TokenRangeParser implements TokenParser {
         pattern = parseWithBoundsCheck(lowerBound, upperBound, '9');
       }
     } else {
-      throw new IllegalArgumentException("Unexpected end of token pattern.");
+      throw new ParsingException("Unexpected end of token pattern.");
     }
 
     return pattern;
@@ -51,7 +52,7 @@ public class TokenRangeParser implements TokenParser {
       return new TokenRange(lowerBound, upperBound);
     }
 
-    throw new IllegalArgumentException(
+    throw new ParsingException(
         "Invalid range defined in token pattern '" + lowerBound + "-" + upperBound + "'");
   }
 }

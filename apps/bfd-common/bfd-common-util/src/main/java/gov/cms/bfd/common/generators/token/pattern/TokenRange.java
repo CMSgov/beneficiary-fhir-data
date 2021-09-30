@@ -1,11 +1,22 @@
 package gov.cms.bfd.common.generators.token.pattern;
 
-import gov.cms.bfd.common.generators.token.TokenPattern;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 
-@Data
-public class TokenRange implements TokenPattern {
+@RequiredArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class TokenRange extends TokenPattern {
 
   private final char lowerBound;
-  private final char uppeBound;
+  private final char upperBound;
+
+  @Override
+  String generateToken(long seed) {
+    return String.valueOf((char) (lowerBound + seed));
+  }
+
+  @Override
+  long calculatePermutations() {
+    return upperBound - lowerBound + 1L;
+  }
 }

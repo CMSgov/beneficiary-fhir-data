@@ -1,7 +1,7 @@
 package gov.cms.bfd.common.generators.token.parser;
 
-import gov.cms.bfd.common.generators.token.TokenPattern;
 import gov.cms.bfd.common.generators.token.pattern.TokenAllOf;
+import gov.cms.bfd.common.generators.token.pattern.TokenPattern;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +14,8 @@ public class TokenAllOfParser extends AbstractTokenGroupParser<List<TokenPattern
 
   @Override
   protected TokenPattern createTokenPattern(List<TokenPattern> tokenPatterns) {
-    return new TokenAllOf(tokenPatterns);
+    TokenPattern pattern = new TokenAllOf(tokenPatterns);
+    pattern.init();
+    return pattern;
   }
 }

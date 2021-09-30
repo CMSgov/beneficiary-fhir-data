@@ -1,6 +1,7 @@
 package gov.cms.bfd.common.generators.token;
 
 import gov.cms.bfd.common.generators.token.parser.TokenAllOfParser;
+import gov.cms.bfd.common.generators.token.pattern.TokenPattern;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.Collectors;
