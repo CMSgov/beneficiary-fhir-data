@@ -982,6 +982,43 @@
         } ],
         "sequence" : 2,
         "provider" : {
+          "identifier" : {
+            "type" : {
+              "coding" : [ {
+                "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+                "code" : "npi",
+                "display" : "National Provider Identifier"
+              } ]
+            },
+            "value" : "1244444444"
+          }
+        },
+        "responsible" : true,
+        "role" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+            "code" : "performing",
+            "display" : "Performing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+            "code" : "A5",
+            "display" : "Pharmacy (DMERC)"
+          } ]
+        }
+      }, {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+            "code" : "1",
+            "display" : "Participating"
+          }
+        } ],
+        "sequence" : 3,
+        "provider" : {
           "reference" : "#1"
         },
         "responsible" : true,
@@ -1151,7 +1188,7 @@
           }
         } ],
         "sequence" : 1,
-        "careTeamSequence" : [ 2 ],
+        "careTeamSequence" : [ 2, 3 ],
         "diagnosisSequence" : [ 3 ],
         "informationSequence" : [ 2 ],
         "category" : {
@@ -3980,9 +4017,9 @@
       "patient" : {
         "reference" : "Patient/567834"
       },
-      "billablePeriod": {
-        "start": "2015-05-12",
-        "end": "2015-05-12"
+      "billablePeriod" : {
+        "start" : "2015-05-12",
+        "end" : "2015-05-12"
       },
       "created" : "IGNORED_FIELD",
       "insurer" : {
@@ -4704,6 +4741,49 @@
         } ],
         "sequence" : 3,
         "provider" : {
+          "identifier" : {
+            "type" : {
+              "coding" : [ {
+                "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+                "code" : "npi",
+                "display" : "National Provider Identifier"
+              } ]
+            },
+            "value" : "1923124"
+          }
+        },
+        "responsible" : true,
+        "role" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+            "code" : "performing",
+            "display" : "Performing provider"
+          } ]
+        },
+        "qualification" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+            "code" : "41",
+            "display" : "Optometrist"
+          } ]
+        }
+      }, {
+        "extension" : [ {
+          "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_prvdr_type_cd",
+            "code" : "0"
+          }
+        }, {
+          "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+            "code" : "1",
+            "display" : "Participating"
+          }
+        } ],
+        "sequence" : 4,
+        "provider" : {
           "reference" : "#1"
         },
         "responsible" : true,
@@ -4722,7 +4802,7 @@
           } ]
         }
       }, {
-        "sequence" : 4,
+        "sequence" : 5,
         "provider" : {
           "identifier" : {
             "type" : {
@@ -4898,7 +4978,7 @@
           }
         } ],
         "sequence" : 6,
-        "careTeamSequence" : [ 3, 4 ],
+        "careTeamSequence" : [ 3, 4, 5 ],
         "diagnosisSequence" : [ 5 ],
         "informationSequence" : [ 2 ],
         "category" : {

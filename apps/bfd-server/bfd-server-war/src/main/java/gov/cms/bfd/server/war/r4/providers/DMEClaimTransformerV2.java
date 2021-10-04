@@ -12,6 +12,7 @@ import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBAdjudication;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
+import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -181,6 +182,31 @@ final class DMEClaimTransformerV2 {
                           CcwCodebookVariable.SUPLRNUM, line.getProviderBillingNumber())));
 
       // PRVDR_NPI => ExplanationOfBenefit.careTeam.provider
+      Optional<CareTeamComponent> performingBeforeChanges =
+          TransformerUtilsV2.addCareTeamMember(
+              eob,
+              item,
+              C4BBPractitionerIdentifierType.NPI,
+              C4BBClaimProfessionalAndNonClinicianCareTeamRole.PERFORMING,
+              line.getProviderNPI());
+
+      // Update the responsible flag
+      performingBeforeChanges.ifPresent(
+          p -> {
+            p.setResponsible(true);
+
+            // PRVDR_SPCLTY => ExplanationOfBenefit.careTeam.qualification
+            p.setQualification(
+                TransformerUtilsV2.createCodeableConcept(
+                    eob, CcwCodebookVariable.PRVDR_SPCLTY, line.getProviderSpecialityCode()));
+
+            // PRTCPTNG_IND_CD => ExplanationOfBenefit.careTeam.extension
+            p.addExtension(
+                TransformerUtilsV2.createExtensionCoding(
+                    eob,
+                    CcwCodebookVariable.PRTCPTNG_IND_CD,
+                    line.getProviderParticipatingIndCode()));
+          });
 
       if (line.getProviderNPI().isPresent() || includeTaxNumbers.orElse(false)) {
         CareTeamComponent performing =
@@ -230,6 +256,12 @@ final class DMEClaimTransformerV2 {
               line.getHcpcsSecondModifierCode(),
               line.getHcpcsThirdModifierCode(),
               line.getHcpcsFourthModifierCode()));
+
+      if (includeTaxNumbers.orElse(false)) {
+        item.addExtension(
+            TransformerUtilsV2.createExtensionCoding(
+                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
+      }
 
       // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(

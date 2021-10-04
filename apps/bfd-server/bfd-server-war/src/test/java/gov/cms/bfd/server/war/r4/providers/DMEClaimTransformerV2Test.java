@@ -149,7 +149,7 @@ public final class DMEClaimTransformerV2Test {
    */
   @Test
   public void shouldHaveCareTeamList() {
-    Assert.assertEquals(2, eob.getCareTeam().size());
+    Assert.assertEquals(3, eob.getCareTeam().size());
   }
 
   /**
@@ -465,7 +465,7 @@ public final class DMEClaimTransformerV2Test {
   public void shouldHaveLineItemCareTeamRef() {
     // The order isn't important but this should reference a care team member
     Assert.assertNotNull(eob.getItemFirstRep().getCareTeamSequence());
-    Assert.assertEquals(1, eob.getItemFirstRep().getCareTeamSequence().size());
+    Assert.assertEquals(2, eob.getItemFirstRep().getCareTeamSequence().size());
   }
 
   @Test

@@ -178,6 +178,43 @@
     } ],
     "sequence" : 2,
     "provider" : {
+      "identifier" : {
+        "type" : {
+          "coding" : [ {
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+            "code" : "npi",
+            "display" : "National Provider Identifier"
+          } ]
+        },
+        "value" : "1244444444"
+      }
+    },
+    "responsible" : true,
+    "role" : {
+      "coding" : [ {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "performing",
+        "display" : "Performing provider"
+      } ]
+    },
+    "qualification" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+        "code" : "A5",
+        "display" : "Pharmacy (DMERC)"
+      } ]
+    }
+  }, {
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/prtcptng_ind_cd",
+        "code" : "1",
+        "display" : "Participating"
+      }
+    } ],
+    "sequence" : 3,
+    "provider" : {
       "reference" : "#1"
     },
     "responsible" : true,
@@ -347,7 +384,7 @@
       }
     } ],
     "sequence" : 1,
-    "careTeamSequence" : [ 2 ],
+    "careTeamSequence" : [ 2, 3 ],
     "diagnosisSequence" : [ 3 ],
     "informationSequence" : [ 2 ],
     "category" : {

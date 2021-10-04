@@ -546,7 +546,7 @@ public class CarrierClaimTransformerV2Test {
    */
   @Test
   public void shouldHaveCareTeamList() {
-    Assert.assertEquals(4, eob.getCareTeam().size());
+    Assert.assertEquals(5, eob.getCareTeam().size());
   }
 
   @Test
@@ -610,13 +610,13 @@ public class CarrierClaimTransformerV2Test {
             .setCode("1")
             .setDisplay("Participating"));
 
-    Assert.assertTrue(compare3.equalsDeep(member3)); */
-
+    Assert.assertTrue(compare3.equalsDeep(member3));
+    */
     // Fourth member
-    CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(4, eob.getCareTeam());
+    CareTeamComponent member4 = TransformerTestUtilsV2.findCareTeamBySequence(5, eob.getCareTeam());
     CareTeamComponent compare4 =
         TransformerTestUtilsV2.createNpiCareTeamMember(
-            4,
+            5,
             "1497758544",
             "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
             "primary",
