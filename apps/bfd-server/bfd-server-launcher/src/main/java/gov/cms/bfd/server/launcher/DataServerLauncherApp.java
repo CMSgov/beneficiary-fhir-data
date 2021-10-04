@@ -21,6 +21,7 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -173,6 +174,10 @@ public final class DataServerLauncherApp {
      * (and then shut Logback down itself).
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
+
+    // Wire up the WebAppContext to Jetty.
+    HandlerCollection handlers = new HandlerCollection(webapp);
+    server.setHandler(handlers);
 
     /*
      * Logback access does not seem to be supported any longer with jetty 10 so switching to
