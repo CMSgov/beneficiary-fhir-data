@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.util.NoSuchElementException;
@@ -37,6 +38,6 @@ public class RandomMcsClaimSource implements MessageSource<McsClaim> {
   public void close() {}
 
   public MessageSource<McsClaimChange> toClaimChanges() {
-    return WrappedClaimSource.wrapMcsClaims(this, generator.getClock());
+    return WrappedClaimSource.wrapMcsClaims(this, generator.getClock(), RdaChange.MIN_SEQUENCE_NUM);
   }
 }

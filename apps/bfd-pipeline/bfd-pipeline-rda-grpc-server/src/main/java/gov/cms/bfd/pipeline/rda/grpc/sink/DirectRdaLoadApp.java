@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -101,7 +102,10 @@ public class DirectRdaLoadApp {
             options.intValue("hash.iterations", 100),
             options.stringValue("hash.pepper", "notarealpepper"));
     final AbstractRdaLoadJob.Config jobConfig =
-        new AbstractRdaLoadJob.Config(Duration.ofDays(1), options.intValue("job.batchSize", 1));
+        new AbstractRdaLoadJob.Config(
+            Duration.ofDays(1), options.intValue("job.batchSize", 1),
+            options.longOption("job.startingFissSeqNum"),
+                options.longOption("job.startingMcsSeqNum"));
     final GrpcRdaSource.Config grpcConfig =
         new GrpcRdaSource.Config(
             options.stringValue("api.host", "localhost"),

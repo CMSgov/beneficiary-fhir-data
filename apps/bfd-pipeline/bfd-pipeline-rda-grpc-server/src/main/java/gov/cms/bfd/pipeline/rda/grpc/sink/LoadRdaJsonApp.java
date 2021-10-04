@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -125,17 +126,18 @@ public class LoadRdaJsonApp {
     private RdaLoadOptions createRdaLoadOptions(int port) {
       final IdHasher.Config idHasherConfig = new IdHasher.Config(hashIterations, hashPepper);
       final AbstractRdaLoadJob.Config jobConfig =
-          new AbstractRdaLoadJob.Config(Duration.ofDays(1), batchSize);
+          new AbstractRdaLoadJob.Config(
+              Duration.ofDays(1), batchSize, Optional.empty(), Optional.empty());
       final GrpcRdaSource.Config grpcConfig =
           new GrpcRdaSource.Config("localhost", port, Duration.ofDays(1));
       return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
     }
 
-    private MessageSource<FissClaimChange> createFissClaimsSource() {
+    private MessageSource<FissClaimChange> createFissClaimsSource(long sequenceNumber) {
       return createClaimsSourceForFile(fissFile, JsonMessageSource::parseFissClaimChange);
     }
 
-    private MessageSource<McsClaimChange> createMcsClaimsSource() {
+    private MessageSource<McsClaimChange> createMcsClaimsSource(long sequenceNumber) {
       return createClaimsSourceForFile(mcsFile, JsonMessageSource::parseMcsClaimChange);
     }
 

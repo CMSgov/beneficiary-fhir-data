@@ -199,17 +199,25 @@ public final class RifLoaderTest {
     newBene.setMedicareBeneficiaryId(medicareBeneficiaryId);
     Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // New beneficiary mbiEffectiveDate is null and the return result should assert false
+    // New beneficiary mbiEffectiveDate is null and the return result should assert true
+    // since the test will ignore empty mbiEffectiveDate.
     newBene.setMbiEffectiveDate(Optional.empty());
-    Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
     // Undo beneficiary mbiEffectiveDate and set it back to old should assert true
     newBene.setMbiEffectiveDate(mbiEffectiveDate);
-    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
-    // New beneficiary mbiObsoleteDate is null and the return result should assert false
-    newBene.setMbiObsoleteDate(Optional.empty());
+    // old beneficiary mbiEffectiveDate was empty and new beneficiary has mbiEffectiveDate
+    oldBene.setMbiEffectiveDate(Optional.empty());
     Assert.assertFalse(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
+
+    // reset old beneficiary mbiEffectiveDate back to starting point
+    oldBene.setMbiEffectiveDate(mbiEffectiveDate);
+
+    // New beneficiary mbiObsoleteDate is null and the return result should assert true
+    // since the test will ignore empty setMbiObsoleteDate.
+    newBene.setMbiObsoleteDate(Optional.empty());
+    Assert.assertTrue(RifLoader.isBeneficiaryHistoryEqual(newBene, oldBene));
 
     // Undo beneficiary mbiObsoleteDate and set it back to old should assert true
     newBene.setMbiObsoleteDate(mbiObsoleteDate);

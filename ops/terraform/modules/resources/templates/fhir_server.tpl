@@ -8,14 +8,6 @@ exec > >(
 	done
 )
 
-# Extend gold image defined root partition with all available free space
-# The extend gold image has been commented out in favor of rotating the logs
-# Doing this should improve deploy time, BLUEBUTTON-1582
-growpart /dev/nvme0n1 2
-pvresize /dev/nvme0n1p2
-lvextend -l +100%FREE /dev/VolGroup00/rootVol
-xfs_growfs /
-
 git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBranchName} --single-branch
 
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/

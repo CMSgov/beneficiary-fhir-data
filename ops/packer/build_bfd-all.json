@@ -20,10 +20,10 @@
           "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
-      "ami_name": "bfd-etl-{{isotime \"20060102030405\"}}",
+      "ami_name": "bfd-amzn2-etl-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
       "tags": {
-        "Name": "bfd-etl-{{isotime \"20060102030405\"}}",
+        "Name": "bfd-amzn2-etl-{{isotime \"20060102030405\"}}",
         "Application": "BFD",
         "Environment": "{{user `env`}}",
         "Function": "ETL APP SERVER",
@@ -47,10 +47,10 @@
           "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
-      "ami_name": "bfd-fhir-{{isotime \"20060102030405\"}}",
+      "ami_name": "bfd-amzn2-fhir-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
       "tags": {
-        "Name": "bfd-fhir-{{isotime \"20060102030405\"}}",
+        "Name": "bfd-amzn2-fhir-{{isotime \"20060102030405\"}}",
         "Application": "BFD",
         "Environment": "{{user `env`}}",
         "Function": "FHIR APP SERVER",
