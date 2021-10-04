@@ -222,7 +222,7 @@
 			</dependency>
 
 			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>42.2.16</version>
@@ -306,7 +306,7 @@
 					<configuration>
 						<toolchains>
 							<jdk>
-								<!-- Use a Java 8 JDK, by default. -->
+								<!-- Use a Java 11 JDK, by default. -->
 								<version>11</version>
 							</jdk>
 						</toolchains>
