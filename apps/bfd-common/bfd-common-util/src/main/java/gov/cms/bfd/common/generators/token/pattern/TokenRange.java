@@ -11,8 +11,23 @@ public class TokenRange extends TokenPattern {
   private final char upperBound;
 
   @Override
+  public boolean isValidPattern(String value) {
+    return value.length() == 1 && value.charAt(0) >= lowerBound && value.charAt(0) <= upperBound;
+  }
+
+  @Override
   String generateToken(long seed) {
     return String.valueOf((char) (lowerBound + seed));
+  }
+
+  @Override
+  long calculateTokenValue(String tokenString) {
+    return (tokenString.charAt(0) - lowerBound);
+  }
+
+  @Override
+  int tokenLength() {
+    return 1;
   }
 
   @Override

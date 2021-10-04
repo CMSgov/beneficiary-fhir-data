@@ -25,6 +25,17 @@ public class TokenOneOf extends TokenPattern {
   }
 
   @Override
+  public boolean isValidPattern(String value) {
+    boolean isValid = false;
+
+    for (int i = 0; !isValid && i < patternOrder.size(); ++i) {
+      isValid = patternOrder.get(i).isValidPattern(value);
+    }
+
+    return isValid;
+  }
+
+  @Override
   String generateToken(long seed) {
     String token = "";
     Iterator<TokenPattern> iterator = patternOrder.iterator();
@@ -47,6 +58,28 @@ public class TokenOneOf extends TokenPattern {
     }
 
     return token;
+  }
+
+  @Override
+  long calculateTokenValue(String tokenString) {
+    long tokenValue = 0;
+
+    for (int i = 0; tokenValue == 0 && i < patternOrder.size(); ++i) {
+      TokenPattern tokenPattern = patternOrder.get(i);
+
+      if (tokenPattern.isValidPattern(tokenString)) {
+        tokenValue += tokenPattern.parseTokenValue(tokenString);
+      } else {
+        tokenValue += tokenPattern.getTotalPermutations();
+      }
+    }
+
+    return tokenValue;
+  }
+
+  @Override
+  int tokenLength() {
+    return orTokens.iterator().next().tokenLength();
   }
 
   @Override

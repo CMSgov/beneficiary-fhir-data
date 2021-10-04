@@ -18,6 +18,21 @@ public class TokenRepeat extends TokenPattern {
   }
 
   @Override
+  public boolean isValidPattern(String value) {
+    boolean isValid = true;
+    int tokenLength = pattern.tokenLength();
+
+    for (int i = 0; isValid && i < repeats; ++i) {
+      int startIndex = i * tokenLength;
+
+      String substring = value.substring(startIndex, startIndex + tokenLength);
+      isValid = pattern.isValidPattern(substring);
+    }
+
+    return isValid;
+  }
+
+  @Override
   String generateToken(long seed) {
     StringBuilder token = new StringBuilder();
 
@@ -31,6 +46,28 @@ public class TokenRepeat extends TokenPattern {
     }
 
     return token.toString();
+  }
+
+  @Override
+  long calculateTokenValue(String tokenString) {
+    long tokenValue = 0;
+    int tokenLength = pattern.tokenLength();
+    long permutations = pattern.getTotalPermutations();
+
+    for (int i = 0; i < repeats; ++i) {
+      int startIndex = i * tokenLength;
+
+      String substring = tokenString.substring(startIndex, startIndex + tokenLength);
+      tokenValue *= permutations;
+      tokenValue += pattern.parseTokenValue(substring);
+    }
+
+    return tokenValue;
+  }
+
+  @Override
+  int tokenLength() {
+    return pattern.tokenLength() * repeats;
   }
 
   @Override

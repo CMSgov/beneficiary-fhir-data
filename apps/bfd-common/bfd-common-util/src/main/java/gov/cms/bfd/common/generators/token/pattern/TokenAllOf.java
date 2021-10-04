@@ -13,6 +13,23 @@ public class TokenAllOf extends TokenPattern {
   private final List<TokenPattern> patterns;
 
   @Override
+  public boolean isValidPattern(String value) {
+    boolean isValid = true;
+
+    int startIndex = 0;
+
+    for (int i = 0; isValid && i < patterns.size(); ++i) {
+      TokenPattern tokenPattern = patterns.get(i);
+
+      String substring = value.substring(startIndex, startIndex + tokenPattern.tokenLength());
+      isValid = tokenPattern.isValidPattern(substring);
+      startIndex += tokenPattern.tokenLength();
+    }
+
+    return isValid;
+  }
+
+  @Override
   String generateToken(long seed) {
     StringBuilder token = new StringBuilder();
     long remainingSeed = seed;
@@ -35,6 +52,31 @@ public class TokenAllOf extends TokenPattern {
     }
 
     return token.toString();
+  }
+
+  @Override
+  long calculateTokenValue(String tokenString) {
+    long tokenValue = 0;
+
+    int startIndex = 0;
+
+    for (TokenPattern tokenPattern : patterns) {
+      String substring = tokenString.substring(startIndex, startIndex + tokenPattern.tokenLength());
+      tokenValue *= tokenPattern.getTotalPermutations();
+      tokenValue += tokenPattern.parseTokenValue(substring);
+
+      // Prep for next loop
+      startIndex += tokenPattern.tokenLength();
+    }
+
+    return tokenValue;
+  }
+
+  // OptionalGetWithoutIsPresent - TokenPattern#tokenLength can't be null.
+  @SuppressWarnings({"OptionalGetWithoutIsPresent", "squid:S3655"})
+  @Override
+  int tokenLength() {
+    return patterns.stream().map(TokenPattern::tokenLength).reduce(Integer::sum).get();
   }
 
   @Override

@@ -1,6 +1,7 @@
 package gov.cms.bfd.common.generators.token.pattern;
 
 import gov.cms.bfd.common.exceptions.GeneratorException;
+import jdk.nashorn.internal.runtime.ParserException;
 import lombok.Getter;
 
 public abstract class TokenPattern {
@@ -31,7 +32,21 @@ public abstract class TokenPattern {
     }
   }
 
+  public long parseTokenValue(String tokenValue) {
+    if (tokenValue.length() != tokenLength()) {
+      throw new ParserException("Given token value is invalid for this pattern");
+    }
+
+    return calculateTokenValue(tokenValue);
+  }
+
+  public abstract boolean isValidPattern(String value);
+
   abstract String generateToken(long seed);
+
+  abstract long calculateTokenValue(String tokenString);
+
+  abstract int tokenLength();
 
   abstract long calculatePermutations();
 }
