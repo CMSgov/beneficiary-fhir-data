@@ -611,11 +611,7 @@ public final class PipelineApplicationIT {
               .filter(f -> f.getFileName().toString().startsWith("bfd-pipeline-app-"))
               .findFirst()
               .get();
-      Path pipelineAppScript =
-          Files.list(assemblyDirectory)
-              .filter(f -> f.getFileName().toString().equals("bfd-pipeline-app.sh"))
-              .findFirst()
-              .get();
+      Path pipelineAppScript = assemblyDirectory.resolve("bfd-pipeline-app.sh");
 
       S3MinioConfig minioConfig = S3MinioConfig.Singleton();
       if (minioConfig.useMinio) {

@@ -11,8 +11,8 @@
 		<fileSet>
 			<directory>src/main/assembly/bin</directory>
 			<outputDirectory>/</outputDirectory>
-			<directoryMode>0755</directoryMode>
-			<fileMode>0755</fileMode>
+			<directoryMode>0700</directoryMode>
+			<fileMode>0500</fileMode>
 		</fileSet>
 	</fileSets>
 	<dependencySets>
