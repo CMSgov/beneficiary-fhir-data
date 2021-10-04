@@ -21,8 +21,6 @@ import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -181,7 +179,6 @@ public final class DataServerLauncherApp {
      * a custom format request log. Custom format string is passed in
      * so no more using an xml file as with logback-access.
      */
-    RequestLogHandler requestLogHandler = new RequestLogHandler();
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
     String requestLogFormat =
@@ -210,10 +207,6 @@ public final class DataServerLauncherApp {
     constraintMapping.setConstraint(constraint);
     securityHandler.setConstraintMappings(new ConstraintMapping[] {constraintMapping});
     webapp.setSecurityHandler(securityHandler);
-
-    // Wire up the WebAppContext to Jetty.
-    HandlerCollection handlers = new HandlerCollection(webapp, requestLogHandler);
-    server.setHandler(handlers);
 
     // Configure shutdown handlers before starting everything up.
     server.setStopTimeout(Duration.ofSeconds(30).toMillis());
