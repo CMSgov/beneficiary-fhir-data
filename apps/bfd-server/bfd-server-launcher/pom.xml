@@ -71,10 +71,6 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 		</dependency>
-		<!--<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-access</artifactId>
-		</dependency>-->
 		<dependency>
 			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides
 				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
