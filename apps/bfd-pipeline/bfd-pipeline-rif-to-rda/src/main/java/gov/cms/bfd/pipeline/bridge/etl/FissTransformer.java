@@ -39,6 +39,7 @@ public class FissTransformer extends AbstractTransformer {
             // Prefixed DCN numbers with '*' to designate synthetic data
             .setDcn(String.format("*%022d", dcnCounter.getAndIncrement()))
             .setMbi(mbiMap.get(beneId).getMbi())
+            .setHicNo(mbiMap.get(beneId).getHicNo())
             .setCurrLoc1EnumValue(0)
             .setCurrLoc2EnumValue(0)
             .setCurrStatusEnumValue(0)

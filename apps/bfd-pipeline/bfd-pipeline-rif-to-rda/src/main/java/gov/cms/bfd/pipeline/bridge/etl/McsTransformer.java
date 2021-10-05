@@ -41,7 +41,9 @@ public class McsTransformer extends AbstractTransformer {
             .setIdrStatusCodeEnumValue(0)
             .setIdrBillProvNpi("invalidinv")
             .setIdrTotBilledAmt(data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).orElse(""))
-            .setIdrClaimMbi(mbiMap.get(beneId).getMbi());
+            .setIdrClaimMbi(mbiMap.get(beneId).getMbi())
+            .setIdrContrId("inval")
+            .setIdrClaimTypeEnumValue(0);
 
     claimBuilder.setIdrBillProvNum("invali");
 

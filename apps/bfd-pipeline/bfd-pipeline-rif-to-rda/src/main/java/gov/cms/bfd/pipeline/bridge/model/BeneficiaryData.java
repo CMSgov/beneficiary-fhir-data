@@ -13,9 +13,11 @@ public class BeneficiaryData {
 
   public static final String MBI_NUM = "MBI_NUM";
   public static final String BENE_ID = "BENE_ID";
+  public static final String BENE_CRNT_HIC_NUM = "BENE_CRNT_HIC_NUM";
 
   private final String beneId;
   private final String mbi;
+  private final String hicNo;
 
   /**
    * Creates a single {@link BeneficiaryData} object from the given {@link Parser.Data}.
@@ -26,7 +28,8 @@ public class BeneficiaryData {
   public static BeneficiaryData fromData(Parser.Data<String> data) {
     String beneId = data.get(BENE_ID).orElse(null);
     String mbi = data.get(MBI_NUM).orElse(null);
+    String hicNo = data.get(BENE_CRNT_HIC_NUM).orElse(null);
 
-    return new BeneficiaryData(beneId, mbi);
+    return new BeneficiaryData(beneId, mbi, hicNo);
   }
 }
