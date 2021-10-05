@@ -8,7 +8,6 @@ import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +41,7 @@ public class FissTransformer extends AbstractTransformer {
             .setMbi(mbiMap.get(beneId).getMbi())
             .setCurrLoc1EnumValue(0)
             .setCurrLoc2EnumValue(0)
-            .setCurrStatusEnumValue(new Random().nextInt(9))
+            .setCurrStatusEnumValue(0)
             .setNpiNumber(npi)
             .setTotalChargeAmount(data.get(Fiss.CLM_TOT_CHRG_AMT).orElse(""))
             .setPrincipleDiag(data.get(Fiss.PRNCPAL_DGNS_CD).orElse(""));

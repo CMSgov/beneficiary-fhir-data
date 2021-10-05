@@ -5,12 +5,12 @@ import static org.junit.Assert.assertTrue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flipkart.zjsonpatch.JsonDiff;
-import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.Test;
@@ -37,9 +37,7 @@ public class ApplicationIT {
 
     Application.main(new String[] {"-o", outputDir.toString(), "-i", "3", "-d", "1", rifDir});
 
-    Set<String> ignorePaths =
-        ImmutableSet.of(
-            "/claim/currStatusEnum", "/claim/idrStatusCodeEnum", "/claim/idrBillProvNpi");
+    Set<String> ignorePaths = Collections.emptySet();
 
     List<String> expectedFissJson = Files.readAllLines(expectedDir.resolve(EXPECTED_FISS));
     List<String> actualFissJson = Files.readAllLines(outputDir.resolve(ACTUAL_FISS));

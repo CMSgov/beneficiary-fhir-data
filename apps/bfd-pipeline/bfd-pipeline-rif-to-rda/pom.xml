@@ -37,7 +37,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>29.0-android</version>
         </dependency>
         <!-- Compile Time only -->
         <dependency>

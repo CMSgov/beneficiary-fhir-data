@@ -59,6 +59,18 @@ public class Application {
           .argumentCount(1);
       arguments
           .register()
+          .flag("m")
+          .label("-m [icnPattern]")
+          .description("The ICN pattern to use for generated ICNs in MCS claims.")
+          .argumentCount(1);
+      arguments
+          .register()
+          .flag("f")
+          .label("-f [dcnPattern]")
+          .description("The DCN pattern to use for generated DCNs in FISS claims.")
+          .argumentCount(1);
+      arguments
+          .register()
           .argument()
           .label("inputDir")
           .description("The directory containing the files to read from.");
@@ -76,7 +88,7 @@ public class Application {
         long icnStart = arguments.getFlagLongValue("i").orElse(0L);
         long dcnStart = arguments.getFlagLongValue("d").orElse(0L);
 
-        new Application().run(new GenConfig(rifRootDir, outputDir, icnStart, dcnStart));
+        new Application().run(new GenConfig(rifRootDir, outputDir, icnStart, dcnStart, null, null));
       } else {
         log.error("Invalid execution\n" + arguments.getUsage());
       }
@@ -216,5 +228,7 @@ public class Application {
     private String outputDir;
     private long icnStart;
     private long dcnStart;
+    private String icnPattern;
+    private String dcnPattern;
   }
 }

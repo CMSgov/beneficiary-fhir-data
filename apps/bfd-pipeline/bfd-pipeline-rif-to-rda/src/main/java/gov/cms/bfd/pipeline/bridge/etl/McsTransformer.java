@@ -9,7 +9,6 @@ import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
@@ -34,22 +33,17 @@ public class McsTransformer extends AbstractTransformer {
   @Override
   public MessageOrBuilder transform(Parser.Data<String> data) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
-    String npi = String.valueOf(new Random().nextInt(Integer.MAX_VALUE - 999999999) + 999999999);
 
     McsClaim.Builder claimBuilder =
         McsClaim.newBuilder()
             // Prefixed ICN numbers with '*' to designate synthetic data
             .setIdrClmHdIcn(String.format("*%014d", icnCounter.getAndIncrement()))
-            .setIdrStatusCodeEnumValue(new Random().nextInt(29))
-            .setIdrBillProvNpi(npi)
+            .setIdrStatusCodeEnumValue(0)
+            .setIdrBillProvNpi("invalidinv")
             .setIdrTotBilledAmt(data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).orElse(""))
             .setIdrClaimMbi(mbiMap.get(beneId).getMbi());
 
-    if (!mpnLookupMap.containsKey(npi)) {
-      mpnLookupMap.putIfAbsent(npi, String.format("%06d", mpnCounter.getAndIncrement()));
-    }
-
-    claimBuilder.setIdrBillProvNum(mpnLookupMap.get(npi));
+    claimBuilder.setIdrBillProvNum("invali");
 
     claimBuilder.addMcsDetails(
         McsDetail.newBuilder()
