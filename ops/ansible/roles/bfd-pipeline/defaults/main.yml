@@ -1,5 +1,5 @@
 ---
-data_pipeline_dir: /usr/local/bfd-pipeline
+data_pipeline_dir: /usr/local/bluebutton-data-pipeline
 data_pipeline_user: bb-etl
 data_pipeline_loader_threads: 200
 data_pipeline_jvm_args: -Xmx64g
