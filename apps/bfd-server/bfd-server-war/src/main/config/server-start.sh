@@ -181,7 +181,7 @@ BFD_PORT="${serverPortHttps}" \
 	BFD_JAVA_HOME="${javaHome}" \
 	"${serverLauncher}" \
 	"${maxHeapArg}" \
-        "-Xlog:gc*:${gcLog}:time,level,tags" \
+	"-Xlog:gc*:${gcLog}:time,level,tags" \
 	"-Dbfd-server-${bfdServerId}" \
 	"-DbfdServer.db.url=${dbUrl}" \
 	"-DbfdServer.v2.enabled=${v2Enabled}" \
