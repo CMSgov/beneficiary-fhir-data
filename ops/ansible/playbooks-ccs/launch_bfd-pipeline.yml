@@ -17,11 +17,6 @@
       include_vars:
         dir: vars/{{ env }}
       tags: [pre-ami, post-ami]
-
-    - name: Configure EFT EFS file systems
-      import_tasks: tasks/eft_efs.yml
-      tags:
-        - pre-ami
       
     - name: Apply Blue Button Data Pipeline Role
       import_role:

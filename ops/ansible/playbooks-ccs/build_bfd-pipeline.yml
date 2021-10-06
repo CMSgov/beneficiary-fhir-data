@@ -31,11 +31,6 @@
       import_role:
         name: base_patch
 
-    - name: Configure EFT EFS file systems
-      import_tasks: tasks/eft_efs.yml
-      tags:
-        - pre-ami
-
     - name: Apply Blue Button Data Pipeline Role
       import_role:
         name: bfd-pipeline
