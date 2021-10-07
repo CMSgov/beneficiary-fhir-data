@@ -23,14 +23,25 @@ FISS:
 MCS:
 - carrier.csv
 
-## Run
-Execute the command
+## Build
 ```shell
-mvn clean install exec:java <Path to Rif Dir>
+mvn clean package
 ```
-or execute the shell script
+
+## Run
+Execute the shell script
 ```shell
 ./run_bridge <Path to Rif Dir>
+```
+
+## Optional Parameters
+```
+run_bridge.sh [Options] inputDir
+    inputDir: The directory containing the files to read from.
+  Options:
+    -d [dcnStart]: The starting DCN value to use for generated FISS claims.
+    -i [icnStart]: The starting ICN value to use for generated MCS claims.
+    -o [outputDir]: The directory where the output files will be written to.
 ```
 
 ## Sample Output

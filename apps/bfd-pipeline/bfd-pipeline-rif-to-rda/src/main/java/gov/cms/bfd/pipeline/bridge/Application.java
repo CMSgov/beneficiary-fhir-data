@@ -59,18 +59,6 @@ public class Application {
           .argumentCount(1);
       arguments
           .register()
-          .flag("m")
-          .label("-m [icnPattern]")
-          .description("The ICN pattern to use for generated ICNs in MCS claims.")
-          .argumentCount(1);
-      arguments
-          .register()
-          .flag("f")
-          .label("-f [dcnPattern]")
-          .description("The DCN pattern to use for generated DCNs in FISS claims.")
-          .argumentCount(1);
-      arguments
-          .register()
           .argument()
           .label("inputDir")
           .description("The directory containing the files to read from.");

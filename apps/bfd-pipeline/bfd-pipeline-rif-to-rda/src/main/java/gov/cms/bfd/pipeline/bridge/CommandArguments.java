@@ -138,13 +138,16 @@ public class CommandArguments {
     for (Map.Entry<String, RegisteredArguments.Argument> entry :
         registeredArguments.arguments.entrySet()) {
       if (!NO_FLAG.equals(entry.getKey())) {
-        usage.append(entry.getValue().label).append(" ");
         options
             .append("\n    ")
             .append(entry.getValue().label)
             .append(": ")
             .append(entry.getValue().description);
       }
+    }
+
+    if (!options.toString().isEmpty()) {
+      usage.append("[Options] ");
     }
 
     usage
