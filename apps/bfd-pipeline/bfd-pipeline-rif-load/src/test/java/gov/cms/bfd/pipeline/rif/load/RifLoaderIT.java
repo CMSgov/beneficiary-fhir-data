@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
+import gov.cms.bfd.model.rif.RecordAction;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
@@ -548,7 +549,10 @@ public final class RifLoaderIT {
             LOGGER.warn("Record(s) failed to load.", error);
           },
           result -> {
-            loadCount.incrementAndGet();
+            // ignore UPDATE and DELETE rows
+            if (result.getRifRecordEvent().getRecordAction() == RecordAction.INSERT) {
+              loadCount.incrementAndGet();
+            }
           });
       Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build().report();
     }

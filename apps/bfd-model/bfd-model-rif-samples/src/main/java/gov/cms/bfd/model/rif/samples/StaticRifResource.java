@@ -380,48 +380,8 @@ public enum StaticRifResource {
    * should <em>roughly</em> (but not exactly, due to inclusion of extra deceased patients) match
    * the population size that Synthea is told to produce.
    */
-  SYNTHEA_BENES_2011(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2011.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2012(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2012.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2013(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2013.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2014(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2014.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2015(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2015.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2016(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2016.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2017(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2017.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2018(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2018.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2019(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2019.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2020(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2020.csv")),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SYNTHEA_BENES_2021(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_2021.csv")),
+  SYNTHEA_BENES(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
 
