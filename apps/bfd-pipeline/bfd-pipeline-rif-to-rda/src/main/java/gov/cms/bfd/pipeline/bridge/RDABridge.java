@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Application {
+public class RDABridge {
 
   private enum SourceType {
     FISS,
@@ -59,6 +59,18 @@ public class Application {
           .argumentCount(1);
       arguments
           .register()
+          .flag("m")
+          .label("-m [icnPattern]")
+          .description("The ICN pattern to use for generated ICNs in MCS claims.")
+          .argumentCount(1);
+      arguments
+          .register()
+          .flag("f")
+          .label("-f [dcnPattern]")
+          .description("The DCN pattern to use for generated DCNs in FISS claims.")
+          .argumentCount(1);
+      arguments
+          .register()
           .argument()
           .label("inputDir")
           .description("The directory containing the files to read from.");
@@ -76,7 +88,7 @@ public class Application {
         long icnStart = arguments.getFlagLongValue("i").orElse(0L);
         long dcnStart = arguments.getFlagLongValue("d").orElse(0L);
 
-        new Application().run(new GenConfig(rifRootDir, outputDir, icnStart, dcnStart, null, null));
+        new RDABridge().run(new GenConfig(rifRootDir, outputDir, icnStart, dcnStart, null, null));
       } else {
         log.error("Invalid execution\n" + arguments.getUsage());
       }
@@ -92,8 +104,7 @@ public class Application {
    * @param config The configurations to use when generating the RDA data.
    * @throws IOException If there was an issue accessing any of the files.
    */
-  @VisibleForTesting
-  void run(GenConfig config) throws IOException {
+  public void run(GenConfig config) throws IOException {
     String[] fissSources = {"inpatient", "outpatient", "home", "hospice", "snf"};
     String[] mcsSources = {"carrier"};
 

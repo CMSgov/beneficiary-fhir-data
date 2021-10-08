@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.Test;
 
-public class ApplicationIT {
+public class RDABridgeIT {
 
   private static final String BENE_HISTORY_CSV = "beneficiary_history.csv";
   private static final String EXPECTED_FISS = "expected-fiss.ndjson";
@@ -35,7 +35,7 @@ public class ApplicationIT {
     Path outputDir = resourcesDir.resolve("output");
     Path expectedDir = resourcesDir.resolve("expected");
 
-    Application.main(new String[] {"-o", outputDir.toString(), "-i", "3", "-d", "1", rifDir});
+    RDABridge.main(new String[] {"-o", outputDir.toString(), "-i", "3", "-d", "1", rifDir});
 
     Set<String> ignorePaths = Collections.emptySet();
 
