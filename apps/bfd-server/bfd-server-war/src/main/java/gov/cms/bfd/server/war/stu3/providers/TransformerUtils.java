@@ -6,6 +6,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -3233,14 +3234,37 @@ public final class TransformerUtils {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
 
-      if (entry.getResource().getResourceType().toString() == "ExplanationOfBenefit") {}
-
-      if (entry.getResource().getResourceType().toString() == "Patient") {
-        if (entry.getResource() != null && entry.getResource().getId() != null)
-          beneIds.add(entry.getResource().getId());
+      if (entry.getResource().getResourceType().toString() == "ExplanationOfBenefit") {
+        ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
+        if (eob != null
+            && eob.getPatient() != null
+            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+          String reference = eob.getPatient().getReference().replace("Patient/", "");
+          if (!Strings.isNullOrEmpty(reference)) {
+            beneIds.add(reference);
+          }
+        }
       }
 
-      if (entry.getResource().getResourceType().toString() == "Coverage") {}
+      if (entry.getResource().getResourceType().toString() == "Patient") {
+        Patient patient = ((Patient) entry.getResource());
+        if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
+          beneIds.add(patient.getId());
+          ;
+        }
+      }
+
+      if (entry.getResource().getResourceType().toString() == "Coverage") {
+        Coverage coverage = ((Coverage) entry.getResource());
+        if (coverage != null
+            && coverage.getBeneficiary() != null
+            && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
+          String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
+          if (!Strings.isNullOrEmpty(reference)) {
+            beneIds.add(reference);
+          }
+        }
+      }
     }
 
     if (!beneIds.isEmpty()) {
