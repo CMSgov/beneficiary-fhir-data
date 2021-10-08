@@ -3228,10 +3228,25 @@ public final class TransformerUtils {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
+    Set<String> beneIds = new HashSet<String>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
+
+      if (entry.getResource().getResourceType().toString() == "ExplanationOfBenefit") {}
+
+      if (entry.getResource().getResourceType().toString() == "Patient") {
+        if (entry.getResource() != null && entry.getResource().getId() != null)
+          beneIds.add(entry.getResource().getId());
+      }
+
+      if (entry.getResource().getResourceType().toString() == "Coverage") {}
     }
+
+    if (!beneIds.isEmpty()) {
+      MDC.put("beneIds", String.join(", ", beneIds));
+    }
+
     return bundle;
   }
 

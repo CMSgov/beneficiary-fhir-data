@@ -1553,6 +1553,7 @@ public final class TransformerUtilsV2 {
             transactionTime.isAfter(maxBundleDate)
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
+
     return bundle;
   }
 
@@ -1564,10 +1565,24 @@ public final class TransformerUtilsV2 {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
+    Set<String> beneIds = new HashSet<String>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
+
+      if (entry.getResource().getResourceType().toString() == "ExplanationOfBenefit") {}
+
+      if (entry.getResource().getResourceType().toString() == "Patient") {
+        beneIds.add(entry.getResource().getId());
+      }
+
+      if (entry.getResource().getResourceType().toString() == "Coverage") {}
     }
+
+    if (!beneIds.isEmpty()) {
+      MDC.put("beneIds", String.join(", ", beneIds));
+    }
+
     return bundle;
   }
 
