@@ -594,6 +594,17 @@ We considered defining a full blown imperative DSL using groovy or something els
 * Declarative structure allows the plugin to guarantee adherance to the RDA API conventions and proper code review.
 * Transformations in the plugin have a standard structure that makes them easier to develop and debug.
 
+Another alternative would be to forgo code generation completely.
+The same metadata could be used to configure a class at runtime to perform all of the same transformations on the fly.
+This idea would have the advantage of eliminating the need for a maven plugin since a single class in a java library could dynamically perform all of the same work as the generated code.
+There are downsides to this approach though:
+* A fully dynamic object would have a performance penalty compared to compiled code.
+  For example with generated code the java JIT could determine that specific code branches are unused in the transformation classes for one of the claim types but always used for a different one.
+  Since we will be processing millions of messages per day this could become a bottleneck or increase CPU resource requirements.
+* Breakpoints can be set in specific places in the generated code to see what's happening if a bug is encountered.  
+  Dynamic code is more general and isolating a problem to a specific field can be more difficult.
+  (Skipping past the first 30 fields while debugging to see what happens in the field you care about can be painful.)
+
 Continuing with the existing hard-written code would have a number of disadvantages:
 * It would will make it more difficult to react to changes in the RDA API going forward.
 * It would greatly complicate PR reviews for RDA API changes since so many files would have to be reviewed.
