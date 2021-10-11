@@ -398,15 +398,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // with paging and then fetch full benes with joins.
     boolean useTwoSteps = (requestHeader.isMBIinIncludeIdentifiers() && paging.isPagingRequested());
 
-    // Set the max query results to one more than the pagesize so that the caller
-    // can figure out whether there is another page.
-    final int maxResults = paging.getPageSize() + 1;
-
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
           queryBeneficiaryIds(contractMonthField, contractCode, paging)
-              .setMaxResults(maxResults)
+              .setMaxResults(paging.getQueryMaxSize())
               .getResultList();
 
       // Fetch the benes using the ids
@@ -414,7 +410,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, requestHeader)
-          .setMaxResults(maxResults)
+          .setMaxResults(paging.getQueryMaxSize())
           .getResultList();
     }
   }
@@ -1161,12 +1157,11 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
                     "bene_ids_by_year_month_part_d_contract_id"))
             .time();
     try {
-      // Set the max query results to one more than the pagesize so that the caller
-      // can figure out whether there is another page.
-      final int maxResults = paging.getPageSize() + 1;
-
       matchingBeneIds =
-          entityManager.createQuery(beneIdCriteria).setMaxResults(maxResults).getResultList();
+          entityManager
+              .createQuery(beneIdCriteria)
+              .setMaxResults(paging.getQueryMaxSize())
+              .getResultList();
       return matchingBeneIds;
     } finally {
       beneHistoryMatchesTimerQueryNanoSeconds = beneIdMatchesTimer.stop();

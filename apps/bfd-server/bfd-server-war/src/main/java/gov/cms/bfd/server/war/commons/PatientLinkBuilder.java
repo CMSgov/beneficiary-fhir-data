@@ -32,7 +32,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
     count = extractCountParam(components);
     cursor = extractCursorParam(components);
     hasAnotherPage = false; // Don't really know, so default to false
-    check();
+    validate();
   }
 
   public PatientLinkBuilder(PatientLinkBuilder prev, boolean hasAnotherPage) {
@@ -40,11 +40,11 @@ public final class PatientLinkBuilder implements LinkBuilder {
     count = prev.count;
     cursor = prev.cursor;
     this.hasAnotherPage = hasAnotherPage;
-    check();
+    validate();
   }
 
   /** Check that the page size is valid */
-  private void check() {
+  private void validate() {
     if (getPageSize() <= 0)
       throw new InvalidRequestException("A zero or negative count is unsupported");
     if (!(getPageSize() < Integer.MAX_VALUE))
@@ -144,5 +144,15 @@ public final class PatientLinkBuilder implements LinkBuilder {
         .replaceQueryParams(params)
         .build()
         .toUriString();
+  }
+
+  /**
+   * Get the value that should be passed as the max size for a query using paging. This value should
+   * be at least as big as the page size to ensure a full page but include at least one additional
+   * record as a way to determine whether another page will be needed. In practice this means
+   * returning one more than the page size.
+   */
+  public int getQueryMaxSize() {
+    return getPageSize() + 1;
   }
 }
