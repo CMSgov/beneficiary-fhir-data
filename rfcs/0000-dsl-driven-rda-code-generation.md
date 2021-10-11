@@ -116,6 +116,12 @@ Since the RDA API data is used in different modules within the BFD code base the
 - The `random-data` goal generates random data generation classes to create randomized data of appropriate size and type for each object/field in the RDA API messages.
 - The `synthea-bridge` goal generates data transformation classes to copy data from Synthea RIF data files into protobuf messages.
 
+For an idea of the code savings consider the difference in complexity between that YAML example and these two hand written classes:
+
+- [PreAdjFissClaims hand written entity](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-model/bfd-model-rda/src/main/java/gov/cms/bfd/model/rda/PreAdjFissClaim.java)
+- [FissClaimTransformer hand written transformer class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/source/FissClaimTransformer.java)
+- [RandomFissClaimGenerator hand written synthetic data class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/server/RandomFissClaimGenerator.java)
+
 Getting the relationships between tables in JPA can be somewhat tricky however they can be trivially defined as `array`s in the YANL and the code generator takes care of getting the details correct:
 
 ````yaml
