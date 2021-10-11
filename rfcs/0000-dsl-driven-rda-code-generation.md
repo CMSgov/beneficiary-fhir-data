@@ -48,6 +48,8 @@ And yet most of this code is repetitive since the fields follow established conv
 For example, every maximum field length in the database must be properly reflected in the database entities, enforced in the data validation code, and honored in the synthetic data generators.
 This can certainly be done with hand-written code but is error prone and requires developer time to write/modify the code and review the associated PR.
 
+*Note: Code examples in this document are taken from proof of concept work performed the `brianburton/dcgeo-186-entities-dsl` branch of th BFD repo.  The code in that branch is functional but incomplete but provided insight into the issues involved in following this recommendation.*
+
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
@@ -546,62 +548,61 @@ public class MessageEnumFieldTransformer extends AbstractFieldTransformer {
 
 Arrays would be recognized and generate code to also transform the array elements appropriately to produce the detail objects for the JPA entities.
 
-This is the technical portion of the RFC. Explain the design in sufficient detail that:
-
-* Its interaction with other features is clear.
-* It is reasonably clear how the feature would be implemented.
-* Corner cases are dissected by example.
-
-The section should return to the examples given in the previous section, and explain more fully how the detailed proposal makes those examples work.
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
 Collect a list of action items to be resolved or officially deferred before this RFC is submitted for final comment, including:
 
-* What parts of the design do you expect to resolve through the RFC process before this gets merged?
-* What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
-* What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
+* ?
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
 Why should we *not* do this?
 
+* Code generators can be somewhat complex.
+  A case can be made that lots of hand written code can be more directly comprehensible than a code generator.
+* Since RDA API is not yet in production might their conventions change substantially in the near future?
+
+
 ### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
 
-* Why is this design the best in the space of possible designs?
-* What other designs have been considered and what is the rationale for not choosing them?
-* What is the impact of not doing this?
+A design based around a maven plugin was chosen because it integrates easily into the current build pipeline.
+Also IDEs can easily detect the presence of the plugin and recognize the generated classes so that they can be debugged.
+The javapoet API was chosen since it is already in use with the RIF code generator and works well for the task.
+
+A spreadsheet could be used for the DSL.
+However we decided thata YAML file format has several advantages over a spreashseet for this process:
+* Existing open source libraries such as jackson can directly convert YAML into java beans.
+* RDA API data is inherently heirarchical and YAML naturally supports heirachical data.
+* YAML is pure text it can be edited from within an IDE and diffs of the file can be reviewed as part of the github PR review process.
+
+We considered using java annotation processing but decided that a maven plugin has some advantages:
+* The maven plugin works directly within the maven build process rather than adding the complexity of java annotation processing.
+* The same plugin can be invoked from multiple modules to generate different portions of the code exactly where it is needed.
+
+We considered defining a full blown imperative DSL using groovy or something else but:
+* Writing transformations in java fits more naturally into the BFD code base and team expertise.
+* Declarative structure allows the plugin to guarantee adherance to the RDA API conventions and proper code review.
+* Transformations in the plugin have a standard structure that makes them easier to develop and debug.
+
+Continuing with the existing hard-written code would have a number of disadvantages:
+* It would will make it more difficult to react to changes in the RDA API going forward.
+* It would greatly complicate PR reviews for RDA API changes since so many files would have to be reviewed.
+* Changes in conventions by the RDA API team would require changing logic in multiple places rather than just in the plugin.  An example of this would be if they changed how they map enums to strings in their responses.
+
 
 ## Prior Art
 [Prior Art]: #prior-art
 
-Discuss prior art, both the good and the bad, in relation to this proposal.
-A few examples of what this can include are:
-
-* For feature proposals:
-  Does this feature exist in other similar-ish APIs and what experience have their community had?
-* For architecture proposals:
-  Is this architecture used by other CMS or fedgov systems and what experience have they had?
-* For process proposals:
-  Is this process used by other CMS or fedgov programs and what experience have they had?
-* For other teams:
-  What lessons can we learn from what other communities have done here?
-* Papers and other references:
-  Are there any published papers or great posts that discuss this?
-  If you have some relevant papers to refer to, this can serve as a more detailed theoretical background.
-
-This section is intended to encourage you as an author to think about the lessons from other languages, provide readers of your RFC with a fuller picture.
-If there is no prior art, that is fine - your ideas are interesting to us whether they are brand new or if it is an adaptation from other languages.
-
-Note that while precedent set by other programs is some motivation, it does not on its own motivate an RFC.
-Please also take into consideration that we (and the government in general) sometimes intentionally diverge from common "best practices".
+The RIF entities are currently generated using java annotation processing and reading metedata from a spreadsheet.
 
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
 
+FROM THE TEMPLATE:
 Think about what the natural extension and evolution of your proposal would be and how it would affect the language and project as a whole in a holistic way.
 Try to use this section as a tool to more fully consider all possible interactions with the project and language in your proposal.
 Also consider how the this all fits into the roadmap for the project and of the relevant sub-team.
