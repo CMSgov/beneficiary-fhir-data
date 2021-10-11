@@ -45,8 +45,8 @@ public final class PatientLinkBuilder implements LinkBuilder {
 
   /** Check that the page size is valid */
   private void check() {
-    if (getPageSize() == 0) throw new InvalidRequestException("A zero count is unsupported");
-    if (getPageSize() < 0) throw new InvalidRequestException("A negative count is invalid");
+    if (getPageSize() <= 0)
+      throw new InvalidRequestException("A zero or negative count is unsupported");
     if (!(getPageSize() < Integer.MAX_VALUE))
       throw new InvalidRequestException("Page size must be less than " + Integer.MAX_VALUE);
   }
