@@ -20,7 +20,7 @@ public class PatientLinkBuilderTest {
 
     Assert.assertFalse(paging.isPagingRequested());
     Assert.assertTrue(paging.isFirstPage());
-    Assert.assertEquals(PatientLinkBuilder.DEFAULT_PAGE_SIZE, paging.getPageSize());
+    Assert.assertEquals(PatientLinkBuilder.MAX_PAGE_SIZE, paging.getPageSize());
 
     Bundle bundle = new Bundle();
     Assert.assertTrue(bundle.getLink().isEmpty());
@@ -35,7 +35,7 @@ public class PatientLinkBuilderTest {
 
     Assert.assertFalse(paging.isPagingRequested());
     Assert.assertTrue(paging.isFirstPage());
-    Assert.assertEquals(PatientLinkBuilder.DEFAULT_PAGE_SIZE, paging.getPageSize());
+    Assert.assertEquals(PatientLinkBuilder.MAX_PAGE_SIZE, paging.getPageSize());
 
     Bundle bundle = new Bundle();
     Assert.assertTrue(bundle.getLink().isEmpty());

@@ -14,11 +14,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 /** A link builder for Patient resources using bene-id cursors */
 public final class PatientLinkBuilder implements LinkBuilder {
   /**
-   * Page size if unspecified is set to one less than the maximum integer value to allow clients to
-   * request one more than the page size as a means to see if an additional page is necessary
-   * without having an integer overflow.
+   * Maximum page size is one less than the maximum integer value to allow clients to request one
+   * more than the page size as a means to see if an additional page is necessary without having an
+   * integer overflow.
    */
-  public static final int DEFAULT_PAGE_SIZE = Integer.MAX_VALUE - 1;
+  public static final int MAX_PAGE_SIZE = Integer.MAX_VALUE - 1;
 
   private final UriComponents components;
   private final Integer count;
@@ -46,9 +46,9 @@ public final class PatientLinkBuilder implements LinkBuilder {
   /** Check that the page size is valid */
   private void validate() {
     if (getPageSize() <= 0)
-      throw new InvalidRequestException("A zero or negative count is unsupported");
-    if (!(getPageSize() < Integer.MAX_VALUE))
-      throw new InvalidRequestException("Page size must be less than " + Integer.MAX_VALUE);
+      throw new InvalidRequestException("A zero or negative page size is unsupported");
+    if (!(getPageSize() <= MAX_PAGE_SIZE))
+      throw new InvalidRequestException("Page size must be less than " + MAX_PAGE_SIZE);
   }
 
   @Override
@@ -58,7 +58,7 @@ public final class PatientLinkBuilder implements LinkBuilder {
 
   @Override
   public int getPageSize() {
-    return isPagingRequested() ? count : DEFAULT_PAGE_SIZE;
+    return isPagingRequested() ? count : MAX_PAGE_SIZE;
   }
 
   @Override
