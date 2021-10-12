@@ -5,11 +5,7 @@
 - name: Configure ETL Server
   hosts: localhost
   vars:
-<<<<<<< HEAD
-    bfd_pipeline_dir: '/usr/local/bfd-pipeline'
-=======
     bfd_pipeline_dir: '/bluebutton-data-pipeline'
->>>>>>> master
 
   tasks:
     - name: Include global variables

@@ -9,11 +9,7 @@
   gather_facts: yes
   vars:
     ansible_ssh_pipelining: no
-<<<<<<< HEAD
-    bfd_pipeline_dir: '/usr/local/bfd-pipeline'
-=======
     bfd_pipeline_dir: '/bluebutton-data-pipeline'
->>>>>>> master
     env: "test"
 
   tasks:
