@@ -1571,7 +1571,7 @@ public final class TransformerUtilsV2 {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
 
-      if (entry.getResource().getResourceType().toString() == "ExplanationOfBenefit") {
+      if (entry.getResource().getResourceType().toString().equals("ExplanationOfBenefit")) {
         ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
         if (eob != null
             && eob.getPatient() != null
@@ -1583,15 +1583,14 @@ public final class TransformerUtilsV2 {
         }
       }
 
-      if (entry.getResource().getResourceType().toString() == "Patient") {
+      if (entry.getResource().getResourceType().toString().equals("Patient")) {
         Patient patient = ((Patient) entry.getResource());
         if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
           beneIds.add(patient.getId());
-          ;
         }
       }
 
-      if (entry.getResource().getResourceType().toString() == "Coverage") {
+      if (entry.getResource().getResourceType().toString().equals("Coverage")) {
         Coverage coverage = ((Coverage) entry.getResource());
         if (coverage != null
             && coverage.getBeneficiary() != null
