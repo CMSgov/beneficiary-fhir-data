@@ -32,30 +32,34 @@ Areas affected by this process could include hibernate entities, data transforma
 
 The RDA API is evolving rapidly and adding new fields as it moves towards production.
 Even once a production release is completed more fields will be added rapidly as that API development evolves from a first release focused on reliability and features to followup releases filling in more and more of the data available in the backend systems.
-Initially code to handle RDA API data was hand-written as there was a small number of fields at that time and the RDA API team had not yet establish conventions for mapping the data into protobuf.
-Now the number of fields is growing and those conventions are well established.
 
-With hand-written code the addition of new fields by the RDA API team can trigger many code changes across the project.  These can include:
+Initially code to handle RDA API data was hand-written as there were relatively few fields at that time and the RDA API team had not yet establish conventions for mapping the data into protobuf.
+Now the number of fields is growing and those conventions are well established.
+When estimating the ultimate size of the RDA API message objects the team indicated that there might ultimately be 2-5 times as many fields as now.
+
+With hand-written code the addition of new fields by the RDA API team can trigger many code changes across the project.
+These can include:
 - SQL migration scripts.
 - Hibernate database entity classes.
 - Data transformation/validation code to copy data from protobuf messages into entity objects.
 - Random synthetic data generation classes.
 - Data transformation code to copy data from Synthea data files into protobuf messages.
 
-Each of these areas require careful attention to ensure the logic is correct, data types are correct, validation rules are correct, etc.
+Each of these areas require careful attention to ensure the logic, data types, and validation rules are correct.
 These changes have to be made consistently in different places in the code.
 And yet most of this code is repetitive since the fields follow established conventions.
 For example, every maximum field length in the database must be properly reflected in the database entities, enforced in the data validation code, and honored in the synthetic data generators.
 This can certainly be done with hand-written code but is error prone and requires developer time to write/modify the code and review the associated PR.
 
-*Note: Code examples in this document are taken from proof of concept work performed the `brianburton/dcgeo-186-entities-dsl` branch of th BFD repo.  The code in that branch is functional but incomplete but provided insight into the issues involved in following this recommendation.*
+*Note: Code examples in this document are taken from proof of concept work performed in the `brianburton/dcgeo-186-entities-dsl` branch of th BFD repo.  The code in that branch is functional though incomplete and provided insight into the issues involved in following this recommendation.*
 
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
 A maven plugin processes a YAML based metadata file to create all of the code required to work with the RDA API data messages, objects, and fields.
-The YAML explains in a declarative way what every RDA API message is, what table that message is stored in, what the columns of table are, and how to transfom the data from the RDA API messages into data in those columns.  For example:
+The YAML explains in a declarative way what every RDA API message is, what table that message is stored in, what the columns of table are, and how to transfom the data from the RDA API messages into data in those columns.
+For example:
 
 ````YAML
   - id: McsDiagnosisCode
@@ -96,9 +100,12 @@ The YAML explains in a declarative way what every RDA API message is, what table
         to: lastUpdated
 ````
 
+*Note: The full DSL file from the POC can be found here: [POC mapping.yaml](https://github.com/CMSgov/beneficiary-fhir-data/blob/brianburton/dcgeo-186-entities-dsl/apps/bfd-model/bfd-model-rda/mapping.yaml)*
+
 This example illustrates some of the advantages of using a declarative file:
 
-- Standard conventions can be supported as defaults.  For example:
+- Standard conventions can be supported as defaults.
+For example:
   - The `to` only needs to be defined if it differs from the `from`.  Generally columns are named directly based on the RDA API field but not always.
   - A `javaType` only needs to be defined if it differs from the default for the column's data type.
   - A `transformer` only needs to be defined if it differs from the default for the column's data type.
@@ -106,7 +113,7 @@ This example illustrates some of the advantages of using a declarative file:
 - The plugin follows a simple set of rules to choose a default transformation if no `transformer`  is provided in the YAML.
 - A single field can have multiple transformations.  For example the MBI field can be copied directly to a column and also used to store a hashed value in another column.
 - Transformers can have their own specific options if their behavior is modifiable from default settings.
-- A few structural transforms can be specified using a virtual `from` that triggers the transform.  Essentially these are for fields that are known at runtime but not taken directly from the messages (like array indexes, the current timestamp, etc).
+- A few structural transforms can be specified using a virtual `from` that triggers the transform.  Essentially these are for fields that are known at runtime but not taken directly from the messages (like array indexes, the current timestamp, parent primary key column value, etc).
 
 Since the RDA API data is used in different modules within the BFD code base the plugin defines goals specific to each type of code that it generates:
 
@@ -122,7 +129,8 @@ For an idea of the code savings consider the difference in complexity between th
 - [FissClaimTransformer hand written transformer class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/source/FissClaimTransformer.java)
 - [RandomFissClaimGenerator hand written synthetic data class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/server/RandomFissClaimGenerator.java)
 
-Getting the relationships between tables in JPA can be somewhat tricky however they can be trivially defined as `array`s in the YANL and the code generator takes care of getting the details correct:
+Getting the relationships right between tables in JPA can be somewhat tricky.
+However, they can be trivially defined as `array`s in the YAML and the code generator takes care of getting the details correct:
 
 ````yaml
   - id: FissClaim
@@ -169,7 +177,7 @@ Getting the relationships between tables in JPA can be somewhat tricky however t
 
 The example illustrates the three detail tables associated with each `FissClaim`.
 The RDA API sends these as `repeated` fields in the protobuf definition and the plugin maps them to detail entities in the JPA classes.
-Each one references the field in in the protobuf message and the entity class and the mapping used to define the detail table.
+Each one references the field in the protobuf message and the entity class and the mapping used to define the detail table.
 
 The classes generated by the plugin rely on a few utility classes that are defined in a separate library module.
 This library is added as a dependency in the modules that require them and is the only part of the plugin that ships with the server and/or pipeline.
@@ -208,6 +216,7 @@ The maven plugin would have a simple structure.  Each goal would follow these st
 
 - Read the mapping file using a library such as Jackson to map the file's contents into java beans.
 - Process the mappings in the file in a goal specific way to generate java code using a library such as javapoet to generate the java files.
+- Write the generated class files to a directory specified by the `pom.xml` file.
 
 The `entities` goal would only need to process the `table` object since it simply generates the relevant Hibernate entities and all of the data required to do so would be defined in the `table`.  Similarly a `sql-definitions` goal could do the same to generate SQL `CREATE TABLE` and `ALTER TABLE` DDL code that a developer could use as the basis of a Flyway migration file.
 
@@ -250,10 +259,10 @@ Some technical details for this example:
 - Specifying a fully defined `entityClassName` ensures that the plugin makes no assumptions about what packages the code it generates will live in.
 - The `schema` would be optional and associated annotations only added to the entity if it has been defined.
 - The `name` and `sqlType` would be required.
-- All other values would have reasonable defaults.  For example any `varchar(n)` or `char(n)` would default to a `String` as the `javaType` without having to specify one.  Similarly `timestamp` would map to `Instant` and `date` would map to `LocalDate` by default.
-- All columns would default to being nullable unless otherwise set using a `nullable: false` since almost all RDA API fields are optional.
+- All other values would have reasonable defaults.  For example any `varchar(n)` or `char(n)` would default to a `String` as the `javaType`.  Similarly `timestamp` would map to `Instant` and `date` would map to `LocalDate` by default.
+- All columns would default to being `nullable` unless otherwise set using `nullable: false` since almost all RDA API fields are optional.
 - The `primaryKeyColumns` would be used to add `Id` annotations to those fields in the entity classes as well as to define the `hashCode` and `equals` methods following Hibernate rules.
-- Tables with multiple `primaryKeyColumns` would automatically generate a static class for the primary key object associated with the table.
+- Tables with multiple `primaryKeyColumns` would automatically generate a static class for the composite key object associated with the table.
 
 Each of the most commonly used `sqlType`s would have an associated default `javaType` and appropriate logic for defining the generated `Column` annotation in the entity class.  For example the plugin would know how to parse a max length out of the `varchar(n)` and `char(n)` types.  Also it would know that it needs to add a `columnDefinition` value for `decimal(m,n)` types but not for most other types.
 
@@ -458,7 +467,7 @@ A transformation takes data from one field in the RDA API message, validates it,
 Each transformation is implemented as a Java class that implements an interface.
 The interface contains three methods:
 - One to get zero or more field definitions for any class level fields needed by the transformer.
-- One to get initialization code for each such field for use in the generated transformer class' constructor.
+- One to get initialization code for each such field for use in the generated transformer's constructor.
 - One to generate any java statements needed to perform the transformation.
 
 The simplest case for a transformer just inserts a single method call:
@@ -475,7 +484,7 @@ public class TimestampFieldTransformer extends AbstractFieldTransformer {
 
 In this example `destSetter` is a helper method in the abstract base class that returns a code block that sets the value of the destination (entity) field.
 
-A more complex transformation would add a field with an `EnumStringExtractor` object, create code to initialize it appropriately, and code to invoke it to copy the enum's value into an entity field:
+The most complex transformation would add a field with an `EnumStringExtractor` object, create code to initialize it appropriately, and code to invoke it to copy the enum's value into an entity field:
 
 ````java
 public class MessageEnumFieldTransformer extends AbstractFieldTransformer {
@@ -554,36 +563,77 @@ public class MessageEnumFieldTransformer extends AbstractFieldTransformer {
 
 Arrays would be recognized and generate code to also transform the array elements appropriately to produce the detail objects for the JPA entities.
 
+The transformations needed to fully implement the current RDA API data model include:
+
+- Amount: parse and copy a dollar amount string
+- Char: copy a single character into a char field
+- Date: parse and copy a date string
+- EnumValueIfPresent: set an enum column if a specific field is present in the RDA message
+- IdHash: hash and copy a string (MBI hash)
+- Int: parse and copy an integer string
+- MessageEnum: extract string value from an enum and copy it
+- String: copy a string
+- Timestamp: copy the current timestamp
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
 
 Collect a list of action items to be resolved or officially deferred before this RFC is submitted for final comment, including:
 
-* ?
+None yet.
+
 
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
 Why should we *not* do this?
 
-* Code generators can be somewhat complex.
-  A case can be made that lots of hand written code can be more directly comprehensible than a code generator.
-* Since RDA API is not yet in production might their conventions change substantially in the near future?
+**Reason 1: Code generators can be complex**
+
+A case can be made that lots of hand written code can be more directly comprehensible than a code generator.
+This is particularly true if the design of the code generator hard codes too many things and embeds too much knowledge of the data it generates code for (e.g. if it adds or looks for fields with specific names that aren't defined in the meta data).
+
+Both of these concerns can be addressed by careful design and coding of the plugin.
+Embedding knowledge of conventions is perfectly OK.
+That is why the plugin exists: to centralize that knowledge in a reusable component.
+However embedding knowledge of fields themselves is harmful since it splits knowledge of the fields between the metadata and the plugin source code.
+
+Complexity of the plugin can be addressed through design.
+Use of a strategy pattern for transformations can provide a clear interface and convention for how those work.
+Adding comments with example output to each section that generates code can make the intent of that code clearer.
+
+**Reason 2: RDA API Conventions may change**
+
+Since RDA API is not yet in production won't their conventions change substantially in the near future?
+That would be a danger either with hand-written code or with a plugin.
+The plugin centralizes the implemtation of those conventions so we can leverage that to simplify adapting to the change.
+Simply change the plugin and the new conventions apply to all fields.
+
+A similar approach has been taken with the hand-written code too.
+However, though embedding the conventions in library classes and methods is helpful it can still lead to widespread code changes if you need to add a parameter to a library method.
+Suddenly dozens of lines of code need to be changed by hand to add that new parameter.
+A code generator can do that sort of thing automatically.
+
+**Reason 3: A single plugin used in multiple modules implies too much knowledge**
+
+The code using the plugin is in separate modules for a reason.
+Won't using a plugin require adding many dependencies to the plugin module that don't make sense there?
+
+This can be addressed by defining interfaces that the plugin generated code calls to perform some of its work.
+Then the module that uses the generated code can implement the interface with whatever extra knowledge it needs.
+This was done in the proof of concept where the code that actually extracts string values from RDA API enums was called through an interface.
+The interface was defined in the plugin library and a factory to create a concrete implementation was passed to the constructor of the generated code.
+This allowed the plugin to generate all of its code without any access to the RDA API stubs themselves.
 
 
 ### Proposed Solution: Notable Alternatives
 [Proposed Solution: Notable Alternatives]: #proposed-solution-notable-alternatives
 
-A design based around a maven plugin was chosen because it integrates easily into the current build pipeline.
-Also IDEs can easily detect the presence of the plugin and recognize the generated classes so that they can be debugged.
-The javapoet API was chosen since it is already in use with the RIF code generator and works well for the task.
-
 A spreadsheet could be used for the DSL.
-However we decided thata YAML file format has several advantages over a spreashseet for this process:
+However we decided that a YAML file format has several advantages over a spreashseet for this process:
 * Existing open source libraries such as jackson can directly convert YAML into java beans.
 * RDA API data is inherently heirarchical and YAML naturally supports heirachical data.
-* YAML is pure text it can be edited from within an IDE and diffs of the file can be reviewed as part of the github PR review process.
+* YAML is pure text so can be edited from within an IDE and diffs of the file can be reviewed as part of the github PR review process.
 
 We considered using java annotation processing but decided that a maven plugin has some advantages:
 * The maven plugin works directly within the maven build process rather than adding the complexity of java annotation processing.
@@ -591,23 +641,20 @@ We considered using java annotation processing but decided that a maven plugin h
 
 We considered defining a full blown imperative DSL using groovy or something else but:
 * Writing transformations in java fits more naturally into the BFD code base and team expertise.
-* Declarative structure allows the plugin to guarantee adherance to the RDA API conventions and proper code review.
-* Transformations in the plugin have a standard structure that makes them easier to develop and debug.
+* Declarative structure allows the plugin to guarantee adherance to the RDA API conventions and proper code review. (i.e. no cheats can be inserted as code in the DSL file)
+* Transformations implemented in java within the plugin have a standard structure that makes them easier to develop and debug.
 
-Another alternative would be to forgo code generation completely.
+We considered using a dynamic transformation system rather than a code generator.
 The same metadata could be used to configure a class at runtime to perform all of the same transformations on the fly.
 This idea would have the advantage of eliminating the need for a maven plugin since a single class in a java library could dynamically perform all of the same work as the generated code.
 There are downsides to this approach though:
-* A fully dynamic object would have a performance penalty compared to compiled code.
-  For example with generated code the java JIT could determine that specific code branches are unused in the transformation classes for one of the claim types but always used for a different one.
-  Since we will be processing millions of messages per day this could become a bottleneck or increase CPU resource requirements.
-* Breakpoints can be set in specific places in the generated code to see what's happening if a bug is encountered.  
-  Dynamic code is more general and isolating a problem to a specific field can be more difficult.
-  (Skipping past the first 30 fields while debugging to see what happens in the field you care about can be painful.)
+* It would not work for creating entity classes or SQL migration files.
+* A fully dynamic object would have a performance penalty compared to compiled code.  For example with generated code the java JIT could determine that specific code branches are unused in the transformation classes for one of the claim types but always used for a different one. Since we will be processing millions of messages per day this could become a bottleneck or increase CPU resource requirements.
+* Breakpoints can be set in specific places in the generated code to see what's happening if a bug is encountered.   Dynamic code is more general and isolating a problem to a specific field can be more difficult.  (e.g. skipping past the first 30 fields in your debugger to see what happens in the field you actually care about can be painful.)
 
 Continuing with the existing hard-written code would have a number of disadvantages:
-* It would will make it more difficult to react to changes in the RDA API going forward.
-* It would greatly complicate PR reviews for RDA API changes since so many files would have to be reviewed.
+* It would make it more difficult to react to changes in the RDA API going forward.
+* It would complicate PR reviews for RDA API changes since multiple files would have to be reviewed for each change.
 * Changes in conventions by the RDA API team would require changing logic in multiple places rather than just in the plugin.  An example of this would be if they changed how they map enums to strings in their responses.
 
 
@@ -619,18 +666,9 @@ The RIF entities are currently generated using java annotation processing and re
 ## Future Possibilities
 [Future Possibilities]: #future-possibilities
 
-FROM THE TEMPLATE:
-Think about what the natural extension and evolution of your proposal would be and how it would affect the language and project as a whole in a holistic way.
-Try to use this section as a tool to more fully consider all possible interactions with the project and language in your proposal.
-Also consider how the this all fits into the roadmap for the project and of the relevant sub-team.
-
-This is also a good place to "dump ideas", if they are out of scope for the RFC you are writing but otherwise related.
-
-If you have tried and cannot think of any future possibilities, you may simply state that you cannot think of anything.
-
-Note that having something written down in the future-possibilities section is not a reason to accept the current or a future RFC;
-  such notes should be in the section on motivation or rationale in this or subsequent RFCs.
-The section merely provides additional information.
+The plugin can be adapted as new ways of using the RDA API data appear over time.
+A similar approach could be used in the future to consume different types of APIs or data.
+For example data from a REST API or a different file format could be handled along similar lines.
 
 ## Addendums
 [Addendums]: #addendums
