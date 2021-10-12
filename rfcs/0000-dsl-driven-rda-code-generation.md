@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0000-dsl-driven-rda-code-generation`
 * Start Date: 2021-10-11
-* RFC PR: [rust-lang/rfcs#0000](https://github.com/rust-lang/rfcs/pull/0000)
+* RFC PR: [beneficiary-fhir-data/rfcs#0000](https://github.com/CMSgov/beneficiary-fhir-data/pull/788)
 * JIRA Ticket(s):
     * [DCGEO-196](https://jira.cms.gov/browse/DCGEO-196)
 
