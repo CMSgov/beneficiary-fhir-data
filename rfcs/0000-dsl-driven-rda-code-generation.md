@@ -3,11 +3,12 @@
 
 * RFC Proposal ID: `0000-dsl-driven-rda-code-generation`
 * Start Date: 2021-10-11
-* RFC PR: [beneficiary-fhir-data/rfcs#0000](https://github.com/CMSgov/beneficiary-fhir-data/pull/788)
+* RFC PR: [CMSgov/beneficiary-fhir-data#788](https://github.com/CMSgov/beneficiary-fhir-data/pull/788)
 * JIRA Ticket(s):
     * [DCGEO-196](https://jira.cms.gov/browse/DCGEO-196)
 
-RDA API fields are chagning rapidly as the RDA API moves towards its production release and each API change triggers BFD code changes in several places.
+RDA API fields are changing rapidly as the RDA API moves towards its production release.
+Each API change triggers BFD code changes in several places.
 An automated process to generate BFD code based on a simple meta data file would eliminate tedious and error prone coding and keep all important details about the RDA data in a single place.
 Doing so would replace a large amount of hand written code with a single maven plugin to generate code that enforces RDA coding conventions and ensures generated code correctly matches the data.
 Areas affected by this process could include hibernate entities, data transformations to copy protobuf objects into entities, database migration SQL, randomized synthetic data production, and data transformations to copy synthea data into protobuf objects.
@@ -45,20 +46,20 @@ These can include:
 - Random synthetic data generation classes.
 - Data transformation code to copy data from Synthea data files into protobuf messages.
 
-Each of these areas require careful attention to ensure the logic, data types, and validation rules are correct.
+Changes made to each of these areas require careful attention to ensure the logic, data types, and validation rules are correct.
 These changes have to be made consistently in different places in the code.
 And yet most of this code is repetitive since the fields follow established conventions.
 For example, every maximum field length in the database must be properly reflected in the database entities, enforced in the data validation code, and honored in the synthetic data generators.
 This can certainly be done with hand-written code but is error prone and requires developer time to write/modify the code and review the associated PR.
 
-*Note: Code examples in this document are taken from proof of concept work performed in the `brianburton/dcgeo-186-entities-dsl` branch of th BFD repo.  The code in that branch is functional though incomplete and provided insight into the issues involved in following this recommendation.*
+*Note: Code examples in this document are taken from proof of concept work performed in the `brianburton/dcgeo-186-entities-dsl` branch of the BFD repo.  The code in that branch is functional though incomplete and provides insight into the issues involved in following this recommendation.*
 
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
 A maven plugin processes a YAML based metadata file to create all of the code required to work with the RDA API data messages, objects, and fields.
-The YAML explains in a declarative way what every RDA API message is, what table that message is stored in, what the columns of table are, and how to transfom the data from the RDA API messages into data in those columns.
+The YAML explains in a declarative way what every RDA API message is, what table that message is stored in, what columns are in the table, and how to transfom the data from the RDA API messages into values in those columns.
 For example:
 
 ````YAML
@@ -123,7 +124,7 @@ Since the RDA API data is used in different modules within the BFD code base the
 - The `random-data` goal generates random data generation classes to create randomized data of appropriate size and type for each object/field in the RDA API messages.
 - The `synthea-bridge` goal generates data transformation classes to copy data from Synthea RIF data files into protobuf messages.
 
-For an idea of the code savings consider the difference in complexity between that YAML example and these two hand written classes:
+For an idea of the code savings consider the difference in complexity between that YAML example and these hand written classes:
 
 - [PreAdjFissClaims hand written entity](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-model/bfd-model-rda/src/main/java/gov/cms/bfd/model/rda/PreAdjFissClaim.java)
 - [FissClaimTransformer hand written transformer class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/source/FissClaimTransformer.java)
