@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>gov.cms.bfd</groupId>
-        <artifactId>bfd-parent</artifactId>
+        <artifactId>bfd-common-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 

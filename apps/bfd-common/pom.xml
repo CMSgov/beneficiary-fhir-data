@@ -10,7 +10,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>bfd-common</artifactId>
+    <artifactId>bfd-common-parent</artifactId>
     <packaging>pom</packaging>
 
     <description>Utility package for common tasks in BFD</description>
