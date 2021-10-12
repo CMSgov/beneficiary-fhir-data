@@ -50,9 +50,9 @@ import org.junit.Test;
 /**
  * Integration tests for {@link PipelineApplication}.
  *
- * <p>These tests require the application capsule JAR to be built and available. Accordingly, they
- * may not run correctly in Eclipse: if the capsule isn't built yet, they'll just fail, but if an
- * older capsule exists (because you haven't rebuilt it), it'll run using the old code, which
+ * <p>These tests require the application pipeline assembly to be built and available. Accordingly,
+ * they may not run correctly in Eclipse: if the assembly isn't built yet, they'll just fail, but if
+ * an older assembly exists (because you haven't rebuilt it), it'll run using the old code, which
  * probably isn't what you want.
  */
 public final class PipelineApplicationIT {
@@ -523,7 +523,7 @@ public final class PipelineApplicationIT {
    * @return ProcessBuilder ready for more env vars to be added
    */
   private static ProcessBuilder createAppProcessBuilder() {
-    String[] command = createCommandForCapsule();
+    String[] command = createCommandForPipelineApp();
     ProcessBuilder appRunBuilder = new ProcessBuilder(command);
     appRunBuilder.redirectErrorStream(true);
 
@@ -602,34 +602,28 @@ public final class PipelineApplicationIT {
 
   /**
    * @return the command array for {@link ProcessBuilder#ProcessBuilder(String...)} that will launch
-   *     the application via its <code>.x</code> capsule executable
+   *     the application via its <code>.x</code> assembly executable script
    */
-  private static String[] createCommandForCapsule() {
+  private static String[] createCommandForPipelineApp() {
     try {
-      Path javaBinDir = Paths.get(System.getProperty("java.home")).resolve("bin");
-      Path javaBin = javaBinDir.resolve("java");
-
-      Path buildTargetDir = Paths.get(".", "target");
-      Path appJar =
-          Files.list(buildTargetDir)
+      Path assemblyDirectory =
+          Files.list(Paths.get(".", "target", "pipeline-app"))
               .filter(f -> f.getFileName().toString().startsWith("bfd-pipeline-app-"))
-              .filter(f -> f.getFileName().toString().endsWith("-capsule-fat.jar"))
               .findFirst()
               .get();
+      Path pipelineAppScript = assemblyDirectory.resolve("bfd-pipeline-app.sh");
 
       S3MinioConfig minioConfig = S3MinioConfig.Singleton();
       if (minioConfig.useMinio) {
         return new String[] {
-          javaBin.toString(),
+          pipelineAppScript.toAbsolutePath().toString(),
           "-Ds3.local=true",
           String.format("-Ds3.localUser=%s", minioConfig.minioUserName),
           String.format("-Ds3.localPass=%s", minioConfig.minioPassword),
-          String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress),
-          "-jar",
-          appJar.toAbsolutePath().toString()
+          String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress)
         };
       }
-      return new String[] {javaBin.toString(), "-jar", appJar.toAbsolutePath().toString()};
+      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
