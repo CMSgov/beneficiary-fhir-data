@@ -1,5 +1,6 @@
 package gov.cms.bfd.common.generators.token.pattern;
 
+import java.math.BigInteger;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
@@ -33,14 +34,14 @@ public class TokenRepeat extends TokenPattern {
   }
 
   @Override
-  String generateToken(long seed) {
+  String generateToken(BigInteger seed) {
     StringBuilder token = new StringBuilder();
 
-    long remainingSeed = seed;
+    BigInteger remainingSeed = seed;
 
     for (int i = 0; i < repeats; ++i) {
-      long nextSeed = remainingSeed % pattern.getTotalPermutations();
-      remainingSeed /= pattern.getTotalPermutations();
+      BigInteger nextSeed = remainingSeed.mod(pattern.getTotalPermutations());
+      remainingSeed = remainingSeed.divide(pattern.getTotalPermutations());
       // Building string backwards to optimize arithmetic
       token.insert(0, pattern.createToken(nextSeed));
     }
@@ -49,17 +50,17 @@ public class TokenRepeat extends TokenPattern {
   }
 
   @Override
-  long calculateTokenValue(String tokenString) {
-    long tokenValue = 0;
+  BigInteger calculateTokenValue(String tokenString) {
+    BigInteger tokenValue = BigInteger.ZERO;
     int tokenLength = pattern.tokenLength();
-    long permutations = pattern.getTotalPermutations();
+    BigInteger permutations = pattern.getTotalPermutations();
 
     for (int i = 0; i < repeats; ++i) {
       int startIndex = i * tokenLength;
 
       String substring = tokenString.substring(startIndex, startIndex + tokenLength);
-      tokenValue *= permutations;
-      tokenValue += pattern.parseTokenValue(substring);
+      tokenValue = tokenValue.multiply(permutations);
+      tokenValue = tokenValue.add(pattern.parseTokenValue(substring));
     }
 
     return tokenValue;
@@ -71,7 +72,7 @@ public class TokenRepeat extends TokenPattern {
   }
 
   @Override
-  long calculatePermutations() {
-    return (long) Math.pow(pattern.getTotalPermutations(), repeats);
+  BigInteger calculatePermutations() {
+    return pattern.getTotalPermutations().pow(repeats);
   }
 }

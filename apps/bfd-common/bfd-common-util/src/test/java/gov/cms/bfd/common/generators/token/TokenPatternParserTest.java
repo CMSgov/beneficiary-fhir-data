@@ -66,7 +66,7 @@ public class TokenPatternParserTest {
 
     TokenPattern tokenPattern = parser.parse(pattern);
 
-    long tokenValue = tokenPattern.parseTokenValue("B2");
+    long tokenValue = tokenPattern.parseTokenValue("B2").longValue();
 
     assertEquals(6, tokenValue);
   }

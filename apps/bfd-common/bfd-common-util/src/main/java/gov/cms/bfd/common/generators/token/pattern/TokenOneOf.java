@@ -1,6 +1,7 @@
 package gov.cms.bfd.common.generators.token.pattern;
 
 import gov.cms.bfd.common.exceptions.GeneratorException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -36,23 +37,23 @@ public class TokenOneOf extends TokenPattern {
   }
 
   @Override
-  String generateToken(long seed) {
+  String generateToken(BigInteger seed) {
     String token = "";
     Iterator<TokenPattern> iterator = patternOrder.iterator();
 
-    long currentSeed = seed;
+    BigInteger currentSeed = seed;
 
     while (token.isEmpty() && iterator.hasNext()) {
       TokenPattern pattern = iterator.next();
 
-      if (pattern.getTotalPermutations() > currentSeed) {
+      if (currentSeed.compareTo(pattern.getTotalPermutations()) < 0) {
         token = pattern.createToken(currentSeed);
       } else {
-        currentSeed -= pattern.getTotalPermutations();
+        currentSeed = currentSeed.subtract(pattern.getTotalPermutations());
       }
     }
 
-    if (currentSeed < 0) {
+    if (currentSeed.compareTo(BigInteger.ZERO) < 0) {
       throw new GeneratorException(
           "This shouldn't have happened, seed size exceeded permutations, seed value: " + seed);
     }
@@ -61,16 +62,16 @@ public class TokenOneOf extends TokenPattern {
   }
 
   @Override
-  long calculateTokenValue(String tokenString) {
-    long tokenValue = 0;
+  BigInteger calculateTokenValue(String tokenString) {
+    BigInteger tokenValue = BigInteger.ZERO;
 
-    for (int i = 0; tokenValue == 0 && i < patternOrder.size(); ++i) {
+    for (int i = 0; tokenValue.compareTo(BigInteger.ZERO) == 0 && i < patternOrder.size(); ++i) {
       TokenPattern tokenPattern = patternOrder.get(i);
 
       if (tokenPattern.isValidPattern(tokenString)) {
-        tokenValue += tokenPattern.parseTokenValue(tokenString);
+        tokenValue = tokenValue.add(tokenPattern.parseTokenValue(tokenString));
       } else {
-        tokenValue += tokenPattern.getTotalPermutations();
+        tokenValue = tokenValue.add(tokenPattern.getTotalPermutations());
       }
     }
 
@@ -83,11 +84,11 @@ public class TokenOneOf extends TokenPattern {
   }
 
   @Override
-  long calculatePermutations() {
-    long permutations = 0;
+  BigInteger calculatePermutations() {
+    BigInteger permutations = BigInteger.ZERO;
 
     for (TokenPattern pattern : orTokens) {
-      permutations += pattern.getTotalPermutations();
+      permutations = permutations.add(pattern.getTotalPermutations());
     }
 
     return permutations;

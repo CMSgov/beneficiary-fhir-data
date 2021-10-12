@@ -2,25 +2,37 @@ package gov.cms.bfd.common.generators.token.pattern;
 
 import gov.cms.bfd.common.exceptions.GeneratorException;
 import gov.cms.bfd.common.exceptions.ParsingException;
+import java.math.BigInteger;
+import java.util.Random;
 import lombok.Getter;
 
 public abstract class TokenPattern {
 
-  @Getter private long totalPermutations;
+  @Getter private BigInteger totalPermutations;
 
   public void init() {
     totalPermutations = calculatePermutations();
   }
 
   public String createToken() {
-    return createToken((long) (totalPermutations * Math.random()));
+    BigInteger randomNumber;
+
+    do {
+      randomNumber = new BigInteger(totalPermutations.bitLength(), new Random());
+    } while (randomNumber.compareTo(totalPermutations) >= 0);
+
+    return createToken(randomNumber);
   }
 
   public String createToken(long seed) {
+    return createToken(new BigInteger(String.valueOf(seed)));
+  }
+
+  public String createToken(BigInteger seed) {
     try {
-      if (seed < 0) {
+      if (seed.compareTo(BigInteger.ZERO) < 0) {
         throw new GeneratorException("Seed value can not be negative.");
-      } else if (getTotalPermutations() < seed) {
+      } else if (totalPermutations.compareTo(seed) <= 0) {
         throw new GeneratorException("Seed value is too high for the given generator");
       }
 
@@ -28,21 +40,21 @@ public abstract class TokenPattern {
     } catch (GeneratorException e) {
       // This will bubble all the way up so we can check what seed value caused failure and
       // investigate.
-      throw new GeneratorException("Failed with seed: " + seed);
+      throw new GeneratorException("Failed with seed: " + seed, e);
     }
   }
 
   public String convertToken(String token, TokenPattern basePattern) {
-    long value = basePattern.parseTokenValue(token);
+    BigInteger value = basePattern.parseTokenValue(token);
 
-    if (value >= totalPermutations) {
+    if (totalPermutations.compareTo(value) < 0) {
       throw new ParsingException("Target pattern does not have enough permutations to convert.");
     }
 
     return createToken(value);
   }
 
-  public long parseTokenValue(String tokenValue) {
+  public BigInteger parseTokenValue(String tokenValue) {
     if (tokenValue.length() != tokenLength()) {
       throw new ParsingException("Given token value is invalid for this pattern");
     }
@@ -52,11 +64,11 @@ public abstract class TokenPattern {
 
   public abstract boolean isValidPattern(String value);
 
-  abstract String generateToken(long seed);
+  abstract String generateToken(BigInteger seed);
 
-  abstract long calculateTokenValue(String tokenString);
+  abstract BigInteger calculateTokenValue(String tokenString);
 
   abstract int tokenLength();
 
-  abstract long calculatePermutations();
+  abstract BigInteger calculatePermutations();
 }

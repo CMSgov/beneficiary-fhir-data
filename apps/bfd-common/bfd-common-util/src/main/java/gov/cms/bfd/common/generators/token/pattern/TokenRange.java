@@ -1,5 +1,6 @@
 package gov.cms.bfd.common.generators.token.pattern;
 
+import java.math.BigInteger;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
@@ -16,13 +17,13 @@ public class TokenRange extends TokenPattern {
   }
 
   @Override
-  String generateToken(long seed) {
-    return String.valueOf((char) (lowerBound + seed));
+  String generateToken(BigInteger seed) {
+    return String.valueOf((char) (lowerBound + seed.intValue()));
   }
 
   @Override
-  long calculateTokenValue(String tokenString) {
-    return (tokenString.charAt(0) - lowerBound);
+  BigInteger calculateTokenValue(String tokenString) {
+    return new BigInteger(String.valueOf(tokenString.charAt(0) - lowerBound));
   }
 
   @Override
@@ -31,7 +32,7 @@ public class TokenRange extends TokenPattern {
   }
 
   @Override
-  long calculatePermutations() {
-    return upperBound - lowerBound + 1L;
+  BigInteger calculatePermutations() {
+    return new BigInteger(String.valueOf(upperBound - lowerBound + 1L));
   }
 }
