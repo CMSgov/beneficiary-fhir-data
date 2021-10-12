@@ -23,7 +23,7 @@ This role is highly configurable, though it tries to provide reasonable defaults
 
 Variables that must be defined to use the role:
 
-* `data_server_launcher`: The path (on the management system) to the app server launcher JAR to be deployed.
+* `data_server_launcher`: The path (on the management system) to the app server launcher ZIP to be deployed.
 * `data_server_war`: The path (on the management system) to the WAR file to be deployed.
 * `data_server_ssl_server_genkeypair_args`: The arguments to pass to the `keytool` command when generating a server keypair.
 * `data_server_ssl_client_cas`: A list of the SSL client certificate authorities that will be given access to the server.
@@ -56,3 +56,11 @@ Example Playbook
 ----------------
 
 See the test script in [.travis/test_base.yml](./.travis/test_base.yml) and the test case variables in [.travis/vars/](./.travis/vars/) for examples of how to apply this role in Ansible plays.
+
+Running the Tests
+-----------------
+
+This role includes a test framework that tests everything out using Docker, locally.
+Those tests can be run, as follows:
+
+    $ ops/ansible/roles/bfd-server/test/run-tests.sh
