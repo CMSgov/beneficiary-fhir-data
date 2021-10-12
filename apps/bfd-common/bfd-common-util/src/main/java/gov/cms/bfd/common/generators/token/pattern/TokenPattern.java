@@ -1,7 +1,7 @@
 package gov.cms.bfd.common.generators.token.pattern;
 
 import gov.cms.bfd.common.exceptions.GeneratorException;
-import jdk.nashorn.internal.runtime.ParserException;
+import gov.cms.bfd.common.exceptions.ParsingException;
 import lombok.Getter;
 
 public abstract class TokenPattern {
@@ -32,9 +32,19 @@ public abstract class TokenPattern {
     }
   }
 
+  public String convertToken(String token, TokenPattern basePattern) {
+    long value = basePattern.parseTokenValue(token);
+
+    if (value >= totalPermutations) {
+      throw new ParsingException("Target pattern does not have enough permutations to convert.");
+    }
+
+    return createToken(value);
+  }
+
   public long parseTokenValue(String tokenValue) {
     if (tokenValue.length() != tokenLength()) {
-      throw new ParserException("Given token value is invalid for this pattern");
+      throw new ParsingException("Given token value is invalid for this pattern");
     }
 
     return calculateTokenValue(tokenValue);

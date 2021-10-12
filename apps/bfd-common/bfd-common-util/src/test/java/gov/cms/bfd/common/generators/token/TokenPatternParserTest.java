@@ -3,37 +3,51 @@ package gov.cms.bfd.common.generators.token;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
+import gov.cms.bfd.common.exceptions.GeneratorException;
+import gov.cms.bfd.common.exceptions.ParsingException;
 import gov.cms.bfd.common.generators.token.pattern.TokenPattern;
 import org.junit.Test;
 
 public class TokenPatternParserTest {
 
   @Test
-  public void shouldGenerateCorrectTokenValues() {
+  public void shouldProduceExpectedPattern() {
     String pattern = "\\-[A-Za-z]TEST[AB0-9]\\d{10}";
 
     TokenPatternParser parser = new TokenPatternParser();
 
     TokenPattern tokenPattern = parser.parse(pattern);
 
-    //    System.out.println(tokenPattern.createToken(2684358725416156L));
+    String actual = tokenPattern.createToken(1265846364265L);
 
-    //    for (int i = 0; i < 10; ++i) {
-    //      System.out.println(tokenPattern.createToken(i));
-    //    }
+    assertEquals("-KTEST65846364265", actual);
+  }
 
-    for (int i = 0; i < 40; ++i) {
-      long s = (long) (tokenPattern.getTotalPermutations() * Math.random());
-      System.out.println(s + ": " + tokenPattern.createToken(s));
-    }
+  @Test(expected = GeneratorException.class)
+  public void shouldThrowParsingExceptionForSeedTooHigh() {
+    String pattern = "[ABF][1-5]";
 
-    fail();
+    TokenPatternParser parser = new TokenPatternParser();
+
+    TokenPattern tokenPattern = parser.parse(pattern);
+
+    tokenPattern.createToken(1000);
+  }
+
+  @Test(expected = GeneratorException.class)
+  public void shouldThrowParsingExceptionForNegativeSeed() {
+    String pattern = "[ABF][1-5]";
+
+    TokenPatternParser parser = new TokenPatternParser();
+
+    TokenPattern tokenPattern = parser.parse(pattern);
+
+    tokenPattern.createToken(-1);
   }
 
   @Test
-  public void validPatternTest() {
+  public void shouldCorrectlyValidatePattern() {
     String pattern = "\\-[A-Za-z]TEST[AB0-9]\\d{10}";
 
     TokenPatternParser parser = new TokenPatternParser();
@@ -45,57 +59,7 @@ public class TokenPatternParserTest {
   }
 
   @Test
-  public void tokenValueTest() {
-    String pattern = "\\-[A-Za-z]TEST[AB0-9]\\d{10}";
-
-    TokenPatternParser parser = new TokenPatternParser();
-
-    TokenPattern tokenPattern = parser.parse(pattern);
-
-    assertEquals(1265846364265L, tokenPattern.parseTokenValue("-KTEST65846364265"));
-  }
-
-  @Test
-  public void generateEvenOnly() {
-    String pattern = "[A-Z]{3}\\d{1}[02468]";
-
-    TokenPatternParser parser = new TokenPatternParser();
-
-    TokenPattern tokenPattern = parser.parse(pattern);
-
-    for (int i = 0; i < 50; i++) {
-      System.out.println(tokenPattern.createToken(i));
-    }
-  }
-
-  @Test
-  public void generateAB() {
-    String pattern = "[ABF][1-5]";
-
-    TokenPatternParser parser = new TokenPatternParser();
-
-    TokenPattern tokenPattern = parser.parse(pattern);
-
-    for (int i = 0; i < tokenPattern.getTotalPermutations(); i++) {
-      System.out.println(tokenPattern.createToken(i));
-    }
-  }
-
-  @Test
-  public void escapedTokens() {
-    String pattern = "\\[TST\\][a-c]\\-[0-3]";
-
-    TokenPatternParser parser = new TokenPatternParser();
-
-    TokenPattern tokenPattern = parser.parse(pattern);
-
-    for (int i = 0; i < tokenPattern.getTotalPermutations(); i++) {
-      System.out.println(tokenPattern.createToken(i));
-    }
-  }
-
-  @Test
-  public void nextValueTest() {
+  public void shouldGetCorrectValueOfToken() {
     String pattern = "[ABF][1-5]";
 
     TokenPatternParser parser = new TokenPatternParser();
@@ -104,6 +68,36 @@ public class TokenPatternParserTest {
 
     long tokenValue = tokenPattern.parseTokenValue("B2");
 
-    assertEquals("B3", tokenPattern.createToken(tokenValue + 1));
+    assertEquals(6, tokenValue);
+  }
+
+  @Test
+  public void shouldCorrectConvertToken() {
+    String fromPattern = "[ABF][1-5]";
+    String toPattern = "A[0-9][AB]";
+
+    TokenPatternParser parser = new TokenPatternParser();
+
+    TokenPattern fromTokenPattern = parser.parse(fromPattern);
+    TokenPattern toTokenPattern = parser.parse(toPattern);
+
+    String token = toTokenPattern.convertToken("B3", fromTokenPattern);
+
+    assertEquals("A3B", token);
+  }
+
+  // If the target pattern doesn't have enough permutations to represent the base value, it should
+  // throw an error.
+  @Test(expected = ParsingException.class)
+  public void shouldThrowParsingExceptionForInvalidToken() {
+    String fromPattern = "[ABF][1-5]";
+    String toPattern = "[AB]";
+
+    TokenPatternParser parser = new TokenPatternParser();
+
+    TokenPattern fromTokenPattern = parser.parse(fromPattern);
+    TokenPattern toTokenPattern = parser.parse(toPattern);
+
+    toTokenPattern.convertToken("B3", fromTokenPattern);
   }
 }

@@ -22,6 +22,8 @@ public class TokenParserFactory {
   private TokenParserFactory() {}
 
   public static TokenParser createTokenParser(Queue<Character> patternStream) {
+    // ConstantConditions - This will never be null
+    //noinspection ConstantConditions
     char firstToken = patternStream.peek();
 
     if (firstToken == '[') {
