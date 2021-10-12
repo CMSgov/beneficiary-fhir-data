@@ -13,13 +13,13 @@
 /insights @jzulim @keithdadkins @njdister @mackec1 @christrotteradhoc
 
 #BCDA Insights Codeowners
-/insights/terraform/projects/bcda @msnook @orenfromberg @njdister @jzulim
+/insights/terraform/projects/bcda @msnook @orenfromberg @keithdadkins @njdister @jzulim
 
 #AB2D Insights Codeowners
-/insights/terraform/projects/ab2d @lailasharshar @nflearl @wnyffenegger @njdister @jzulim
+/insights/terraform/projects/ab2d @lailasharshar @nflearl @wnyffenegger @keithdadkins @njdister @jzulim
 
 #BB2 Insights Codeowners
-/insights/terraform/projects/bb2 @dtisza1 @njdister @jzulim
+/insights/terraform/projects/bb2 @dtisza1 @keithdadkins @njdister @jzulim
 
 #DCGEO Pipeline Codeowners
 /apps/bfd-pipeline/bfd-pipeline-rda-grpc @ericbuckley @brianburton @jzulim @christrotteradhoc
