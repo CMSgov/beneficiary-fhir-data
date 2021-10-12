@@ -121,7 +121,7 @@ cd "${targetDirectory}/.."
 
 # Define all of the derived paths we'll need.
 workDirectory="${targetDirectory}/server-work"
-serverLauncher="${workDirectory}/$(ls ${workDirectory} | grep '^bfd-server-launcher-' | grep -v '^bfd-server-launcher-.*\.zip$')/bfd-server-launcher.sh"
+serverLauncher=$(echo ${workDirectory}/bfd-server-launcher-*/bfd-server-launcher.sh)
 serverPortsFile="${workDirectory}/server-ports.properties"
 serverLog="${workDirectory}/server-console.log"
 gcLog="${workDirectory}/gc.log"

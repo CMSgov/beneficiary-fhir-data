@@ -8,10 +8,19 @@ export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
 export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
 export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
-{% if data_pipeline_new_relic_app_name is defined %}export NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'{% endif %}
+
 export NEW_RELIC_METRIC_HOST='{{ data_pipeline_new_relic_metric_host }}'
 export NEW_RELIC_METRIC_PATH='{{ data_pipeline_new_relic_metric_path }}'
-{% if data_pipeline_new_relic_metric_key is defined %}export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'{% endif %}
+{% if data_pipeline_new_relic_app_name is defined %}
+export NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
+{% else %}
+#export NEW_RELIC_APP_NAME=
+{% endif %}
+{% if data_pipeline_new_relic_metric_key is defined %}
+export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
+{% else %}
+#export NEW_RELIC_METRIC_KEY=
+{% endif %}
 export RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
 export RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
 export RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'

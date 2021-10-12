@@ -1,3 +1,4 @@
 ---
+
 - name: Configure ETL service
   import_tasks: etl.yml

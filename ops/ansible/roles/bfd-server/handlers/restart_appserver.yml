@@ -29,7 +29,7 @@
   failed_when: false
 
 - name: Grab Log Contents
-  command: cat /usr/local/bfd-pipeline/bluebutton-data-pipeline.log
+  command: cat /usr/local/bluebutton-data-pipeline/bluebutton-data-pipeline.log
   listen: Restart BFD Server Service
   changed_when: false
   register: command_cat_pipeline_log
