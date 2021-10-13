@@ -31,11 +31,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
-
-		<dependency>
 			<!-- Uses the Codebook XML files from `bluebutton-data-model-codebook-extractor` 
 				to codegen related utility code. -->
 			<groupId>gov.cms.bfd</groupId>

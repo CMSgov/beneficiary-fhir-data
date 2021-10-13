@@ -100,16 +100,6 @@
 			<artifactId>bfd-model-rif-samples</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<!-- API, java.xml.bind module -->
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-		</dependency>
-		<!-- Runtime, com.sun.xml.bind module -->
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>

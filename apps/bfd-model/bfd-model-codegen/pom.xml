@@ -31,10 +31,6 @@
 			<artifactId>bfd-model-codebook-extractor</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
 
 		<dependency>
 			<!-- Automatically generates META-INF/services files for service classes 
