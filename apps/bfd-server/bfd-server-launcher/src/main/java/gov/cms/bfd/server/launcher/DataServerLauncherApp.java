@@ -179,17 +179,21 @@ public final class DataServerLauncherApp {
     HandlerCollection handlers = new HandlerCollection(webapp);
     server.setHandler(handlers);
 
-    /*
-     * Logback access does not seem to be supported any longer with jetty 10 so switching to
-     * a custom format request log. Custom format string is passed in
-     * so no more using an xml file as with logback-access.
-     */
+    // Configure the 'access.log' file generation via a Jetty CustomRequestLog
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
     String requestLogFormat =
         "%{remote}a - \"%u\" [%t] \"%r\" \"%q\" %s %{CLF}S %D"
-            + " %{BlueButton-OriginalQueryId}i %{BlueButton-OriginalQueryCounter}i [%{BlueButton-OriginalQueryTimestamp}i] %{BlueButton-DeveloperId}i \"%{BlueButton-Developer}i\""
-            + " %{BlueButton-ApplicationId}i \"%{BlueButton-Application}i\" %{BlueButton-UserId}i \"%{BlueButton-User}i\" %{BlueButton-BeneficiaryId}i";
+            + " %{BlueButton-OriginalQueryId}i"
+            + " %{BlueButton-OriginalQueryCounter}i"
+            + " [%{BlueButton-OriginalQueryTimestamp}i]"
+            + " %{BlueButton-DeveloperId}i"
+            + " \"%{BlueButton-Developer}i\""
+            + " %{BlueButton-ApplicationId}i"
+            + " \"%{BlueButton-Application}i\""
+            + " %{BlueButton-UserId}i"
+            + " \"%{BlueButton-User}i\""
+            + " %{BlueButton-BeneficiaryId}i";
     CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
 
     server.setRequestLog(requestLog);

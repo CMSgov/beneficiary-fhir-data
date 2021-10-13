@@ -129,7 +129,7 @@
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
-    		<artifactId>javax.servlet-api</artifactId>
+			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 		<dependency>
 			<!-- Used in tests to help with managing asynchronous behavior. Reference:

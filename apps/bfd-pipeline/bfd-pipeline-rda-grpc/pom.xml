@@ -181,19 +181,19 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-			<!-- API, java.xml.bind module -->
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-		</dependency>
-		<dependency>
+            <!-- API, java.xml.bind module -->
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+        <dependency>
             <!-- Runtime, com.sun.xml.bind module -->
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
-		<dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+        </dependency>
+        <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
-		</dependency>
+        </dependency>
     </dependencies>
 
     <build>

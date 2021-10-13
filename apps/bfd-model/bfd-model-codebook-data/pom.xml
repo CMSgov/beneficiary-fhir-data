@@ -31,12 +31,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- Provides a sane facade for the giant mess of incompatible logging 
-				frameworks in Java. -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
@@ -49,10 +43,16 @@
 			<version>${project.version}</version>
 
 			<!-- Marked as provided to keep it (and its dependencies) out of our production 
-							systems. -->
+				systems. -->
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<!-- Provides a sane facade for the giant mess of incompatible logging 
+				frameworks in Java. -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>

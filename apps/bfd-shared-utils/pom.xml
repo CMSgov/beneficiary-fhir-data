@@ -28,13 +28,4 @@
 		</dependency>
 	</dependencies>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-		</plugins>
-	</build>
-
 </project>

@@ -24,13 +24,23 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the 
+			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
 				model classes in the gov.cms.bfd.model.rif package. -->
 			<groupId>gov.cms.bfd</groupId>
 			<artifactId>bfd-model-codegen-annotations</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
+				model classes in the gov.cms.bfd.model.rif package. -->
+			<groupId>gov.cms.bfd</groupId>
+			<artifactId>bfd-model-codegen</artifactId>
+			<version>${project.version}</version>
 
+			<!-- Marked as provided to keep it (and its dependencies) out of our production 
+				systems. -->
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<!-- Provides a sane facade for the giant mess of incompatible logging 
 				frameworks in Java. -->
@@ -43,31 +53,6 @@
 			<artifactId>metrics-core</artifactId>
 		</dependency>
 
-		<dependency>
-			<!-- Uses the `dev/rif-layout-and-fhir-mapping.xlsx` file to codegen the
-				model classes in the gov.cms.bfd.model.rif package. -->
-			<groupId>gov.cms.bfd</groupId>
-			<artifactId>bfd-model-codegen</artifactId>
-			<version>${project.version}</version>
-
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
-				for JPA entities. This happens happens automagically via javac's annotation
-				processor. -->
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-jpamodelgen</artifactId>
-			<version>${hibernate.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jboss.logging</groupId>
-					<artifactId>jboss-logging</artifactId>
-				</exclusion>
-			</exclusions>
-
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
@@ -95,6 +80,21 @@
 				Hibernate is used for that in the BFD projects.) -->
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
 			<groupId>org.hibernate.javax.persistence</groupId>
+		</dependency>
+		<dependency>
+			<!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
+				for JPA entities. This happens happens automagically via javac's annotation
+				processor. -->
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jpamodelgen</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.logging</groupId>
+					<artifactId>jboss-logging</artifactId>
+				</exclusion>
+			</exclusions>
+
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<!-- Hibernate is a popular ORM that implements the JPA 2.1 spec. It's 
