@@ -23,7 +23,7 @@
 			<version>24.1.1-jre</version>
 		</dependency>
 
-                <!-- Provide the api and implementation for XML binf which are used by many BFD modules. -->
+		<!-- Provide the api and implementation for XML binf which are used by many BFD modules. -->
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>

@@ -29,7 +29,6 @@
 			<artifactId>bfd-model-codegen-annotations</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<dependency>
 			<!-- Uses the Codebook XML files from `bluebutton-data-model-codebook-extractor` 
 				to codegen related utility code. -->
