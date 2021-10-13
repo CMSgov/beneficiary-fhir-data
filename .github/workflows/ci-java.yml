@@ -30,8 +30,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11'
-          # Pinning this version as version 262 causes AuthenticationIT tests to fail
-          # See BFD-332.
       - name: 'Generate maven toolchain config'
         run: |
           cat << EOF > ~/.m2/toolchains.xml
