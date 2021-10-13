@@ -175,14 +175,10 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    // Wire up the WebAppContext to Jetty.
-    HandlerCollection handlers = new HandlerCollection(webapp);
-    server.setHandler(handlers);
-
     // Configure the 'access.log' file generation via a Jetty CustomRequestLog
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
-    String requestLogFormat =
+    final String requestLogFormat =
         "%{remote}a - \"%u\" [%t] \"%r\" \"%q\" %s %{CLF}S %D"
             + " %{BlueButton-OriginalQueryId}i"
             + " %{BlueButton-OriginalQueryCounter}i"
@@ -194,7 +190,7 @@ public final class DataServerLauncherApp {
             + " %{BlueButton-UserId}i"
             + " \"%{BlueButton-User}i\""
             + " %{BlueButton-BeneficiaryId}i";
-    CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
+    final CustomRequestLog requestLog = new CustomRequestLog(accessLogFileName, requestLogFormat);
 
     server.setRequestLog(requestLog);
 
@@ -216,6 +212,10 @@ public final class DataServerLauncherApp {
     constraintMapping.setConstraint(constraint);
     securityHandler.setConstraintMappings(new ConstraintMapping[] {constraintMapping});
     webapp.setSecurityHandler(securityHandler);
+
+    // Wire up the WebAppContext to Jetty.
+    HandlerCollection handlers = new HandlerCollection(webapp);
+    server.setHandler(handlers);
 
     // Configure shutdown handlers before starting everything up.
     server.setStopTimeout(Duration.ofSeconds(30).toMillis());
