@@ -90,6 +90,7 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
@@ -1571,7 +1572,7 @@ public final class TransformerUtilsV2 {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
 
-      if (entry.getResource().getResourceType().toString().equals("ExplanationOfBenefit")) {
+      if (entry.getResource().getResourceType() == ResourceType.ExplanationOfBenefit) {
         ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
         if (eob != null
             && eob.getPatient() != null
@@ -1581,16 +1582,20 @@ public final class TransformerUtilsV2 {
             beneIds.add(reference);
           }
         }
+
+        continue;
       }
 
-      if (entry.getResource().getResourceType().toString().equals("Patient")) {
+      if (entry.getResource().getResourceType() == ResourceType.Patient) {
         Patient patient = ((Patient) entry.getResource());
         if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
           beneIds.add(patient.getId());
         }
+
+        continue;
       }
 
-      if (entry.getResource().getResourceType().toString().equals("Coverage")) {
+      if (entry.getResource().getResourceType() == ResourceType.Coverage) {
         Coverage coverage = ((Coverage) entry.getResource());
         if (coverage != null
             && coverage.getBeneficiary() != null
@@ -1600,6 +1605,7 @@ public final class TransformerUtilsV2 {
             beneIds.add(reference);
           }
         }
+        continue;
       }
     }
 
