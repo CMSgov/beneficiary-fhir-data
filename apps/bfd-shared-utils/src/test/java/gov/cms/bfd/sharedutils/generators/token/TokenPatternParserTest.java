@@ -85,7 +85,22 @@ public class TokenPatternParserTest {
   }
 
   @Test
-  public void shouldCorrectConvertToken() {
+  public void shouldCorrectlyConvertToken() {
+    String fromPattern = "\\-\\d{8}";
+    String toPattern = "[0-9A-F]{8}";
+
+    TokenPatternParser parser = new TokenPatternParser();
+
+    TokenPattern fromTokenPattern = parser.parse(fromPattern);
+    TokenPattern toTokenPattern = parser.parse(toPattern);
+
+    String token = toTokenPattern.convertToken("-00004351", fromTokenPattern);
+
+    assertEquals("000010FF", token);
+  }
+
+  @Test
+  public void shouldCorrectlyConvertToken2() {
     String fromPattern = "[ABF][1-5]";
     String toPattern = "A[0-9][AB]";
 
