@@ -2,21 +2,20 @@ package gov.cms.bfd.sharedutils.generators.token.parser;
 
 import gov.cms.bfd.sharedutils.generators.token.pattern.TokenOneOf;
 import gov.cms.bfd.sharedutils.generators.token.pattern.TokenPattern;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TokenOneOfParser extends AbstractTokenGroupParser<Set<TokenPattern>> {
+public class TokenOneOfParser extends AbstractTokenGroupParser<List<TokenPattern>> {
 
   @Override
-  protected Set<TokenPattern> createCollection() {
-    return new HashSet<>();
+  protected List<TokenPattern> createCollection() {
+    return new ArrayList<>();
   }
 
   @Override
-  protected TokenPattern createTokenPattern(Set<TokenPattern> tokenPatterns) {
+  protected TokenPattern createTokenPattern(List<TokenPattern> tokenPatterns) {
     TokenOneOf pattern = new TokenOneOf(tokenPatterns);
     pattern.init();
-    pattern.sortTokens();
     return pattern;
   }
 }

@@ -1,28 +1,32 @@
 package gov.cms.bfd.sharedutils.generators.token.pattern;
 
 import gov.cms.bfd.sharedutils.generators.exceptions.GeneratorException;
+import gov.cms.bfd.sharedutils.generators.exceptions.ParsingException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class TokenOneOf extends TokenPattern {
 
-  private final Set<TokenPattern> orTokens;
-  private final List<TokenPattern> patternOrder = new ArrayList<>();
+  private final List<TokenPattern> patternOrder;
+  private final Set<TokenPattern> orTokens = new HashSet<>();
 
-  public void sortTokens() {
-    patternOrder.clear();
-    patternOrder.addAll(orTokens);
+  public TokenOneOf(List<TokenPattern> tokens) {
+    patternOrder = tokens;
 
-    // TODO: Fix this priority sort, right now 'A' is before 'a'
-    patternOrder.sort(Comparator.comparing(pattern -> pattern.createToken(0)));
+    // TODO: This could use more rigorous range overlap checks
+    for (TokenPattern token : patternOrder) {
+      // Make sure there are no duplicates
+      if (orTokens.contains(token)) {
+        throw new ParsingException("Duplicate 'or' type token pattern found");
+      } else {
+        orTokens.add(token);
+      }
+    }
   }
 
   @Override

@@ -12,8 +12,8 @@ import org.junit.Test;
 public class TokenPatternParserTest {
 
   @Test
-  public void shouldProduceExpectedPattern() {
-    String pattern = "\\-[A-Za-z]TEST[AB0-9]\\d{10}";
+  public void shouldProduceExpectedToken() {
+    String pattern = "\\-[A-Za-z0-9]TEST[0-9AB]\\d{10}";
 
     TokenPatternParser parser = new TokenPatternParser();
 
@@ -22,6 +22,19 @@ public class TokenPatternParserTest {
     String actual = tokenPattern.createToken(1265846364265L);
 
     assertEquals("-KTEST65846364265", actual);
+  }
+
+  @Test
+  public void shouldProduceExpectedTokenWithDifferentPatternOrder() {
+    String pattern = "\\-[0-9A-Za-z]TEST[AB0-9]\\d{10}";
+
+    TokenPatternParser parser = new TokenPatternParser();
+
+    TokenPattern tokenPattern = parser.parse(pattern);
+
+    String actual = tokenPattern.createToken(1265846364265L);
+
+    assertEquals("-ATEST45846364265", actual);
   }
 
   @Test(expected = GeneratorException.class)
