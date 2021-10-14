@@ -136,10 +136,6 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
     }
 
-    if (!beneficiaryEntity.getBeneEnrollmentReferenceYear().isPresent()) {
-      throw new ResourceNotFoundException("Cannot find coverage for non present enrollment year");
-    }
-
     Coverage coverage =
         CoverageTransformerV2.transform(metricRegistry, coverageIdSegment.get(), beneficiaryEntity);
     return coverage;
