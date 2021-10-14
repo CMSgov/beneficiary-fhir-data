@@ -22,7 +22,7 @@
 		<module>bfd-pipeline-shared-utils</module>
 		<module>bfd-pipeline-app</module>
 		<module>bfd-pipeline-benchmarks</module>
-		<module>bfd-pipeline-rif-to-rda</module>
+		<module>bfd-pipeline-rda-bridge</module>
 	</modules>
 
 	<properties>

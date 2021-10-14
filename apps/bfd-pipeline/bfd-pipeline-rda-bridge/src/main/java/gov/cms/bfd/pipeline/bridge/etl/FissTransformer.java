@@ -6,9 +6,9 @@ import gov.cms.bfd.pipeline.bridge.model.Fiss;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
+import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +18,6 @@ public class FissTransformer extends AbstractTransformer {
 
   private static final AtomicLong dcnCounter = new AtomicLong();
 
-  private static final Map<String, String> mpnLookupMap = new ConcurrentHashMap<>();
   private static final int MAX_PROC_CODES = 25;
 
   private final Map<String, BeneficiaryData> mbiMap;
@@ -40,20 +39,16 @@ public class FissTransformer extends AbstractTransformer {
             .setDcn(String.format("*%022d", dcnCounter.getAndIncrement()))
             .setMbi(mbiMap.get(beneId).getMbi())
             .setHicNo(mbiMap.get(beneId).getHicNo())
-            .setCurrLoc1EnumValue(0)
-            .setCurrLoc2EnumValue(0)
-            .setCurrStatusEnumValue(0)
+            .setCurrLoc1Unrecognized("?") // Not generated
+            .setCurrLoc2Unrecognized("?") // Not generated
+            .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING) // Not generated
             .setNpiNumber(npi)
             .setTotalChargeAmount(data.get(Fiss.CLM_TOT_CHRG_AMT).orElse(""))
             .setPrincipleDiag(data.get(Fiss.PRNCPAL_DGNS_CD).orElse(""));
 
     data.get(Fiss.ADMTG_DGNS_CD).ifPresent(claimBuilder::setAdmDiagCode);
 
-    if (!mpnLookupMap.containsKey(npi)) {
-      mpnLookupMap.putIfAbsent(npi, String.format("%06d", mpnCounter.getAndIncrement()));
-    }
-
-    claimBuilder.setMedaProvId(mpnLookupMap.get(npi));
+    claimBuilder.setMedaProvId("");
 
     for (int i = 1; i <= MAX_PROC_CODES; ++i) {
       final int INDEX = i;
@@ -65,7 +60,7 @@ public class FissTransformer extends AbstractTransformer {
                   claimBuilder.addFissProcCodes(
                       FissProcedureCode.newBuilder()
                           .setProcCd(data.get(Fiss.ICD_PRCDR_CD + INDEX).orElse(""))
-                          .setProcDt(data.get(Fiss.PRCDR_DT + INDEX).orElse(""))
+                          .setProcDt(convertRifDate(data.get(Fiss.PRCDR_DT + INDEX).orElse("")))
                           .build()));
     }
 

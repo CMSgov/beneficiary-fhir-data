@@ -165,7 +165,9 @@ public class RDABridge {
 
       while (parser.hasData()) {
         MessageOrBuilder message = transformer.transform(parser.read());
-        sink.write(message);
+        if (message != null) {
+          sink.write(message);
+        }
 
         ++i;
       }
