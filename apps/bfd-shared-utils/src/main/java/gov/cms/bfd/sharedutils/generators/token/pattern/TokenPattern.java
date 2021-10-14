@@ -4,6 +4,7 @@ import gov.cms.bfd.sharedutils.generators.exceptions.GeneratorException;
 import gov.cms.bfd.sharedutils.generators.exceptions.ParsingException;
 import java.math.BigInteger;
 import java.util.Random;
+import java.util.Set;
 import lombok.Getter;
 
 public abstract class TokenPattern {
@@ -22,6 +23,10 @@ public abstract class TokenPattern {
     } while (randomNumber.compareTo(totalPermutations) >= 0);
 
     return createToken(randomNumber);
+  }
+
+  public boolean overlaps(TokenPattern tokenPattern) {
+    return tokenPattern.containsAnyOf(this.characters());
   }
 
   public String createToken(long seed) {
@@ -71,4 +76,8 @@ public abstract class TokenPattern {
   abstract int tokenLength();
 
   abstract BigInteger calculatePermutations();
+
+  abstract boolean containsAnyOf(Set<Character> chars);
+
+  abstract Set<Character> characters();
 }

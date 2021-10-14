@@ -12,19 +12,24 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class TokenOneOf extends TokenPattern {
 
-  private final List<TokenPattern> patternOrder;
-  private final Set<TokenPattern> orTokens = new HashSet<>();
+  private final List<TokenPattern> patterns;
 
   public TokenOneOf(List<TokenPattern> tokens) {
-    patternOrder = tokens;
+    patterns = tokens;
+    Set<TokenPattern> uniqueTokens = new HashSet<>();
 
-    // TODO: This could use more rigorous range overlap checks
-    for (TokenPattern token : patternOrder) {
+    for (TokenPattern newToken : patterns) {
       // Make sure there are no duplicates
-      if (orTokens.contains(token)) {
+      if (uniqueTokens.contains(newToken)) {
         throw new ParsingException("Duplicate 'or' type token pattern found");
       } else {
-        orTokens.add(token);
+        // Even if not a duplicate, make sure it doesn't overlap with other patterns
+        for (TokenPattern storedToken : uniqueTokens) {
+          if (newToken.overlaps(storedToken)) {
+            throw new ParsingException("Token pattern overlap found");
+          }
+        }
+        uniqueTokens.add(newToken);
       }
     }
   }
@@ -33,8 +38,8 @@ public class TokenOneOf extends TokenPattern {
   public boolean isValidPattern(String value) {
     boolean isValid = false;
 
-    for (int i = 0; !isValid && i < patternOrder.size(); ++i) {
-      isValid = patternOrder.get(i).isValidPattern(value);
+    for (int i = 0; !isValid && i < patterns.size(); ++i) {
+      isValid = patterns.get(i).isValidPattern(value);
     }
 
     return isValid;
@@ -43,7 +48,7 @@ public class TokenOneOf extends TokenPattern {
   @Override
   String generateToken(BigInteger seed) {
     String token = "";
-    Iterator<TokenPattern> iterator = patternOrder.iterator();
+    Iterator<TokenPattern> iterator = patterns.iterator();
 
     BigInteger currentSeed = seed;
 
@@ -69,8 +74,8 @@ public class TokenOneOf extends TokenPattern {
   BigInteger calculateTokenValue(String tokenString) {
     BigInteger tokenValue = BigInteger.ZERO;
 
-    for (int i = 0; tokenValue.compareTo(BigInteger.ZERO) == 0 && i < patternOrder.size(); ++i) {
-      TokenPattern tokenPattern = patternOrder.get(i);
+    for (int i = 0; tokenValue.compareTo(BigInteger.ZERO) == 0 && i < patterns.size(); ++i) {
+      TokenPattern tokenPattern = patterns.get(i);
 
       if (tokenPattern.isValidPattern(tokenString)) {
         tokenValue = tokenValue.add(tokenPattern.parseTokenValue(tokenString));
@@ -84,17 +89,31 @@ public class TokenOneOf extends TokenPattern {
 
   @Override
   int tokenLength() {
-    return orTokens.iterator().next().tokenLength();
+    return patterns.iterator().next().tokenLength();
   }
 
   @Override
   BigInteger calculatePermutations() {
     BigInteger permutations = BigInteger.ZERO;
 
-    for (TokenPattern pattern : orTokens) {
+    for (TokenPattern pattern : patterns) {
       permutations = permutations.add(pattern.getTotalPermutations());
     }
 
     return permutations;
+  }
+
+  @Override
+  boolean containsAnyOf(Set<Character> chars) {
+    return patterns.stream().anyMatch(t -> t.containsAnyOf(chars));
+  }
+
+  @Override
+  Set<Character> characters() {
+    Set<Character> characters = new HashSet<>();
+
+    patterns.forEach(t -> characters.addAll(t.characters()));
+
+    return characters;
   }
 }

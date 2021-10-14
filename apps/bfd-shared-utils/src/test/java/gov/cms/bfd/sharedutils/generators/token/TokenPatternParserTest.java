@@ -113,4 +113,33 @@ public class TokenPatternParserTest {
 
     toTokenPattern.convertToken("B3", fromTokenPattern);
   }
+
+  // DefaultAnnotationParam - Better to be explicit
+  @SuppressWarnings("DefaultAnnotationParam")
+  @Test(expected = Test.None.class)
+  public void shouldNotThrowParsingExceptionIfNoOrGroupOverlap() {
+    String pattern = "[A-DE-J]1";
+
+    TokenPatternParser parser = new TokenPatternParser();
+
+    parser.parse(pattern);
+  }
+
+  @Test(expected = ParsingException.class)
+  public void shouldThrowParsingExceptionForDuplicateOrGroup() {
+    String pattern = "[AA]1";
+
+    TokenPatternParser parser = new TokenPatternParser();
+
+    parser.parse(pattern);
+  }
+
+  @Test(expected = ParsingException.class)
+  public void shouldThrowParsingExceptionForOverlappingOrGroup() {
+    String pattern = "[A-DD-F]1";
+
+    TokenPatternParser parser = new TokenPatternParser();
+
+    parser.parse(pattern);
+  }
 }

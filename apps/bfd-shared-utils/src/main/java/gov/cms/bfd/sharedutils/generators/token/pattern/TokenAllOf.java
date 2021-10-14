@@ -2,8 +2,10 @@ package gov.cms.bfd.sharedutils.generators.token.pattern;
 
 import gov.cms.bfd.sharedutils.generators.exceptions.GeneratorException;
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
@@ -89,5 +91,19 @@ public class TokenAllOf extends TokenPattern {
     }
 
     return permutations;
+  }
+
+  @Override
+  boolean containsAnyOf(Set<Character> chars) {
+    return patterns.stream().anyMatch(t -> t.containsAnyOf(chars));
+  }
+
+  @Override
+  Set<Character> characters() {
+    Set<Character> characters = new HashSet<>();
+
+    patterns.forEach(t -> characters.addAll(t.characters()));
+
+    return characters;
   }
 }

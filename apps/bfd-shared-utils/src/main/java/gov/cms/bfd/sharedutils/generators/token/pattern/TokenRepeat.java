@@ -1,6 +1,7 @@
 package gov.cms.bfd.sharedutils.generators.token.pattern;
 
 import java.math.BigInteger;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
@@ -74,5 +75,15 @@ public class TokenRepeat extends TokenPattern {
   @Override
   BigInteger calculatePermutations() {
     return pattern.getTotalPermutations().pow(repeats);
+  }
+
+  @Override
+  boolean containsAnyOf(Set<Character> chars) {
+    return pattern.containsAnyOf(chars);
+  }
+
+  @Override
+  Set<Character> characters() {
+    return pattern.characters();
   }
 }

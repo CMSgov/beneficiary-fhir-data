@@ -1,6 +1,8 @@
 package gov.cms.bfd.sharedutils.generators.token.pattern;
 
+import com.google.common.collect.Sets;
 import java.math.BigInteger;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
@@ -33,5 +35,15 @@ public class TokenSingleton extends TokenPattern {
   @Override
   BigInteger calculatePermutations() {
     return BigInteger.ONE;
+  }
+
+  @Override
+  boolean containsAnyOf(Set<Character> chars) {
+    return chars.contains(token);
+  }
+
+  @Override
+  Set<Character> characters() {
+    return Sets.newHashSet(token);
   }
 }

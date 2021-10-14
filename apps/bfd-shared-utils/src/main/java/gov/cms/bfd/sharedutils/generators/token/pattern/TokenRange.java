@@ -1,6 +1,9 @@
 package gov.cms.bfd.sharedutils.generators.token.pattern;
 
 import java.math.BigInteger;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
@@ -34,5 +37,24 @@ public class TokenRange extends TokenPattern {
   @Override
   BigInteger calculatePermutations() {
     return new BigInteger(String.valueOf(upperBound - lowerBound + 1L));
+  }
+
+  @Override
+  boolean containsAnyOf(Set<Character> chars) {
+    for (Character c : chars) {
+      if (c >= lowerBound && c <= upperBound) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  @Override
+  Set<Character> characters() {
+    return IntStream.range(lowerBound, upperBound + 1)
+        .boxed()
+        .map(c -> (char) c.intValue())
+        .collect(Collectors.toSet());
   }
 }
