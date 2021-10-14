@@ -5,6 +5,11 @@ import gov.cms.bfd.sharedutils.generators.token.pattern.TokenPattern;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class helps parse 'and' group tokens.
+ *
+ * <p>Group parsing is mostly common, so this only defines the parts that make it different.
+ */
 public class TokenAllOfParser extends AbstractTokenGroupParser<List<TokenPattern>> {
 
   @Override

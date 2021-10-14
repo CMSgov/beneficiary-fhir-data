@@ -6,6 +6,7 @@ import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
+/** Represents a single character token. */
 @RequiredArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class TokenSingleton extends TokenPattern {

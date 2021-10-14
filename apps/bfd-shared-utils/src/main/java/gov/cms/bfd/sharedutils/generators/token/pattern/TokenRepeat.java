@@ -4,6 +4,11 @@ import java.math.BigInteger;
 import java.util.Set;
 import lombok.EqualsAndHashCode;
 
+/**
+ * Represents a token that is repeated a specified number of times.
+ *
+ * <p>To keep this simplistic, it's a set number of repeats, not a variable range.
+ */
 @EqualsAndHashCode(callSuper = true)
 public class TokenRepeat extends TokenPattern {
 

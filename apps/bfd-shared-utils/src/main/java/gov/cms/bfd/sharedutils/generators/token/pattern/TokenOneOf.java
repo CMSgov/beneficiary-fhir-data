@@ -9,6 +9,15 @@ import java.util.List;
 import java.util.Set;
 import lombok.EqualsAndHashCode;
 
+/**
+ * This class holds tokens of an "or" group, meaning one of the stored token patterns will be used.
+ *
+ * <p>The order in which the tokens are used is defined by the order in which they were declared by
+ * the user in their token pattern string.
+ *
+ * <p>Example or group: [ABF0-9]. This would allow A, B, F, or any digit to be chosen, in that
+ * order.
+ */
 @EqualsAndHashCode(callSuper = true)
 public class TokenOneOf extends TokenPattern {
 

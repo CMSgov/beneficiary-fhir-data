@@ -9,6 +9,12 @@ import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Represents an 'and' group, which is going to only really be the top level group with the current
+ * API.
+ *
+ * <p>This would represent an entire token pattern definition.
+ */
 @RequiredArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class TokenAllOf extends TokenPattern {

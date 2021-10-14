@@ -7,6 +7,11 @@ import gov.cms.bfd.sharedutils.generators.token.pattern.TokenRepeat;
 import java.util.Collection;
 import java.util.Queue;
 
+/**
+ * This is the base class for the group parsing implementations.
+ *
+ * @param <C> The type of collection the implementing class uses for it's internal container.
+ */
 public abstract class AbstractTokenGroupParser<C extends Collection<TokenPattern>>
     implements TokenParser {
 
@@ -51,7 +56,23 @@ public abstract class AbstractTokenGroupParser<C extends Collection<TokenPattern
     throw new ParsingException("Illegal empty allOf parser pattern.");
   }
 
+  /**
+   * Creates an instance of the implementing class's collection container type.
+   *
+   * <p>This is implemented by the child class.
+   *
+   * @return Should provide a new instance of the implementing class's collection container type.
+   */
   protected abstract C createCollection();
 
+  /**
+   * Creates an instance of the implementing class's specific {@link TokenPattern} implementation.
+   *
+   * <p>This is implemented by the child class.
+   *
+   * @param patterns The patterns to be added to the child implementation's {@link TokenPattern}
+   *     implementation instance.
+   * @return The {@link TokenPattern} implementation object instance created.
+   */
   protected abstract TokenPattern createTokenPattern(C patterns);
 }

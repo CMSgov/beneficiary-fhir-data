@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
+/** Defines a range of characters that are valid for this particular token character. */
 @RequiredArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class TokenRange extends TokenPattern {

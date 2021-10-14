@@ -6,6 +6,7 @@ import gov.cms.bfd.sharedutils.generators.token.pattern.TokenPattern;
 import gov.cms.bfd.sharedutils.generators.token.pattern.TokenRepeat;
 import java.util.Queue;
 
+/** This class parses repeated {@link TokenPattern}s, carrying overflow to the next place value. */
 public class TokenRepeatParser implements TokenParser {
 
   @Override

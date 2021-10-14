@@ -7,6 +7,15 @@ import gov.cms.bfd.sharedutils.generators.token.pattern.TokenRange;
 import gov.cms.bfd.sharedutils.generators.token.pattern.TokenSingleton;
 import java.util.Queue;
 
+/**
+ * This class parses token ranges.
+ *
+ * <p>Currently only letteres (upper or lower) and digits can be ranges.
+ *
+ * <p>\d is automatically parsed as a range 0-9
+ *
+ * <p>Partial ranges can be used, ex: 4-8 or d-k.
+ */
 public class TokenRangeParser implements TokenParser {
 
   @Override

@@ -5,6 +5,10 @@ import gov.cms.bfd.sharedutils.generators.token.pattern.TokenPattern;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * This parser handles bracket groups, which can be square brackets ('or' groups) or curly brackets
+ * (repeat groups)
+ */
 public class TokenBracketParser implements TokenParser {
 
   @Override
