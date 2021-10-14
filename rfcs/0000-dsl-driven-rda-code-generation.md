@@ -52,6 +52,24 @@ And yet most of this code is repetitive since the fields follow established conv
 For example, every maximum field length in the database must be properly reflected in the database entities, enforced in the data validation code, and honored in the synthetic data generators.
 This can certainly be done with hand-written code but is error prone and requires developer time to write/modify the code and review the associated PR.
 
+This RFC proposes replacing all of the hand written code with a code generator that creates code using metadata in a YAML file.
+The code generator would remove the need to write and maintain large amounts of code.
+In the proof of concept the code generator replaced seven hand-written entity classes (over 1,000 LOC) and two transformer clases (over 1,400 lines) with a single 741 line YAML file.
+The YAML fils is much simpler to understand than the hand-written code and less error prone.
+A full implementation would add further savings by replacing still more hand-written code.
+
+For an illustration of the code savings consider the difference in complexity between the [YAML DSL file from the POC](https://github.com/CMSgov/beneficiary-fhir-data/blob/brianburton/dcgeo-186-entities-dsl/apps/bfd-model/bfd-model-rda/mapping.yaml) and these hand written classes:
+
+- [PreAdjFissClaims hand written entity](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-model/bfd-model-rda/src/main/java/gov/cms/bfd/model/rda/PreAdjFissClaim.java)
+- [FissClaimTransformer hand written transformer class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/source/FissClaimTransformer.java)
+- [RandomFissClaimGenerator hand written synthetic data class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/server/RandomFissClaimGenerator.java)
+
+The code generator would be implemented as a maven plugin.
+There are many advantages to using a maven plugin:
+- The plugin would fit seamlessly into the BFD build process.  Nothing in the BFD build or release process would have to change.
+- Code would be generated at compile time and automatically made available to the compiler.
+- IDEs would be able to display and debug the generated code without any special settings.  This includes setting breakpoints within the generated code if needed.
+
 *Note: Code examples in this document are taken from proof of concept work performed in the `brianburton/dcgeo-186-entities-dsl` branch of the BFD repo.  The code in that branch is functional though incomplete and provides insight into the issues involved in following this recommendation.*
 
 
@@ -63,45 +81,51 @@ The YAML explains in a declarative way what every RDA API message is, what table
 For example:
 
 ````YAML
-  - id: McsDiagnosisCode
-    messageClassName: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode
-    entityClassName: gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode
+  - id: McsClaim
+    messageClassName: gov.cms.mpsm.rda.v1.mcs.McsClaim
+    entityClassName: gov.cms.bfd.model.rda.PreAdjMcsClaim
+    transformerClassName: gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer2
     table:
-      name: McsDiagnosisCodes
+      name: McsClaims
       schema: pre_adj
       primaryKeyColumns:
         - idrClmHdIcn
-        - priority
       columns:
         - name: idrClmHdIcn
           sqlType: varchar(15)
           nullable: false
-        - name: priority
-          sqlType: smallint
-          javaType: short
-          nullable: false
-        - name: idrDiagIcdType
+        - name: sequenceNumber
+          sqlType: bigint
+        - name: idrClaimType
           sqlType: varchar(1)
-        - name: idrDiagCode
-          sqlType: varchar(7)
-        - name: lastUpdated
-          sqlType: timestamp with time zone
+        - name: idrDtlCnt
+          sqlType: int
+        - name: idrBeneLast_1_6
+          sqlType: varchar(6)
+        - name: idrBeneFirstInit
+          sqlType: varchar(1)
+        - name: idrBeneMidInit
+          sqlType: varchar(1)
+        - name: idrCoinsurance
+          sqlType: decimal(7,2)
+        - name: idrClaimReceiptDate
+          sqlType: date
     transformations:
-      - from: PARENT
-        to: idrClmHdIcn
-      - from: INDEX
-        to: priority
-      - from: idrDiagIcdType
+      - from: idrClmHdIcn
+        optional: false
+      - from: sequenceNumber
+      - from: idrClaimType
         transformer: MessageEnum
         transformerOptions:
-          enumClass: gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType
-          unrecognizedNameSuffix: EnumUnrecognized
-      - from: idrDiagCode
-      - from: NOW
-        to: lastUpdated
+          enumClass: gov.cms.mpsm.rda.v1.mcs.McsClaimType
+      - from: idrDtlCnt
+      - from: idrBeneLast16
+        to: idrBeneLast_1_6
+      - from: idrBeneFirstInit
+      - from: idrBeneMidInit
+      - from: idrCoinsurance
+      - from: idrClaimReceiptDate
 ````
-
-*Note: The full DSL file from the POC can be found here: [POC mapping.yaml](https://github.com/CMSgov/beneficiary-fhir-data/blob/brianburton/dcgeo-186-entities-dsl/apps/bfd-model/bfd-model-rda/mapping.yaml)*
 
 This example illustrates some of the advantages of using a declarative file:
 
@@ -124,14 +148,9 @@ Since the RDA API data is used in different modules within the BFD code base the
 - The `random-data` goal generates random data generation classes to create randomized data of appropriate size and type for each object/field in the RDA API messages.
 - The `synthea-bridge` goal generates data transformation classes to copy data from Synthea RIF data files into protobuf messages.
 
-For an idea of the code savings consider the difference in complexity between that YAML example and these hand written classes:
-
-- [PreAdjFissClaims hand written entity](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-model/bfd-model-rda/src/main/java/gov/cms/bfd/model/rda/PreAdjFissClaim.java)
-- [FissClaimTransformer hand written transformer class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/source/FissClaimTransformer.java)
-- [RandomFissClaimGenerator hand written synthetic data class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/server/RandomFissClaimGenerator.java)
-
 Getting the relationships right between tables in JPA can be somewhat tricky.
-However, they can be trivially defined as `array`s in the YAML and the code generator takes care of getting the details correct:
+In JPA detail tables require properly defined composite key class and the parent requires a special collection field with appropriate annotation.
+However, these relationships can be trivially defined as `array`s in the YAML and the code generator takes care of getting the implementation details correct:
 
 ````yaml
   - id: FissClaim
@@ -213,6 +232,58 @@ The plugin itself is easily triggered from each module by adding a `<plugin>` el
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
 
+#### DSL Syntax
+
+The DSL file is a YAML file containing an array of mappings.
+Each mapping defines one RDA API message object.
+Top level properties in a mapping are:
+- id: Unique identifier (name) of the mapping.
+- messageClassName: Name of the protobuf message class as defined in the RDA API proto files.
+- entityClassName: Name of the generated JPA entity class to store objects of this type.
+- transformerClassName: Name of the generated class to implement the transformation of protobuf message objects into JPA entities.
+- table: Object defining details about the database table that the JPA entity maps to.
+- enumTypes: Array of objects defining any `enum` classes that the generator should create for use in the transformation.
+- transformations: Array of objects defining what transformations to apply to an RDA API message to copy its data into a JPA entity.
+- arrays: Array of objects defining detail objects (one-to-many relationships) containined within the message.
+
+The `table` objects contain the following properties:
+- name: Name of the table as it appears in the database.
+- schema: Name of the schema containing the table.
+- primaryKeyColumns: Array of column names for the primary key.
+- columns: Array of objects defining the columns in the table.  Columns have the following properties:
+  - name: Name of the column as it appears in the database and entity class.
+  - sqlType: Type of the column as it would appear in SQL DDL defining the column.
+  - javaType: Type of the field in the JPA entity class that holds this column's value.
+  - nullable: Boolean indicating if the column is nullable.
+
+The `enumType` objects are somtimes used as flags in mapping messages to entities.
+For example the RDA API sends data in one of two possible sub-objects for payer details in FissPayer messages and the transformer copies data from whichever one has data and sets an enum column in the entity to indicate which of the two it copied the data from.
+The properties of these objects in the DSL are:
+- name: Name of the enum class in java.
+- values: Array of enum value names added to the enum in the java code.
+
+The `transformation` objects define how to copy data from a field in an RDA API message to a field in the JPA entity.
+A field can have multiple transformations applied to it. 
+A simple example of this is a the mbi field.
+It will have two transformations: one to copy the field as is and another to store its hashed value.
+The properties of these objects in the DSL are:
+- from: Name of the field to transform as it appears in an RDA API message.
+- to: Name of the field in the JPA entity to store the the transformed value into.
+- optional: Boolean indicating whether or not a missing field value in the RDA API message is allowed.
+- transformer: Specifies the name of the transformation to apply.  These are predefined in the plugin.
+- transformerOptions: Optional object containing key value pairs of configuration options for the transformer.  These settings are specific to the particular transformer.
+
+The `array` objects contain the following properties:
+- from: Name of the field containing the array in the RDA API message.
+- to: Name of the field containing the collection of entities in the JPA entity.
+- mapping: Id of a mapping that will be used to transform each of the messages in the array.
+- namePrefix: Additional prefix added to field names for array elements when logging transformation errors.  These are optional but they make the error messages much more readable.
+
+Most of these properties have reasonable defaults to handle the most common use cases.
+
+
+#### Maven Plugin Design
+
 The maven plugin would have a simple structure.  Each goal would follow these steps:
 
 - Read the mapping file using a library such as Jackson to map the file's contents into java beans.
@@ -229,7 +300,7 @@ The `entities` goal would generate Hibernate entities that are virtually identic
 This would include the use of the same lombok, JPA, and hibernate annotations.
 The existing integration tests would continue to pass with the generated entities.
 
-This example illustrates how the table and its columns would be defined in YAML:
+This simplified example illustrates how the table and its columns would be defined in YAML:
 
 ````yaml
     entityClassName: gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode
@@ -255,7 +326,7 @@ This example illustrates how the table and its columns would be defined in YAML:
           sqlType: timestamp with time zone
 ````
 
-Some technical details for this example:
+Some details illustrated by this example:
 
 - Specifying a fully defined `entityClassName` ensures that the plugin makes no assumptions about what packages the code it generates will live in.
 - The `schema` would be optional and associated annotations only added to the entity if it has been defined.
@@ -471,6 +542,18 @@ The interface contains three methods:
 - One to get initialization code for each such field for use in the generated transformer's constructor.
 - One to generate any java statements needed to perform the transformation.
 
+The transformations needed to fully implement the current RDA API data model include:
+
+- Amount: parse and copy a dollar amount string
+- Char: copy a single character into a char field
+- Date: parse and copy a date string
+- EnumValueIfPresent: set an enum column if a specific field is present in the RDA message
+- IdHash: hash and copy a string (MBI hash)
+- Int: parse and copy an integer string
+- MessageEnum: extract string value from an enum and copy it
+- String: copy a string
+- Timestamp: copy the current timestamp
+
 The simplest case for a transformer just inserts a single method call:
 
 ````java
@@ -483,7 +566,7 @@ public class TimestampFieldTransformer extends AbstractFieldTransformer {
 }
 ````
 
-In this example `destSetter` is a helper method in the abstract base class that returns a code block that sets the value of the destination (entity) field.
+In this example `destSetter` is a helper method in the abstract base class to create a code block that sets the value of the destination (entity) field.
 
 The most complex transformation would add a field with an `EnumStringExtractor` object, create code to initialize it appropriately, and code to invoke it to copy the enum's value into an entity field:
 
@@ -562,19 +645,55 @@ public class MessageEnumFieldTransformer extends AbstractFieldTransformer {
   }
 ````
 
-Arrays would be recognized and generate code to also transform the array elements appropriately to produce the detail objects for the JPA entities.
+#### Array Transformation (Detail records)
 
-The transformations needed to fully implement the current RDA API data model include:
+Arrays are recognized and generate code to transform the array elements appropriately to produce the detail objects for the JPA entities.
+Detail tables require additional columns containing their parent record's primary key.
+Additionally each detail object in the array is assigned a "priority" number equal to its array index.
+The `priority` is used when sorting the detail records so that their original order in the RDA API message is preserved.
 
-- Amount: parse and copy a dollar amount string
-- Char: copy a single character into a char field
-- Date: parse and copy a date string
-- EnumValueIfPresent: set an enum column if a specific field is present in the RDA message
-- IdHash: hash and copy a string (MBI hash)
-- Int: parse and copy an integer string
-- MessageEnum: extract string value from an enum and copy it
-- String: copy a string
-- Timestamp: copy the current timestamp
+The DSL has two special `from` values (`PARENT` and `INDEX`) for this purpose.
+
+- `PARENT` tells the transformer to copy the value of the `to` field from the parent into the detail object.
+- `INDEX` tells the transformer to set the value of the `to` field to the object's array index.
+
+The generated code for transforming arrays first creates the detail objects and then applies any `PARENT` or `INDEX` transformations.
+
+Here is a subset of the YAML for a detail object containing a number of fields including `dcn` (copied from parent) and `priority` (set to array index):
+
+````yaml
+  - id: FissProcCode
+    transformations:
+      - from: PARENT
+        to: dcn
+      - from: INDEX
+        to: priority
+      - from: procCd
+        to: procCode
+        optional: false
+      - from: procFlag
+      - from: procDt
+        to: procDate
+      - from: NOW
+        to: lastUpdated
+````
+
+Here is the code generated to create the array object, initialize the fields from the parent, and add the object to its parent.
+
+````java
+  private void transformMessageArrays(FissClaim from, PreAdjFissClaim to,
+      DataTransformer transformer, Instant now, String namePrefix) {
+    for (short index = 0; index < from.getFissProcCodesCount(); ++index) {
+      final String itemNamePrefix = namePrefix + "procCode" + "-" + index + "-";
+      final FissProcedureCode itemFrom = from.getFissProcCodes(index);
+      final PreAdjFissProcCode itemTo = transformMessageImpl(itemFrom,transformer,now,itemNamePrefix);
+      itemTo.setDcn(from.getDcn());
+      itemTo.setPriority(index);
+      to.getProcCodes().add(itemTo);
+    }
+  }
+````
+
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
