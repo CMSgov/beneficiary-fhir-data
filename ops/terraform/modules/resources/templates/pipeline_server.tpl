@@ -23,7 +23,7 @@ aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 cat <<EOF >> extra_vars.json
 {
     "env":"${env}",
-    "data_pipeline_jar":"/bluebutton-data-pipeline/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar"
+    "data_pipeline_zip":"/bluebutton-data-pipeline/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
 }
 EOF
 

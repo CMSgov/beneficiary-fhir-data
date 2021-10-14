@@ -151,7 +151,7 @@ stop_service_if_failing() {
 JVM_ARGS='{{ data_server_appserver_jvmargs }}'
 
 # 3... 2... 1... launch!
-java \
+bfd-server-launcher-1.0.0-SNAPSHOT/bfd-server-launcher.sh \
   -javaagent:{{ data_server_dir }}/newrelic/newrelic.jar \
   ${JVM_ARGS} \
   "-DbfdServer.logs.dir=${LOGS_DIR}" \
@@ -162,5 +162,4 @@ java \
   "-DbfdServer.v2.enabled=${BFD_V2_ENABLED}" \
   "-DbfdServer.preadj.enabled=${BFD_PREADJ_ENABLED}" \
   "-Djava.io.tmpdir={{ data_server_tmp_dir }}" \
-  -jar "{{ data_server_dir }}/{{ data_server_launcher | basename }}" \
   >>"{{ data_server_dir }}/bluebutton-server-app-log.json" 2>&1
