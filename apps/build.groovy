@@ -12,7 +12,7 @@
  * Models the results of a call to {@link #build}: contains the paths to the artifacts that were built.
  */
 class AppBuildResults implements Serializable {
-	String dataPipelineUberJar
+	String dataPipelineZip
 	String dataServerLauncher
 	String dataServerWar
 }
@@ -40,8 +40,8 @@ def build(String build_env) {
 	}
 
 	return new AppBuildResults(
-		dataPipelineUberJar: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar',
-		dataServerLauncher: 'apps/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT-capsule-fat.jar',
+		dataPipelineZip: 'apps/bfd-pipeline/bfd-pipeline-app/target/bfd-pipeline-app-1.0.0-SNAPSHOT.zip',
+		dataServerLauncher: 'apps/bfd-server/bfd-server-launcher/target/bfd-server-launcher-1.0.0-SNAPSHOT.zip',
 		dataServerWar: 'apps/bfd-server/bfd-server-war/target/bfd-server-war-1.0.0-SNAPSHOT.war'
 	)
 }
