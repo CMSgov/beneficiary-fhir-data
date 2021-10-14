@@ -48,7 +48,7 @@ public class FissTransformer extends AbstractTransformer {
 
     data.get(Fiss.ADMTG_DGNS_CD).ifPresent(claimBuilder::setAdmDiagCode);
 
-    claimBuilder.setMedaProvId("");
+    claimBuilder.setMedaProvId("0000000000000");
 
     for (int i = 1; i <= MAX_PROC_CODES; ++i) {
       final int INDEX = i;

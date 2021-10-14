@@ -47,12 +47,12 @@ public class McsTransformer extends AbstractTransformer {
               // Prefixed ICN numbers with '*' to designate synthetic data
               .setIdrClmHdIcn(icn)
               .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A) // Not generated
-              .setIdrBillProvNpi("") // Not generated
+              .setIdrBillProvNpi("0000000000") // Not generated
               .setIdrTotBilledAmt(data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).orElse(""))
               .setIdrClaimMbi(mbiMap.get(beneId).getMbi())
-              .setIdrContrId("") // Not generated
+              .setIdrContrId("00000") // Not generated
               .setIdrClaimTypeUnrecognized("?") // Not generated
-              .setIdrBillProvNum(""); // Not generated
+              .setIdrBillProvNum("0000000000"); // Not generated
 
       claimBuilder.addMcsDetails(
           McsDetail.newBuilder()
