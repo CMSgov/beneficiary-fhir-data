@@ -44,6 +44,14 @@
 		<tag>HEAD</tag>
 	</scm>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub CMSgov Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data</url>
+		</repository>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
 			<id>ossrh-snapshots</id>
@@ -479,15 +487,9 @@ checkJavaFormat
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>2.8.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.6.7</version>
 					<configuration>
-						<serverId>ossrh</serverId>
-						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-						<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						<!-- Delay deployment of build artifacts until after all modules build successfully. -->
+						<deployAtEnd>true</deployAtEnd>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -550,15 +552,6 @@ checkJavaFormat
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<!-- Specifying this plugin here replaces the default deploy plugin in 
-					the lifecycle: this plugin will be used to deploy artifacts. This is great 
-					for interacting with OSSRH and deploying to Maven Central. However, it can 
-					be disabled in descendant projects by setting 'extensions' to false. -->
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<extensions>true</extensions>
 			</plugin>
 			<plugin>
 				<groupId>com.coveo</groupId>
@@ -633,6 +626,15 @@ checkJavaFormat
 				</executions>
 			</plugin>
 		</plugins>
+		<extensions>
+			<extension>
+				<!-- Used by the bfd-pipeline-rda-grpc-server and bfd-pipeline-rda-grpc modules, but
+				defined here to workaround https://issues.apache.org/jira/browse/MDEPLOY-193. -->
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.6.2</version>
+			</extension>
+		</extensions>
 	</build>
 
 	<profiles>

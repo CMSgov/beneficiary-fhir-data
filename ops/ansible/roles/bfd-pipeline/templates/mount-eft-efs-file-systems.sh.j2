@@ -52,7 +52,7 @@ is_valid_ip(){
 # $1 == file system id
 add_host_entry() {
   local ip # mount target ip
-  
+
   # the default here is to only mount file systems available on the same physical AZ (to avoid cross-az fees)
   if [[ "$SAME_AZ_ONLY" == "true" ]]; then
     if ! ip=$($aws efs describe-mount-targets --region "$AWS_REGION" --file-system-id="$1" --query 'MountTargets[*].{ID:AvailabilityZoneId,IP:IpAddress}' --output text | grep "$AZID" | cut -f2); then
@@ -79,13 +79,13 @@ add_host_entry() {
         ip="${ips[${rand_num}]}" ;;
     esac
   fi
-  
+
   # simple ipv4 test
   if ! is_valid_ip "$ip" >/dev/null 2>&1; then
     echo "Unable to retrieve a valid mount target IP address for file system $1 on AZ $AZID."
     exit 1
   fi
-  
+
   # remove any existing /etc/hosts entries pointing to our file system id
   sed -i.bak "/^.*\ ${1}/d" /etc/hosts
 
@@ -115,7 +115,7 @@ mount_fs(){
 add_fstab_entry(){
   local fstab # fstab entry string
   fstab="${1}:/ ${PARTNER_DIR} efs ${fstab_options}"
-  
+
   local epdir # escaped partner dir for use in sed
   epdir=$(sed 's#/#\\/#g' <(echo "${PARTNER_DIR}"))
 
@@ -159,7 +159,7 @@ prep_mount_directories
 # for each file system in the array
 for fs in "${file_systems[@]}"; do
   # add an entry to /etc/hosts
-  [[ "$ADD_HOST_ENTRY" == true ]] && add_host_entry "$fs" 
+  [[ "$ADD_HOST_ENTRY" == true ]] && add_host_entry "$fs"
 
   # mount the file system if desired
   if mount_fs "$fs"; then

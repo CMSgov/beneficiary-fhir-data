@@ -1,4 +1,0 @@
----
-# Install Oracle's Java 8 JDK
-# https://galaxy.ansible.com/geerlingguy/java/
-- src: geerlingguy.java

@@ -8,10 +8,18 @@ export DATABASE_USERNAME='{{ data_pipeline_db_username }}'
 export DATABASE_PASSWORD='{{ data_pipeline_db_password }}'
 export LOADER_THREADS='{{ data_pipeline_loader_threads }}'
 export IDEMPOTENCY_REQUIRED='{{ data_pipeline_idempotency_required }}'
-export NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
 export NEW_RELIC_METRIC_HOST='{{ data_pipeline_new_relic_metric_host }}'
 export NEW_RELIC_METRIC_PATH='{{ data_pipeline_new_relic_metric_path }}'
+{% if data_pipeline_new_relic_app_name is defined %}
+export NEW_RELIC_APP_NAME='{{ data_pipeline_new_relic_app_name }}'
+{% else %}
+#export NEW_RELIC_APP_NAME=
+{% endif %}
+{% if data_pipeline_new_relic_metric_key is defined %}
 export NEW_RELIC_METRIC_KEY='{{ data_pipeline_new_relic_metric_key }}'
+{% else %}
+#export NEW_RELIC_METRIC_KEY=
+{% endif %}
 export RDA_JOB_ENABLED='{{ data_pipeline_rda_job_enabled }}'
 export RDA_JOB_INTERVAL_SECONDS='{{ data_pipeline_rda_job_interval_seconds }}'
 export RDA_JOB_BATCH_SIZE='{{ data_pipeline_rda_job_batch_size }}'
@@ -28,8 +36,6 @@ export RDA_GRPC_MAX_IDLE_SECONDS='{{ data_pipeline_rda_grpc_max_idle_seconds }}'
 # Either don't set this variable, or set it to one of: BENEFICIARY, CARRIER, DME, HHA, HOSPICE, INPATIENT, OUTPATIENT, PDE, SNF
 # export DATA_SET_TYPE_ALLOWED="BENEFICIARY"
 
-java \
-	{{ data_pipeline_jvm_args }} \
+exec "{{ data_pipeline_dir }}/bfd-pipeline-app-1.0.0-SNAPSHOT/bfd-pipeline-app.sh" \
 	-Djava.io.tmpdir={{ data_pipeline_tmp_dir }} \
-	-jar "{{ data_pipeline_dir }}/{{ data_pipeline_jar | basename }}" \
 	&>> "{{ data_pipeline_dir }}/bluebutton-data-pipeline.log"
