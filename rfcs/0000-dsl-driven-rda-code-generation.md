@@ -32,9 +32,9 @@ Areas affected by this process could include hibernate entities, data transforma
 [Motivation]: #motivation
 
 The RDA API is evolving rapidly and adding new fields as it moves towards production.
-Even once a production release is completed more fields will be added rapidly as that API development evolves from a first release focused on reliability and features to followup releases filling in more and more of the data available in the backend systems.
+Even after a production release is completed more fields will be added rapidly as that API development evolves from a first release focused on reliability and features to followup releases filling in more and more of the data available in the backend systems.
 
-Initially code to handle RDA API data was hand-written as there were relatively few fields at that time and the RDA API team had not yet establish conventions for mapping the data into protobuf.
+Initially code to handle RDA API data was hand-written as there were relatively few fields at that time and the RDA API team had not yet established conventions for mapping the data into protobuf.
 Now the number of fields is growing and those conventions are well established.
 When estimating the ultimate size of the RDA API message objects the team indicated that there might ultimately be 2-5 times as many fields as now.
 
@@ -64,20 +64,14 @@ For an illustration of the code savings consider the difference in complexity be
 - [FissClaimTransformer hand written transformer class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/source/FissClaimTransformer.java)
 - [RandomFissClaimGenerator hand written synthetic data class](https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rda-grpc/src/main/java/gov/cms/bfd/pipeline/rda/grpc/server/RandomFissClaimGenerator.java)
 
-The code generator would be implemented as a maven plugin.
-There are many advantages to using a maven plugin:
-- The plugin would fit seamlessly into the BFD build process.  Nothing in the BFD build or release process would have to change.
-- Code would be generated at compile time and automatically made available to the compiler.
-- IDEs would be able to display and debug the generated code without any special settings.  This includes setting breakpoints within the generated code if needed.
-
 *Note: Code examples in this document are taken from proof of concept work performed in the `brianburton/dcgeo-186-entities-dsl` branch of the BFD repo.  The code in that branch is functional though incomplete and provides insight into the issues involved in following this recommendation.*
 
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
 
-A maven plugin processes a YAML based metadata file to create all of the code required to work with the RDA API data messages, objects, and fields.
-The YAML explains in a declarative way what every RDA API message is, what table that message is stored in, what columns are in the table, and how to transfom the data from the RDA API messages into values in those columns.
+A code generator processes a YAML based metadata file to create all of the code required to work with the RDA API data messages, objects, and fields.
+The YAML describes in a declarative way what every RDA API message is, what table that message is stored in, what columns are in the table, and how to transfom the data from the RDA API messages into values in those columns.
 For example:
 
 ````YAML
@@ -129,28 +123,19 @@ For example:
 
 This example illustrates some of the advantages of using a declarative file:
 
-- Standard conventions can be supported as defaults.
-For example:
-  - The `to` only needs to be defined if it differs from the `from`.  Generally columns are named directly based on the RDA API field but not always.
+- Standard conventions can be supported as defaults.  For example:
+  - The `to` only needs to be defined if it differs from the `from`.  Generally columns have the same name as their RDA API field but not always.
   - A `javaType` only needs to be defined if it differs from the default for the column's data type.
   - A `transformer` only needs to be defined if it differs from the default for the column's data type.
 - Transformers can be easily created and added to the plugin.  Each has a name used to reference it in the YAML.
-- The plugin follows a simple set of rules to choose a default transformation if no `transformer`  is provided in the YAML.
+- The code generator follows a simple set of rules to choose a default transformation if no `transformer`  is provided in the YAML.
 - A single field can have multiple transformations.  For example the MBI field can be copied directly to a column and also used to store a hashed value in another column.
 - Transformers can have their own specific options if their behavior is modifiable from default settings.
-- A few structural transforms can be specified using a virtual `from` that triggers the transform.  Essentially these are for fields that are known at runtime but not taken directly from the messages (like array indexes, the current timestamp, parent primary key column value, etc).
+- A few structural transforms can be specified using a virtual `from` that triggers the transform.  These are useful for columns whose values are known at runtime but not taken directly from the messages (like array indexes, the current timestamp, parent primary key column value, etc).
 
-Since the RDA API data is used in different modules within the BFD code base the plugin defines goals specific to each type of code that it generates:
-
-- The `entities` goal generates Hibernate database entity classes with all appropriate annotations, getters, setters, equals/hashCode, and entity relationship mappings.
-- The `transformers` goal generates data transformation/validation classes to copy data from RDA API protbuf messages into database entity classes.
-- The `migration` goal generates SQL DDL for each table that can be used as the basis for creating Flyway migration files.
-- The `random-data` goal generates random data generation classes to create randomized data of appropriate size and type for each object/field in the RDA API messages.
-- The `synthea-bridge` goal generates data transformation classes to copy data from Synthea RIF data files into protobuf messages.
-
-Getting the relationships right between tables in JPA can be somewhat tricky.
+A code generator can ensure the relationships between tables in JPA are handled correctly.
 In JPA detail tables require properly defined composite key class and the parent requires a special collection field with appropriate annotation.
-However, these relationships can be trivially defined as `array`s in the YAML and the code generator takes care of getting the implementation details correct:
+These relationships can be trivially defined as `array`s in the YAML and the code generator takes care of getting the implementation details correct:
 
 ````yaml
   - id: FissClaim
@@ -183,6 +168,7 @@ However, these relationships can be trivially defined as `array`s in the YAML an
         optional: false
       # ... skipping lots of transforms for the sake of this example ...
     arrays:
+      # Every FissClaim can have multiple procedure codes, diagnosis codes, and payers
       - from: fissProcCodes
         to: procCodes
         mapping: FissProcCode
@@ -199,34 +185,11 @@ The example illustrates the three detail tables associated with each `FissClaim`
 The RDA API sends these as `repeated` fields in the protobuf definition and the plugin maps them to detail entities in the JPA classes.
 Each one references the field in the protobuf message and the entity class and the mapping used to define the detail table.
 
-The classes generated by the plugin rely on a few utility classes that are defined in a separate library module.
-This library is added as a dependency in the modules that require them and is the only part of the plugin that ships with the server and/or pipeline.
-
-The plugin itself is easily triggered from each module by adding a `<plugin>` element to the `<build>` element of the module's `pom.xml` file.  For example:
-
-````XML
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>gov.cms.bfd</groupId>
-                <artifactId>bfd-model-rda-codegen-plugin</artifactId>
-                <version>${project.version}</version>
-                <configuration>
-                    <mappingFile>${mapping.directory}/mapping.yaml</mappingFile>
-                    <outputDirectory>${project.build.directory}/generated-sources/transformers</outputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>transformers</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-````
-
+The code generator is implemented as a maven plugin.
+This has several advantages:
+- The plugin fits seamlessly into the BFD build process.  Nothing in the BFD build or release process has to change.
+- Code is automatically generated and made available to the compiler.
+- IDEs can display and debug the generated code without any special settings.  This includes allowing breakpoints within the generated code if needed.
 
 
 ### Proposed Solution: Detailed Design
@@ -263,14 +226,14 @@ The properties of these objects in the DSL are:
 - values: Array of enum value names added to the enum in the java code.
 
 The `transformation` objects define how to copy data from a field in an RDA API message to a field in the JPA entity.
-A field can have multiple transformations applied to it. 
-A simple example of this is a the mbi field.
-It will have two transformations: one to copy the field as is and another to store its hashed value.
-The properties of these objects in the DSL are:
+Generally each field has one transformation applied to it, but the DSL allows multiple transformations to be applied.
+A simple example of needing multiple transformations is a the `mbi` field.
+It requires two transformations: one to copy the field as is and another to store its hashed value.
+The properties of `transformation` objects in the DSL are:
 - from: Name of the field to transform as it appears in an RDA API message.
 - to: Name of the field in the JPA entity to store the the transformed value into.
 - optional: Boolean indicating whether or not a missing field value in the RDA API message is allowed.
-- transformer: Specifies the name of the transformation to apply.  These are predefined in the plugin.
+- transformer: Specifies the name of the transformation to apply.  These are predefined in the code generator.
 - transformerOptions: Optional object containing key value pairs of configuration options for the transformer.  These settings are specific to the particular transformer.
 
 The `array` objects contain the following properties:
@@ -284,23 +247,66 @@ Most of these properties have reasonable defaults to handle the most common use 
 
 #### Maven Plugin Design
 
-The maven plugin would have a simple structure.  Each goal would follow these steps:
+Every maven plugin implements one or more goals.
+Each goal defines some operation specific to the plugin.
+The RDA code generation plugin has a goal for each type of code to be generated.
+
+- The `entities` goal generates Hibernate database entity classes with all appropriate annotations, getters, setters, equals/hashCode, and entity relationship mappings.
+- The `transformers` goal generates data transformation/validation classes to copy data from RDA API protbuf messages into database entity classes.
+- The `migration` goal generates SQL DDL for each table that can be used as the basis for creating Flyway migration files.
+- The `random-data` goal generates random data generation classes to create randomized data of appropriate size and type for each object/field in the RDA API messages.
+- The `synthea-bridge` goal generates data transformation classes to copy data from Synthea RIF data files into protobuf messages.
+
+All of the goals provided by the plugin follow the same basic steps:
 
 - Read the mapping file using a library such as Jackson to map the file's contents into java beans.
-- Process the mappings in the file in a goal specific way to generate java code using a library such as javapoet to generate the java files.
+- Process the mappings from the file in a goal specific way to generate java code using a library such as javapoet to generate the java files.
 - Write the generated class files to a directory specified by the `pom.xml` file.
 
-The `entities` goal would only need to process the `table` object since it simply generates the relevant Hibernate entities and all of the data required to do so would be defined in the `table`.  Similarly a `sql-definitions` goal could do the same to generate SQL `CREATE TABLE` and `ALTER TABLE` DDL code that a developer could use as the basis of a Flyway migration file.
+Different goals use different subsets of the metadata in the DSL file to generate different types of source code.
+- The `entities` goal only processes the `table` object since it generates the relevant Hibernate entities and all of the data required to do so is defined in the `table`.
+- A `sql-definitions` goal would also process the `table` object to generate SQL `CREATE TABLE` and `ALTER TABLE` DDL code that a developer could use as the basis of a Flyway migration file.
+- The `transformers` goal additionally needs to process the `transformations` and `arrays` sections since these define the relationships between the RDA API message data and the fields in the Hibernate entities.
 
-The `transformers` goal would additionally need to process the `transformations` and `arrays` sections since these define the relationships between the RDA API message data and the fields in the Hibernate entities.
+The plugin itself is easily executed in any module by adding a `<plugin>` element to the `<build>` element of the module's `pom.xml` file.  
+The `pom.xml` file specifies where to store the generated source code and the plugin automatically adds the directory to the maven compiler's source path.
+
+For example:
+
+````XML
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>gov.cms.bfd</groupId>
+                <artifactId>bfd-model-rda-codegen-plugin</artifactId>
+                <version>${project.version}</version>
+                <configuration>
+                    <mappingFile>${mapping.directory}/mapping.yaml</mappingFile>
+                    <outputDirectory>${project.build.directory}/generated-sources/transformers</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>transformers</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+````
+
+The classes generated by the plugin rely on a few utility classes that are defined in a separate library module.
+This library is added as a dependency in the modules that require them.
+
 
 #### Generating JPA Entity classes
 
-The `entities` goal would generate Hibernate entities that are virtually identical (minus javapoet's code indentation, etc) to what we are currently maintaining by hand.
-This would include the use of the same lombok, JPA, and hibernate annotations.
-The existing integration tests would continue to pass with the generated entities.
+The `entities` goal generates JPA/Hibernate entities that are virtually identical (minus javapoet's code indentation, etc) to what we are currently maintaining by hand.
+This includes the use of the same lombok, JPA, and hibernate annotations.
+The existing integration tests continue to pass with the generated entities.
 
-This simplified example illustrates how the table and its columns would be defined in YAML:
+This simplified example illustrates how a table and its columns can be defined in YAML:
 
 ````yaml
     entityClassName: gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode
@@ -331,14 +337,16 @@ Some details illustrated by this example:
 - Specifying a fully defined `entityClassName` ensures that the plugin makes no assumptions about what packages the code it generates will live in.
 - The `schema` would be optional and associated annotations only added to the entity if it has been defined.
 - The `name` and `sqlType` would be required.
-- All other values would have reasonable defaults.  For example any `varchar(n)` or `char(n)` would default to a `String` as the `javaType`.  Similarly `timestamp` would map to `Instant` and `date` would map to `LocalDate` by default.
-- All columns would default to being `nullable` unless otherwise set using `nullable: false` since almost all RDA API fields are optional.
-- The `primaryKeyColumns` would be used to add `Id` annotations to those fields in the entity classes as well as to define the `hashCode` and `equals` methods following Hibernate rules.
-- Tables with multiple `primaryKeyColumns` would automatically generate a static class for the composite key object associated with the table.
+- All other values have reasonable defaults.  For example any `varchar(n)` or `char(n)` defaults to a `String` as the `javaType`.  Similarly `timestamp` maps to `Instant` and `date` maps to `LocalDate` by default.
+- All columns default to being `nullable` unless otherwise set using `nullable: false` since almost all RDA API fields are optional.
+- The `primaryKeyColumns` are used to add `Id` annotations to those fields in the entity classes as well as to define the `hashCode` and `equals` methods following Hibernate rules.
+- Tables with multiple `primaryKeyColumns` automatically generate a static class for the composite key object associated with the table.
 
-Each of the most commonly used `sqlType`s would have an associated default `javaType` and appropriate logic for defining the generated `Column` annotation in the entity class.  For example the plugin would know how to parse a max length out of the `varchar(n)` and `char(n)` types.  Also it would know that it needs to add a `columnDefinition` value for `decimal(m,n)` types but not for most other types.
+Each of the most commonly used `sqlType`s have an associated default `javaType` and appropriate logic for defining the generated `Column` annotation in the entity class.
+For example the code generator knows how to parse a max length out of the `varchar(n)` and `char(n)` types.
+Also it knows that it needs to add a `columnDefinition` value for `decimal(m,n)` types but not for most other types.
 
-Each `array` definined in the YAML file would result in a `Set<TEntity>` field being created in the parent entity.  For example:
+Each `array` definined in the YAML file results in a `Set<TEntity>` field being created in the parent entity.  For example:
 
 ````yaml
   - id: FissClaim
@@ -364,7 +372,7 @@ Each `array` definined in the YAML file would result in a `Set<TEntity>` field b
         mapping: FissProcCode
 ````
 
-would generate code like this in the `PreAdjFissClaim` class:
+generates code like this in the `PreAdjFissClaim` class:
 
 ````java
 @Entity
@@ -400,7 +408,8 @@ public class PreAdjFissClaim {
   private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
 ````
 
-If a table has multiple primary key columns the plugin would know to also generate a java bean for the composite key.  For example:
+If a table has multiple primary key columns the plugin knows to also generate a java bean for the composite key.
+For example:
 
 ````yaml
   - id: McsDiagnosisCode
@@ -437,7 +446,7 @@ If a table has multiple primary key columns the plugin would know to also genera
         to: lastUpdated
 ````
 
-Would generate code like this:
+Generate code like this:
 
 ````java
 @Entity
@@ -492,18 +501,18 @@ public class PreAdjMcsDiagnosisCode {
 
 #### Generating Transformation class
 
-The current code base has a transformer class for each type of claim returned by the RDA API (i.e. `FissClaimTransformer` and `McsClaimTransformer`).
+The current code base has a hand-written transformer class for each type of claim returned by the RDA API (i.e. `FissClaimTransformer` and `McsClaimTransformer`).
 These classes contain code to copy RDA API data from protobuf messages into corresponding JPA entities.
 Field values are copied using a `DataTransformation` object that provides methods for validating and parsing the individual field values.
 There is a `DataTransformer` method for each type of field.
 These methods support the conventions RDA API uses when mapping its data into protobuf.
 
-The plugin generated code would continue to follow this same pattern.
-It would generate a transformation class for every mapping that has a `transformerClassName` value.
-The transformers would contain essentially the same sequence of method calls that a developer would currently write by hand.
+The plugin generated code follows this same pattern.
+It generates a transformation class for every mapping that has a `transformerClassName` value.
+The transformers contain essentially the same sequence of method calls that a developer would currently write by hand.
 
 Each transformation class has one public method that accepts an RDA API message object and a `DataTransformer` and returns a corresponding entity object.
-The `DataTransformer` is provided by the caller since it collects any validation errors and the caller can query it afterwards to determine if there were any errors.
+The caller provides the `DataTransformer` since it collects any validation errors and the caller can query it afterwards to determine if there were any errors.
 
 ````java
 public class FissClaimTransformer2 {
@@ -527,10 +536,10 @@ public class FissClaimTransformer2 {
   // all the generated private methods to handle individual mappings
 ````
 
-The `transformMessageImpl()` and `transformMessageArrays()` methods are private methods created for each mapping that the transformation class transforms.
+The `transformMessageImpl()` and `transformMessageArrays()` methods are private methods created for each mapping.
 Generally there is one `transformMessageImpl` method for the parent mapping plus one for each array mapping.
 There will currently be only one `transformMessageArrays` method since the RDA API only uses arrays at the top level.
-But the plugin would be capable of handling arrays in the child objects as well.
+But the plugin would be capable of handling arrays in the child objects as well in case that changes in the future.
 
 #### Field Transformations
 
@@ -538,7 +547,7 @@ A transformation takes data from one field in the RDA API message, validates it,
 
 Each transformation is implemented as a Java class that implements an interface.
 The interface contains three methods:
-- One to get zero or more field definitions for any class level fields needed by the transformer.
+- One to get a list of field definitions for any class level fields needed by the transformer.
 - One to get initialization code for each such field for use in the generated transformer's constructor.
 - One to generate any java statements needed to perform the transformation.
 
@@ -647,7 +656,7 @@ public class MessageEnumFieldTransformer extends AbstractFieldTransformer {
 
 #### Array Transformation (Detail records)
 
-Arrays are recognized and generate code to transform the array elements appropriately to produce the detail objects for the JPA entities.
+Arrays are recognized and code is generated to transform the array elements appropriately to produce the detail objects for the JPA entities.
 Detail tables require additional columns containing their parent record's primary key.
 Additionally each detail object in the array is assigned a "priority" number equal to its array index.
 The `priority` is used when sorting the detail records so that their original order in the RDA API message is preserved.
@@ -714,7 +723,7 @@ A case can be made that lots of hand written code can be more directly comprehen
 This is particularly true if the design of the code generator hard codes too many things and embeds too much knowledge of the data it generates code for (e.g. if it adds or looks for fields with specific names that aren't defined in the meta data).
 
 Both of these concerns can be addressed by careful design and coding of the plugin.
-Embedding knowledge of conventions is perfectly OK.
+Embedding knowledge of *conventions* is perfectly OK.
 That is why the plugin exists: to centralize that knowledge in a reusable component.
 However embedding knowledge of fields themselves is harmful since it splits knowledge of the fields between the metadata and the plugin source code.
 
@@ -727,7 +736,7 @@ Adding comments with example output to each section that generates code can make
 Since RDA API is not yet in production won't their conventions change substantially in the near future?
 That would be a danger either with hand-written code or with a plugin.
 The plugin centralizes the implemtation of those conventions so we can leverage that to simplify adapting to the change.
-Simply change the plugin and the new conventions apply to all fields.
+Simply change the plugin and the new conventions apply to all classes and fields automatically.
 
 A similar approach has been taken with the hand-written code too.
 However, though embedding the conventions in library classes and methods is helpful it can still lead to widespread code changes if you need to add a parameter to a library method.
@@ -753,15 +762,16 @@ A spreadsheet could be used for the DSL.
 However we decided that a YAML file format has several advantages over a spreashseet for this process:
 * Existing open source libraries such as jackson can directly convert YAML into java beans.
 * RDA API data is inherently heirarchical and YAML naturally supports heirachical data.
-* YAML is pure text so can be edited from within an IDE and diffs of the file can be reviewed as part of the github PR review process.
+* YAML is pure text so it can be edited from within an IDE and diffs of the file can be reviewed as part of the github PR review process.
 
 We considered using java annotation processing but decided that a maven plugin has some advantages:
 * The maven plugin works directly within the maven build process rather than adding the complexity of java annotation processing.
 * The same plugin can be invoked from multiple modules to generate different portions of the code exactly where it is needed.
+* Maven pkugins interact more seamlessly with IDEs.
 
 We considered defining a full blown imperative DSL using groovy or something else but:
 * Writing transformations in java fits more naturally into the BFD code base and team expertise.
-* Declarative structure allows the plugin to guarantee adherance to the RDA API conventions and proper code review. (i.e. no cheats can be inserted as code in the DSL file)
+* Declarative structure allows the plugin to guarantee adherance to the RDA API conventions and proper code review. (i.e. no cheats or workarounds can be inserted as code in the DSL file)
 * Transformations implemented in java within the plugin have a standard structure that makes them easier to develop and debug.
 
 We considered using a dynamic transformation system rather than a code generator.
