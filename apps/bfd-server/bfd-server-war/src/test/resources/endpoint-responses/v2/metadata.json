@@ -25,10 +25,6 @@
         "code" : "search-type"
       } ],
       "searchParam" : [ {
-        "name" : "mbi",
-        "type" : "reference",
-        "documentation" : "The patient identifier to search for"
-      }, {
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
@@ -36,6 +32,10 @@
         "name" : "isHashed",
         "type" : "string",
         "documentation" : "A boolean indicating whether or not the MBI is hashed"
+      }, {
+        "name" : "mbi",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
       }, {
         "name" : "service-date",
         "type" : "date",
@@ -54,10 +54,6 @@
         "code" : "search-type"
       } ],
       "searchParam" : [ {
-        "name" : "mbi",
-        "type" : "reference",
-        "documentation" : "The patient identifier to search for"
-      }, {
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
@@ -65,6 +61,10 @@
         "name" : "isHashed",
         "type" : "string",
         "documentation" : "A boolean indicating whether or not the MBI is hashed"
+      }, {
+        "name" : "mbi",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
       }, {
         "name" : "service-date",
         "type" : "date",
@@ -83,13 +83,13 @@
         "code" : "search-type"
       } ],
       "searchParam" : [ {
-        "name" : "beneficiary",
-        "type" : "reference",
-        "documentation" : "The patient identifier to search for"
-      }, {
         "name" : "_lastUpdated",
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "beneficiary",
+        "type" : "reference",
+        "documentation" : "The patient identifier to search for"
       }, {
         "name" : "startIndex",
         "type" : "string",
@@ -151,10 +151,6 @@
         "type" : "token",
         "documentation" : "Part D reference year"
       }, {
-        "name" : "cursor",
-        "type" : "string",
-        "documentation" : "The cursor used for result pagination"
-      }, {
         "name" : "_id",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
@@ -163,17 +159,21 @@
         "type" : "date",
         "documentation" : "Include resources last updated in the given range"
       }, {
-        "name" : "startIndex",
+        "name" : "_lastUpdated",
+        "type" : "date",
+        "documentation" : "Include resources last updated in the given range"
+      }, {
+        "name" : "cursor",
         "type" : "string",
-        "documentation" : "The offset used for result pagination"
+        "documentation" : "The cursor used for result pagination"
       }, {
         "name" : "identifier",
         "type" : "token",
         "documentation" : "The patient identifier to search for"
       }, {
-        "name" : "_lastUpdated",
-        "type" : "date",
-        "documentation" : "Include resources last updated in the given range"
+        "name" : "startIndex",
+        "type" : "string",
+        "documentation" : "The offset used for result pagination"
       }, {
         "name" : "startIndex",
         "type" : "string",
