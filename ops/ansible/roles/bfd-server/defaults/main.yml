@@ -28,3 +28,6 @@ data_server_db_connections_max: 40
 
 # Whether to enable BFD API V2
 data_server_v2_enabled: false
+
+# Whether or not pre-adjudicated claims data resources are enabled.
+pre_adj_resources_enabled: false
