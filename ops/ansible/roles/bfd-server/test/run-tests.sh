@@ -8,7 +8,7 @@
 set -e
 
 # These variables can be adjusted to change which test is run.
-export ROLE=bfd-pipeline
+export ROLE=bfd-server
 export CONTAINER_PREFIX=ansible_test_pipeline
 export TEST_PLAY=test_basic.yml
 export PLATFORM=centos_7
