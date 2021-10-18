@@ -82,7 +82,7 @@ public class RdaServer {
       test.accept(server.getPort());
     } finally {
       server.shutdown();
-      server.awaitTermination(5, TimeUnit.SECONDS);
+      server.awaitTermination(3, TimeUnit.MINUTES);
     }
   }
 
@@ -109,11 +109,11 @@ public class RdaServer {
         test.accept(channel);
       } finally {
         channel.shutdown();
-        channel.awaitTermination(5, TimeUnit.SECONDS);
+        channel.awaitTermination(3, TimeUnit.MINUTES);
       }
     } finally {
       server.shutdown();
-      server.awaitTermination(5, TimeUnit.SECONDS);
+      server.awaitTermination(3, TimeUnit.MINUTES);
     }
   }
 }
