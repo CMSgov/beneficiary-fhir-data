@@ -961,11 +961,8 @@ public final class RifLoader {
     if (!Objects.equals(newBeneficiaryRecord.getMbiHash(), oldBeneficiaryRecord.getMbiHash())) {
       return false;
     }
-    if (newBeneficiaryRecord.getMbiEffectiveDate().isPresent()
-        && oldBeneficiaryRecord.getMbiEffectiveDate().isPresent()
-        && !Objects.equals(
-            newBeneficiaryRecord.getMbiEffectiveDate(),
-            oldBeneficiaryRecord.getMbiEffectiveDate())) {
+    if (!Objects.equals(
+        newBeneficiaryRecord.getMbiEffectiveDate(), oldBeneficiaryRecord.getMbiEffectiveDate())) {
       return false;
     }
     // BFD-1308: removed check for getMbiObsoleteDate; this value is derived from the Beneficiary
