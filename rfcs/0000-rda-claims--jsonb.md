@@ -7,10 +7,9 @@
 * JIRA Ticket(s):
     * [DCGEO-219](https://jira.cms.gov/browse/DCGEO-219)
 
-FISS and MCS claims can be ingested 3-5 times faster using a JSONB column in a single table per claim type than with the current BNF schema.
-The current schema uses a BNF primary/detail schema structure that requires seven tables (4 for FISS and 3 for MCS) plus accompanying foreign keys and indexes.
-Using a JSONB column to store all of the claim data in a single column we can simplify the schema down to one table for each type of claim.
-Benchmarking on a local postresql database saw ingestion rates 3-4 times faster with this structure.
+The current schema uses a normalized relational schema structure that requires seven tables (4 for FISS and 3 for MCS) plus accompanying foreign keys and indexes.
+By switching to a single table per claim type with a JSONB column to store all of a claim's data in a single column we can simplify the schema and imporve performance.
+Benchmarking on a local postresql database saw ingestion rates 3-5 times faster with this structure.
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
@@ -30,10 +29,10 @@ Benchmarking on a local postresql database saw ingestion rates 3-4 times faster 
 ## Motivation
 [Motivation]: #motivation
 
-BNF databases provide great flexibility for querying relational data using joins and/or subselects.
-However the BFD database exists solely to serve the BFD API server and the queries that it needs for normal operations.
+Normalized relational databases provide great flexibility for querying relational data using joins and/or sub-queries.
+However the BFD database exists solely to serve the BFD API server and the queries that it needs for its operations.
 These queries generally consist of a simple query on one or two columns from the claim table followed by reading all of the associated detail data into a DTO object for each claim to allow delivery to clients.
-Consolidating the records from the BNF structure into an object graph requires JPA to perform extra database queries and extra work in memory to assemble the records from detail tables.
+Consolidating the records from the normalized relational structure into an object graph requires JPA to perform extra database queries and extra work in memory to assemble the records from detail tables.
 
 Postgresql (and Amazon Aurora) supports storing object graphs as JSON directly in a single column of a record.
 Using this feature will allow the use of only one table per claim type.
@@ -43,14 +42,14 @@ With this structure JPA needs to execute only a single query to find an retrieve
 Also the work performed in memory to convert the claim JSON into an object graph is simpler since the heirarchical structure of the graph directly matches that of the JSON.
 
 Benchmarking a prototype of this concept against a local postgresql database revealed that claims could be ingested 5.7x faster for FISS claims and 3.5x faster for MCS claims.
-The higher throughput improvement for FISS claims corresponds to the greater complexity of the FISS schema (4 tables) vs MCS (3 tables) in the BNF schema.
+The higher throughput improvement for FISS claims corresponds to the greater complexity of the FISS schema (4 tables) vs MCS (3 tables) in the normalized relational schema.
 
 In addition to acheiving higher throughput during claim ingestion, the JSONB based schema resulted in a simpler database schema.
 That simpler schema (1 table each for FISS and MCS claims) would also require far less maintenance over time.
 Table changes would only be required when a new type of query is added to BFD API.
 Addition of new fields and objects to the claim data itself would not require any schema migration since that data would simply change the JSON written to the existing column.
 Contrast this to adding a new field (e.g. payers) to MCS claims.
-With a BNF schema this would require adding a new table to hold the individual payer records.
+With a normalized relational schema this would require adding a new table to hold the individual payer records.
 Along with that extra table the database would have to maintain additional indexes and foreign/primary key constraints.
 
 ## Proposed Solution
@@ -90,16 +89,17 @@ The single table for FISS claims has a small number of columns:
 - `dcn`: primary key
 - `mbi`: to support MBI query
 - `mbiHash`: to support hashed MBI query
-- `startDate`: to support dat query
+- `stmtCovToDate`: to support date query
 - `jsonData`: all of the claim information stored as JSON
 - `sequenceNumber`: to track version of the claim
 - `lastUpdated`: to track last time the record was updated
+- `claim`: entire claim object as JSON
 
 Each of the queryable non-JSON columns has an associated index.
-The `jsonData` column is not indexed.
+The `claim` column is not indexed.
 
 When the API receives a request for a claim with a particular MBI a simple query is performed on that column.
-The `jsonData` value of the matching record is returned as part of the query.
+The `claim` value of the matching record is returned as part of the query.
 In memory this JSON is converted into an object graph using an open source library.
 This conversion happens seamlessly using a JPA feature, the `Convert` field annotation.
 
