@@ -36,28 +36,26 @@ Consolidating the records from the normalized relational structure into an objec
 
 Postgresql (and Amazon Aurora) supports storing object graphs as JSON directly in a single column of a record.
 Using this feature will allow the use of only one table per claim type.
-The records in this table would contain a column for each of the queries supported by the BFD API.
-One additional column would hold the entire claim as JSON.
-With this structure JPA needs to execute only a single query to find an retrieve claims.
-Also the work performed in memory to convert the claim JSON into an object graph is simpler since the heirarchical structure of the graph directly matches that of the JSON.
+The records in this table would contain a column for each of the queries supported by the BFD API plus one additional column to hold the entire claim as JSON.
+With this structure JPA would be able to find and retrieve an entire claim using only one query.
+Also the work performed in memory to convert the claim JSON into an object graph would be simpler since the heirarchical structure of the graph directly matches that of the JSON.
 
 Benchmarking a prototype of this concept against a local postgresql database revealed that claims could be ingested 5.7x faster for FISS claims and 3.5x faster for MCS claims.
-The higher throughput improvement for FISS claims corresponds to the greater complexity of the FISS schema (4 tables) vs MCS (3 tables) in the normalized relational schema.
+The larger throughput improvement for FISS claims corresponds to the greater complexity of the FISS schema (4 tables) vs MCS (3 tables) in the normalized relational schema.
 
 In addition to acheiving higher throughput during claim ingestion, the JSONB based schema resulted in a simpler database schema.
 That simpler schema (1 table each for FISS and MCS claims) would also require far less maintenance over time.
 Table changes would only be required when a new type of query is added to BFD API.
-Addition of new fields and objects to the claim data itself would not require any schema migration since that data would simply change the JSON written to the existing column.
-Contrast this to adding a new field (e.g. payers) to MCS claims.
+Addition of new fields and sub-objects to the claim data returned by the RDA API would not require any schema migration since that data would simply change the JSON written to the JSONB column.
+Contrast this to adding a new field containing multiple sub-objects (e.g. payers) to MCS claims.
 With a normalized relational schema this would require adding a new table to hold the individual payer records.
 Along with that extra table the database would have to maintain additional indexes and foreign/primary key constraints.
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
-**This section discusses changes specifically for FISS claims.
-The changes for MCS claims are directly analagous and would simply complicate the presentation.**
+**This section discusses changes specifically for FISS claims.  The changes for MCS claims are directly analagous to the ones for FISS.**
 
-The new schema simplifies the current database schema for FISS claims from four tables like this:
+The new schema simplifies the normalized one for by reducing the table count from four:
 
 ````
 +------------------------------------------------------+
@@ -75,7 +73,7 @@ The new schema simplifies the current database schema for FISS claims from four 
 +---------------+  +---------------+   +---------------+
 ````
 
-To a single table like this:
+To one:
 
 ````
 +------------------------------------------------------+
@@ -90,7 +88,6 @@ The single table for FISS claims has a small number of columns:
 - `mbi`: to support MBI query
 - `mbiHash`: to support hashed MBI query
 - `stmtCovToDate`: to support date query
-- `jsonData`: all of the claim information stored as JSON
 - `sequenceNumber`: to track version of the claim
 - `lastUpdated`: to track last time the record was updated
 - `claim`: entire claim object as JSON
@@ -103,16 +100,16 @@ The `claim` value of the matching record is returned as part of the query.
 In memory this JSON is converted into an object graph using an open source library.
 This conversion happens seamlessly using a JPA feature, the `Convert` field annotation.
 
-Code changes are minimal across the BFD code base since the claim data objects are simply converted from JPA entities to Plain Old Java Objects.
+Code changes are minimal across the BFD code base since the claim data objects are simply converted from JPA entities to Plain Old Java Objects by removing the JPA annotations.
 Two new entity classes are added for the two remaining database tables.
 These have a field for each of the queryable columns plus a field to hold the claim POJO.
-Clients perform queries using the new entity class but then use the returned POJO exactly as they previously used the JPA entities.
+Clients perform queries using the new entity class but then use the returned POJO exactly as they previously used the old JPA entities.
 
 
 ### Proposed Solution: Detailed Design
 [Proposed Solution: Detailed Design]: #proposed-solution-detailed-design
-**This section discusses changes specifically for FISS claims.
-The changes for MCS claims are directly analagous and would simply complicate the presentation.**
+**This section discusses changes specifically for FISS claims.  The changes for MCS claims are directly analagous to the ones for FISS.**
+
 
 The `bfd-model-rda` objects are modified as follows:
 
@@ -143,6 +140,7 @@ Note the template macro for the `claim` column type.
 This macro is used since the type of the column will be different in postgresql vs HSQLDB:
 - In postgresql the JSONB type is used to allow use of JSON path querying for ad-hoc queries.
 - In HSQLDB `varchar(max)` is used since `JSONB` is not supported for that database.
+With this macro in place integration and unit tests can work with either postgresql or HSQLDB with no code changes.
 
 The JPA entity for the `FissClaimsJson` object is correspondingly simple:
 
@@ -194,13 +192,13 @@ public class PreAdjFissClaimJson {
 }
 ````
 
-Although the underlying column type is JSON, the `claim` field in the entity is the root POJO for a claim.
+Although the underlying column type is JSONB, the `claim` field in the entity is the root POJO for a claim.
 JPA supports automatic conversion between any database type and a Java type through the `@Convert` annotation.
 This annotation tells JPA what class to use to perform the conversion.
 
 The implementation of this converter uses Jackson to convert between an object and JSON.
-The code to call Jackson is completely generic so the same base class supports any type of POJO.
-A concrete subclass is defined for each POJO type and simply calls the base class constructor with the `Class<T>` of the POJO.
+The code to call Jackson is generic so a single base class supports any type of POJO.
+A concrete subclass is defined for each POJO type and simply calls the base class constructor to set the correct `Class<T>` for the POJO.
 
 ````java
 public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
