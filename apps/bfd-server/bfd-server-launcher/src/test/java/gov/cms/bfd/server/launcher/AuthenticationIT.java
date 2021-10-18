@@ -4,7 +4,6 @@ import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugEnableMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
 import java.io.IOException;
 import java.util.Optional;
-import javax.net.ssl.SSLException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -36,7 +35,7 @@ public final class AuthenticationIT {
    *
    * @throws IOException (this exception indicates a test failure)
    */
-  @Test(expected = SSLException.class)
+  @Test(expected = IOException.class)
   public void accessDeniedForNoClientCert() throws IOException {
     try (ServerProcess serverProcess =
             new ServerProcess(
@@ -58,7 +57,7 @@ public final class AuthenticationIT {
    *
    * @throws IOException (this exception indicates a test failure)
    */
-  @Test(expected = SSLException.class)
+  @Test(expected = IOException.class)
   public void accessDeniedForClientCertThatIsNotTrusted() throws IOException {
     try (ServerProcess serverProcess =
             new ServerProcess(
