@@ -8,7 +8,7 @@
     * [DCGEO-219](https://jira.cms.gov/browse/DCGEO-219)
 
 The current schema uses a normalized relational schema structure that requires seven tables (4 for FISS and 3 for MCS) plus accompanying foreign keys and indexes.
-By switching to a single table per claim type with a JSONB column to store all of a claim's data in a single column we can simplify the schema and imporve performance.
+By switching to a single table per claim type with a JSONB column to store all of a claim's data in a single column we can simplify the schema and improve performance.
 Benchmarking on a local postresql database saw ingestion rates 3-5 times faster with this structure.
 
 ## Table of Contents
