@@ -9,7 +9,13 @@ import gov.cms.bfd.sharedutils.generators.token.pattern.TokenSingleton;
 import java.util.Queue;
 import java.util.Set;
 
-/** This class parses a single token character, including escaped characters. */
+/**
+ * This class parses a single token character, including escaped characters.
+ *
+ * <p>It may be noticed that '.' is not used as a special character (as well as many others). Tokens
+ * are expected to be defined with a more rigid pattern, and currently don't support "wildcard"
+ * definitions.
+ */
 public class TokenSingletonParser implements TokenParser {
 
   private static final Set<Character> VALID_ESCAPE_CHARS =

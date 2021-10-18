@@ -1,5 +1,6 @@
 package gov.cms.bfd.sharedutils.generators.token.pattern;
 
+import gov.cms.bfd.sharedutils.generators.exceptions.GeneratorException;
 import java.math.BigInteger;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,7 +23,11 @@ public class TokenRange extends TokenPattern {
 
   @Override
   String generateToken(BigInteger seed) {
-    return String.valueOf((char) (lowerBound + seed.intValue()));
+    if (seed.intValue() + lowerBound <= upperBound) {
+      return String.valueOf((char) (lowerBound + seed.intValue()));
+    }
+
+    throw new GeneratorException("Seed value is too big for defined range.");
   }
 
   @Override

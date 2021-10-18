@@ -10,7 +10,13 @@ import java.util.Queue;
 /**
  * This class parses token ranges.
  *
- * <p>Currently only letteres (upper or lower) and digits can be ranges.
+ * <p>Currently only letters (upper or lower) and digits can be used in defined ranges.
+ *
+ * <p>This class is created by the {@link
+ * gov.cms.bfd.sharedutils.generators.token.TokenParserFactory} if the next character in the pattern
+ * stream can potentially be a range definition. This class subsequently checks if it actually is a
+ * range by checking for an ensuing '-', and creates a {@link TokenSingleton} instead if it's not
+ * there.
  *
  * <p>\d is automatically parsed as a range 0-9
  *
@@ -42,11 +48,11 @@ public class TokenRangeParser implements TokenParser {
       char upperBound = patternStream.remove();
 
       if (lowerBound >= 'a') {
-        pattern = parseWithBoundsCheck(lowerBound, upperBound, 'z');
+        pattern = parseWithBoundsCheck(lowerBound, upperBound, 'a', 'z');
       } else if (lowerBound >= 'A') {
-        pattern = parseWithBoundsCheck(lowerBound, upperBound, 'Z');
+        pattern = parseWithBoundsCheck(lowerBound, upperBound, 'A', 'Z');
       } else {
-        pattern = parseWithBoundsCheck(lowerBound, upperBound, '9');
+        pattern = parseWithBoundsCheck(lowerBound, upperBound, '0', '9');
       }
     } else {
       throw new ParsingException("Unexpected end of token pattern.");
@@ -56,8 +62,9 @@ public class TokenRangeParser implements TokenParser {
   }
 
   @VisibleForTesting
-  TokenPattern parseWithBoundsCheck(char lowerBound, char upperBound, char maxBound) {
-    if (upperBound >= lowerBound && upperBound <= maxBound) {
+  TokenPattern parseWithBoundsCheck(
+      char lowerBound, char upperBound, char minBound, char maxBound) {
+    if (upperBound > lowerBound && lowerBound >= minBound && upperBound <= maxBound) {
       return new TokenRange(lowerBound, upperBound);
     }
 

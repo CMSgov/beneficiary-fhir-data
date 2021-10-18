@@ -5,9 +5,11 @@ import gov.cms.bfd.sharedutils.generators.exceptions.ParsingException;
 import java.math.BigInteger;
 import java.util.Random;
 import java.util.Set;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /** The base class for all {@link TokenPattern} implementations. */
+@EqualsAndHashCode
 public abstract class TokenPattern {
 
   /** We store this value for optimization. */
@@ -35,20 +37,6 @@ public abstract class TokenPattern {
     } while (randomNumber.compareTo(totalPermutations) >= 0);
 
     return createToken(randomNumber);
-  }
-
-  /**
-   * Checks if the given {@link TokenPattern} "overlaps" with the current one.
-   *
-   * <p>Example: If one pattern is A-M and the other is K-R, the patterns overlap on K-M
-   *
-   * <p>This check is used to prevent duplicate entries in 'or' groups
-   *
-   * @param tokenPattern The target {@link TokenPattern} to check for overlaps with the current one.
-   * @return True if the patterns overlap, False otherwise.
-   */
-  public boolean overlaps(TokenPattern tokenPattern) {
-    return tokenPattern.containsAnyOf(this.characters());
   }
 
   /**
@@ -84,6 +72,20 @@ public abstract class TokenPattern {
       // investigate.
       throw new GeneratorException("Failed with seed: " + seed, e);
     }
+  }
+
+  /**
+   * Checks if the given {@link TokenPattern} "overlaps" with the current one.
+   *
+   * <p>Example: If one pattern is A-M and the other is K-R, the patterns overlap on K-M
+   *
+   * <p>This check is used to prevent duplicate entries in 'or' groups
+   *
+   * @param tokenPattern The target {@link TokenPattern} to check for overlaps with the current one.
+   * @return True if the patterns overlap, False otherwise.
+   */
+  public boolean overlaps(TokenPattern tokenPattern) {
+    return tokenPattern.containsAnyOf(this.characters());
   }
 
   /**

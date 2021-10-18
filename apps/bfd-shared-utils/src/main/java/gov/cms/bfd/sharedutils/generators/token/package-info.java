@@ -17,6 +17,12 @@
  *
  * <p>00004351 -> 000010FF
  *
+ * <p>Or binary to decimal
+ *
+ * <p>Example: [01]{4} to \d{2}
+ *
+ * <p>1001 -> 09
+ *
  * <p>A subset of Regular Expressions is used to define the token patterns, allowing for rather
  * complex definitions.
  *

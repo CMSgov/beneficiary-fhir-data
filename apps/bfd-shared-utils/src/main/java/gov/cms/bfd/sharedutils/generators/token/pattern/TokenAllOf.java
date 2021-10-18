@@ -23,19 +23,19 @@ public class TokenAllOf extends TokenPattern {
 
   @Override
   public boolean isValidPattern(String value) {
-    boolean isValid = true;
-
     int startIndex = 0;
 
-    for (int i = 0; isValid && i < patterns.size(); ++i) {
-      TokenPattern tokenPattern = patterns.get(i);
-
+    for (TokenPattern tokenPattern : patterns) {
       String substring = value.substring(startIndex, startIndex + tokenPattern.tokenLength());
-      isValid = tokenPattern.isValidPattern(substring);
+
+      if (!tokenPattern.isValidPattern(substring)) {
+        return false;
+      }
+
       startIndex += tokenPattern.tokenLength();
     }
 
-    return isValid;
+    return startIndex == value.length();
   }
 
   @Override
@@ -55,7 +55,7 @@ public class TokenAllOf extends TokenPattern {
       token.insert(0, pattern.generateToken(currentSeed));
     }
 
-    if (remainingSeed.compareTo(BigInteger.ZERO) < 0) {
+    if (remainingSeed.compareTo(BigInteger.ZERO) > 0) {
       throw new GeneratorException(
           "This shouldn't have happened, seed size exceeded permutations, seed value: " + seed);
     }

@@ -66,12 +66,13 @@ public class TokenOneOf extends TokenPattern {
 
       if (currentSeed.compareTo(pattern.getTotalPermutations()) < 0) {
         token = pattern.createToken(currentSeed);
+        currentSeed = BigInteger.ZERO;
       } else {
         currentSeed = currentSeed.subtract(pattern.getTotalPermutations());
       }
     }
 
-    if (currentSeed.compareTo(BigInteger.ZERO) < 0) {
+    if (currentSeed.compareTo(BigInteger.ZERO) > 0) {
       throw new GeneratorException(
           "This shouldn't have happened, seed size exceeded permutations, seed value: " + seed);
     }
@@ -83,17 +84,15 @@ public class TokenOneOf extends TokenPattern {
   BigInteger calculateTokenValue(String tokenString) {
     BigInteger tokenValue = BigInteger.ZERO;
 
-    for (int i = 0; tokenValue.compareTo(BigInteger.ZERO) == 0 && i < patterns.size(); ++i) {
-      TokenPattern tokenPattern = patterns.get(i);
-
+    for (TokenPattern tokenPattern : patterns) {
       if (tokenPattern.isValidPattern(tokenString)) {
-        tokenValue = tokenValue.add(tokenPattern.parseTokenValue(tokenString));
+        return tokenValue.add(tokenPattern.parseTokenValue(tokenString));
       } else {
         tokenValue = tokenValue.add(tokenPattern.getTotalPermutations());
       }
     }
 
-    return tokenValue;
+    throw new ParsingException("Token string was not valid for any of the current patterns");
   }
 
   @Override

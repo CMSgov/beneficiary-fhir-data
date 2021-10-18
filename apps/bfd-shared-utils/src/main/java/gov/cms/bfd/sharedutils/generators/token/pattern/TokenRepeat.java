@@ -3,6 +3,7 @@ package gov.cms.bfd.sharedutils.generators.token.pattern;
 import java.math.BigInteger;
 import java.util.Set;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
  * Represents a token that is repeated a specified number of times.
@@ -12,16 +13,17 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class TokenRepeat extends TokenPattern {
 
-  private TokenPattern pattern;
-  private final int repeats;
+  private final TokenPattern pattern;
+  @Getter private final int repeats;
 
   public TokenRepeat(int repeats) {
+    this.pattern = null;
     this.repeats = repeats;
   }
 
-  public TokenRepeat(TokenPattern pattern, TokenRepeat oldRepeat) {
+  public TokenRepeat(TokenPattern pattern, int repeats) {
     this.pattern = pattern;
-    this.repeats = oldRepeat.repeats;
+    this.repeats = repeats;
   }
 
   @Override

@@ -1,5 +1,6 @@
 package gov.cms.bfd.sharedutils.generators.token.parser;
 
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.generators.exceptions.ParsingException;
 import gov.cms.bfd.sharedutils.generators.token.TokenParserFactory;
 import gov.cms.bfd.sharedutils.generators.token.pattern.TokenPattern;
@@ -22,12 +23,12 @@ public abstract class AbstractTokenGroupParser<C extends Collection<TokenPattern
     TokenPattern previousPattern = null;
 
     while (!patternStream.isEmpty()) {
-      TokenParser tokenParser = TokenParserFactory.createTokenParser(patternStream);
+      TokenParser tokenParser = createTokenParser(patternStream);
       TokenPattern pattern = tokenParser.parse(patternStream);
 
       if (pattern instanceof TokenRepeat) {
         if (previousPattern != null) {
-          pattern = new TokenRepeat(previousPattern, (TokenRepeat) pattern);
+          pattern = new TokenRepeat(previousPattern, ((TokenRepeat) pattern).getRepeats());
           pattern.init();
           patterns.add(pattern);
           previousPattern = null;
@@ -54,6 +55,17 @@ public abstract class AbstractTokenGroupParser<C extends Collection<TokenPattern
     }
 
     throw new ParsingException("Illegal empty allOf parser pattern.");
+  }
+
+  /**
+   * Helper method to make unit testing easier.
+   *
+   * @param patternStream The pattern stream to help create the correct {@link TokenParser}.
+   * @return A {@link TokenParser} for the next data of the pattern stream.
+   */
+  @VisibleForTesting
+  TokenParser createTokenParser(Queue<Character> patternStream) {
+    return TokenParserFactory.createTokenParser(patternStream);
   }
 
   /**
