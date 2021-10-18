@@ -54,3 +54,17 @@ data_server_ssl_client_certificates:
 # Enables the RDA API data pipline with a 1 hour retry interval.
 data_pipeline_rda_job_enabled: true
 data_pipeline_rda_job_interval_seconds: 3600
+
+# Only define this variable if you want to force the RDA API pipeline to always request a specific
+# starting sequence number for FISS claims from the RDA API.  Normally this variable should be 
+# commented out so that the default logic can resume from the most recently received
+# sequence number in the database.
+# In TEST this is being forced to zero so we can evaluate pipeline ingestion rate.
+data_pipeline_rda_job_starting_fiss_seq_num: 0
+
+# Only define this variable if you want to force the RDA API pipeline to always request a specific
+# starting sequence number for MCS claims from the RDA API.  Normally this variable should be 
+# commented out so that the default logic can resume from the most recently received
+# sequence number in the database.
+# In TEST this is being forced to zero so we can evaluate pipeline ingestion rate.
+data_pipeline_rda_job_starting_mcs_seq_num: 0

@@ -1,0 +1,76 @@
+---
+##
+# Applies and verifies the role on the container being used for the test case.
+##
+
+- hosts: localhost
+  tasks:
+    - name: Download BFD Server Launcher
+      command: >
+        mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
+          -DremoteRepositories=central::default::https://repo.maven.apache.org/maven2,github::default::https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
+          -Dartifact=gov.cms.bfd:bfd-server-launcher:1.0.0-SNAPSHOT:zip
+          -Dtransitive=false
+      args:
+        creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
+    - name: Download BFD Server WAR
+      command: >
+        mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
+          -DremoteRepositories=central::default::https://repo.maven.apache.org/maven2,github::default::https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
+          -Dartifact=gov.cms.bfd:bfd-server-war:1.0.0-SNAPSHOT:war
+          -Dtransitive=false
+      args:
+        creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
+
+# Apply the role.
+- hosts: docker_container
+  tasks:
+    - name: Install Prerequisites
+      package:
+        name:
+          - unzip
+          - selinux-policy
+        state: present
+      become: true
+
+    - name: Apply Role
+      import_role:
+        name: bfd-server
+      vars:
+        data_server_appserver_https_port: "443"
+        data_server_launcher: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-launcher/1.0.0-SNAPSHOT/bfd-server-launcher-1.0.0-SNAPSHOT.zip"
+        data_server_war: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-server-war/1.0.0-SNAPSHOT/bfd-server-war-1.0.0-SNAPSHOT.war"
+        data_server_appserver_keystore: 'files/server-fake.pem'
+        #data_server_ssl_server_genkeypair_args: '-keyalg RSA -keysize 4096 -dname cn=localhost -validity 3650'
+        data_server_ssl_client_certificates:
+          - alias: client_foo
+            certificate: "{{ lookup('file', 'files/client-foo.crt.pem') }}"
+        data_server_db_url: 'jdbc:hsqldb:mem:test'
+        data_server_ssl_client_certificate_test: 'files/client-foo.crt.pem'
+        data_server_db_username: ""
+        data_server_db_password: ""
+
+# Verify that things worked as expected.
+- hosts: docker_container
+  tasks:
+    - name: Ensure Service Is Running
+      service:
+        name: bfd-server
+        state: started
+        enabled: yes
+      changed_when: false
+      become: true
+
+    - name: Grab Log Contents
+      command: cat /usr/local/bfd-server/bluebutton-server-app-log.json
+      changed_when: false
+      register: command_cat_log
+
+    - name: Print out the log
+      ansible.builtin.debug:
+        var: command_cat_log
+      when: "'Started Jetty. Server available at' not in command_cat_log.stdout"
+
+    - name: Log Failed Application Launches
+      action: fail
+      when: "'Started Jetty. Server available at' not in command_cat_log.stdout"
