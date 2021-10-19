@@ -245,6 +245,7 @@ public class RdaLoadJobIT {
             serverPort,
             IN_PROCESS_NAME,
             Duration.ofMinutes(1)),
+        new RdaServerJob.Config(),
         new IdHasher.Config(100, "thisisjustatest"));
   }
 

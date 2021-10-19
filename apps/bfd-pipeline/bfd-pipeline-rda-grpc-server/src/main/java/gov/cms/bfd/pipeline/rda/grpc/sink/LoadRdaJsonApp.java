@@ -6,6 +6,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
@@ -131,7 +132,7 @@ public class LoadRdaJsonApp {
       final GrpcRdaSource.Config grpcConfig =
           new GrpcRdaSource.Config(
               GrpcRdaSource.Config.ServerType.Remote, "localhost", port, "", Duration.ofDays(1));
-      return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
+      return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
     }
 
     private MessageSource<FissClaimChange> createFissClaimsSource(long sequenceNumber) {

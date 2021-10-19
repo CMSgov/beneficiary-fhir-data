@@ -25,6 +25,7 @@ public class RdaLoadOptionsTest {
                 5432,
                 "mock-server",
                 Duration.ofMinutes(59)),
+            new RdaServerJob.Config(),
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {

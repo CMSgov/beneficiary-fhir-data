@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
@@ -113,6 +114,6 @@ public class DirectRdaLoadApp {
             options.intValue("api.port", 5003),
             "",
             Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)));
-    return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
+    return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
   }
 }
