@@ -16,11 +16,6 @@ public class TokenRepeat extends TokenPattern {
   private final TokenPattern pattern;
   @Getter private final int repeats;
 
-  public TokenRepeat(int repeats) {
-    this.pattern = null;
-    this.repeats = repeats;
-  }
-
   public TokenRepeat(TokenPattern pattern, int repeats) {
     this.pattern = pattern;
     this.repeats = repeats;

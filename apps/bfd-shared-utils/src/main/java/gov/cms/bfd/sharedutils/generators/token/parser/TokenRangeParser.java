@@ -22,7 +22,7 @@ import java.util.Queue;
  *
  * <p>Partial ranges can be used, ex: 4-8 or d-k.
  */
-public class TokenRangeParser implements TokenParser {
+public class TokenRangeParser extends TokenParser {
 
   @Override
   public TokenPattern parse(Queue<Character> patternStream) {

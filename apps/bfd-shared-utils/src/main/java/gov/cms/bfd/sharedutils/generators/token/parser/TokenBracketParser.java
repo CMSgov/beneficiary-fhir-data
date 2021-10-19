@@ -16,7 +16,7 @@ import java.util.Queue;
  *
  * <p>Example: [AB0-9] defines an 'or' group that can be A, B, or any digit.
  */
-public class TokenBracketParser implements TokenParser {
+public class TokenBracketParser extends TokenParser {
 
   @Override
   public TokenPattern parse(Queue<Character> patternStream) {

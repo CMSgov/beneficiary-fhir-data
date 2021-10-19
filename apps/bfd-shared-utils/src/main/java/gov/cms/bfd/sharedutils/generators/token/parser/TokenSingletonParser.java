@@ -16,7 +16,7 @@ import java.util.Set;
  * are expected to be defined with a more rigid pattern, and currently don't support "wildcard"
  * definitions.
  */
-public class TokenSingletonParser implements TokenParser {
+public class TokenSingletonParser extends TokenParser {
 
   private static final Set<Character> VALID_ESCAPE_CHARS =
       ImmutableSet.of('\\', 'd', '[', ']', '{', '}', '-');

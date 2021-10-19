@@ -4,8 +4,9 @@ import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.sharedutils.generators.exceptions.ParsingException;
 import gov.cms.bfd.sharedutils.generators.token.TokenParserFactory;
 import gov.cms.bfd.sharedutils.generators.token.pattern.TokenPattern;
-import gov.cms.bfd.sharedutils.generators.token.pattern.TokenRepeat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -14,44 +15,47 @@ import java.util.Queue;
  * @param <C> The type of collection the implementing class uses for it's internal container.
  */
 public abstract class AbstractTokenGroupParser<C extends Collection<TokenPattern>>
-    implements TokenParser {
+    extends TokenParser {
 
   @Override
   public TokenPattern parse(Queue<Character> patternStream) {
-    C patterns = createCollection();
+    List<TokenPattern> patterns = new ArrayList<>();
 
-    TokenPattern previousPattern = null;
+    //    TokenPattern previousPattern = null;
 
     while (!patternStream.isEmpty()) {
       TokenParser tokenParser = createTokenParser(patternStream);
-      TokenPattern pattern = tokenParser.parse(patternStream);
+      tokenParser.parseAndAdd(patternStream, patterns);
+      //      TokenPattern pattern = tokenParser.parse(patternStream);
 
-      if (pattern instanceof TokenRepeat) {
-        if (previousPattern != null) {
-          pattern = new TokenRepeat(previousPattern, ((TokenRepeat) pattern).getRepeats());
-          pattern.init();
-          patterns.add(pattern);
-          previousPattern = null;
-        } else {
-          throw new ParsingException("Repeat definition has no associated preceding token");
-        }
-      } else {
-        if (previousPattern != null) {
-          patterns.add(previousPattern);
-        }
-
-        previousPattern = pattern;
-      }
+      //      if (pattern instanceof TokenRepeat) {
+      //        if (previousPattern != null) {
+      //          pattern = new TokenRepeat(previousPattern, ((TokenRepeat) pattern).getRepeats());
+      //          pattern.init();
+      //          patterns.add(pattern);
+      //          previousPattern = null;
+      //        } else {
+      //          throw new ParsingException("Repeat definition has no associated preceding token");
+      //        }
+      //      } else {
+      //        if (previousPattern != null) {
+      //          patterns.add(previousPattern);
+      //        }
+      //
+      //        previousPattern = pattern;
+      //      }
     }
-
-    if (previousPattern != null) {
-      patterns.add(previousPattern);
-    }
+    //
+    //    if (previousPattern != null) {
+    //      patterns.add(previousPattern);
+    //    }
 
     if (patterns.size() == 1) {
-      return patterns.iterator().next();
+      return patterns.get(0);
     } else if (!patterns.isEmpty()) {
-      return createTokenPattern(patterns);
+      C collection = createCollection();
+      collection.addAll(patterns);
+      return createTokenPattern(collection);
     }
 
     throw new ParsingException("Illegal empty allOf parser pattern.");
