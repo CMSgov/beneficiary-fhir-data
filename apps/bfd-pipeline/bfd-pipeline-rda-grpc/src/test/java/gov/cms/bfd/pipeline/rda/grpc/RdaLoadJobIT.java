@@ -36,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class RdaLoadJobIT {
-  public static final String IN_PROCESS_NAME = "mock-server";
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   private static final CharSource fissClaimsSource =
       Resources.asCharSource(Resources.getResource("FISS.ndjson"), StandardCharsets.UTF_8);
@@ -134,7 +133,7 @@ public class RdaLoadJobIT {
         (appState, entityManager) -> {
           assertTablesAreEmpty(entityManager);
           runWithInProcessServer(
-              IN_PROCESS_NAME,
+              RdaServerJob.Config.DEFAULT_SERVER_NAME,
               EmptyMessageSource.factory(),
               mcsJsonSource(mcsClaimJson),
               () -> {
@@ -243,7 +242,7 @@ public class RdaLoadJobIT {
                 : GrpcRdaSource.Config.ServerType.InProcess,
             "localhost",
             serverPort,
-            IN_PROCESS_NAME,
+            RdaServerJob.Config.DEFAULT_SERVER_NAME,
             Duration.ofMinutes(1)),
         new RdaServerJob.Config(),
         new IdHasher.Config(100, "thisisjustatest"));
