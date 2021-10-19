@@ -108,8 +108,10 @@ public class DirectRdaLoadApp {
                 options.longOption("job.startingMcsSeqNum"));
     final GrpcRdaSource.Config grpcConfig =
         new GrpcRdaSource.Config(
+            GrpcRdaSource.Config.ServerType.Remote,
             options.stringValue("api.host", "localhost"),
             options.intValue("api.port", 5003),
+            "",
             Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)));
     return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
   }

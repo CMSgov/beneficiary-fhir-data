@@ -129,7 +129,8 @@ public class LoadRdaJsonApp {
           new AbstractRdaLoadJob.Config(
               Duration.ofDays(1), batchSize, Optional.empty(), Optional.empty());
       final GrpcRdaSource.Config grpcConfig =
-          new GrpcRdaSource.Config("localhost", port, Duration.ofDays(1));
+          new GrpcRdaSource.Config(
+              GrpcRdaSource.Config.ServerType.Remote, "localhost", port, "", Duration.ofDays(1));
       return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
     }
 

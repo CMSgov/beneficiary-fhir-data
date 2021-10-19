@@ -19,7 +19,12 @@ public class RdaLoadOptionsTest {
         new RdaLoadOptions(
             new AbstractRdaLoadJob.Config(
                 Duration.ofDays(12), 9832, Optional.empty(), Optional.empty()),
-            new GrpcRdaSource.Config("localhost", 5432, Duration.ofMinutes(59)),
+            new GrpcRdaSource.Config(
+                GrpcRdaSource.Config.ServerType.Remote,
+                "localhost",
+                5432,
+                "mock-server",
+                Duration.ofMinutes(59)),
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {

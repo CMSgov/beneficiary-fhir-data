@@ -13,14 +13,15 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -233,72 +234,78 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   }
 
   /** This class contains the configuration settings specific to the RDA rRPC service. */
+  @Getter
+  @EqualsAndHashCode
   public static class Config implements Serializable {
     private static final long serialVersionUID = 6667857735839524L;
 
+    /** The type of RDA API server to connect to. */
+    private final ServerType serverType;
+    /** The hostname or IP address of the host running the RDA API. */
     private final String host;
+    /** The port on which the RDA API listens for connections. */
     private final int port;
+    /** The name used to connect to an in-process mock RDA API server. */
+    private final String inProcessServerName;
+    /** The maximum time the stream is allowed to remain idle before being automatically closed. */
     private final Duration maxIdle;
 
-    public Config(String host, int port, Duration maxIdle) {
+    /**
+     * Specifies which type of server we want to connect to. {@code Remote} is the normal
+     * configuration. {@code InProcess} is used when populating an environment with synthetic data
+     * served by a mock RDA API server running as a pipeline job.
+     */
+    public enum ServerType {
+      Remote,
+      InProcess
+    }
+
+    public Config(
+        ServerType serverType,
+        String host,
+        int port,
+        String inProcessServerName,
+        Duration maxIdle) {
+      this.serverType = serverType;
       this.host = Preconditions.checkNotNull(host);
       this.port = port;
+      this.inProcessServerName = inProcessServerName;
       this.maxIdle = maxIdle;
-      Preconditions.checkArgument(host.length() >= 1, "host name is empty");
-      Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
+      if (serverType == ServerType.Remote) {
+        Preconditions.checkArgument(host.length() >= 1, "host name is empty");
+        Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
+      } else {
+        Preconditions.checkArgument(
+            inProcessServerName.length() >= 1, "inProcessServerName is empty");
+      }
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
     }
 
-    /** @return the hostname or IP address of the host running the RDA API. */
-    public String getHost() {
-      return host;
-    }
-
-    /** @return the port on which the RDA API listens for connections. */
-    public int getPort() {
-      return port;
-    }
-
-    /**
-     * Used to specify the maximum amount of time to wait for responses to arrive on the response
-     * stream. This is an inter-message time, not an overall connection time. For example if maxIdle
-     * is set for five minutes the stream would be kept open forever as long as messages arrive
-     * within 5 minutes of each other.
-     *
-     * @return the maximum idle time for the rRPC service's response stream.
-     */
-    public Duration getMaxIdle() {
-      return maxIdle;
-    }
-
     private ManagedChannel createChannel() {
-      final ManagedChannelBuilder<?> builder =
-          ManagedChannelBuilder.forAddress(host, port)
-              .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS)
-              .enableRetry();
+      return createChannelBuilder()
+          .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS)
+          .enableRetry()
+          .build();
+    }
+
+    private ManagedChannelBuilder<?> createChannelBuilder() {
+      if (serverType == ServerType.InProcess) {
+        return createInProcessChannelBuilder();
+      } else {
+        return createRemoteChannelBuilder();
+      }
+    }
+
+    private ManagedChannelBuilder<?> createRemoteChannelBuilder() {
+      final ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forAddress(host, port);
       if (host.equals("localhost")) {
         builder.usePlaintext();
       }
-      return builder.build();
+      return builder;
     }
 
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (!(o instanceof Config)) {
-        return false;
-      }
-      Config config = (Config) o;
-      return port == config.port
-          && Objects.equals(host, config.host)
-          && Objects.equals(maxIdle, config.maxIdle);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(host, port, maxIdle);
+    private ManagedChannelBuilder<?> createInProcessChannelBuilder() {
+      return InProcessChannelBuilder.forName(inProcessServerName);
     }
   }
 

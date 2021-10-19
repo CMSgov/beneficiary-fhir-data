@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static gov.cms.bfd.pipeline.rda.grpc.server.RdaServer.runWithLocalServer;
+import static gov.cms.bfd.pipeline.rda.grpc.server.RdaServer.*;
 import static org.junit.Assert.*;
 
 import com.google.common.base.Strings;
@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class RdaLoadJobIT {
+  public static final String IN_PROCESS_NAME = "mock-server";
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   private static final CharSource fissClaimsSource =
       Resources.asCharSource(Resources.getResource("FISS.ndjson"), StandardCharsets.UTF_8);
@@ -132,11 +133,12 @@ public class RdaLoadJobIT {
         clock,
         (appState, entityManager) -> {
           assertTablesAreEmpty(entityManager);
-          runWithLocalServer(
+          runWithInProcessServer(
+              IN_PROCESS_NAME,
               EmptyMessageSource.factory(),
               mcsJsonSource(mcsClaimJson),
-              port -> {
-                final RdaLoadOptions config = createRdaLoadOptions(port);
+              () -> {
+                final RdaLoadOptions config = createRdaLoadOptions(-1);
                 final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
                 job.call();
               });
@@ -235,7 +237,14 @@ public class RdaLoadJobIT {
     return new RdaLoadOptions(
         new AbstractRdaLoadJob.Config(
             Duration.ofSeconds(1), BATCH_SIZE, Optional.empty(), Optional.empty()),
-        new GrpcRdaSource.Config("localhost", serverPort, Duration.ofMinutes(1)),
+        new GrpcRdaSource.Config(
+            serverPort > 0
+                ? GrpcRdaSource.Config.ServerType.Remote
+                : GrpcRdaSource.Config.ServerType.InProcess,
+            "localhost",
+            serverPort,
+            IN_PROCESS_NAME,
+            Duration.ofMinutes(1)),
         new IdHasher.Config(100, "thisisjustatest"));
   }
 

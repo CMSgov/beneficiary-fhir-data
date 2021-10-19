@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -170,11 +171,19 @@ public final class AppConfiguration implements Serializable {
   public static final int DEFAULT_RDA_JOB_BATCH_SIZE = 1;
 
   /**
+   * The name of the environment variable that specifies which type of RDA API server to connect to.
+   * {@link GrpcRdaSource.Config#getServerType()}
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "RDA_GRPC_SERVER_TYPE";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_TYPE}. */
+  public static final GrpcRdaSource.Config.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
+      GrpcRdaSource.Config.ServerType.Remote;
+
+  /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getHost()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_HOST = "RDA_GRPC_HOST";
-
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_HOST}. */
   public static final String DEFAULT_RDA_GRPC_HOST = "localhost";
 
@@ -185,13 +194,23 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "RDA_GRPC_PORT";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_PORT}. */
   public static final int DEFAULT_RDA_GRPC_PORT = 443;
+
+  /**
+   * The name of the environment variable that specifies the name of an in-process mock RDA API
+   * server. This name is used when instantiating the server as well as when connecting to it.
+   * {@link GrpcRdaSource.Config#getInProcessServerName()}
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME =
+      "RDA_GRPC_INPROC_SERVER_NAME";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME} */
+  public static final String DEFAULT_RDA_GRPC_INPROC_SERVER_NAME = "MockRdaServer";
+
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMaxIdle()} ()} value. This variable value
    * should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "RDA_GRPC_MAX_IDLE_SECONDS";
-
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
   public static final int DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS = Integer.MAX_VALUE;
 
@@ -415,8 +434,13 @@ public final class AppConfiguration implements Serializable {
             readEnvLongOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM));
     final GrpcRdaSource.Config grpcConfig =
         new GrpcRdaSource.Config(
+            readEnvEnumOptional(
+                    ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, GrpcRdaSource.Config.ServerType::valueOf)
+                .orElse(DEFAULT_RDA_GRPC_SERVER_TYPE),
             readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST).orElse(DEFAULT_RDA_GRPC_HOST),
             readEnvIntOptional(ENV_VAR_KEY_RDA_GRPC_PORT).orElse(DEFAULT_RDA_GRPC_PORT),
+            readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME)
+                .orElse(DEFAULT_RDA_GRPC_INPROC_SERVER_NAME),
             Duration.ofSeconds(
                 readEnvIntOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS)
                     .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
@@ -456,6 +480,28 @@ public final class AppConfiguration implements Serializable {
     }
 
     return environmentVariableValue.get();
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @param parser the function used to convert the name into an enum value
+   * @return the value of the specified environment variable converted to an enum., or {@code
+   *     defaultValue} if it is not set
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value cannot be parsed.
+   */
+  static <T extends Enum<T>> Optional<T> readEnvEnumOptional(
+      String environmentVariableName, Function<String, T> parser) {
+    Optional<String> environmentVariableValueText = readEnvStringOptional(environmentVariableName);
+
+    try {
+      return environmentVariableValueText.map(parser);
+    } catch (Throwable e) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              environmentVariableName, environmentVariableValueText.get()));
+    }
   }
 
   /**
