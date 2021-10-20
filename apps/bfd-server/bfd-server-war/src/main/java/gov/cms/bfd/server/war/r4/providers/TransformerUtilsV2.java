@@ -1582,15 +1582,12 @@ public final class TransformerUtilsV2 {
             beneIds.add(reference);
           }
         }
-
-        continue;
       } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
         Patient patient = ((Patient) entry.getResource());
         if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
           beneIds.add(patient.getId());
         }
 
-        continue;
       } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
         Coverage coverage = ((Coverage) entry.getResource());
         if (coverage != null
@@ -1601,7 +1598,6 @@ public final class TransformerUtilsV2 {
             beneIds.add(reference);
           }
         }
-        continue;
       }
     }
 
