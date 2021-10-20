@@ -556,28 +556,6 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * @param environmentVariableName the name of the environment variable to get the value of
-   * @param parser the function used to convert the name into a parsed value
-   * @return the value of the specified environment variable converted to a parsed value
-   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
-   *     value cannot be parsed.
-   */
-  static <T> Optional<T> readEnvParsedOptional(
-      String environmentVariableName, Function<String, T> parser) {
-    Optional<String> environmentVariableValueText =
-        readEnvNonEmptyStringOptional(environmentVariableName);
-
-    try {
-      return environmentVariableValueText.map(parser);
-    } catch (Throwable e) {
-      throw new AppConfigurationException(
-          String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValueText.get()));
-    }
-  }
-
-  /**
-   * @param environmentVariableName the name of the environment variable to get the value of
    * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
    *     not set
    * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
@@ -593,6 +571,28 @@ public final class AppConfiguration implements Serializable {
     try {
       return Optional.of(Integer.valueOf(environmentVariableValueText.get()));
     } catch (NumberFormatException e) {
+      throw new AppConfigurationException(
+          String.format(
+              "Invalid value for configuration environment variable '%s': '%s'",
+              environmentVariableName, environmentVariableValueText.get()));
+    }
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @param parser the function used to convert the name into a parsed value
+   * @return the value of the specified environment variable converted to a parsed value
+   * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
+   *     value cannot be parsed.
+   */
+  static <T> Optional<T> readEnvParsedOptional(
+      String environmentVariableName, Function<String, T> parser) {
+    Optional<String> environmentVariableValueText =
+        readEnvNonEmptyStringOptional(environmentVariableName);
+
+    try {
+      return environmentVariableValueText.map(parser);
+    } catch (RuntimeException e) {
       throw new AppConfigurationException(
           String.format(
               "Invalid value for configuration environment variable '%s': '%s'",
