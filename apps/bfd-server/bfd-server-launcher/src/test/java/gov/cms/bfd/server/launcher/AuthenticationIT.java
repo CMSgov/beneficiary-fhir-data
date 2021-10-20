@@ -33,7 +33,11 @@ public final class AuthenticationIT {
   /**
    * Verifies that clients that don't present a client certificate receive an access denied error.
    *
-   * @throws IOException (this exception indicates a test failure)
+   * @throws IOException (this exception is expected for this negative test)
+   *     <p>Note that we expect to receive SSLException but sometimes we can receive a
+   *     SocketException which is the subject of
+   *     https://github.com/eclipse/jetty.project/issues/7021. Until that issue is resolved the test
+   *     is considered to be passing as long as we get an IOException.
    */
   @Test(expected = IOException.class)
   public void accessDeniedForNoClientCert() throws IOException {
@@ -55,7 +59,11 @@ public final class AuthenticationIT {
    * Verifies that clients that present a client certificate that is not in the server's trust store
    * receive an access denied error.
    *
-   * @throws IOException (this exception indicates a test failure)
+   * @throws IOException (this exception is expected for this negative test)
+   *     <p>Note that we expect to receive SSLException but sometimes we can receive a
+   *     SocketException which is the subject of
+   *     https://github.com/eclipse/jetty.project/issues/7021. Until that issue is resolved the test
+   *     is considered to be passing as long as we get an IOException.
    */
   @Test(expected = IOException.class)
   public void accessDeniedForClientCertThatIsNotTrusted() throws IOException {
