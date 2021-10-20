@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,11 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
   private static final Duration SERVER_SHUTDOWN_TIMEOUT = Duration.ofMinutes(5);
 
   private final Config config;
+  private final AtomicInteger running;
 
   public RdaServerJob(Config config) {
     this.config = config;
+    running = new AtomicInteger();
   }
 
   @Override
@@ -57,6 +60,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         RdaServer.startInProcess(
             config.serverName, config::createFissClaims, config::createMcsClaims);
     try {
+      running.incrementAndGet();
       try {
         LOGGER.info("server started - sleeping...");
         Thread.sleep(Long.MAX_VALUE);
@@ -64,6 +68,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         LOGGER.info("sleep interrupted");
       }
     } finally {
+      running.decrementAndGet();
       LOGGER.info("telling server to shut down");
       server.shutdown();
       LOGGER.info("waiting up to {} for server to finish shutting down", SERVER_SHUTDOWN_TIMEOUT);
@@ -71,6 +76,10 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     }
     LOGGER.info("server shutdown complete");
     return PipelineJobOutcome.WORK_DONE;
+  }
+
+  public boolean isRunning() {
+    return running.get() > 0;
   }
 
   public static class Config implements Serializable {
