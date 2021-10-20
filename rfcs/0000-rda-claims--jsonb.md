@@ -138,7 +138,7 @@ The schema also contains one index for each of the queryable columns.
 
 Note the template macro for the `claim` column type.
 This macro is used since the type of the column will be different in postgresql vs HSQLDB:
-- In postgresql the JSONB type is used to allow use of JSON path querying for ad-hoc queries.
+- In postgresql the `JSONB` type is used to allow use of JSON path querying for ad-hoc queries.
 - In HSQLDB `varchar(max)` is used since `JSONB` is not supported for that database.
 With this macro in place integration and unit tests can work with either postgresql or HSQLDB with no code changes.
 
@@ -278,14 +278,16 @@ None.
 ### Proposed Solution: Drawbacks
 [Proposed Solution: Drawbacks]: #proposed-solution-drawbacks
 
-This is a departure from existing practice in the BFD database schema.
+**Drawback 1:** This is a departure from existing practice in the BFD database schema.
+
 As such it creates code and design differences that could trip up new developers.
 However this is offset by:
 - The database schema is greatly simplified.
 - The likelihood of schema migrations being needed for future RDA API changes are greatly reduced.
 - The implementation is simple to understand and would work as-is with other entities in the future if desired.
 
-Postgresql JSONB columns store the full JSON in binary form.
+**Drawback 2:** Postgresql JSONB columns store the full JSON in binary form.
+
 This increases storage reqirements for the schema since the field names in the JSON are repeated in every record.
 The same benchmark that measured faster ingestion rates also measured increased storage requirements:
 - Storage per FISS claim increased from 1,460 bytes per claim to 1,958.
@@ -294,8 +296,16 @@ The size measurement was not extremely precise as the size increased between upd
 This variation was likely due to internal postgresql details.
 
 Although the overal storage in the database was increased somewhat with JSONB the overall performance would not be affected.
-Since the JSONB columns is not indexed, the size of the indexes being queried would be the same with JSONB as with the current schema.
+Since the JSONB column is not indexed, the size of the indexes being queried would be the same with JSONB as with the current schema.
 Overall I/O with the database should be lower with this schema since only one query is needed for each claim instead of one per table.
+
+**Drawback 3:** Without the relational structure we can't perform queries in the normal way.
+
+Standard SQL query syntax for fields within the JSON would not be available however postgresql provides a set of operators and functions for querying information within a `JSONB` column.
+This feature is documented here: https://www.postgresql.org/docs/12/functions-json.html
+
+The functions and operators are different than what a SQL user may be used to but they allow full access to values contained in the JSON.
+Postgresql also supports building indexes from properties of objects stored in a JSONB column although we plan to copy often used values into separate columns within the record so that BFD API queries don't have to depend on non-standard query syntax.
 
 
 ### Proposed Solution: Notable Alternatives
@@ -304,7 +314,7 @@ Overall I/O with the database should be lower with this schema since only one qu
 Since this proposal could be boiled down to using a NoSQL approach for FISS and MCS claims why not go all the way?
 A case could be made to move this data into Amazon's DynamoDB since it is built for this sort of design.
 While there could be advantages to that approach the proposed design has some practical advantages:
-- Using postgresql allows us to reap he benefits of a NoSQL approach without the need to add a whole new database technology to BFD.
+- Using postgresql allows us to reap the benefits of a NoSQL approach without the need to add a whole new database technology to BFD.
 - RDS is already approved for storing PII so the changes can be implemented at any time without having to wait for review and approval of DynamoDB.
 
 
