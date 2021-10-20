@@ -55,11 +55,28 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
             Pattern.CASE_INSENSITIVE);
   }
 
+  /**
+   * Creates a valid object key with the given information about the file. The key will contain the
+   * min/max sequence numbers to assist with filtering files.
+   *
+   * @param filePrefix prefix for the S3 object key
+   * @param fileSuffix suffix for the S3 object key
+   * @param minSeq lowest sequence number in the file
+   * @param maxSeq highest sequence number in the file
+   * @return an object key that will match the expected pattern for a S3BucketMessageSourceFactory
+   */
   public static String createValidObjectKey(
       String filePrefix, String fileSuffix, long minSeq, long maxSeq) {
     return String.format("%s-%d-%d.%s", filePrefix, minSeq, maxSeq, fileSuffix);
   }
 
+  /**
+   * Creates a valid object key with the given information about the file.
+   *
+   * @param filePrefix prefix for the S3 object key
+   * @param fileSuffix suffix for the S3 object key
+   * @return an object key that will match the expected pattern for a S3BucketMessageSourceFactory
+   */
   public static String createValidObjectKey(String filePrefix, String fileSuffix) {
     return String.format("%s.%s", filePrefix, fileSuffix);
   }

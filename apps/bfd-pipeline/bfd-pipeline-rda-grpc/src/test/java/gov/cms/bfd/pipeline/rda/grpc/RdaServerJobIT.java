@@ -143,7 +143,7 @@ public class RdaServerJobIT {
    */
   private static void waitForServerToStart(RdaServerJob job) throws InterruptedException {
     Thread.sleep(500);
-    for (int i = 1; i <= 59 && !job.isRunning(); ++i) {
+    for (int i = 1; i <= 59 && !job.isServerRunning(); ++i) {
       Thread.sleep(500);
     }
   }
