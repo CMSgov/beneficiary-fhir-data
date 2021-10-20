@@ -28,7 +28,7 @@ public final class SharedS3Utilities {
   /** The default AWS {@link Region} to interact with. */
   public static final Regions REGION_DEFAULT = Regions.US_EAST_1;
 
-  private static final String BUCKET_NAME_PREFIX = "bfd-test";
+  private static final String BUCKET_NAME_PREFIX = "bb-test";
 
   /**
    * Creates a AmazonS3 that connects to either a local Minio or real Amazon S3 based on the
