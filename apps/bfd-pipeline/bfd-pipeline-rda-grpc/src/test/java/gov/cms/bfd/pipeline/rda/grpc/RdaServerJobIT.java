@@ -137,6 +137,49 @@ public class RdaServerJobIT {
     }
   }
 
+  @Test
+  public void jobRunsCorrectlyMultipleTimes() throws Exception {
+    final RdaServerJob.Config config =
+        new RdaServerJob.Config(
+            RdaServerJob.Config.ServerMode.Random,
+            SERVER_NAME,
+            Optional.empty(),
+            Optional.of(1L),
+            Optional.of(4),
+            Optional.empty(),
+            Optional.empty());
+    final RdaServerJob job = new RdaServerJob(config);
+    final ExecutorService exec = Executors.newCachedThreadPool();
+    try {
+      // run it once and then interrupt it
+      Future<PipelineJobOutcome> outcome = exec.submit(job);
+      waitForServerToStart(job);
+      ManagedChannel fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
+      FissClaimStreamCaller fissCaller =
+          new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
+      GrpcResponseStream<RdaChange<PreAdjFissClaim>> fissStream =
+          fissCaller.callService(fissChannel, 2);
+      assertEquals(true, fissStream.hasNext());
+      assertEquals(2L, fissStream.next().getSequenceNumber());
+      outcome.cancel(true);
+      waitForServerToStop(job);
+
+      // now run it again to ensure gRPC lets server start a second time
+      outcome = exec.submit(job);
+      waitForServerToStart(job);
+      fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
+      fissCaller = new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
+      fissStream = fissCaller.callService(fissChannel, 2);
+      assertEquals(true, fissStream.hasNext());
+      assertEquals(2L, fissStream.next().getSequenceNumber());
+      outcome.cancel(true);
+      waitForServerToStop(job);
+    } finally {
+      exec.shutdownNow();
+      exec.awaitTermination(10, TimeUnit.SECONDS);
+    }
+  }
+
   /**
    * Waits at most 30 seconds for the server to get started. It's possible for the thread pool to
    * take longer to start than the test takes to create its StreamCallers.
@@ -144,6 +187,17 @@ public class RdaServerJobIT {
   private static void waitForServerToStart(RdaServerJob job) throws InterruptedException {
     Thread.sleep(500);
     for (int i = 1; i <= 59 && !job.isServerRunning(); ++i) {
+      Thread.sleep(500);
+    }
+  }
+
+  /**
+   * Waits at most 30 seconds for the server to get started. It's possible for the thread pool to
+   * take longer to start than the test takes to create its StreamCallers.
+   */
+  private static void waitForServerToStop(RdaServerJob job) throws InterruptedException {
+    Thread.sleep(500);
+    for (int i = 1; i <= 59 && job.isServerRunning(); ++i) {
       Thread.sleep(500);
     }
   }
