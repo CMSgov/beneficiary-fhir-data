@@ -78,6 +78,24 @@ public class S3JsonMessageSources {
     return createMessageSource(ndjsonObjectKey, JsonMessageSource::parseMcsClaimChange);
   }
 
+  public static String createFissObjectKey() {
+    return S3BucketMessageSourceFactory.createValidObjectKey(FISS_OBJECT_KEY_PREFIX, FILE_SUFFIX);
+  }
+
+  public static String createFissObjectKey(long minSeq, long maxSeq) {
+    return S3BucketMessageSourceFactory.createValidObjectKey(
+        FISS_OBJECT_KEY_PREFIX, FILE_SUFFIX, minSeq, maxSeq);
+  }
+
+  public static String createMcsObjectKey() {
+    return S3BucketMessageSourceFactory.createValidObjectKey(MCS_OBJECT_KEY_PREFIX, FILE_SUFFIX);
+  }
+
+  public static String createMcsObjectKey(long minSeq, long maxSeq) {
+    return S3BucketMessageSourceFactory.createValidObjectKey(
+        MCS_OBJECT_KEY_PREFIX, FILE_SUFFIX, minSeq, maxSeq);
+  }
+
   private <T> MessageSource<T> createMessageSource(
       String ndjsonObjectKey, JsonMessageSource.Parser<T> parser) {
     LOGGER.info(

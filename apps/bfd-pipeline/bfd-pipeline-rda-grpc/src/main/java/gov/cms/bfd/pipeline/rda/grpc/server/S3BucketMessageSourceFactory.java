@@ -55,6 +55,15 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
             Pattern.CASE_INSENSITIVE);
   }
 
+  public static String createValidObjectKey(
+      String filePrefix, String fileSuffix, long minSeq, long maxSeq) {
+    return String.format("%s-%d-%d.%s", filePrefix, minSeq, maxSeq, fileSuffix);
+  }
+
+  public static String createValidObjectKey(String filePrefix, String fileSuffix) {
+    return String.format("%s.%s", filePrefix, fileSuffix);
+  }
+
   /**
    * Gets all available NDJSON files in the bucket that contain the specified sequence number and
    * creates a {@link MessageSource} that will return their messages.

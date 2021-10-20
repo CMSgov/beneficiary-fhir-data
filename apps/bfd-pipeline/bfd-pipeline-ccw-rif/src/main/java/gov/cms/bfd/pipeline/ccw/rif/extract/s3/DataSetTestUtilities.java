@@ -41,9 +41,11 @@ public class DataSetTestUtilities {
    */
   public static Bucket createTestBucket(AmazonS3 s3Client) {
     String username = System.getProperty("user.name");
-    if (username == null || username.isEmpty()) username = "anonymous";
-    username.replaceAll("@", "-");
-    username.replaceAll("\\\\", "-");
+    if (username == null || username.isEmpty()) {
+      username = "anonymous";
+    } else {
+      username = username.replaceAll("[@\\\\]", "-");
+    }
     int randomId = new Random().nextInt(100000);
     String bucketName = String.format("bb-test-%s-%d", username, randomId);
 
