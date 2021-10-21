@@ -7,6 +7,10 @@ import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.time.Clock;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Wrapper for a FissClaim or McsClaim source that promotes it to return a ClaimChange containing
@@ -18,7 +22,9 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
   private final MessageSource<TClaim> source;
   private final Clock clock;
   private long sequenceNumber;
+  private final Function<TClaim, String> keyExtractor;
   private final ChangeFactory<TChange, TClaim> changeFactory;
+  private final Set<String> keys;
 
   /**
    * Creates a wrapper object to promote each claim from source into a ClaimChange object with
@@ -31,11 +37,14 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
       MessageSource<TClaim> source,
       Clock clock,
       long sequenceNumber,
+      Function<TClaim, String> keyExtractor,
       ChangeFactory<TChange, TClaim> changeFactory) {
     this.source = source;
     this.clock = clock;
     this.sequenceNumber = sequenceNumber;
+    this.keyExtractor = keyExtractor;
     this.changeFactory = changeFactory;
+    this.keys = Collections.synchronizedSet(new HashSet<>());
   }
 
   @Override
@@ -47,8 +56,11 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
   public TChange next() throws Exception {
     final Timestamp timestamp =
         Timestamp.newBuilder().setSeconds(clock.instant().getEpochSecond()).build();
-    return changeFactory.create(
-        timestamp, ChangeType.CHANGE_TYPE_UPDATE, sequenceNumber++, source.next());
+    final TClaim claim = source.next();
+    final boolean inserted = keys.add(keyExtractor.apply(claim));
+    final ChangeType changeType =
+        inserted ? ChangeType.CHANGE_TYPE_INSERT : ChangeType.CHANGE_TYPE_UPDATE;
+    return changeFactory.create(timestamp, changeType, sequenceNumber++, claim);
   }
 
   @Override
@@ -62,6 +74,7 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
         source,
         clock,
         startingSequenceNumber,
+        FissClaim::getDcn,
         (timestamp, type, seq, claim) ->
             FissClaimChange.newBuilder()
                 .setTimestamp(timestamp)
@@ -77,6 +90,7 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
         source,
         clock,
         startingSequenceNumber,
+        McsClaim::getIdrClmHdIcn,
         (timestamp, type, seq, claim) ->
             McsClaimChange.newBuilder()
                 .setTimestamp(timestamp)
