@@ -17,6 +17,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsDetail;
+import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
@@ -60,6 +65,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
+  private PreAdjR4SamhsaMatcher samhsaMatcher;
 
   private ClaimDao claimDao;
 
@@ -75,6 +81,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
+  }
+
+  /** @param samhsaMatcher the {@link PreAdjR4SamhsaMatcher} to use */
+  @Inject
+  public void setSamhsaFilterer(PreAdjR4SamhsaMatcher samhsaMatcher) {
+    this.samhsaMatcher = samhsaMatcher;
   }
 
   @PostConstruct
@@ -206,6 +218,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       @OptionalParam(name = "isHashed")
           @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
           String hashed,
+      @OptionalParam(name = "excludeSAMHSA")
+          @Description(shortDefinition = "If true, exclude all SAMHSA-related resources")
+          String samhsa,
       @OptionalParam(name = "_lastUpdated")
           @Description(shortDefinition = "Include resources last updated in the given range")
           DateRangeParam lastUpdated,
@@ -219,13 +234,21 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Bundle bundleResource;
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
+      boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
 
       if (types != null) {
         bundleResource =
-            createBundleFor(parseClaimTypes(types), mbiString, isHashed, lastUpdated, serviceDate);
+            createBundleFor(
+                parseClaimTypes(types),
+                mbiString,
+                isHashed,
+                lastUpdated,
+                serviceDate,
+                excludeSamhsa);
       } else {
         bundleResource =
-            createBundleFor(getResourceTypes(), mbiString, isHashed, lastUpdated, serviceDate);
+            createBundleFor(
+                getResourceTypes(), mbiString, isHashed, lastUpdated, serviceDate, excludeSamhsa);
       }
 
       return bundleResource;
@@ -242,6 +265,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param isHashed Denotes if the given mbi is hashed.
    * @param lastUpdated Date range of desired lastUpdate values to retrieve data for.
    * @param serviceDate Date range of the desired service date to retrieve data for.
+   * @param excludeSamhsa Indicates if samhsa filtering should be done on returned resources.
    * @return A Bundle with data found using the provided parameters.
    */
   @VisibleForTesting
@@ -250,7 +274,8 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       String mbi,
       boolean isHashed,
       DateRangeParam lastUpdated,
-      DateRangeParam serviceDate) {
+      DateRangeParam serviceDate,
+      boolean excludeSamhsa) {
     List<T> resources = new ArrayList<>();
 
     for (ResourceTypeV2<T> type : resourceTypes) {
@@ -268,6 +293,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               serviceDate,
               type.getEntityEndDateAttribute());
 
+      if (excludeSamhsa) {
+        filterOutSamhsaClaims(entities);
+      }
+
       resources.addAll(
           entities.stream()
               .map(e -> type.getTransformer().transform(metricRegistry, e))
@@ -283,5 +312,56 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         });
 
     return bundle;
+  }
+
+  void filterOutSamhsaClaims(List<?> entities) {
+    if (!entities.isEmpty()) {
+      if (entities.get(0) instanceof PreAdjFissClaim) {
+        // unchecked - Just checked above.
+        //noinspection unchecked
+        filterOutFissSamhsaClaims((List<PreAdjFissClaim>) entities);
+      } else if (entities.get(0) instanceof PreAdjMcsClaim) {
+        // unchecked - Just checked above.
+        //noinspection unchecked
+        filterOutMcsSamhsaClaims((List<PreAdjMcsClaim>) entities);
+      } else {
+        throw new IllegalArgumentException(
+            "Processing of " + entities.get(0).getClass().getCanonicalName() + " not supported.");
+      }
+    }
+  }
+
+  void filterOutFissSamhsaClaims(List<PreAdjFissClaim> entities) {
+    entities.removeIf(
+        e ->
+            samhsaMatcher.test(
+                PreAdjR4SamhsaMatcher.SamhsaCheck.create()
+                    .addIcd10ProcCode(
+                        e.getProcCodes().stream()
+                            .map(PreAdjFissProcCode::getProcCode)
+                            .collect(Collectors.toList()))
+                    .addIcd10DiagCode(e.getPrincipleDiag())
+                    .addIcd10DiagCode(e.getAdmitDiagCode())));
+  }
+
+  void filterOutMcsSamhsaClaims(List<PreAdjMcsClaim> entities) {
+    entities.removeIf(
+        e ->
+            samhsaMatcher.test(
+                PreAdjR4SamhsaMatcher.SamhsaCheck.create()
+                    .addIcd10DiagCode(
+                        e.getDiagCodes().stream()
+                            .filter(c -> c.getIdrDiagIcdType().equals("0"))
+                            .map(PreAdjMcsDiagnosisCode::getIdrDiagCode)
+                            .collect(Collectors.toList()))
+                    .addIcd9DiagCode(
+                        e.getDiagCodes().stream()
+                            .filter(c -> !c.getIdrDiagIcdType().equals("0"))
+                            .map(PreAdjMcsDiagnosisCode::getIdrDiagCode)
+                            .collect(Collectors.toList()))
+                    .addCptCode(
+                        e.getDetails().stream()
+                            .map(PreAdjMcsDetail::getIdrProcCode)
+                            .collect(Collectors.toList()))));
   }
 }
