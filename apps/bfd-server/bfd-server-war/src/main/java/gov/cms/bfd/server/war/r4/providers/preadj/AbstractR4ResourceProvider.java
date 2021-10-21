@@ -17,6 +17,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
@@ -39,6 +41,7 @@ import javax.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
@@ -60,6 +63,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
+  private PreAdjR4SamhsaMatcher samhsaMatcher;
 
   private ClaimDao claimDao;
 
@@ -75,6 +79,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
+  }
+
+  /** @param samhsaMatcher the {@link PreAdjR4SamhsaMatcher} to use */
+  @Inject
+  public void setSamhsaFilterer(PreAdjR4SamhsaMatcher samhsaMatcher) {
+    this.samhsaMatcher = samhsaMatcher;
   }
 
   @PostConstruct
@@ -270,6 +280,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       resources.addAll(
           entities.stream()
+              .filter(e -> hasNoSamhsaData(metricRegistry, e))
               .map(e -> type.getTransformer().transform(metricRegistry, e))
               .collect(Collectors.toList()));
     }
@@ -283,5 +294,21 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         });
 
     return bundle;
+  }
+
+  @VisibleForTesting
+  boolean hasNoSamhsaData(MetricRegistry metricRegistry, Object entity) {
+    Claim claim;
+
+    if (entity instanceof PreAdjFissClaim) {
+      claim = FissClaimTransformerV2.transform(metricRegistry, entity);
+    } else if (entity instanceof PreAdjMcsClaim) {
+      claim = McsClaimTransformerV2.transform(metricRegistry, entity);
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");
+    }
+
+    return !samhsaMatcher.test(claim);
   }
 }

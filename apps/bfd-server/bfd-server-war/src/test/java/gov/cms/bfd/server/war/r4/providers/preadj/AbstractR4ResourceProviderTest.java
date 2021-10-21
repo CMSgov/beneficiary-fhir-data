@@ -842,5 +842,10 @@ public class AbstractR4ResourceProviderTest {
     Map<String, ResourceTypeV2<Claim>> getResourceTypeMap() {
       return null;
     }
+
+    @Override
+    boolean hasNoSamhsaData(MetricRegistry metricRegistry, Object entity) {
+      return true;
+    }
   }
 }
