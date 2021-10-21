@@ -156,6 +156,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
           Optional.empty(),
           Optional.empty(),
           Optional.empty(),
+          Optional.empty(),
           Optional.empty());
     }
 
@@ -166,7 +167,8 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         Optional<Long> randomSeed,
         Optional<Integer> randomMaxClaims,
         Optional<Regions> s3Region,
-        Optional<String> s3Bucket) {
+        Optional<String> s3Bucket,
+        Optional<String> s3Directory) {
       Preconditions.checkNotNull(serverMode, "serverMode is required");
       if (serverMode == ServerMode.S3) {
         Preconditions.checkArgument(
@@ -181,7 +183,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       if (s3Bucket.isPresent()) {
         final Regions region = s3Region.orElse(SharedS3Utilities.REGION_DEFAULT);
         final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
-        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get());
+        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get(), s3Directory.orElse(""));
       } else {
         s3Sources = null;
       }

@@ -273,6 +273,14 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_RDA_INPROC_SERVER_S3_BUCKET =
       "RDA_GRPC_INPROC_SERVER_S3_BUCKET";
 
+  /**
+   * The name of the environment variable that should be used to provide a directory path to add as
+   * a prefix when looking for files within the S3 bucket. This is optional and defaults to objects
+   * being accessed at the bucket's root.
+   */
+  public static final String ENV_VAR_KEY_RDA_INPROC_SERVER_S3_DIRECTORY =
+      "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
+
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
   // this can be null if the RDA job is not configured, Optional is not Serializable
@@ -504,7 +512,8 @@ public final class AppConfiguration implements Serializable {
             readEnvParsedOptional(
                 ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_MAX_CLAIMS, Integer::parseInt),
             readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_REGION, Regions::fromName),
-            readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_BUCKET));
+            readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_BUCKET),
+            readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_DIRECTORY));
     return new RdaLoadOptions(jobConfig, grpcConfig, mockServerConfig, idHasherConfig);
   }
 

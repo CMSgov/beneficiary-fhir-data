@@ -9,7 +9,6 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
@@ -35,8 +34,6 @@ public class RdaServerJobIT {
       Resources.asByteSource(Resources.getResource("FISS.ndjson"));
   private static final ByteSource mcsClaimsSource =
       Resources.asByteSource(Resources.getResource("MCS.ndjson"));
-  public static final String FISS_OBJECT_KEY = S3JsonMessageSources.createFissObjectKey();
-  public static final String MCS_OBJECT_KEY = S3JsonMessageSources.createMcsObjectKey();
 
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(100, "whatever"));
@@ -50,6 +47,7 @@ public class RdaServerJobIT {
             Optional.empty(),
             Optional.of(1L),
             Optional.of(4),
+            Optional.empty(),
             Optional.empty(),
             Optional.empty());
     final RdaServerJob job = new RdaServerJob(config);
@@ -88,9 +86,6 @@ public class RdaServerJobIT {
     Bucket bucket = null;
     try {
       bucket = createTestBucket(s3Client);
-      uploadJsonToBucket(s3Client, bucket.getName(), FISS_OBJECT_KEY, fissClaimsSource);
-      uploadJsonToBucket(s3Client, bucket.getName(), MCS_OBJECT_KEY, mcsClaimsSource);
-
       final RdaServerJob.Config config =
           new RdaServerJob.Config(
               RdaServerJob.Config.ServerMode.S3,
@@ -99,7 +94,13 @@ public class RdaServerJobIT {
               Optional.empty(),
               Optional.empty(),
               Optional.empty(),
-              Optional.of(bucket.getName()));
+              Optional.of(bucket.getName()),
+              Optional.of("files-go-here"));
+      final String fissObjectKey = config.getS3Sources().createFissObjectKey();
+      final String mcsObjectKey = config.getS3Sources().createMcsObjectKey();
+      uploadJsonToBucket(s3Client, bucket.getName(), fissObjectKey, fissClaimsSource);
+      uploadJsonToBucket(s3Client, bucket.getName(), mcsObjectKey, mcsClaimsSource);
+
       final RdaServerJob job = new RdaServerJob(config);
       final ExecutorService exec = Executors.newCachedThreadPool();
       final Future<PipelineJobOutcome> outcome = exec.submit(job);
@@ -146,6 +147,7 @@ public class RdaServerJobIT {
             Optional.empty(),
             Optional.of(1L),
             Optional.of(4),
+            Optional.empty(),
             Optional.empty(),
             Optional.empty());
     final RdaServerJob job = new RdaServerJob(config);
