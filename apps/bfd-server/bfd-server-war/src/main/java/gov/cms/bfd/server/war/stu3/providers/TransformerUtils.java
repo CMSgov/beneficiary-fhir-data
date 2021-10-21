@@ -59,6 +59,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3263,11 +3264,17 @@ public final class TransformerUtils {
       }
     }
 
-    if (!beneIds.isEmpty()) {
-      MDC.put("beneIds", String.join(", ", beneIds));
-    }
+    logBeneIdToMdc(beneIds);
 
     return bundle;
+  }
+
+  public static void logBeneIdToMdc(Collection<String> beneIds) {
+    if (beneIds.size() == 1) {
+      MDC.put("bene_id", beneIds.iterator().next());
+    } else if (beneIds.size() > 1) {
+      MDC.put("bene_Ids", String.join(", ", beneIds));
+    }
   }
 
   /**

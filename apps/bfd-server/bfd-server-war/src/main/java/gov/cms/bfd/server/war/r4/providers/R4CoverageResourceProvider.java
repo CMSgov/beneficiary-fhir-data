@@ -22,6 +22,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,6 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -187,7 +187,7 @@ public final class R4CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     // Add bene_id to MDC logs
-    MDC.put("bene_id", beneficiary.getIdPart());
+    TransformerUtilsV2.logBeneIdToMdc(Arrays.asList(beneficiary.getIdPart()));
 
     return TransformerUtilsV2.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());
