@@ -141,19 +141,20 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
   private boolean isSamhsaDrgCode(Coding coding) {
     // Per the CCW Codebook DRG codes in the CCW are already normalized to the 3
     // digit code.
-    return drgCodes.contains(coding.getCode());
+    return coding.getCode() != null && drgCodes.contains(coding.getCode());
   }
 
   /**
-   * @param diagnosisCoding the diagnosis {@link Coding} to check
+   * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
    *     BaseSamhsaMatcher#icd9DiagnosisCodes} entries, <code>false</code> if it does not
    */
-  private boolean isSamhsaIcd9Diagnosis(Coding diagnosisCoding) {
+  private boolean isSamhsaIcd9Diagnosis(Coding coding) {
     /*
      * Note: per XXX all codes in icd9DiagnosisCodes are already normalized.
      */
-    return icd9DiagnosisCodes.contains(normalizeIcdCode(diagnosisCoding.getCode()));
+    return coding.getCode() != null
+        && icd9DiagnosisCodes.contains(normalizeIcdCode(coding.getCode()));
   }
 
   /**
@@ -162,35 +163,38 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
    *     #icd9ProcedureCodes} entries, <code>false</code> if it does not
    */
   private boolean isSamhsaIcd9Procedure(Coding coding) {
-    return icd9ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
+    return coding.getCode() != null
+        && icd9ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
   }
 
   /**
-   * @param diagnosisCoding the diagnosis {@link Coding} to check
+   * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
    *     BaseSamhsaMatcher#icd10DiagnosisCodes} entries, <code>false</code> if it does not
    */
-  private boolean isSamhsaIcd10Diagnosis(Coding diagnosisCoding) {
+  private boolean isSamhsaIcd10Diagnosis(Coding coding) {
     /*
      * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
      */
-    return icd10DiagnosisCodes.contains(normalizeIcdCode(diagnosisCoding.getCode()));
+    return coding.getCode() != null
+        && icd10DiagnosisCodes.contains(normalizeIcdCode(coding.getCode()));
   }
 
   private boolean isSamhsaIcd10Procedure(Coding coding) {
-    return icd10ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
+    return coding.getCode() != null
+        && icd10ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
   }
 
   /**
-   * @param procedureCoding the procedure {@link Coding} to check
+   * @param coding the procedure {@link Coding} to check
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
    *     BaseSamhsaMatcher#cptCodes} entries, <code>false</code> if it does not
    */
-  protected boolean isSamhsaCptCode(Coding procedureCoding) {
+  protected boolean isSamhsaCptCode(Coding coding) {
     /*
      * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
      */
-    return cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode()));
+    return coding.getCode() != null && cptCodes.contains(normalizeHcpcsCode(coding.getCode()));
   }
 
   protected boolean isSamhsaDiagnosis(CodeableConcept concept) {
@@ -216,6 +220,8 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
                       return icd9Check.test(coding);
                     } else if (IcdCode.CODING_SYSTEM_ICD_10.equals(coding.getSystem())) {
                       return icd10Check.test(coding);
+                    } else if (TransformerConstants.CODING_SYSTEM_CPT.equals(coding.getSystem())) {
+                      return isSamhsaCptCode(coding);
                     } else {
                       // Fail safe: if we don't know the ICD version, assume the code is SAMHSA.
                       return true;

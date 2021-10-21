@@ -216,6 +216,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       @OptionalParam(name = "isHashed")
           @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
           String hashed,
+      @OptionalParam(name = "excludeSAMHSA")
+          @Description(shortDefinition = "If true, exclude all SAMHSA-related resources")
+          String samhsa,
       @OptionalParam(name = "_lastUpdated")
           @Description(shortDefinition = "Include resources last updated in the given range")
           DateRangeParam lastUpdated,
@@ -229,13 +232,21 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Bundle bundleResource;
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
+      boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
 
       if (types != null) {
         bundleResource =
-            createBundleFor(parseClaimTypes(types), mbiString, isHashed, lastUpdated, serviceDate);
+            createBundleFor(
+                parseClaimTypes(types),
+                mbiString,
+                isHashed,
+                excludeSamhsa,
+                lastUpdated,
+                serviceDate);
       } else {
         bundleResource =
-            createBundleFor(getResourceTypes(), mbiString, isHashed, lastUpdated, serviceDate);
+            createBundleFor(
+                getResourceTypes(), mbiString, isHashed, excludeSamhsa, lastUpdated, serviceDate);
       }
 
       return bundleResource;
@@ -259,6 +270,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Set<ResourceTypeV2<T>> resourceTypes,
       String mbi,
       boolean isHashed,
+      boolean excludeSamhsa,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate) {
     List<T> resources = new ArrayList<>();
@@ -280,7 +292,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       resources.addAll(
           entities.stream()
-              .filter(e -> hasNoSamhsaData(metricRegistry, e))
+              .filter(e -> !excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
               .map(e -> type.getTransformer().transform(metricRegistry, e))
               .collect(Collectors.toList()));
     }
