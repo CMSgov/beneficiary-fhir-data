@@ -40,7 +40,7 @@ public class DataSetTestUtilities {
    * @return a new, random {@link Bucket} for use in an integration test
    */
   public static Bucket createTestBucket(AmazonS3 s3Client) {
-    // TODO this method be replaced by call to SharedS3Utilities.createTestBucket()
+    // TODO this method should be replaced by call to SharedS3Utilities.createTestBucket()
     String username = System.getProperty("user.name");
     if (username == null || username.isEmpty()) {
       username = "anonymous";
@@ -70,7 +70,7 @@ public class DataSetTestUtilities {
    * @param bucket the {@link Bucket} to empty and delete
    */
   public static void deleteObjectsAndBucket(AmazonS3 s3Client, Bucket bucket) {
-    // TODO this method be replaced by call to SharedS3Utilities.deleteTestBucket()
+    // TODO this method should be replaced by call to SharedS3Utilities.deleteTestBucket()
     ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
     s3BucketListRequest.setBucketName(bucket.getName());
     ListObjectsV2Result s3ObjectListing;
