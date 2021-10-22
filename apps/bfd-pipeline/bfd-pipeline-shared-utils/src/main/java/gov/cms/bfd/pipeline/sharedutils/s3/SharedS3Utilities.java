@@ -21,7 +21,7 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
+import java.util.Random;
 
 /** Contains utility/helper methods for AWS S3 that can be used in application and test code. */
 public final class SharedS3Utilities {
@@ -72,7 +72,7 @@ public final class SharedS3Utilities {
   }
 
   /**
-   * Creates a new test bucket with a name based on the current user and time.
+   * Creates a new test bucket with a name based on the current user and a random number.
    *
    * @param s3Client the {@link AmazonS3} client to use
    * @return a new, random {@link Bucket} for use in an integration test
@@ -84,12 +84,10 @@ public final class SharedS3Utilities {
     } else {
       username = username.replaceAll("[@\\\\]", "-");
     }
-    Instant now = Instant.now();
-    String bucketName =
-        String.format(
-            "%s-%s-%d-%09d", BUCKET_NAME_PREFIX, username, now.getEpochSecond(), now.getNano());
+    final int randomId = new Random().nextInt(100000);
+    final String bucketName = String.format("%s-%s-%d", BUCKET_NAME_PREFIX, username, randomId);
 
-    Bucket bucket = s3Client.createBucket(bucketName);
+    final Bucket bucket = s3Client.createBucket(bucketName);
     waitForBucketToExist(s3Client, bucketName);
 
     return bucket;
