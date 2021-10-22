@@ -21,7 +21,7 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /** Contains utility/helper methods for AWS S3 that can be used in application and test code. */
 public final class SharedS3Utilities {
@@ -84,7 +84,7 @@ public final class SharedS3Utilities {
     } else {
       username = username.replaceAll("[@\\\\]", "-");
     }
-    final int randomId = new Random().nextInt(100000);
+    final int randomId = ThreadLocalRandom.current().nextInt(100000);
     final String bucketName = String.format("%s-%s-%d", BUCKET_NAME_PREFIX, username, randomId);
 
     final Bucket bucket = s3Client.createBucket(bucketName);
