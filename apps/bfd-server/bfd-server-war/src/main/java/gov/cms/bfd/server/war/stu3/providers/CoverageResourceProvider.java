@@ -127,6 +127,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(coverageIdBeneficiaryIdText, null);
+
+      if (!beneficiaryEntity.getBeneEnrollmentReferenceYear().isPresent()) {
+        throw new ResourceNotFoundException("Cannot find coverage for non present enrollment year");
+      }
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
@@ -172,6 +176,11 @@ public final class CoverageResourceProvider implements IResourceProvider {
     List<IBaseResource> coverages;
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiary.getIdPart(), lastUpdated);
+
+      if (!beneficiaryEntity.getBeneEnrollmentReferenceYear().isPresent()) {
+        throw new ResourceNotFoundException("Cannot find coverage for non present enrollment year");
+      }
+
       coverages = CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();

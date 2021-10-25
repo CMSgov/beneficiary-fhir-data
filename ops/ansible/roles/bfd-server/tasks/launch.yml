@@ -22,7 +22,7 @@
     # Note: This PEM file is encrypted within the project via Ansible Vault, which will
     # automagically decrypt it as part of the copy operation.
     src: "{{ data_server_ssl_client_certificate_test }}"
-    dest: "{{ bfd_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem"
+    dest: "{{ data_server_dir }}/bluebutton-backend-test-data-server-client-test-keypair.pem"
     owner: "{{ data_server_user }}"
     group: "{{ data_server_user }}"
     mode: 'u=rw,g=,o='
@@ -32,7 +32,7 @@
   copy:
     # Note: this JKS file is encrypted via the Ansible Vault
     src: "{{ data_server_appserver_keystore }}"
-    dest: "{{ bfd_server_dir }}/bluebutton-appserver-keystore.jks"
+    dest: "{{ data_server_dir }}/bluebutton-appserver-keystore.jks"
     force: yes # overwrite the existing keystore
   become: true
 
