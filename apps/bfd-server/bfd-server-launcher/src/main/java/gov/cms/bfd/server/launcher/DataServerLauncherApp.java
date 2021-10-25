@@ -116,6 +116,7 @@ public final class DataServerLauncherApp {
     // Create the HTTPS config.
     HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
     SecureRequestCustomizer customizer = new SecureRequestCustomizer();
+    // SNI host check is not required for BFD since there is only a single domain and certificate.
     customizer.setSniHostCheck(false);
     httpsConfig.addCustomizer(customizer);
 
