@@ -1,31 +1,35 @@
 ---
 ##
-# Installs and verifies Jenkins on the container being used for the test case.
+# Applies and verifies the role on the container being used for the test case.
 ##
 
 - hosts: localhost
   tasks:
-    - name: Download Blue Button Data Pipeline JAR
-      # FIXME: Not actually available in Maven Central right now.
-      #maven_artifact:
-      #  group_id: 'gov.cms.bfd'
-      #  artifact_id: 'bfd-pipeline-app'
-      #  version: '1.0.0-SNAPSHOT'
-      #  extension: 'jar'
-      #  classifier: 'capsule-fat'
-      #  dest: /tmp/bfd-pipeline-app-capsule-fat.jar
-      copy:
-        src: bfd-pipeline-app-capsule-fat.jar
-        dest: /tmp/bfd-pipeline-app-capsule-fat.jar
+    - name: Download BFD Pipeline ZIP
+      command: >
+        mvn org.apache.maven.plugins:maven-dependency-plugin:3.2.0:get
+          -DremoteRepositories=central::default::https://repo.maven.apache.org/maven2,github::default::https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data
+          -Dartifact=gov.cms.bfd:bfd-pipeline-app:1.0.0-SNAPSHOT:zip
+          -Dtransitive=false
+      args:
+        creates: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-pipeline-app/1.0.0-SNAPSHOT/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
 
-# Install Jenkins.
+# Apply the role.
 - hosts: docker_container
   tasks:
-    - import_role:
-        name: karlmdavis.bluebutton-data-pipeline
+    - name: Install Prerequisites
+      package:
+        name:
+          - unzip
+        state: present
+      become: true
+
+    - name: Apply Role
+      import_role:
+        name: bfd-pipeline
       vars:
-        data_pipeline_jar: /tmp/bfd-pipeline-app-capsule-fat.jar
-        data_pipeline_s3_bucket: 'gov-hhs-cms-bluebutton-datapipeline-benchmark-dataset'  # Using because public. Structured incorrectly, so no data will be found -- which is actually a good thing.
+        data_pipeline_zip: "{{ lookup('env','HOME') }}/.m2/repository/gov/cms/bfd/bfd-pipeline-app/1.0.0-SNAPSHOT/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
+        data_pipeline_s3_bucket: 'example-fake'  # Doesn't need to actually exist.
         data_pipeline_hicn_hash_iterations: '42'  # NIST recommends at least 1000
         data_pipeline_hicn_hash_pepper: '6E6F747468657265616C706570706572'  # Hex-encoded "nottherealpepper".
         data_pipeline_db_url: 'jdbc:hsqldb:mem:test'
@@ -37,15 +41,22 @@
   tasks:
     - name: Ensure Service Is Running
       service:
-        name: bluebutton-data-pipeline
+        name: bfd-pipeline
         state: started
         enabled: yes
+      changed_when: false
       become: true
-    
+
     - name: Grab Log Contents
       command: cat /usr/local/bluebutton-data-pipeline/bluebutton-data-pipeline.log
+      changed_when: false
       register: command_cat_pipeline_log
-    
+
+    - name: Log Failed Application Launches
+      ansible.builtin.debug:
+        var: command_cat_pipeline_log
+      when: "'Application starting up!' not in command_cat_pipeline_log.stdout"
+
     - name: Verify Log Contents
       action: fail
       when: "'Application starting up!' not in command_cat_pipeline_log.stdout"
