@@ -1556,7 +1556,6 @@ public final class TransformerUtilsV2 {
             transactionTime.isAfter(maxBundleDate)
                 ? Date.from(transactionTime)
                 : Date.from(maxBundleDate));
-
     return bundle;
   }
 
