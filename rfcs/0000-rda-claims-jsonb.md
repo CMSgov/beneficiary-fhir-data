@@ -7,8 +7,9 @@
 * JIRA Ticket(s):
     * [DCGEO-219](https://jira.cms.gov/browse/DCGEO-219)
 
-The current schema uses a normalized relational schema structure that requires seven tables (4 for FISS and 3 for MCS) plus accompanying foreign keys and indexes.
-By switching to a single table per claim type with a JSONB column to store all of a claim's data in a single column we can simplify the schema and improve performance.
+The current schema uses a normalized relational structure that requires seven tables (4 for FISS and 3 for MCS) plus accompanying foreign keys and indexes.
+More tables and indexes will be needed in the near future as the data returned by the RDA API expands.
+By switching to a single table per type of claim with a JSONB column to store all of a claim's data in a single column we can simplify the schema and improve performance.
 Benchmarking on a local postresql database saw ingestion rates 3-5 times faster with this structure.
 
 ## Table of Contents
@@ -36,20 +37,22 @@ Consolidating the records from the normalized relational structure into an objec
 
 Postgresql (and Amazon Aurora) supports storing object graphs as JSON directly in a single column of a record.
 Using this feature will allow the use of only one table per claim type.
-The records in this table would contain a column for each of the queries supported by the BFD API plus one additional column to hold the entire claim as JSON.
+The records in this table would contain the minimum number of columns required to support BFD API queries or data analytics plus one additional column to hold the entire claim as JSON.
 With this structure JPA would be able to find and retrieve an entire claim using only one query.
 Also the work performed in memory to convert the claim JSON into an object graph would be simpler since the heirarchical structure of the graph directly matches that of the JSON.
 
 Benchmarking a prototype of this concept against a local postgresql database revealed that claims could be ingested 5.7x faster for FISS claims and 3.5x faster for MCS claims.
 The larger throughput improvement for FISS claims corresponds to the greater complexity of the FISS schema (4 tables) vs MCS (3 tables) in the normalized relational schema.
 
-In addition to acheiving higher throughput during claim ingestion, the JSONB based schema resulted in a simpler database schema.
-That simpler schema (1 table each for FISS and MCS claims) would also require far less maintenance over time.
+In addition to acheiving higher throughput during claim ingestion, the JSONB based schema results in a simpler database structure.
+That simpler schema (1 table each for FISS and MCS claims) would require far less maintenance over time.
 Table changes would only be required when a new type of query is added to BFD API.
 Addition of new fields and sub-objects to the claim data returned by the RDA API would not require any schema migration since that data would simply change the JSON written to the JSONB column.
 Contrast this to adding a new field containing multiple sub-objects (e.g. payers) to MCS claims.
 With a normalized relational schema this would require adding a new table to hold the individual payer records.
-Along with that extra table the database would have to maintain additional indexes and foreign/primary key constraints.
+Along with that extra table the database would also have to maintain additional indexes and foreign/primary key constraints.
+
+Because postgresql supports directly querying fields within the JSONB column the new schema would still allow ad-hoc queries to be used for data exporation or analysis.
 
 ## Proposed Solution
 [Proposed Solution]: #proposed-solution
@@ -295,9 +298,9 @@ The same benchmark that measured faster ingestion rates also measured increased 
 The size measurement was not extremely precise as the size increased between updates.
 This variation was likely due to internal postgresql details.
 
-Although the overal storage in the database was increased somewhat with JSONB the overall performance would not be affected.
-Since the JSONB column is not indexed, the size of the indexes being queried would be the same with JSONB as with the current schema.
-Overall I/O with the database should be lower with this schema since only one query is needed for each claim instead of one per table.
+Although the overal storage in the database was increased somewhat with JSONB the overall performance would not be adversely affected.
+Since the JSONB column is not indexed, the size of the index for each column would be the same with JSONB as with the current schema.
+Overall I/O with the database should be lower with this schema since only one `SELECT`` is needed for each claim rather than one for the main table plus one for each detail table.
 
 **Drawback 3:** Without the relational structure we can't perform queries in the normal way.
 
