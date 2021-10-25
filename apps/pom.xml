@@ -447,6 +447,7 @@ checkJavaFormat
 							to specify environment-specific JVM arguments for tests. For example, one
 							might want to configure the max heap size and/or proxy server settings for
 							tests run on a system. -->
+						<useModulePath>false</useModulePath>
 						<argLine>${maven-test.jvm-args.env-specific}</argLine>
 						<trimStackTrace>false</trimStackTrace>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
