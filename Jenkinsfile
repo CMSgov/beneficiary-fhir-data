@@ -124,6 +124,7 @@ def sendNotifications(String buildStatus = '', String stageName = '', String git
 
 // begin pipeline
 try {
+	// See ops/jenkins/cbc-build-push.sh for this image's definition.
 	podTemplate(containers: [containerTemplate(name: 'bfd-cbc-build', image: 'public.ecr.aws/c2o1d8s9/bfd-cbc-build:jdk11-mvn3-an29-tf12', command: 'cat', ttyEnabled: true, alwaysPullImage: true, resourceLimitCpu: '4000m', resourceLimitMemory: '8192Mi', resourceRequestCpu: '4000m', resourceRequestMemory: '8192Mi')], serviceAccount: 'bfd') {
 		node(POD_LABEL) {
 			stage('Prepare') {
