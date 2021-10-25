@@ -441,7 +441,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>3.0.0-M5</version>
 					<configuration>
 						<!-- The intent here is to provide a property that can be set in `settings.xml`,
 							to specify environment-specific JVM arguments for tests. For example, one
