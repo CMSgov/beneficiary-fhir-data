@@ -961,19 +961,14 @@ public final class RifLoader {
     if (!Objects.equals(newBeneficiaryRecord.getMbiHash(), oldBeneficiaryRecord.getMbiHash())) {
       return false;
     }
-    if (newBeneficiaryRecord.getMbiEffectiveDate().isPresent()
-        && !Objects.equals(
-            newBeneficiaryRecord.getMbiEffectiveDate(),
-            oldBeneficiaryRecord.getMbiEffectiveDate())) {
+    if (!Objects.equals(
+        newBeneficiaryRecord.getMbiEffectiveDate(), oldBeneficiaryRecord.getMbiEffectiveDate())) {
       return false;
     }
-    // checking for getMbiObsoleteDate is perfunctory at best; to date there has never been
-    // a RIF record that included an EFCTV_END_DT with a value.
-    if (newBeneficiaryRecord.getMbiObsoleteDate().isPresent()
-        && !Objects.equals(
-            newBeneficiaryRecord.getMbiObsoleteDate(), oldBeneficiaryRecord.getMbiObsoleteDate())) {
-      return false;
-    }
+    // BFD-1308: removed check for getMbiObsoleteDate; this value is derived from the Beneficiary
+    // EFCTV_END_DT but that field has never had a value in the beneficiary.rif file received from
+    // CCW.
+
     // last but not least...these probably won't ever change
     return (Objects.equals(newBeneficiaryRecord.getBirthDate(), oldBeneficiaryRecord.getBirthDate())
         && Objects.equals(newBeneficiaryRecord.getSex(), oldBeneficiaryRecord.getSex()));
