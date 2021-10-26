@@ -3273,7 +3273,7 @@ public final class TransformerUtils {
     if (beneIds.size() == 1) {
       MDC.put("bene_id", beneIds.iterator().next());
     } else if (beneIds.size() > 1) {
-      MDC.put("bene_ids", String.join(", ", beneIds));
+      MDC.put("bene_id", String.join(", ", beneIds));
     }
   }
 
