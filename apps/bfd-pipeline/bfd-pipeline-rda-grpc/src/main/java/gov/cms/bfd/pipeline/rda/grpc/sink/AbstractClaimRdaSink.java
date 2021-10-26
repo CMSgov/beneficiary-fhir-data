@@ -6,12 +6,15 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.time.Clock;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
@@ -46,7 +49,8 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
     }
   }
 
-  public int writeBatch(Collection<RdaChange<TClaim>> claims) throws ProcessingException {
+  public int writeBatch(Collection<RdaChange<TClaim>> allClaims) throws ProcessingException {
+    final Collection<RdaChange<TClaim>> claims = dedupChanges(allClaims);
     final long maxSeq = maxSequenceInBatch(claims);
     try {
       metrics.calls.mark();
@@ -195,6 +199,38 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
       error = error.getCause() == error ? null : error.getCause();
     }
     return false;
+  }
+
+  /**
+   * Hibernate has a bug that causes detail table records to become corrupted if a single batch of
+   * updates includes more than one object for the same claim. This is unlikely to happen with real
+   * data from the RDA API but it does happen in testing. This method ensures that if a batch
+   * contains more than one change for the same claim that we only store the last one.
+   *
+   * <p>NOTE: This code depends on the fact that the entities have equals methods that only compare
+   * primary key values. This is a reasonable assumption since Hibernate/JPA requires this behavior
+   * in entity objects.
+   */
+  private Collection<RdaChange<TClaim>> dedupChanges(Collection<RdaChange<TClaim>> changes) {
+    // Build a map of changes keyed on the primary key.
+    // Only the last object will be retained for each key.
+    // Can't use a Set here because that would keep the first version.
+    final Map<TClaim, RdaChange<TClaim>> dedupMap = new LinkedHashMap<>();
+    for (RdaChange<TClaim> claim : changes) {
+      dedupMap.put(claim.getClaim(), claim);
+    }
+    final Collection<RdaChange<TClaim>> newChanges = ImmutableList.copyOf(dedupMap.values());
+    if (logger.isDebugEnabled()) {
+      if (changes.size() != newChanges.size()) {
+        for (RdaChange<TClaim> claim : changes) {
+          logger.debug("received: {}", claim);
+        }
+      }
+      for (RdaChange<TClaim> claim : newChanges) {
+        logger.debug("writing: {}", claim);
+      }
+    }
+    return newChanges;
   }
 
   /**
