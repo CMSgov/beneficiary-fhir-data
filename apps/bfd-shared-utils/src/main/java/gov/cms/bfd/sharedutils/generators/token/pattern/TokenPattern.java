@@ -3,8 +3,8 @@ package gov.cms.bfd.sharedutils.generators.token.pattern;
 import gov.cms.bfd.sharedutils.generators.exceptions.GeneratorException;
 import gov.cms.bfd.sharedutils.generators.exceptions.ParsingException;
 import java.math.BigInteger;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -33,7 +33,7 @@ public abstract class TokenPattern {
     BigInteger randomNumber;
 
     do {
-      randomNumber = new BigInteger(totalPermutations.bitLength(), new Random());
+      randomNumber = new BigInteger(totalPermutations.bitLength(), ThreadLocalRandom.current());
     } while (randomNumber.compareTo(totalPermutations) >= 0);
 
     return createToken(randomNumber);

@@ -21,34 +21,10 @@ public abstract class AbstractTokenGroupParser<C extends Collection<TokenPattern
   public TokenPattern parse(Queue<Character> patternStream) {
     List<TokenPattern> patterns = new ArrayList<>();
 
-    //    TokenPattern previousPattern = null;
-
     while (!patternStream.isEmpty()) {
       TokenParser tokenParser = createTokenParser(patternStream);
       tokenParser.parseAndAdd(patternStream, patterns);
-      //      TokenPattern pattern = tokenParser.parse(patternStream);
-
-      //      if (pattern instanceof TokenRepeat) {
-      //        if (previousPattern != null) {
-      //          pattern = new TokenRepeat(previousPattern, ((TokenRepeat) pattern).getRepeats());
-      //          pattern.init();
-      //          patterns.add(pattern);
-      //          previousPattern = null;
-      //        } else {
-      //          throw new ParsingException("Repeat definition has no associated preceding token");
-      //        }
-      //      } else {
-      //        if (previousPattern != null) {
-      //          patterns.add(previousPattern);
-      //        }
-      //
-      //        previousPattern = pattern;
-      //      }
     }
-    //
-    //    if (previousPattern != null) {
-    //      patterns.add(previousPattern);
-    //    }
 
     if (patterns.size() == 1) {
       return patterns.get(0);
