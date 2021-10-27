@@ -113,7 +113,7 @@ public class FissClaimRdaSinkIT {
             FissClaimChange rdaChange =
                 FissClaimChange.newBuilder()
                     .setChangeType(
-                        i % numberOfUniqueClaims == 0
+                        i < numberOfUniqueClaims
                             ? ChangeType.CHANGE_TYPE_INSERT
                             : ChangeType.CHANGE_TYPE_UPDATE)
                     .setSeq(i)
