@@ -52,12 +52,11 @@
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
 		</dependency>
-			<!-- Used for annotating JPA model entities. -->
 		<dependency>
+			<!-- Used for annotating JPA model entities. -->
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
-
 		<dependency>
 			<!-- Provides BOMInputStream, and other basic I/O utilities. -->
 			<groupId>commons-io</groupId>
