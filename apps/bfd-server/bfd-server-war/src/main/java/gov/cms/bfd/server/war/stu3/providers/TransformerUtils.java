@@ -3270,9 +3270,7 @@ public final class TransformerUtils {
   }
 
   public static void logBeneIdToMdc(Collection<String> beneIds) {
-    if (beneIds.size() == 1) {
-      MDC.put("bene_id", beneIds.iterator().next());
-    } else if (beneIds.size() > 1) {
+    if (!beneIds.isEmpty()) {
       MDC.put("bene_id", String.join(", ", beneIds));
     }
   }
