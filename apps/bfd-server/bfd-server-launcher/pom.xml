@@ -117,8 +117,8 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- Used for launching the server with Jetty 10. -->
 		<dependency>
+			<!-- Used for launching the server with Jetty 10. -->
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
