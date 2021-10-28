@@ -117,23 +117,26 @@ public final class DataServerLauncherApp {
     HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
     SecureRequestCustomizer customizer = new SecureRequestCustomizer();
     /*
-     * SNI (server name indication) is a mechanism that allows a client to indicate which
-     * server name (domain) it is issuing a request for when multiple domains are hosted
-     * at the same IP address. This indication is available before TLS handshaking occurs
-     * which gives the server an opportunity to present a different certificate for each
-     * server name (domain). BFD only hosts one domain (per environment) and only has one
-     * certificate, therefore SNI is unnecessary for its intended purpose for BFD. Note as
-     * well that SNI is not a security mechanism -- it merely allows clients to indicate
-     * (select) which host/certificate will be returned from the server to prove its
-     * legitimacy to the client. SNI does not influence the way that the server validates
-     * client certificates or any other aspects of TLS.
+     * SNI (server name indication) is a TLS extension that allows a client to indicate
+     * the server name (domain) it is issuing a request for which is helpful when multiple
+     * domains are hosted at the same IP address. This indication is available before TLS
+     * handshaking occurs which gives the server an opportunity to present a different
+     * certificate for each server name (domain) that is being hosted. BFD only hosts one
+     * domain (per environment) and only has one certificate. Therefore, SNI is unnecessary
+     * for its intended purpose for BFD. Note as well that SNI is not a security mechanism --
+     * it merely allows clients to indicate which domain they are trying to reach so that the
+     * correct certificate will be returned from the server to prove its legitimacy to the
+     * client. SNI does not influence the way that the server validates client certificates
+     * or any other aspects of TLS.
      *
      * By default, SNI is not required by Jetty and BFD does not override that. However,
      * if SNI is provided by the client, Jetty 10 will, by default, check that the host
-     * passed matches a certificate that is available. This is a change from Jetty 9 and
-     * other aspects of BFD including server startup checking scripts have come to rely on
-     * being able to pass an SNI that does not match the host name in the BFD public
-     * certificate. For this reason, we turn off the Jetty SNI host name checking here.
+     * passed matches a certificate that is available to the server. This is a change from
+     * Jetty 9 which did not perform this SNI validation. The server startup sanity checking
+     * scripts and test tools make use of the ability to issue requests to localhost even
+     * though no certificate exists for that host within BFD so in order to allow those
+     * scripts to continue to work with Jetty 10, we turn off the Jetty SNI host name
+     * checking here.
      */
     customizer.setSniHostCheck(false);
     httpsConfig.addCustomizer(customizer);
