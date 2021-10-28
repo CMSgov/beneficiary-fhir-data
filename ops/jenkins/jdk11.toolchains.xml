@@ -3,11 +3,11 @@
     <toolchain>
         <type>jdk</type>
         <provides>
-            <version>1.8</version>
+            <version>11</version>
             <vendor>openjdk</vendor>
         </provides>
         <configuration>
-            <jdkHome>/usr/local/openjdk-8</jdkHome>
+            <jdkHome>/usr/local/openjdk-11</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>

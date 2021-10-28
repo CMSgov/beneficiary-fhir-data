@@ -16,7 +16,8 @@
 	</description>
 
 	<properties>
-		<jetty.version>9.4.43.v20210629</jetty.version>
+		<!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
+		<jetty.version>10.0.7</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -71,11 +72,6 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Provides an HTTP request log for Jetty. -->
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-access</artifactId>
-		</dependency>
-		<dependency>
 			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides
 				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
 			<groupId>ch.qos.logback.contrib</groupId>
@@ -120,6 +116,11 @@
 					<groupId>commons-logging</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<!-- Used for launching the server with Jetty 10. -->
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 		<dependency>
 			<!-- Used in tests to help with managing asynchronous behavior. Reference:
