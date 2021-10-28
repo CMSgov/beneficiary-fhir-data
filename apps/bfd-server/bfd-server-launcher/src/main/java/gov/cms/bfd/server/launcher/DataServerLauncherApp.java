@@ -199,6 +199,7 @@ public final class DataServerLauncherApp {
     /* Configure the 'access.log' file generation via a Jetty CustomRequestLog
      * NOTE: As of late October 2021, the access.log file is slightly different
      * in terms of response time being in microseconds instead of milliseconds
+     */
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
     final String requestLogFormat =
