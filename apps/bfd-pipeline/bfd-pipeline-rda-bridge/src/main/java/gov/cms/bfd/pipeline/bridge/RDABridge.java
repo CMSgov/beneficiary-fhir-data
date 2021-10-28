@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.bridge;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.etl.AbstractTransformer;
 import gov.cms.bfd.pipeline.bridge.etl.FissTransformer;
@@ -12,14 +13,26 @@ import gov.cms.bfd.pipeline.bridge.io.RifSource;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.ObjectUtils;
 
 @Slf4j
 public class RDABridge {
@@ -37,62 +50,31 @@ public class RDABridge {
    */
   public static void main(String[] args) {
     try {
-      // Build CLI commands for executing this via CLI
-      CommandArguments arguments = new CommandArguments("run_bridge.sh");
-      arguments
-          .register()
-          .flag("o")
-          .label("-o [outputDir]")
-          .description("The directory where the output files will be written to.")
-          .argumentCount(1);
-      arguments
-          .register()
-          .flag("i")
-          .label("-i [icnStart]")
-          .description("The starting ICN value to use for generated MCS claims.")
-          .argumentCount(1);
-      arguments
-          .register()
-          .flag("d")
-          .label("-d [dcnStart]")
-          .description("The starting DCN value to use for generated FISS claims.")
-          .argumentCount(1);
-      arguments
-          .register()
-          .flag("m")
-          .label("-m [icnPattern]")
-          .description("The ICN pattern to use for generated ICNs in MCS claims.")
-          .argumentCount(1);
-      arguments
-          .register()
-          .flag("f")
-          .label("-f [dcnPattern]")
-          .description("The DCN pattern to use for generated DCNs in FISS claims.")
-          .argumentCount(1);
-      arguments
-          .register()
-          .argument()
-          .label("inputDir")
-          .description("The directory containing the files to read from.");
-      arguments.addAll(args);
+      Options options =
+          new Options()
+              .addOption("o", true, "The directory where the output files will be written to.")
+              .addOption("f", true, "FISS file to read from")
+              .addOption("m", true, "MCS file to read from");
 
-      if (arguments.hasArgs()) {
-        String rifRootDir =
-            arguments
-                .getArg(0)
-                .orElseThrow(
-                    () ->
-                        new IllegalArgumentException(
-                            "No root directory for RIF files provided.\n" + arguments.getUsage()));
-        String outputDir = arguments.getFlagValue("o").orElse(null);
-        long icnStart = arguments.getFlagLongValue("i").orElse(0L);
-        long dcnStart = arguments.getFlagLongValue("d").orElse(0L);
+      CommandLineParser parser = new DefaultParser();
+      CommandLine cmd = parser.parse(options, args);
 
-        new RDABridge().run(new GenConfig(rifRootDir, outputDir, icnStart, dcnStart, null, null));
+      if (!cmd.getArgList().isEmpty()) {
+        String rifRootDir = cmd.getArgList().get(0);
+        String outputDir = ObjectUtils.defaultIfNull(cmd.getOptionValue("o"), "output");
+        Set<String> fissFiles = Sets.newHashSet(cmd.getOptionValues('f'));
+        Set<String> mcsFiles = Sets.newHashSet(cmd.getOptionValues('m'));
+
+        new RDABridge().run(new GenConfig(rifRootDir, outputDir, fissFiles, mcsFiles));
       } else {
-        log.error("Invalid execution\n" + arguments.getUsage());
+        log.error("Invalid execution");
+        final PrintWriter writer = new PrintWriter(System.out);
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printUsage(writer, 80, "run_bridge sourceDir", options);
+        formatter.printOptions(writer, 80, options, 4, 4);
+        writer.flush();
       }
-    } catch (IOException e) {
+    } catch (IOException | ParseException e) {
       log.error("Failed to execute", e);
       System.exit(1);
     }
@@ -105,22 +87,10 @@ public class RDABridge {
    * @throws IOException If there was an issue accessing any of the files.
    */
   public void run(GenConfig config) throws IOException {
-    String[] fissSources = {"inpatient", "outpatient", "home", "hospice", "snf"};
-    String[] mcsSources = {"carrier"};
-
     Path path = Paths.get(config.getInputDir());
     Map<String, BeneficiaryData> mbiMap = parseMbiNumbers(path);
 
-    Path outputPath;
-
-    if (config.getOutputDir() != null) {
-      outputPath = Paths.get(config.getOutputDir());
-    } else {
-      outputPath = Paths.get("output");
-    }
-
-    FissTransformer.setStartingDCN(config.getDcnStart());
-    McsTransformer.setStartingICN(config.getIcnStart());
+    Path outputPath = Paths.get(config.getOutputDir());
 
     // ResultOfMethodCallIgnored - Don't need to know if it had to be created.
     //noinspection ResultOfMethodCallIgnored
@@ -128,9 +98,17 @@ public class RDABridge {
 
     try (Sink<MessageOrBuilder> fissSink = new NdJsonSink(outputPath.resolve("rda-fiss.ndjson"))) {
       try (Sink<MessageOrBuilder> mcsSink = new NdJsonSink(outputPath.resolve("rda-mcs.ndjson"))) {
+        // Sorting the files so tests are more deterministic
+        List<String> fissSources = new ArrayList<>(config.getFissFiles());
+        Collections.sort(fissSources);
+
         for (String fissSource : fissSources) {
           executeTransformation(SourceType.FISS, path, fissSource, mbiMap, fissSink);
         }
+
+        // Sorting the files so tests are more deterministic
+        List<String> mcsSources = new ArrayList<>(config.getMcsFiles());
+        Collections.sort(mcsSources);
 
         for (String mcsSource : mcsSources) {
           executeTransformation(SourceType.MCS, path, mcsSource, mbiMap, mcsSink);
@@ -227,9 +205,7 @@ public class RDABridge {
 
     private String inputDir;
     private String outputDir;
-    private long icnStart;
-    private long dcnStart;
-    private String icnPattern;
-    private String dcnPattern;
+    private Set<String> fissFiles;
+    private Set<String> mcsFiles;
   }
 }

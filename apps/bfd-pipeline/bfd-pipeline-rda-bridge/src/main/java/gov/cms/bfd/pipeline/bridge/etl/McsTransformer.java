@@ -12,17 +12,13 @@ import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /** Transforms data into MCS FISS claim change objects. */
 @RequiredArgsConstructor
 public class McsTransformer extends AbstractTransformer {
 
-  private static final AtomicLong icnCounter = new AtomicLong();
-
-  private static final Map<String, String> mpnLookupMap = new ConcurrentHashMap<>();
   private static final int MAX_DIAGNOSIS_CODES = 12;
 
   private final Map<String, BeneficiaryData> mbiMap;
@@ -36,7 +32,7 @@ public class McsTransformer extends AbstractTransformer {
   @Override
   public MessageOrBuilder transform(Parser.Data<String> data) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
-    String icn = String.format("*%014d", icnCounter.getAndIncrement());
+    String icn = convertIcn(data);
 
     // Carrier claims break claims into multiple lines (rows).  Synthea isn't doing this, but just
     // to protect against it
@@ -94,14 +90,20 @@ public class McsTransformer extends AbstractTransformer {
     return null;
   }
 
-  public static void setStartingICN(long start) {
-    icnCounter.set(start);
-  }
-
   @VisibleForTesting
   boolean isFirstLineNum(Parser.Data<String> data) {
     Optional<String> lineNum = data.get("LINE_NUM");
 
     return !lineNum.isPresent() || lineNum.get().equals("1");
+  }
+
+  @VisibleForTesting
+  String convertIcn(Parser.Data<String> data) {
+    String claimId =
+        data.get(Mcs.CLM_ID)
+            .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
+
+    String hash = new String(DigestUtils.sha256Hex(claimId));
+    return "Z" + hash.substring(0, 14);
   }
 }

@@ -35,7 +35,24 @@ public class RDABridgeIT {
     Path outputDir = resourcesDir.resolve("output");
     Path expectedDir = resourcesDir.resolve("expected");
 
-    RDABridge.main(new String[] {"-o", outputDir.toString(), "-i", "3", "-d", "1", rifDir});
+    RDABridge.main(
+        new String[] {
+          "-o",
+          outputDir.toString(),
+          "-f",
+          "inpatient",
+          "-f",
+          "outpatient",
+          "-f",
+          "home",
+          "-f",
+          "hospice",
+          "-f",
+          "snf",
+          "-m",
+          "carrier",
+          rifDir
+        });
 
     Set<String> ignorePaths = Collections.emptySet();
 
