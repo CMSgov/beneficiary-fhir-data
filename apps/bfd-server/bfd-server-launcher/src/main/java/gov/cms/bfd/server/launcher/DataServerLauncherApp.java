@@ -14,7 +14,6 @@ import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -197,7 +196,9 @@ public final class DataServerLauncherApp {
      */
     webapp.setInitParameter("logbackDisableServletContainerInitializer", "true");
 
-    // Configure the 'access.log' file generation via a Jetty CustomRequestLog
+    /* Configure the 'access.log' file generation via a Jetty CustomRequestLog
+     * NOTE: As of late October 2021, the access.log file is slightly different
+     * in terms of response time being in microseconds instead of milliseconds
     final String accessLogFileName =
         System.getProperty("bfdServer.logs.dir", "./target/server-work/") + "access.log";
     final String requestLogFormat =
