@@ -2730,7 +2730,7 @@
         },
         "productOrService" : {
           "coding" : [ {
-            "system" : "https://bluebutton.cms.gov/resources/variables/hcpcs_cd",
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
             "code" : "M55"
           } ]
         },
@@ -3970,9 +3970,9 @@
       "patient" : {
         "reference" : "Patient/567834"
       },
-      "billablePeriod": {
-        "start": "2015-05-12",
-        "end": "2015-05-12"
+      "billablePeriod" : {
+        "start" : "2015-05-12",
+        "end" : "2015-05-12"
       },
       "created" : "IGNORED_FIELD",
       "insurer" : {

@@ -673,7 +673,7 @@
     },
     "productOrService" : {
       "coding" : [ {
-        "system" : "https://bluebutton.cms.gov/resources/variables/hcpcs_cd",
+        "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
         "code" : "M55"
       } ]
     },
