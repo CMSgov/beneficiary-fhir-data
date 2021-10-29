@@ -1,7 +1,16 @@
-package gov.cms.bfd.pipeline.rda.grpc.shared;
+package gov.cms.bfd.sharedutils.config;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
@@ -15,11 +24,8 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConfigLoaderTest {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigLoaderTest.class);
 
   private Map<String, String> values;
   private ConfigLoader loader;
@@ -27,7 +33,7 @@ public class ConfigLoaderTest {
   @Before
   public void setUp() {
     values = new HashMap<>();
-    loader = spy(new ConfigLoader(values::get));
+    loader = spy(ConfigLoader.builder().addSingle(values::get).build());
   }
 
   @Test
@@ -105,7 +111,7 @@ public class ConfigLoaderTest {
     // configure the mock to accept any file with the expected path
     doAnswer(invocation -> invocation.getArgument(1))
         .when(loader)
-        .validateReadableFile(eq("f"), eq(new File("path")));
+        .validateReadableFile("f", new File("path"));
     values.put("f", "path");
     assertEquals(new File("path"), loader.readableFile("f"));
   }
@@ -158,7 +164,7 @@ public class ConfigLoaderTest {
     // configure the mock to accept any file with the expected path
     doAnswer(invocation -> invocation.getArgument(1))
         .when(loader)
-        .validateWriteableFile(eq("f"), eq(new File("path")));
+        .validateWriteableFile("f", new File("path"));
     values.put("f", "path");
     assertEquals(new File("path"), loader.writeableFile("f"));
   }
@@ -168,7 +174,7 @@ public class ConfigLoaderTest {
     // configure the mock to reject any file with the expected path
     doThrow(new ConfigException("f", "not readable"))
         .when(loader)
-        .validateWriteableFile(eq("f"), eq(new File("path")));
+        .validateWriteableFile("f", new File("path"));
     values.put("f", "path");
     assertException("f", "not readable", () -> loader.writeableFile("f"));
   }
@@ -185,7 +191,7 @@ public class ConfigLoaderTest {
   }
 
   @Test
-  public void validateWriteableFileExists() throws Exception {
+  public void validateWriteableFileExists() {
     File file = mock(File.class);
     doReturn(true).when(file).exists();
     doReturn(true).when(file).isFile();
@@ -237,8 +243,8 @@ public class ConfigLoaderTest {
   @Test
   public void optionalBooleanValue() {
     values.put("a", "True");
-    assertEquals(true, loader.booleanValue("a", false));
-    assertEquals(false, loader.booleanValue("z", false));
+    assertTrue(loader.booleanValue("a", false));
+    assertFalse(loader.booleanValue("z", false));
   }
 
   @Test(expected = ConfigException.class)
@@ -248,7 +254,7 @@ public class ConfigLoaderTest {
   }
 
   @Test
-  public void fromProperties() throws Exception {
+  public void fromProperties() {
     Properties p = new Properties();
     p.setProperty("a", "A");
     ConfigLoader config = ConfigLoader.builder().addProperties(p).build();
@@ -260,7 +266,7 @@ public class ConfigLoaderTest {
     final List<String> names = new ArrayList<>(System.getenv().keySet());
     final ConfigLoader config = ConfigLoader.builder().addEnvironmentVariables().build();
     for (String name : names) {
-      assertTrue("mismatch for " + name, System.getenv(name).equals(config.stringValue(name, "")));
+      assertEquals("mismatch for " + name, System.getenv(name), config.stringValue(name, ""));
     }
   }
 
@@ -269,9 +275,8 @@ public class ConfigLoaderTest {
     final Iterable<String> names = System.getProperties().stringPropertyNames();
     final ConfigLoader config = ConfigLoader.builder().addSystemProperties().build();
     for (String name : names) {
-      assertTrue(
-          "mismatch for " + name,
-          System.getProperty(name, "").equals(config.stringValue(name, "")));
+      assertEquals(
+          "mismatch for " + name, System.getProperty(name, ""), config.stringValue(name, ""));
     }
   }
 
@@ -291,7 +296,8 @@ public class ConfigLoaderTest {
     final Map<String, String> primary = ImmutableMap.of("in-primary", "A");
     final Map<String, String> fallback =
         ImmutableMap.of("in-primary", "hidden", "in-fallback", "B");
-    final ConfigLoader config = ConfigLoader.builder().add(fallback::get).add(primary::get).build();
+    final ConfigLoader config =
+        ConfigLoader.builder().addSingle(fallback::get).addSingle(primary::get).build();
     assertEquals("A", config.stringValue("in-primary"));
     assertEquals("B", config.stringValue("in-fallback"));
   }

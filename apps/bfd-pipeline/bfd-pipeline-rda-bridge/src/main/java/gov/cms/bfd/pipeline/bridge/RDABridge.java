@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.bridge;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.etl.AbstractTransformer;
 import gov.cms.bfd.pipeline.bridge.etl.FissTransformer;
@@ -12,19 +12,24 @@ import gov.cms.bfd.pipeline.bridge.io.NdJsonSink;
 import gov.cms.bfd.pipeline.bridge.io.RifSource;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -32,15 +37,22 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang3.ObjectUtils;
+import org.yaml.snakeyaml.Yaml;
 
 @Slf4j
 public class RDABridge {
 
-  private enum SourceType {
+  enum SourceType {
     FISS,
     MCS
   }
+
+  private static final String OUTPUT_FLAG = "o";
+  private static final String FISS_FLAG = "f";
+  private static final String MCS_FLAG = "m";
+  private static final String FISS_OUTPUT_FLAG = "g";
+  private static final String MCS_OUTPUT_FLAG = "n";
+  private static final String EXTERNAL_CONFIG_FLAG = "e";
 
   /**
    * Handles translation of a CLI execution, validating and pulling arguments to then invoke the
@@ -52,28 +64,30 @@ public class RDABridge {
     try {
       Options options =
           new Options()
-              .addOption("o", true, "The directory where the output files will be written to.")
-              .addOption("f", true, "FISS file to read from")
-              .addOption("m", true, "MCS file to read from");
+              .addOption(
+                  OUTPUT_FLAG, true, "The directory where the output files will be written to.")
+              .addOption(FISS_FLAG, true, "FISS file to read from")
+              .addOption(MCS_FLAG, true, "MCS file to read from")
+              .addOption(FISS_OUTPUT_FLAG, true, "FISS RDA output file")
+              .addOption(MCS_OUTPUT_FLAG, true, "MCS RDA output file")
+              .addOption(EXTERNAL_CONFIG_FLAG, true, "Path to yaml file containing run configs");
 
       CommandLineParser parser = new DefaultParser();
       CommandLine cmd = parser.parse(options, args);
 
-      if (!cmd.getArgList().isEmpty()) {
-        String rifRootDir = cmd.getArgList().get(0);
-        String outputDir = ObjectUtils.defaultIfNull(cmd.getOptionValue("o"), "output");
-        Set<String> fissFiles = Sets.newHashSet(cmd.getOptionValues('f'));
-        Set<String> mcsFiles = Sets.newHashSet(cmd.getOptionValues('m'));
+      ConfigLoader config;
 
-        new RDABridge().run(new GenConfig(rifRootDir, outputDir, fissFiles, mcsFiles));
+      if (cmd.hasOption(EXTERNAL_CONFIG_FLAG)) {
+        config = createYamlConfig(cmd.getOptionValue(EXTERNAL_CONFIG_FLAG));
+      } else if (!cmd.getArgList().isEmpty()) {
+        config = createCliConfig(cmd);
       } else {
-        log.error("Invalid execution");
-        final PrintWriter writer = new PrintWriter(System.out);
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printUsage(writer, 80, "run_bridge sourceDir", options);
-        formatter.printOptions(writer, 80, options, 4, 4);
-        writer.flush();
+        printUsage(options);
+        System.exit(1);
+        throw new IllegalStateException("This will never happen");
       }
+
+      new RDABridge().run(config);
     } catch (IOException | ParseException e) {
       log.error("Failed to execute", e);
       System.exit(1);
@@ -86,20 +100,26 @@ public class RDABridge {
    * @param config The configurations to use when generating the RDA data.
    * @throws IOException If there was an issue accessing any of the files.
    */
-  public void run(GenConfig config) throws IOException {
-    Path path = Paths.get(config.getInputDir());
+  public void run(ConfigLoader config) throws IOException {
+    Path path = Paths.get(config.stringValue(AppConfig.Fields.inputDirPath));
     Map<String, BeneficiaryData> mbiMap = parseMbiNumbers(path);
 
-    Path outputPath = Paths.get(config.getOutputDir());
+    Path outputPath =
+        Paths.get(config.stringOption(AppConfig.Fields.outputDirPath).orElse("output"));
 
     // ResultOfMethodCallIgnored - Don't need to know if it had to be created.
     //noinspection ResultOfMethodCallIgnored
     outputPath.toFile().mkdir();
 
-    try (Sink<MessageOrBuilder> fissSink = new NdJsonSink(outputPath.resolve("rda-fiss.ndjson"))) {
-      try (Sink<MessageOrBuilder> mcsSink = new NdJsonSink(outputPath.resolve("rda-mcs.ndjson"))) {
+    String fissOutputFile = config.stringOption(AppConfig.Fields.fissOutputFile).orElse("rda-fiss");
+    String mcsOutputFile = config.stringOption(AppConfig.Fields.mcsOutputFile).orElse("rda-mcs");
+
+    try (Sink<MessageOrBuilder> fissSink =
+        new NdJsonSink(outputPath.resolve(fissOutputFile + ".ndjson"))) {
+      try (Sink<MessageOrBuilder> mcsSink =
+          new NdJsonSink(outputPath.resolve(mcsOutputFile + ".ndjson"))) {
         // Sorting the files so tests are more deterministic
-        List<String> fissSources = new ArrayList<>(config.getFissFiles());
+        List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
         Collections.sort(fissSources);
 
         for (String fissSource : fissSources) {
@@ -107,7 +127,7 @@ public class RDABridge {
         }
 
         // Sorting the files so tests are more deterministic
-        List<String> mcsSources = new ArrayList<>(config.getMcsFiles());
+        List<String> mcsSources = config.stringValues(AppConfig.Fields.mcsSources);
         Collections.sort(mcsSources);
 
         for (String mcsSource : mcsSources) {
@@ -198,14 +218,69 @@ public class RDABridge {
     return mbiMap;
   }
 
-  @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class GenConfig {
+  @VisibleForTesting
+  static ConfigLoader createYamlConfig(String yamlFilePath) throws FileNotFoundException {
+    Yaml yaml = new Yaml();
+    AppConfig appConfig = yaml.loadAs(new FileReader(yamlFilePath), AppConfig.class);
 
-    private String inputDir;
-    private String outputDir;
-    private Set<String> fissFiles;
-    private Set<String> mcsFiles;
+    Map<String, Collection<String>> mapConfig =
+        ImmutableMap.<String, Collection<String>>builder()
+            .put(AppConfig.Fields.inputDirPath, Collections.singleton(appConfig.inputDirPath))
+            .put(AppConfig.Fields.outputDirPath, Collections.singleton(appConfig.outputDirPath))
+            .put(AppConfig.Fields.fissOutputFile, Collections.singleton(appConfig.fissOutputFile))
+            .put(AppConfig.Fields.mcsOutputFile, Collections.singleton(appConfig.mcsOutputFile))
+            .put(AppConfig.Fields.fissSources, appConfig.fissSources)
+            .put(AppConfig.Fields.mcsSources, appConfig.mcsSources)
+            .build();
+
+    return new ConfigLoader(mapConfig::get);
+  }
+
+  @VisibleForTesting
+  static ConfigLoader createCliConfig(CommandLine cmd) {
+    Map<String, Collection<String>> mapConfig =
+        ImmutableMap.<String, Collection<String>>builder()
+            .put(AppConfig.Fields.inputDirPath, nullOrSet(cmd.getArgList().get(0)))
+            .put(AppConfig.Fields.outputDirPath, nullOrSet(cmd.getOptionValue(OUTPUT_FLAG)))
+            .put(AppConfig.Fields.fissOutputFile, nullOrSet(cmd.getOptionValue(FISS_OUTPUT_FLAG)))
+            .put(AppConfig.Fields.mcsOutputFile, nullOrSet(cmd.getOptionValue(MCS_OUTPUT_FLAG)))
+            .put(AppConfig.Fields.fissSources, arrayToSet(cmd.getOptionValues(FISS_FLAG)))
+            .put(AppConfig.Fields.mcsSources, arrayToSet(cmd.getOptionValues(MCS_FLAG)))
+            .build();
+
+    return new ConfigLoader(mapConfig::get);
+  }
+
+  @VisibleForTesting
+  static Set<String> nullOrSet(String value) {
+    return value == null ? null : Collections.singleton(value);
+  }
+
+  @VisibleForTesting
+  static Set<String> arrayToSet(String[] values) {
+    return new HashSet<>(Arrays.asList(values));
+  }
+
+  @VisibleForTesting
+  static void printUsage(Options options) {
+    final StringWriter stringValue = new StringWriter();
+    final PrintWriter writer = new PrintWriter(stringValue);
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printUsage(writer, 80, "run_bridge sourceDir", options);
+    formatter.printOptions(writer, 80, options, 4, 4);
+    writer.flush();
+    log.error("Invalid execution \n" + stringValue);
+  }
+
+  @VisibleForTesting
+  @Data
+  @FieldNameConstants
+  public static class AppConfig {
+    private String inputDirPath;
+    private String outputDirPath;
+    private String fissOutputFile;
+    private String mcsOutputFile;
+    private Set<String> fissSources = new HashSet<>();
+    private Set<String> mcsSources = new HashSet<>();
   }
 }
