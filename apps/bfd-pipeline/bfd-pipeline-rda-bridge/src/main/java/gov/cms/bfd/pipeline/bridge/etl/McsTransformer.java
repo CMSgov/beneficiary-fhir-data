@@ -80,7 +80,7 @@ public class McsTransformer implements AbstractTransformer {
     String claimId =
         data.get(Mcs.CLM_ID)
             .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
-    return "Z" + DigestUtils.sha256Hex(claimId).substring(0, 14);
+    return "-" + DigestUtils.sha256Hex(claimId).substring(0, 14);
   }
 
   @VisibleForTesting
