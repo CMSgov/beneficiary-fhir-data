@@ -1,12 +1,13 @@
-inputDirPath: /home/kyrobbins/dev/github/synthetichealth/datasets/small/
+inputDirPath: path/to/rif/data/
 outputDirPath: output/
-fissOutputFile: rda-fiss
-mcsOutputFile: rda-mcs
+fissOutputFile: rda-fiss.ndjson
+mcsOutputFile: rda-mcs.ndjson
 fissSources:
-  - inpatient
-  - outpatient
-  - home
-  - hospice
-  - snf
+  - inpatient.csv
+  - outpatient.csv
+  - home.csv
+  - hospice.csv
+  - snf.csv
 mcsSources:
-  - carrier
+  - carrier.csv
+mbiSource: beneficiary_history.csv

@@ -17,7 +17,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 /** Transforms data into MCS FISS claim change objects. */
 @RequiredArgsConstructor
-public class McsTransformer extends AbstractTransformer {
+public class McsTransformer implements AbstractTransformer {
 
   private static final int MAX_DIAGNOSIS_CODES = 12;
 
@@ -53,7 +53,7 @@ public class McsTransformer extends AbstractTransformer {
       claimBuilder.addMcsDetails(
           McsDetail.newBuilder()
               .setIdrProcCode(data.get(Mcs.HCPCS_CD).orElse("00000"))
-              .setIdrDtlToDate(convertRifDate(data.get(Mcs.CLM_THRU_DT).orElse("")))
+              .setIdrDtlToDate(data.getFromType(Mcs.CLM_THRU_DT, Parser.Data.Type.DATE).orElse(""))
               .build());
 
       for (int i = 1; i <= MAX_DIAGNOSIS_CODES; ++i) {
@@ -102,8 +102,6 @@ public class McsTransformer extends AbstractTransformer {
     String claimId =
         data.get(Mcs.CLM_ID)
             .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
-
-    String hash = new String(DigestUtils.sha256Hex(claimId));
-    return "Z" + hash.substring(0, 14);
+    return "Z" + DigestUtils.sha256Hex(claimId).substring(0, 14);
   }
 }

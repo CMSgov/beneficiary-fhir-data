@@ -15,7 +15,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 /** Transforms data into RDA FISS claim change objects. */
 @RequiredArgsConstructor
-public class FissTransformer extends AbstractTransformer {
+public class FissTransformer implements AbstractTransformer {
 
   private static final int MAX_PROC_CODES = 25;
 
@@ -30,19 +30,17 @@ public class FissTransformer extends AbstractTransformer {
   @Override
   public MessageOrBuilder transform(Parser.Data<String> data) {
     String beneId = data.get(Fiss.BENE_ID).orElse("");
-    String npi = data.get(Fiss.ORG_NPI_NUM).orElse("");
-    String dcn = convertDcn(data);
 
     FissClaim.Builder claimBuilder =
         FissClaim.newBuilder()
             // Prefixed DCN numbers with '*' to designate synthetic data
-            .setDcn(dcn)
+            .setDcn(convertDcn(data))
             .setMbi(mbiMap.get(beneId).getMbi())
             .setHicNo(mbiMap.get(beneId).getHicNo())
             .setCurrLoc1Unrecognized("?") // Not generated
             .setCurrLoc2Unrecognized("?") // Not generated
             .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING) // Not generated
-            .setNpiNumber(npi)
+            .setNpiNumber(data.get(Fiss.ORG_NPI_NUM).orElse(""))
             .setTotalChargeAmount(data.get(Fiss.CLM_TOT_CHRG_AMT).orElse(""))
             .setPrincipleDiag(data.get(Fiss.PRNCPAL_DGNS_CD).orElse(""));
 
@@ -60,7 +58,9 @@ public class FissTransformer extends AbstractTransformer {
                   claimBuilder.addFissProcCodes(
                       FissProcedureCode.newBuilder()
                           .setProcCd(data.get(Fiss.ICD_PRCDR_CD + INDEX).orElse(""))
-                          .setProcDt(convertRifDate(data.get(Fiss.PRCDR_DT + INDEX).orElse("")))
+                          .setProcDt(
+                              data.getFromType(Fiss.PRCDR_DT + INDEX, Parser.Data.Type.DATE)
+                                  .orElse(""))
                           .build()));
     }
 
@@ -75,7 +75,6 @@ public class FissTransformer extends AbstractTransformer {
     String claimId =
         data.get(Fiss.CLM_ID)
             .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
-    String hash = new String(DigestUtils.sha256Hex(claimId));
-    return "Z" + hash.substring(0, 22);
+    return "Z" + DigestUtils.sha256Hex(claimId).substring(0, 22);
   }
 }

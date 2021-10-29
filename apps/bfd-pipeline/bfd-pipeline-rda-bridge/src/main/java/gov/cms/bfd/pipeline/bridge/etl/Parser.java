@@ -12,8 +12,16 @@ public interface Parser<T> extends Closeable {
 
   Data<T> read() throws IOException;
 
-  interface Data<T> {
+  abstract class Data<T> {
 
-    Optional<T> get(String fieldName);
+    public enum Type {
+      DATE
+    }
+
+    public abstract Optional<T> get(String fieldName);
+
+    public Optional<T> getFromType(String fieldName, Type type) {
+      return get(fieldName);
+    }
   }
 }

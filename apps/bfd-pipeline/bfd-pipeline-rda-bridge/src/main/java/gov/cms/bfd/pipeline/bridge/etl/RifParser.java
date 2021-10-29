@@ -2,6 +2,8 @@ package gov.cms.bfd.pipeline.bridge.etl;
 
 import gov.cms.bfd.pipeline.bridge.io.Source;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class RifParser implements Parser<String> {
+
+  private static final SimpleDateFormat rifDateFormat = new SimpleDateFormat("dd-MMM-yyy");
+  private static final SimpleDateFormat standardFormat = new SimpleDateFormat("yyyy-MM-dd");
 
   private static final String DELIMITER = "\\|";
 
@@ -57,11 +62,12 @@ public class RifParser implements Parser<String> {
   }
 
   @RequiredArgsConstructor
-  public static class RifData implements Data<String> {
+  public static class RifData extends Data<String> {
 
     private final Map<String, Integer> headerIndexMap;
     private final String[] rowData;
 
+    @Override
     public Optional<String> get(String rifIdentifier) {
       Optional<String> optional;
 
@@ -74,6 +80,23 @@ public class RifParser implements Parser<String> {
       }
 
       return optional;
+    }
+
+    @Override
+    public Optional<String> getFromType(String rifIdentifier, Data.Type type) {
+      return get(rifIdentifier)
+          .map(
+              value -> {
+                if (Type.DATE.equals(type)) {
+                  try {
+                    return standardFormat.format(rifDateFormat.parse(value));
+                  } catch (ParseException e) {
+                    throw new IllegalArgumentException("Invalid date format", e);
+                  }
+                }
+
+                return value;
+              });
     }
   }
 }

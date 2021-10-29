@@ -31,9 +31,9 @@ public class RDABridgeIT {
 
   private static final String BENE_HISTORY_CSV = "beneficiary_history.csv";
   private static final String EXPECTED_FISS = "expected-fiss.ndjson";
-  private static final String ACTUAL_FISS = "rda-fiss-test";
+  private static final String ACTUAL_FISS = "rda-fiss-test.ndjson";
   private static final String EXPECTED_MCS = "expected-mcs.ndjson";
-  private static final String ACTUAL_MCS = "rda-mcs-test";
+  private static final String ACTUAL_MCS = "rda-mcs-test.ndjson";
 
   @Test
   public void shouldGenerateCorrectOutput() throws IOException {
@@ -51,33 +51,35 @@ public class RDABridgeIT {
         new String[] {
           "-o",
           outputDir.toString(),
+          "-b",
+          "beneficiary_history.csv",
           "-g",
           ACTUAL_FISS,
           "-n",
           ACTUAL_MCS,
           "-f",
-          "inpatient",
+          "inpatient.csv",
           "-f",
-          "outpatient",
+          "outpatient.csv",
           "-f",
-          "home",
+          "home.csv",
           "-f",
-          "hospice",
+          "hospice.csv",
           "-f",
-          "snf",
+          "snf.csv",
           "-m",
-          "carrier",
+          "carrier.csv",
           rifDir
         });
 
     Set<String> ignorePaths = Collections.emptySet();
 
     List<String> expectedFissJson = Files.readAllLines(expectedDir.resolve(EXPECTED_FISS));
-    List<String> actualFissJson = Files.readAllLines(outputDir.resolve(ACTUAL_FISS + ".ndjson"));
+    List<String> actualFissJson = Files.readAllLines(outputDir.resolve(ACTUAL_FISS));
     assertJsonEquals(expectedFissJson, actualFissJson, ignorePaths);
 
     List<String> expectedMcsJson = Files.readAllLines(expectedDir.resolve(EXPECTED_MCS));
-    List<String> actualMcsJson = Files.readAllLines(outputDir.resolve(ACTUAL_MCS + ".ndjson"));
+    List<String> actualMcsJson = Files.readAllLines(outputDir.resolve(ACTUAL_MCS));
     assertJsonEquals(expectedMcsJson, actualMcsJson, ignorePaths);
   }
 
@@ -93,10 +95,11 @@ public class RDABridgeIT {
         new File(getClass().getClassLoader().getResource(BENE_HISTORY_CSV).getFile())
             .getParentFile()
             .toPath();
-    String inpatientData = resourcesDir.resolve("inpatient").toString();
-    String carrierData = resourcesDir.resolve("carrier").toString();
+    String inpatientData = resourcesDir.resolve("inpatient.csv").toString();
+    String carrierData = resourcesDir.resolve("carrier.csv").toString();
 
-    Map<String, BeneficiaryData> mbiMap = bridge.parseMbiNumbers(resourcesDir);
+    Map<String, BeneficiaryData> mbiMap =
+        bridge.parseMbiNumbers(resourcesDir.resolve("beneficiary_history.csv"));
 
     List<MessageOrBuilder> results = new ArrayList<>();
 
