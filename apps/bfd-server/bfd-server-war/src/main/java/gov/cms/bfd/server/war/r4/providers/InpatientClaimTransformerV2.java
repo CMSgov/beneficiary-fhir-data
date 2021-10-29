@@ -13,6 +13,7 @@ import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -337,12 +338,8 @@ public class InpatientClaimTransformerV2 {
           line.getDeductibleCoinsuranceCd());
 
       // HCPCS_CD => item.productOrService
-      line.getHcpcsCode()
-          .ifPresent(
-              c ->
-                  item.setProductOrService(
-                      TransformerUtilsV2.createCodeableConcept(
-                          eob, CcwCodebookVariable.HCPCS_CD, c)));
+      TransformerUtilsV2.mapHcpcs(
+          eob, item, line.getHcpcsCode(), Optional.empty(), Collections.emptyList());
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(
