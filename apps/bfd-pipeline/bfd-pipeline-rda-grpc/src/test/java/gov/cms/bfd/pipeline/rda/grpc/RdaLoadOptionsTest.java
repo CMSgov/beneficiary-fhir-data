@@ -25,6 +25,7 @@ public class RdaLoadOptionsTest {
                 .host("localhost")
                 .port(5432)
                 .maxIdle(Duration.ofMinutes(59))
+                .authenticationToken("my-secret")
                 .build(),
             new RdaServerJob.Config(),
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));

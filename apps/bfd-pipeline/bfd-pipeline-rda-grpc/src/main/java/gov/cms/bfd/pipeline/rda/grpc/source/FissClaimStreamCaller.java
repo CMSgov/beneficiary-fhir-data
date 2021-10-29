@@ -41,14 +41,14 @@ public class FissClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjF
    */
   @Override
   public GrpcResponseStream<RdaChange<PreAdjFissClaim>> callService(
-      ManagedChannel channel, long startingSequenceNumber) throws Exception {
+      ManagedChannel channel, CallOptions callOptions, long startingSequenceNumber)
+      throws Exception {
     LOGGER.info("calling service");
     Preconditions.checkNotNull(channel);
     final ClaimRequest request = ClaimRequest.newBuilder().setSince(startingSequenceNumber).build();
     final MethodDescriptor<ClaimRequest, FissClaimChange> method =
         RDAServiceGrpc.getGetFissClaimsMethod();
-    final ClientCall<ClaimRequest, FissClaimChange> call =
-        channel.newCall(method, CallOptions.DEFAULT);
+    final ClientCall<ClaimRequest, FissClaimChange> call = channel.newCall(method, callOptions);
     final Iterator<FissClaimChange> apiResults =
         ClientCalls.blockingServerStreamingCall(call, request);
     final Iterator<RdaChange<PreAdjFissClaim>> transformedResults =

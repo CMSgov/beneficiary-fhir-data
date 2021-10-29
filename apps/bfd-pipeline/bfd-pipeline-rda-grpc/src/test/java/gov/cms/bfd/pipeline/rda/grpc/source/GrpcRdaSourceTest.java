@@ -9,6 +9,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream.StreamInterruptedException;
+import io.grpc.CallOptions;
 import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -49,7 +50,10 @@ public class GrpcRdaSourceTest {
   @Before
   public void setUp() throws Exception {
     appMetrics = new MetricRegistry();
-    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints", Optional.empty()));
+    source =
+        spy(
+            new GrpcRdaSource<>(
+                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
     metrics = source.getMetrics();
   }
 
@@ -70,7 +74,9 @@ public class GrpcRdaSourceTest {
   @Test
   public void testSuccessfullyProcessThreeItems() throws Exception {
     doReturn(Optional.of(41L)).when(sink).readMaxExistingSequenceNumber();
-    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3)).when(caller).callService(channel, 42L);
+    doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3))
+        .when(caller)
+        .callService(channel, CallOptions.DEFAULT, 42L);
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     doReturn(1).when(sink).writeBatch(Collections.singletonList(CLAIM_3));
 
@@ -87,13 +93,16 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(3)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
   @Test
   public void testUsesHardCodedSequenceNumberWhenProvided() throws Exception {
-    source = spy(new GrpcRdaSource<>(channel, caller, appMetrics, "ints", Optional.of(18L)));
-    doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, 18L);
+    source =
+        spy(
+            new GrpcRdaSource<>(
+                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.of(18L)));
+    doReturn(createResponse(CLAIM_1)).when(caller).callService(channel, CallOptions.DEFAULT, 18L);
     doReturn(1).when(sink).writeBatch(Arrays.asList(CLAIM_1));
 
     final int result = source.retrieveAndProcessObjects(2, sink);
@@ -109,7 +118,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(1)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 18L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 18L);
     verify(sink, times(0)).readMaxExistingSequenceNumber();
   }
 
@@ -119,7 +128,7 @@ public class GrpcRdaSourceTest {
     final Exception error = new IOException("oops");
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
-        .callService(same(channel), anyLong());
+        .callService(same(channel), any(), anyLong());
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     doThrow(new ProcessingException(error, 1))
@@ -145,7 +154,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
   @Test
@@ -156,9 +165,10 @@ public class GrpcRdaSourceTest {
         spy(
             new GrpcRdaSource<>(
                 channel,
-                (channel, sequenceNumber) -> {
+                (channel, callOptions, sequenceNumber) -> {
                   throw error;
                 },
+                () -> CallOptions.DEFAULT,
                 appMetrics,
                 "ints",
                 Optional.empty()));
@@ -186,7 +196,7 @@ public class GrpcRdaSourceTest {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3, CLAIM_4, CLAIM_5))
         .when(caller)
-        .callService(same(channel), anyLong());
+        .callService(same(channel), eq(CallOptions.DEFAULT), anyLong());
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
     // second batch should throw our exception as though it failed after processing 1 record
     final Exception error = new RuntimeException("oops");
@@ -210,7 +220,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(4)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 0L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 0L);
   }
 
   @Test
@@ -223,7 +233,7 @@ public class GrpcRdaSourceTest {
         .thenReturn(true)
         .thenReturn(true)
         .thenThrow(new StreamInterruptedException(new StatusRuntimeException(Status.INTERNAL)));
-    doReturn(response).when(caller).callService(same(channel), anyLong());
+    doReturn(response).when(caller).callService(same(channel), any(), anyLong());
 
     // we expect to write a single batch with the first two records
     doReturn(2).when(sink).writeBatch(Arrays.asList(CLAIM_1, CLAIM_2));
@@ -242,7 +252,7 @@ public class GrpcRdaSourceTest {
     // once per object received
     verify(source, times(2)).setUptimeToReceiving();
     verify(source).setUptimeToStopped();
-    verify(caller).callService(channel, 42L);
+    verify(caller).callService(channel, CallOptions.DEFAULT, 42L);
   }
 
   @Test
@@ -262,6 +272,7 @@ public class GrpcRdaSourceTest {
             .host("localhost")
             .port(5432)
             .maxIdle(Duration.ofMinutes(59))
+            .authenticationToken("secret")
             .build();
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {

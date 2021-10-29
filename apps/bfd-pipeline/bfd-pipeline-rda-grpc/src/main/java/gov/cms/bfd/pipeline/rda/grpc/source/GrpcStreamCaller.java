@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 
 /**
@@ -20,10 +21,12 @@ public interface GrpcStreamCaller<TResponse> {
    * numbers come back from the API server in change objects.
    *
    * @param channel an already open channel to the service being called
+   * @param callOptions the CallOptions object to use for the API call
    * @param startingSequenceNumber specifies the sequence number to send to the RDA API server
    * @return a blocking GrpcResponseStream allowing iteration over stream results
    * @throws Exception any exception thrown calling the RPC or setting up the stream
    */
-  GrpcResponseStream<TResponse> callService(ManagedChannel channel, long startingSequenceNumber)
+  GrpcResponseStream<TResponse> callService(
+      ManagedChannel channel, CallOptions callOptions, long startingSequenceNumber)
       throws Exception;
 }

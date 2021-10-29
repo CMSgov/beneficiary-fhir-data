@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -21,46 +21,52 @@ public class McsClaimStreamCallerIT {
 
   @Test
   public void basicCall() throws Exception {
-    RdaServer.runWithInProcessServer(
-        getClass().getSimpleName(),
-        EmptyMessageSource.factory(),
-        sequenceNumber -> new RandomMcsClaimSource(1000L, 2).toClaimChanges().skip(sequenceNumber),
-        channel -> {
-          final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
-          final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
-              caller.callService(channel, 0L);
-          assertEquals(true, results.hasNext());
+    RdaServer.InProcessConfig.builder()
+        .serverName(getClass().getSimpleName())
+        .mcsSourceFactory(
+            sequenceNumber ->
+                new RandomMcsClaimSource(1000L, 2).toClaimChanges().skip(sequenceNumber))
+        .build()
+        .run(
+            channel -> {
+              final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
+              final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
+                  caller.callService(channel, CallOptions.DEFAULT, 0L);
+              assertEquals(true, results.hasNext());
 
-          PreAdjMcsClaim claim = results.next().getClaim();
-          assertEquals("75302", claim.getIdrClmHdIcn());
-          assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-          assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-          assertEquals(true, results.hasNext());
+              PreAdjMcsClaim claim = results.next().getClaim();
+              assertEquals("75302", claim.getIdrClmHdIcn());
+              assertEquals(Long.valueOf(0), claim.getSequenceNumber());
+              assertEquals(Long.valueOf(0), claim.getSequenceNumber());
+              assertEquals(true, results.hasNext());
 
-          claim = results.next().getClaim();
-          assertEquals("43644459", claim.getIdrClmHdIcn());
-          assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-          assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-          assertEquals(false, results.hasNext());
-        });
+              claim = results.next().getClaim();
+              assertEquals("43644459", claim.getIdrClmHdIcn());
+              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+              assertEquals(false, results.hasNext());
+            });
   }
 
   @Test
   public void sequenceNumbers() throws Exception {
-    RdaServer.runWithInProcessServer(
-        getClass().getSimpleName(),
-        EmptyMessageSource.factory(),
-        sequenceNumber -> new RandomMcsClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber),
-        channel -> {
-          final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
-          final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
-              caller.callService(channel, 10L);
-          assertEquals(10L, results.next().getSequenceNumber());
-          assertEquals(11L, results.next().getSequenceNumber());
-          assertEquals(12L, results.next().getSequenceNumber());
-          assertEquals(13L, results.next().getSequenceNumber());
-          assertEquals(14L, results.next().getSequenceNumber());
-          assertEquals(false, results.hasNext());
-        });
+    RdaServer.InProcessConfig.builder()
+        .serverName(getClass().getSimpleName())
+        .mcsSourceFactory(
+            sequenceNumber ->
+                new RandomMcsClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber))
+        .build()
+        .run(
+            channel -> {
+              final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
+              final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
+                  caller.callService(channel, CallOptions.DEFAULT, 10L);
+              assertEquals(10L, results.next().getSequenceNumber());
+              assertEquals(11L, results.next().getSequenceNumber());
+              assertEquals(12L, results.next().getSequenceNumber());
+              assertEquals(13L, results.next().getSequenceNumber());
+              assertEquals(14L, results.next().getSequenceNumber());
+              assertEquals(false, results.hasNext());
+            });
   }
 }

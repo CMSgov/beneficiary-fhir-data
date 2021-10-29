@@ -254,43 +254,45 @@ public final class PipelineApplicationIT {
 
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
-      RdaServer.runWithLocalServer(
-          ignored -> new RandomFissClaimSource(12345, 100).toClaimChanges(),
-          ignored -> new RandomMcsClaimSource(12345, 100).toClaimChanges(),
-          port -> {
-            // Start the app.
-            ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
-            appRunBuilder.redirectErrorStream(true);
-            appProcess.set(appRunBuilder.start());
+      RdaServer.LocalConfig.builder()
+          .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 100).toClaimChanges())
+          .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 100).toClaimChanges())
+          .build()
+          .run(
+              port -> {
+                // Start the app.
+                ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
+                appRunBuilder.redirectErrorStream(true);
+                appProcess.set(appRunBuilder.start());
 
-            // Read the app's output.
-            ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess.get());
-            Thread appRunConsumerThread = new Thread(appRunConsumer);
-            appRunConsumerThread.start();
+                // Read the app's output.
+                ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess.get());
+                Thread appRunConsumerThread = new Thread(appRunConsumer);
+                appRunConsumerThread.start();
 
-            // Wait for it to start scanning.
-            try {
-              Awaitility.await()
-                  .atMost(Duration.ONE_MINUTE)
-                  .until(
-                      () ->
-                          hasRdaFissLoadJobCompleted(appRunConsumer)
-                              && hasRdaMcsLoadJobCompleted(appRunConsumer));
-            } catch (ConditionTimeoutException e) {
-              throw new RuntimeException(
-                  "Pipeline application failed to start scanning within timeout, STDOUT:\n"
-                      + appRunConsumer.getStdoutContents(),
-                  e);
-            }
+                // Wait for it to start scanning.
+                try {
+                  Awaitility.await()
+                      .atMost(Duration.ONE_MINUTE)
+                      .until(
+                          () ->
+                              hasRdaFissLoadJobCompleted(appRunConsumer)
+                                  && hasRdaMcsLoadJobCompleted(appRunConsumer));
+                } catch (ConditionTimeoutException e) {
+                  throw new RuntimeException(
+                      "Pipeline application failed to start scanning within timeout, STDOUT:\n"
+                          + appRunConsumer.getStdoutContents(),
+                      e);
+                }
 
-            // Stop the application.
-            sendSigterm(appProcess.get());
-            appProcess.get().waitFor(1, TimeUnit.MINUTES);
-            appRunConsumerThread.join();
+                // Stop the application.
+                sendSigterm(appProcess.get());
+                appProcess.get().waitFor(1, TimeUnit.MINUTES);
+                appRunConsumerThread.join();
 
-            // Verify that the application exited as expected.
-            verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
-          });
+                // Verify that the application exited as expected.
+                verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
+              });
     } finally {
       if (appProcess.get() != null) appProcess.get().destroyForcibly();
     }
@@ -302,47 +304,51 @@ public final class PipelineApplicationIT {
 
     final AtomicReference<Process> appProcess = new AtomicReference<>();
     try {
-      RdaServer.runWithLocalServer(
-          ignored ->
-              new ExceptionMessageSource<>(
-                  new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
-          ignored ->
-              new ExceptionMessageSource<>(
-                  new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new),
-          port -> {
-            // Start the app.
-            ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
-            appRunBuilder.redirectErrorStream(true);
-            appProcess.set(appRunBuilder.start());
+      RdaServer.LocalConfig.builder()
+          .fissSourceFactory(
+              ignored ->
+                  new ExceptionMessageSource<>(
+                      new RandomFissClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
+          .mcsSourceFactory(
+              ignored ->
+                  new ExceptionMessageSource<>(
+                      new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
+          .build()
+          .run(
+              port -> {
+                // Start the app.
+                ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
+                appRunBuilder.redirectErrorStream(true);
+                appProcess.set(appRunBuilder.start());
 
-            // Read the app's output.
-            ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess.get());
-            Thread appRunConsumerThread = new Thread(appRunConsumer);
-            appRunConsumerThread.start();
+                // Read the app's output.
+                ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess.get());
+                Thread appRunConsumerThread = new Thread(appRunConsumer);
+                appRunConsumerThread.start();
 
-            // Wait for it to start scanning.
-            try {
-              Awaitility.await()
-                  .atMost(Duration.ONE_MINUTE)
-                  .until(
-                      () ->
-                          hasRdaFissLoadJobCompleted(appRunConsumer)
-                              && hasRdaMcsLoadJobCompleted(appRunConsumer));
-            } catch (ConditionTimeoutException e) {
-              throw new RuntimeException(
-                  "Pipeline application failed to start scanning within timeout, STDOUT:\n"
-                      + appRunConsumer.getStdoutContents(),
-                  e);
-            }
+                // Wait for it to start scanning.
+                try {
+                  Awaitility.await()
+                      .atMost(Duration.ONE_MINUTE)
+                      .until(
+                          () ->
+                              hasRdaFissLoadJobCompleted(appRunConsumer)
+                                  && hasRdaMcsLoadJobCompleted(appRunConsumer));
+                } catch (ConditionTimeoutException e) {
+                  throw new RuntimeException(
+                      "Pipeline application failed to start scanning within timeout, STDOUT:\n"
+                          + appRunConsumer.getStdoutContents(),
+                      e);
+                }
 
-            // Stop the application.
-            sendSigterm(appProcess.get());
-            appProcess.get().waitFor(1, TimeUnit.MINUTES);
-            appRunConsumerThread.join();
+                // Stop the application.
+                sendSigterm(appProcess.get());
+                appProcess.get().waitFor(1, TimeUnit.MINUTES);
+                appRunConsumerThread.join();
 
-            // Verify that the application exited as expected.
-            verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
-          });
+                // Verify that the application exited as expected.
+                verifyExitValueMatchesSignal(SIGTERM, appProcess.get());
+              });
     } finally {
       if (appProcess.get() != null) appProcess.get().destroyForcibly();
     }

@@ -13,14 +13,13 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
-import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -95,127 +94,128 @@ public class GrpcRdaSourceIT {
 
   @Test
   public void testGrpcCall() throws Exception {
-    Server server = null;
-    try {
-      // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
-      final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-      final MetricRegistry appMetrics = new MetricRegistry();
-      final IdHasher hasher = new IdHasher(new IdHasher.Config(5, "pepper-pepper-pepper"));
-      final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
-      server =
-          RdaServer.startLocal(
-              sequenceNumber ->
-                  WrappedClaimSource.wrapFissClaims(
-                      new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim),
-                      clock,
-                      sequenceNumber),
-              EmptyMessageSource.factory());
-      final ManagedChannel channel =
-          ManagedChannelBuilder.forAddress("localhost", server.getPort())
-              .usePlaintext()
-              .idleTimeout(5, TimeUnit.SECONDS)
-              .build();
-      final JsonCaptureSink sink = new JsonCaptureSink();
-      int count;
-      FissClaimStreamCaller streamCaller =
-          new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
-      try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source =
-          new GrpcRdaSource<>(channel, streamCaller, appMetrics, "fiss", Optional.empty())) {
-        count = source.retrieveAndProcessObjects(3, sink);
-      }
-      assertEquals(2, count);
-      assertEquals(2, sink.getValues().size());
-      assertEquals(
-          "{\n"
-              + "  \"dcn\" : \"63843470\",\n"
-              + "  \"sequenceNumber\" : 0,\n"
-              + "  \"hicNo\" : \"916689703543\",\n"
-              + "  \"currStatus\" : \"P\",\n"
-              + "  \"currLoc1\" : \"M\",\n"
-              + "  \"currLoc2\" : \"uma\",\n"
-              + "  \"medaProvId\" : \"oducjgzt67joc\",\n"
-              + "  \"totalChargeAmount\" : 3.75,\n"
-              + "  \"currTranDate\" : \"2021-03-20\",\n"
-              + "  \"principleDiag\" : \"uec\",\n"
-              + "  \"mbi\" : \"c1ihk7q0g3i57\",\n"
-              + "  \"mbiHash\" : \"56dd7e48bfbfcfe851d4cda2dbd863775b450aea207614a9cc118ed2765713e7\",\n"
-              + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
-              + "  \"procCodes\" : [ {\n"
-              + "    \"dcn\" : \"63843470\",\n"
-              + "    \"priority\" : 2,\n"
-              + "    \"procCode\" : \"zhaj\",\n"
-              + "    \"procDate\" : \"2021-01-07\",\n"
-              + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  }, {\n"
-              + "    \"dcn\" : \"63843470\",\n"
-              + "    \"priority\" : 1,\n"
-              + "    \"procCode\" : \"egkkkw\",\n"
-              + "    \"procFlag\" : \"hsw\",\n"
-              + "    \"procDate\" : \"2021-02-03\",\n"
-              + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  }, {\n"
-              + "    \"dcn\" : \"63843470\",\n"
-              + "    \"priority\" : 3,\n"
-              + "    \"procCode\" : \"ods\",\n"
-              + "    \"procDate\" : \"2021-01-03\",\n"
-              + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  }, {\n"
-              + "    \"dcn\" : \"63843470\",\n"
-              + "    \"priority\" : 0,\n"
-              + "    \"procCode\" : \"uec\",\n"
-              + "    \"procFlag\" : \"nli\",\n"
-              + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  } ],\n"
-              + "  \"diagCodes\" : [ ],\n"
-              + "  \"payers\" : [ ]\n"
-              + "}",
-          sink.getValues().get(0));
-      assertEquals(
-          "{\n"
-              + "  \"dcn\" : \"2643602\",\n"
-              + "  \"sequenceNumber\" : 1,\n"
-              + "  \"hicNo\" : \"640930211775\",\n"
-              + "  \"currStatus\" : \"R\",\n"
-              + "  \"currLoc1\" : \"O\",\n"
-              + "  \"currLoc2\" : \"p6s\",\n"
-              + "  \"totalChargeAmount\" : 55.91,\n"
-              + "  \"receivedDate\" : \"2021-05-14\",\n"
-              + "  \"currTranDate\" : \"2020-12-21\",\n"
-              + "  \"principleDiag\" : \"egnj\",\n"
-              + "  \"npiNumber\" : \"5764657700\",\n"
-              + "  \"mbi\" : \"0vtc7u321x0se\",\n"
-              + "  \"mbiHash\" : \"9c0e61338935c978c25f73442c5593cdc20e35164ad8d8e426955b626de24e2c\",\n"
-              + "  \"fedTaxNumber\" : \"2845244764\",\n"
-              + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
-              + "  \"procCodes\" : [ {\n"
-              + "    \"dcn\" : \"2643602\",\n"
-              + "    \"priority\" : 2,\n"
-              + "    \"procCode\" : \"fipyd\",\n"
-              + "    \"procFlag\" : \"g\",\n"
-              + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  }, {\n"
-              + "    \"dcn\" : \"2643602\",\n"
-              + "    \"priority\" : 1,\n"
-              + "    \"procCode\" : \"vvqtwoz\",\n"
-              + "    \"procDate\" : \"2021-04-29\",\n"
-              + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  }, {\n"
-              + "    \"dcn\" : \"2643602\",\n"
-              + "    \"priority\" : 0,\n"
-              + "    \"procCode\" : \"egnj\",\n"
-              + "    \"procDate\" : \"2021-05-13\",\n"
-              + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
-              + "  } ],\n"
-              + "  \"diagCodes\" : [ ],\n"
-              + "  \"payers\" : [ ]\n"
-              + "}",
-          sink.getValues().get(1));
-    } finally {
-      if (server != null) {
-        server.shutdown();
-        server.awaitTermination(1, TimeUnit.MINUTES);
-      }
-    }
+    // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
+    final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+    final MetricRegistry appMetrics = new MetricRegistry();
+    final IdHasher hasher = new IdHasher(new IdHasher.Config(5, "pepper-pepper-pepper"));
+    final String claimsJson = SOURCE_CLAIM_1 + System.lineSeparator() + SOURCE_CLAIM_2;
+    RdaServer.LocalConfig.builder()
+        .fissSourceFactory(
+            sequenceNumber ->
+                WrappedClaimSource.wrapFissClaims(
+                    new JsonMessageSource<>(claimsJson, JsonMessageSource::parseFissClaim),
+                    clock,
+                    sequenceNumber))
+        .build()
+        .run(
+            port -> {
+              final ManagedChannel channel =
+                  ManagedChannelBuilder.forAddress("localhost", port)
+                      .usePlaintext()
+                      .idleTimeout(5, TimeUnit.SECONDS)
+                      .build();
+              final JsonCaptureSink sink = new JsonCaptureSink();
+              int count;
+              FissClaimStreamCaller streamCaller =
+                  new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
+              try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source =
+                  new GrpcRdaSource<>(
+                      channel,
+                      streamCaller,
+                      () -> CallOptions.DEFAULT,
+                      appMetrics,
+                      "fiss",
+                      Optional.empty())) {
+                count = source.retrieveAndProcessObjects(3, sink);
+              }
+              assertEquals(2, count);
+              assertEquals(2, sink.getValues().size());
+              assertEquals(
+                  "{\n"
+                      + "  \"dcn\" : \"63843470\",\n"
+                      + "  \"sequenceNumber\" : 0,\n"
+                      + "  \"hicNo\" : \"916689703543\",\n"
+                      + "  \"currStatus\" : \"P\",\n"
+                      + "  \"currLoc1\" : \"M\",\n"
+                      + "  \"currLoc2\" : \"uma\",\n"
+                      + "  \"medaProvId\" : \"oducjgzt67joc\",\n"
+                      + "  \"totalChargeAmount\" : 3.75,\n"
+                      + "  \"currTranDate\" : \"2021-03-20\",\n"
+                      + "  \"principleDiag\" : \"uec\",\n"
+                      + "  \"mbi\" : \"c1ihk7q0g3i57\",\n"
+                      + "  \"mbiHash\" : \"56dd7e48bfbfcfe851d4cda2dbd863775b450aea207614a9cc118ed2765713e7\",\n"
+                      + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
+                      + "  \"procCodes\" : [ {\n"
+                      + "    \"dcn\" : \"63843470\",\n"
+                      + "    \"priority\" : 2,\n"
+                      + "    \"procCode\" : \"zhaj\",\n"
+                      + "    \"procDate\" : \"2021-01-07\",\n"
+                      + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+                      + "  }, {\n"
+                      + "    \"dcn\" : \"63843470\",\n"
+                      + "    \"priority\" : 1,\n"
+                      + "    \"procCode\" : \"egkkkw\",\n"
+                      + "    \"procFlag\" : \"hsw\",\n"
+                      + "    \"procDate\" : \"2021-02-03\",\n"
+                      + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+                      + "  }, {\n"
+                      + "    \"dcn\" : \"63843470\",\n"
+                      + "    \"priority\" : 3,\n"
+                      + "    \"procCode\" : \"ods\",\n"
+                      + "    \"procDate\" : \"2021-01-03\",\n"
+                      + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+                      + "  }, {\n"
+                      + "    \"dcn\" : \"63843470\",\n"
+                      + "    \"priority\" : 0,\n"
+                      + "    \"procCode\" : \"uec\",\n"
+                      + "    \"procFlag\" : \"nli\",\n"
+                      + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+                      + "  } ],\n"
+                      + "  \"diagCodes\" : [ ],\n"
+                      + "  \"payers\" : [ ]\n"
+                      + "}",
+                  sink.getValues().get(0));
+              assertEquals(
+                  "{\n"
+                      + "  \"dcn\" : \"2643602\",\n"
+                      + "  \"sequenceNumber\" : 1,\n"
+                      + "  \"hicNo\" : \"640930211775\",\n"
+                      + "  \"currStatus\" : \"R\",\n"
+                      + "  \"currLoc1\" : \"O\",\n"
+                      + "  \"currLoc2\" : \"p6s\",\n"
+                      + "  \"totalChargeAmount\" : 55.91,\n"
+                      + "  \"receivedDate\" : \"2021-05-14\",\n"
+                      + "  \"currTranDate\" : \"2020-12-21\",\n"
+                      + "  \"principleDiag\" : \"egnj\",\n"
+                      + "  \"npiNumber\" : \"5764657700\",\n"
+                      + "  \"mbi\" : \"0vtc7u321x0se\",\n"
+                      + "  \"mbiHash\" : \"9c0e61338935c978c25f73442c5593cdc20e35164ad8d8e426955b626de24e2c\",\n"
+                      + "  \"fedTaxNumber\" : \"2845244764\",\n"
+                      + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
+                      + "  \"procCodes\" : [ {\n"
+                      + "    \"dcn\" : \"2643602\",\n"
+                      + "    \"priority\" : 2,\n"
+                      + "    \"procCode\" : \"fipyd\",\n"
+                      + "    \"procFlag\" : \"g\",\n"
+                      + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+                      + "  }, {\n"
+                      + "    \"dcn\" : \"2643602\",\n"
+                      + "    \"priority\" : 1,\n"
+                      + "    \"procCode\" : \"vvqtwoz\",\n"
+                      + "    \"procDate\" : \"2021-04-29\",\n"
+                      + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+                      + "  }, {\n"
+                      + "    \"dcn\" : \"2643602\",\n"
+                      + "    \"priority\" : 0,\n"
+                      + "    \"procCode\" : \"egnj\",\n"
+                      + "    \"procDate\" : \"2021-05-13\",\n"
+                      + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
+                      + "  } ],\n"
+                      + "  \"diagCodes\" : [ ],\n"
+                      + "  \"payers\" : [ ]\n"
+                      + "}",
+                  sink.getValues().get(1));
+            });
   }
 
   private static class JsonCaptureSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
