@@ -5,6 +5,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -45,6 +46,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,6 +91,7 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
@@ -1564,11 +1567,49 @@ public final class TransformerUtilsV2 {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
+    Set<String> beneIds = new HashSet<String>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
+
+      if (entry.getResource().getResourceType() == ResourceType.ExplanationOfBenefit) {
+        ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
+        if (eob != null
+            && eob.getPatient() != null
+            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+          String reference = eob.getPatient().getReference().replace("Patient/", "");
+          if (!Strings.isNullOrEmpty(reference)) {
+            beneIds.add(reference);
+          }
+        }
+      } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
+        Patient patient = ((Patient) entry.getResource());
+        if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
+          beneIds.add(patient.getId());
+        }
+
+      } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
+        Coverage coverage = ((Coverage) entry.getResource());
+        if (coverage != null
+            && coverage.getBeneficiary() != null
+            && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
+          String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
+          if (!Strings.isNullOrEmpty(reference)) {
+            beneIds.add(reference);
+          }
+        }
+      }
     }
+
+    logBeneIdToMdc(beneIds);
+
     return bundle;
+  }
+
+  public static void logBeneIdToMdc(Collection<String> beneIds) {
+    if (!beneIds.isEmpty()) {
+      MDC.put("bene_id", String.join(", ", beneIds));
+    }
   }
 
   /**

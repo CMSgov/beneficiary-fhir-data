@@ -110,7 +110,8 @@ public final class CodebookVariableReader {
    */
   private static Codebook unmarshallCodebookXml(InputStream codebookXmlStream) {
     try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(Codebook.class);
+      JAXBContext jaxbContext =
+          JAXBContext.newInstance(Codebook.class.getPackageName(), Codebook.class.getClassLoader());
       Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
       InputStreamReader codebookXmlReader =

@@ -206,7 +206,7 @@ public final class ServerProcess implements AutoCloseable {
      * We have to use reflection and external commands here to work around this ridiculous JDK bug:
      * https://bugs.openjdk.java.net/browse/JDK-5101298.
      */
-    if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
+    if (process.getClass().getName().equals("java.lang.ProcessImpl")) {
       try {
         Field pidField = process.getClass().getDeclaredField("pid");
         pidField.setAccessible(true);

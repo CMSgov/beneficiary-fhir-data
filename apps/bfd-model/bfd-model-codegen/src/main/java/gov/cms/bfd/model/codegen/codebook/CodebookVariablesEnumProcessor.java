@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,6 +83,10 @@ public class CodebookVariablesEnumProcessor extends AbstractProcessor {
       logNote(
           "Processing triggered for '%s' on root elements '%s'.",
           annotations, roundEnv.getRootElements());
+      logNote("Processor sysprop java.class.path: " + System.getProperty("java.class.path"));
+      logNote(
+          "Processor classloader URLs: "
+              + Arrays.toString(((URLClassLoader) getClass().getClassLoader()).getURLs()));
 
       Set<? extends Element> annotatedElements =
           roundEnv.getElementsAnnotatedWith(CodebookVariableEnumGeneration.class);

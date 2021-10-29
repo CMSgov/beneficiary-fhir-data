@@ -4,7 +4,10 @@ import ca.uhn.fhir.rest.api.Constants;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
 import java.util.Collections;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.web.util.UriComponents;
@@ -82,6 +85,54 @@ public class PatientLinkBuilderTest {
     Assert.assertNotNull(bundle.getLink(Constants.LINK_SELF));
     Assert.assertNotNull(bundle.getLink(Constants.LINK_FIRST));
     UriComponents firstLink =
+        UriComponentsBuilder.fromUriString(bundle.getLink(Constants.LINK_FIRST).getUrl()).build();
+    Assert.assertEquals("10", firstLink.getQueryParams().getFirst(Constants.PARAM_COUNT));
+    Assert.assertNull(bundle.getLink(Constants.LINK_NEXT));
+  }
+
+  @Test
+  public void testMdcLogsInAddResourcesToBundle() {
+    PatientLinkBuilder paging = new PatientLinkBuilder(TEST_CONTRACT_URL + "&_count=10");
+
+    Assert.assertTrue(paging.isPagingRequested());
+    Assert.assertTrue(paging.isFirstPage());
+    Assert.assertEquals(10, paging.getPageSize());
+
+    Bundle bundle = new Bundle();
+    TransformerUtils.addResourcesToBundle(
+        bundle, Collections.singletonList(new Patient().setId("Id")));
+    Assert.assertTrue(bundle.getLink().isEmpty());
+    paging.addLinks(bundle);
+    Assert.assertNotNull(bundle.getLink(Constants.LINK_SELF));
+    Assert.assertNotNull(bundle.getLink(Constants.LINK_FIRST));
+    UriComponents firstLink =
+        UriComponentsBuilder.fromUriString(bundle.getLink(Constants.LINK_FIRST).getUrl()).build();
+    Assert.assertEquals("10", firstLink.getQueryParams().getFirst(Constants.PARAM_COUNT));
+    Assert.assertNull(bundle.getLink(Constants.LINK_NEXT));
+
+    bundle = new Bundle();
+    TransformerUtils.addResourcesToBundle(
+        bundle,
+        Collections.singletonList(new Coverage().setBeneficiary(new Reference("Patient/Id"))));
+    Assert.assertTrue(bundle.getLink().isEmpty());
+    paging.addLinks(bundle);
+    Assert.assertNotNull(bundle.getLink(Constants.LINK_SELF));
+    Assert.assertNotNull(bundle.getLink(Constants.LINK_FIRST));
+    firstLink =
+        UriComponentsBuilder.fromUriString(bundle.getLink(Constants.LINK_FIRST).getUrl()).build();
+    Assert.assertEquals("10", firstLink.getQueryParams().getFirst(Constants.PARAM_COUNT));
+    Assert.assertNull(bundle.getLink(Constants.LINK_NEXT));
+
+    bundle = new Bundle();
+    TransformerUtils.addResourcesToBundle(
+        bundle,
+        Collections.singletonList(
+            new ExplanationOfBenefit().setPatient(new Reference("Patient/Id"))));
+    Assert.assertTrue(bundle.getLink().isEmpty());
+    paging.addLinks(bundle);
+    Assert.assertNotNull(bundle.getLink(Constants.LINK_SELF));
+    Assert.assertNotNull(bundle.getLink(Constants.LINK_FIRST));
+    firstLink =
         UriComponentsBuilder.fromUriString(bundle.getLink(Constants.LINK_FIRST).getUrl()).build();
     Assert.assertEquals("10", firstLink.getQueryParams().getFirst(Constants.PARAM_COUNT));
     Assert.assertNull(bundle.getLink(Constants.LINK_NEXT));

@@ -118,7 +118,7 @@ It can be run as follows from a Bash prompt:
 
 What does it do for you? Great question! It will create a `~/workspaces/tools/` directory and then download and install (as a user) the following into there for you:
 
-* An [Oracle Java 8 JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* An [Oracle Java 11 JDK](https://www.oracle.com/java/technologies/downloads/#java11)
 * [Apache Maven](https://maven.apache.org/)
 * [Latest Eclipse Version](https://www.eclipse.org/downloads/)
     * As of 10/20/2017, Eclipse Mars and Oxygen are known to work with our projects.
@@ -203,7 +203,7 @@ The following instructions are to be executed from within the Eclipse IDE applic
 
 ### Eclipse JDK
 
-Verify Eclipse is using the correct Java 8 JDK.
+Verify Eclipse is using the correct Java 11 JDK.
 
 1. Open **Window > Preferences**.
 1. Select **Java > Installed JREs**.
