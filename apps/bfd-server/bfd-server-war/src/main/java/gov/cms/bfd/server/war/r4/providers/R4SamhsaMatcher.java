@@ -599,17 +599,17 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
         procedureConcept.getCoding().stream()
             .map(coding -> coding.getSystem())
             .collect(Collectors.toSet());
-    for (Coding procedureCoding : procedureConcept.getCoding()) {
-      if (!codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
-        throw new IllegalArgumentException();
-      }
 
-      /*
-       * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
-       */
-      return cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode()));
+    if (!codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
+      throw new IllegalArgumentException();
     }
-    return false;
+
+    /*
+     * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
+     */
+    return procedureConcept.getCoding().stream()
+        .anyMatch(
+            procedureCoding -> cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode())));
   }
 
   /**
