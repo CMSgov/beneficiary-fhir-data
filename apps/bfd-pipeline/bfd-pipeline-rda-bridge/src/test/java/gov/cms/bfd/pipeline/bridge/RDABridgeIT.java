@@ -37,12 +37,7 @@ public class RDABridgeIT {
 
   @Test
   public void shouldGenerateCorrectOutput() throws IOException {
-    // ConstantConditions - It'll be there, don't worry.
-    //noinspection ConstantConditions
-    Path resourcesDir =
-        new File(getClass().getClassLoader().getResource(BENE_HISTORY_CSV).getFile())
-            .getParentFile()
-            .toPath();
+    Path resourcesDir = getResourcePath();
     String rifDir = resourcesDir.toString();
     Path outputDir = resourcesDir.resolve("output-test");
     Path expectedDir = resourcesDir.resolve("expected");
@@ -89,14 +84,9 @@ public class RDABridgeIT {
   public void shouldProduceValidClaimStructures() throws IOException {
     RDABridge bridge = new RDABridge();
 
-    // ConstantConditions - It'll be there, don't worry.
-    //noinspection ConstantConditions
-    Path resourcesDir =
-        new File(getClass().getClassLoader().getResource(BENE_HISTORY_CSV).getFile())
-            .getParentFile()
-            .toPath();
-    String inpatientData = resourcesDir.resolve("inpatient.csv").toString();
-    String carrierData = resourcesDir.resolve("carrier.csv").toString();
+    Path resourcesDir = getResourcePath();
+    String inpatientData = "inpatient.csv";
+    String carrierData = "carrier.csv";
 
     Map<String, BeneficiaryData> mbiMap =
         bridge.parseMbiNumbers(resourcesDir.resolve("beneficiary_history.csv"));
@@ -199,5 +189,13 @@ public class RDABridgeIT {
     }
 
     return diffs;
+  }
+
+  private Path getResourcePath() {
+    // ConstantConditions - It'll be there, don't worry.
+    //noinspection ConstantConditions
+    return new File(getClass().getClassLoader().getResource(BENE_HISTORY_CSV).getFile())
+        .getParentFile()
+        .toPath();
   }
 }

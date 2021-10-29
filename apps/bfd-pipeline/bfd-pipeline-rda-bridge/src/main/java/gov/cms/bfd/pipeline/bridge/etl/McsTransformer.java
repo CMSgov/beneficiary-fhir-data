@@ -56,29 +56,7 @@ public class McsTransformer implements AbstractTransformer {
               .setIdrDtlToDate(data.getFromType(Mcs.CLM_THRU_DT, Parser.Data.Type.DATE).orElse(""))
               .build());
 
-      for (int i = 1; i <= MAX_DIAGNOSIS_CODES; ++i) {
-        final int INDEX = i;
-
-        data.get(Mcs.ICD_DGNS_CD + i)
-            .ifPresent(
-                value ->
-                    claimBuilder.addMcsDiagnosisCodes(
-                        McsDiagnosisCode.newBuilder()
-                            .setIdrClmHdIcn(icn)
-                            .setIdrDiagCode(data.get(Mcs.ICD_DGNS_CD + INDEX).orElse(""))
-                            .setIdrDiagIcdTypeEnumValue(
-                                data.get(Mcs.ICD_DGNS_VRSN_CD + INDEX)
-                                    .map(
-                                        dxVersionCode -> {
-                                          try {
-                                            return Integer.parseInt(dxVersionCode);
-                                          } catch (NumberFormatException e) {
-                                            return -1;
-                                          }
-                                        })
-                                    .orElse(-1))
-                            .build()));
-      }
+      addDiagnosisCodes(claimBuilder, data, icn);
 
       return McsClaimChange.newBuilder()
           .setClaim(claimBuilder)
@@ -92,7 +70,7 @@ public class McsTransformer implements AbstractTransformer {
 
   @VisibleForTesting
   boolean isFirstLineNum(Parser.Data<String> data) {
-    Optional<String> lineNum = data.get("LINE_NUM");
+    Optional<String> lineNum = data.get(Mcs.LINE_NUM);
 
     return !lineNum.isPresent() || lineNum.get().equals("1");
   }
@@ -103,5 +81,32 @@ public class McsTransformer implements AbstractTransformer {
         data.get(Mcs.CLM_ID)
             .orElseThrow(() -> new IllegalStateException("Claim did not contain a Claim ID"));
     return "Z" + DigestUtils.sha256Hex(claimId).substring(0, 14);
+  }
+
+  @VisibleForTesting
+  void addDiagnosisCodes(McsClaim.Builder claimBuilder, Parser.Data<String> data, String icn) {
+    for (int i = 1; i <= MAX_DIAGNOSIS_CODES; ++i) {
+      final int INDEX = i;
+
+      data.get(Mcs.ICD_DGNS_CD + i)
+          .ifPresent(
+              value ->
+                  claimBuilder.addMcsDiagnosisCodes(
+                      McsDiagnosisCode.newBuilder()
+                          .setIdrClmHdIcn(icn)
+                          .setIdrDiagCode(data.get(Mcs.ICD_DGNS_CD + INDEX).orElse(""))
+                          .setIdrDiagIcdTypeEnumValue(
+                              data.get(Mcs.ICD_DGNS_VRSN_CD + INDEX)
+                                  .map(
+                                      dxVersionCode -> {
+                                        try {
+                                          return Integer.parseInt(dxVersionCode);
+                                        } catch (NumberFormatException e) {
+                                          return -1;
+                                        }
+                                      })
+                                  .orElse(-1))
+                          .build()));
+    }
   }
 }

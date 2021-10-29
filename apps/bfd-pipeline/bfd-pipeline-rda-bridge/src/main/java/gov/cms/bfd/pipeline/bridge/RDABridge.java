@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.bridge.io.RifSource;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
+import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -134,23 +135,22 @@ public class RDABridge {
 
     if (sinkMap.containsKey(fissOutputType)) {
       if (sinkMap.containsKey(mcsOutputType)) {
-        try (Sink<MessageOrBuilder> fissSink = sinkMap.get(fissOutputType).apply(fissOutputPath)) {
-          try (Sink<MessageOrBuilder> mcsSink = sinkMap.get(mcsOutputType).apply(mcsOutputPath)) {
-            // Sorting the files so tests are more deterministic
-            List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
-            Collections.sort(fissSources);
+        try (Sink<MessageOrBuilder> fissSink = sinkMap.get(fissOutputType).apply(fissOutputPath);
+            Sink<MessageOrBuilder> mcsSink = sinkMap.get(mcsOutputType).apply(mcsOutputPath)) {
+          // Sorting the files so tests are more deterministic
+          List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
+          Collections.sort(fissSources);
 
-            for (String fissSource : fissSources) {
-              executeTransformation(SourceType.FISS, path, fissSource, mbiMap, fissSink);
-            }
+          for (String fissSource : fissSources) {
+            executeTransformation(SourceType.FISS, path, fissSource, mbiMap, fissSink);
+          }
 
-            // Sorting the files so tests are more deterministic
-            List<String> mcsSources = config.stringValues(AppConfig.Fields.mcsSources);
-            Collections.sort(mcsSources);
+          // Sorting the files so tests are more deterministic
+          List<String> mcsSources = config.stringValues(AppConfig.Fields.mcsSources);
+          Collections.sort(mcsSources);
 
-            for (String mcsSource : mcsSources) {
-              executeTransformation(SourceType.MCS, path, mcsSource, mbiMap, mcsSink);
-            }
+          for (String mcsSource : mcsSources) {
+            executeTransformation(SourceType.MCS, path, mcsSource, mbiMap, mcsSink);
           }
         }
       } else {
@@ -187,7 +187,7 @@ public class RDABridge {
     if (parserMap.containsKey(fileType)) {
       try (Parser<String> parser = parserMap.get(fileType).apply(file)) {
         parser.init();
-        int i = 0;
+        int claimsWritten = 0;
 
         AbstractTransformer transformer = createTransformer(sourceType, mbiMap);
 
@@ -197,10 +197,10 @@ public class RDABridge {
             sink.write(message);
           }
 
-          ++i;
+          ++claimsWritten;
         }
 
-        log.info("Written {} {} claims", i, sourceName);
+        log.info("Wrote {} {} claims", claimsWritten, sourceName);
       }
     } else {
       throw new IllegalArgumentException("No support for parsing files of type '" + fileType + "'");
@@ -264,22 +264,24 @@ public class RDABridge {
    * @throws FileNotFoundException If the yaml configuration file was not found.
    */
   @VisibleForTesting
-  static ConfigLoader createYamlConfig(String yamlFilePath) throws FileNotFoundException {
-    Yaml yaml = new Yaml();
-    AppConfig appConfig = yaml.loadAs(new FileReader(yamlFilePath), AppConfig.class);
+  static ConfigLoader createYamlConfig(String yamlFilePath) throws IOException {
+    try (FileReader reader = new FileReader(yamlFilePath)) {
+      Yaml yaml = new Yaml();
+      AppConfig appConfig = yaml.loadAs(reader, AppConfig.class);
 
-    Map<String, Collection<String>> mapConfig =
-        ImmutableMap.<String, Collection<String>>builder()
-            .put(AppConfig.Fields.inputDirPath, Collections.singleton(appConfig.inputDirPath))
-            .put(AppConfig.Fields.outputDirPath, Collections.singleton(appConfig.outputDirPath))
-            .put(AppConfig.Fields.fissOutputFile, Collections.singleton(appConfig.fissOutputFile))
-            .put(AppConfig.Fields.mcsOutputFile, Collections.singleton(appConfig.mcsOutputFile))
-            .put(AppConfig.Fields.fissSources, appConfig.fissSources)
-            .put(AppConfig.Fields.mcsSources, appConfig.mcsSources)
-            .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.mbiSource))
-            .build();
+      Map<String, Collection<String>> mapConfig =
+          ImmutableMap.<String, Collection<String>>builder()
+              .put(AppConfig.Fields.inputDirPath, Collections.singleton(appConfig.inputDirPath))
+              .put(AppConfig.Fields.outputDirPath, Collections.singleton(appConfig.outputDirPath))
+              .put(AppConfig.Fields.fissOutputFile, Collections.singleton(appConfig.fissOutputFile))
+              .put(AppConfig.Fields.mcsOutputFile, Collections.singleton(appConfig.mcsOutputFile))
+              .put(AppConfig.Fields.fissSources, appConfig.fissSources)
+              .put(AppConfig.Fields.mcsSources, appConfig.mcsSources)
+              .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.mbiSource))
+              .build();
 
-    return new ConfigLoader(mapConfig::get);
+      return new ConfigLoader(mapConfig::get);
+    }
   }
 
   /**
@@ -290,40 +292,35 @@ public class RDABridge {
    */
   @VisibleForTesting
   static ConfigLoader createCliConfig(CommandLine cmd) {
-    Map<String, Collection<String>> mapConfig =
-        ImmutableMap.<String, Collection<String>>builder()
-            .put(AppConfig.Fields.inputDirPath, nullOrSet(cmd.getArgList().get(0)))
-            .put(AppConfig.Fields.outputDirPath, nullOrSet(cmd.getOptionValue(OUTPUT_FLAG)))
-            .put(AppConfig.Fields.fissOutputFile, nullOrSet(cmd.getOptionValue(FISS_OUTPUT_FLAG)))
-            .put(AppConfig.Fields.mcsOutputFile, nullOrSet(cmd.getOptionValue(MCS_OUTPUT_FLAG)))
-            .put(AppConfig.Fields.fissSources, arrayToSet(cmd.getOptionValues(FISS_FLAG)))
-            .put(AppConfig.Fields.mcsSources, arrayToSet(cmd.getOptionValues(MCS_FLAG)))
-            .put(AppConfig.Fields.mbiSource, nullOrSet(cmd.getOptionValue(MBI_FLAG)))
-            .build();
+    ImmutableMap.Builder<String, Collection<String>> builder = ImmutableMap.builder();
+
+    putIfNotNull(builder, AppConfig.Fields.inputDirPath, cmd.getArgList().get(0));
+    putIfNotNull(builder, AppConfig.Fields.outputDirPath, cmd.getOptionValue(OUTPUT_FLAG));
+    putIfNotNull(builder, AppConfig.Fields.fissOutputFile, cmd.getOptionValue(FISS_OUTPUT_FLAG));
+    putIfNotNull(builder, AppConfig.Fields.mcsOutputFile, cmd.getOptionValue(MCS_OUTPUT_FLAG));
+    putIfNotNull(builder, AppConfig.Fields.fissSources, cmd.getOptionValues(FISS_FLAG));
+    putIfNotNull(builder, AppConfig.Fields.mcsSources, cmd.getOptionValues(MCS_FLAG));
+    putIfNotNull(builder, AppConfig.Fields.mbiSource, cmd.getOptionValue(MBI_FLAG));
+
+    ImmutableMap<String, Collection<String>> mapConfig = builder.build();
 
     return new ConfigLoader(mapConfig::get);
   }
 
-  /**
-   * Helper method to return either null or a set containing the non-null given value.
-   *
-   * @param value The value to add to the set if not null.
-   * @return A Set containing the non-null given value or null.
-   */
   @VisibleForTesting
-  static Set<String> nullOrSet(String value) {
-    return value == null ? null : Collections.singleton(value);
+  static void putIfNotNull(
+      ImmutableMap.Builder<String, Collection<String>> builder, String key, String value) {
+    if (value != null) {
+      builder.put(key, Collections.singleton(value));
+    }
   }
 
-  /**
-   * Helper method to turn a String array into a Set.
-   *
-   * @param values The String array to convert.
-   * @return The converted Set.
-   */
   @VisibleForTesting
-  static Set<String> arrayToSet(String[] values) {
-    return new HashSet<>(Arrays.asList(values));
+  static void putIfNotNull(
+      ImmutableMap.Builder<String, Collection<String>> builder, String key, String[] values) {
+    if (values != null && values.length > 0) {
+      builder.put(key, new HashSet<>(Arrays.asList(values)));
+    }
   }
 
   /**
@@ -340,18 +337,6 @@ public class RDABridge {
     formatter.printOptions(writer, 80, options, 4, 4);
     writer.flush();
     log.error("Invalid execution \n" + stringValue);
-  }
-
-  /**
-   * Functional Interface for creating {@link java.util.function.Function} lambdas that throw.
-   *
-   * @param <R> The return type of the function.
-   * @param <T> The consumed parameter type of the function.
-   * @param <E> The exception that is thrown by the function.
-   */
-  @FunctionalInterface
-  interface ThrowingFunction<R, T, E extends Throwable> {
-    R apply(T value) throws E;
   }
 
   /** Helper class for defining application specific configurations. */

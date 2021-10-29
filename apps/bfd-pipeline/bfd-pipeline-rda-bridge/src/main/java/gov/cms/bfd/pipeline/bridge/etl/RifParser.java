@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RifParser implements Parser<String> {
 
-  private static final SimpleDateFormat rifDateFormat = new SimpleDateFormat("dd-MMM-yyy");
+  private static final SimpleDateFormat rifDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
   private static final SimpleDateFormat standardFormat = new SimpleDateFormat("yyyy-MM-dd");
 
   private static final String DELIMITER = "\\|";
@@ -20,6 +20,12 @@ public class RifParser implements Parser<String> {
   private final Source<String> source;
   private final Map<String, Integer> headerIndexMap = new HashMap<>();
 
+  /**
+   * Grabs the headers so they can be used to build maps for the {@link RifData} objects created
+   * later.
+   *
+   * @throws IOException If there was an error handling the file.
+   */
   @Override
   public void init() throws IOException {
     if (source.hasInput()) {
@@ -82,6 +88,15 @@ public class RifParser implements Parser<String> {
       return optional;
     }
 
+    /**
+     * Defining a custom {@link Parser.Data#getFromType(String, Type)} here so we can convert RIF
+     * style dates to more standard yyyy-mm-dd format.
+     *
+     * @param rifIdentifier The rif data being retrieved.
+     * @param type The expected type of the data being retrieved.
+     * @return An {@link Optional} possibly containing the transformed data associated with the
+     *     given name.
+     */
     @Override
     public Optional<String> getFromType(String rifIdentifier, Data.Type type) {
       return get(rifIdentifier)

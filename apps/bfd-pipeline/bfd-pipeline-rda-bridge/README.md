@@ -1,12 +1,12 @@
-# RIF to RDA Bridge
-Utility project for convert rif files into RDA ndjson files to be used with the bfd-pipeline-rda-grpc-server to provide
-synthetic RDA data for FISS and MCS claims.
+# RDA Bridge
+Utility project for converting data to RDA data (such as rif files into RDA ndjson files) to be used with the
+bfd-pipeline-rda-grpc-server to provide synthetic RDA data for FISS and MCS claims.
 
 
 ## Prerequisite
-Before the rif-to-rda bridge can be executed, you need RIF files to read from.  These RIF file can have any origin, but
-the expected approach is to generate them from the Synthea project (using the bfd specific branch) to first create the
-required RIF files and then use the root directory of those files as the basis for the bridge execution.
+Before the rda bridge can be executed, you need data files to read from.  For converting RIF files, they can have any
+origin, but the expected approach is to generate them from the Synthea project (using the bfd specific branch) to first
+create the required RIF files, and then use the root directory of those files as the basis for the bridge execution.
 
 The bridge project will generate FISS claims from the supplied FISS sources, as well as additional MCS claims from the
 supplied MCS sources.
@@ -56,10 +56,10 @@ usage: run_bridge sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
 ## Sample Output
 
 ```
-Written 43214 inpatient claims
-Written 391498 outpatient claims
-Written 54940 home claims
-Written 140635 hospice claims
-Written 3784 snf claims
-Written 326592 carrier claims
+Wrote 43214 inpatient claims
+Wrote 391498 outpatient claims
+Wrote 54940 home claims
+Wrote 140635 hospice claims
+Wrote 3784 snf claims
+Wrote 326592 carrier claims
 ```

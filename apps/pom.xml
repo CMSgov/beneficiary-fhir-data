@@ -243,6 +243,14 @@
 				 <scope>provided</scope>
 			 </dependency>
 
+
+			<dependency>
+				<!-- Common utility classes -->
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.12.0</version>
+			</dependency>
+
 			<dependency>
 				<!-- The test framework used for unit and integration tests. -->
 				<groupId>junit</groupId>

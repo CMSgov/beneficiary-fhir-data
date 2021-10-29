@@ -1,11 +1,8 @@
 package gov.cms.bfd.sharedutils.config;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -121,7 +118,7 @@ public class ConfigLoaderTest {
     // configure the mock to reject any file with the expected path
     doThrow(new ConfigException("f", "not readable"))
         .when(loader)
-        .validateReadableFile(eq("f"), eq(new File("path")));
+        .validateReadableFile("f", new File("path"));
     values.put("f", "path");
     assertException("f", "not readable", () -> loader.readableFile("f"));
   }
@@ -240,11 +237,13 @@ public class ConfigLoaderTest {
     assertException("a", "oops", () -> loader.validateWriteableFile("a", file));
   }
 
+  // SimplifiableAssert - Clearer failure message with assertEquals
+  @SuppressWarnings("SimplifiableAssertion")
   @Test
   public void optionalBooleanValue() {
     values.put("a", "True");
-    assertTrue(loader.booleanValue("a", false));
-    assertFalse(loader.booleanValue("z", false));
+    assertEquals(true, loader.booleanValue("a", false));
+    assertEquals(false, loader.booleanValue("z", false));
   }
 
   @Test(expected = ConfigException.class)
