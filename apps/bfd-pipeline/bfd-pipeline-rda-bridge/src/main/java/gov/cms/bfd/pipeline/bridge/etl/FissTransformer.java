@@ -41,9 +41,9 @@ public class FissTransformer implements AbstractTransformer {
             .setCurrLoc2Unrecognized("?") // Not generated
             .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_ROUTING) // Not generated
             .setNpiNumber(data.get(Fiss.ORG_NPI_NUM).orElse(""))
-            .setTotalChargeAmount(data.get(Fiss.CLM_TOT_CHRG_AMT).orElse(""))
-            .setPrincipleDiag(data.get(Fiss.PRNCPAL_DGNS_CD).orElse(""));
+            .setTotalChargeAmount(data.get(Fiss.CLM_TOT_CHRG_AMT).orElse(""));
 
+    data.get(Fiss.PRNCPAL_DGNS_CD).ifPresent(claimBuilder::setPrincipleDiag);
     data.get(Fiss.ADMTG_DGNS_CD).ifPresent(claimBuilder::setAdmDiagCode);
 
     claimBuilder.setMedaProvId("0000000000000");
