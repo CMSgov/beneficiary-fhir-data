@@ -582,8 +582,9 @@ public final class AppConfiguration implements Serializable {
     } catch (NumberFormatException e) {
       throw new AppConfigurationException(
           String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValueText.get()));
+              "Invalid value for configuration environment variable '%s': '%s' (%s)",
+              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
+          e);
     }
   }
 
@@ -604,8 +605,9 @@ public final class AppConfiguration implements Serializable {
     } catch (RuntimeException e) {
       throw new AppConfigurationException(
           String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValueText.get()));
+              "Invalid value for configuration environment variable '%s': '%s' (%s)",
+              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
+          e);
     }
   }
 
@@ -697,8 +699,9 @@ public final class AppConfiguration implements Serializable {
     } catch (DecoderException e) {
       throw new AppConfigurationException(
           String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValueText.get()));
+              "Invalid value for configuration environment variable '%s': '%s' (%s)",
+              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
+          e);
     }
   }
 }
