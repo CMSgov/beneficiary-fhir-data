@@ -191,7 +191,6 @@ get_java_dependencies(){
     error_exit "could not generate dependencies using '$mvn_dep_cmd'"
   fi
   echo "$deps" > "${java_inv_dir}/java-dependencies.txt"
-  echo " ( **please review ${java_inv_dir}/java-dependencies.txt before submitting** )"
 }
 
 # selects a server to inventory
@@ -270,10 +269,12 @@ inventory_pipeline_server
 
 echo
 echo "Inventory Complete! Now:"
-echo "1) Copy the previous months inventory in confluence."
-echo "2) Change the title to reflect the correct month."
-echo "3) Drop the $INVENTORY_DIR/{java,api,pipeline} files under the appropriate headings"
-echo "4) When finished updating confluence, press Y to continue.."
+echo "1) Please review the inventories to ensure there were no errors."
+echo "2) Copy the previous months inventory in confluence."
+echo "3) Change the title to reflect the correct month."
+echo "4) Drop the $INVENTORY_DIR/{java,api,pipeline} files under the appropriate headings"
+echo "5) When finished updating confluence, press Y to cleanup.."
+
 open "$INVENTORY_DIR"
 
 echo
