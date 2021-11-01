@@ -50,11 +50,12 @@ check_requirements(){
 
   # make sure we have all the required tools
   for requirement in "${requirements[@]}"; do
+    reqname="$(echo "$requirement" | tr '[:lower:]' '[:upper:]')"
     if command -v "$requirement" >/dev/null 2>&1; then
-      printf "  %s %+$((25-${#requirement}))s\n" "${requirement^^}" "OK"
+      printf "  %s %+$((25-${#requirement}))s\n" "${reqname}" "OK"
     else
       export ok=false
-      printf "  %s %+$((25-${#requirement}))s\n" "${requirement^^}" "MISSING"
+      printf "  %s %+$((25-${#requirement}))s\n" "${reqname}" "MISSING"
     fi
   done
 
