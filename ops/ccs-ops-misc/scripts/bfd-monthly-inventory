@@ -191,7 +191,7 @@ get_java_dependencies(){
     error_exit "could not generate dependencies using '$mvn_dep_cmd'"
   fi
   echo "$deps" > "${java_inv_dir}/java-dependencies.txt"
-  echo " (note: please review ${java_inv_dir}/java-dependencies.txt before submitting to ensure the mvn dependency plugin worked)"
+  echo " ( **please review ${java_inv_dir}/java-dependencies.txt before submitting** )"
 }
 
 # selects a server to inventory
