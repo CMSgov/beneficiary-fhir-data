@@ -14,7 +14,6 @@ java_inv_dir="$INVENTORY_DIR/java"
 api_inv_dir="$INVENTORY_DIR/api-servers"
 pipeline_inv_dir="$INVENTORY_DIR/pipeline-servers"
 requirements=(aws ssh)
-vpn_ping="ping -t 5 -c 3 splunk.cloud.cms.gov"
 
 br_name="master" # name of the main branch
 br_name_re="^(master|main)$"
@@ -58,14 +57,6 @@ check_requirements(){
       printf "  %s %+$((25-${#requirement}))s\n" "$requirement" "MISSING"
     fi
   done
-
-  # check vpn
-  if $vpn_ping >/dev/null 2>&1; then
-    printf "  %s %+$((25-10))s\n" "vpn tunnel" "OK"
-  else
-    printf "  %s %+$((25-10))s\n" "vpn tunnel" "MISSING"
-    export ok=false
-  fi
 
   # make sure ssh vars are set
   if [[ -n "$BFD_SSH_USER" ]]; then
@@ -216,7 +207,10 @@ select_target(){
 # $2 == cmd to run
 ssh_cmd(){
   # 2>/dev/null to not print ssh banner
-  ssh -i "$BFD_SSH_KEY_PATH" -t "${BFD_SSH_USER}@${1}" "$2" 2>/dev/null
+  if ! ssh -i "$BFD_SSH_KEY_PATH" -t "${BFD_SSH_USER}@${1}" "$2" 2>/dev/null; then
+    echo "Failed to run '$2' on '$1'.. is the vpn up?"
+    error_exit "ssh command failure"
+  fi
 }
 
 # $1 == target to inventory
