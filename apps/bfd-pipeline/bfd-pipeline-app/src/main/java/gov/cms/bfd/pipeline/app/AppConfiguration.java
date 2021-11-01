@@ -242,35 +242,35 @@ public final class AppConfiguration implements Serializable {
    * The name of the environment variable that should be used to provide the run interval in seconds
    * for the in-process RDA API server job.
    */
-  public static final String ENV_VAR_KEY_RDA_INPROC_SERVER_RUN_INTERVAL =
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS =
       "RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS";
 
   /**
    * The name of the environment variable that should be used to provide the random number generator
    * for the PRNG used by the the in-process RDA API server job's random mode.
    */
-  public static final String ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_SEED =
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED =
       "RDA_GRPC_INPROC_SERVER_RANDOM_SEED";
 
   /**
    * The name of the environment variable that should be used to provide the maximum number of
    * random claims to be returned to clients by the in-process RDA API server job's random mode.
    */
-  public static final String ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_MAX_CLAIMS =
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS =
       "RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS";
 
   /**
    * The name of the environment variable that should be used to provide the name of the S3 region
    * containing the bucket used to serve claims by the in-process RDA API server job's random mode.
    */
-  public static final String ENV_VAR_KEY_RDA_INPROC_SERVER_S3_REGION =
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION =
       "RDA_GRPC_INPROC_SERVER_S3_REGION";
 
   /**
    * The name of the environment variable that should be used to provide the name of the S3 bucket
    * used to serve claims by the in-process RDA API server job's random mode.
    */
-  public static final String ENV_VAR_KEY_RDA_INPROC_SERVER_S3_BUCKET =
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET =
       "RDA_GRPC_INPROC_SERVER_S3_BUCKET";
 
   /**
@@ -278,7 +278,7 @@ public final class AppConfiguration implements Serializable {
    * a prefix when looking for files within the S3 bucket. This is optional and defaults to objects
    * being accessed at the bucket's root.
    */
-  public static final String ENV_VAR_KEY_RDA_INPROC_SERVER_S3_DIRECTORY =
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
       "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
   private final MetricOptions metricOptions;
@@ -516,18 +516,18 @@ public final class AppConfiguration implements Serializable {
                 ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode::valueOf)
             .orElse(RdaServerJob.Config.ServerMode.Random));
     mockServerConfig.serverName(grpcConfig.getInProcessServerName());
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_RUN_INTERVAL, Long::parseLong)
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS, Long::parseLong)
         .map(Duration::ofSeconds)
         .ifPresent(mockServerConfig::runInterval);
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_SEED, Long::parseLong)
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED, Long::parseLong)
         .ifPresent(mockServerConfig::randomSeed);
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_MAX_CLAIMS, Integer::parseInt)
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS, Integer::parseInt)
         .ifPresent(mockServerConfig::randomMaxClaims);
-    readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_REGION, Regions::fromName)
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Regions::fromName)
         .ifPresent(mockServerConfig::s3Region);
-    readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_BUCKET)
+    readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
         .ifPresent(mockServerConfig::s3Bucket);
-    readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_DIRECTORY)
+    readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
         .ifPresent(mockServerConfig::s3Directory);
     return new RdaLoadOptions(
         jobConfig.build(), grpcConfig, mockServerConfig.build(), idHasherConfig);
