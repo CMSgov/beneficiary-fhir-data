@@ -13,7 +13,7 @@ BFD_SSH_KEY_PATH=${BFD_SSH_KEY_PATH:-} # must be set to ssh
 java_inv_dir="$INVENTORY_DIR/java"
 api_inv_dir="$INVENTORY_DIR/api-servers"
 pipeline_inv_dir="$INVENTORY_DIR/pipeline-servers"
-requirements=(aws ssh)
+requirements=(ssh aws)
 
 br_name="master" # name of the main branch
 br_name_re="^(master|main)$"
@@ -51,12 +51,21 @@ check_requirements(){
   # make sure we have all the required tools
   for requirement in "${requirements[@]}"; do
     if command -v "$requirement" >/dev/null 2>&1; then
-      printf "  %s %+$((25-${#requirement}))s\n" "$requirement" "OK"
+      printf "  %s %+$((25-${#requirement}))s\n" "${requirement^^}" "OK"
     else
       export ok=false
-      printf "  %s %+$((25-${#requirement}))s\n" "$requirement" "MISSING"
+      printf "  %s %+$((25-${#requirement}))s\n" "${requirement^^}" "MISSING"
     fi
   done
+
+  # check aws
+  if aws sts get-caller-identity >/dev/null 2>&1; then
+    printf "  %s %+$((25-11))s\n" "AWS_SESSION" "OK"
+  else
+    printf "  %s %+$((25-11))s\n" "AWS_SESSION" "MISSING"
+    export ok=false
+  fi
+
 
   # make sure ssh vars are set
   if [[ -n "$BFD_SSH_USER" ]]; then
@@ -70,13 +79,6 @@ check_requirements(){
   else
     printf "  %s %+$((25-16))s\n" "BFD_SSH_KEY_PATH" "MISSING"
     export ok=false
-  fi
-
-  # check aws
-  if aws sts get-caller-identity >/dev/null 2>&1; then
-    printf "  %s %+$((25-11))s\n" "AWS_SESSION" "OK"
-  else
-    printf "  %s %+$((25-11))s\n" "AWS_SESSION" "MISSING"
   fi
 
   echo
