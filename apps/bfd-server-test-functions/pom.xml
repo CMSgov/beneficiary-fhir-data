@@ -133,14 +133,14 @@
             <plugins>
                 <plugin>
                     <!-- Can be used to select which JDK to use (amongst other things).
-                        Options must be specified in `~/.m2/toolchains.xml`. -->
+                         Options must be specified in `~/.m2/toolchains.xml`. -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-toolchains-plugin</artifactId>
                     <configuration>
                         <toolchains>
                             <jdk>
-                                <!-- Use a Java 8 JDK. -->
-                                <version>1.8</version>
+                                <!-- Use a Java 11 JDK. -->
+                                <version>11</version>
                             </jdk>
                         </toolchains>
                     </configuration>

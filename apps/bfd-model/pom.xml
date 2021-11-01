@@ -43,7 +43,7 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>9.4.1208</version>

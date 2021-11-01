@@ -18,7 +18,7 @@
           "tag:Name": "bfd-mgmt-vpn-private"
         }
       },
-      "ami_name": "bfd-amzn2-platinum-{{isotime \"20060102030405\"}}",
+      "ami_name": "bfd-amzn2-jdk11-platinum-{{isotime \"20060102030405\"}}",
       "ssh_pty": true,
       "launch_block_device_mappings": [
         {
@@ -29,7 +29,7 @@
         }
       ],
       "tags": {
-        "Name": "bfd-amzn2-platinum-{{isotime \"20060102030405\"}}",
+        "Name": "bfd-amzn2-jdk11-platinum-{{isotime \"20060102030405\"}}",
         "Application": "bfd-platinum"
       },
       "encrypt_boot": true,
