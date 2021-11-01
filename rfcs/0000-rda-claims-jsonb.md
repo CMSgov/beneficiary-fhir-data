@@ -142,7 +142,7 @@ The schema also contains one index for each of the queryable columns.
 Note the template macro for the `claim` column type.
 This macro is used since the type of the column will be different in postgresql vs HSQLDB:
 - In postgresql the `JSONB` type is used to allow use of JSON path querying for ad-hoc queries.
-- In HSQLDB `varchar(max)` is used since `JSONB` is not supported for that database.
+- In HSQLDB `longvarchar` is used since `JSONB` is not supported for that database.
 With this macro in place integration and unit tests can work with either postgresql or HSQLDB with no code changes.
 
 The JPA entity for the `FissClaimsJson` object is correspondingly simple:
