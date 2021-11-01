@@ -72,6 +72,13 @@ check_requirements(){
     export ok=false
   fi
 
+  # check aws
+  if aws sts get-caller-identity >/dev/null 2>&1; then
+    printf "  %s %+$((25-11))s\n" "AWS_SESSION" "OK"
+  else
+    printf "  %s %+$((25-11))s\n" "AWS_SESSION" "MISSING"
+  fi
+
   echo
   if ! $ok; then
     echo "Error: missing requirements (try './$PROGNAME --help')"
