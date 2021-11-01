@@ -1,0 +1,283 @@
+#!/usr/local/bin/bash
+set -eo pipefail
+
+# global variables
+PROGNAME=${0##*/}
+INVENTORY_DIR=~/Desktop/monthly_inventory
+APPS_DIR=${APPS_DIR:-../../../apps}
+BUILD_APPS="${BUILD_APPS:-true}"
+BFD_SSH_USER=${BFD_SSH_USER:-} # must be set to ssh
+BFD_SSH_KEY_PATH=${BFD_SSH_KEY_PATH:-} # must be set to ssh
+
+# local variables
+java_inv_dir="$INVENTORY_DIR/java"
+api_inv_dir="$INVENTORY_DIR/api-servers"
+pipeline_inv_dir="$INVENTORY_DIR/pipeline-servers"
+requirements=(aws ssh)
+vpn_ping="ping -t 5 -c 3 splunk.cloud.cms.gov"
+
+br_name="master" # name of the main branch
+br_name_re="^(master|main)$"
+
+mvn_dep_ver="2.10"
+mvn_dep_cmd="mvn org.apache.maven.plugins:maven-dependency-plugin:${mvn_dep_ver}:list"
+
+#-------------------- GENERAL SCRIPT/HOUSEKEEPING STUFF --------------------#
+
+clean_up() {
+  rm -rf "$INVENTORY_DIR"
+}
+trap "clean_up" INT HUP
+
+error_exit() {
+  echo "Error: $*"
+  echo
+  exit 1
+}
+
+usage() {
+  echo -e "Usage: $PROGNAME [-h|--help]"
+}
+check_requirements(){
+  echo "Checking requirements"
+  local ok=true
+  
+  # make sure inventory dir is empty
+  if [[ -d "$INVENTORY_DIR" ]]; then
+    if [[ "$(ls -A $INVENTORY_DIR)" ]]; then
+      error_exit "$INVENTORY_DIR is not empty"
+    fi
+  fi
+
+  # make sure we have all the required tools
+  for requirement in "${requirements[@]}"; do
+    if command -v "$requirement" >/dev/null 2>&1; then
+      printf "  %s %+$((25-${#requirement}))s\n" "$requirement" "OK"
+    else
+      export ok=false
+      printf "  %s %+$((25-${#requirement}))s\n" "$requirement" "MISSING"
+    fi
+  done
+
+  # check vpn
+  if $vpn_ping >/dev/null 2>&1; then
+    printf "  %s %+$((25-10))s\n" "vpn tunnel" "OK"
+  else
+    printf "  %s %+$((25-10))s\n" "vpn tunnel" "MISSING"
+    export ok=false
+  fi
+
+  # make sure ssh vars are set
+  if [[ -n "$BFD_SSH_USER" ]]; then
+    printf "  %s %+$((25-12))s\n" "BFD_SSH_USER" "OK"
+  else
+    printf "  %s %+$((25-12))s\n" "BFD_SSH_USER" "MISSING"
+    export ok=false
+  fi
+  if [[ -n "$BFD_SSH_KEY_PATH" ]]; then
+    printf "  %s %+$((25-16))s\n" "BFD_SSH_KEY_PATH" "OK"
+  else
+    printf "  %s %+$((25-16))s\n" "BFD_SSH_KEY_PATH" "MISSING"
+    export ok=false
+  fi
+
+  echo
+  if ! $ok; then
+    echo "Error: missing requirements (try './$PROGNAME --help')"
+    exit 1
+  fi
+}
+
+
+help_message() {
+  cat <<- _EOF_
+  $PROGNAME automatically inventories:
+    1) Java dependencies using mvn dependency plugin (../../apps)
+    2) BFD FHIR API server (via ssh)
+    3) BFD ETL/PIPELINE server (via ssh)
+  
+  By default, this script will export the results to a 'monthly_inventory' folder
+  on your desktop (set INVENTORY_DIR env var to overide).
+
+  $(usage)
+
+  Requirements:
+    1) Properly configured aws command line utilities
+    2) An active CMS VPN tunnel
+    3) BFD_SSH_USER env var set to your ssh user name
+    4) BFD_SSH_KEY_PATH env var set to the path to your ssh key
+  
+  Options:
+    -h, --help
+      Display this help message and exit.
+    -i, --inventory-dir <path>
+      Path to export inventory. This dir must not exist.
+    -b, --build <true|false>
+      Build apps before running mvn dependency plugin (defaults to true)
+    -u, --ssh-user <user.name>
+      A valid ssh user id used to access BFD servers. If you use the bfd
+      ssh scripts, you may have these already exported using env vars
+    -k, --ssh-key-path <path>
+      A path to your ssh key to be used to access BFD servers. If you use
+      the bfd ssh scripts, you may have these already exported via env
+      vars.
+
+  
+  Examples: (first clone and cd into ops/ccs-ops-misc/scripts dir)
+      ./$PROGNAME                             # uses default values
+      ./$PROGNAME -i ~/oct/inventory          # must not exist
+      ./$PROGNAME -b false                    # dont build apps
+      ./$PROGNAME -u j.doe -k ~/.ssh/my_key   # ssh creds
+
+_EOF_
+  return
+}
+
+
+#-------------------- SCRIPT ENTRYPOINT --------------------#
+# Parse command-line
+while [[ -n $1 ]]; do
+  case $1 in
+    -h | --help) help_message; exit;;
+    -i | --inventory-dir) shift; export INVENTORY_DIR="$1";;
+    -b | --build) shift; export BUILD_APPS="$1";;
+    -u | --ssh-user) shift; export BFD_SSH_USER="$1";;
+    -k | --ssh-key-path) shift; export BFD_SSH_KEY_PATH="$1";;
+    -*) error_exit "Unknown option $1" ;;
+    *) error_exit "Unknown argument $1" ;;
+  esac
+  shift
+done
+
+#-------------------- MAIN LOGIC --------------------#
+
+git_pull(){
+  if ! br=$(git branch --show-current); then
+    # not in a repo, check for apps directory
+    [[ ! -d $APPS_DIR ]] && error_exit "could not find apps directory"
+    echo "Warning! We are not in the BFD repo so we are *assuming* we have the latest code to inventory."
+  fi
+  if [[ "$br" =~ $br_name_re ]]; then
+    printf "Grabbing the latest from %s.. " "$br_name"
+    if git pull >/dev/null 2>&1; then
+      echo "OK"
+    else
+      echo "ERROR"
+      error_exit "could not pull from $br"
+    fi
+  else
+    error_exit "not on $br_name branch.. please 'git checkout $br_name' and try again."
+  fi
+}
+
+get_java_dependencies(){
+  echo
+  mkdir -p "$java_inv_dir"
+  cd "$APPS_DIR" || error_exit "could not access apps directory"
+  if $BUILD_APPS; then
+    printf "We need to build apps before getting dependencies (this may take a few minutes)... "
+    if mvn clean install -DskipITs >/dev/null 2>&1; then
+      echo "OK"
+    else
+      echo "ERROR"
+      error_exit "could not build apps"
+    fi
+  fi
+
+  printf "Exporting java dependencies.. "
+  if deps=$($mvn_dep_cmd | grep ":.*:.*:.*" | cut -d] -f2- | sed 's/:[a-z]*$//g' | sort -u); then
+    echo "OK"
+  else
+    error_exit "could not generate dependencies using '$mvn_dep_cmd'"
+  fi
+  echo "$deps" > "${java_inv_dir}/java-dependencies.txt"
+  echo " (note: please review ${java_inv_dir}/java-dependencies.txt before submitting to ensure the mvn dependency plugin worked)"
+}
+
+# selects a server to inventory
+# $1 == environment (bfd-prod-sbx bfd-test prod-etl prod-sbx-etl test-etl)
+# returns an ip address
+select_target(){
+  # TODO: make this dynamic
+  PS3="Select an IP to inventory: "
+  # display a list of active ip's for the selected environment
+  select ip in $(aws ec2 describe-instances \
+  --filters 'Name=instance-state-name,Values=running' \
+  --query 'Reservations[].Instances[].[PrivateIpAddress,Tags[?Key==`Name`]| [0].Value]' \
+  --output table | grep "$1" | awk '{print $2}' | grep -v "None")
+  do
+    echo "$ip"
+    return
+  done
+}
+
+# runs a command on a remote ip using ssh
+# $1 == ip address of the target
+# $2 == cmd to run
+ssh_cmd(){
+  # 2>/dev/null to not print ssh banner
+  ssh -i "$BFD_SSH_KEY_PATH" -t "${BFD_SSH_USER}@${1}" "$2" 2>/dev/null
+}
+
+# $1 == target to inventory
+# $2 == where to write results
+inventory_server(){
+  ssh_cmd "$1" "java -version" > "$2/java-dependencies.txt"
+  ssh_cmd "$1" "cat /etc/os-release" > "$2/os-release.txt"
+  ssh_cmd "$1" "sudo yum list installed --color=no" > "$2/yum-installed-packages.txt"
+  ssh_cmd "$1" "pip3 list" > "$2/python-packages.txt"
+}
+
+inventory_api_server(){
+  echo
+  mkdir -p "$api_inv_dir"
+  echo "We will now inventory one of the FHIR API servers from prod-sbx"
+  target="$(select_target "bfd-prod-sbx")"
+  printf "Inventorying %s.. " "$target"
+  inventory_server "$target" "$api_inv_dir"
+  echo "OK"
+}
+
+inventory_pipeline_server(){
+  echo
+  mkdir -p "$pipeline_inv_dir"
+  echo "We will now inventory one of the ETL/pipeline servers from prod-sbx"
+  target="$(select_target "bfd-prod-sbx-etl")"
+  printf "Inventorying %s.. " "$target"
+  inventory_server "$target" "$pipeline_inv_dir"
+  echo "OK"
+}
+
+
+#----------------- GO! ------------------#
+# make sure we have all we need to run the inventory
+check_requirements
+
+# get the latest from main/master
+git_pull
+
+# build apps and get mvn dependencies
+get_java_dependencies
+
+# inventory a fhir api server
+inventory_api_server
+
+# inventory an etl/pipeline server
+inventory_pipeline_server
+
+echo
+echo "Inventory Complete! Now:"
+echo "1) Copy the previous months inventory in confluence."
+echo "2) Change the title to reflect the correct month."
+echo "3) Drop the $INVENTORY_DIR/{java,api,pipeline} files under the appropriate headings"
+echo "4) When finished updating confluence, press Y to continue.."
+open "$INVENTORY_DIR"
+
+echo
+read -p "Press Y to remove the $INVENTORY_DIR directory from your computer." -n 1 -r; echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  clean_up
+  echo "Finished!"
+else
+  echo "You can remove the directory manually by running 'rm -rf $INVENTORY_DIR'"
+fi
