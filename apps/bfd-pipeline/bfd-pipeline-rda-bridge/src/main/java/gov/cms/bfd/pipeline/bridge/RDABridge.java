@@ -133,33 +133,31 @@ public class RDABridge {
     String fissOutputType = FilenameUtils.getExtension(fissOutputPath.getFileName().toString());
     String mcsOutputType = FilenameUtils.getExtension(mcsOutputPath.getFileName().toString());
 
-    if (sinkMap.containsKey(fissOutputType)) {
-      if (sinkMap.containsKey(mcsOutputType)) {
-        try (Sink<MessageOrBuilder> fissSink = sinkMap.get(fissOutputType).apply(fissOutputPath);
-            Sink<MessageOrBuilder> mcsSink = sinkMap.get(mcsOutputType).apply(mcsOutputPath)) {
-          // Sorting the files so tests are more deterministic
-          List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
-          Collections.sort(fissSources);
-
-          for (String fissSource : fissSources) {
-            executeTransformation(SourceType.FISS, path, fissSource, mbiMap, fissSink);
-          }
-
-          // Sorting the files so tests are more deterministic
-          List<String> mcsSources = config.stringValues(AppConfig.Fields.mcsSources);
-          Collections.sort(mcsSources);
-
-          for (String mcsSource : mcsSources) {
-            executeTransformation(SourceType.MCS, path, mcsSource, mbiMap, mcsSink);
-          }
-        }
-      } else {
-        throw new IllegalArgumentException(
-            "Unsupported mcs output file type '" + mcsOutputType + "'");
-      }
-    } else {
+    if (!sinkMap.containsKey(fissOutputType)) {
       throw new IllegalArgumentException(
           "Unsupported fiss output file type '" + fissOutputType + "'");
+    } else if (!sinkMap.containsKey(mcsOutputType)) {
+      throw new IllegalArgumentException(
+          "Unsupported mcs output file type '" + mcsOutputType + "'");
+    } else {
+      try (Sink<MessageOrBuilder> fissSink = sinkMap.get(fissOutputType).apply(fissOutputPath);
+          Sink<MessageOrBuilder> mcsSink = sinkMap.get(mcsOutputType).apply(mcsOutputPath)) {
+        // Sorting the files so tests are more deterministic
+        List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
+        Collections.sort(fissSources);
+
+        for (String fissSource : fissSources) {
+          executeTransformation(SourceType.FISS, path, fissSource, mbiMap, fissSink);
+        }
+
+        // Sorting the files so tests are more deterministic
+        List<String> mcsSources = config.stringValues(AppConfig.Fields.mcsSources);
+        Collections.sort(mcsSources);
+
+        for (String mcsSource : mcsSources) {
+          executeTransformation(SourceType.MCS, path, mcsSource, mbiMap, mcsSink);
+        }
+      }
     }
   }
 
