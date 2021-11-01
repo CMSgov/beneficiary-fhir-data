@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -124,6 +125,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
      * value for the PipelineJob.getSchedule() method.
      */
     private final Duration runInterval;
+
     /**
      * Server can either return data from an S3 bucket or generate random data. This field
      * determines which mode the server will use.
@@ -149,43 +151,38 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
     }
 
     public Config() {
-      this(
-          ServerMode.Random,
-          DEFAULT_SERVER_NAME,
-          Optional.empty(),
-          Optional.empty(),
-          Optional.empty(),
-          Optional.empty(),
-          Optional.empty(),
-          Optional.empty());
+      this(ServerMode.Random, DEFAULT_SERVER_NAME, null, null, null, null, null, null);
     }
 
-    public Config(
+    @Builder
+    private Config(
         ServerMode serverMode,
         String serverName,
-        Optional<Duration> runInterval,
-        Optional<Long> randomSeed,
-        Optional<Integer> randomMaxClaims,
-        Optional<Regions> s3Region,
-        Optional<String> s3Bucket,
-        Optional<String> s3Directory) {
+        Duration runInterval,
+        Long randomSeed,
+        Integer randomMaxClaims,
+        Regions s3Region,
+        String s3Bucket,
+        String s3Directory) {
       Preconditions.checkNotNull(serverMode, "serverMode is required");
       if (serverMode == ServerMode.S3) {
         Preconditions.checkArgument(
             !Strings.isNullOrEmpty(serverName), "serverName is required in S3 mode");
-        Preconditions.checkArgument(s3Bucket.isPresent(), "S3 bucket is required in S3 mode");
+        Preconditions.checkArgument(
+            !Strings.isNullOrEmpty(s3Bucket), "S3 bucket is required in S3 mode");
       }
       this.serverMode = serverMode;
       this.serverName = serverName;
-      this.runInterval = runInterval.orElse(DEFAULT_RUN_INTERVAL);
-      this.randomSeed = randomSeed.orElse(DEFAULT_SEED);
-      this.randomMaxClaims = randomMaxClaims.orElse(DEFAULT_MAX_CLAIMS);
-      if (s3Bucket.isPresent()) {
-        final Regions region = s3Region.orElse(SharedS3Utilities.REGION_DEFAULT);
-        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
-        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get(), s3Directory.orElse(""));
-      } else {
+      this.runInterval = runInterval == null ? DEFAULT_RUN_INTERVAL : runInterval;
+      this.randomSeed = randomSeed == null ? DEFAULT_SEED : randomSeed;
+      this.randomMaxClaims = randomMaxClaims == null ? DEFAULT_MAX_CLAIMS : randomMaxClaims;
+      if (Strings.isNullOrEmpty(s3Bucket)) {
         s3Sources = null;
+      } else {
+        final Regions region = s3Region == null ? SharedS3Utilities.REGION_DEFAULT : s3Region;
+        final AmazonS3 s3Client = SharedS3Utilities.createS3Client(region);
+        final String directory = s3Directory == null ? "" : s3Directory;
+        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket, directory);
       }
     }
 

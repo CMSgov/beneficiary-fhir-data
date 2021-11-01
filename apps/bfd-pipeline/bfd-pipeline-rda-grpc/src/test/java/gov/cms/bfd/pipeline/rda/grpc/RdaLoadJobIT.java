@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import org.junit.Before;
@@ -233,17 +232,24 @@ public class RdaLoadJobIT {
   }
 
   private static RdaLoadOptions createRdaLoadOptions(int serverPort) {
+    final GrpcRdaSource.Config.ConfigBuilder rdaSourceConfig = GrpcRdaSource.Config.builder();
+    if (serverPort > 0) {
+      rdaSourceConfig
+          .serverType(GrpcRdaSource.Config.ServerType.Remote)
+          .host("localhost")
+          .port(serverPort);
+    } else {
+      rdaSourceConfig
+          .serverType(GrpcRdaSource.Config.ServerType.InProcess)
+          .inProcessServerName(RdaServerJob.Config.DEFAULT_SERVER_NAME);
+    }
+    rdaSourceConfig.maxIdle(Duration.ofMinutes(1));
     return new RdaLoadOptions(
-        new AbstractRdaLoadJob.Config(
-            Duration.ofSeconds(1), BATCH_SIZE, Optional.empty(), Optional.empty()),
-        new GrpcRdaSource.Config(
-            serverPort > 0
-                ? GrpcRdaSource.Config.ServerType.Remote
-                : GrpcRdaSource.Config.ServerType.InProcess,
-            "localhost",
-            serverPort,
-            RdaServerJob.Config.DEFAULT_SERVER_NAME,
-            Duration.ofMinutes(1)),
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(Duration.ofSeconds(1))
+            .batchSize(BATCH_SIZE)
+            .build(),
+        rdaSourceConfig.build(),
         new RdaServerJob.Config(),
         new IdHasher.Config(100, "thisisjustatest"));
   }

@@ -477,44 +477,60 @@ public final class AppConfiguration implements Serializable {
     if (!enabled) {
       return null;
     }
-    final AbstractRdaLoadJob.Config jobConfig =
-        new AbstractRdaLoadJob.Config(
-            Duration.ofSeconds(
-                readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, Integer::parseInt)
-                    .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)),
-            readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, Integer::parseInt)
-                .orElse(DEFAULT_RDA_JOB_BATCH_SIZE),
-            readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, Long::parseLong),
-            readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong));
+    final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(
+                Duration.ofSeconds(
+                    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, Integer::parseInt)
+                        .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)))
+            .batchSize(
+                readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, Integer::parseInt)
+                    .orElse(DEFAULT_RDA_JOB_BATCH_SIZE));
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, Long::parseLong)
+        .ifPresent(jobConfig::startingFissSeqNum);
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
+        .ifPresent(jobConfig::startingMcsSeqNum);
     final GrpcRdaSource.Config grpcConfig =
-        new GrpcRdaSource.Config(
-            readEnvParsedOptional(
-                    ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, GrpcRdaSource.Config.ServerType::valueOf)
-                .orElse(DEFAULT_RDA_GRPC_SERVER_TYPE),
-            readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST).orElse(DEFAULT_RDA_GRPC_HOST),
-            readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_PORT, Integer::parseInt)
-                .orElse(DEFAULT_RDA_GRPC_PORT),
-            readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME)
-                .orElse(DEFAULT_RDA_GRPC_INPROC_SERVER_NAME),
-            Duration.ofSeconds(
-                readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, Integer::parseInt)
-                    .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
-    RdaServerJob.Config mockServerConfig =
-        new RdaServerJob.Config(
-            readEnvParsedOptional(
-                    ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE,
-                    RdaServerJob.Config.ServerMode::valueOf)
-                .orElse(RdaServerJob.Config.ServerMode.Random),
-            grpcConfig.getInProcessServerName(),
-            readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_RUN_INTERVAL, Long::parseLong)
-                .map(Duration::ofSeconds),
-            readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_SEED, Long::parseLong),
-            readEnvParsedOptional(
-                ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_MAX_CLAIMS, Integer::parseInt),
-            readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_REGION, Regions::fromName),
-            readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_BUCKET),
-            readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_DIRECTORY));
-    return new RdaLoadOptions(jobConfig, grpcConfig, mockServerConfig, idHasherConfig);
+        GrpcRdaSource.Config.builder()
+            .serverType(
+                readEnvParsedOptional(
+                        ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, GrpcRdaSource.Config.ServerType::valueOf)
+                    .orElse(DEFAULT_RDA_GRPC_SERVER_TYPE))
+            .host(
+                readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST)
+                    .orElse(DEFAULT_RDA_GRPC_HOST))
+            .port(
+                readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_PORT, Integer::parseInt)
+                    .orElse(DEFAULT_RDA_GRPC_PORT))
+            .inProcessServerName(
+                readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME)
+                    .orElse(DEFAULT_RDA_GRPC_INPROC_SERVER_NAME))
+            .maxIdle(
+                Duration.ofSeconds(
+                    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, Integer::parseInt)
+                        .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)))
+            .build();
+    final RdaServerJob.Config.ConfigBuilder mockServerConfig = RdaServerJob.Config.builder();
+    mockServerConfig.serverMode(
+        readEnvParsedOptional(
+                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode::valueOf)
+            .orElse(RdaServerJob.Config.ServerMode.Random));
+    mockServerConfig.serverName(grpcConfig.getInProcessServerName());
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_RUN_INTERVAL, Long::parseLong)
+        .map(Duration::ofSeconds)
+        .ifPresent(mockServerConfig::runInterval);
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_SEED, Long::parseLong)
+        .ifPresent(mockServerConfig::randomSeed);
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_RANDOM_MAX_CLAIMS, Integer::parseInt)
+        .ifPresent(mockServerConfig::randomMaxClaims);
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_REGION, Regions::fromName)
+        .ifPresent(mockServerConfig::s3Region);
+    readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_BUCKET)
+        .ifPresent(mockServerConfig::s3Bucket);
+    readEnvStringOptional(ENV_VAR_KEY_RDA_INPROC_SERVER_S3_DIRECTORY)
+        .ifPresent(mockServerConfig::s3Directory);
+    return new RdaLoadOptions(
+        jobConfig.build(), grpcConfig, mockServerConfig.build(), idHasherConfig);
   }
 
   /**

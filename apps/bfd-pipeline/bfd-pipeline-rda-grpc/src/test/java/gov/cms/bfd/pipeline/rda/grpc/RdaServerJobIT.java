@@ -21,7 +21,6 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -41,15 +40,12 @@ public class RdaServerJobIT {
   @Test
   public void testRandom() throws Exception {
     final RdaServerJob.Config config =
-        new RdaServerJob.Config(
-            RdaServerJob.Config.ServerMode.Random,
-            SERVER_NAME,
-            Optional.empty(),
-            Optional.of(1L),
-            Optional.of(4),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty());
+        RdaServerJob.Config.builder()
+            .serverMode(RdaServerJob.Config.ServerMode.Random)
+            .serverName(SERVER_NAME)
+            .randomSeed(1L)
+            .randomMaxClaims(4)
+            .build();
     final RdaServerJob job = new RdaServerJob(config);
     final ExecutorService exec = Executors.newCachedThreadPool();
     final Future<PipelineJobOutcome> outcome = exec.submit(job);
@@ -87,15 +83,12 @@ public class RdaServerJobIT {
     try {
       bucket = createTestBucket(s3Client);
       final RdaServerJob.Config config =
-          new RdaServerJob.Config(
-              RdaServerJob.Config.ServerMode.S3,
-              SERVER_NAME,
-              Optional.empty(),
-              Optional.empty(),
-              Optional.empty(),
-              Optional.empty(),
-              Optional.of(bucket.getName()),
-              Optional.of("files-go-here"));
+          RdaServerJob.Config.builder()
+              .serverMode(RdaServerJob.Config.ServerMode.S3)
+              .serverName(SERVER_NAME)
+              .s3Bucket(bucket.getName())
+              .s3Directory("files-go-here")
+              .build();
       final String fissObjectKey = config.getS3Sources().createFissObjectKey();
       final String mcsObjectKey = config.getS3Sources().createMcsObjectKey();
       uploadJsonToBucket(s3Client, bucket.getName(), fissObjectKey, fissClaimsSource);
@@ -141,15 +134,12 @@ public class RdaServerJobIT {
   @Test
   public void jobRunsCorrectlyMultipleTimes() throws Exception {
     final RdaServerJob.Config config =
-        new RdaServerJob.Config(
-            RdaServerJob.Config.ServerMode.Random,
-            SERVER_NAME,
-            Optional.empty(),
-            Optional.of(1L),
-            Optional.of(4),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty());
+        RdaServerJob.Config.builder()
+            .serverMode(RdaServerJob.Config.ServerMode.Random)
+            .serverName(SERVER_NAME)
+            .randomSeed(1L)
+            .randomMaxClaims(4)
+            .build();
     final RdaServerJob job = new RdaServerJob(config);
     final ExecutorService exec = Executors.newCachedThreadPool();
     try {

@@ -127,11 +127,17 @@ public class LoadRdaJsonApp {
     private RdaLoadOptions createRdaLoadOptions(int port) {
       final IdHasher.Config idHasherConfig = new IdHasher.Config(hashIterations, hashPepper);
       final AbstractRdaLoadJob.Config jobConfig =
-          new AbstractRdaLoadJob.Config(
-              Duration.ofDays(1), batchSize, Optional.empty(), Optional.empty());
+          AbstractRdaLoadJob.Config.builder()
+              .runInterval(Duration.ofDays(1))
+              .batchSize(batchSize)
+              .build();
       final GrpcRdaSource.Config grpcConfig =
-          new GrpcRdaSource.Config(
-              GrpcRdaSource.Config.ServerType.Remote, "localhost", port, "", Duration.ofDays(1));
+          GrpcRdaSource.Config.builder()
+              .serverType(GrpcRdaSource.Config.ServerType.Remote)
+              .host("localhost")
+              .port(port)
+              .maxIdle(Duration.ofDays(1))
+              .build();
       return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
     }
 

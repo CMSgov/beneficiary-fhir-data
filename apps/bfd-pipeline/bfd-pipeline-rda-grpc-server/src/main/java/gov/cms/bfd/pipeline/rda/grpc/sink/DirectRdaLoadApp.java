@@ -102,18 +102,20 @@ public class DirectRdaLoadApp {
         new IdHasher.Config(
             options.intValue("hash.iterations", 100),
             options.stringValue("hash.pepper", "notarealpepper"));
-    final AbstractRdaLoadJob.Config jobConfig =
-        new AbstractRdaLoadJob.Config(
-            Duration.ofDays(1), options.intValue("job.batchSize", 1),
-            options.longOption("job.startingFissSeqNum"),
-                options.longOption("job.startingMcsSeqNum"));
+    final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(Duration.ofDays(1))
+            .batchSize(options.intValue("job.batchSize", 1));
+    options.longOption("job.startingFissSeqNum").ifPresent(jobConfig::startingFissSeqNum);
+    options.longOption("job.startingMcsSeqNum").ifPresent(jobConfig::startingMcsSeqNum);
     final GrpcRdaSource.Config grpcConfig =
-        new GrpcRdaSource.Config(
-            GrpcRdaSource.Config.ServerType.Remote,
-            options.stringValue("api.host", "localhost"),
-            options.intValue("api.port", 5003),
-            "",
-            Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)));
-    return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
+        GrpcRdaSource.Config.builder()
+            .serverType(GrpcRdaSource.Config.ServerType.Remote)
+            .host(options.stringValue("api.host", "localhost"))
+            .port(options.intValue("api.port", 5003))
+            .maxIdle(Duration.ofSeconds(options.intValue("job.idleSeconds", Integer.MAX_VALUE)))
+            .build();
+    return new RdaLoadOptions(
+        jobConfig.build(), grpcConfig, new RdaServerJob.Config(), idHasherConfig);
   }
 }

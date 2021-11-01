@@ -8,6 +8,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -260,23 +262,24 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       InProcess
     }
 
-    public Config(
+    @Builder
+    private Config(
         ServerType serverType,
         String host,
         int port,
         String inProcessServerName,
         Duration maxIdle) {
-      this.serverType = serverType;
-      this.host = Preconditions.checkNotNull(host);
+      this.serverType = Preconditions.checkNotNull(serverType, "serverType is required");
+      this.host = host;
       this.port = port;
       this.inProcessServerName = inProcessServerName;
       this.maxIdle = maxIdle;
       if (serverType == ServerType.Remote) {
-        Preconditions.checkArgument(host.length() >= 1, "host name is empty");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(host), "host name is required");
         Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
       } else {
         Preconditions.checkArgument(
-            inProcessServerName.length() >= 1, "inProcessServerName is empty");
+            !Strings.isNullOrEmpty(inProcessServerName), "inProcessServerName is required");
       }
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
     }
