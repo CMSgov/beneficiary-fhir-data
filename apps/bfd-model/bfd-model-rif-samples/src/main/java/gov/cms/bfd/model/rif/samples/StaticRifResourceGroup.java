@@ -100,6 +100,7 @@ public enum StaticRifResourceGroup {
    */
   SYNTHEA(
       StaticRifResource.SYNTHEA_BENES,
+      StaticRifResource.SYNTHEA_BENE_UPDATES,
       StaticRifResource.SYNTHEA_INPATIENT,
       StaticRifResource.SYNTHEA_OUTPATIENT,
       StaticRifResource.SYNTHEA_PDE,

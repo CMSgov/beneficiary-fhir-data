@@ -384,6 +384,10 @@ public enum StaticRifResource {
       syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
+  SYNTHEA_BENE_UPDATES(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_updates.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
 
   /**
    * The {@link InpatientClaim} records produced by {@link #generateSyntheaData()}, the amount of
@@ -525,8 +529,10 @@ public enum StaticRifResource {
             if (idColumn.isPresent()) {
               // We can't just count the number of lines, as that won't account for there being
               // multiple claim lines per claim.
-              String id = csvRecord.get(idColumn.get());
-              uniqueIds.add(id);
+              if (csvRecord.get(0).equals("INSERT")) {
+                String id = csvRecord.get(idColumn.get());
+                uniqueIds.add(id);
+              }
             } else {
               // Just count the number of lines
               uniqueIds.add("" + csvRecord.getRecordNumber());
