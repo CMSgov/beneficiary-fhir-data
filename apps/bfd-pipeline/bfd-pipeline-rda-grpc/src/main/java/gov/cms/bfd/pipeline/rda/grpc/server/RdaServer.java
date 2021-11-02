@@ -10,9 +10,11 @@ import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.Builder;
 import lombok.NonNull;
+import lombok.Singular;
 import lombok.Value;
 
 public class RdaServer {
@@ -25,6 +27,7 @@ public class RdaServer {
   public static Server startLocal(LocalConfig config) throws IOException {
     return ServerBuilder.forPort(config.getPort())
         .addService(new RdaService(config.getFissSourceFactory(), config.getMcsSourceFactory()))
+        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
         .start();
   }
@@ -38,6 +41,7 @@ public class RdaServer {
   public static Server startInProcess(InProcessConfig config) throws IOException {
     return InProcessServerBuilder.forName(config.getServerName())
         .addService(new RdaService(config.getFissSourceFactory(), config.getMcsSourceFactory()))
+        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
         .start();
   }
@@ -119,7 +123,7 @@ public class RdaServer {
      * The port for the server to listen on. A value of zero causes the server to allocate any open
      * port. Default for the builder is zero.
      */
-    @NonNull @Builder.Default int port = 0;
+    @Builder.Default int port = 0;
 
     /** Factory used to create {@link MessageSource<FissClaimChange>} objects on demand. */
     @NonNull @Builder.Default
@@ -128,6 +132,11 @@ public class RdaServer {
     /** Factory used to create {@link MessageSource<McsClaimChange>} objects on demand. */
     @NonNull @Builder.Default
     MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
+
+    /**
+     * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
+     */
+    @NonNull @Singular Set<String> authorizedTokens;
 
     /** Shorthand for calling {@link runWithLocalServer} with this config object. */
     public void run(ThrowableConsumer<Integer> action) throws Exception {
@@ -152,6 +161,11 @@ public class RdaServer {
     /** Factory used to create {@link MessageSource<McsClaimChange>} objects on demand. */
     @NonNull @Builder.Default
     MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
+
+    /**
+     * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
+     */
+    @NonNull @Singular Set<String> authorizedTokens;
 
     /** Shorthand for calling {@link runWithInProcessServer} with this config object. */
     public void run(ThrowableConsumer<ManagedChannel> action) throws Exception {
