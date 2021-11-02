@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.app;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.regions.Regions;
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadOptions;
 import gov.cms.bfd.pipeline.ccw.rif.extract.ExtractionOptions;
@@ -9,6 +10,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest;
 import gov.cms.bfd.pipeline.ccw.rif.load.LoadAppOptions;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -17,6 +19,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -170,11 +173,19 @@ public final class AppConfiguration implements Serializable {
   public static final int DEFAULT_RDA_JOB_BATCH_SIZE = 1;
 
   /**
+   * The name of the environment variable that specifies which type of RDA API server to connect to.
+   * {@link GrpcRdaSource.Config#getServerType()}
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "RDA_GRPC_SERVER_TYPE";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_TYPE}. */
+  public static final GrpcRdaSource.Config.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
+      GrpcRdaSource.Config.ServerType.Remote;
+
+  /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getHost()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_HOST = "RDA_GRPC_HOST";
-
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_HOST}. */
   public static final String DEFAULT_RDA_GRPC_HOST = "localhost";
 
@@ -185,13 +196,23 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "RDA_GRPC_PORT";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_PORT}. */
   public static final int DEFAULT_RDA_GRPC_PORT = 443;
+
+  /**
+   * The name of the environment variable that specifies the name of an in-process mock RDA API
+   * server. This name is used when instantiating the server as well as when connecting to it.
+   * {@link GrpcRdaSource.Config#getInProcessServerName()}
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME =
+      "RDA_GRPC_INPROC_SERVER_NAME";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME} */
+  public static final String DEFAULT_RDA_GRPC_INPROC_SERVER_NAME = "MockRdaServer";
+
   /**
    * The name of the environment variable that should be used to provide the {@link
    * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMaxIdle()} ()} value. This variable value
    * should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "RDA_GRPC_MAX_IDLE_SECONDS";
-
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
   public static final int DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS = Integer.MAX_VALUE;
 
@@ -208,6 +229,57 @@ public final class AppConfiguration implements Serializable {
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM =
       "RDA_JOB_STARTING_MCS_SEQ_NUM";
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * gov.cms.bfd.pipeline.rda.grpc.RdaServerJob.Config.ServerMode} value for the in-process RDA API
+   * server.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE =
+      "RDA_GRPC_INPROC_SERVER_MODE";
+
+  /**
+   * The name of the environment variable that should be used to provide the run interval in seconds
+   * for the in-process RDA API server job.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS =
+      "RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS";
+
+  /**
+   * The name of the environment variable that should be used to provide the random number generator
+   * for the PRNG used by the the in-process RDA API server job's random mode.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED =
+      "RDA_GRPC_INPROC_SERVER_RANDOM_SEED";
+
+  /**
+   * The name of the environment variable that should be used to provide the maximum number of
+   * random claims to be returned to clients by the in-process RDA API server job's random mode.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS =
+      "RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS";
+
+  /**
+   * The name of the environment variable that should be used to provide the name of the S3 region
+   * containing the bucket used to serve claims by the in-process RDA API server job's random mode.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION =
+      "RDA_GRPC_INPROC_SERVER_S3_REGION";
+
+  /**
+   * The name of the environment variable that should be used to provide the name of the S3 bucket
+   * used to serve claims by the in-process RDA API server job's random mode.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET =
+      "RDA_GRPC_INPROC_SERVER_S3_BUCKET";
+
+  /**
+   * The name of the environment variable that should be used to provide a directory path to add as
+   * a prefix when looking for files within the S3 bucket. This is optional and defaults to objects
+   * being accessed at the bucket's root.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY =
+      "RDA_GRPC_INPROC_SERVER_S3_DIRECTORY";
 
   private final MetricOptions metricOptions;
   private final DatabaseOptions databaseOptions;
@@ -405,22 +477,60 @@ public final class AppConfiguration implements Serializable {
     if (!enabled) {
       return null;
     }
-    final AbstractRdaLoadJob.Config jobConfig =
-        new AbstractRdaLoadJob.Config(
-            Duration.ofSeconds(
-                readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS)
-                    .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)),
-            readEnvIntOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE).orElse(DEFAULT_RDA_JOB_BATCH_SIZE),
-            readEnvLongOptional(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM),
-            readEnvLongOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM));
+    final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
+        AbstractRdaLoadJob.Config.builder()
+            .runInterval(
+                Duration.ofSeconds(
+                    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS, Integer::parseInt)
+                        .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)))
+            .batchSize(
+                readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, Integer::parseInt)
+                    .orElse(DEFAULT_RDA_JOB_BATCH_SIZE));
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, Long::parseLong)
+        .ifPresent(jobConfig::startingFissSeqNum);
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)
+        .ifPresent(jobConfig::startingMcsSeqNum);
     final GrpcRdaSource.Config grpcConfig =
-        new GrpcRdaSource.Config(
-            readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST).orElse(DEFAULT_RDA_GRPC_HOST),
-            readEnvIntOptional(ENV_VAR_KEY_RDA_GRPC_PORT).orElse(DEFAULT_RDA_GRPC_PORT),
-            Duration.ofSeconds(
-                readEnvIntOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS)
-                    .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)));
-    return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
+        GrpcRdaSource.Config.builder()
+            .serverType(
+                readEnvParsedOptional(
+                        ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE, GrpcRdaSource.Config.ServerType::valueOf)
+                    .orElse(DEFAULT_RDA_GRPC_SERVER_TYPE))
+            .host(
+                readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_HOST)
+                    .orElse(DEFAULT_RDA_GRPC_HOST))
+            .port(
+                readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_PORT, Integer::parseInt)
+                    .orElse(DEFAULT_RDA_GRPC_PORT))
+            .inProcessServerName(
+                readEnvNonEmptyStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_NAME)
+                    .orElse(DEFAULT_RDA_GRPC_INPROC_SERVER_NAME))
+            .maxIdle(
+                Duration.ofSeconds(
+                    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, Integer::parseInt)
+                        .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)))
+            .build();
+    final RdaServerJob.Config.ConfigBuilder mockServerConfig = RdaServerJob.Config.builder();
+    mockServerConfig.serverMode(
+        readEnvParsedOptional(
+                ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_MODE, RdaServerJob.Config.ServerMode::valueOf)
+            .orElse(RdaServerJob.Config.ServerMode.Random));
+    mockServerConfig.serverName(grpcConfig.getInProcessServerName());
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_INTERVAL_SECONDS, Long::parseLong)
+        .map(Duration::ofSeconds)
+        .ifPresent(mockServerConfig::runInterval);
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_SEED, Long::parseLong)
+        .ifPresent(mockServerConfig::randomSeed);
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_RANDOM_MAX_CLAIMS, Integer::parseInt)
+        .ifPresent(mockServerConfig::randomMaxClaims);
+    readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_REGION, Regions::fromName)
+        .ifPresent(mockServerConfig::s3Region);
+    readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_BUCKET)
+        .ifPresent(mockServerConfig::s3Bucket);
+    readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_INPROC_SERVER_S3_DIRECTORY)
+        .ifPresent(mockServerConfig::s3Directory);
+    return new RdaLoadOptions(
+        jobConfig.build(), grpcConfig, mockServerConfig.build(), idHasherConfig);
   }
 
   /**
@@ -432,6 +542,17 @@ public final class AppConfiguration implements Serializable {
     Optional<String> environmentVariableValue =
         Optional.ofNullable(System.getenv(environmentVariableName));
     return environmentVariableValue;
+  }
+
+  /**
+   * @param environmentVariableName the name of the environment variable to get the value of
+   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
+   *     not set or contains an empty value
+   */
+  static Optional<String> readEnvNonEmptyStringOptional(String environmentVariableName) {
+    return readEnvStringOptional(environmentVariableName)
+        .map(String::trim)
+        .filter(s -> !s.isEmpty());
   }
 
   /**
@@ -477,32 +598,32 @@ public final class AppConfiguration implements Serializable {
     } catch (NumberFormatException e) {
       throw new AppConfigurationException(
           String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValueText.get()));
+              "Invalid value for configuration environment variable '%s': '%s' (%s)",
+              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
+          e);
     }
   }
 
   /**
    * @param environmentVariableName the name of the environment variable to get the value of
-   * @return the value of the specified environment variable, or {@link Optional#empty()} if it is
-   *     not set
+   * @param parser the function used to convert the name into a parsed value
+   * @return the value of the specified environment variable converted to a parsed value
    * @throws AppConfigurationException An {@link AppConfigurationException} will be thrown if the
    *     value cannot be parsed.
    */
-  static Optional<Long> readEnvLongOptional(String environmentVariableName) {
+  static <T> Optional<T> readEnvParsedOptional(
+      String environmentVariableName, Function<String, T> parser) {
     Optional<String> environmentVariableValueText =
-        Optional.ofNullable(System.getenv(environmentVariableName));
-    if (!environmentVariableValueText.isPresent()) {
-      return Optional.empty();
-    }
+        readEnvNonEmptyStringOptional(environmentVariableName);
 
     try {
-      return Optional.of(Long.valueOf(environmentVariableValueText.get()));
-    } catch (NumberFormatException e) {
+      return environmentVariableValueText.map(parser);
+    } catch (RuntimeException e) {
       throw new AppConfigurationException(
           String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValueText.get()));
+              "Invalid value for configuration environment variable '%s': '%s' (%s)",
+              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
+          e);
     }
   }
 
@@ -594,8 +715,9 @@ public final class AppConfiguration implements Serializable {
     } catch (DecoderException e) {
       throw new AppConfigurationException(
           String.format(
-              "Invalid value for configuration environment variable '%s': '%s'",
-              environmentVariableName, environmentVariableValueText.get()));
+              "Invalid value for configuration environment variable '%s': '%s' (%s)",
+              environmentVariableName, environmentVariableValueText.get(), e.getMessage()),
+          e);
     }
   }
 }

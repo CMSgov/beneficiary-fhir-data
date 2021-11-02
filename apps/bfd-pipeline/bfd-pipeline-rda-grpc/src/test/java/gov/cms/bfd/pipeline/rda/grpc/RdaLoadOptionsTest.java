@@ -8,7 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,9 +16,17 @@ public class RdaLoadOptionsTest {
   public void configIsSerializable() throws Exception {
     final RdaLoadOptions original =
         new RdaLoadOptions(
-            new AbstractRdaLoadJob.Config(
-                Duration.ofDays(12), 9832, Optional.empty(), Optional.empty()),
-            new GrpcRdaSource.Config("localhost", 5432, Duration.ofMinutes(59)),
+            AbstractRdaLoadJob.Config.builder()
+                .runInterval(Duration.ofDays(12))
+                .batchSize(9832)
+                .build(),
+            GrpcRdaSource.Config.builder()
+                .serverType(GrpcRdaSource.Config.ServerType.Remote)
+                .host("localhost")
+                .port(5432)
+                .maxIdle(Duration.ofMinutes(59))
+                .build(),
+            new RdaServerJob.Config(),
             new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {

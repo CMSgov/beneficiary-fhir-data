@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.protobuf.Timestamp;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -7,6 +10,7 @@ import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.time.Clock;
+import java.util.function.Function;
 
 /**
  * Wrapper for a FissClaim or McsClaim source that promotes it to return a ClaimChange containing
@@ -15,27 +19,38 @@ import java.time.Clock;
  * @param <T> either FissClaim or McsClaim
  */
 public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChange> {
+  // Cache used to select whether to return CHANGE_TYPE_UPDATE or CHANGE_TYPE_INSERT.
+  private static final int KEY_CACHE_SIZE = 20_000;
+
   private final MessageSource<TClaim> source;
   private final Clock clock;
   private long sequenceNumber;
+  private final Function<TClaim, String> keyExtractor;
   private final ChangeFactory<TChange, TClaim> changeFactory;
+  private final Cache<String, String> knownKeys;
 
   /**
-   * Creates a wrapper object to promote each claim from source into a ClaimChange object with
-   * ChangeType of CHANGE_TYPE_UPDATE.
+   * Creates a wrapper object to promote each claim from source into a ClaimChange object. A cache
+   * is used to decide which ChangeType to use. The cache is imperfect but since this class is only
+   * intended for testing with a random claim source it is suitable for testing purposes.
    *
    * @param source the actual source of FISS/MCS claims
    * @param setter lambda to add the claim to the appropriate field in the ClaimChange builder
    */
-  private WrappedClaimSource(
+  @VisibleForTesting
+  WrappedClaimSource(
       MessageSource<TClaim> source,
       Clock clock,
       long sequenceNumber,
+      int keyCacheSize,
+      Function<TClaim, String> keyExtractor,
       ChangeFactory<TChange, TClaim> changeFactory) {
     this.source = source;
     this.clock = clock;
     this.sequenceNumber = sequenceNumber;
+    this.keyExtractor = keyExtractor;
     this.changeFactory = changeFactory;
+    this.knownKeys = CacheBuilder.newBuilder().maximumSize(keyCacheSize).build();
   }
 
   @Override
@@ -47,8 +62,12 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
   public TChange next() throws Exception {
     final Timestamp timestamp =
         Timestamp.newBuilder().setSeconds(clock.instant().getEpochSecond()).build();
-    return changeFactory.create(
-        timestamp, ChangeType.CHANGE_TYPE_UPDATE, sequenceNumber++, source.next());
+    final TClaim claim = source.next();
+    final String key = keyExtractor.apply(claim);
+    final boolean inserted = knownKeys.asMap().putIfAbsent(key, key) == null;
+    final ChangeType changeType =
+        inserted ? ChangeType.CHANGE_TYPE_INSERT : ChangeType.CHANGE_TYPE_UPDATE;
+    return changeFactory.create(timestamp, changeType, sequenceNumber++, claim);
   }
 
   @Override
@@ -62,6 +81,8 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
         source,
         clock,
         startingSequenceNumber,
+        KEY_CACHE_SIZE,
+        FissClaim::getDcn,
         (timestamp, type, seq, claim) ->
             FissClaimChange.newBuilder()
                 .setTimestamp(timestamp)
@@ -77,6 +98,8 @@ public class WrappedClaimSource<TChange, TClaim> implements MessageSource<TChang
         source,
         clock,
         startingSequenceNumber,
+        KEY_CACHE_SIZE,
+        McsClaim::getIdrClmHdIcn,
         (timestamp, type, seq, claim) ->
             McsClaimChange.newBuilder()
                 .setTimestamp(timestamp)
