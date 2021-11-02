@@ -8,6 +8,10 @@ import io.grpc.Metadata;
 import io.grpc.Status;
 import java.util.concurrent.Executor;
 
+/**
+ * A CallCredentials implementation that adds a bearer token to every request. Used to invoke the
+ * RDA API with a JWT token for authorization.
+ */
 public class BearerToken extends CallCredentials {
   private static final String HEADER_PREFIX = "Bearer ";
   private static final Metadata.Key<String> HEADER_KEY =
