@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.google.common.base.Strings;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import lombok.Getter;
@@ -19,10 +20,22 @@ public class S3JsonMessageSources {
 
   private final AmazonS3 s3Client;
   @Getter private final String bucketName;
+  private final String fissPrefix;
+  private final String mcsPrefix;
 
-  public S3JsonMessageSources(AmazonS3 s3Client, String bucketName) {
+  /**
+   * Creates an instance using the specified S3, bucket, and optional directory within the bucket. A
+   * path is only added if the directoryPath is non-empty.
+   *
+   * @param s3Client the S3 client to use
+   * @param bucketName the bucket files are stored in
+   * @param directoryPath the path within the bucket
+   */
+  public S3JsonMessageSources(AmazonS3 s3Client, String bucketName, String directoryPath) {
     this.s3Client = s3Client;
     this.bucketName = bucketName;
+    fissPrefix = createCompoundKeyPrefix(directoryPath, FISS_OBJECT_KEY_PREFIX);
+    mcsPrefix = createCompoundKeyPrefix(directoryPath, MCS_OBJECT_KEY_PREFIX);
   }
 
   /**
@@ -35,7 +48,7 @@ public class S3JsonMessageSources {
     return new S3BucketMessageSourceFactory<>(
         s3Client,
         bucketName,
-        FISS_OBJECT_KEY_PREFIX,
+        fissPrefix,
         FILE_SUFFIX,
         this::readFissClaimChanges,
         FissClaimChange::getSeq);
@@ -51,7 +64,7 @@ public class S3JsonMessageSources {
     return new S3BucketMessageSourceFactory<>(
         s3Client,
         bucketName,
-        MCS_OBJECT_KEY_PREFIX,
+        mcsPrefix,
         FILE_SUFFIX,
         this::readMcsClaimChanges,
         McsClaimChange::getSeq);
@@ -78,10 +91,64 @@ public class S3JsonMessageSources {
     return createMessageSource(ndjsonObjectKey, JsonMessageSource::parseMcsClaimChange);
   }
 
+  /**
+   * Creates an object key compatible with the MessageSources returned by this object. Intended for
+   * use in integration tests that need to upload files without using hard coded keys.
+   *
+   * @return a valid object key for FISS claims data
+   */
+  public String createFissObjectKey() {
+    return S3BucketMessageSourceFactory.createValidObjectKey(fissPrefix, FILE_SUFFIX);
+  }
+
+  /**
+   * Creates an object key compatible with the MessageSources returned by this object. Allows the
+   * range of sequence numbers within the file to be added to the key in a compatible way. Intended
+   * for use in integration tests that need to upload files without using hard coded keys.
+   *
+   * @return a valid object key for FISS claims data
+   */
+  public String createFissObjectKey(long minSeq, long maxSeq) {
+    return S3BucketMessageSourceFactory.createValidObjectKey(
+        fissPrefix, FILE_SUFFIX, minSeq, maxSeq);
+  }
+
+  /**
+   * Creates an object key compatible with the MessageSources returned by this object. Intended for
+   * use in integration tests that need to upload files without using hard coded keys.
+   *
+   * @return a valid object key for FISS claims data
+   */
+  public String createMcsObjectKey() {
+    return S3BucketMessageSourceFactory.createValidObjectKey(mcsPrefix, FILE_SUFFIX);
+  }
+
+  /**
+   * Creates an object key compatible with the MessageSources returned by this object. Allows the
+   * range of sequence numbers within the file to be added to the key in a compatible way. Intended
+   * for use in integration tests that need to upload files without using hard coded keys.
+   *
+   * @return a valid object key for MCS claims data
+   */
+  public String createMcsObjectKey(long minSeq, long maxSeq) {
+    return S3BucketMessageSourceFactory.createValidObjectKey(
+        mcsPrefix, FILE_SUFFIX, minSeq, maxSeq);
+  }
+
   private <T> MessageSource<T> createMessageSource(
       String ndjsonObjectKey, JsonMessageSource.Parser<T> parser) {
     LOGGER.info(
         "creating S3JsonMessageSource from S3: bucket={} key={}", bucketName, ndjsonObjectKey);
     return new S3JsonMessageSource<>(s3Client.getObject(bucketName, ndjsonObjectKey), parser);
+  }
+
+  private static String createCompoundKeyPrefix(String directoryPath, String keyPrefix) {
+    if (Strings.isNullOrEmpty(directoryPath)) {
+      return keyPrefix;
+    } else if (directoryPath.endsWith("/")) {
+      return directoryPath + keyPrefix;
+    } else {
+      return String.format("%s/%s", directoryPath, keyPrefix);
+    }
   }
 }

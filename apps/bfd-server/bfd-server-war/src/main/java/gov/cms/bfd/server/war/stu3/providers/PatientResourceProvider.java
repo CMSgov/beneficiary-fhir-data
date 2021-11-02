@@ -187,7 +187,7 @@ public final class PatientResourceProvider implements IResourceProvider, CommonH
     }
 
     // Add bene_id to MDC logs
-    MDC.put("bene_id", beneIdText);
+    TransformerUtils.logBeneIdToMdc(Arrays.asList(beneIdText));
 
     Patient patient = BeneficiaryTransformer.transform(metricRegistry, beneficiary, requestHeader);
     return patient;

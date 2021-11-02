@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import gov.cms.bfd.pipeline.rda.grpc.ThrowableAction;
 import gov.cms.bfd.pipeline.rda.grpc.ThrowableConsumer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
@@ -82,7 +83,7 @@ public class RdaServer {
       test.accept(server.getPort());
     } finally {
       server.shutdown();
-      server.awaitTermination(5, TimeUnit.SECONDS);
+      server.awaitTermination(3, TimeUnit.MINUTES);
     }
   }
 
@@ -109,11 +110,37 @@ public class RdaServer {
         test.accept(channel);
       } finally {
         channel.shutdown();
-        channel.awaitTermination(5, TimeUnit.SECONDS);
+        channel.awaitTermination(3, TimeUnit.MINUTES);
       }
     } finally {
       server.shutdown();
-      server.awaitTermination(5, TimeUnit.SECONDS);
+      server.awaitTermination(3, TimeUnit.MINUTES);
+    }
+  }
+
+  /**
+   * Starts a server, runs a test with a no parameter, and then shuts down the server once the test
+   * has finished running. InProcess servers have less overhead than Local servers but still
+   * exercise most of the GRPC plumbing. This assumes the test will know how to connect to the
+   * server on its own without any parameters.
+   *
+   * @param fissSourceFactory factory to create a FissClaimChange MessageSource
+   * @param mcsSourceFactory factory to create a McsClaimChange MessageSource
+   * @param test the test to execute
+   * @throws Exception any exception is passed through to the caller
+   */
+  public static void runWithInProcessServer(
+      String serverName,
+      MessageSource.Factory<FissClaimChange> fissSourceFactory,
+      MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+      ThrowableAction test)
+      throws Exception {
+    final Server server = startInProcess(serverName, fissSourceFactory, mcsSourceFactory);
+    try {
+      test.act();
+    } finally {
+      server.shutdown();
+      server.awaitTermination(3, TimeUnit.MINUTES);
     }
   }
 }

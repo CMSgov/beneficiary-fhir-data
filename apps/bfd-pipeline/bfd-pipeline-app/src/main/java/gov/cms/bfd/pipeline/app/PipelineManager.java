@@ -43,12 +43,12 @@ public final class PipelineManager implements AutoCloseable {
   /**
    * The number of jobs that can be run at one time. Because the {@link VolunteerJob} and {@link
    * SchedulerJob} will always be running, this number must be greater than or equal to 3, in order
-   * for any actual jobs to get run. Value of 5 is sufficient for VolunteerJob, SchedulerJob,
-   * CcwRifLoadJob, RdaFissClaimLoadJob, and RdaMcsClaimLoadJob.
+   * for any actual jobs to get run. Value of 6 is sufficient for VolunteerJob, SchedulerJob,
+   * CcwRifLoadJob, RdaFissClaimLoadJob, RdaMcsClaimLoadJob, and RdaServerJob.
    *
    * @see #jobExecutor
    */
-  public static final int JOB_EXECUTOR_THREADS = 5;
+  public static final int JOB_EXECUTOR_THREADS = 6;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManager.class);
 
