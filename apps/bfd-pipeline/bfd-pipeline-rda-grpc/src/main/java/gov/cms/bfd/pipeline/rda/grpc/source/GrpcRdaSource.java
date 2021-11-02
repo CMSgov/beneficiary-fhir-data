@@ -326,6 +326,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       CallOptions answer = CallOptions.DEFAULT;
       if (authenticationToken != null) {
         answer = answer.withCallCredentials(new BearerToken(authenticationToken));
+      } else {
+        LOGGER.warn("authenticationToken has not been set - calling server with no token");
       }
       return answer;
     }
