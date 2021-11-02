@@ -38,7 +38,7 @@ public class SimpleAuthorizationInterceptor implements ServerInterceptor {
       final Metadata metadata,
       final ServerCallHandler<ReqT, RespT> serverCallHandler) {
     if (!isAuthorized(metadata)) {
-      throw new StatusRuntimeException(Status.PERMISSION_DENIED);
+      throw new StatusRuntimeException(Status.UNAUTHENTICATED);
     }
     return serverCallHandler.startCall(serverCall, metadata);
   }
