@@ -64,7 +64,7 @@ public class RdaLoadJobIT {
           RdaServer.LocalConfig.builder()
               .fissSourceFactory(fissJsonSource(fissClaimJson))
               .build()
-              .run(
+              .runWithPortParam(
                   port -> {
                     final RdaLoadOptions config = createRdaLoadOptions(port);
                     final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
@@ -108,7 +108,7 @@ public class RdaLoadJobIT {
           RdaServer.LocalConfig.builder()
               .fissSourceFactory(fissJsonSource(badFissClaimJson))
               .build()
-              .run(
+              .runWithPortParam(
                   port -> {
                     final RdaLoadOptions config = createRdaLoadOptions(port);
                     final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState);
@@ -136,7 +136,7 @@ public class RdaLoadJobIT {
               .serverName(RdaServerJob.Config.DEFAULT_SERVER_NAME)
               .mcsSourceFactory(mcsJsonSource(mcsClaimJson))
               .build()
-              .runWithNoArguments(
+              .runWithNoParam(
                   () -> {
                     final RdaLoadOptions config = createRdaLoadOptions(-1);
                     final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
@@ -182,7 +182,7 @@ public class RdaLoadJobIT {
                           claimsToSendBeforeThrowing,
                           () -> new IOException("oops")))
               .build()
-              .run(
+              .runWithPortParam(
                   port -> {
                     final RdaLoadOptions config = createRdaLoadOptions(port);
                     final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState);

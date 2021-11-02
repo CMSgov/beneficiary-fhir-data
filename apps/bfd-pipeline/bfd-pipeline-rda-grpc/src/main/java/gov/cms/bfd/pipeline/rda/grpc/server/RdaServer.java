@@ -104,7 +104,7 @@ public class RdaServer {
    * @param test the test to execute
    * @throws Exception any exception is passed through to the caller
    */
-  public static void runWithInProcessServerNoArguments(InProcessConfig config, ThrowableAction test)
+  public static void runWithInProcessServerNoParam(InProcessConfig config, ThrowableAction test)
       throws Exception {
     final Server server = startInProcess(config);
     try {
@@ -138,8 +138,11 @@ public class RdaServer {
      */
     @NonNull @Singular Set<String> authorizedTokens;
 
-    /** Shorthand for calling {@link runWithLocalServer} with this config object. */
-    public void run(ThrowableConsumer<Integer> action) throws Exception {
+    /**
+     * Shorthand for calling {@link RdaServer#runWithLocalServer(LocalConfig, ThrowableConsumer)}
+     * with this config object.
+     */
+    public void runWithPortParam(ThrowableConsumer<Integer> action) throws Exception {
       runWithLocalServer(this, action);
     }
   }
@@ -167,14 +170,20 @@ public class RdaServer {
      */
     @NonNull @Singular Set<String> authorizedTokens;
 
-    /** Shorthand for calling {@link runWithInProcessServer} with this config object. */
-    public void run(ThrowableConsumer<ManagedChannel> action) throws Exception {
+    /**
+     * Shorthand for calling {@link RdaServer#runWithInProcessServer(InProcessConfig,
+     * ThrowableConsumer)} with this config object.
+     */
+    public void runWithChannelParam(ThrowableConsumer<ManagedChannel> action) throws Exception {
       runWithInProcessServer(this, action);
     }
 
-    /** Shorthand for calling {@link runWithInProcessServer} with this config object. */
-    public void runWithNoArguments(ThrowableAction action) throws Exception {
-      runWithInProcessServerNoArguments(this, action);
+    /**
+     * Shorthand for calling {@link RdaServer#runWithInProcessServerNoParam(InProcessConfig,
+     * ThrowableAction)} with this config object.
+     */
+    public void runWithNoParam(ThrowableAction action) throws Exception {
+      runWithInProcessServerNoParam(this, action);
     }
   }
 }

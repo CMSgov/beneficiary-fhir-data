@@ -69,7 +69,7 @@ public class LoadRdaJsonApp {
           .fissSourceFactory(config::createFissClaimsSource)
           .mcsSourceFactory(config::createMcsClaimsSource)
           .build()
-          .run(
+          .runWithPortParam(
               port -> {
                 final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
                 final DatabaseOptions databaseConfig = config.createDatabaseOptions();

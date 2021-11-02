@@ -258,7 +258,7 @@ public final class PipelineApplicationIT {
           .fissSourceFactory(ignored -> new RandomFissClaimSource(12345, 100).toClaimChanges())
           .mcsSourceFactory(ignored -> new RandomMcsClaimSource(12345, 100).toClaimChanges())
           .build()
-          .run(
+          .runWithPortParam(
               port -> {
                 // Start the app.
                 ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);
@@ -314,7 +314,7 @@ public final class PipelineApplicationIT {
                   new ExceptionMessageSource<>(
                       new RandomMcsClaimSource(12345, 100).toClaimChanges(), 25, IOException::new))
           .build()
-          .run(
+          .runWithPortParam(
               port -> {
                 // Start the app.
                 ProcessBuilder appRunBuilder = createRdaAppProcessBuilder(port);

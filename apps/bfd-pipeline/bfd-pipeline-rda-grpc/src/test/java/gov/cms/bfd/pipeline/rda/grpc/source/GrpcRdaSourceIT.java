@@ -195,7 +195,7 @@ public class GrpcRdaSourceIT {
   public void grpcCallNoAuthTokenNeeded() throws Exception {
     createServerConfig()
         .build()
-        .run(
+        .runWithPortParam(
             port -> {
               int count;
               GrpcRdaSource.Config config = createSourceConfig(port).build();
@@ -214,7 +214,7 @@ public class GrpcRdaSourceIT {
     createServerConfig()
         .authorizedToken("secret")
         .build()
-        .run(
+        .runWithPortParam(
             port -> {
               int count;
               GrpcRdaSource.Config config =
@@ -234,7 +234,7 @@ public class GrpcRdaSourceIT {
     createServerConfig()
         .authorizedToken("secret")
         .build()
-        .run(
+        .runWithPortParam(
             port -> {
               GrpcRdaSource.Config config = createSourceConfig(port).build();
               try {
@@ -257,7 +257,7 @@ public class GrpcRdaSourceIT {
     createServerConfig()
         .authorizedToken("secret")
         .build()
-        .run(
+        .runWithPortParam(
             port -> {
               GrpcRdaSource.Config config =
                   createSourceConfig(port).authenticationToken("wrong-secret").build();

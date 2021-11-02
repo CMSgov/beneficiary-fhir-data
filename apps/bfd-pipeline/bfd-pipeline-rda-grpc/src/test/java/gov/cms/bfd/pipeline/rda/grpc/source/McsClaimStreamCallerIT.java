@@ -27,7 +27,7 @@ public class McsClaimStreamCallerIT {
             sequenceNumber ->
                 new RandomMcsClaimSource(1000L, 2).toClaimChanges().skip(sequenceNumber))
         .build()
-        .run(
+        .runWithChannelParam(
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
@@ -56,7 +56,7 @@ public class McsClaimStreamCallerIT {
             sequenceNumber ->
                 new RandomMcsClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber))
         .build()
-        .run(
+        .runWithChannelParam(
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =

@@ -65,7 +65,7 @@ public class FissClaimStreamCallerIT {
                     clock,
                     sequenceNumber))
         .build()
-        .run(
+        .runWithChannelParam(
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
@@ -92,7 +92,7 @@ public class FissClaimStreamCallerIT {
             sequenceNumber ->
                 new RandomFissClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber))
         .build()
-        .run(
+        .runWithChannelParam(
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
