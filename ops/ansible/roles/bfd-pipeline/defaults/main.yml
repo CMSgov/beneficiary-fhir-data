@@ -28,6 +28,9 @@ data_pipeline_rda_job_batch_size: 20
 # How long to allow the RDA API stream to be idle before closing the connection.
 data_pipeline_rda_grpc_max_idle_seconds: 600
 
+# By default call the RDA API with no token.  Override this value in env specific vault
+# to enable authentication.
+data_pipeline_rda_grpc_auth_token: ''
 
 ## EFT EFS 
 #
