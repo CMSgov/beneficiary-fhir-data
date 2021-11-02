@@ -246,7 +246,7 @@ public class GrpcRdaSourceIT {
                 assertEquals(0, ex.getProcessedCount());
                 assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
                 assertEquals(
-                    Status.PERMISSION_DENIED,
+                    Status.UNAUTHENTICATED,
                     ((StatusRuntimeException) ex.getOriginalCause()).getStatus());
               }
             });
@@ -270,7 +270,7 @@ public class GrpcRdaSourceIT {
                 assertEquals(0, ex.getProcessedCount());
                 assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
                 assertEquals(
-                    Status.PERMISSION_DENIED,
+                    Status.UNAUTHENTICATED,
                     ((StatusRuntimeException) ex.getOriginalCause()).getStatus());
               }
             });
