@@ -6,6 +6,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
@@ -126,11 +127,18 @@ public class LoadRdaJsonApp {
     private RdaLoadOptions createRdaLoadOptions(int port) {
       final IdHasher.Config idHasherConfig = new IdHasher.Config(hashIterations, hashPepper);
       final AbstractRdaLoadJob.Config jobConfig =
-          new AbstractRdaLoadJob.Config(
-              Duration.ofDays(1), batchSize, Optional.empty(), Optional.empty());
+          AbstractRdaLoadJob.Config.builder()
+              .runInterval(Duration.ofDays(1))
+              .batchSize(batchSize)
+              .build();
       final GrpcRdaSource.Config grpcConfig =
-          new GrpcRdaSource.Config("localhost", port, Duration.ofDays(1));
-      return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
+          GrpcRdaSource.Config.builder()
+              .serverType(GrpcRdaSource.Config.ServerType.Remote)
+              .host("localhost")
+              .port(port)
+              .maxIdle(Duration.ofDays(1))
+              .build();
+      return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
     }
 
     private MessageSource<FissClaimChange> createFissClaimsSource(long sequenceNumber) {

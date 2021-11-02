@@ -257,7 +257,12 @@ public class GrpcRdaSourceTest {
   @Test
   public void configIsSerializable() throws Exception {
     final GrpcRdaSource.Config original =
-        new GrpcRdaSource.Config("localhost", 5432, Duration.ofMinutes(59));
+        GrpcRdaSource.Config.builder()
+            .serverType(GrpcRdaSource.Config.ServerType.Remote)
+            .host("localhost")
+            .port(5432)
+            .maxIdle(Duration.ofMinutes(59))
+            .build();
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
       out.writeObject(original);

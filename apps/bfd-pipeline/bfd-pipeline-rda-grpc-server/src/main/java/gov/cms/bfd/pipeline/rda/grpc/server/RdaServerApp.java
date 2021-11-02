@@ -67,7 +67,8 @@ public class RdaServerApp {
                 .enumOption("s3Region", Regions::fromName)
                 .orElse(SharedS3Utilities.REGION_DEFAULT);
         final AmazonS3 s3Client = SharedS3Utilities.createS3Client(s3Region);
-        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get());
+        final String s3Directory = config.stringOption("s3Directory").orElse("");
+        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get(), s3Directory);
       } else {
         s3Sources = null;
       }
