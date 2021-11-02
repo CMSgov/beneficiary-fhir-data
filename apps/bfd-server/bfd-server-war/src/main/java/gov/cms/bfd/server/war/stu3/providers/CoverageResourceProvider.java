@@ -22,6 +22,7 @@ import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.QueryUtils;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -127,6 +127,10 @@ public final class CoverageResourceProvider implements IResourceProvider {
     Beneficiary beneficiaryEntity;
     try {
       beneficiaryEntity = findBeneficiaryById(coverageIdBeneficiaryIdText, null);
+
+      if (!beneficiaryEntity.getBeneEnrollmentReferenceYear().isPresent()) {
+        throw new ResourceNotFoundException("Cannot find coverage for non present enrollment year");
+      }
     } catch (NoResultException e) {
       throw new ResourceNotFoundException(
           new IdDt(Beneficiary.class.getSimpleName(), coverageIdBeneficiaryIdText));
@@ -172,6 +176,11 @@ public final class CoverageResourceProvider implements IResourceProvider {
     List<IBaseResource> coverages;
     try {
       Beneficiary beneficiaryEntity = findBeneficiaryById(beneficiary.getIdPart(), lastUpdated);
+
+      if (!beneficiaryEntity.getBeneEnrollmentReferenceYear().isPresent()) {
+        throw new ResourceNotFoundException("Cannot find coverage for non present enrollment year");
+      }
+
       coverages = CoverageTransformer.transform(metricRegistry, beneficiaryEntity);
     } catch (NoResultException e) {
       coverages = new LinkedList<IBaseResource>();
@@ -187,7 +196,7 @@ public final class CoverageResourceProvider implements IResourceProvider {
     operation.publishOperationName();
 
     // Add bene_id to MDC logs
-    MDC.put("bene_id", beneficiary.getIdPart());
+    TransformerUtils.logBeneIdToMdc(Arrays.asList(beneficiary.getIdPart()));
 
     return TransformerUtils.createBundle(
         paging, coverages, loadedFilterManager.getTransactionTime());

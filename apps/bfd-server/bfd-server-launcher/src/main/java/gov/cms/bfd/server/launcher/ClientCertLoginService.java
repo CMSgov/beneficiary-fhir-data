@@ -1,7 +1,11 @@
 package gov.cms.bfd.server.launcher;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.jetty.security.AbstractLoginService;
 import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.security.RolePrincipal;
+import org.eclipse.jetty.security.UserPrincipal;
 import org.eclipse.jetty.util.security.Credential;
 
 /** A Jetty {@link LoginService} for mutual TLS. */
@@ -23,8 +27,8 @@ public class ClientCertLoginService extends AbstractLoginService {
    *     org.eclipse.jetty.security.AbstractLoginService#loadRoleInfo(org.eclipse.jetty.security.AbstractLoginService.UserPrincipal)
    */
   @Override
-  protected String[] loadRoleInfo(UserPrincipal user) {
-    return new String[] {};
+  protected List<RolePrincipal> loadRoleInfo(UserPrincipal user) {
+    return new ArrayList<>();
   }
 
   /**

@@ -27,8 +27,8 @@
         data_server_dir: "{{ bfd_server_dir }}"
         data_server_tmp_dir: "{{ data_server_dir }}/tmp"
         data_server_appserver_https_port: "{{ vault_data_server_appserver_https_port }}"
-        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xloggc:{{ bfd_server_dir }}/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintTenuringDistribution -XX:+PreserveFramePointer"
-        data_server_launcher: "bfd-server-launcher-{{ data_server_version }}-capsule-fat.jar"
+        data_server_appserver_jvmargs: "-Xmx{{ (((data_server_ec2_instance_type_mem_mib | int) * 0.80) - 2048) | int }}m -XX:MaxMetaspaceSize=2048m -XX:MaxMetaspaceSize=2048m -Xlog:gc*:{{ bfd_server_dir }}/gc.log:time,level,tags -XX:+PreserveFramePointer"
+        data_server_launcher: "bfd-server-launcher-{{ data_server_version }}.zip"
         data_server_war: "bfd-server-war-{{ data_server_version }}.war"
         # Note: the `data_server_ssl_client_certificates` variable is defined for each env/group in `group_vars/*/main.yml`.
         # Secondary (i.e. read-only) DBs defined in `group_vars/env_<name>_az_<x>/vault.yml`:

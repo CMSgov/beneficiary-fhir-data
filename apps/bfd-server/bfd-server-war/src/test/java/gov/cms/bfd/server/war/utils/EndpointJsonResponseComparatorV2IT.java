@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -287,7 +288,7 @@ public final class EndpointJsonResponseComparatorV2IT {
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
     fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
-    return sortMetadataSearchParamArray(jsonInterceptor.getResponse());
+    return sortMetadataResponse(jsonInterceptor.getResponse());
   }
 
   /**
@@ -309,7 +310,7 @@ public final class EndpointJsonResponseComparatorV2IT {
    * @param unsortedResponse the JSON string with an unsorted searchParam array
    * @return the JSON string with the sorted searchParam array
    */
-  private static String sortMetadataSearchParamArray(String unsortedResponse) {
+  private static String sortMetadataResponse(String unsortedResponse) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.writerWithDefaultPrettyPrinter();
     JsonNode parsedJson = null;
@@ -320,33 +321,9 @@ public final class EndpointJsonResponseComparatorV2IT {
           "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
     }
 
-    // This returns the searchParam node for the resource type='Patient' from
-    // metadata.json
-    JsonNode searchParamsArray = parsedJson.at("/rest/0/resource/3/searchParam");
+    sortMetaDataResources(parsedJson.at("/rest/0/resource"));
 
-    Iterator<JsonNode> searchParamsArrayIterator = searchParamsArray.elements();
-    List<JsonNode> searchParams = new ArrayList<JsonNode>();
-    while (searchParamsArrayIterator.hasNext()) {
-      searchParams.add(searchParamsArrayIterator.next());
-    }
-
-    Collections.sort(
-        searchParams,
-        new Comparator<JsonNode>() {
-          @Override
-          public int compare(JsonNode node1, JsonNode node2) {
-            String name1 = node1.get("name").toString();
-            String name2 = node2.get("name").toString();
-            return name1.compareTo(name2);
-          }
-        });
-
-    ((ArrayNode) searchParamsArray).removeAll();
-    for (int i = 0; i < searchParams.size(); i++) {
-      ((ArrayNode) searchParamsArray).add(searchParams.get(i));
-    }
-
-    String jsonResponse = null;
+    String jsonResponse;
     try {
       jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
     } catch (JsonProcessingException e) {
@@ -354,6 +331,32 @@ public final class EndpointJsonResponseComparatorV2IT {
           "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
     }
     return jsonResponse;
+  }
+
+  static void sortMetaDataResources(JsonNode resources) {
+    for (JsonNode resource : resources) {
+      sortMetaDataSearchParamArray(resource);
+    }
+
+    List<JsonNode> resourceList = Lists.newArrayList(resources.elements());
+
+    resourceList.sort(Comparator.comparing(node -> node.get("type").toString()));
+
+    ((ArrayNode) resources).removeAll();
+    resourceList.forEach(((ArrayNode) resources)::add);
+  }
+
+  static void sortMetaDataSearchParamArray(JsonNode resource) {
+    if (resource.has("searchParam")) {
+      JsonNode searchParamsArray = resource.at("/searchParam");
+
+      List<JsonNode> searchParams = Lists.newArrayList(searchParamsArray.elements());
+
+      searchParams.sort(Comparator.comparing(node -> node.get("name").toString()));
+
+      ((ArrayNode) searchParamsArray).removeAll();
+      searchParams.forEach(((ArrayNode) searchParamsArray)::add);
+    }
   }
 
   /**

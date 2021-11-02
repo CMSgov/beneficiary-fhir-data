@@ -515,3 +515,19 @@ data-synthetic/Sample-A-Synthetic-Data/ based on data from Step 1.  Changed the 
 11.  Compared the data in these files to real values in prod and made sure it made sense.  Again DID NOT use real prod data.
 12.  Uploaded all of these files in Test, Prod-sandbox, and Prod.
 
+### Synthea Data Set Details
+09/09/2021 - Generated Synthea data set from the following properities file that is located at: `[./synthea/synthea.properities-08092021](./synthea/synthea.properities-08092021)`.
+
+exporter.bfd.export = true
+exporter.bfd.config_file = export/bfd_field_values.tsv
+exporter.bfd.bene_id_start = -10000000000000
+exporter.bfd.clm_id_start = -10000000000000
+exporter.bfd.clm_grp_id_start = -100000000
+exporter.bfd.pde_id_start = -10000000000
+exporter.bfd.mbi_start = 1S00-E00-AA01 - the next mbi start should be 1S00-E00-FZ01
+exporter.bfd.hicn_start = T01000000A
+exporter.bfd.partd_contract_start = Z0001
+exporter.bfd.partd_contract_count = 10
+
+Ran the synthea utility with the following command:
+    ./run_synthea -s 0 -cs 0 -r 20210808 -p 10000 --exporter.fhir.export=false --exporter.bfd.export=true --exporter.years_of_history=10 --generate.only_alive_patients=true -a 65-80

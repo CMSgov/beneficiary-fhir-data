@@ -1,5 +1,14 @@
 ---
 
+- name: Install Pre-requisites
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # Needed to supply `keytool` and also to run the app server.
+    - java-11-openjdk-devel
+  become: true
+
 - name: Create Server User
   user:
     name: "{{ data_server_user }}"
@@ -34,10 +43,12 @@
   become: true
   when: data_server_tmp_dir is defined and stat_tmp.stat.exists == false
 
-- name: Copy BFD Server Launcher
-  copy:
+- name: Copy and Unzip BFD Server Launcher
+  unarchive:
     src: "{{ data_server_launcher }}"
-    dest: "{{ data_server_dir }}/{{ data_server_launcher | basename }}"
+    dest: "{{ data_server_dir }}"
+    owner: "{{ data_server_user }}"
+    group: "{{ data_server_user }}"
   become: true
 
 - name: Copy BFD Server WAR

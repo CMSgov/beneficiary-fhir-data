@@ -68,7 +68,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
@@ -106,43 +106,57 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
-					<!-- Used to build executable JARs, with all dependencies included in
-						them. -->
-					<groupId>com.github.chrischristo</groupId>
-					<artifactId>capsule-maven-plugin</artifactId>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.3.0</version>
 					<configuration>
-						<appClass>gov.cms.bfd.pipeline.app.PipelineApplication</appClass>
-
-						<!-- Building the "really executable" .x files is tempting, but ultimately
-							not very useful, as there's no way to pass JVM args into such launchers,
-							which prevents customizing the heap size at runtime. -->
-						<chmod>false</chmod>
-
-						<types>fat</types>
-						<manifest>
-							<entry>
-								<key>JVM-Args</key>
-								<value>-Xmx1g</value>
-							</entry>
-							<entry>
-								<key>Min-Java-Version</key>
-								<value>1.8.0</value>
-							</entry>
-						</manifest>
+						<appendAssemblyId>false</appendAssemblyId>
+						<descriptors>
+							<descriptor>src/main/assembly/zip.xml</descriptor>
+						</descriptors>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<!-- Unpack the assembly for use in ITs. -->
+					<configuration>
+						<artifactItems>
+							<artifactItem>
+								<groupId>${project.groupId}</groupId>
+								<artifactId>${project.artifactId}</artifactId>
+								<version>${project.version}</version>
+								<type>zip</type>
+								<outputDirectory>${project.build.directory}/pipeline-app</outputDirectory>
+							</artifactItem>
+						</artifactItems>
 					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<!-- Used to build executable JARs, with all dependencies included in
-					them. -->
-				<groupId>com.github.chrischristo</groupId>
-				<artifactId>capsule-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>build-assembly</id>
+						<phase>package</phase>
 						<goals>
-							<goal>build</goal>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>server-unpack-assembly</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>unpack</goal>
 						</goals>
 					</execution>
 				</executions>

@@ -4,6 +4,8 @@
 ##
 - name: Configure ETL Server
   hosts: localhost
+  vars:
+    bfd_pipeline_dir: '/bluebutton-data-pipeline'
 
   tasks:
     - name: Include global variables
@@ -20,8 +22,8 @@
       import_role:
         name: bfd-pipeline
       vars:
-        data_pipeline_dir: '/bluebutton-data-pipeline'
-        # Note: The `data_pipeline_jar` variable should have been provided by `--extra-vars` on the command line.
+        data_pipeline_dir: "{{ bfd_pipeline_dir }}"
+        # Note: The `data_pipeline_zip` variable should have been provided by `--extra-vars` on the command line.
         data_pipeline_jvm_args: "-Xmx{{ ((data_pipeline_ec2_instance_type_mem_mib | int) * 0.80) | int }}m -XX:+PreserveFramePointer"
         data_pipeline_tmp_dir: "{{ data_pipeline_dir }}/tmp"
         data_pipeline_loader_threads: "{{ data_pipeline_ec2_instance_type_vcpu * 25 }}"

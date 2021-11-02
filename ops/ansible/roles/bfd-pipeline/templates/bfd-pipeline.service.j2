@@ -5,7 +5,7 @@ After=network.target network-online.target
 
 [Service]
 WorkingDirectory={{ data_pipeline_dir }}
-ExecStart={{ data_pipeline_dir }}/bluebutton-data-pipeline.sh
+ExecStart={{ data_pipeline_dir }}/bfd-pipeline-service.sh
 User={{ data_pipeline_user }}
 
 [Install]

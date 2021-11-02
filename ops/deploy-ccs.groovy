@@ -51,21 +51,21 @@ def findAmis() {
 		platinumAmiId: sh(
 			returnStdout: true,
 			script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-platinum-??????????????' \
+			'Name=name,Values=bfd-amzn2-jdk11-platinum-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
     bfdPipelineAmiId: sh(
       returnStdout: true,
       script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-etl-??????????????' \
+			'Name=name,Values=bfd-amzn2-jdk11-etl-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
     bfdServerAmiId: sh(
       returnStdout: true,
       script: "aws ec2 describe-images --owners self --filters \
-			'Name=name,Values=bfd-amzn2-fhir-??????????????' \
+			'Name=name,Values=bfd-amzn2-jdk11-fhir-??????????????' \
 			'Name=state,Values=available' --region us-east-1 --output json | \
 			jq -r '.Images | sort_by(.CreationDate) | last(.[]).ImageId'"
     ).trim(),
@@ -125,7 +125,7 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 			writeFile file: "${workspace}/ops/ansible/playbooks-ccs/extra_vars.json", text: """{
     "data_server_launcher": "${workspace}/${appBuildResults.dataServerLauncher}",
     "data_server_war": "${workspace}/${appBuildResults.dataServerWar}",
-    "data_pipeline_jar": "${workspace}/${appBuildResults.dataPipelineUberJar}"
+    "data_pipeline_zip": "${workspace}/${appBuildResults.dataPipelineZip}"
 }"""
 
 			// build AMIs in parallel

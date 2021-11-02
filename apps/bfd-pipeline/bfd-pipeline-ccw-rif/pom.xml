@@ -69,7 +69,7 @@
 		</dependency>
 
 		<dependency>
-			<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). 
+			<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). 
 				Brought into the compile classpath here, because RifLoader directly uses 
 				its CopyManager API. -->
 			<groupId>org.postgresql</groupId>
