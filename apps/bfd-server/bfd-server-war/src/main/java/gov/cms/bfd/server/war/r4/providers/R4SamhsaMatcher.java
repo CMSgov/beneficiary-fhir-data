@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
@@ -526,20 +527,56 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
    *     not
    */
   private boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
+    // Does the CodeableConcept have a legit HCPCS Coding?
+    boolean hasHcpcsCoding = findHcpcsCoding(procedureConcept);
+
+    // Check that Coding to see if it's blacklisted.
+    if (hasHcpcsCoding && isSamhsaCptCode(procedureConcept)) {
+      return true;
+    } else if (hasHcpcsCoding && hasUnknownSystem(procedureConcept)) {
+      /*
+       * Fail safe: if we don't know the procedure Coding system, assume the code is
+       * SAMHSA.
+       */
+      return true;
+    } else {
+      // Otherwise, this only has known & non-SAMHSA-blacklisted procedure codes.
+      return false;
+    }
+  }
+
+  /**
+   * @param procedureConcept the procedure {@link CodeableConcept} to check
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
+   *     {@link Coding}s that match any of the {@link #cptCodes}, <code>false</code> if they all do
+   *     not
+   */
+  private boolean findHcpcsCoding(CodeableConcept procedureConcept) {
     for (Coding procedureCoding : procedureConcept.getCoding()) {
       if (TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem())) {
-        if (isSamhsaCptCode(procedureCoding)) return true;
-      } else {
-        /*
-         * Fail safe: if we don't know the procedure Coding system, assume the code is
-         * SAMHSA.
-         */
         return true;
       }
     }
-
-    // No blacklisted procedure Codings found: this procedure isn't SAMHSA-related.
     return false;
+  }
+
+  private boolean hasUnknownSystem(CodeableConcept procedureConcept) {
+    Set<String> codingSystems =
+        procedureConcept.getCoding().stream()
+            .map(coding -> coding.getSystem())
+            .collect(Collectors.toSet());
+    if (codingSystems.size() == 2
+        && codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)
+        && codingSystems.contains(
+            TransformerUtilsV2.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD))) {
+      /* add a comment here explaining why this complex check is needed and referencing the JIRA ticket */
+      return false;
+    } else if (codingSystems.size() == 1
+        && codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   /**
@@ -547,18 +584,22 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
    *     #cptCodes} entries, <code>false</code> if it does not
    */
-  private boolean isSamhsaCptCode(Coding procedureCoding) {
+  private boolean isSamhsaCptCode(CodeableConcept procedureConcept) {
     /*
      * Note: CPT codes represent a subset of possible HCPCS codes (but are the only
      * subset that we blacklist from).
      */
-    if (!TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem()))
-      throw new IllegalArgumentException();
+    for (Coding procedureCoding : procedureConcept.getCoding()) {
+      if (!TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem())) {
+        throw new IllegalArgumentException();
+      }
 
-    /*
-     * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
-     */
-    return cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode()));
+      /*
+       * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
+       */
+      return cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode()));
+    }
+    return false;
   }
 
   /**
