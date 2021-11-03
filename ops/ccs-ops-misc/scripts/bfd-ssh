@@ -1,0 +1,329 @@
+#!/usr/bin/env bash
+# BFD SSH HELPER UTIL
+APP_NAME=${0##*/}
+set -eo pipefail
+
+# GLOBAL CONFIGS/VARS
+RANDOM_IP="${BFD_SSH_RANDOM_IP:-false}" # randomly choose an ip, don't prompt
+SSH_CMD="${BFD_SSH_CMD:-}"              # run a command on the remote server (redirects to stdout/stderr)
+SETUP="${BFD_SSH_SETUP:-false}"         # install/configure bfd-ssh
+UPDATE="${BFD_SSH_UPDATE:-true}"        # check for updates
+DEL_KNOWN="${DEL_KNOWN:-true}"          # delete the target from your local known hosts
+BFD_ENVS=()                             # either dynamically set or set via command line args
+BFD_APPS=()                             # either dynamically set or set via command line args
+
+# LOCAL VARIABLES
+default_environments="prod prod-sbx test"
+allowed_environments_re="^(prod|prod-sbx|test)$"
+default_apps="api pipeline"
+allowed_apps_re="^(api|pipeline|fhir|etl)$"
+valid_api_env_re="^bfd-(prod|prod-sbx|test)-(api|fhir)$"
+
+
+
+#-------------------- GENERAL SCRIPT/HOUSEKEEPING STUFF --------------------#
+error_exit() {
+  echo -e "Error: ${1:-"cause unknown"}" >&2
+  exit 1
+}
+
+usage() {
+  echo -e "Usage: $APP_NAME [-h|--help] " \
+  "[-e|--env BFD_ENV]" \
+  "[-a|--app APP_NAME]" \
+  "[-r|--random-instance]" \
+  "[-c|--command COMMAND]" \
+  "[-s|--setup]"
+}
+
+help_message() {
+  cat <<- _EOF_
+  BFD SSH helper utility.
+
+  $(usage)
+
+  Requirements:
+    This utility uses the AWS api to help you ssh into live BFD instances:
+    - aws cli tools must be installed and properly configured
+    - you must have an active authenticated aws session (mfa)
+    - $APP_NAME must be configured to use your ssh creds (run --setup to do this)
+
+  Options:
+  -h, --help  Display this help message and exit.
+  -e, --env BFD_ENV
+    Where BFD_ENV is one of: test, prod-sbx, or prod
+  -a, --app APP_NAME
+    Where 'APP_NAME' is either: api or pipeline (fhir and etl aliases are also ok)
+  -r, --random-instance
+    If present, will randomly select an instance instead of prompting you for one.
+  -c, --command COMMAND
+    Will remotely run the COMMAND instead of logging you into a tty.
+  -s, --setup
+    Will walk you through configuring $APP_NAME. This only needs to be done once,
+    and all other arguments are ignored.
+
+  Examples:
+    # with no args, $APP_NAME will prompt you for a server to log into
+    $APP_NAME
+
+    # select a prod-sbx FHIR API instance to log into
+    $APP_NAME -e prod-sbx -a api
+
+    # randomly pick a test FHIR API instance (no prompt) to log into 
+    # note: when -r is set, detached instances are filtered out
+    $APP_NAME -e test -a api -r
+
+    # get the uptime for a random prod instance (using long form args)
+    $APP_NAME --env prod --app="api" --random-instance --command uptime
+_EOF_
+  return
+}
+
+
+#-------------------- SCRIPT ENTRYPOINT --------------------#
+# Parse command-line
+while [[ -n $1 ]]; do
+  case $1 in
+    -h | --help) help_message; exit ;;
+    -e | --env) 
+      shift
+      [[ ! "$1" =~ $allowed_environments_re ]] && error_exit "unknown environment '$1'"
+      export BFD_ENVS=( "$1" )
+    ;;
+    -a | --app)
+      shift
+      [[ ! "$1" =~ $allowed_apps_re ]] && error_exit "unknown app '$1'"
+      export BFD_APPS=( "$1" )
+    ;;
+    -r | --random-instance) export RANDOM_IP=true ;;
+    -c | --command) shift; export SSH_CMD="$1" ;;
+    -s | --setup) export SETUP=true ;;
+    -d | --delete-known-host) export DEL_KNOWN=true ;;
+    -*) usage; error_exit "Unknown option $1" ;;
+    *) usage; error_exit "Unknown argument $1" ;;
+  esac
+  shift
+done
+
+
+#-------------------- MAIN LOGIC --------------------#
+check_for_updates() {
+  :
+}
+
+run_setup() {
+  :
+}
+
+check_requirements() {
+  :
+}
+
+# delete the ip/host from the local known_hosts file
+# $1 == $ip
+delete_known_host() {
+  local target="$1"
+  if command -v ssh-keygen >/dev/null 2>&1; then
+    # more portable between mac<>linux
+    ssh-keygen -R "$1" >/dev/null 2>&1
+  else
+    # -i'' is required on mac (may work on linux)
+    sed -i'' "/^${target}/d"
+  fi
+}
+
+load_default_environments() {
+  local IFS=" "
+  read -r -a BFD_ENVS <<< "$default_environments"
+  export BFD_ENVS
+}
+
+load_default_apps() {
+  local IFS=" "
+  read -r -a BFD_APPS <<< "$default_apps"
+  export BFD_APPS
+}
+
+# selects an app env (bfd-test-etl, bfd-prod-sbx-fhir, etc) 
+# may be filtered by -a and/or -e args (will not prompt if both are set)
+select_app_env() {
+  local app_envs=()
+  [[ -z "$BFD_ENVS" ]] && load_default_environments
+  [[ -z "$BFD_APPS" ]] && load_default_apps
+
+  # build an array of app envs (bfd-prod-fhir bfd-prod-sbx-fhir ...)
+  for e in "${BFD_ENVS[@]}"; do
+    for a in "${BFD_APPS[@]}"; do
+      # convert service names to actual aws resource names
+      [[ "$a" == "api" ]] && a="fhir"
+      [[ "$a" == "pipeline" ]] && a="etl"
+      if [[ ! "${app_envs[*]}" == "bfd-$e-$a" ]]; then
+        app_envs+=("bfd-$e-$a")
+      fi
+    done
+  done
+
+  # if there is only one app env, use it
+  if [[ "${#app_envs[@]}" -eq 1 ]]; then
+    echo "${app_envs[*]}"
+    return
+  fi
+  
+  # else, prompt user to select one
+  if [[ "${#app_envs[@]}" -gt 1 ]]; then
+    PS3="Select an environment: "
+    select app_env in "${app_envs[@]}"
+    do
+      if [[ -n "$app_env" ]]; then
+        echo "$app_env"
+        return
+      fi
+    done
+  fi
+  error_exit "error selecting an environment"
+}
+
+# returns instance id's, ip's, Name (i-1234567890abcdef 10.123.45.67 bfd-prod-sbx-fhir)
+# $1 == filter string
+# shellcheck disable=SC2016
+describe_instances() {
+  aws ec2 describe-instances \
+  --filters 'Name=instance-state-name,Values=running' \
+  --query 'Reservations[].Instances[].[InstanceId,PrivateIpAddress,Tags[?Key==`Name`]| [0].Value]' \
+  --output text \
+  | grep "$1" \
+  | sed 's/\t/ /g' \
+  | grep -v "None" 2>/dev/null
+}
+
+
+# returns instance ids and health status of instances
+# $1 == load balancer name
+describe_lb_instances() {
+  aws elb describe-instance-health --load-balancer-name "$1" --output text \
+  | grep -v "None" \
+  | awk '{print $3 "|" $5}' 2>/dev/null
+}
+
+# queries aws for a list of instance id's, ip's, and status
+# if load balanced (api), then status load balancer health (ie 'InService')
+# if it's an api server and not load balanced, we assumed it's 'Detached'
+# all others are just marked 'Running' (ie. etl)
+# $1 == selected_app_env
+get_instances() {
+  local id ip re status lb_instances
+  local app_env="$1"
+
+  # get load balanced instance ids (if api)
+  # these are our "live" instances
+  if [[ "$app_env" =~ $valid_api_env_re ]]; then
+    for i in $(describe_lb_instances "$app_env"); do
+      lb_instances+=" $i "
+    done
+  fi
+
+  # iterate over all running instances for the $selected_app_env
+  IFS=$'\n'
+  for i in $(describe_instances "$app_env"); do
+    id="$(echo "$i" | awk '{print $1}')"
+    ip="$(echo "$i" | awk '{print $2}')"
+
+    # regex pattern to match an $id and everything up to the first space
+    # ie. 'i-1234567890abcdefghi|InService'
+    re="$id([^ ]+)"
+    if [[ "$lb_instances" =~ $re ]]; then
+      # this instance is in a load balancer, so also return the health status
+      status=$( echo "${BASH_REMATCH[1]}" | cut -d'|' -f2)
+      printf "%s\t%s\t%s\n" "$id" " $ip" "$status"
+    else
+      if [[ "app_env" =~ $valid_api_env_re ]]; then
+        printf "%s\t%s\t%s\n" "$id" " $ip" "Detached"
+      else
+        printf "%s\t%s\t%s\n" "$id" " $ip" "Running"
+      fi
+    fi
+  done
+}
+
+# prompt user to select a target
+# $1 == app env
+select_target() {
+  local target instances rinstances
+  local app_env="$1"
+  instances="$(get_instances "$app_env")"
+  IFS=$'\n'
+  COLUMNS=90
+  
+  # if --random just pick one
+  if $RANDOM_IP; then
+    mapfile -t rinstances <<< "$instances"
+    echo "${rinstances[$(( RANDOM  % ${#rinstances[@]} ))]}" | awk '{print $2}'
+    return
+  fi
+
+  # else, prompt for one
+  PS3="Select $app_env instance: "
+  select ip in $instances
+  do
+    if [[ -n "$ip" ]]; then
+      target="$ip"
+      break
+    else
+      echo "Invalid entry"
+    fi
+  done
+  echo "$target" | awk '{print $2}'
+}
+
+# runs a command remotely using ssh
+# $1 == ip
+# $2 == command to run
+run_cmd() {
+  local target="$1"
+  shift
+  local cmd="$*"
+  exec ssh -o "StrictHostKeyChecking no" -i "$BFD_SSH_KEY_PATH" -t "${BFD_SSH_USER}@${target}" "$cmd" 2>/dev/null
+}
+
+# logs into the target
+# $1 == ip
+login() { 
+  local target="$1"
+  echo "Connecting to $target.. good day"
+  exec ssh -o "StrictHostKeyChecking no" -i "$BFD_SSH_KEY_PATH" "${BFD_SSH_USER}@${target}"
+}
+
+
+#----- GO! -----#
+
+# check for newer versions of bfd-ssh script
+if $UPDATE; then
+  check_for_updates
+fi
+
+# make sure we have all we need
+if $SETUP; then
+  run_setup
+  echo "setting"
+  exit
+else
+  check_requirements
+fi
+
+# select app environment (bfd-prod-sbx-fhir, test-etl, etc)
+selected_app_env=$(select_app_env)
+
+# select a target instance (prompts user unless --random is selected)
+target=$(select_target "$selected_app_env")
+
+# remove taget from known_hosts
+if $DEL_KNOWN; then
+  delete_known_host "$target"
+fi
+
+# if a command was provided run it, else log into the server
+if [[ -n "$SSH_CMD" ]]; then
+  run_cmd "$target" "$SSH_CMD"
+else
+  login "$target"
+fi
