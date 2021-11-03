@@ -384,7 +384,6 @@ fi
 # make sure we have all we need
 if $SETUP; then
   run_setup
-  echo "setting"
   exit
 else
   check_requirements
