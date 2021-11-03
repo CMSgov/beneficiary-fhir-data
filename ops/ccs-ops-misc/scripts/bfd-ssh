@@ -111,12 +111,85 @@ check_for_updates() {
   :
 }
 
-run_setup() {
-  :
+add_script_to_path() {
+  local script_dir
+  script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
+  # if /usr/local/bin is in the path, place it there
+  if [[ ":$PATH:" == *":/usr/local/bin:"* ]]; then
+    cp -f "${script_dir}/$APP_NAME" "/usr/local/bin/$APP_NAME"
+    chmod +x "/usr/local/bin/$APP_NAME"
+    echo "Added /usr/local/bin/$APP_NAME"
+  fi
 }
 
+# walk user through setting up ssh env vars
+run_setup() {
+  local keys=()
+  local account user bin
+
+  # check aws creds
+  if id=$(aws sts get-caller-identity --output text); then
+     account=$(echo "$id" | awk '{print $1}')
+     user=$(echo "$id" | awk '{print $2}' | cut -d'/' -f2)
+     echo "Using AWS:"
+     echo " - account '$account'"
+     echo " - user '$user'"
+     read -p "Continue? " -n 1 -r; echo
+     [[ ! $REPLY =~ ^[Yy]$ ]] && exit 1
+  else
+    error_exit "you need an active, mfa authenticated, AWS session to use this tool"
+  fi
+
+  # user name
+  read -p "Enter your BFD SSH username (ie. jo.doe): " -r BFD_SSH_USER
+  echo
+  
+  # ssh key
+  echo "SELECT YOUR BFD SSH KEY"
+  for f in ~/.ssh/*.pub; do
+    [[ -f "${f%.*}" ]] && keys+=("${f%.*}")
+  done
+
+  COLUMNS=90
+  PS3="menu item: "
+  select BFD_SSH_KEY_PATH in "${keys[@]}"
+  do
+    if [[ -n "$BFD_SSH_KEY_PATH" ]]; then
+      break
+    fi
+    echo "Invalid meny entry (please enter a number)"
+  done
+  
+  export BFD_SSH_USER
+  export BFD_SSH_KEY_PATH
+
+  echo
+  echo "You should add $APP_NAME to your PATH."
+  read -p "Do this now? " -n 1 -r; echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    add_script_to_path
+  fi
+   
+  echo
+  echo "The following env vars must be set to use the tool:"
+  printf "\t%s\n" "BFD_SSH_USER='$BFD_SSH_USER'"
+  printf "\t%s\n" "BFD_SSH_KEY_PATH='$BFD_SSH_KEY_PATH'"
+  echo
+  echo "For BASH users, run these commands to set them on startup (replace '~/.profile' with your shell's equivalent):"
+  printf "\t%s\n" "echo BFD_SSH_USER='$BFD_SSH_USER' > ~/.profile"
+  printf "\t%s\n" "echo BFD_SSH_KEY_PATH='$BFD_SSH_KEY_PATH' > ~/.profile"
+  printf "\t%s\n" "source ~/.profile"
+  echo
+  echo "Setup complete!"
+}
+
+# aws cli
 check_requirements() {
-  :
+  if ! command -v aws >/dev/null 2>&1; then
+    echo "please install and configure aws command line tools"
+    error_exit "missing aws command line tools"
+  fi
 }
 
 # delete the ip/host from the local known_hosts file
