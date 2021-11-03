@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A single combined configuration object to hold the configuration settings for the various
@@ -23,14 +24,18 @@ public class RdaLoadOptions implements Serializable {
 
   private final AbstractRdaLoadJob.Config jobConfig;
   private final GrpcRdaSource.Config grpcConfig;
+  private final RdaServerJob.Config mockServerConfig;
   private final IdHasher.Config idHasherConfig;
 
   public RdaLoadOptions(
       AbstractRdaLoadJob.Config jobConfig,
       GrpcRdaSource.Config grpcConfig,
+      RdaServerJob.Config mockServerConfig,
       IdHasher.Config idHasherConfig) {
     this.jobConfig = Preconditions.checkNotNull(jobConfig, "jobConfig is a required parameter");
     this.grpcConfig = Preconditions.checkNotNull(grpcConfig, "grpcConfig is a required parameter");
+    this.mockServerConfig =
+        Preconditions.checkNotNull(mockServerConfig, "mockServerConfig is a required parameter");
     this.idHasherConfig =
         Preconditions.checkNotNull(idHasherConfig, "idHasherConfig is a required parameter");
   }
@@ -43,6 +48,14 @@ public class RdaLoadOptions implements Serializable {
   /** @return settings for the gRPC service caller. */
   public GrpcRdaSource.Config getGrpcConfig() {
     return grpcConfig;
+  }
+
+  public Optional<RdaServerJob> createRdaServerJob() {
+    if (grpcConfig.getServerType() == GrpcRdaSource.Config.ServerType.InProcess) {
+      return Optional.of(new RdaServerJob(mockServerConfig));
+    } else {
+      return Optional.empty();
+    }
   }
 
   /**
