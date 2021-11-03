@@ -14,7 +14,7 @@ BFD_APPS=()                             # either dynamically set or set via comm
 
 # SSH CREDS
 BFD_SSH_USER="${BFD_SSH_USER:-}"
-BFD_SSH_KEY_PATH="${BFD_SSH_KEY_PATH:-}"
+BFD_SSH_KEYFILE="${BFD_SSH_KEYFILE:-}"
 
 # LOCAL VARIABLES
 default_environments="prod prod-sbx test"
@@ -153,7 +153,7 @@ run_setup() {
   fi
   
   # ssh keyfile
-  if [[ ! -f "$BFD_SSH_KEY_PATH" ]]; then
+  if [[ ! -f "$BFD_SSH_KEYFILE" ]]; then
     echo "SELECT YOUR BFD SSH KEYFILE"
     for f in ~/.ssh/*.pub; do
       [[ -f "${f%.*}" ]] && keys+=("${f%.*}")
@@ -161,14 +161,14 @@ run_setup() {
 
     COLUMNS=90
     PS3="menu item: "
-    select BFD_SSH_KEY_PATH in "${keys[@]}"
+    select BFD_SSH_KEYFILE in "${keys[@]}"
     do
-      if [[ -n "$BFD_SSH_KEY_PATH" ]]; then
+      if [[ -n "$BFD_SSH_KEYFILE" ]]; then
         break
       fi
       echo "Invalid meny entry (please enter a number)"
     done
-    export BFD_SSH_KEY_PATH
+    export BFD_SSH_KEYFILE
   fi
 
   echo
@@ -181,11 +181,11 @@ run_setup() {
   echo
   echo "The following env vars must be set to use the tool:"
   printf "\t%s\n" "BFD_SSH_USER='$BFD_SSH_USER'"
-  printf "\t%s\n" "BFD_SSH_KEY_PATH='$BFD_SSH_KEY_PATH'"
+  printf "\t%s\n" "BFD_SSH_KEYFILE='$BFD_SSH_KEYFILE'"
   echo
   echo "For BASH users, run these commands to set them on startup (replace '~/.profile' with your shell's equivalent):"
   printf "\t%s\n" "echo BFD_SSH_USER='$BFD_SSH_USER' > ~/.profile"
-  printf "\t%s\n" "echo BFD_SSH_KEY_PATH='$BFD_SSH_KEY_PATH' > ~/.profile"
+  printf "\t%s\n" "echo BFD_SSH_KEYFILE='$BFD_SSH_KEYFILE' > ~/.profile"
   printf "\t%s\n" "source ~/.profile"
   echo
   echo "Setup complete!"
@@ -362,7 +362,7 @@ run_cmd() {
   local target="$1"
   shift
   local cmd="$*"
-  exec ssh -o "StrictHostKeyChecking no" -i "$BFD_SSH_KEY_PATH" -t "${BFD_SSH_USER}@${target}" "$cmd" 2>/dev/null
+  exec ssh -o "StrictHostKeyChecking no" -i "$BFD_SSH_KEYFILE" -t "${BFD_SSH_USER}@${target}" "$cmd" 2>/dev/null
 }
 
 # logs into the target
@@ -370,7 +370,7 @@ run_cmd() {
 login() { 
   local target="$1"
   echo "Connecting to $target.. good day"
-  exec ssh -o "StrictHostKeyChecking no" -i "$BFD_SSH_KEY_PATH" "${BFD_SSH_USER}@${target}"
+  exec ssh -o "StrictHostKeyChecking no" -i "$BFD_SSH_KEYFILE" "${BFD_SSH_USER}@${target}"
 }
 
 
