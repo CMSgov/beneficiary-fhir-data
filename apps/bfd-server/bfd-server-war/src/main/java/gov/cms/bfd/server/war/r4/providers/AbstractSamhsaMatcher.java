@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -18,12 +19,12 @@ import org.apache.commons.csv.CSVParser;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
-public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
+public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
 
   /** The {@link CSVFormat} used to parse the SAMHSA-related code CSV files. */
   private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader();
 
-  private static final String DRG =
+  protected static final String DRG =
       TransformerUtilsV2.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
   protected final List<String> drgCodes;
@@ -34,45 +35,40 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
   protected final List<String> icd10DiagnosisCodes;
 
   /**
-   * Constructs a new {@link BaseSamhsaMatcher}, loading the lists of SAMHSA-related codes from the
-   * classpath.
+   * Constructs a new {@link AbstractSamhsaMatcher}, loading the lists of SAMHSA-related codes from
+   * the classpath.
    */
-  protected BaseSamhsaMatcher() {
+  protected AbstractSamhsaMatcher() {
     this.drgCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList("samhsa-related-codes/codes-drg.csv", "MS-DRGs").stream()
-                .map(BaseSamhsaMatcher::normalizeDrgCode)
-                .collect(Collectors.toList()));
+        resourceCsvColumnToList("samhsa-related-codes/codes-drg.csv", "MS-DRGs").stream()
+            .map(AbstractSamhsaMatcher::normalizeDrgCode)
+            .collect(Collectors.toUnmodifiableList());
     this.cptCodes =
         Collections.unmodifiableList(
             resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code"));
     this.icd9ProcedureCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
-                .stream()
-                .map(BaseSamhsaMatcher::normalizeIcdCode)
-                .collect(Collectors.toList()));
+        resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
+            .stream()
+            .map(AbstractSamhsaMatcher::normalizeIcdCode)
+            .collect(Collectors.toUnmodifiableList());
     this.icd9DiagnosisCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList(
-                    "samhsa-related-codes/codes-icd-9-diagnosis.csv", "ICD-9-CM Diagnosis Code")
-                .stream()
-                .map(BaseSamhsaMatcher::normalizeIcdCode)
-                .collect(Collectors.toList()));
+        resourceCsvColumnToList(
+                "samhsa-related-codes/codes-icd-9-diagnosis.csv", "ICD-9-CM Diagnosis Code")
+            .stream()
+            .map(AbstractSamhsaMatcher::normalizeIcdCode)
+            .collect(Collectors.toUnmodifiableList());
     this.icd10ProcedureCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList(
-                    "samhsa-related-codes/codes-icd-10-procedure.csv", "ICD-10-PCS Code")
-                .stream()
-                .map(BaseSamhsaMatcher::normalizeIcdCode)
-                .collect(Collectors.toList()));
+        resourceCsvColumnToList(
+                "samhsa-related-codes/codes-icd-10-procedure.csv", "ICD-10-PCS Code")
+            .stream()
+            .map(AbstractSamhsaMatcher::normalizeIcdCode)
+            .collect(Collectors.toUnmodifiableList());
     this.icd10DiagnosisCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList(
-                    "samhsa-related-codes/codes-icd-10-diagnosis.csv", "ICD-10-CM Diagnosis Code")
-                .stream()
-                .map(BaseSamhsaMatcher::normalizeIcdCode)
-                .collect(Collectors.toList()));
+        resourceCsvColumnToList(
+                "samhsa-related-codes/codes-icd-10-diagnosis.csv", "ICD-10-CM Diagnosis Code")
+            .stream()
+            .map(AbstractSamhsaMatcher::normalizeIcdCode)
+            .collect(Collectors.toUnmodifiableList());
   }
 
   /**
@@ -80,8 +76,8 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
    * @param columnToReturn the name of the column to return from the CSV file
    * @return a {@link List} of values from the specified column of the specified CSV file
    */
-  private static List<String> resourceCsvColumnToList(
-      String csvResourceName, String columnToReturn) {
+  @VisibleForTesting
+  static List<String> resourceCsvColumnToList(String csvResourceName, String columnToReturn) {
     try (InputStream csvStream =
             Thread.currentThread().getContextClassLoader().getResourceAsStream(csvResourceName);
         InputStreamReader csvReader = new InputStreamReader(csvStream, StandardCharsets.UTF_8);
@@ -120,7 +116,7 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
   protected boolean isSamhsaPackageCode(CodeableConcept packageConcept) {
     if (packageConcept != null) {
       for (Coding packageCoding : packageConcept.getCoding()) {
-        if (BaseSamhsaMatcher.DRG.equals(packageCoding.getSystem())) {
+        if (AbstractSamhsaMatcher.DRG.equals(packageCoding.getSystem())) {
           if (isSamhsaDrgCode(packageCoding)) return true;
         } else {
           // Fail safe: if we don't know the package coding system, assume the code is
@@ -138,7 +134,8 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
    * @return <code>true</code> if the specified code {@link Coding} matches one of the {@link
    *     #drgCodes} entries, <code>false</code> if it does not
    */
-  private boolean isSamhsaDrgCode(Coding coding) {
+  @VisibleForTesting
+  boolean isSamhsaDrgCode(Coding coding) {
     // Per the CCW Codebook DRG codes in the CCW are already normalized to the 3
     // digit code.
     return coding.getCode() != null && drgCodes.contains(coding.getCode());
@@ -147,9 +144,10 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
   /**
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
-   *     BaseSamhsaMatcher#icd9DiagnosisCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icd9DiagnosisCodes} entries, <code>false</code> if it does not
    */
-  private boolean isSamhsaIcd9Diagnosis(Coding coding) {
+  @VisibleForTesting
+  boolean isSamhsaIcd9Diagnosis(Coding coding) {
     /*
      * Note: per XXX all codes in icd9DiagnosisCodes are already normalized.
      */
@@ -162,7 +160,8 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
    *     #icd9ProcedureCodes} entries, <code>false</code> if it does not
    */
-  private boolean isSamhsaIcd9Procedure(Coding coding) {
+  @VisibleForTesting
+  boolean isSamhsaIcd9Procedure(Coding coding) {
     return coding.getCode() != null
         && icd9ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
   }
@@ -170,9 +169,10 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
   /**
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
-   *     BaseSamhsaMatcher#icd10DiagnosisCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#icd10DiagnosisCodes} entries, <code>false</code> if it does not
    */
-  private boolean isSamhsaIcd10Diagnosis(Coding coding) {
+  @VisibleForTesting
+  boolean isSamhsaIcd10Diagnosis(Coding coding) {
     /*
      * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
      */
@@ -180,7 +180,8 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
         && icd10DiagnosisCodes.contains(normalizeIcdCode(coding.getCode()));
   }
 
-  private boolean isSamhsaIcd10Procedure(Coding coding) {
+  @VisibleForTesting
+  boolean isSamhsaIcd10Procedure(Coding coding) {
     return coding.getCode() != null
         && icd10ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
   }
@@ -188,7 +189,7 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
   /**
    * @param coding the procedure {@link Coding} to check
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
-   *     BaseSamhsaMatcher#cptCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#cptCodes} entries, <code>false</code> if it does not
    */
   protected boolean isSamhsaCptCode(Coding coding) {
     /*
@@ -205,7 +206,8 @@ public abstract class BaseSamhsaMatcher<T> implements Predicate<T> {
     return isSamhsaCoding(concept, this::isSamhsaIcd9Procedure, this::isSamhsaIcd10Procedure);
   }
 
-  private boolean isSamhsaCoding(
+  @VisibleForTesting
+  boolean isSamhsaCoding(
       CodeableConcept concept,
       final Predicate<Coding> icd9Check,
       final Predicate<Coding> icd10Check) {

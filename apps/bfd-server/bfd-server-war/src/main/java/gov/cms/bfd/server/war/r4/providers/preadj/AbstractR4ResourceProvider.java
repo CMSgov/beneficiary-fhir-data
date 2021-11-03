@@ -63,7 +63,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private PreAdjR4SamhsaMatcher samhsaMatcher;
+  private R4ClaimSamhsaMatcher samhsaMatcher;
 
   private ClaimDao claimDao;
 
@@ -81,9 +81,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param samhsaMatcher the {@link PreAdjR4SamhsaMatcher} to use */
+  /** @param samhsaMatcher the {@link R4ClaimSamhsaMatcher} to use */
   @Inject
-  public void setSamhsaFilterer(PreAdjR4SamhsaMatcher samhsaMatcher) {
+  public void setSamhsaFilterer(R4ClaimSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 
@@ -147,7 +147,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
     String claimIdTypeText = claimIdMatcher.group(1);
     Optional<ResourceTypeV2<T>> optional = parseClaimType(claimIdTypeText);
-    if (!optional.isPresent()) throw new ResourceNotFoundException(claimId);
+    if (optional.isEmpty()) throw new ResourceNotFoundException(claimId);
     ResourceTypeV2<T> claimIdType = optional.get();
     String claimIdString = claimIdMatcher.group(2);
 

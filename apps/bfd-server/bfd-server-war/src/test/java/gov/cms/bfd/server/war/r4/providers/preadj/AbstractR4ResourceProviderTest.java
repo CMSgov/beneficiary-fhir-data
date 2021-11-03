@@ -327,6 +327,7 @@ public class AbstractR4ResourceProviderTest {
                         mockParam,
                         types,
                         hashed,
+                        "false",
                         mockLastUpdated,
                         mockServiceDate,
                         mockRequestDetails));
@@ -355,6 +356,7 @@ public class AbstractR4ResourceProviderTest {
                         mockParam,
                         types,
                         hashed,
+                        "false",
                         mockLastUpdated,
                         mockServiceDate,
                         mockRequestDetails));
@@ -406,17 +408,29 @@ public class AbstractR4ResourceProviderTest {
             anySet(),
             anyString(),
             anyBoolean(),
+            anyBoolean(),
             any(DateRangeParam.class),
             any(DateRangeParam.class));
 
     doReturn(expected)
         .when(providerSpy)
         .createBundleFor(
-            Collections.singleton(mockResourceType), mbi, false, mockLastUpdated, mockServiceDate);
+            Collections.singleton(mockResourceType),
+            mbi,
+            false,
+            false,
+            mockLastUpdated,
+            mockServiceDate);
 
     Bundle actual =
         providerSpy.findByPatient(
-            mockParam, types, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
+            mockParam,
+            types,
+            hashed,
+            "false",
+            mockLastUpdated,
+            mockServiceDate,
+            mockRequestDetails);
 
     assertSame(expected, actual);
   }
@@ -460,16 +474,23 @@ public class AbstractR4ResourceProviderTest {
             anySet(),
             anyString(),
             anyBoolean(),
+            anyBoolean(),
             any(DateRangeParam.class),
             any(DateRangeParam.class));
 
     doReturn(expected)
         .when(providerSpy)
-        .createBundleFor(mockTypesList, mbi, false, mockLastUpdated, mockServiceDate);
+        .createBundleFor(mockTypesList, mbi, false, false, mockLastUpdated, mockServiceDate);
 
     Bundle actual =
         providerSpy.findByPatient(
-            mockParam, types, hashed, mockLastUpdated, mockServiceDate, mockRequestDetails);
+            mockParam,
+            types,
+            hashed,
+            "false",
+            mockLastUpdated,
+            mockServiceDate,
+            mockRequestDetails);
 
     assertSame(expected, actual);
   }
@@ -496,6 +517,7 @@ public class AbstractR4ResourceProviderTest {
                     mockRefParam,
                     mockTokenListParam,
                     hashed,
+                    "false",
                     mockLastUpdated,
                     mockServiceDate,
                     null));
@@ -527,6 +549,7 @@ public class AbstractR4ResourceProviderTest {
                     mockRefParam,
                     mockTokenListParam,
                     hashed,
+                    "false",
                     mockLastUpdated,
                     mockServiceDate,
                     null));
@@ -566,16 +589,23 @@ public class AbstractR4ResourceProviderTest {
             anySet(),
             anyString(),
             anyBoolean(),
+            anyBoolean(),
             any(DateRangeParam.class),
             any(DateRangeParam.class));
 
     doReturn(expected)
         .when(providerSpy)
-        .createBundleFor(mockTypeSet, mbi, false, mockLastUpdated, mockServiceDate);
+        .createBundleFor(mockTypeSet, mbi, false, false, mockLastUpdated, mockServiceDate);
 
     Bundle actual =
         providerSpy.findByPatient(
-            mockRefParam, mockTokenListParam, hashed, mockLastUpdated, mockServiceDate, null);
+            mockRefParam,
+            mockTokenListParam,
+            hashed,
+            "false",
+            mockLastUpdated,
+            mockServiceDate,
+            null);
 
     assertSame(expected, actual);
   }
@@ -609,16 +639,17 @@ public class AbstractR4ResourceProviderTest {
             anySet(),
             anyString(),
             anyBoolean(),
+            anyBoolean(),
             any(DateRangeParam.class),
             any(DateRangeParam.class));
 
     doReturn(expected)
         .when(providerSpy)
-        .createBundleFor(mockTypeSet, mbi, true, mockLastUpdated, mockServiceDate);
+        .createBundleFor(mockTypeSet, mbi, true, false, mockLastUpdated, mockServiceDate);
 
     Bundle actual =
         providerSpy.findByPatient(
-            mockRefParam, null, hashed, mockLastUpdated, mockServiceDate, null);
+            mockRefParam, null, hashed, "false", mockLastUpdated, mockServiceDate, null);
 
     assertSame(expected, actual);
   }
@@ -715,7 +746,8 @@ public class AbstractR4ResourceProviderTest {
     expected.addEntry().setResource(resource2);
 
     Bundle actual =
-        provider.createBundleFor(resourceTypes, mbi, isHashed, mockLastUpdated, mockServiceDate);
+        provider.createBundleFor(
+            resourceTypes, mbi, isHashed, false, mockLastUpdated, mockServiceDate);
 
     assertTrue(expected.equalsDeep(actual));
   }
@@ -821,7 +853,8 @@ public class AbstractR4ResourceProviderTest {
     expected.addEntry().setResource(resource2);
 
     Bundle actual =
-        provider.createBundleFor(resourceTypes, mbi, isHashed, mockLastUpdated, mockServiceDate);
+        provider.createBundleFor(
+            resourceTypes, mbi, isHashed, false, mockLastUpdated, mockServiceDate);
 
     assertTrue(expected.equalsDeep(actual));
   }
