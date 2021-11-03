@@ -973,6 +973,8 @@ public final class InpatientClaimTransformerV2Test {
             .setCoding(
                 Arrays.asList(
                     new Coding(
+                        "https://bluebutton.cms.gov/resources/variables/hcpcs_cd", "M55", null),
+                    new Coding(
                         "https://bluebutton.cms.gov/resources/codesystem/hcpcs", "M55", null)));
 
     Assert.assertTrue(compare.equalsDeep(pos));
