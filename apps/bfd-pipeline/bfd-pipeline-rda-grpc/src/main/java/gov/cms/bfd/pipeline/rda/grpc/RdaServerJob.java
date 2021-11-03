@@ -69,7 +69,11 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       LOGGER.info("starting server with name {} and mode {}", config.serverName, config.serverMode);
       final Server server =
           RdaServer.startInProcess(
-              config.serverName, config::createFissClaims, config::createMcsClaims);
+              RdaServer.InProcessConfig.builder()
+                  .serverName(config.serverName)
+                  .fissSourceFactory(config::createFissClaims)
+                  .mcsSourceFactory(config::createMcsClaims)
+                  .build());
       try {
         running.incrementAndGet();
         try {

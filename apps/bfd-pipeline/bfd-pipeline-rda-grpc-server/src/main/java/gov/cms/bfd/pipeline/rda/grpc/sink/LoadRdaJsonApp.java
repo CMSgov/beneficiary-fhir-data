@@ -65,31 +65,33 @@ public class LoadRdaJsonApp {
     reporter.start(5, TimeUnit.SECONDS);
     try {
       logger.info("starting RDA API local server");
-      RdaServer.runWithLocalServer(
-          config::createFissClaimsSource,
-          config::createMcsClaimsSource,
-          port -> {
-            final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
-            final DatabaseOptions databaseConfig = config.createDatabaseOptions();
-            final HikariDataSource pooledDataSource =
-                PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
-            if (config.runSchemaMigration) {
-              logger.info("running database migration");
-              DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
-            }
-            try (PipelineApplicationState appState =
-                new PipelineApplicationState(
-                    metrics,
-                    pooledDataSource,
-                    PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
-                    Clock.systemUTC())) {
-              final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
-              for (PipelineJob<?> job : jobs) {
-                logger.info("starting job {}", job.getClass().getSimpleName());
-                job.call();
-              }
-            }
-          });
+      RdaServer.LocalConfig.builder()
+          .fissSourceFactory(config::createFissClaimsSource)
+          .mcsSourceFactory(config::createMcsClaimsSource)
+          .build()
+          .runWithPortParam(
+              port -> {
+                final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
+                final DatabaseOptions databaseConfig = config.createDatabaseOptions();
+                final HikariDataSource pooledDataSource =
+                    PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+                if (config.runSchemaMigration) {
+                  logger.info("running database migration");
+                  DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
+                }
+                try (PipelineApplicationState appState =
+                    new PipelineApplicationState(
+                        metrics,
+                        pooledDataSource,
+                        PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+                        Clock.systemUTC())) {
+                  final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
+                  for (PipelineJob<?> job : jobs) {
+                    logger.info("starting job {}", job.getClass().getSimpleName());
+                    job.call();
+                  }
+                }
+              });
     } finally {
       reporter.report();
       reporter.close();

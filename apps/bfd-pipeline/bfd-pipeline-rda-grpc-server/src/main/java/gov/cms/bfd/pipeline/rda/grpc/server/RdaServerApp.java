@@ -39,7 +39,12 @@ public class RdaServerApp {
     final Config config = new Config(args);
     LOGGER.info("Starting server on port {}.", config.getPort());
     Server server =
-        RdaServer.startLocal(config.getPort(), config::createFissClaims, config::createMcsClaims);
+        RdaServer.startLocal(
+            RdaServer.LocalConfig.builder()
+                .port(config.getPort())
+                .fissSourceFactory(config::createFissClaims)
+                .mcsSourceFactory(config::createMcsClaims)
+                .build());
     server.awaitTermination();
     LOGGER.info("server stopping.");
   }
