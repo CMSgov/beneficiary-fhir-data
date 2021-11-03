@@ -12,6 +12,10 @@ DEL_KNOWN="${DEL_KNOWN:-true}"          # delete the target from your local know
 BFD_ENVS=()                             # either dynamically set or set via command line args
 BFD_APPS=()                             # either dynamically set or set via command line args
 
+# SSH CREDS
+BFD_SSH_USER="${BFD_SSH_USER:-}"
+BFD_SSH_KEY_PATH="${BFD_SSH_KEY_PATH:-}"
+
 # LOCAL VARIABLES
 default_environments="prod prod-sbx test"
 allowed_environments_re="^(prod|prod-sbx|test)$"
@@ -126,7 +130,7 @@ add_script_to_path() {
 # walk user through setting up ssh env vars
 run_setup() {
   local keys=()
-  local account user bin
+  local account user
 
   # check aws creds
   if id=$(aws sts get-caller-identity --output text); then
@@ -141,28 +145,31 @@ run_setup() {
     error_exit "you need an active, mfa authenticated, AWS session to use this tool"
   fi
 
-  # user name
-  read -p "Enter your BFD SSH username (ie. jo.doe): " -r BFD_SSH_USER
-  echo
+  # ssh user name
+  if [[ -z "$BFD_SSH_USER" ]]; then
+    read -p "Enter your BFD SSH username (ie. jo.doe): " -r BFD_SSH_USER
+    export BFD_SSH_USER
+    echo
+  fi
   
-  # ssh key
-  echo "SELECT YOUR BFD SSH KEY"
-  for f in ~/.ssh/*.pub; do
-    [[ -f "${f%.*}" ]] && keys+=("${f%.*}")
-  done
+  # ssh keyfile
+  if [[ ! -f "$BFD_SSH_KEY_PATH" ]]; then
+    echo "SELECT YOUR BFD SSH KEYFILE"
+    for f in ~/.ssh/*.pub; do
+      [[ -f "${f%.*}" ]] && keys+=("${f%.*}")
+    done
 
-  COLUMNS=90
-  PS3="menu item: "
-  select BFD_SSH_KEY_PATH in "${keys[@]}"
-  do
-    if [[ -n "$BFD_SSH_KEY_PATH" ]]; then
-      break
-    fi
-    echo "Invalid meny entry (please enter a number)"
-  done
-  
-  export BFD_SSH_USER
-  export BFD_SSH_KEY_PATH
+    COLUMNS=90
+    PS3="menu item: "
+    select BFD_SSH_KEY_PATH in "${keys[@]}"
+    do
+      if [[ -n "$BFD_SSH_KEY_PATH" ]]; then
+        break
+      fi
+      echo "Invalid meny entry (please enter a number)"
+    done
+    export BFD_SSH_KEY_PATH
+  fi
 
   echo
   echo "You should add $APP_NAME to your PATH."
