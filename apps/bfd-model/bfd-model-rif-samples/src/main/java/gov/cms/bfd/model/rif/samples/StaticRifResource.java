@@ -384,8 +384,12 @@ public enum StaticRifResource {
       syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
-  SYNTHEA_BENE_UPDATES(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_updates.csv")),
+  SYNTHEA_BENE_INTERIM(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_interim.csv")),
+      RifFileType.BENEFICIARY,
+      Optional.empty()),
+  SYNTHEA_BENE_FINAL(
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/beneficiary_final.csv")),
       RifFileType.BENEFICIARY,
       Optional.empty()),
 
@@ -412,7 +416,7 @@ public enum StaticRifResource {
    * which will vary across Synthea versions.
    */
   SYNTHEA_PDE(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/prescription.csv")),
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/pde.csv")),
       RifFileType.PDE,
       Optional.empty()),
 
@@ -439,7 +443,7 @@ public enum StaticRifResource {
    * vary across Synthea versions.
    */
   SYNTHEA_HHA(
-      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/home.csv")),
+      syntheaData(FileSystems.getDefault().getPathMatcher("glob:**/hha.csv")),
       RifFileType.HHA,
       Optional.empty()),
 
