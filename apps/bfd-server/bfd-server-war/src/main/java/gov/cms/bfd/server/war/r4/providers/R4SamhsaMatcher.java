@@ -523,8 +523,8 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   /**
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
-   *     {@link Coding}s that match any of the {@link #cptCodes}, <code>false</code> if they all do
-   *     not
+   *     {@link Coding}s that match any of the {@link #cptCodes} and has no unknown {@link System}s,
+   *     <code>false</code> if they all do not
    */
   private boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
     // Does the CodeableConcept have a legit HCPCS Coding?
@@ -547,9 +547,8 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 
   /**
    * @param procedureConcept the procedure {@link CodeableConcept} to check
-   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
-   *     {@link Coding}s that match any of the {@link #cptCodes}, <code>false</code> if they all do
-   *     not
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains the
+   *     {@link Coding} with the HCPCS {@link System}, <code>false</code> if it does not
    */
   private boolean findHcpcsCoding(CodeableConcept procedureConcept) {
     for (Coding procedureCoding : procedureConcept.getCoding()) {
@@ -560,16 +559,22 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     return false;
   }
 
+  /**
+   * @param procedureConcept the procedure {@link CodeableConcept} to check
+   * @return <code>false</code> if the specified procedure {@link CodeableConcept} contains any
+   *     {@link Coding}s that do not contain any of the {@link System}s <code>true</code> if they do
+   */
   private boolean hasUnknownSystem(CodeableConcept procedureConcept) {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream()
             .map(coding -> coding.getSystem())
             .collect(Collectors.toSet());
+    // CHeck for HCPCS and HCPCS CD code systems, so that the right code is given in a backwards
+    // compatible way: https://jira.cms.gov/browse/BFD-1345
     if (codingSystems.size() == 2
         && codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)
         && codingSystems.contains(
             TransformerUtilsV2.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD))) {
-      /* add a comment here explaining why this complex check is needed and referencing the JIRA ticket */
       return false;
     } else if (codingSystems.size() == 1
         && codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
@@ -580,9 +585,10 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   }
 
   /**
-   * @param procedureCoding the procedure {@link Coding} to check
-   * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
-   *     #cptCodes} entries, <code>false</code> if it does not
+   * @param procedureConcept the procedure {@link CodeableConcept} to check
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
+   *     {@link Coding}s that match any of the {@link #cptCodes}, <code>false</code> if they all do
+   *     not
    */
   private boolean isSamhsaCptCode(CodeableConcept procedureConcept) {
     /*
