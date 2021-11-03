@@ -595,8 +595,12 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
      * Note: CPT codes represent a subset of possible HCPCS codes (but are the only
      * subset that we blacklist from).
      */
+    Set<String> codingSystems =
+        procedureConcept.getCoding().stream()
+            .map(coding -> coding.getSystem())
+            .collect(Collectors.toSet());
     for (Coding procedureCoding : procedureConcept.getCoding()) {
-      if (!TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem())) {
+      if (!codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
         throw new IllegalArgumentException();
       }
 
