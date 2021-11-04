@@ -569,11 +569,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
-    String hcpcsCdSystem =
-        String.format(
-            "%s/%s",
-            TransformerConstants.BASE_URL_CCW_VARIABLES,
-            CcwCodebookVariable.HCPCS_CD.getVariable().getId().toLowerCase());
+    String hcpcsCdSystem = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
 
     String hcpcsSystem = TransformerConstants.CODING_SYSTEM_HCPCS;
 
