@@ -429,7 +429,12 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
+    if (claim instanceof PartDEvent
+        || claim instanceof DMEClaim
+        || claim instanceof HHAClaim
+        || claim instanceof HospiceClaim
+        || claim instanceof CarrierClaim) {
       expectMatch = false;
     }
 
@@ -452,7 +457,12 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
+    if (claim instanceof PartDEvent
+        || claim instanceof DMEClaim
+        || claim instanceof HHAClaim
+        || claim instanceof HospiceClaim
+        || claim instanceof CarrierClaim) {
       expectMatch = false;
     }
 
@@ -485,7 +495,12 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
+    if (claim instanceof PartDEvent
+        || claim instanceof DMEClaim
+        || claim instanceof HHAClaim
+        || claim instanceof HospiceClaim
+        || claim instanceof CarrierClaim) {
       expectMatch = false;
     }
 
@@ -508,7 +523,12 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
+    if (claim instanceof PartDEvent
+        || claim instanceof DMEClaim
+        || claim instanceof HHAClaim
+        || claim instanceof HospiceClaim
+        || claim instanceof CarrierClaim) {
       expectMatch = false;
     }
 
