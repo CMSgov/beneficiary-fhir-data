@@ -559,8 +559,13 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       codeableConcept.setCoding(codingList);
     }
 
-    // Set item coding to empty so we dont check it for matches
-    modifiedEob.getItem().get(0).getProductOrService().setCoding(new ArrayList<>());
+    // Set item coding to non-SAMHSA so we dont check it for matches
+    List<Coding> codings = new ArrayList<>();
+    Coding coding = new Coding();
+    coding.setSystem(TransformerConstants.CODING_SYSTEM_HCPCS);
+    coding.setCode(NON_SAMHSA_HCPCS_CODE);
+    codings.add(coding);
+    modifiedEob.getItem().get(0).getProductOrService().setCoding(codings);
 
     assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
   }
@@ -594,8 +599,13 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       codeableConcept.setCoding(codingList);
     }
 
-    // Set item coding to empty so we dont check it for matches
-    modifiedEob.getItem().get(0).getProductOrService().setCoding(new ArrayList<>());
+    // Set item coding to non-SAMHSA so we dont check it for matches
+    List<Coding> codings = new ArrayList<>();
+    Coding coding = new Coding();
+    coding.setSystem(TransformerConstants.CODING_SYSTEM_HCPCS);
+    coding.setCode(NON_SAMHSA_HCPCS_CODE);
+    codings.add(coding);
+    modifiedEob.getItem().get(0).getProductOrService().setCoding(codings);
 
     assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
   }
