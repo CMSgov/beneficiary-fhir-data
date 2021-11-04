@@ -62,7 +62,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    *
    * @return the collection
    */
-  @Parameterized.Parameters
+  @Parameterized.Parameters(name = "{0}")
   public static Collection<Object[]> data() {
     // Load and transform the various claim types for testing
     RifRecordBase inpatientClaim = getClaim(InpatientClaim.class);
