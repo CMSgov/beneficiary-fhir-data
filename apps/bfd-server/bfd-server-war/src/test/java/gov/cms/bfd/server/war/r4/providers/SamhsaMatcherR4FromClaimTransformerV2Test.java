@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -22,7 +21,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -194,6 +192,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCdCodeAndNonMatchingCptExpectNoMatch() {
     // When/Then
+    // TODO: adjust this to change all CODES in codings but not system
     verifySamhsaMatcherForItemWithSingleCoding(
         CODING_SYSTEM_HCPCS_CD, NON_SAMHSA_HCPCS_CODE, false, loadedExplanationOfBenefit);
   }
@@ -224,9 +223,16 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithNoHcpcsCodeExpectNoMatch() {
+  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithNoCodesExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
     // When/Then
-    verifyNonSamhsaCodingDoesNotTriggerSamhsaFiltering(loadedExplanationOfBenefit);
+    verifyNoItemCodingsTriggersSamhsaFiltering(loadedExplanationOfBenefit, expectMatch);
   }
 
   /**
@@ -464,13 +470,14 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that a claim with no samhsa diagnosis, procedure, or item-level HCPCS codes does not
-   * trigger filtering.
+   * Verifies that a claim with no samhsa diagnosis, procedure, or item-level HCPCS codes does
+   * trigger filtering because the code array is empty and therefore does not contain known systems.
    *
+   * @param expectMatch if the test is expecting a filtering match
    * @param explanationOfBenefit the loaded benefit to use for the test
    */
-  private void verifyNonSamhsaCodingDoesNotTriggerSamhsaFiltering(
-      ExplanationOfBenefit explanationOfBenefit) {
+  private void verifyNoItemCodingsTriggersSamhsaFiltering(
+      ExplanationOfBenefit explanationOfBenefit, boolean expectMatch) {
 
     ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
 
@@ -484,17 +491,13 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     modifiedEob.setProcedure(new ArrayList<>());
 
     // Set item level codings to non-SAMHSA
-    modifiedEob
-        .getItem()
-        .get(0)
-        .getProductOrService()
-        .setCoding(Collections.singletonList(new Coding("Test/other/url", "2436467", "")));
+    modifiedEob.getItem().get(0).setProductOrService(null);
 
     // When
     boolean isMatch = samhsaMatcherV2.test(modifiedEob);
 
     // Then
-    assertFalse(isMatch);
+    assertEquals(expectMatch, isMatch);
   }
 
   /**
