@@ -128,6 +128,14 @@ public class PreAdjMcsClaim {
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
+  /**
+   * String specifying the source of the data contained in this record. Generally this will be the
+   * version string returned by the RDA API server but when populating data from mock server it will
+   * also include information about the mode the server was running in.
+   */
+  @Column(name = "`apiSource`", length = 64)
+  private String apiSource;
+
   @OneToMany(
       mappedBy = "idrClmHdIcn",
       fetch = FetchType.EAGER,
