@@ -349,7 +349,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithUnknownIcd9SystemExpectMatch() {
+  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownIcd9SystemExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -368,7 +368,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * method will not identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd9CodeExpectNoMatch() {
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithNonBlacklistedIcd9CodeExpectNoMatch() {
     // When/Then
     verifySamhsaMatcherForIcd(
         IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
@@ -381,8 +382,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithBlacklistedIcd10CodeExpectMatch() {
+  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithBlacklistedIcd10CodeExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -405,8 +405,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10SystemExpectMatch() {
+  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownIcd10SystemExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -427,7 +426,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10CodeExpectNoMatch() {
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithNonBlacklistedIcd10CodeExpectNoMatch() {
     // When/Then
     verifySamhsaMatcherForIcd(
         IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
