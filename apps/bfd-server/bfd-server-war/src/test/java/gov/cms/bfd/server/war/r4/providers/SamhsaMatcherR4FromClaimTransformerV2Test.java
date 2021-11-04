@@ -44,7 +44,11 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
           + CcwCodebookVariable.HCPCS_CD.getVariable().getId().toLowerCase();
   private static final String BLACKLISTED_HCPCS_CODE = "M1034";
   private static final String NON_SAMHSA_HCPCS_CODE = "11111";
+  private static final String BLACKLISTED_IC9_DIAGNOSIS_CODE = "291.0";
+  private static final String BLACKLISTED_IC10_DIAGNOSIS_CODE = "F10.10";
+  private static final String NON_BLACKLISTED_IC_CODE = "111111";
 
+  private final RifRecordBase claim;
   private final ExplanationOfBenefit loadedExplanationOfBenefit;
 
   /** Sets up the test. */
@@ -61,49 +65,51 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Parameterized.Parameters
   public static Collection<Object[]> data() {
     // Load and transform the various claim types for testing
+    RifRecordBase inpatientClaim = getClaim(InpatientClaim.class);
     ExplanationOfBenefit inpatientEob =
         InpatientClaimTransformerV2.transform(
-            new MetricRegistry(), getClaim(InpatientClaim.class), Optional.empty());
+            new MetricRegistry(), inpatientClaim, Optional.empty());
 
+    RifRecordBase outpatientClaim = getClaim(OutpatientClaim.class);
     ExplanationOfBenefit outpatientEob =
         OutpatientClaimTransformerV2.transform(
-            new MetricRegistry(), getClaim(OutpatientClaim.class), Optional.empty());
+            new MetricRegistry(), outpatientClaim, Optional.empty());
 
+    RifRecordBase dmeClaim = getClaim(DMEClaim.class);
     ExplanationOfBenefit dmeEob =
-        DMEClaimTransformerV2.transform(
-            new MetricRegistry(), getClaim(DMEClaim.class), Optional.empty());
+        DMEClaimTransformerV2.transform(new MetricRegistry(), dmeClaim, Optional.empty());
 
+    RifRecordBase hhaClaim = getClaim(HHAClaim.class);
     ExplanationOfBenefit hhaEob =
-        HHAClaimTransformerV2.transform(
-            new MetricRegistry(), getClaim(HHAClaim.class), Optional.empty());
+        HHAClaimTransformerV2.transform(new MetricRegistry(), hhaClaim, Optional.empty());
 
+    RifRecordBase hospiceClaim = getClaim(HospiceClaim.class);
     ExplanationOfBenefit hospiceEob =
-        HospiceClaimTransformerV2.transform(
-            new MetricRegistry(), getClaim(HospiceClaim.class), Optional.empty());
+        HospiceClaimTransformerV2.transform(new MetricRegistry(), hospiceClaim, Optional.empty());
 
+    RifRecordBase snfClaim = getClaim(SNFClaim.class);
     ExplanationOfBenefit snfEob =
-        SNFClaimTransformerV2.transform(
-            new MetricRegistry(), getClaim(SNFClaim.class), Optional.empty());
+        SNFClaimTransformerV2.transform(new MetricRegistry(), snfClaim, Optional.empty());
 
-    ExplanationOfBenefit pdeEob =
-        PartDEventTransformerV2.transform(
-            new MetricRegistry(), getClaim(PartDEvent.class), Optional.empty());
-
+    RifRecordBase carrierClaim = getClaim(CarrierClaim.class);
     ExplanationOfBenefit carrierEob =
-        CarrierClaimTransformerV2.transform(
-            new MetricRegistry(), getClaim(CarrierClaim.class), Optional.empty());
+        CarrierClaimTransformerV2.transform(new MetricRegistry(), carrierClaim, Optional.empty());
+
+    RifRecordBase pdeClaim = getClaim(PartDEvent.class);
+    ExplanationOfBenefit pdeEob =
+        PartDEventTransformerV2.transform(new MetricRegistry(), pdeClaim, Optional.empty());
 
     // Load the claim types into the test data that will be run against each test
     return Arrays.asList(
         new Object[][] {
-          {inpatientEob},
-          {outpatientEob},
-          {dmeEob},
-          {hhaEob},
-          {hospiceEob},
-          {snfEob},
-          {carrierEob},
-          {pdeEob}
+          {inpatientClaim, inpatientEob},
+          {outpatientClaim, outpatientEob},
+          {dmeClaim, dmeEob},
+          {hhaClaim, hhaEob},
+          {hospiceClaim, hospiceEob},
+          {snfClaim, snfEob},
+          {carrierClaim, carrierEob},
+          {pdeClaim, pdeEob}
         });
   }
 
@@ -112,7 +118,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    *
    * @param explanationOfBenefit the explanation of benefit to use
    */
-  public SamhsaMatcherR4FromClaimTransformerV2Test(ExplanationOfBenefit explanationOfBenefit) {
+  public SamhsaMatcherR4FromClaimTransformerV2Test(
+      RifRecordBase claim, ExplanationOfBenefit explanationOfBenefit) {
+    this.claim = claim;
     this.loadedExplanationOfBenefit = explanationOfBenefit;
   }
 
@@ -125,11 +133,18 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndMatchingCptExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
     // When/Then
     verifySamhsaMatcherForItem(
         TransformerConstants.CODING_SYSTEM_HCPCS,
         BLACKLISTED_HCPCS_CODE,
-        true,
+        expectMatch,
         loadedExplanationOfBenefit);
   }
 
@@ -142,7 +157,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndNonMatchingCptExpectNoMatch() {
-    // When/Then
+    // When/Then/
     verifySamhsaMatcherForItem(
         TransformerConstants.CODING_SYSTEM_HCPCS,
         NON_SAMHSA_HCPCS_CODE,
@@ -159,9 +174,12 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCdCodeAndMatchingCptExpectMatch() {
+    // Only inpatient claims will match HCPCS_CD
+    boolean expectMatch = claim instanceof InpatientClaim;
+
     // When/Then
     verifySamhsaMatcherForItem(
-        CODING_SYSTEM_HCPCS_CD, BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
+        CODING_SYSTEM_HCPCS_CD, BLACKLISTED_HCPCS_CODE, expectMatch, loadedExplanationOfBenefit);
   }
 
   /**
@@ -185,9 +203,15 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownSystemExpectFallbackMatch() {
-    // When/Then
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
     verifySamhsaMatcherForItem(
-        "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, true, loadedExplanationOfBenefit);
+        "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, expectMatch, loadedExplanationOfBenefit);
   }
 
   /**
@@ -302,10 +326,20 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithValidIcd9CodeExpectMatch() {
+  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithBlacklistedIcd9CodeExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
     // When/Then
     verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_9, BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
+        IcdCode.CODING_SYSTEM_ICD_9,
+        BLACKLISTED_IC9_DIAGNOSIS_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
   }
 
   /**
@@ -315,23 +349,29 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd9SystemExpectMatch() {
-    // When/Then
+  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithUnknownIcd9SystemExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
     verifySamhsaMatcherForIcd(
-        "not valid icd9 system", BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
+        "not valid icd9 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
   }
 
   /**
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
-   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is not blacklisted the SAMHSA matcher's test
+   * method will not identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd9CodeExpectMatch() {
+  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd9CodeExpectNoMatch() {
     // When/Then
     verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_9, "invalid code", false, loadedExplanationOfBenefit);
+        IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
 
   /**
@@ -341,10 +381,21 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithValidIcd10CodeExpectMatch() {
+  public void
+      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithBlacklistedIcd10CodeExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
     // When/Then
     verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_10, BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
+        IcdCode.CODING_SYSTEM_ICD_10,
+        BLACKLISTED_IC10_DIAGNOSIS_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
   }
 
   /**
@@ -356,22 +407,30 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10SystemExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
     // When/Then
     verifySamhsaMatcherForIcd(
-        "not valid icd10 system", BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
+        "not valid icd10 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
   }
 
   /**
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
-   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is not blacklisted the SAMHSA matcher's test
+   * method will not identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10CodeExpectMatch() {
+  public void
+      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10CodeExpectNoMatch() {
     // When/Then
     verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_10, "invalid code", false, loadedExplanationOfBenefit);
+        IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
 
   /**
