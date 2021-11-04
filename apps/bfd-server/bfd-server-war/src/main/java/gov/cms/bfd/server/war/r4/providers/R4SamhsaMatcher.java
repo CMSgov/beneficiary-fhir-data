@@ -533,7 +533,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     // Check that Coding to see if it's blacklisted.
     if (hasHcpcsCoding && isSamhsaCptCode(procedureConcept)) {
       return true;
-    } else if (hasHcpcsCoding && containsOnlyKnownSystems(procedureConcept)) {
+    } else if (hasHcpcsCoding && !containsOnlyKnownSystems(procedureConcept)) {
       /*
        * Fail safe: if we don't know the procedure Coding system, assume the code is
        * SAMHSA.
