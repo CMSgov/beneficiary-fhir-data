@@ -8,6 +8,7 @@ import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -220,6 +221,60 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
     explanationOfBenefit.getItem().get(0).getProductOrService().getCoding().get(0).setCode(code);
 
     assertEquals(shouldMatch, samhsaMatcherV2.test(explanationOfBenefit));
+  }
+
+  /**
+   * Verify SAMHSA matcher for item with the given system, code and if the expectation is that there
+   * should be a match for this combination.
+   *
+   * @param system the system value
+   * @param code the code
+   * @param shouldMatch if the matcher should match on this combination
+   */
+  private void verifySamhsaMatcherForIcd(
+      String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
+
+    // Set Top level diagnosis and package code to null so we can test item logic
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent :
+        explanationOfBenefit.getDiagnosis()) {
+      CodeableConcept codeableConcept = diagnosisComponent.getDiagnosisCodeableConcept();
+      ArrayList<Coding> codingList = new ArrayList<Coding>();
+      codingList.add(new Coding().setSystem(system));
+
+      codeableConcept.setCoding(codingList);
+      diagnosisComponent.setPackageCode(null);
+    }
+
+    // Set item level code to the correct coding system
+    explanationOfBenefit
+        .getItem()
+        .get(0)
+        .getProductOrService()
+        .getCoding()
+        .get(0)
+        .setSystem(system);
+    // Set allowed CPT code
+    explanationOfBenefit.getItem().get(0).getProductOrService().getCoding().get(0).setCode(code);
+
+    assertEquals(shouldMatch, samhsaMatcherV2.test(explanationOfBenefit));
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
+   * CcwCodebookVariable.HCPCS_CD) and the CPT code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithValidIcd9CodeExpectMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForIcd(
+        IcdCode.CODING_SYSTEM_ICD_9, BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
   }
 
   /**

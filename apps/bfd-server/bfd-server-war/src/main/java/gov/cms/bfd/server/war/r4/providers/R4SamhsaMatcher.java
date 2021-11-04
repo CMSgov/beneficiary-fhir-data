@@ -168,7 +168,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+      if (containsHcpcsCoding(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -197,7 +197,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+      if (containsHcpcsCoding(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -225,7 +225,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+      if (containsHcpcsCoding(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -250,7 +250,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+      if (containsHcpcsCoding(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -272,7 +272,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     if (containsSamhsaIcdCode(eob.getDiagnosis())) return true;
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) return true;
+      if (containsHcpcsCoding(eobItem.getProductOrService())) return true;
     }
 
     // No blacklisted codes found: this claim isn't SAMHSA-related.
@@ -310,7 +310,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
+      if (containsHcpcsCoding(eobItem.getProductOrService())) {
         return true;
       }
     }
