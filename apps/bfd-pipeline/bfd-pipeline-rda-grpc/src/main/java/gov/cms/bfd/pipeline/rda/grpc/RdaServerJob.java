@@ -9,6 +9,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -71,6 +72,7 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
           RdaServer.startInProcess(
               RdaServer.InProcessConfig.builder()
                   .serverName(config.serverName)
+                  .version(config.createVersion())
                   .fissSourceFactory(config::createFissClaims)
                   .mcsSourceFactory(config::createMcsClaims)
                   .build());
@@ -188,6 +190,16 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         final String directory = s3Directory == null ? "" : s3Directory;
         s3Sources = new S3JsonMessageSources(s3Client, s3Bucket, directory);
       }
+    }
+
+    private RdaService.Version createVersion() {
+      RdaService.Version.VersionBuilder versionBuilder = RdaService.Version.builder();
+      if (serverMode == ServerMode.S3) {
+        versionBuilder.version(String.format("S3:%d", System.currentTimeMillis()));
+      } else {
+        versionBuilder.version(String.format("Random:%d", randomSeed));
+      }
+      return versionBuilder.build();
     }
 
     private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {

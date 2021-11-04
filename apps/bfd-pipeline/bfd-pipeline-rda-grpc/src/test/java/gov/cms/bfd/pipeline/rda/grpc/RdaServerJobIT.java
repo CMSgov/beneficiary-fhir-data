@@ -56,18 +56,25 @@ public class RdaServerJobIT {
           new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
       final GrpcResponseStream<RdaChange<PreAdjFissClaim>> fissStream =
           fissCaller.callService(fissChannel, 2);
+
       assertEquals(true, fissStream.hasNext());
-      assertEquals(2L, fissStream.next().getSequenceNumber());
+      RdaChange<PreAdjFissClaim> fissChange = fissStream.next();
+      assertEquals("Random:1", fissChange.getClaim().getApiSource());
+      assertEquals(2L, fissChange.getSequenceNumber());
       assertEquals(true, fissStream.hasNext());
-      assertEquals(3L, fissStream.next().getSequenceNumber());
+      fissChange = fissStream.next();
+      assertEquals(3L, fissChange.getSequenceNumber());
       assertEquals(false, fissStream.hasNext());
+
       final ManagedChannel mcsChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
       final McsClaimStreamCaller mcsCaller =
           new McsClaimStreamCaller(new McsClaimTransformer(clock, hasher));
       final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> mcsStream =
           mcsCaller.callService(mcsChannel, 3);
       assertEquals(true, mcsStream.hasNext());
-      assertEquals(3L, mcsStream.next().getSequenceNumber());
+      RdaChange<PreAdjMcsClaim> mcsChange = mcsStream.next();
+      assertEquals("Random:1", mcsChange.getClaim().getApiSource());
+      assertEquals(3L, mcsChange.getSequenceNumber());
       assertEquals(false, mcsStream.hasNext());
     } finally {
       exec.shutdownNow();
@@ -105,11 +112,15 @@ public class RdaServerJobIT {
         final GrpcResponseStream<RdaChange<PreAdjFissClaim>> fissStream =
             fissCaller.callService(fissChannel, 1098);
         assertEquals(true, fissStream.hasNext());
-        assertEquals(1098L, fissStream.next().getSequenceNumber());
+        RdaChange<PreAdjFissClaim> fissChange = fissStream.next();
+        assertEquals(true, fissChange.getClaim().getApiSource().matches("S3:\\d+"));
+        assertEquals(1098L, fissChange.getSequenceNumber());
         assertEquals(true, fissStream.hasNext());
-        assertEquals(1099L, fissStream.next().getSequenceNumber());
+        fissChange = fissStream.next();
+        assertEquals(1099L, fissChange.getSequenceNumber());
         assertEquals(true, fissStream.hasNext());
-        assertEquals(1100L, fissStream.next().getSequenceNumber());
+        fissChange = fissStream.next();
+        assertEquals(1100L, fissChange.getSequenceNumber());
         assertEquals(false, fissStream.hasNext());
         final ManagedChannel mcsChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
         final McsClaimStreamCaller mcsCaller =
@@ -117,9 +128,12 @@ public class RdaServerJobIT {
         final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> mcsStream =
             mcsCaller.callService(mcsChannel, 1099);
         assertEquals(true, mcsStream.hasNext());
-        assertEquals(1099L, mcsStream.next().getSequenceNumber());
+        RdaChange<PreAdjMcsClaim> mcsChange = mcsStream.next();
+        assertEquals(true, mcsChange.getClaim().getApiSource().matches("S3:\\d+"));
+        assertEquals(1099L, mcsChange.getSequenceNumber());
         assertEquals(true, mcsStream.hasNext());
-        assertEquals(1100L, mcsStream.next().getSequenceNumber());
+        mcsChange = mcsStream.next();
+        assertEquals(1100L, mcsChange.getSequenceNumber());
         assertEquals(false, mcsStream.hasNext());
       } finally {
         exec.shutdownNow();
