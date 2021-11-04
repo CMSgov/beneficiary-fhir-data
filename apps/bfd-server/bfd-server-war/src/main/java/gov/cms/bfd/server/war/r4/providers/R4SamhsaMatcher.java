@@ -526,14 +526,14 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
    *     {@link Coding}s that match any of the {@link #cptCodes} and has no unknown {@link System}s,
    *     <code>false</code> if they all do not
    */
-  private boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
+  private boolean containsHcpcsCoding(CodeableConcept procedureConcept) {
     // Does the CodeableConcept have a legit HCPCS Coding?
     boolean hasHcpcsCoding = findHcpcsCoding(procedureConcept);
 
     // Check that Coding to see if it's blacklisted.
     if (hasHcpcsCoding && isSamhsaCptCode(procedureConcept)) {
       return true;
-    } else if (hasHcpcsCoding && hasUnknownSystem(procedureConcept)) {
+    } else if (hasHcpcsCoding && containsOnlyKnownSystems(procedureConcept)) {
       /*
        * Fail safe: if we don't know the procedure Coding system, assume the code is
        * SAMHSA.
@@ -564,24 +564,26 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
    * @return <code>false</code> if the specified procedure {@link CodeableConcept} contains any
    *     {@link Coding}s that do not contain any of the {@link System}s <code>true</code> if they do
    */
-  private boolean hasUnknownSystem(CodeableConcept procedureConcept) {
+  private boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
     Set<String> codingSystems =
-        procedureConcept.getCoding().stream()
-            .map(coding -> coding.getSystem())
-            .collect(Collectors.toSet());
-    // CHeck for HCPCS and HCPCS CD code systems, so that the right code is given in a backwards
-    // compatible way: https://jira.cms.gov/browse/BFD-1345
-    if (codingSystems.size() == 2
-        && codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)
-        && codingSystems.contains(
-            TransformerUtilsV2.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD))) {
-      return false;
-    } else if (codingSystems.size() == 1
-        && codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
-      return false;
-    } else {
-      return true;
-    }
+        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
+
+    String hcpcsCdSystem =
+        String.format(
+            "%s/%s",
+            TransformerConstants.BASE_URL_CCW_VARIABLES,
+            CcwCodebookVariable.HCPCS_CD.getVariable().getId().toLowerCase());
+
+    String hcpcsSystem = TransformerConstants.CODING_SYSTEM_HCPCS;
+
+    // Valid system url for productOrService coding
+    Set<String> knownHcpcsSystem = Set.of(hcpcsSystem);
+    // Additional valid coding system URL for backwards-compatibility
+    // See: https://jira.cms.gov/browse/BFD-1345
+    Set<String> backwardsCompatibleHcpcsSystem = Set.of(hcpcsSystem, hcpcsCdSystem);
+
+    return codingSystems.equals(knownHcpcsSystem)
+        || codingSystems.equals(backwardsCompatibleHcpcsSystem);
   }
 
   /**
