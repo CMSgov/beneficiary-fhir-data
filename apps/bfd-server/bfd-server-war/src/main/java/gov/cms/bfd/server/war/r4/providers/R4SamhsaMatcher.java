@@ -534,7 +534,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     // Check that Coding to see if it's blacklisted.
     if (hasHcpcsCoding && isSamhsaCptCode(procedureConcept)) {
       return true;
-    } else if (hasHcpcsCoding && !containsOnlyKnownSystems(procedureConcept)) {
+    } else if (!containsOnlyKnownSystems(procedureConcept)) {
       /*
        * Fail safe: if we don't know the procedure Coding system, assume the code is
        * SAMHSA.
@@ -568,6 +568,10 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   private boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
+
+    if (codingSystems.isEmpty()) {
+      return false;
+    }
 
     String hcpcsCdSystem = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
 
