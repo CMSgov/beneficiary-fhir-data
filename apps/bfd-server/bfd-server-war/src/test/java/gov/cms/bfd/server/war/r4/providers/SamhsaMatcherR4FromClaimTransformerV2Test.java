@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /** Verifies that transformations that contain SAMHSA codes are filtered as expected. */
-public final class SamhsaMatcherV2Test {
+public final class SamhsaMatcherR4FromClaimTransformerV2Test {
 
   private R4SamhsaMatcher samhsaMatcherV2;
   private static final String CODING_SYSTEM_HCPCS_CD =
@@ -39,71 +39,132 @@ public final class SamhsaMatcherV2Test {
   }
 
   /**
-   * Verifies that when transforming a SAMSHA claim into an ExplanationOfBenefit (where the
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
    * TransformerConstants.CODING_SYSTEM_HCPCS) and the CPT code is blacklisted, the SAMHSA matcher's
-   * test method will successfully identify this as a SAMSHA related ExplanationOfBenefit.
+   * test method will successfully identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedInpatientHasItemWithHcpcsCodeAndMatchingCptExpectMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
     verifySamhsaMatcherForItem(
-        TransformerConstants.CODING_SYSTEM_HCPCS, BLACKLISTED_HCPCS_CODE, true);
+        TransformerConstants.CODING_SYSTEM_HCPCS,
+        BLACKLISTED_HCPCS_CODE,
+        true,
+        explanationOfBenefit);
   }
 
   /**
-   * Verifies that when transforming a SAMSHA claim into an ExplanationOfBenefit (where the
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
    * TransformerConstants.CODING_SYSTEM_HCPCS) and the code is not included in the blacklist, the
-   * SAMHSA matcher's test method will not identify this as a SAMSHA related ExplanationOfBenefit.
+   * SAMHSA matcher's test method will not identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedInpatientHasItemWithHcpcsCodeAndNonMatchingCptExpectNoMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
     verifySamhsaMatcherForItem(
-        TransformerConstants.CODING_SYSTEM_HCPCS, NON_SAMHSA_HCPCS_CODE, false);
+        TransformerConstants.CODING_SYSTEM_HCPCS,
+        NON_SAMHSA_HCPCS_CODE,
+        false,
+        explanationOfBenefit);
   }
 
   /**
-   * Verifies that when transforming a SAMSHA claim into an ExplanationOfBenefit (where the
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
    * CcwCodebookVariable.HCPCS_CD) and the CPT code is blacklisted the SAMHSA matcher's test method
-   * will identify this as a SAMSHA related ExplanationOfBenefit.
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedInpatientHasItemWithHcpcsCdCodeAndMatchingCptExpectMatch() {
-    verifySamhsaMatcherForItem(CODING_SYSTEM_HCPCS_CD, BLACKLISTED_HCPCS_CODE, true);
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForItem(
+        CODING_SYSTEM_HCPCS_CD, BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
   }
 
   /**
-   * Verifies that when transforming a SAMSHA claim into an ExplanationOfBenefit (where the
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
    * CcwCodebookVariable.HCPCS_CD) and the CPT code is not included in the blacklist the SAMHSA
-   * matcher's test method will not identify this as a SAMSHA related ExplanationOfBenefit.
+   * matcher's test method will not identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedInpatientHasItemWithHcpcsCdCodeAndNonMatchingCptExpectNoMatch() {
-    verifySamhsaMatcherForItem(CODING_SYSTEM_HCPCS_CD, NON_SAMHSA_HCPCS_CODE, false);
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForItem(
+        CODING_SYSTEM_HCPCS_CD, NON_SAMHSA_HCPCS_CODE, false, explanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when the item[n].productOrService.coding[n].system is an unknown/unexpected
+   * value, the matcher will identify this as a SAMHSA related ExplanationOfBenefit using its
+   * fallback logic to assume the claim is SAMHSA.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithUnknownSystemExpectFallbackMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForItem(
+        "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, true, explanationOfBenefit);
   }
 
   /**
    * Verifies that when transforming a claim into an ExplanationOfBenefit which has no
    * item[n].productOrService.coding[n].system (procedure code) values which =
-   * TransformerConstants.CODING_SYSTEM_HCPCS, has no eob.diagnosis SAMSHA code, and has no
-   * eob.procedure SAMSHA code, then the SAMHSA matcher's test method will not identify this as a
-   * SAMSHA related ExplanationOfBenefit.
+   * TransformerConstants.CODING_SYSTEM_HCPCS, has no eob.diagnosis SAMHSA code, and has no
+   * eob.procedure SAMHSA code, then the SAMHSA matcher's test method will not identify this as a
+   * SAMHSA related ExplanationOfBenefit.
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithNoHcpcsCodeExpectNoMatch() {
 
     // Given
     InpatientClaim claim = getInpatientClaim();
-
     ExplanationOfBenefit explanationOfBenefit =
         InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
 
+    // When/Then
+    verifyNonSamhsaCodingDoesNotTriggerSamhsaFiltering(explanationOfBenefit);
+  }
+
+  /**
+   * Verifies that a claim with no samhsa diagnosis, procedure, or item-level HCPCS codes does not
+   * trigger filtering.
+   *
+   * @param explanationOfBenefit the loaded benefit to use for the test
+   */
+  private void verifyNonSamhsaCodingDoesNotTriggerSamhsaFiltering(
+      ExplanationOfBenefit explanationOfBenefit) {
     // Set Top level diagnosis and package code to null and coding to empty
     for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent :
         explanationOfBenefit.getDiagnosis()) {
@@ -129,19 +190,15 @@ public final class SamhsaMatcherV2Test {
   }
 
   /**
-   * Verify samsha matcher for item with the given system, code and if the expectation is that there
+   * Verify SAMHSA matcher for item with the given system, code and if the expectation is that there
    * should be a match for this combination.
    *
    * @param system the system value
    * @param code the code
    * @param shouldMatch if the matcher should match on this combination
    */
-  public void verifySamhsaMatcherForItem(String system, String code, boolean shouldMatch) {
-
-    InpatientClaim claim = getInpatientClaim();
-
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+  private void verifySamhsaMatcherForItem(
+      String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
 
     // Set Top level diagnosis and package code to null so we can test item logic
     for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent :

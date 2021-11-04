@@ -598,9 +598,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
      * subset that we blacklist from).
      */
     Set<String> codingSystems =
-        procedureConcept.getCoding().stream()
-            .map(coding -> coding.getSystem())
-            .collect(Collectors.toSet());
+        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
     if (!codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
       throw new IllegalArgumentException();
