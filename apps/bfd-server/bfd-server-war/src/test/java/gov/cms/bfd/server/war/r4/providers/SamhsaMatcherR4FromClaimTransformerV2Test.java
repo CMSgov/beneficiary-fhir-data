@@ -5,7 +5,15 @@ import static org.junit.Assert.assertFalse;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.model.rif.CarrierClaim;
+import gov.cms.bfd.model.rif.DMEClaim;
+import gov.cms.bfd.model.rif.HHAClaim;
+import gov.cms.bfd.model.rif.HospiceClaim;
 import gov.cms.bfd.model.rif.InpatientClaim;
+import gov.cms.bfd.model.rif.OutpatientClaim;
+import gov.cms.bfd.model.rif.PartDEvent;
+import gov.cms.bfd.model.rif.RifRecordBase;
+import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
@@ -13,6 +21,7 @@ import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +30,12 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /** Verifies that transformations that contain SAMHSA codes are filtered as expected. */
-public final class SamhsaMatcherR4FromClaimTransformerV2Test {
+@RunWith(Parameterized.class)
+public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
   private R4SamhsaMatcher samhsaMatcherV2;
   private static final String CODING_SYSTEM_HCPCS_CD =
@@ -33,10 +45,75 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
   private static final String BLACKLISTED_HCPCS_CODE = "M1034";
   private static final String NON_SAMHSA_HCPCS_CODE = "11111";
 
+  private final ExplanationOfBenefit loadedExplanationOfBenefit;
+
   /** Sets up the test. */
   @Before
   public void setup() {
     samhsaMatcherV2 = new R4SamhsaMatcher();
+  }
+
+  /**
+   * Data collection.
+   *
+   * @return the collection
+   */
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+    // Load and transform the various claim types for testing
+    ExplanationOfBenefit inpatientEob =
+        InpatientClaimTransformerV2.transform(
+            new MetricRegistry(), getClaim(InpatientClaim.class), Optional.empty());
+
+    ExplanationOfBenefit outpatientEob =
+        OutpatientClaimTransformerV2.transform(
+            new MetricRegistry(), getClaim(OutpatientClaim.class), Optional.empty());
+
+    ExplanationOfBenefit dmeEob =
+        DMEClaimTransformerV2.transform(
+            new MetricRegistry(), getClaim(DMEClaim.class), Optional.empty());
+
+    ExplanationOfBenefit hhaEob =
+        HHAClaimTransformerV2.transform(
+            new MetricRegistry(), getClaim(HHAClaim.class), Optional.empty());
+
+    ExplanationOfBenefit hospiceEob =
+        HospiceClaimTransformerV2.transform(
+            new MetricRegistry(), getClaim(HospiceClaim.class), Optional.empty());
+
+    ExplanationOfBenefit snfEob =
+        SNFClaimTransformerV2.transform(
+            new MetricRegistry(), getClaim(SNFClaim.class), Optional.empty());
+
+    ExplanationOfBenefit pdeEob =
+        PartDEventTransformerV2.transform(
+            new MetricRegistry(), getClaim(PartDEvent.class), Optional.empty());
+
+    ExplanationOfBenefit carrierEob =
+        CarrierClaimTransformerV2.transform(
+            new MetricRegistry(), getClaim(CarrierClaim.class), Optional.empty());
+
+    // Load the claim types into the test data that will be run against each test
+    return Arrays.asList(
+        new Object[][] {
+          {inpatientEob},
+          {outpatientEob},
+          {dmeEob},
+          {hhaEob},
+          {hospiceEob},
+          {snfEob},
+          {carrierEob},
+          {pdeEob}
+        });
+  }
+
+  /**
+   * Creates a new test with the specified parameter.
+   *
+   * @param explanationOfBenefit the explanation of benefit to use
+   */
+  public SamhsaMatcherR4FromClaimTransformerV2Test(ExplanationOfBenefit explanationOfBenefit) {
+    this.loadedExplanationOfBenefit = explanationOfBenefit;
   }
 
   /**
@@ -47,18 +124,13 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithHcpcsCodeAndMatchingCptExpectMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndMatchingCptExpectMatch() {
     // When/Then
     verifySamhsaMatcherForItem(
         TransformerConstants.CODING_SYSTEM_HCPCS,
         BLACKLISTED_HCPCS_CODE,
         true,
-        explanationOfBenefit);
+        loadedExplanationOfBenefit);
   }
 
   /**
@@ -69,18 +141,13 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithHcpcsCodeAndNonMatchingCptExpectNoMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndNonMatchingCptExpectNoMatch() {
     // When/Then
     verifySamhsaMatcherForItem(
         TransformerConstants.CODING_SYSTEM_HCPCS,
         NON_SAMHSA_HCPCS_CODE,
         false,
-        explanationOfBenefit);
+        loadedExplanationOfBenefit);
   }
 
   /**
@@ -91,15 +158,10 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithHcpcsCdCodeAndMatchingCptExpectMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCdCodeAndMatchingCptExpectMatch() {
     // When/Then
     verifySamhsaMatcherForItem(
-        CODING_SYSTEM_HCPCS_CD, BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+        CODING_SYSTEM_HCPCS_CD, BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
   }
 
   /**
@@ -110,15 +172,10 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithHcpcsCdCodeAndNonMatchingCptExpectNoMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCdCodeAndNonMatchingCptExpectNoMatch() {
     // When/Then
     verifySamhsaMatcherForItem(
-        CODING_SYSTEM_HCPCS_CD, NON_SAMHSA_HCPCS_CODE, false, explanationOfBenefit);
+        CODING_SYSTEM_HCPCS_CD, NON_SAMHSA_HCPCS_CODE, false, loadedExplanationOfBenefit);
   }
 
   /**
@@ -127,16 +184,10 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
    * fallback logic to assume the claim is SAMHSA.
    */
   @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithUnknownSystemExpectFallbackMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
+  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownSystemExpectFallbackMatch() {
     // When/Then
     verifySamhsaMatcherForItem(
-        "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, true, explanationOfBenefit);
+        "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, true, loadedExplanationOfBenefit);
   }
 
   /**
@@ -147,15 +198,9 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
    * SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithNoHcpcsCodeExpectNoMatch() {
-
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
+  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithNoHcpcsCodeExpectNoMatch() {
     // When/Then
-    verifyNonSamhsaCodingDoesNotTriggerSamhsaFiltering(explanationOfBenefit);
+    verifyNonSamhsaCodingDoesNotTriggerSamhsaFiltering(loadedExplanationOfBenefit);
   }
 
   /**
@@ -166,25 +211,27 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   private void verifyNonSamhsaCodingDoesNotTriggerSamhsaFiltering(
       ExplanationOfBenefit explanationOfBenefit) {
+
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
     // Set Top level diagnosis and package code to null and coding to empty
-    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent :
-        explanationOfBenefit.getDiagnosis()) {
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent : modifiedEob.getDiagnosis()) {
       diagnosisComponent.getDiagnosisCodeableConcept().setCoding(new ArrayList<>());
       diagnosisComponent.setPackageCode(null);
     }
 
     // Set procedure to empty
-    explanationOfBenefit.setProcedure(new ArrayList<>());
+    modifiedEob.setProcedure(new ArrayList<>());
 
     // Set item level codings to non-SAMHSA
-    explanationOfBenefit
+    modifiedEob
         .getItem()
         .get(0)
         .getProductOrService()
         .setCoding(Collections.singletonList(new Coding("Test/other/url", "2436467", "")));
 
     // When
-    boolean isMatch = samhsaMatcherV2.test(explanationOfBenefit);
+    boolean isMatch = samhsaMatcherV2.test(modifiedEob);
 
     // Then
     assertFalse(isMatch);
@@ -197,30 +244,26 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
    * @param system the system value
    * @param code the code
    * @param shouldMatch if the matcher should match on this combination
+   * @param explanationOfBenefit the explanation of benefit
    */
   private void verifySamhsaMatcherForItem(
       String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
 
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
     // Set Top level diagnosis and package code to null so we can test item logic
-    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent :
-        explanationOfBenefit.getDiagnosis()) {
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent : modifiedEob.getDiagnosis()) {
       CodeableConcept codeableConcept = diagnosisComponent.getDiagnosisCodeableConcept();
       codeableConcept.setCoding(new ArrayList<>());
       diagnosisComponent.setPackageCode(null);
     }
 
     // Set item level code to the correct coding system
-    explanationOfBenefit
-        .getItem()
-        .get(0)
-        .getProductOrService()
-        .getCoding()
-        .get(0)
-        .setSystem(system);
-    // Set allowed CPT code
-    explanationOfBenefit.getItem().get(0).getProductOrService().getCoding().get(0).setCode(code);
+    modifiedEob.getItem().get(0).getProductOrService().getCoding().get(0).setSystem(system);
+    // Set CPT code
+    modifiedEob.getItem().get(0).getProductOrService().getCoding().get(0).setCode(code);
 
-    assertEquals(shouldMatch, samhsaMatcherV2.test(explanationOfBenefit));
+    assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
   }
 
   /**
@@ -371,18 +414,15 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
   /**
    * Generates the Claim object to be used in a test.
    *
-   * @return the inpatient claim to be used for the test
+   * @param type the type
+   * @return the claim to be used for the test, should match the input type
    */
-  public InpatientClaim getInpatientClaim() {
+  public static RifRecordBase getClaim(Class<? extends RifRecordBase> type) {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    InpatientClaim claim =
-        parsedRecords.stream()
-            .filter(r -> r instanceof InpatientClaim)
-            .map(r -> (InpatientClaim) r)
-            .findFirst()
-            .orElse(null);
+    RifRecordBase claim =
+        parsedRecords.stream().filter(type::isInstance).map(type::cast).findFirst().orElse(null);
 
     if (claim != null) {
       claim.setLastUpdated(Instant.now());
