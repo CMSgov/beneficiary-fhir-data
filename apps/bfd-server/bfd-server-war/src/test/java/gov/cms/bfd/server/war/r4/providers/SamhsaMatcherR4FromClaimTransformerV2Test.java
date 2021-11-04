@@ -46,6 +46,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   private static final String NON_SAMHSA_HCPCS_CODE = "11111";
   private static final String BLACKLISTED_IC9_DIAGNOSIS_CODE = "291.0";
   private static final String BLACKLISTED_IC10_DIAGNOSIS_CODE = "F10.10";
+  private static final String BLACKLISTED_IC9_PROCEDURE_CODE = "94.45";
+  private static final String BLACKLISTED_IC10_PROCEDURE_CODE = "HZ2ZZZZ";
   private static final String NON_BLACKLISTED_IC_CODE = "111111";
 
   private final RifRecordBase claim;
@@ -228,6 +230,240 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   }
 
   /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd9CodeExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    // When/Then
+    verifySamhsaMatcherForDiagnosisIcd(
+        IcdCode.CODING_SYSTEM_ICD_9,
+        BLACKLISTED_IC9_DIAGNOSIS_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd9SystemExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    verifySamhsaMatcherForDiagnosisIcd(
+        "not valid icd9 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is not blacklisted the SAMHSA matcher's test
+   * method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithNonBlacklistedIcd9CodeExpectNoMatch() {
+    // When/Then
+    verifySamhsaMatcherForDiagnosisIcd(
+        IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd10CodeExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    // When/Then
+    verifySamhsaMatcherForDiagnosisIcd(
+        IcdCode.CODING_SYSTEM_ICD_10,
+        BLACKLISTED_IC10_DIAGNOSIS_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd10SystemExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    // When/Then
+    verifySamhsaMatcherForDiagnosisIcd(
+        "not valid icd10 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a diagnosis[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is not blacklisted the SAMHSA matcher's test
+   * method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithNonBlacklistedIcd10CodeExpectNoMatch() {
+    // When/Then
+    verifySamhsaMatcherForDiagnosisIcd(
+        IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd9CodeExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    // When/Then
+    verifySamhsaMatcherForProcedureIcd(
+        IcdCode.CODING_SYSTEM_ICD_9,
+        BLACKLISTED_IC9_PROCEDURE_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd9SystemExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    verifySamhsaMatcherForProcedureIcd(
+        "not valid icd9 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is not blacklisted the SAMHSA matcher's test
+   * method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithNonBlacklistedIcd9CodeExpectNoMatch() {
+    // When/Then
+    verifySamhsaMatcherForProcedureIcd(
+        IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd10CodeExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    // When/Then
+    verifySamhsaMatcherForProcedureIcd(
+        IcdCode.CODING_SYSTEM_ICD_10,
+        BLACKLISTED_IC10_PROCEDURE_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd10SystemExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    // When/Then
+    verifySamhsaMatcherForProcedureIcd(
+        "not valid icd10 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is not blacklisted the SAMHSA matcher's test
+   * method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithNonBlacklistedIcd10CodeExpectNoMatch() {
+    // When/Then
+    verifySamhsaMatcherForProcedureIcd(
+        IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
+  }
+
+  /**
    * Verifies that a claim with no samhsa diagnosis, procedure, or item-level HCPCS codes does not
    * trigger filtering.
    *
@@ -298,19 +534,25 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * @param code the code
    * @param shouldMatch if the matcher should match on this combination
    */
-  private void verifySamhsaMatcherForIcd(
+  private void verifySamhsaMatcherForDiagnosisIcd(
       String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
 
     ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
 
-    // Set Top level diagnosis and package code to null so we can test item logic
+    // Set diagnosis
     for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent : modifiedEob.getDiagnosis()) {
       CodeableConcept codeableConcept = diagnosisComponent.getDiagnosisCodeableConcept();
       ArrayList<Coding> codingList = new ArrayList<>();
       codingList.add(new Coding().setSystem(system).setCode(code));
-
       codeableConcept.setCoding(codingList);
       diagnosisComponent.setPackageCode(null);
+    }
+
+    // Set procedure to empty so we dont check it for matches
+    for (ExplanationOfBenefit.ProcedureComponent diagnosisComponent : modifiedEob.getProcedure()) {
+      CodeableConcept codeableConcept = diagnosisComponent.getProcedureCodeableConcept();
+      ArrayList<Coding> codingList = new ArrayList<>();
+      codeableConcept.setCoding(codingList);
     }
 
     // Set item coding to empty so we dont check it for matches
@@ -320,116 +562,38 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
-   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
-   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   * Verify SAMHSA matcher for ICD item with the given system, code and if the expectation is that
+   * there should be a match for this combination.
+   *
+   * @param system the system value
+   * @param code the code
+   * @param shouldMatch if the matcher should match on this combination
    */
-  @Test
-  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithBlacklistedIcd9CodeExpectMatch() {
-    boolean expectMatch = true;
+  private void verifySamhsaMatcherForProcedureIcd(
+      String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
 
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
-      expectMatch = false;
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
+    // Set diagnosis to empty so we dont check it for matches
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent : modifiedEob.getDiagnosis()) {
+      CodeableConcept codeableConcept = diagnosisComponent.getDiagnosisCodeableConcept();
+      ArrayList<Coding> codingList = new ArrayList<>();
+      codeableConcept.setCoding(codingList);
+      diagnosisComponent.setPackageCode(null);
     }
 
-    // When/Then
-    verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_9,
-        BLACKLISTED_IC9_DIAGNOSIS_CODE,
-        expectMatch,
-        loadedExplanationOfBenefit);
-  }
-
-  /**
-   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
-   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
-   * will identify this as a SAMHSA related ExplanationOfBenefit.
-   */
-  @Test
-  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownIcd9SystemExpectMatch() {
-    boolean expectMatch = true;
-
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
-      expectMatch = false;
+    // Set procedure
+    for (ExplanationOfBenefit.ProcedureComponent diagnosisComponent : modifiedEob.getProcedure()) {
+      CodeableConcept codeableConcept = diagnosisComponent.getProcedureCodeableConcept();
+      ArrayList<Coding> codingList = new ArrayList<>();
+      codingList.add(new Coding().setSystem(system).setCode(code));
+      codeableConcept.setCoding(codingList);
     }
 
-    verifySamhsaMatcherForIcd(
-        "not valid icd9 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
-  }
+    // Set item coding to empty so we dont check it for matches
+    modifiedEob.getItem().get(0).getProductOrService().setCoding(new ArrayList<>());
 
-  /**
-   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
-   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is not blacklisted the SAMHSA matcher's test
-   * method will not identify this as a SAMHSA related ExplanationOfBenefit.
-   */
-  @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedClaimHasItemWithNonBlacklistedIcd9CodeExpectNoMatch() {
-    // When/Then
-    verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
-  }
-
-  /**
-   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
-   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
-   * will identify this as a SAMHSA related ExplanationOfBenefit.
-   */
-  @Test
-  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithBlacklistedIcd10CodeExpectMatch() {
-    boolean expectMatch = true;
-
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
-      expectMatch = false;
-    }
-
-    // When/Then
-    verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_10,
-        BLACKLISTED_IC10_DIAGNOSIS_CODE,
-        expectMatch,
-        loadedExplanationOfBenefit);
-  }
-
-  /**
-   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
-   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
-   * will identify this as a SAMHSA related ExplanationOfBenefit.
-   */
-  @Test
-  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownIcd10SystemExpectMatch() {
-    boolean expectMatch = true;
-
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
-      expectMatch = false;
-    }
-
-    // When/Then
-    verifySamhsaMatcherForIcd(
-        "not valid icd10 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
-  }
-
-  /**
-   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
-   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is not blacklisted the SAMHSA matcher's test
-   * method will not identify this as a SAMHSA related ExplanationOfBenefit.
-   */
-  @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedClaimHasItemWithNonBlacklistedIcd10CodeExpectNoMatch() {
-    // When/Then
-    verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
+    assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
   }
 
   /**
