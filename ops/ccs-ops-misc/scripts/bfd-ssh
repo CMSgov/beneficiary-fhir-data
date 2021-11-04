@@ -336,7 +336,7 @@ select_target() {
   
   # if --random just pick one
   if $RANDOM_IP; then
-    mapfile -t rinstances <<< "$instances"
+    read -r -a rinstances <<< "$instances"
     echo "${rinstances[$(( RANDOM  % ${#rinstances[@]} ))]}" | awk '{print $2}'
     return
   fi
