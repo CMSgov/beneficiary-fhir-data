@@ -224,8 +224,8 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
   }
 
   /**
-   * Verify SAMHSA matcher for item with the given system, code and if the expectation is that there
-   * should be a match for this combination.
+   * Verify SAMHSA matcher for ICD item with the given system, code and if the expectation is that
+   * there should be a match for this combination.
    *
    * @param system the system value
    * @param code the code
@@ -239,7 +239,7 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
         explanationOfBenefit.getDiagnosis()) {
       CodeableConcept codeableConcept = diagnosisComponent.getDiagnosisCodeableConcept();
       ArrayList<Coding> codingList = new ArrayList<Coding>();
-      codingList.add(new Coding().setSystem(system));
+      codingList.add(new Coding().setSystem(system).setCode(code));
 
       codeableConcept.setCoding(codingList);
       diagnosisComponent.setPackageCode(null);
@@ -253,7 +253,7 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
         .getCoding()
         .get(0)
         .setSystem(system);
-    // Set allowed CPT code
+    // Set allowed ICD code
     explanationOfBenefit.getItem().get(0).getProductOrService().getCoding().get(0).setCode(code);
 
     assertEquals(shouldMatch, samhsaMatcherV2.test(explanationOfBenefit));
@@ -262,7 +262,7 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
   /**
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * CcwCodebookVariable.HCPCS_CD) and the CPT code is blacklisted the SAMHSA matcher's test method
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
@@ -275,6 +275,97 @@ public final class SamhsaMatcherR4FromClaimTransformerV2Test {
     // When/Then
     verifySamhsaMatcherForIcd(
         IcdCode.CODING_SYSTEM_ICD_9, BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd9SystemExpectMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForIcd(
+        "not valid icd9 system", BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd9CodeExpectMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForIcd(
+        IcdCode.CODING_SYSTEM_ICD_9, "invalid code", false, explanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithValidIcd10CodeExpectMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForIcd(
+        IcdCode.CODING_SYSTEM_ICD_10, BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10SystemExpectMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForIcd(
+        "not valid icd10 system", BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
+   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
+   * IcdCode.CODING_SYSTEM_ICD_10) and the ICD code is blacklisted the SAMHSA matcher's test method
+   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   */
+  @Test
+  public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10CodeExpectMatch() {
+    // Given
+    InpatientClaim claim = getInpatientClaim();
+    ExplanationOfBenefit explanationOfBenefit =
+        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
+
+    // When/Then
+    verifySamhsaMatcherForIcd(
+        IcdCode.CODING_SYSTEM_ICD_10, "invalid code", false, explanationOfBenefit);
   }
 
   /**
