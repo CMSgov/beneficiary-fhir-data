@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -33,7 +32,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -81,13 +79,6 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
    * not. Defaults to <code>"false"</code>.
    */
   public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
-
-  public static final Date DATE_OF_DEFECT =
-      java.util.Date.from(
-          LocalDate.of(2004, 12, 25).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-  public static final Date DATE_OF_FIX =
-      java.util.Date.from(
-          LocalDate.of(2004, 12, 25).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
@@ -270,14 +261,6 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     operation.publishOperationName();
 
     List<IBaseResource> eobs = new ArrayList<IBaseResource>();
-
-    if (claimTypes.contains(ClaimTypeV2.INPATIENT)) {
-      if (lastUpdated.getLowerBound().getValue().after(DATE_OF_DEFECT)
-          && lastUpdated.getLowerBound().getValue().before(DATE_OF_FIX)) {
-        lastUpdated.setLowerBound(
-            new DateParam().setPrefix(ParamPrefixEnum.LESSTHAN_OR_EQUALS).setValue(DATE_OF_DEFECT));
-      }
-    }
 
     // Optimize when the lastUpdated parameter is specified and result set is empty
     if (loadedFilterManager.isResultSetEmpty(beneficiaryId, lastUpdated)) {
