@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
@@ -350,7 +351,7 @@ public class InpatientClaimTransformerV2 {
                               Arrays.asList(
                                   new Coding()
                                       .setSystem(
-                                          TransformerUtilsV2.calculateVariableReferenceUrl(
+                                          CCWUtils.calculateVariableReferenceUrl(
                                               CcwCodebookVariable.HCPCS_CD))
                                       .setCode(c),
                                   new Coding()
