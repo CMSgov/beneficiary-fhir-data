@@ -143,7 +143,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     }
 
     // When/Then
-    verifySamhsaMatcherForItem(
+    verifySamhsaMatcherForItemWithSingleCoding(
         TransformerConstants.CODING_SYSTEM_HCPCS,
         BLACKLISTED_HCPCS_CODE,
         expectMatch,
@@ -160,7 +160,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndNonMatchingCptExpectNoMatch() {
     // When/Then/
-    verifySamhsaMatcherForItem(
+    verifySamhsaMatcherForItemWithSingleCoding(
         TransformerConstants.CODING_SYSTEM_HCPCS,
         NON_SAMHSA_HCPCS_CODE,
         false,
@@ -180,7 +180,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     boolean expectMatch = claim instanceof InpatientClaim;
 
     // When/Then
-    verifySamhsaMatcherForItem(
+    verifySamhsaMatcherForItemWithSingleCoding(
         CODING_SYSTEM_HCPCS_CD, BLACKLISTED_HCPCS_CODE, expectMatch, loadedExplanationOfBenefit);
   }
 
@@ -194,7 +194,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCdCodeAndNonMatchingCptExpectNoMatch() {
     // When/Then
-    verifySamhsaMatcherForItem(
+    verifySamhsaMatcherForItemWithSingleCoding(
         CODING_SYSTEM_HCPCS_CD, NON_SAMHSA_HCPCS_CODE, false, loadedExplanationOfBenefit);
   }
 
@@ -212,7 +212,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    verifySamhsaMatcherForItem(
+    verifySamhsaMatcherForItemWithSingleCoding(
         "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, expectMatch, loadedExplanationOfBenefit);
   }
 
@@ -506,7 +506,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    * @param shouldMatch if the matcher should match on this combination
    * @param explanationOfBenefit the explanation of benefit
    */
-  private void verifySamhsaMatcherForItem(
+  private void verifySamhsaMatcherForItemWithSingleCoding(
       String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
 
     ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
@@ -518,10 +518,11 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       diagnosisComponent.setPackageCode(null);
     }
 
-    // Set item level code to the correct coding system
-    modifiedEob.getItem().get(0).getProductOrService().getCoding().get(0).setSystem(system);
-    // Set CPT code
-    modifiedEob.getItem().get(0).getProductOrService().getCoding().get(0).setCode(code);
+    List<Coding> codings = new ArrayList<>();
+    Coding coding = new Coding();
+    coding.setSystem(system);
+    coding.setCode(code);
+    modifiedEob.getItem().get(0).getProductOrService().setCoding(codings);
 
     assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
   }
