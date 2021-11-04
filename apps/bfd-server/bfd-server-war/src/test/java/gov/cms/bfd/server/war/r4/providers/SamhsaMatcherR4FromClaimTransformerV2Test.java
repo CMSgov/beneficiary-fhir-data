@@ -277,29 +277,22 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   private void verifySamhsaMatcherForIcd(
       String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
 
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
     // Set Top level diagnosis and package code to null so we can test item logic
-    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent :
-        explanationOfBenefit.getDiagnosis()) {
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent : modifiedEob.getDiagnosis()) {
       CodeableConcept codeableConcept = diagnosisComponent.getDiagnosisCodeableConcept();
-      ArrayList<Coding> codingList = new ArrayList<Coding>();
+      ArrayList<Coding> codingList = new ArrayList<>();
       codingList.add(new Coding().setSystem(system).setCode(code));
 
       codeableConcept.setCoding(codingList);
       diagnosisComponent.setPackageCode(null);
     }
 
-    // Set item level code to the correct coding system
-    explanationOfBenefit
-        .getItem()
-        .get(0)
-        .getProductOrService()
-        .getCoding()
-        .get(0)
-        .setSystem(system);
-    // Set allowed ICD code
-    explanationOfBenefit.getItem().get(0).getProductOrService().getCoding().get(0).setCode(code);
+    // Set item coding to empty so we dont check it for matches
+    modifiedEob.getItem().get(0).getProductOrService().setCoding(new ArrayList<>());
 
-    assertEquals(shouldMatch, samhsaMatcherV2.test(explanationOfBenefit));
+    assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
   }
 
   /**
@@ -310,14 +303,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithValidIcd9CodeExpectMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
     // When/Then
     verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_9, BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+        IcdCode.CODING_SYSTEM_ICD_9, BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
   }
 
   /**
@@ -328,14 +316,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd9SystemExpectMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
     // When/Then
     verifySamhsaMatcherForIcd(
-        "not valid icd9 system", BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+        "not valid icd9 system", BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
   }
 
   /**
@@ -346,14 +329,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd9CodeExpectMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
     // When/Then
     verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_9, "invalid code", false, explanationOfBenefit);
+        IcdCode.CODING_SYSTEM_ICD_9, "invalid code", false, loadedExplanationOfBenefit);
   }
 
   /**
@@ -364,14 +342,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithValidIcd10CodeExpectMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
     // When/Then
     verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_10, BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+        IcdCode.CODING_SYSTEM_ICD_10, BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
   }
 
   /**
@@ -383,14 +356,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10SystemExpectMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
     // When/Then
     verifySamhsaMatcherForIcd(
-        "not valid icd10 system", BLACKLISTED_HCPCS_CODE, true, explanationOfBenefit);
+        "not valid icd10 system", BLACKLISTED_HCPCS_CODE, true, loadedExplanationOfBenefit);
   }
 
   /**
@@ -401,14 +369,9 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedInpatientHasItemWithInvalidIcd10CodeExpectMatch() {
-    // Given
-    InpatientClaim claim = getInpatientClaim();
-    ExplanationOfBenefit explanationOfBenefit =
-        InpatientClaimTransformerV2.transform(new MetricRegistry(), claim, Optional.empty());
-
     // When/Then
     verifySamhsaMatcherForIcd(
-        IcdCode.CODING_SYSTEM_ICD_10, "invalid code", false, explanationOfBenefit);
+        IcdCode.CODING_SYSTEM_ICD_10, "invalid code", false, loadedExplanationOfBenefit);
   }
 
   /**
