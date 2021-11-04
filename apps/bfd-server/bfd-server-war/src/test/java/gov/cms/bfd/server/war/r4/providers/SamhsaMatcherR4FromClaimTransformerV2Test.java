@@ -140,7 +140,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    // When/Then
     verifySamhsaMatcherForItemWithSingleCoding(
         TransformerConstants.CODING_SYSTEM_HCPCS,
         BLACKLISTED_HCPCS_CODE,
@@ -166,35 +165,107 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
-   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * CcwCodebookVariable.HCPCS_CD) and the CPT code is blacklisted the SAMHSA matcher's test method
-   * will identify this as a SAMHSA related ExplanationOfBenefit.
+   * Verifies that when an item has multiple codings which contain both HCPCS and HCPCS_CD systems
+   * and neither is set to a blacklisted CPT code, the matcher will return false.
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCdCodeAndMatchingCptExpectMatch() {
-    // Only inpatient claims will match HCPCS_CD
-    boolean expectMatch = claim instanceof InpatientClaim;
-
-    // When/Then
-    verifySamhsaMatcherForItemWithSingleCoding(
-        CODING_SYSTEM_HCPCS_CD, BLACKLISTED_HCPCS_CODE, expectMatch, loadedExplanationOfBenefit);
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleKnownCodesAndNoBlacklistedCptExpectNoMatch() {
+    verifySamhsaMatcherForItemWithMultiCoding(
+        CODING_SYSTEM_HCPCS_CD,
+        NON_SAMHSA_HCPCS_CODE,
+        TransformerConstants.CODING_SYSTEM_HCPCS,
+        NON_SAMHSA_HCPCS_CODE,
+        false,
+        loadedExplanationOfBenefit);
   }
 
   /**
-   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
-   * ExplanationOfBenefit then contains an item[n].productOrService.coding[n].system =
-   * CcwCodebookVariable.HCPCS_CD) and the CPT code is not included in the blacklist the SAMHSA
-   * matcher's test method will not identify this as a SAMHSA related ExplanationOfBenefit.
+   * Verifies that when an item has multiple codings which contain both HCPCS and HCPCS_CD systems
+   * and one is set to a blacklisted CPT code, the matcher will return true.
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCdCodeAndNonMatchingCptExpectNoMatch() {
-    // When/Then
-    // TODO: adjust this to change all CODES in codings but not system
-    verifySamhsaMatcherForItemWithSingleCoding(
-        CODING_SYSTEM_HCPCS_CD, NON_SAMHSA_HCPCS_CODE, false, loadedExplanationOfBenefit);
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleKnownCodesAndOneHasBlacklistedCptExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    verifySamhsaMatcherForItemWithMultiCoding(
+        CODING_SYSTEM_HCPCS_CD,
+        NON_SAMHSA_HCPCS_CODE,
+        TransformerConstants.CODING_SYSTEM_HCPCS,
+        BLACKLISTED_HCPCS_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when an item has multiple codings which contain both an HCPCS and unknown code
+   * system and both are set to non-SAMHSA codes, the matcher will return true since the code system
+   * of one of the entries was unknown. This is a safety feature to ensure we filter if we don't
+   * know the system, just in case.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleCodesAndOneUnknownCodeAndNonSamhsaCptExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    verifySamhsaMatcherForItemWithMultiCoding(
+        "unknown/system/code",
+        NON_SAMHSA_HCPCS_CODE,
+        TransformerConstants.CODING_SYSTEM_HCPCS,
+        NON_SAMHSA_HCPCS_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when an item has multiple unknown codings and none are HCPCS, the matcher will
+   * return true since the code system of one of the entries was unknown. This is a safety feature
+   * to ensure we filter if we don't know the system, just in case.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleCodesAndAllUnknownCodesExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    verifySamhsaMatcherForItemWithMultiCoding(
+        "unknown/system/code",
+        NON_SAMHSA_HCPCS_CODE,
+        "unknown/system/code",
+        NON_SAMHSA_HCPCS_CODE,
+        expectMatch,
+        loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when an item has multiple codings which contain both HCPCS and HCPCS_CD systems
+   * and are both set to non-SAMHSA codes, the matcher will return false.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleKnownCodesAndHcpcsCdCodeAndNonSamhsaCptExpectNoMatch() {
+    verifySamhsaMatcherForItemWithMultiCoding(
+        CODING_SYSTEM_HCPCS_CD,
+        NON_SAMHSA_HCPCS_CODE,
+        TransformerConstants.CODING_SYSTEM_HCPCS,
+        NON_SAMHSA_HCPCS_CODE,
+        false,
+        loadedExplanationOfBenefit);
   }
 
   /**
@@ -231,7 +302,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    // When/Then
     verifyNoItemCodingsTriggersSamhsaFiltering(loadedExplanationOfBenefit, expectMatch);
   }
 
@@ -251,7 +321,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    // When/Then
     verifySamhsaMatcherForDiagnosisIcd(
         IcdCode.CODING_SYSTEM_ICD_9,
         BLACKLISTED_IC9_DIAGNOSIS_CODE,
@@ -288,7 +357,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithNonBlacklistedIcd9CodeExpectNoMatch() {
-    // When/Then
     verifySamhsaMatcherForDiagnosisIcd(
         IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
@@ -309,7 +377,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    // When/Then
     verifySamhsaMatcherForDiagnosisIcd(
         IcdCode.CODING_SYSTEM_ICD_10,
         BLACKLISTED_IC10_DIAGNOSIS_CODE,
@@ -333,7 +400,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    // When/Then
     verifySamhsaMatcherForDiagnosisIcd(
         "not valid icd10 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
   }
@@ -347,7 +413,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithNonBlacklistedIcd10CodeExpectNoMatch() {
-    // When/Then
     verifySamhsaMatcherForDiagnosisIcd(
         IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
@@ -368,7 +433,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    // When/Then
     verifySamhsaMatcherForProcedureIcd(
         IcdCode.CODING_SYSTEM_ICD_9,
         BLACKLISTED_IC9_PROCEDURE_CODE,
@@ -405,7 +469,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithNonBlacklistedIcd9CodeExpectNoMatch() {
-    // When/Then
     verifySamhsaMatcherForProcedureIcd(
         IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
@@ -426,7 +489,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    // When/Then
     verifySamhsaMatcherForProcedureIcd(
         IcdCode.CODING_SYSTEM_ICD_10,
         BLACKLISTED_IC10_PROCEDURE_CODE,
@@ -450,7 +512,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    // When/Then
     verifySamhsaMatcherForProcedureIcd(
         "not valid icd10 system", NON_BLACKLISTED_IC_CODE, expectMatch, loadedExplanationOfBenefit);
   }
@@ -464,7 +525,6 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   @Test
   public void
       testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithNonBlacklistedIcd10CodeExpectNoMatch() {
-    // When/Then
     verifySamhsaMatcherForProcedureIcd(
         IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
@@ -525,6 +585,49 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
     Coding coding = new Coding();
     coding.setSystem(system);
     coding.setCode(code);
+    codings.add(coding);
+    modifiedEob.getItem().get(0).getProductOrService().setCoding(codings);
+
+    assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
+  }
+
+  /**
+   * Verify SAMHSA matcher for item with the given system, code and if the expectation is that there
+   * should be a match for this combination.
+   *
+   * @param system the system value of the first coding
+   * @param code the code of the first coding
+   * @param system2 the system value of the second coding
+   * @param code2 the code of the second coding
+   * @param shouldMatch if the matcher should match on this combination
+   * @param explanationOfBenefit the explanation of benefit
+   */
+  private void verifySamhsaMatcherForItemWithMultiCoding(
+      String system,
+      String code,
+      String system2,
+      String code2,
+      boolean shouldMatch,
+      ExplanationOfBenefit explanationOfBenefit) {
+
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
+    // Set Top level diagnosis and package code to null so we can test item logic
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent : modifiedEob.getDiagnosis()) {
+      CodeableConcept codeableConcept = diagnosisComponent.getDiagnosisCodeableConcept();
+      codeableConcept.setCoding(new ArrayList<>());
+      diagnosisComponent.setPackageCode(null);
+    }
+
+    List<Coding> codings = new ArrayList<>();
+    Coding coding = new Coding();
+    coding.setSystem(system);
+    coding.setCode(code);
+    Coding coding2 = new Coding();
+    coding2.setSystem(system2);
+    coding2.setCode(code2);
+    codings.add(coding);
+    codings.add(coding2);
     modifiedEob.getItem().get(0).getProductOrService().setCoding(codings);
 
     assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
