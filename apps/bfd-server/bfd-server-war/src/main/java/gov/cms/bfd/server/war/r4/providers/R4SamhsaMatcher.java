@@ -534,7 +534,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     // Does the CodeableConcept have a legit HCPCS Coding?
-    boolean hasHcpcsCoding = findHcpcsCoding(procedureConcept);
+    boolean hasHcpcsCoding = hasHcpcsCoding(procedureConcept);
 
     // Check that Coding to see if it's blacklisted.
     if (hasHcpcsCoding && isSamhsaCptCode(procedureConcept)) {
@@ -556,7 +556,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains the
    *     {@link Coding} with the HCPCS {@link System}, <code>false</code> if it does not
    */
-  private boolean findHcpcsCoding(CodeableConcept procedureConcept) {
+  private boolean hasHcpcsCoding(CodeableConcept procedureConcept) {
     for (Coding procedureCoding : procedureConcept.getCoding()) {
       if (TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem())) {
         return true;
