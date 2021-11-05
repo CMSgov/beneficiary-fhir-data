@@ -550,20 +550,6 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 
   /**
    * @param procedureConcept the procedure {@link CodeableConcept} to check
-   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains the
-   *     {@link Coding} with the HCPCS coding system, <code>false</code> if it does not
-   */
-  private boolean hasHcpcsCoding(CodeableConcept procedureConcept) {
-    for (Coding procedureCoding : procedureConcept.getCoding()) {
-      if (TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains at least
    *     one {@link Coding} and only contains {@link Coding}s that have known coding systems <code>
    *     false</code> otherwise

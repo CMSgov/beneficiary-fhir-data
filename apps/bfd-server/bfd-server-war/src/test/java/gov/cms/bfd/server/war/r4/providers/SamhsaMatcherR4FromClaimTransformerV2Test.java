@@ -15,12 +15,14 @@ import gov.cms.bfd.model.rif.RifRecordBase;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -40,6 +42,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       TransformerConstants.BASE_URL_CCW_VARIABLES
           + "/"
           + CcwCodebookVariable.HCPCS_CD.getVariable().getId().toLowerCase();
+  private static final String DRG_SYSTEM =
+      CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
   private static final String BLACKLISTED_HCPCS_CODE = "M1034";
   private static final String NON_SAMHSA_HCPCS_CODE = "11111";
   private static final String BLACKLISTED_IC9_DIAGNOSIS_CODE = "291.0";
@@ -47,6 +51,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   private static final String BLACKLISTED_IC9_PROCEDURE_CODE = "94.45";
   private static final String BLACKLISTED_IC10_PROCEDURE_CODE = "HZ2ZZZZ";
   private static final String NON_BLACKLISTED_IC_CODE = "111111";
+  private static final String BLACKLISTED_DRG_DIAGNOSIS_CODE = "522";
+  private static final String NON_BLACKLISTED_DRG_DIAGNOSIS_CODE = "1111111";
 
   private final RifRecordBase claim;
   private final ExplanationOfBenefit loadedExplanationOfBenefit;
@@ -411,6 +417,54 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   }
 
   /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the Diagnosis
+   * contains a blacklisted package DRG code, the matcher returns a SAMHSA match.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisPackageWithBlacklistedDrgCodeExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    verifySamhsaMatcherForDiagnosisPackage(
+        DRG_SYSTEM, BLACKLISTED_DRG_DIAGNOSIS_CODE, expectMatch, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the Diagnosis
+   * contains a non-blacklisted package DRG code, the matcher returns false.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisPackageWithNonBlacklistedDrgCodeExpectNoMatch() {
+    verifySamhsaMatcherForDiagnosisPackage(
+        DRG_SYSTEM, NON_BLACKLISTED_DRG_DIAGNOSIS_CODE, false, loadedExplanationOfBenefit);
+  }
+
+  /**
+   * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit where the Diagnosis
+   * contains an unknown package system, the matcher returns a SAMHSA match. This is a fallback
+   * mechanism to ensure unknown systems are filtered.
+   */
+  @Test
+  public void
+      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisPackageWithUnknownPackageSystemExpectMatch() {
+    boolean expectMatch = true;
+
+    // PDE has no SAMHSA, so expect no match on SAMSHA filter
+    if (claim instanceof PartDEvent) {
+      expectMatch = false;
+    }
+
+    verifySamhsaMatcherForDiagnosisPackage(
+        "UNKNOWN", NON_BLACKLISTED_DRG_DIAGNOSIS_CODE, expectMatch, loadedExplanationOfBenefit);
+  }
+
+  /**
    * Verifies that when transforming a SAMHSA claim into an ExplanationOfBenefit (where the
    * ExplanationOfBenefit then contains a procedure[n].coding[n].system =
    * IcdCode.CODING_SYSTEM_ICD_9) and the ICD code is blacklisted the SAMHSA matcher's test method
@@ -666,6 +720,46 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       codingList.add(new Coding().setSystem(system).setCode(code));
       codeableConcept.setCoding(codingList);
       diagnosisComponent.setPackageCode(null);
+    }
+
+    // Set procedure to empty so we dont check it for matches
+    for (ExplanationOfBenefit.ProcedureComponent diagnosisComponent : modifiedEob.getProcedure()) {
+      CodeableConcept codeableConcept = diagnosisComponent.getProcedureCodeableConcept();
+      ArrayList<Coding> codingList = new ArrayList<>();
+      codeableConcept.setCoding(codingList);
+    }
+
+    // Set item coding to non-SAMHSA so we dont check it for matches
+    List<Coding> codings = new ArrayList<>();
+    Coding coding = new Coding();
+    coding.setSystem(TransformerConstants.CODING_SYSTEM_HCPCS);
+    coding.setCode(NON_SAMHSA_HCPCS_CODE);
+    codings.add(coding);
+    modifiedEob.getItem().get(0).getProductOrService().setCoding(codings);
+
+    assertEquals(shouldMatch, samhsaMatcherV2.test(modifiedEob));
+  }
+
+  /**
+   * Verify SAMHSA matcher for package with the given system, code and if the expectation is that
+   * there should be a match for this combination.
+   *
+   * @param system the system value
+   * @param code the code
+   * @param shouldMatch if the matcher should match on this combination
+   */
+  private void verifySamhsaMatcherForDiagnosisPackage(
+      String system, String code, boolean shouldMatch, ExplanationOfBenefit explanationOfBenefit) {
+
+    ExplanationOfBenefit modifiedEob = explanationOfBenefit.copy();
+
+    // Set diagnosis DRG
+    for (ExplanationOfBenefit.DiagnosisComponent diagnosisComponent : modifiedEob.getDiagnosis()) {
+      diagnosisComponent.getDiagnosisCodeableConcept().setCoding(new ArrayList<>());
+      CodeableConcept codeableConcept = new CodeableConcept();
+      Coding coding = new Coding(system, code, null);
+      codeableConcept.setCoding(Collections.singletonList(coding));
+      diagnosisComponent.setPackageCode(codeableConcept);
     }
 
     // Set procedure to empty so we dont check it for matches
