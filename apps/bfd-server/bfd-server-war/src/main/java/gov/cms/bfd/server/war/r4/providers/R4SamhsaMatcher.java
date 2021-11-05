@@ -576,17 +576,17 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
     String hcpcsCdSystem = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
-    String hcpcsSystem = TransformerConstants.CODING_SYSTEM_HCPCS;
 
     // Valid system url for productOrService coding
-    Set<String> knownHcpcsSystem = Set.of(hcpcsSystem);
+    Set<String> hcpcsSystem = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
 
     // Additional valid coding system URL for backwards-compatibility
     // See: https://jira.cms.gov/browse/BFD-1345
-    Set<String> backwardsCompatibleHcpcsSystem = Set.of(hcpcsSystem, hcpcsCdSystem);
+    Set<String> backwardsCompatibleHcpcsSystems =
+        Set.of(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsCdSystem);
 
-    return codingSystems.equals(knownHcpcsSystem)
-        || codingSystems.equals(backwardsCompatibleHcpcsSystem);
+    return codingSystems.equals(hcpcsSystem)
+        || codingSystems.equals(backwardsCompatibleHcpcsSystems);
   }
 
   /**
