@@ -169,7 +169,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsHcpcsCoding(eobItem.getProductOrService())) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -198,7 +198,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsHcpcsCoding(eobItem.getProductOrService())) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -226,7 +226,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsHcpcsCoding(eobItem.getProductOrService())) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -251,7 +251,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsHcpcsCoding(eobItem.getProductOrService())) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -273,7 +273,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     if (containsSamhsaIcdCode(eob.getDiagnosis())) return true;
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsHcpcsCoding(eobItem.getProductOrService())) return true;
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) return true;
     }
 
     // No blacklisted codes found: this claim isn't SAMHSA-related.
@@ -311,7 +311,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     }
 
     for (ExplanationOfBenefit.ItemComponent eobItem : eob.getItem()) {
-      if (containsHcpcsCoding(eobItem.getProductOrService())) {
+      if (containsSamhsaProcedureCode(eobItem.getProductOrService())) {
         return true;
       }
     }
@@ -527,7 +527,12 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
    *     {@link Coding}s that match any of the {@link #cptCodes} and has no unknown {@link System}s,
    *     <code>false</code> if they all do not
    */
-  private boolean containsHcpcsCoding(CodeableConcept procedureConcept) {
+  private boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
+    // If there are no procedure codes, then we cannot have any blacklisted codes
+    if (procedureConcept.getCoding().isEmpty()) {
+      return false;
+    }
+
     // Does the CodeableConcept have a legit HCPCS Coding?
     boolean hasHcpcsCoding = findHcpcsCoding(procedureConcept);
 
@@ -569,16 +574,12 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
-    if (codingSystems.isEmpty()) {
-      return false;
-    }
-
     String hcpcsCdSystem = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
-
     String hcpcsSystem = TransformerConstants.CODING_SYSTEM_HCPCS;
 
     // Valid system url for productOrService coding
     Set<String> knownHcpcsSystem = Set.of(hcpcsSystem);
+
     // Additional valid coding system URL for backwards-compatibility
     // See: https://jira.cms.gov/browse/BFD-1345
     Set<String> backwardsCompatibleHcpcsSystem = Set.of(hcpcsSystem, hcpcsCdSystem);

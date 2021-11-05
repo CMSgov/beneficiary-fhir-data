@@ -189,15 +189,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithNoCodesExpectMatch() {
-    boolean expectMatch = true;
-
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
-      expectMatch = false;
-    }
-
-    verifyNoItemCodingsTriggersSamhsaFiltering(loadedExplanationOfBenefit, expectMatch);
+  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithNoCodesExpectNoMatch() {
+    verifyNoItemCodingsTriggersSamhsaFiltering(loadedExplanationOfBenefit, false);
   }
 
   /**

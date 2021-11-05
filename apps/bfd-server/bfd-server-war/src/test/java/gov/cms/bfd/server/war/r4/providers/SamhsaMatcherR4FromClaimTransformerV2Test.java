@@ -295,14 +295,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithNoCodesExpectMatch() {
-    boolean expectMatch = true;
-
-    // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
-      expectMatch = false;
-    }
-
-    verifyNoItemCodingsTriggersSamhsaFiltering(loadedExplanationOfBenefit, expectMatch);
+    verifyNoItemCodingsTriggersSamhsaFiltering(loadedExplanationOfBenefit, false);
   }
 
   /**
