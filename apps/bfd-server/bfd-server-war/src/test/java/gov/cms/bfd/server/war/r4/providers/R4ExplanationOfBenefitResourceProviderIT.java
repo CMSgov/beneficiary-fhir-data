@@ -1632,9 +1632,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * Find the first Beneficiary from a record list returned by {@link ServerTestUtils#loadData(List}
    *
    * @param loadedRecords to use
-   * @param loadedRecords the loaded records
    * @return the first Beneficiary*
-   * @return the beneficiary
    */
   private static Beneficiary findFirstBeneficary(List<Object> loadedRecords) {
     return loadedRecords.stream()
