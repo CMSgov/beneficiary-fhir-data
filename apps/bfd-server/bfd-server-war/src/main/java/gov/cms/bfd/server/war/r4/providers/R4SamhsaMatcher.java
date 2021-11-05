@@ -524,8 +524,8 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   /**
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
-   *     {@link Coding}s that match any of the {@link #cptCodes} and has no unknown {@link System}s,
-   *     <code>false</code> if they all do not
+   *     {@link Coding}s that match any of the {@link #cptCodes} or has unknown coding systems,
+   *     <code>false</code> otherwise
    */
   private boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
     // If there are no procedure codes, then we cannot have any blacklisted codes
@@ -554,7 +554,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   /**
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains the
-   *     {@link Coding} with the HCPCS {@link System}, <code>false</code> if it does not
+   *     {@link Coding} with the HCPCS coding system, <code>false</code> if it does not
    */
   private boolean hasHcpcsCoding(CodeableConcept procedureConcept) {
     for (Coding procedureCoding : procedureConcept.getCoding()) {
@@ -567,8 +567,9 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 
   /**
    * @param procedureConcept the procedure {@link CodeableConcept} to check
-   * @return <code>false</code> if the specified procedure {@link CodeableConcept} contains any
-   *     {@link Coding}s that do not contain any of the {@link System}s <code>true</code> if they do
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains at least
+   *     one {@link Coding} and only contains {@link Coding}s that have known coding systems <code>
+   *     false</code> otherwise
    */
   private boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
     Set<String> codingSystems =
