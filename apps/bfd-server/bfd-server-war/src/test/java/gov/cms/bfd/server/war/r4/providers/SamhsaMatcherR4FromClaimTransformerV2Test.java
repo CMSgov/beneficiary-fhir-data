@@ -100,7 +100,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
         PartDEventTransformerV2.transform(new MetricRegistry(), pdeClaim, Optional.empty());
 
     // Load the claim types into the test data that will be run against each test
-    return Arrays.asList(
+    return List.of(
         new Object[][] {
           {inpatientClaim, inpatientEob},
           {outpatientClaim, outpatientEob},
