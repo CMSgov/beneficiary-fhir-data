@@ -533,11 +533,8 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
       return false;
     }
 
-    // Does the CodeableConcept have a legit HCPCS Coding?
-    boolean hasHcpcsCoding = hasHcpcsCoding(procedureConcept);
-
     // Check that Coding to see if it's blacklisted.
-    if (hasHcpcsCoding && isSamhsaCptCode(procedureConcept)) {
+    if (hasHspcAndSamhsaCptCode(procedureConcept)) {
       return true;
     } else if (!containsOnlyKnownSystems(procedureConcept)) {
       /*
@@ -595,7 +592,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
    *     {@link Coding}s that match any of the {@link #cptCodes}, <code>false</code> if they all do
    *     not
    */
-  private boolean isSamhsaCptCode(CodeableConcept procedureConcept) {
+  private boolean hasHspcAndSamhsaCptCode(CodeableConcept procedureConcept) {
     /*
      * Note: CPT codes represent a subset of possible HCPCS codes (but are the only
      * subset that we blacklist from).
@@ -603,8 +600,9 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
+    // Does the CodeableConcept have a legit HCPCS Coding?
     if (!codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
-      throw new IllegalArgumentException();
+      return false;
     }
 
     /*
