@@ -130,8 +130,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * test method will successfully identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndMatchingCptExpectMatch() {
+  public void testSamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndMatchingCptExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -154,7 +153,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndNonMatchingCptExpectNoMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasItemWithHcpcsCodeAndNonMatchingCptExpectNoMatch() {
     // When/Then/
     verifySamhsaMatcherForItemWithSingleCoding(
         TransformerConstants.CODING_SYSTEM_HCPCS,
@@ -169,7 +168,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * fallback logic to assume the claim is SAMHSA.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownSystemExpectFallbackMatch() {
+  public void testSamhsaMatcherWhenTransformedClaimHasItemWithUnknownSystemExpectFallbackMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -189,7 +188,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithNoCodesExpectNoMatch() {
+  public void testSamhsaMatcherWhenTransformedClaimHasItemWithNoCodesExpectNoMatch() {
     verifyNoItemCodingsTriggersSamhsaFiltering(loadedExplanationOfBenefit, false);
   }
 
@@ -201,7 +200,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd9CodeExpectMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd9CodeExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -223,8 +222,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd9SystemExpectMatch() {
+  public void testSamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd9SystemExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -244,7 +242,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithNonBlacklistedIcd9CodeExpectNoMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasDiagnosisWithNonBlacklistedIcd9CodeExpectNoMatch() {
     verifySamhsaMatcherForDiagnosisIcd(
         IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
@@ -257,7 +255,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd10CodeExpectMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasDiagnosisWithBlacklistedIcd10CodeExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -279,8 +277,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd10SystemExpectMatch() {
+  public void testSamhsaMatcherWhenTransformedClaimHasDiagnosisWithUnknownIcd10SystemExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -300,7 +297,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasDiagnosisWithNonBlacklistedIcd10CodeExpectNoMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasDiagnosisWithNonBlacklistedIcd10CodeExpectNoMatch() {
     verifySamhsaMatcherForDiagnosisIcd(
         IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
@@ -313,7 +310,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd9CodeExpectMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd9CodeExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -340,8 +337,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd9SystemExpectMatch() {
+  public void testSamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd9SystemExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -366,7 +362,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithNonBlacklistedIcd9CodeExpectNoMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasProcedureWithNonBlacklistedIcd9CodeExpectNoMatch() {
     verifySamhsaMatcherForProcedureIcd(
         IcdCode.CODING_SYSTEM_ICD_9, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
@@ -379,7 +375,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd10CodeExpectMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasProcedureWithBlacklistedIcd10CodeExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -406,8 +402,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * will identify this as a SAMHSA related ExplanationOfBenefit.
    */
   @Test
-  public void
-      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd10SystemExpectMatch() {
+  public void testSamhsaMatcherWhenTransformedClaimHasProcedureWithUnknownIcd10SystemExpectMatch() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -432,7 +427,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasProcedureWithNonBlacklistedIcd10CodeExpectNoMatch() {
+      testSamhsaMatcherWhenTransformedClaimHasProcedureWithNonBlacklistedIcd10CodeExpectNoMatch() {
     verifySamhsaMatcherForProcedureIcd(
         IcdCode.CODING_SYSTEM_ICD_10, NON_BLACKLISTED_IC_CODE, false, loadedExplanationOfBenefit);
   }
