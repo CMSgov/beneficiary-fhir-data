@@ -565,11 +565,9 @@ public class SamhsaMatcherFromClaimTransformerTest {
     }
 
     // Set procedure to empty so we dont check it for matches
-    for (ExplanationOfBenefit.ProcedureComponent diagnosisComponent : modifiedEob.getProcedure()) {
-      CodeableConcept codeableConcept = diagnosisComponent.getProcedureCodeableConcept();
-      ArrayList<Coding> codingList = new ArrayList<>();
-      codeableConcept.setCoding(codingList);
-    }
+    modifiedEob
+        .getProcedure()
+        .forEach(c -> c.getProcedureCodeableConcept().setCoding(new ArrayList<>()));
 
     // Set item coding to non-SAMHSA so we dont check it for matches
     List<Coding> codings = new ArrayList<>();
