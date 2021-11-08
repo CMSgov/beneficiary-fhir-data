@@ -44,6 +44,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   private static final String DRG =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
+  // normalized list of ICD9/ICD10/CPT codes
   private final List<String> drgCodes;
   private final List<String> cptCodes;
   private final List<String> icd9ProcedureCodes;
@@ -53,7 +54,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 
   /**
    * Constructs a new {@link R4SamhsaMatcher}, loading the lists of SAMHSA-related codes from the
-   * classpath.
+   * classpath. The list data is normalized as it is loaded.
    */
   public R4SamhsaMatcher() {
     this.drgCodes =
@@ -63,7 +64,9 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
                 .collect(Collectors.toList()));
     this.cptCodes =
         Collections.unmodifiableList(
-            resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code"));
+            resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
+                .map(R4SamhsaMatcher::normalizeHcpcsCode)
+                .collect(Collectors.toList()));
     this.icd9ProcedureCodes =
         Collections.unmodifiableList(
             resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
@@ -430,9 +433,6 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     if (!IcdCode.CODING_SYSTEM_ICD_9.equals(diagnosisCoding.getSystem()))
       throw new IllegalArgumentException();
 
-    /*
-     * Note: per XXX all codes in icd9DiagnosisCodes are already normalized.
-     */
     return icd9DiagnosisCodes.contains(normalizeIcd9Code(diagnosisCoding.getCode()));
   }
 
@@ -495,9 +495,6 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     if (!IcdCode.CODING_SYSTEM_ICD_10.equals(diagnosisCoding.getSystem()))
       throw new IllegalArgumentException();
 
-    /*
-     * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
-     */
     return icd10DiagnosisCodes.contains(normalizeIcd10Code(diagnosisCoding.getCode()));
   }
 
@@ -537,7 +534,8 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
       return false;
     }
 
-    return hasHspcAndSamhsaCptCode(procedureConcept) || !containsOnlyKnownSystems(procedureConcept);
+    return hasHcpcsAndSamhsaCptCode(procedureConcept)
+        || !containsOnlyKnownSystems(procedureConcept);
   }
 
   /**
@@ -565,12 +563,15 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   }
 
   /**
+   * Checks that for a {@link CodeableConcept} the {@link Coding}s contain a HCPCS system and at
+   * least one blacklisted CPT code.
+   *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
    *     {@link Coding}s that match any of the {@link #cptCodes}, <code>false</code> if they all do
    *     not
    */
-  private boolean hasHspcAndSamhsaCptCode(CodeableConcept procedureConcept) {
+  private boolean hasHcpcsAndSamhsaCptCode(CodeableConcept procedureConcept) {
     /*
      * Note: CPT codes represent a subset of possible HCPCS codes (but are the only
      * subset that we blacklist from).
@@ -580,12 +581,9 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 
     // Does the CodeableConcept have a legit HCPCS Coding?
     if (!codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
-      return false;
+      throw new IllegalArgumentException();
     }
 
-    /*
-     * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
-     */
     return procedureConcept.getCoding().stream()
         .anyMatch(
             procedureCoding -> cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode())));

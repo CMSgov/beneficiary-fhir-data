@@ -61,6 +61,9 @@ import org.junit.Test;
 
 /** R4ExplanationOfBenefitResourceProviderIT. */
 public final class R4ExplanationOfBenefitResourceProviderIT {
+
+  public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
@@ -1134,7 +1137,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .where(
                 ExplanationOfBenefit.PATIENT.hasId(
                     TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
-            .and(new StringClientParam("excludeSAMHSA").matches().value("true"))
+            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("true"))
             .returnBundle(Bundle.class)
             .execute();
     Assert.assertNotNull(searchResults);
@@ -1171,7 +1174,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .where(
                 ExplanationOfBenefit.PATIENT.hasId(
                     TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
-            .and(new StringClientParam("excludeSAMHSA").matches().value("false"))
+            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("false"))
             .returnBundle(Bundle.class)
             .execute();
     Assert.assertNotNull(searchResults);
@@ -1202,7 +1205,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .where(
                 ExplanationOfBenefit.PATIENT.hasId(
                     TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
-            .and(new StringClientParam("excludeSAMHSA").matches().value("true"))
+            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("true"))
             .returnBundle(Bundle.class)
             .execute();
     Assert.assertNotNull(searchResults);
@@ -1236,7 +1239,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .where(
                 ExplanationOfBenefit.PATIENT.hasId(
                     TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
-            .and(new StringClientParam("excludeSAMHSA").matches().value("false"))
+            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("false"))
             .returnBundle(Bundle.class)
             .execute();
     Assert.assertNotNull(searchResults);
@@ -1682,14 +1685,11 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Assert each eob.
+   * Verify that each of the expected claims (one for every claim type) is present and looks
+   * correct.
    *
    * @param searchResults the search results
    * @param loadedRecords the loaded records
-   */
-  /*
-   * Verify that each of the expected claims (one for every claim type) is present
-   * and looks correct.
    */
   private static void assertEachEob(Bundle searchResults, List<Object> loadedRecords) {
     compareEob(ClaimTypeV2.CARRIER, searchResults, loadedRecords);

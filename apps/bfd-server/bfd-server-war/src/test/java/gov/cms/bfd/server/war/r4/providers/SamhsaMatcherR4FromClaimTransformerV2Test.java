@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -236,12 +237,12 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
   /**
    * Verifies that when an item has multiple unknown codings and none are HCPCS, the matcher will
-   * return true since the code system of one of the entries was unknown. This is a safety feature
-   * to ensure we filter if we don't know the system, just in case.
+   * return an exception since at least one code needs to be HCPCS. This generally indicates a
+   * coding error as there should always be a HCPCS code.
    */
   @Test
   public void
-      testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleCodesAndAllUnknownCodesExpectMatch() {
+      testR4SamhsaMatcherWhenTransformedClaimHasItemWithMultipleCodesAndAllUnknownCodesExpectException() {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
@@ -249,13 +250,21 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    verifySamhsaMatcherForItemWithMultiCoding(
-        "unknown/system/code",
-        NON_SAMHSA_HCPCS_CODE,
-        "unknown/system/code",
-        NON_SAMHSA_HCPCS_CODE,
-        expectMatch,
-        loadedExplanationOfBenefit);
+    try {
+      verifySamhsaMatcherForItemWithMultiCoding(
+          "unknown/system/code",
+          NON_SAMHSA_HCPCS_CODE,
+          "unknown/system/code",
+          NON_SAMHSA_HCPCS_CODE,
+          expectMatch,
+          loadedExplanationOfBenefit);
+    } catch (IllegalArgumentException ex) {
+      // Expect an exception; dont use junit built in because some paths dont hit an exception
+      return;
+    }
+    if (expectMatch) {
+      fail();
+    }
   }
 
   /**
@@ -276,8 +285,8 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
   /**
    * Verifies that when the item[n].productOrService.coding[n].system is an unknown/unexpected
-   * value, the matcher will identify this as a SAMHSA related ExplanationOfBenefit using its
-   * fallback logic to assume the claim is SAMHSA.
+   * value, the matcher will return an exception since at least one code needs to be HCPCS. This
+   * generally indicates a coding error as there should always be a HCPCS code.
    */
   @Test
   public void testR4SamhsaMatcherWhenTransformedClaimHasItemWithUnknownSystemExpectFallbackMatch() {
@@ -288,8 +297,16 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
       expectMatch = false;
     }
 
-    verifySamhsaMatcherForItemWithSingleCoding(
-        "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, expectMatch, loadedExplanationOfBenefit);
+    try {
+      verifySamhsaMatcherForItemWithSingleCoding(
+          "unknknown/system/value", NON_SAMHSA_HCPCS_CODE, expectMatch, loadedExplanationOfBenefit);
+    } catch (IllegalArgumentException ex) {
+      // Expect an exception; dont use junit built in because some paths dont hit an exception
+      return;
+    }
+    if (expectMatch) {
+      fail();
+    }
   }
 
   /**

@@ -2,7 +2,7 @@ package gov.cms.bfd.server.war.commons;
 
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
 
-/** As set of methods to work with CCW Codebook variables. */
+/** A set of methods to work with {@link CcwCodebookInterface} instances. */
 public class CCWUtils {
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
