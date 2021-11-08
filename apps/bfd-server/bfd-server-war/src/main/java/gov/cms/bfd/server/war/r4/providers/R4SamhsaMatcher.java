@@ -522,6 +522,10 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   }
 
   /**
+   * Checks that for the specified {@link CodeableConcept} the Codings (if any) within contain a
+   * blacklisted SAMHSA procedure code. If any of the systems within the {@link CodeableConcept} are
+   * not known/expected, returns {@code true} and assumes the system is SAMHSA as a safety fallback.
+   *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
    *     {@link Coding}s that match any of the {@link #cptCodes} or has unknown coding systems,
@@ -533,19 +537,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
       return false;
     }
 
-    // Check that Coding to see if it's blacklisted.
-    if (hasHspcAndSamhsaCptCode(procedureConcept)) {
-      return true;
-    } else if (!containsOnlyKnownSystems(procedureConcept)) {
-      /*
-       * Fail safe: if we don't know the procedure Coding system, assume the code is
-       * SAMHSA.
-       */
-      return true;
-    } else {
-      // Otherwise, this only has known & non-SAMHSA-blacklisted procedure codes.
-      return false;
-    }
+    return hasHspcAndSamhsaCptCode(procedureConcept) || !containsOnlyKnownSystems(procedureConcept);
   }
 
   /**
