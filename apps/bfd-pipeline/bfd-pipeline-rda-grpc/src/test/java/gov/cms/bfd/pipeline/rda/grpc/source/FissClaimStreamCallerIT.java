@@ -7,6 +7,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.time.Clock;
@@ -74,11 +75,13 @@ public class FissClaimStreamCallerIT {
               PreAdjFissClaim claim = results.next().getClaim();
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
+              assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
               assertEquals(true, results.hasNext());
 
               claim = results.next().getClaim();
               assertEquals("2643602", claim.getDcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+              assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
               assertEquals(false, results.hasNext());
             });
   }

@@ -10,6 +10,7 @@ import io.grpc.ClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.MethodDescriptor;
 import io.grpc.stub.ClientCalls;
+import java.io.IOException;
 import java.util.Iterator;
 import org.slf4j.Logger;
 
@@ -50,7 +51,7 @@ public abstract class GrpcStreamCaller<TResponse> {
    * @param channel an already open channel to the server
    * @return version string from the server
    */
-  public String callVersionService(ManagedChannel channel) {
+  public String callVersionService(ManagedChannel channel) throws Exception {
     Preconditions.checkNotNull(channel);
     logger.info("calling getVersion service");
     final MethodDescriptor<Empty, ApiVersion> method = RDAServiceGrpc.getGetVersionMethod();
@@ -64,11 +65,19 @@ public abstract class GrpcStreamCaller<TResponse> {
     while (apiResults.hasNext()) {
       ApiVersion response = apiResults.next();
       logger.info(
-          "getVersion service resoibse: version='{}' commitId='{}' buildTime='{}'",
+          "getVersion service response: version='{}' commitId='{}' buildTime='{}'",
           response.getVersion(),
           response.getCommitId(),
           response.getBuildTime());
-      answer = Strings.nullToEmpty(response.getVersion());
+      if (!Strings.isNullOrEmpty(response.getVersion())) {
+        if (!answer.isEmpty()) {
+          throw new IOException("RDA API Server returned multiple non-empty version strings");
+        }
+        answer = response.getVersion();
+      }
+    }
+    if (answer.isEmpty()) {
+      throw new IOException("RDA API Server did not return a non-empty version string");
     }
     return answer;
   }

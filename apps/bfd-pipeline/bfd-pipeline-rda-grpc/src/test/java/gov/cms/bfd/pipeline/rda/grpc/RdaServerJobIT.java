@@ -1,10 +1,11 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import static gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
+import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
@@ -59,7 +60,7 @@ public class RdaServerJobIT {
 
       assertEquals(true, fissStream.hasNext());
       RdaChange<PreAdjFissClaim> fissChange = fissStream.next();
-      assertEquals("Random:1", fissChange.getClaim().getApiSource());
+      assertMatches(fissChange.getClaim().getApiSource(), "Random:1:.*");
       assertEquals(2L, fissChange.getSequenceNumber());
       assertEquals(true, fissStream.hasNext());
       fissChange = fissStream.next();
@@ -73,7 +74,7 @@ public class RdaServerJobIT {
           mcsCaller.callService(mcsChannel, 3);
       assertEquals(true, mcsStream.hasNext());
       RdaChange<PreAdjMcsClaim> mcsChange = mcsStream.next();
-      assertEquals("Random:1", mcsChange.getClaim().getApiSource());
+      assertMatches(mcsChange.getClaim().getApiSource(), "Random:1:.*");
       assertEquals(3L, mcsChange.getSequenceNumber());
       assertEquals(false, mcsStream.hasNext());
     } finally {
@@ -113,7 +114,7 @@ public class RdaServerJobIT {
             fissCaller.callService(fissChannel, 1098);
         assertEquals(true, fissStream.hasNext());
         RdaChange<PreAdjFissClaim> fissChange = fissStream.next();
-        assertEquals(true, fissChange.getClaim().getApiSource().matches("S3:\\d+"));
+        assertMatches(fissChange.getClaim().getApiSource(), "S3:\\d+:.*");
         assertEquals(1098L, fissChange.getSequenceNumber());
         assertEquals(true, fissStream.hasNext());
         fissChange = fissStream.next();
@@ -129,7 +130,7 @@ public class RdaServerJobIT {
             mcsCaller.callService(mcsChannel, 1099);
         assertEquals(true, mcsStream.hasNext());
         RdaChange<PreAdjMcsClaim> mcsChange = mcsStream.next();
-        assertEquals(true, mcsChange.getClaim().getApiSource().matches("S3:\\d+"));
+        assertMatches(mcsChange.getClaim().getApiSource(), "S3:\\d+:.*");
         assertEquals(1099L, mcsChange.getSequenceNumber());
         assertEquals(true, mcsStream.hasNext());
         mcsChange = mcsStream.next();
@@ -183,6 +184,12 @@ public class RdaServerJobIT {
     } finally {
       exec.shutdownNow();
       exec.awaitTermination(10, TimeUnit.SECONDS);
+    }
+  }
+
+  private void assertMatches(String actual, String regex) {
+    if (!Strings.nullToEmpty(actual).matches(regex)) {
+      fail(String.format("value did not match regex: regex='%s' value='%s'", regex, actual));
     }
   }
 
