@@ -1,8 +1,3 @@
 ---
-- name: Configure EFT EFS file systems
-  import_tasks: eft_efs.yml
-  tags:
-    - pre-ami
-
 - name: Configure ETL service
   import_tasks: etl.yml
