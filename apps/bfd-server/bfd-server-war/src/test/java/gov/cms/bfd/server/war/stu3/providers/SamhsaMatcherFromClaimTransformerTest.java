@@ -50,7 +50,13 @@ public class SamhsaMatcherFromClaimTransformerTest {
   private static final String BLACKLISTED_DRG_DIAGNOSIS_CODE = "522";
   private static final String NON_BLACKLISTED_DRG_DIAGNOSIS_CODE = "1111111";
 
-  private final RifRecordBase claim;
+  private static final String PART_D_EVENT_CLAIM = "PDE";
+  private static final String DME_CLAIM = "DME";
+  private static final String HHA_CLAIM = "HHA";
+  private static final String HOSPICE_CLAIM = "HOSPICE";
+  private static final String CARRIER_CLAIM = "CARRIER";
+
+  private final String claimType;
   private final ExplanationOfBenefit loadedExplanationOfBenefit;
 
   /** Sets up the test. */
@@ -67,50 +73,58 @@ public class SamhsaMatcherFromClaimTransformerTest {
   @Parameterized.Parameters(name = "{0}")
   public static Collection<Object[]> data() {
     // Load and transform the various claim types for testing
-    RifRecordBase inpatientClaim = getClaim(InpatientClaim.class);
-    ExplanationOfBenefit inpatientEob =
-        InpatientClaimTransformer.transform(new MetricRegistry(), inpatientClaim, Optional.empty());
 
-    RifRecordBase outpatientClaim = getClaim(OutpatientClaim.class);
+    ExplanationOfBenefit inpatientEob =
+        InpatientClaimTransformer.transform(
+            new MetricRegistry(), getClaim(InpatientClaim.class), Optional.empty());
+    String inpatientClaimType = TransformerUtils.getClaimType(inpatientEob).toString();
+
     ExplanationOfBenefit outpatientEob =
         OutpatientClaimTransformer.transform(
-            new MetricRegistry(), outpatientClaim, Optional.empty());
+            new MetricRegistry(), getClaim(OutpatientClaim.class), Optional.empty());
+    String outpatientClaimType = TransformerUtils.getClaimType(outpatientEob).toString();
 
-    RifRecordBase dmeClaim = getClaim(DMEClaim.class);
     ExplanationOfBenefit dmeEob =
-        DMEClaimTransformer.transform(new MetricRegistry(), dmeClaim, Optional.empty());
+        DMEClaimTransformer.transform(
+            new MetricRegistry(), getClaim(DMEClaim.class), Optional.empty());
+    String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
-    RifRecordBase hhaClaim = getClaim(HHAClaim.class);
     ExplanationOfBenefit hhaEob =
-        HHAClaimTransformer.transform(new MetricRegistry(), hhaClaim, Optional.empty());
+        HHAClaimTransformer.transform(
+            new MetricRegistry(), getClaim(HHAClaim.class), Optional.empty());
+    String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
-    RifRecordBase hospiceClaim = getClaim(HospiceClaim.class);
     ExplanationOfBenefit hospiceEob =
-        HospiceClaimTransformer.transform(new MetricRegistry(), hospiceClaim, Optional.empty());
+        HospiceClaimTransformer.transform(
+            new MetricRegistry(), getClaim(HospiceClaim.class), Optional.empty());
+    String hospiceClaimType = TransformerUtils.getClaimType(hospiceEob).toString();
 
-    RifRecordBase snfClaim = getClaim(SNFClaim.class);
     ExplanationOfBenefit snfEob =
-        SNFClaimTransformer.transform(new MetricRegistry(), snfClaim, Optional.empty());
+        SNFClaimTransformer.transform(
+            new MetricRegistry(), getClaim(SNFClaim.class), Optional.empty());
+    String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
-    RifRecordBase carrierClaim = getClaim(CarrierClaim.class);
     ExplanationOfBenefit carrierEob =
-        CarrierClaimTransformer.transform(new MetricRegistry(), carrierClaim, Optional.empty());
+        CarrierClaimTransformer.transform(
+            new MetricRegistry(), getClaim(CarrierClaim.class), Optional.empty());
+    String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
 
-    RifRecordBase pdeClaim = getClaim(PartDEvent.class);
     ExplanationOfBenefit pdeEob =
-        PartDEventTransformer.transform(new MetricRegistry(), pdeClaim, Optional.empty());
+        PartDEventTransformer.transform(
+            new MetricRegistry(), getClaim(PartDEvent.class), Optional.empty());
+    String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
 
     // Load the claim types into the test data that will be run against each test
     return List.of(
         new Object[][] {
-          {inpatientClaim, inpatientEob},
-          {outpatientClaim, outpatientEob},
-          {dmeClaim, dmeEob},
-          {hhaClaim, hhaEob},
-          {hospiceClaim, hospiceEob},
-          {snfClaim, snfEob},
-          {carrierClaim, carrierEob},
-          {pdeClaim, pdeEob}
+          {inpatientClaimType, inpatientEob},
+          {outpatientClaimType, outpatientEob},
+          {dmeClaimType, dmeEob},
+          {hhaClaimType, hhaEob},
+          {hospiceClaimType, hospiceEob},
+          {snfClaimType, snfEob},
+          {carrierClaimType, carrierEob},
+          {pdeClaimType, pdeEob}
         });
   }
 
@@ -120,8 +134,8 @@ public class SamhsaMatcherFromClaimTransformerTest {
    * @param explanationOfBenefit the explanation of benefit to use
    */
   public SamhsaMatcherFromClaimTransformerTest(
-      RifRecordBase claim, ExplanationOfBenefit explanationOfBenefit) {
-    this.claim = claim;
+      String claimType, ExplanationOfBenefit explanationOfBenefit) {
+    this.claimType = claimType;
     this.loadedExplanationOfBenefit = explanationOfBenefit;
   }
 
@@ -136,7 +150,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -174,7 +188,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -206,7 +220,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -228,7 +242,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -261,7 +275,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -283,7 +297,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -314,7 +328,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -344,7 +358,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     boolean expectMatch = true;
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
-    if (claim instanceof PartDEvent) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -365,11 +379,11 @@ public class SamhsaMatcherFromClaimTransformerTest {
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
-    if (claim instanceof PartDEvent
-        || claim instanceof DMEClaim
-        || claim instanceof HHAClaim
-        || claim instanceof HospiceClaim
-        || claim instanceof CarrierClaim) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)
+        || DME_CLAIM.equals(claimType)
+        || HHA_CLAIM.equals(claimType)
+        || HOSPICE_CLAIM.equals(claimType)
+        || CARRIER_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -392,11 +406,11 @@ public class SamhsaMatcherFromClaimTransformerTest {
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
-    if (claim instanceof PartDEvent
-        || claim instanceof DMEClaim
-        || claim instanceof HHAClaim
-        || claim instanceof HospiceClaim
-        || claim instanceof CarrierClaim) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)
+        || DME_CLAIM.equals(claimType)
+        || HHA_CLAIM.equals(claimType)
+        || HOSPICE_CLAIM.equals(claimType)
+        || CARRIER_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -430,11 +444,11 @@ public class SamhsaMatcherFromClaimTransformerTest {
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
-    if (claim instanceof PartDEvent
-        || claim instanceof DMEClaim
-        || claim instanceof HHAClaim
-        || claim instanceof HospiceClaim
-        || claim instanceof CarrierClaim) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)
+        || DME_CLAIM.equals(claimType)
+        || HHA_CLAIM.equals(claimType)
+        || HOSPICE_CLAIM.equals(claimType)
+        || CARRIER_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
@@ -457,11 +471,11 @@ public class SamhsaMatcherFromClaimTransformerTest {
 
     // PDE has no SAMHSA, so expect no match on SAMSHA filter
     // DME, HHA, Hospice, Carrier does not look at procedure so it wont match
-    if (claim instanceof PartDEvent
-        || claim instanceof DMEClaim
-        || claim instanceof HHAClaim
-        || claim instanceof HospiceClaim
-        || claim instanceof CarrierClaim) {
+    if (PART_D_EVENT_CLAIM.equals(claimType)
+        || DME_CLAIM.equals(claimType)
+        || HHA_CLAIM.equals(claimType)
+        || HOSPICE_CLAIM.equals(claimType)
+        || CARRIER_CLAIM.equals(claimType)) {
       expectMatch = false;
     }
 
