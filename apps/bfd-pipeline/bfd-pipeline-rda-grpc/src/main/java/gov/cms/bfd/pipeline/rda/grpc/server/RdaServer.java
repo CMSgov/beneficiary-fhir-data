@@ -10,37 +10,24 @@ import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Singular;
+import lombok.Value;
 
 public class RdaServer {
   /**
-   * Creates a local RDA API server on a random port for testing.
+   * Creates a local RDA API server for testing.
    *
-   * @param fissSourceFactory factory to create a FissClaimChange MessageSource
-   * @param mcsSourceFactory factory to create a McsClaimChange MessageSource
+   * @param config {@link LocalConfig} for the server
    * @return a running RDA API Server object
    */
-  public static Server startLocal(
-      MessageSource.Factory<FissClaimChange> fissSourceFactory,
-      MessageSource.Factory<McsClaimChange> mcsSourceFactory)
-      throws IOException {
-    return startLocal(0, fissSourceFactory, mcsSourceFactory);
-  }
-
-  /**
-   * Creates a local RDA API server on a specific port for testing.
-   *
-   * @param fissSourceFactory factory to create a FissClaimChange MessageSource
-   * @param mcsSourceFactory factory to create a McsClaimChange MessageSource
-   * @return a running RDA API Server object
-   */
-  public static Server startLocal(
-      int port,
-      MessageSource.Factory<FissClaimChange> fissSourceFactory,
-      MessageSource.Factory<McsClaimChange> mcsSourceFactory)
-      throws IOException {
-    return ServerBuilder.forPort(port)
-        .addService(new RdaService(fissSourceFactory, mcsSourceFactory))
+  public static Server startLocal(LocalConfig config) throws IOException {
+    return ServerBuilder.forPort(config.getPort())
+        .addService(new RdaService(config.getFissSourceFactory(), config.getMcsSourceFactory()))
+        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
         .start();
   }
@@ -48,39 +35,30 @@ public class RdaServer {
   /**
    * Creates an in-process (no network connections involved) RDA API server for testing.
    *
-   * @param name name used InProcessChannelBuilders to connect to the server
-   * @param fissSourceFactory factory to create a FissClaimChange MessageSource
-   * @param mcsSourceFactory factory to create a McsClaimChange MessageSource
+   * @param config {@link InProcessConfig} for the server
    * @return a running RDA API Server object
    */
-  public static Server startInProcess(
-      String name,
-      MessageSource.Factory<FissClaimChange> fissSourceFactory,
-      MessageSource.Factory<McsClaimChange> mcsSourceFactory)
-      throws IOException {
-    return InProcessServerBuilder.forName(name)
-        .addService(new RdaService(fissSourceFactory, mcsSourceFactory))
+  public static Server startInProcess(InProcessConfig config) throws IOException {
+    return InProcessServerBuilder.forName(config.getServerName())
+        .addService(new RdaService(config.getFissSourceFactory(), config.getMcsSourceFactory()))
+        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
         .start();
   }
 
   /**
-   * Starts a server, runs a test with the server's port as a parameter, and then shuts down the
-   * server once the test has finished running.
+   * Starts a server, runs an action with the server's port as a parameter, and then shuts down the
+   * server once the action has finished running.
    *
-   * @param fissSourceFactory factory to create a FissClaimChange MessageSource
-   * @param mcsSourceFactory factory to create a McsClaimChange MessageSource
-   * @param test the test to execute
+   * @param config {@link LocalConfig} for the server
+   * @param action the action to execute
    * @throws Exception any exception is passed through to the caller
    */
-  public static void runWithLocalServer(
-      MessageSource.Factory<FissClaimChange> fissSourceFactory,
-      MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-      ThrowableConsumer<Integer> test)
+  public static void runWithLocalServer(LocalConfig config, ThrowableConsumer<Integer> action)
       throws Exception {
-    final Server server = startLocal(fissSourceFactory, mcsSourceFactory);
+    final Server server = startLocal(config);
     try {
-      test.accept(server.getPort());
+      action.accept(server.getPort());
     } finally {
       server.shutdown();
       server.awaitTermination(3, TimeUnit.MINUTES);
@@ -88,26 +66,23 @@ public class RdaServer {
   }
 
   /**
-   * Starts a server, runs a test with a ManagedChannel to the server as a parameter, and then shuts
-   * down the server once the test has finished running. InProcess servers have less overhead than
-   * Local servers but still exercise most of the GRPC plumbing.
+   * Starts a server, runs an action with a ManagedChannel to the server as a parameter, and then
+   * shuts down the server once the action has finished running. InProcess servers have less
+   * overhead than Local servers but still exercise most of the GRPC plumbing.
    *
    * @param fissSourceFactory factory to create a FissClaimChange MessageSource
    * @param mcsSourceFactory factory to create a McsClaimChange MessageSource
-   * @param test the test to execute
+   * @param action the action to execute
    * @throws Exception any exception is passed through to the caller
    */
   public static void runWithInProcessServer(
-      String serverName,
-      MessageSource.Factory<FissClaimChange> fissSourceFactory,
-      MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-      ThrowableConsumer<ManagedChannel> test)
-      throws Exception {
-    final Server server = startInProcess(serverName, fissSourceFactory, mcsSourceFactory);
+      InProcessConfig config, ThrowableConsumer<ManagedChannel> action) throws Exception {
+    final Server server = startInProcess(config);
     try {
-      final ManagedChannel channel = InProcessChannelBuilder.forName(serverName).build();
+      final ManagedChannel channel =
+          InProcessChannelBuilder.forName(config.getServerName()).build();
       try {
-        test.accept(channel);
+        action.accept(channel);
       } finally {
         channel.shutdown();
         channel.awaitTermination(3, TimeUnit.MINUTES);
@@ -129,18 +104,86 @@ public class RdaServer {
    * @param test the test to execute
    * @throws Exception any exception is passed through to the caller
    */
-  public static void runWithInProcessServer(
-      String serverName,
-      MessageSource.Factory<FissClaimChange> fissSourceFactory,
-      MessageSource.Factory<McsClaimChange> mcsSourceFactory,
-      ThrowableAction test)
+  public static void runWithInProcessServerNoParam(InProcessConfig config, ThrowableAction test)
       throws Exception {
-    final Server server = startInProcess(serverName, fissSourceFactory, mcsSourceFactory);
+    final Server server = startInProcess(config);
     try {
       test.act();
     } finally {
       server.shutdown();
       server.awaitTermination(3, TimeUnit.MINUTES);
+    }
+  }
+
+  /** Configuration data for running a server on a local port. */
+  @Value
+  @Builder
+  public static class LocalConfig {
+    /**
+     * The port for the server to listen on. A value of zero causes the server to allocate any open
+     * port. Default for the builder is zero.
+     */
+    @Builder.Default int port = 0;
+
+    /** Factory used to create {@link MessageSource<FissClaimChange>} objects on demand. */
+    @NonNull @Builder.Default
+    MessageSource.Factory<FissClaimChange> fissSourceFactory = EmptyMessageSource.factory();
+
+    /** Factory used to create {@link MessageSource<McsClaimChange>} objects on demand. */
+    @NonNull @Builder.Default
+    MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
+
+    /**
+     * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
+     */
+    @NonNull @Singular Set<String> authorizedTokens;
+
+    /**
+     * Shorthand for calling {@link RdaServer#runWithLocalServer(LocalConfig, ThrowableConsumer)}
+     * with this config object.
+     */
+    public void runWithPortParam(ThrowableConsumer<Integer> action) throws Exception {
+      runWithLocalServer(this, action);
+    }
+  }
+
+  /** Configuration data for running an in-process server. */
+  @Value
+  @Builder
+  public static class InProcessConfig {
+    /**
+     * Server name to use when starting the in-process server. Defaults to {@code
+     * RdaServer.class.getName()}.
+     */
+    @NonNull @Builder.Default String serverName = RdaServer.class.getName();
+
+    /** Factory used to create {@link MessageSource<FissClaimChange>} objects on demand. */
+    @NonNull @Builder.Default
+    MessageSource.Factory<FissClaimChange> fissSourceFactory = EmptyMessageSource.factory();
+
+    /** Factory used to create {@link MessageSource<McsClaimChange>} objects on demand. */
+    @NonNull @Builder.Default
+    MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
+
+    /**
+     * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
+     */
+    @NonNull @Singular Set<String> authorizedTokens;
+
+    /**
+     * Shorthand for calling {@link RdaServer#runWithInProcessServer(InProcessConfig,
+     * ThrowableConsumer)} with this config object.
+     */
+    public void runWithChannelParam(ThrowableConsumer<ManagedChannel> action) throws Exception {
+      runWithInProcessServer(this, action);
+    }
+
+    /**
+     * Shorthand for calling {@link RdaServer#runWithInProcessServerNoParam(InProcessConfig,
+     * ThrowableAction)} with this config object.
+     */
+    public void runWithNoParam(ThrowableAction action) throws Exception {
+      runWithInProcessServerNoParam(this, action);
     }
   }
 }

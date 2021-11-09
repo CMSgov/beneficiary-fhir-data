@@ -41,14 +41,14 @@ public class McsClaimStreamCaller implements GrpcStreamCaller<RdaChange<PreAdjMc
    */
   @Override
   public GrpcResponseStream<RdaChange<PreAdjMcsClaim>> callService(
-      ManagedChannel channel, long startingSequenceNumber) throws Exception {
+      ManagedChannel channel, CallOptions callOptions, long startingSequenceNumber)
+      throws Exception {
     LOGGER.info("calling service");
     Preconditions.checkNotNull(channel);
     final ClaimRequest request = ClaimRequest.newBuilder().setSince(startingSequenceNumber).build();
     final MethodDescriptor<ClaimRequest, McsClaimChange> method =
         RDAServiceGrpc.getGetMcsClaimsMethod();
-    final ClientCall<ClaimRequest, McsClaimChange> call =
-        channel.newCall(method, CallOptions.DEFAULT);
+    final ClientCall<ClaimRequest, McsClaimChange> call = channel.newCall(method, callOptions);
     final Iterator<McsClaimChange> apiResults =
         ClientCalls.blockingServerStreamingCall(call, request);
     final Iterator<RdaChange<PreAdjMcsClaim>> transformedResults =

@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -54,50 +54,55 @@ public class FissClaimStreamCallerIT {
 
   @Test
   public void basicCall() throws Exception {
-    RdaServer.runWithInProcessServer(
-        getClass().getSimpleName(),
-        sequenceNumber ->
-            WrappedClaimSource.wrapFissClaims(
-                new JsonMessageSource<>(
-                    CLAIM_1 + System.lineSeparator() + CLAIM_2, JsonMessageSource::parseFissClaim),
-                clock,
-                sequenceNumber),
-        EmptyMessageSource.factory(),
-        channel -> {
-          final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
-          final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
-              caller.callService(channel, 0L);
-          assertEquals(true, results.hasNext());
+    RdaServer.InProcessConfig.builder()
+        .serverName(getClass().getSimpleName())
+        .fissSourceFactory(
+            sequenceNumber ->
+                WrappedClaimSource.wrapFissClaims(
+                    new JsonMessageSource<>(
+                        CLAIM_1 + System.lineSeparator() + CLAIM_2,
+                        JsonMessageSource::parseFissClaim),
+                    clock,
+                    sequenceNumber))
+        .build()
+        .runWithChannelParam(
+            channel -> {
+              final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
+              final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
+                  caller.callService(channel, CallOptions.DEFAULT, 0L);
+              assertEquals(true, results.hasNext());
 
-          PreAdjFissClaim claim = results.next().getClaim();
-          assertEquals("63843470", claim.getDcn());
-          assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-          assertEquals(true, results.hasNext());
+              PreAdjFissClaim claim = results.next().getClaim();
+              assertEquals("63843470", claim.getDcn());
+              assertEquals(Long.valueOf(0), claim.getSequenceNumber());
+              assertEquals(true, results.hasNext());
 
-          claim = results.next().getClaim();
-          assertEquals("2643602", claim.getDcn());
-          assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-          assertEquals(false, results.hasNext());
-        });
+              claim = results.next().getClaim();
+              assertEquals("2643602", claim.getDcn());
+              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+              assertEquals(false, results.hasNext());
+            });
   }
 
   @Test
   public void sequenceNumbers() throws Exception {
-    RdaServer.runWithInProcessServer(
-        getClass().getSimpleName(),
-        sequenceNumber ->
-            new RandomFissClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber),
-        EmptyMessageSource.factory(),
-        channel -> {
-          final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
-          final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
-              caller.callService(channel, 10L);
-          assertEquals(10L, results.next().getSequenceNumber());
-          assertEquals(11L, results.next().getSequenceNumber());
-          assertEquals(12L, results.next().getSequenceNumber());
-          assertEquals(13L, results.next().getSequenceNumber());
-          assertEquals(14L, results.next().getSequenceNumber());
-          assertEquals(false, results.hasNext());
-        });
+    RdaServer.InProcessConfig.builder()
+        .serverName(getClass().getSimpleName())
+        .fissSourceFactory(
+            sequenceNumber ->
+                new RandomFissClaimSource(1000L, 15).toClaimChanges().skip(sequenceNumber))
+        .build()
+        .runWithChannelParam(
+            channel -> {
+              final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
+              final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
+                  caller.callService(channel, CallOptions.DEFAULT, 10L);
+              assertEquals(10L, results.next().getSequenceNumber());
+              assertEquals(11L, results.next().getSequenceNumber());
+              assertEquals(12L, results.next().getSequenceNumber());
+              assertEquals(13L, results.next().getSequenceNumber());
+              assertEquals(14L, results.next().getSequenceNumber());
+              assertEquals(false, results.hasNext());
+            });
   }
 }
