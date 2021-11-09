@@ -3,11 +3,12 @@ set -eo pipefail
 
 # global variables
 PROGNAME=${0##*/}
-INVENTORY_DIR=~/Desktop/monthly_inventory
+INVENTORY_DIR="${INVENTORY_DIR:- ~/Desktop/monthly_inventory}"
 APPS_DIR=${APPS_DIR:-../../../apps}
 BUILD_APPS="${BUILD_APPS:-true}"
 BFD_SSH_USER=${BFD_SSH_USER:-} # must be set to ssh
 BFD_SSH_KEY_PATH=${BFD_SSH_KEY_PATH:-} # must be set to ssh
+CLEANUP="${CLEANUP:-true}" # defaults to removing inv on error, interupt, etc.
 
 # local variables
 java_inv_dir="$INVENTORY_DIR/java"
@@ -24,26 +25,30 @@ mvn_dep_cmd="mvn org.apache.maven.plugins:maven-dependency-plugin:${mvn_dep_ver}
 #-------------------- GENERAL SCRIPT/HOUSEKEEPING STUFF --------------------#
 
 clean_up() {
-  rm -rf "$INVENTORY_DIR"
+  if $CLEANUP; then
+    rm -rf "$INVENTORY_DIR"
+  fi
 }
 trap "clean_up" INT HUP
 
 error_exit() {
   echo "Error: $*"
   echo
+  clean_up
   exit 1
 }
 
 usage() {
   echo -e "Usage: $PROGNAME [-h|--help]"
 }
+
 check_requirements(){
   echo "Checking requirements"
   local ok=true
   
   # make sure inventory dir is empty
   if [[ -d "$INVENTORY_DIR" ]]; then
-    if [[ "$(ls -A $INVENTORY_DIR)" ]]; then
+    if [[ ! "$(ls -A "$INVENTORY_DIR")" ]]; then
       error_exit "$INVENTORY_DIR is not empty"
     fi
   fi
@@ -97,9 +102,15 @@ help_message() {
     2) BFD FHIR API server (via ssh)
     3) BFD ETL/PIPELINE server (via ssh)
   
+  The script is intended to be run from the repo directory where it resides, but
+  you can run from it anywhere as long as you set the APPS_DIR path correctly. Ie
+      mv $PROGNAME /usr/local/bin/inventory-bfd
+      chmod +x /usr/local/bin/inventory-bfd
+      APPS_DIR=/path/to/bfd-repo/apps inventory-bfd
+  
   By default, this script will export the results to a 'monthly_inventory' folder
   on your desktop (set INVENTORY_DIR env var to overide).
-
+  
   $(usage)
 
   Requirements:
@@ -107,6 +118,7 @@ help_message() {
     2) An active CMS VPN tunnel
     3) BFD_SSH_USER env var set to your ssh user name
     4) BFD_SSH_KEY_PATH env var set to the path to your ssh key
+    5) chmod +x $PROGNAME to make the script executable
   
   Options:
     -h, --help
@@ -281,6 +293,7 @@ open "$INVENTORY_DIR"
 echo
 read -p "Press Y to remove the $INVENTORY_DIR directory from your computer." -n 1 -r; echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
+  export CLEANUP=true
   clean_up
   echo "Finished!"
 else
