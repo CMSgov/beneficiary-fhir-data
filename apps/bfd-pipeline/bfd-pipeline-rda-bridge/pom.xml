@@ -17,9 +17,6 @@
     <description>Utility project for creating RDA data</description>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-
         <snakeyml.version>1.29</snakeyml.version>
         <commons-cli.version>1.4</commons-cli.version>
 
@@ -69,11 +66,6 @@
             <artifactId>bfd-pipeline-rda-grpc</artifactId>
             <version>${bfd-pipeline-rda-grpcs.version}</version>
         </dependency>
-        <dependency>
-            <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-shared-utils</artifactId>
-            <version>${bfd-shared-utils.version}</version>
-        </dependency>
         <!-- Testing -->
         <dependency>
             <groupId>junit</groupId>
@@ -105,6 +97,21 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>gov.cms.bfd.pipeline.bridge.RDABridge</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -58,10 +58,10 @@ public class RDABridge {
   private static final String EXTERNAL_CONFIG_FLAG = "e";
 
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
-      ImmutableMap.of("csv", filePath -> new RifParser(new RifSource(filePath)));
+      Map.of("csv", filePath -> new RifParser(new RifSource(filePath)));
 
   private static final Map<String, ThrowingFunction<Sink<MessageOrBuilder>, Path, IOException>>
-      sinkMap = ImmutableMap.of("ndjson", NdJsonSink::new);
+      sinkMap = Map.of("ndjson", NdJsonSink::new);
 
   /**
    * Handles translation of a CLI execution, validating and pulling arguments to then invoke the
@@ -217,7 +217,7 @@ public class RDABridge {
   @VisibleForTesting
   AbstractTransformer createTransformer(
       SourceType sourceType, Map<String, BeneficiaryData> mbiMap) {
-    if (SourceType.FISS.equals(sourceType)) {
+    if (SourceType.FISS == sourceType) {
       return new FissTransformer(mbiMap);
     } else {
       return new McsTransformer(mbiMap);

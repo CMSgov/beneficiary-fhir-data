@@ -12,9 +12,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RifParser implements Parser<String> {
 
-  private static final SimpleDateFormat rifDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
-  private static final SimpleDateFormat standardFormat = new SimpleDateFormat("yyyy-MM-dd");
-
   private static final String DELIMITER = "\\|";
 
   private final Source<String> source;
@@ -70,6 +67,9 @@ public class RifParser implements Parser<String> {
   @RequiredArgsConstructor
   public static class RifData extends Data<String> {
 
+    private final SimpleDateFormat rifDateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+    private final SimpleDateFormat standardFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     private final Map<String, Integer> headerIndexMap;
     private final String[] rowData;
 
@@ -102,7 +102,7 @@ public class RifParser implements Parser<String> {
       return get(rifIdentifier)
           .map(
               value -> {
-                if (Type.DATE.equals(type)) {
+                if (Type.DATE == type) {
                   try {
                     return standardFormat.format(rifDateFormat.parse(value));
                   } catch (ParseException e) {
