@@ -579,9 +579,10 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
-    // Does the CodeableConcept have a legit HCPCS Coding?
+    /* Does the CodeableConcept have a legit HCPCS Coding?
+    DME can have other types, so return false if SAMHSA doesnt apply */
     if (!codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
-      throw new IllegalArgumentException();
+      return false;
     }
 
     return procedureConcept.getCoding().stream()
