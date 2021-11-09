@@ -8,6 +8,7 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -43,9 +44,7 @@ public final class BeneficiaryTransformerTest {
 
     // Verify identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient,
-        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
-        "567834");
+        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
   }
@@ -66,9 +65,7 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient,
-        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
-        "567834");
+        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
@@ -101,9 +98,7 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient,
-        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
-        "567834");
+        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
@@ -137,9 +132,7 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals("Number of identifiers should be 6", 6, patient.getIdentifier().size());
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient,
-        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
-        "567834");
+        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
@@ -179,9 +172,7 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals("Number of identifiers should be 4", 4, patient.getIdentifier().size());
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient,
-        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
-        "567834");
+        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
