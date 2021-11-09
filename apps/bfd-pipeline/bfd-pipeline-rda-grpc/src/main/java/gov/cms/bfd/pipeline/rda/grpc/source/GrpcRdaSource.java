@@ -12,6 +12,7 @@ import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
+import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -46,6 +49,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   private final GrpcStreamCaller<TResponse> caller;
   private final String claimType;
   private final Optional<Long> startingSequenceNumber;
+  private final Supplier<CallOptions> callOptionsFactory;
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -64,7 +68,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
-    this(config.createChannel(), caller, appMetrics, claimType, startingSequenceNumber);
+    this(
+        config.createChannel(),
+        caller,
+        config::createCallOptions,
+        appMetrics,
+        claimType,
+        startingSequenceNumber);
   }
 
   /**
@@ -81,11 +91,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   GrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller<TResponse> caller,
+      Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
+    this.callOptionsFactory = callOptionsFactory;
     this.channel = Preconditions.checkNotNull(channel);
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     metrics = new Metrics(appMetrics, claimType);
@@ -115,7 +127,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
           claimType,
           startingSequenceNumber);
       final GrpcResponseStream<TResponse> responseStream =
-          caller.callService(channel, startingSequenceNumber);
+          caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);
       final List<TResponse> batch = new ArrayList<>();
       try {
         while (responseStream.hasNext()) {
@@ -251,6 +263,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     private final String inProcessServerName;
     /** The maximum time the stream is allowed to remain idle before being automatically closed. */
     private final Duration maxIdle;
+    /** The token to pass to the RDA API server to authenticate the client. */
+    @Nullable private final String authenticationToken;
 
     /**
      * Specifies which type of server we want to connect to. {@code Remote} is the normal
@@ -268,7 +282,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
         String host,
         int port,
         String inProcessServerName,
-        Duration maxIdle) {
+        Duration maxIdle,
+        String authenticationToken) {
       this.serverType = Preconditions.checkNotNull(serverType, "serverType is required");
       this.host = host;
       this.port = port;
@@ -281,6 +296,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
         Preconditions.checkArgument(
             !Strings.isNullOrEmpty(inProcessServerName), "inProcessServerName is required");
       }
+      this.authenticationToken =
+          Strings.isNullOrEmpty(authenticationToken) ? null : authenticationToken;
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
     }
 
@@ -297,6 +314,34 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       } else {
         return createRemoteChannelBuilder();
       }
+    }
+
+    /**
+     * Creates a CallOptions object for an API call. Will be {@link CallOptions.DEFAULT} if no token
+     * has been defined or a BearerToken if one has been defined.
+     *
+     * @return a valid CallOptions object
+     */
+    public CallOptions createCallOptions() {
+      CallOptions answer = CallOptions.DEFAULT;
+      if (authenticationToken != null) {
+        answer = answer.withCallCredentials(new BearerToken(authenticationToken));
+      } else {
+        LOGGER.warn("authenticationToken has not been set - calling server with no token");
+      }
+      return answer;
+    }
+
+    /**
+     * Used to specify the maximum amount of time to wait for responses to arrive on the response
+     * stream. This is an inter-message time, not an overall connection time. For example if maxIdle
+     * is set for five minutes the stream would be kept open forever as long as messages arrive
+     * within 5 minutes of each other.
+     *
+     * @return the maximum idle time for the rRPC service's response stream.
+     */
+    public Duration getMaxIdle() {
+      return maxIdle;
     }
 
     private ManagedChannelBuilder<?> createRemoteChannelBuilder() {

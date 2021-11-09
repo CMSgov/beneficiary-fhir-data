@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static gov.cms.bfd.pipeline.rda.grpc.server.RdaServer.*;
 import static org.junit.Assert.*;
 
 import com.google.common.base.Strings;
@@ -9,10 +8,10 @@ import com.google.common.io.CharSource;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -62,14 +61,15 @@ public class RdaLoadJobIT {
         clock,
         (appState, entityManager) -> {
           assertTablesAreEmpty(entityManager);
-          runWithLocalServer(
-              fissJsonSource(fissClaimJson),
-              EmptyMessageSource.factory(),
-              port -> {
-                final RdaLoadOptions config = createRdaLoadOptions(port);
-                final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
-                job.call();
-              });
+          RdaServer.LocalConfig.builder()
+              .fissSourceFactory(fissJsonSource(fissClaimJson))
+              .build()
+              .runWithPortParam(
+                  port -> {
+                    final RdaLoadOptions config = createRdaLoadOptions(port);
+                    final PipelineJob<?> job = config.createFissClaimsLoadJob(appState);
+                    job.call();
+                  });
           final ImmutableList<FissClaimChange> expectedClaims =
               JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
           List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
@@ -105,20 +105,21 @@ public class RdaLoadJobIT {
               badFissClaimJson
                   .get(badClaimIndex)
                   .replaceAll("\"hicNo\":\"\\d+\"", "\"hicNo\":\"123456789012345\""));
-          runWithLocalServer(
-              fissJsonSource(badFissClaimJson),
-              EmptyMessageSource.factory(),
-              port -> {
-                final RdaLoadOptions config = createRdaLoadOptions(port);
-                final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState);
-                try {
-                  job.callRdaServiceAndStoreRecords();
-                  fail("expected an exception to be thrown");
-                } catch (ProcessingException ex) {
-                  assertEquals(fullBatchSize, ex.getProcessedCount());
-                  assertEquals(true, ex.getMessage().contains("invalid length"));
-                }
-              });
+          RdaServer.LocalConfig.builder()
+              .fissSourceFactory(fissJsonSource(badFissClaimJson))
+              .build()
+              .runWithPortParam(
+                  port -> {
+                    final RdaLoadOptions config = createRdaLoadOptions(port);
+                    final RdaFissClaimLoadJob job = config.createFissClaimsLoadJob(appState);
+                    try {
+                      job.callRdaServiceAndStoreRecords();
+                      fail("expected an exception to be thrown");
+                    } catch (ProcessingException ex) {
+                      assertEquals(fullBatchSize, ex.getProcessedCount());
+                      assertEquals(true, ex.getMessage().contains("invalid length"));
+                    }
+                  });
           List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
@@ -131,15 +132,16 @@ public class RdaLoadJobIT {
         clock,
         (appState, entityManager) -> {
           assertTablesAreEmpty(entityManager);
-          runWithInProcessServer(
-              RdaServerJob.Config.DEFAULT_SERVER_NAME,
-              EmptyMessageSource.factory(),
-              mcsJsonSource(mcsClaimJson),
-              () -> {
-                final RdaLoadOptions config = createRdaLoadOptions(-1);
-                final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
-                job.call();
-              });
+          RdaServer.InProcessConfig.builder()
+              .serverName(RdaServerJob.Config.DEFAULT_SERVER_NAME)
+              .mcsSourceFactory(mcsJsonSource(mcsClaimJson))
+              .build()
+              .runWithNoParam(
+                  () -> {
+                    final RdaLoadOptions config = createRdaLoadOptions(-1);
+                    final PipelineJob<?> job = config.createMcsClaimsLoadJob(appState);
+                    job.call();
+                  });
           final ImmutableList<McsClaimChange> expectedClaims =
               JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
           List<PreAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
@@ -171,24 +173,27 @@ public class RdaLoadJobIT {
           final int fullBatchSize =
               claimsToSendBeforeThrowing - claimsToSendBeforeThrowing % BATCH_SIZE;
           assertEquals(true, fullBatchSize > 0);
-          runWithLocalServer(
-              EmptyMessageSource.factory(),
-              ignored ->
-                  new ExceptionMessageSource<>(
-                      new JsonMessageSource<>(mcsClaimJson, JsonMessageSource::parseMcsClaimChange),
-                      claimsToSendBeforeThrowing,
-                      () -> new IOException("oops")),
-              port -> {
-                final RdaLoadOptions config = createRdaLoadOptions(port);
-                final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState);
-                try {
-                  job.callRdaServiceAndStoreRecords();
-                  fail("expected an exception to be thrown");
-                } catch (ProcessingException ex) {
-                  assertEquals(fullBatchSize, ex.getProcessedCount());
-                  assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
-                }
-              });
+          RdaServer.LocalConfig.builder()
+              .mcsSourceFactory(
+                  ignored ->
+                      new ExceptionMessageSource<>(
+                          new JsonMessageSource<>(
+                              mcsClaimJson, JsonMessageSource::parseMcsClaimChange),
+                          claimsToSendBeforeThrowing,
+                          () -> new IOException("oops")))
+              .build()
+              .runWithPortParam(
+                  port -> {
+                    final RdaLoadOptions config = createRdaLoadOptions(port);
+                    final RdaMcsClaimLoadJob job = config.createMcsClaimsLoadJob(appState);
+                    try {
+                      job.callRdaServiceAndStoreRecords();
+                      fail("expected an exception to be thrown");
+                    } catch (ProcessingException ex) {
+                      assertEquals(fullBatchSize, ex.getProcessedCount());
+                      assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
+                    }
+                  });
           List<PreAdjMcsClaim> claims = getPreAdjMcsClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
@@ -244,6 +249,7 @@ public class RdaLoadJobIT {
           .inProcessServerName(RdaServerJob.Config.DEFAULT_SERVER_NAME);
     }
     rdaSourceConfig.maxIdle(Duration.ofMinutes(1));
+    rdaSourceConfig.authenticationToken("secret-token");
     return new RdaLoadOptions(
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(1))
