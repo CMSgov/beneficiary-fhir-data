@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 public abstract class GrpcStreamCaller<TResponse> {
   protected final Logger logger;
 
-  protected GrpcStreamCaller(Logger LOGGER) {
-    logger = LOGGER;
+  protected GrpcStreamCaller(Logger logger) {
+    this.logger = logger;
   }
 
   /**
@@ -37,13 +37,15 @@ public abstract class GrpcStreamCaller<TResponse> {
    * sequence number allows the caller to resume the stream at an arbitrary location. The sequence
    * numbers come back from the API server in change objects.
    *
-   * @param channel an already open channel to the server
+   * @param channel an already open channel to the service being called
+   * @param callOptions the CallOptions object to use for the API call
    * @param startingSequenceNumber specifies the sequence number to send to the RDA API server
    * @return a blocking GrpcResponseStream allowing iteration over stream results
    * @throws Exception any exception thrown calling the RPC or setting up the stream
    */
   public abstract GrpcResponseStream<TResponse> callService(
-      ManagedChannel channel, long startingSequenceNumber) throws Exception;
+      ManagedChannel channel, CallOptions callOptions, long startingSequenceNumber)
+      throws Exception;
 
   /**
    * Make a call to the server's {@code getVersion()} service and return the version component.
@@ -51,11 +53,12 @@ public abstract class GrpcStreamCaller<TResponse> {
    * @param channel an already open channel to the server
    * @return version string from the server
    */
-  public String callVersionService(ManagedChannel channel) throws Exception {
+  public String callVersionService(ManagedChannel channel, CallOptions callOptions)
+      throws Exception {
     Preconditions.checkNotNull(channel);
     logger.info("calling getVersion service");
     final MethodDescriptor<Empty, ApiVersion> method = RDAServiceGrpc.getGetVersionMethod();
-    final ClientCall<Empty, ApiVersion> call = channel.newCall(method, CallOptions.DEFAULT);
+    final ClientCall<Empty, ApiVersion> call = channel.newCall(method, callOptions);
     final Iterator<ApiVersion> apiResults =
         ClientCalls.blockingServerStreamingCall(call, Empty.getDefaultInstance());
     // Oddly enough the server returns a stream.  Rather than hard code an assumption of one

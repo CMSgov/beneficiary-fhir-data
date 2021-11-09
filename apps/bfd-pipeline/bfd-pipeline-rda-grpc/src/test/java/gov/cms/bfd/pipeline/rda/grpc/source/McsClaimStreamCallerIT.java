@@ -7,6 +7,7 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -30,7 +31,7 @@ public class McsClaimStreamCallerIT {
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
-                  caller.callService(channel, 0L);
+                  caller.callService(channel, CallOptions.DEFAULT, 0L);
               assertEquals(true, results.hasNext());
 
               PreAdjMcsClaim claim = results.next().getClaim();
@@ -59,7 +60,7 @@ public class McsClaimStreamCallerIT {
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
-                  caller.callService(channel, 10L);
+                  caller.callService(channel, CallOptions.DEFAULT, 10L);
               assertEquals(10L, results.next().getSequenceNumber());
               assertEquals(11L, results.next().getSequenceNumber());
               assertEquals(12L, results.next().getSequenceNumber());

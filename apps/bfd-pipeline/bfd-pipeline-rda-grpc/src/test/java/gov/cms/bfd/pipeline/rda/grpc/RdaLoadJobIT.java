@@ -249,6 +249,7 @@ public class RdaLoadJobIT {
           .inProcessServerName(RdaServerJob.Config.DEFAULT_SERVER_NAME);
     }
     rdaSourceConfig.maxIdle(Duration.ofMinutes(1));
+    rdaSourceConfig.authenticationToken("secret-token");
     return new RdaLoadOptions(
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofSeconds(1))

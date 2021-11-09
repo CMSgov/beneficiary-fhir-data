@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,6 +17,8 @@ import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -206,6 +208,73 @@ public class GrpcRdaSourceIT {
               assertEquals(2, sink.getValues().size());
               assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
               assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
+            });
+  }
+
+  @Test
+  public void grpcCallWithCorrectAuthToken() throws Exception {
+    createServerConfig()
+        .authorizedToken("secret")
+        .build()
+        .runWithPortParam(
+            port -> {
+              int count;
+              GrpcRdaSource.Config config =
+                  createSourceConfig(port).authenticationToken("secret").build();
+              try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+                count = source.retrieveAndProcessObjects(3, sink);
+              }
+              assertEquals(2, count);
+              assertEquals(2, sink.getValues().size());
+              assertEquals(EXPECTED_CLAIM_1, sink.getValues().get(0));
+              assertEquals(EXPECTED_CLAIM_2, sink.getValues().get(1));
+            });
+  }
+
+  @Test
+  public void grpcCallWithMissingAuthToken() throws Exception {
+    createServerConfig()
+        .authorizedToken("secret")
+        .build()
+        .runWithPortParam(
+            port -> {
+              GrpcRdaSource.Config config = createSourceConfig(port).build();
+              try {
+                try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+                  source.retrieveAndProcessObjects(3, sink);
+                }
+                fail("should have thrown an exception due to missing token");
+              } catch (ProcessingException ex) {
+                assertEquals(0, ex.getProcessedCount());
+                assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
+                assertEquals(
+                    Status.UNAUTHENTICATED,
+                    ((StatusRuntimeException) ex.getOriginalCause()).getStatus());
+              }
+            });
+  }
+
+  @Test
+  public void grpcCallWithIncorrectAuthToken() throws Exception {
+    createServerConfig()
+        .authorizedToken("secret")
+        .build()
+        .runWithPortParam(
+            port -> {
+              GrpcRdaSource.Config config =
+                  createSourceConfig(port).authenticationToken("wrong-secret").build();
+              try {
+                try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+                  source.retrieveAndProcessObjects(3, sink);
+                }
+                fail("should have thrown an exception due to missing token");
+              } catch (ProcessingException ex) {
+                assertEquals(0, ex.getProcessedCount());
+                assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
+                assertEquals(
+                    Status.UNAUTHENTICATED,
+                    ((StatusRuntimeException) ex.getOriginalCause()).getStatus());
+              }
             });
   }
 

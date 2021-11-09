@@ -11,9 +11,12 @@ import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.Singular;
 
 public class RdaServer {
   /**
@@ -25,6 +28,7 @@ public class RdaServer {
   public static Server startLocal(LocalConfig config) throws IOException {
     return ServerBuilder.forPort(config.getPort())
         .addService(config.createService())
+        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
         .start();
   }
@@ -38,6 +42,7 @@ public class RdaServer {
   public static Server startInProcess(InProcessConfig config) throws IOException {
     return InProcessServerBuilder.forName(config.getServerName())
         .addService(config.createService())
+        .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
         .start();
   }
@@ -122,15 +127,22 @@ public class RdaServer {
     /** Factory used to create {@link MessageSource<McsClaimChange>} objects on demand. */
     private final MessageSource.Factory<McsClaimChange> mcsSourceFactory;
 
+    /**
+     * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
+     */
+    private final Set<String> authorizedTokens;
+
     BaseConfig(
         RdaService.Version version,
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
-        MessageSource.Factory<McsClaimChange> mcsSourceFactory) {
+        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        Set<String> authorizedTokens) {
       this.version = version != null ? version : RdaService.Version.builder().build();
       this.fissSourceFactory =
           fissSourceFactory != null ? fissSourceFactory : EmptyMessageSource.factory();
       this.mcsSourceFactory =
           mcsSourceFactory != null ? mcsSourceFactory : EmptyMessageSource.factory();
+      this.authorizedTokens = authorizedTokens;
     }
 
     /** @return properly configured RdaService instance */
@@ -158,8 +170,9 @@ public class RdaServer {
         RdaService.Version version,
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
         MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @NonNull @Singular Set<String> authorizedTokens,
         int port) {
-      super(version, fissSourceFactory, mcsSourceFactory);
+      super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
       this.port = port;
     }
 
@@ -186,8 +199,9 @@ public class RdaServer {
         RdaService.Version version,
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
         MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @NonNull @Singular Set<String> authorizedTokens,
         String serverName) {
-      super(version, fissSourceFactory, mcsSourceFactory);
+      super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
       this.serverName = Strings.isNullOrEmpty(serverName) ? RdaServer.class.getName() : serverName;
     }
 

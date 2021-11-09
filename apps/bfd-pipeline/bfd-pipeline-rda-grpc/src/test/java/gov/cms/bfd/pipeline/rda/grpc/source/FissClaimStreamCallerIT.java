@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -69,7 +70,7 @@ public class FissClaimStreamCallerIT {
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
-                  caller.callService(channel, 0L);
+                  caller.callService(channel, CallOptions.DEFAULT, 0L);
               assertEquals(true, results.hasNext());
 
               PreAdjFissClaim claim = results.next().getClaim();
@@ -98,7 +99,7 @@ public class FissClaimStreamCallerIT {
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
-                  caller.callService(channel, 10L);
+                  caller.callService(channel, CallOptions.DEFAULT, 10L);
               assertEquals(10L, results.next().getSequenceNumber());
               assertEquals(11L, results.next().getSequenceNumber());
               assertEquals(12L, results.next().getSequenceNumber());
