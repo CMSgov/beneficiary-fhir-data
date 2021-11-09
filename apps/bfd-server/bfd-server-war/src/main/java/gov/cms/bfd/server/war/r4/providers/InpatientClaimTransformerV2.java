@@ -6,15 +6,20 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.InpatientClaim;
 import gov.cms.bfd.model.rif.InpatientClaimLine;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.ProfileConstants;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimInstitutionalCareTeamRole;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBPractitionerIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit.ItemComponent;
 
@@ -341,8 +346,17 @@ public class InpatientClaimTransformerV2 {
           .ifPresent(
               c ->
                   item.setProductOrService(
-                      TransformerUtilsV2.createCodeableConcept(
-                          eob, CcwCodebookVariable.HCPCS_CD, c)));
+                      new CodeableConcept()
+                          .setCoding(
+                              Arrays.asList(
+                                  new Coding()
+                                      .setSystem(
+                                          CCWUtils.calculateVariableReferenceUrl(
+                                              CcwCodebookVariable.HCPCS_CD))
+                                      .setCode(c),
+                                  new Coding()
+                                      .setSystem(TransformerConstants.CODING_SYSTEM_HCPCS)
+                                      .setCode(c)))));
 
       // RNDRNG_PHYSN_UPIN => ExplanationOfBenefit.careTeam.provider
       TransformerUtilsV2.addCareTeamMember(

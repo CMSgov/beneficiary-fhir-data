@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -40,7 +41,7 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader();
 
   private static final String DRG =
-      TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
+      CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
   private final List<String> drgCodes;
   private final List<String> cptCodes;
