@@ -133,7 +133,7 @@ public class PreAdjMcsClaim {
    * version string returned by the RDA API server but when populating data from mock server it will
    * also include information about the mode the server was running in.
    */
-  @Column(name = "`apiSource`", length = 64)
+  @Column(name = "`apiSource`", length = 24)
   private String apiSource;
 
   @OneToMany(
