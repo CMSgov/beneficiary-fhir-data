@@ -29,7 +29,7 @@ public final class LoadedFilterManagerIT {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManagerIT.class);
 
-  private static final String SAMPLE_BENE = "567834";
+  private static final String SAMPLE_BENE = TransformerTestUtils.getGoldenBeneId();
   private static final String INVALID_BENE = "1";
 
   @Test

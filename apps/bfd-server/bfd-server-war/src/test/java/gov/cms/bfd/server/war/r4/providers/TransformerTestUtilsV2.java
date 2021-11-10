@@ -47,6 +47,8 @@ import org.junit.Assert;
 public final class TransformerTestUtilsV2 {
   /* Do this very slow operation once */
   private static final FhirContext fhirContext = FhirContext.forR4();
+  private static final String GOLDEN_BENE_ID = "-88888888888888";
+
   /**
    * Test the transformation of common group level header fields between all claim types
    *
@@ -111,6 +113,15 @@ public final class TransformerTestUtilsV2 {
     if (paymentAmount.isPresent()) {
       Assert.assertEquals(paymentAmount.get(), eob.getPayment().getAmount().getValue());
     }
+  }
+
+  /**
+   * Gets the golden beneficiary id.
+   *
+   * @return the golden beneficiary id
+   */
+  static String getGoldenBeneId() {
+    return GOLDEN_BENE_ID;
   }
 
   /**

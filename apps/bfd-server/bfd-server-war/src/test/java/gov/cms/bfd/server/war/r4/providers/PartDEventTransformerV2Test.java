@@ -112,7 +112,8 @@ public final class PartDEventTransformerV2Test {
   @Test
   public void shouldReferencePatient() {
     Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    Assert.assertEquals(
+        "Patient/" + TransformerTestUtilsV2.getGoldenBeneId(), eob.getPatient().getReference());
   }
 
   @Test
@@ -552,7 +553,8 @@ public final class PartDEventTransformerV2Test {
     Assert.assertEquals(1, eob.getInsurance().size());
     Assert.assertNotNull(eob.getInsuranceFirstRep());
     Assert.assertEquals(
-        "Coverage/part-d-567834", eob.getInsuranceFirstRep().getCoverage().getReference());
+        "Coverage/part-d-" + TransformerTestUtilsV2.getGoldenBeneId(),
+        eob.getInsuranceFirstRep().getCoverage().getReference());
   }
 
   /** Line Items */

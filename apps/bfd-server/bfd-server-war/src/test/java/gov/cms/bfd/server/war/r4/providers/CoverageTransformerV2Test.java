@@ -90,7 +90,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetIDPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
-    verifyID("part-a-567834");
+    verifyID("part-a-" + TransformerTestUtilsV2.getGoldenBeneId());
   }
 
   @Test
@@ -193,7 +193,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetIDPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
-    verifyID("part-b-567834");
+    verifyID("part-b-" + TransformerTestUtilsV2.getGoldenBeneId());
   }
 
   @Test
@@ -275,7 +275,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetIDPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
-    verifyID("part-c-567834");
+    verifyID("part-c-" + TransformerTestUtilsV2.getGoldenBeneId());
   }
 
   @Test
@@ -376,7 +376,7 @@ public final class CoverageTransformerV2Test {
   @Test
   public void shouldSetIDPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
-    verifyID("part-d-567834");
+    verifyID("part-d-" + TransformerTestUtilsV2.getGoldenBeneId());
   }
 
   @Test
@@ -568,7 +568,8 @@ public final class CoverageTransformerV2Test {
   private static void verifySubscriber() {
     Assert.assertEquals("3456789", coverage.getSubscriberId());
     Reference ex = coverage.getBeneficiary();
-    Reference compare = TransformerUtilsV2.referencePatient("567834");
+    Reference compare =
+        TransformerUtilsV2.referencePatient(TransformerTestUtilsV2.getGoldenBeneId());
     Assert.assertTrue(compare.equalsDeep(ex));
   }
 

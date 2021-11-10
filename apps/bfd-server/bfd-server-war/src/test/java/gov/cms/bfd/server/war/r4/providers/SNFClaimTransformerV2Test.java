@@ -124,7 +124,8 @@ public class SNFClaimTransformerV2Test {
   @Test
   public void shouldReferencePatient() {
     Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    Assert.assertEquals(
+        "Patient/" + TransformerTestUtilsV2.getGoldenBeneId(), eob.getPatient().getReference());
   }
 
   @Test
@@ -774,7 +775,9 @@ public class SNFClaimTransformerV2Test {
 
     InsuranceComponent compare =
         new InsuranceComponent()
-            .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
+            .setCoverage(
+                new Reference()
+                    .setReference("Coverage/part-a-" + TransformerTestUtilsV2.getGoldenBeneId()));
 
     Assert.assertTrue(compare.equalsDeep(insurance));
   }

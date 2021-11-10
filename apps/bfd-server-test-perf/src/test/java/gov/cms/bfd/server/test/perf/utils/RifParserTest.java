@@ -16,7 +16,7 @@ public class RifParserTest {
     RifRecordEvent<?> rifRecordEvent = parser.next();
     if (rifRecordEvent != null) {
       Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
-      Assert.assertEquals("567834", beneRow.getBeneficiaryId());
+      Assert.assertEquals("-88888888888888", beneRow.getBeneficiaryId());
     }
   }
 

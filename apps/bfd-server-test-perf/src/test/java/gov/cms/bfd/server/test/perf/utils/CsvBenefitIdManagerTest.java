@@ -13,7 +13,7 @@ public class CsvBenefitIdManagerTest {
     URL url = Thread.currentThread().getContextClassLoader().getResource("bene-ids.csv");
     File f = Paths.get(url.getPath()).toFile();
     BenefitIdManager bim = new CsvBenefitIdManager(f);
-    assertEquals("567834", bim.nextId());
+    assertEquals("-88888888888888", bim.nextId());
     assertEquals("5303", bim.nextId());
     assertEquals("12162", bim.nextId());
   }
@@ -23,9 +23,9 @@ public class CsvBenefitIdManagerTest {
     URL url = Thread.currentThread().getContextClassLoader().getResource("bene-ids.csv");
     File f = Paths.get(url.getPath()).toFile();
     BenefitIdManager bim = new CsvBenefitIdManager(f);
-    assertEquals("567834", bim.nextId());
+    assertEquals("-88888888888888", bim.nextId());
     assertEquals("5303", bim.nextId());
     assertEquals("12162", bim.nextId());
-    assertEquals("567834", bim.nextId());
+    assertEquals("-88888888888888", bim.nextId());
   }
 };

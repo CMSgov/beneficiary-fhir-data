@@ -154,7 +154,8 @@ public final class HospiceClaimTransformerV2Test {
   @Test
   public void shouldHavePatientReference() {
     Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    Assert.assertEquals(
+        "Patient/" + TransformerTestUtilsV2.getGoldenBeneId(), eob.getPatient().getReference());
   }
 
   @Test
@@ -488,7 +489,9 @@ public final class HospiceClaimTransformerV2Test {
     InsuranceComponent insurance = eob.getInsuranceFirstRep();
     InsuranceComponent compare =
         new InsuranceComponent()
-            .setCoverage(new Reference().setReference("Coverage/part-a-567834"));
+            .setCoverage(
+                new Reference()
+                    .setReference("Coverage/part-a-" + TransformerTestUtilsV2.getGoldenBeneId()));
 
     Assert.assertTrue(compare.equalsDeep(insurance));
   }

@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 /** Integration tests for {@link RifLoader}. */
 public final class RifLoaderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderIT.class);
+  public static final String GOLDEN_BENE_ID = "-88888888888888";
 
   @Rule
   public TestWatcher testCaseEntryExitLogger =
@@ -100,7 +101,7 @@ public final class RifLoaderIT {
                   "Expected to have at least one beneficiary loaded", batches.size() > 0);
               Assert.assertEquals(
                   "Expected to match the sample-a beneficiary",
-                  "567834",
+                  GOLDEN_BENE_ID,
                   allBatches.getBeneficiariesAsList().get(0));
             });
   }
@@ -220,7 +221,7 @@ public final class RifLoaderIT {
                       beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
               .getResultList();
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
-        Assert.assertEquals("567834", beneHistory.getBeneficiaryId());
+        Assert.assertEquals(GOLDEN_BENE_ID, beneHistory.getBeneficiaryId());
         // A recent lastUpdated timestamp
         Assert.assertTrue("Expected a lastUpdated field", beneHistory.getLastUpdated().isPresent());
         beneHistory
@@ -234,7 +235,7 @@ public final class RifLoaderIT {
       }
       Assert.assertEquals(4, beneficiaryHistoryEntries.size());
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, GOLDEN_BENE_ID);
       // Last Name inserted with value of "Johnson"
       Assert.assertEquals("Johnson", beneficiaryFromDb.getNameSurname());
       // Following fields were NOT changed in update record
@@ -319,7 +320,7 @@ public final class RifLoaderIT {
                       beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
               .getResultList();
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
-        Assert.assertEquals("567834", beneHistory.getBeneficiaryId());
+        Assert.assertEquals(GOLDEN_BENE_ID, beneHistory.getBeneficiaryId());
         // A recent lastUpdated timestamp
         Assert.assertTrue("Expected a lastUpdated field", beneHistory.getLastUpdated().isPresent());
         long end = System.currentTimeMillis();
@@ -365,7 +366,7 @@ public final class RifLoaderIT {
     EntityManager entityManager = null;
     try {
       entityManager = entityManagerFactory.createEntityManager();
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, GOLDEN_BENE_ID);
       // Checks all 12 months are in beneficiary monthlys for that beneficiary
       Assert.assertEquals(12, beneficiaryFromDb.getBeneficiaryMonthlys().size());
       // Checks every month in the beneficiary monthly table
@@ -395,7 +396,7 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, GOLDEN_BENE_ID);
       // Checks to make sure we have 2 years or 24 months of data
       Assert.assertEquals(24, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
@@ -426,7 +427,7 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, GOLDEN_BENE_ID);
       // Checks to make sure we only have 20 months of data
       Assert.assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
@@ -455,7 +456,7 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, GOLDEN_BENE_ID);
       Assert.assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
 
       BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
@@ -486,7 +487,7 @@ public final class RifLoaderIT {
     try {
       entityManager = entityManagerFactory.createEntityManager();
 
-      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
+      Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, GOLDEN_BENE_ID);
       Assert.assertEquals(21, beneficiaryFromDb.getBeneficiaryMonthlys().size());
       BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
       Assert.assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());

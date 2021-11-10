@@ -570,7 +570,7 @@ public final class R4PatientResourceProviderIT {
         fhirClient,
         beneficiariesList,
         beneficiariesHistoryList,
-        "567834",
+        TransformerTestUtilsV2.getGoldenBeneId(),
         "3456789",
         useMbiFromBeneficiaryTable,
         expectsSingleBeneMatch);

@@ -125,7 +125,8 @@ public class HHAClaimTransformerV2Test {
   @Test
   public void shouldReferencePatient() {
     Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    Assert.assertEquals(
+        "Patient/" + TransformerTestUtilsV2.getGoldenBeneId(), eob.getPatient().getReference());
   }
 
   @Test
@@ -531,7 +532,9 @@ public class HHAClaimTransformerV2Test {
 
     InsuranceComponent compare =
         new InsuranceComponent()
-            .setCoverage(new Reference().setReference("Coverage/part-b-567834"));
+            .setCoverage(
+                new Reference()
+                    .setReference("Coverage/part-b-" + TransformerTestUtilsV2.getGoldenBeneId()));
 
     Assert.assertTrue(compare.equalsDeep(insurance));
   }

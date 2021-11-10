@@ -355,14 +355,16 @@ public class CarrierClaimTransformerV2Test {
   @Test
   public void shouldReferencePatient() {
     Assert.assertNotNull(eob.getPatient());
-    Assert.assertEquals("Patient/567834", eob.getPatient().getReference());
+    Assert.assertEquals(
+        "Patient/" + TransformerTestUtilsV2.getGoldenBeneId(), eob.getPatient().getReference());
   }
 
   @Test
   public void shouldInsuranceCoverage() {
     Assert.assertNotNull(eob.getInsurance());
     Assert.assertEquals(
-        "Coverage/part-b-567834", eob.getInsurance().get(0).getCoverage().getReference());
+        "Coverage/part-b-" + TransformerTestUtilsV2.getGoldenBeneId(),
+        eob.getInsurance().get(0).getCoverage().getReference());
   }
 
   @Test

@@ -159,7 +159,7 @@ public final class BeneficiaryTransformerV2Test {
     Identifier compare =
         TransformerTestUtilsV2.createIdentifier(
             "https://bluebutton.cms.gov/resources/variables/bene_id",
-            "567834",
+            TransformerTestUtilsV2.getGoldenBeneId(),
             "http://terminology.hl7.org/CodeSystem/v2-0203",
             "MB",
             "Member Number");
@@ -215,7 +215,7 @@ public final class BeneficiaryTransformerV2Test {
     Identifier ident =
         TransformerTestUtilsV2.createIdentifier(
             "https://bluebutton.cms.gov/resources/variables/bene_id",
-            "567834",
+            TransformerTestUtilsV2.getGoldenBeneId(),
             "http://terminology.hl7.org/CodeSystem/v2-0203",
             "MB",
             "Member Number");

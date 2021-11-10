@@ -38,6 +38,7 @@ import org.junit.rules.ExpectedException;
 
 /** Unit tests for {@link RifFilesProcessor}. */
 public final class RifFilesProcessorTest {
+  public static final String GOLDEN_BENE_ID = "-88888888888888";
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
   /**
@@ -65,7 +66,7 @@ public final class RifFilesProcessorTest {
     Beneficiary beneRow = (Beneficiary) rifRecordEvent.getRecord();
     Assert.assertEquals(beneRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
-    Assert.assertEquals("567834", beneRow.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, beneRow.getBeneficiaryId());
     Assert.assertEquals("MO", beneRow.getStateCode());
     Assert.assertEquals("123", beneRow.getCountyCode());
     Assert.assertEquals("12345", beneRow.getPostalCode());
@@ -161,7 +162,7 @@ public final class RifFilesProcessorTest {
     BeneficiaryHistory beneficiaryHistory0 = (BeneficiaryHistory) rifRecordEvent0.getRecord();
     Assert.assertEquals(beneficiaryHistory0.getBeneficiaryId(), rifRecordEvent0.getBeneficiaryId());
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent0.getRecordAction());
-    Assert.assertEquals("567834", beneficiaryHistory0.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, beneficiaryHistory0.getBeneficiaryId());
     Assert.assertEquals(LocalDate.of(1979, Month.MARCH, 17), beneficiaryHistory0.getBirthDate());
     Assert.assertEquals(('2'), beneficiaryHistory0.getSex());
     Assert.assertEquals("543217066Z", beneficiaryHistory0.getHicn());
@@ -183,7 +184,7 @@ public final class RifFilesProcessorTest {
       Assert.assertTrue(rifRecordEvent.getRecord() instanceof BeneficiaryHistory);
       BeneficiaryHistory beneficiaryHistory = (BeneficiaryHistory) rifRecordEvent.getRecord();
       Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
-      Assert.assertEquals("567834", beneficiaryHistory.getBeneficiaryId());
+      Assert.assertEquals(GOLDEN_BENE_ID, beneficiaryHistory.getBeneficiaryId());
       Assert.assertEquals(LocalDate.of(1980, Month.MARCH, 17), beneficiaryHistory.getBirthDate());
       Assert.assertEquals(('1'), beneficiaryHistory.getSex());
       Assert.assertEquals("543217066T", beneficiaryHistory.getHicn());
@@ -222,7 +223,7 @@ public final class RifFilesProcessorTest {
     MedicareBeneficiaryIdHistory medicareBeneficiaryIdHistory =
         (MedicareBeneficiaryIdHistory) rifRecordEvent0.getRecord();
 
-    Assert.assertEquals("567834", medicareBeneficiaryIdHistory.getBeneficiaryId().get());
+    Assert.assertEquals(GOLDEN_BENE_ID, medicareBeneficiaryIdHistory.getBeneficiaryId().get());
     Assert.assertEquals(
         LocalDate.of(2011, Month.APRIL, 16),
         medicareBeneficiaryIdHistory.getMbiEffectiveDate().get());
@@ -277,7 +278,7 @@ public final class RifFilesProcessorTest {
     Assert.assertEquals(pdeRow.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
     Assert.assertEquals("89", pdeRow.getEventId());
     Assert.assertEquals(new BigDecimal(900), pdeRow.getClaimGroupId());
-    Assert.assertEquals("567834", pdeRow.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, pdeRow.getBeneficiaryId());
     Assert.assertEquals(LocalDate.of(2015, Month.MAY, 12), pdeRow.getPrescriptionFillDate());
     Assert.assertEquals(LocalDate.of(2015, Month.MAY, 27), pdeRow.getPaymentDate().get());
     Assert.assertEquals("01", pdeRow.getServiceProviderIdQualiferCode());
@@ -363,7 +364,7 @@ public final class RifFilesProcessorTest {
     CarrierClaim claimGroup = (CarrierClaim) rifRecordEvent.getRecord();
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     Assert.assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
-    Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, claimGroup.getBeneficiaryId());
     Assert.assertEquals("9991831999", claimGroup.getClaimId());
     Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     Assert.assertEquals('O', claimGroup.getNearLineRecordIdCode());
@@ -499,7 +500,7 @@ public final class RifFilesProcessorTest {
     InpatientClaim claimGroup = (InpatientClaim) rifRecordEvent.getRecord();
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     Assert.assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
-    Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, claimGroup.getBeneficiaryId());
     Assert.assertEquals("333333222222", claimGroup.getClaimId());
     Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     Assert.assertEquals('V', claimGroup.getNearLineRecordIdCode());
@@ -619,7 +620,7 @@ public final class RifFilesProcessorTest {
     OutpatientClaim claimGroup = (OutpatientClaim) rifRecordEvent.getRecord();
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     Assert.assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
-    Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, claimGroup.getBeneficiaryId());
     Assert.assertEquals("1234567890", claimGroup.getClaimId());
     Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     Assert.assertEquals('W', claimGroup.getNearLineRecordIdCode());
@@ -715,7 +716,7 @@ public final class RifFilesProcessorTest {
     SNFClaim claimGroup = (SNFClaim) rifRecordEvent.getRecord();
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     Assert.assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
-    Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, claimGroup.getBeneficiaryId());
     Assert.assertEquals("777777777", claimGroup.getClaimId());
     Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     Assert.assertEquals('V', claimGroup.getNearLineRecordIdCode());
@@ -827,7 +828,7 @@ public final class RifFilesProcessorTest {
     HospiceClaim claimGroup = (HospiceClaim) rifRecordEvent.getRecord();
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     Assert.assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
-    Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, claimGroup.getBeneficiaryId());
     Assert.assertEquals("9992223422", claimGroup.getClaimId());
     Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     Assert.assertEquals('V', claimGroup.getNearLineRecordIdCode());
@@ -911,7 +912,7 @@ public final class RifFilesProcessorTest {
     HHAClaim claimGroup = (HHAClaim) rifRecordEvent.getRecord();
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     Assert.assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
-    Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, claimGroup.getBeneficiaryId());
     Assert.assertEquals("2925555555", claimGroup.getClaimId());
     Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     Assert.assertEquals('W', claimGroup.getNearLineRecordIdCode());
@@ -996,7 +997,7 @@ public final class RifFilesProcessorTest {
     DMEClaim claimGroup = (DMEClaim) rifRecordEvent.getRecord();
     Assert.assertEquals(RecordAction.INSERT, rifRecordEvent.getRecordAction());
     Assert.assertEquals(claimGroup.getBeneficiaryId(), rifRecordEvent.getBeneficiaryId());
-    Assert.assertEquals("567834", claimGroup.getBeneficiaryId());
+    Assert.assertEquals(GOLDEN_BENE_ID, claimGroup.getBeneficiaryId());
     Assert.assertEquals("2188888888", claimGroup.getClaimId());
     Assert.assertEquals(new BigDecimal(900), claimGroup.getClaimGroupId());
     Assert.assertEquals('M', claimGroup.getNearLineRecordIdCode());
