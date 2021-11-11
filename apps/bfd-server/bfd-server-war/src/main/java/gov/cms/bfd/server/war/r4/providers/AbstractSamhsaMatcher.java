@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
@@ -91,42 +92,76 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks that for the specified {@link CodeableConcept}, the Codings (if any) within, contain a
+   * blacklisted MHSA procedure code. If any of the systemms within th {@link CodeableConcept} are
+   * not known/expected, returns {@code true} and assuems the system is SAMHSA as a safety fallback.
+   *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
-   *     {@link Coding}s that match any of the {@link #cptCodes}, <code>false</code> if they all do
-   *     not
+   *     {@link Coding}s that match any of the {@link #cptCodes} or has unkonwn coding systems,
+   *     <code>false</code> otherwise.
    */
-  protected boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
-    for (Coding procedureCoding : procedureConcept.getCoding()) {
-      if (TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem())) {
-        if (isSamhsaCptCode(procedureCoding)) return true;
-      } else {
-        /*
-         * Fail safe: if we don't know the procedure Coding system, assume the code is
-         * SAMHSA.
-         */
-        return true;
-      }
-    }
+  protected boolean containsSamhsaProcedureCode(
+      CodeableConcept
+          procedureConcept) { // If there are no procedure codes, then we cannot have any
+    // blacklisted codes
+    return !procedureConcept.getCoding().isEmpty()
+        && (hasHcpcsAndSamhsaCptCode(procedureConcept)
+            || !containsOnlyKnownSystems(procedureConcept));
+  }
 
-    // No blacklisted procedure Codings found: this procedure isn't SAMHSA-related.
-    return false;
+  /**
+   * Checks if the given concept contains any HCPCS system as well as a CPT samhsa code.
+   *
+   * @param procedureConcept the procedure {@link CodeableConcept} to check
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains a HCPCS
+   *     system as well as a CPT samhsa coding, (matched with {@link #cptCodes}), <code>false</code>
+   *     otherwise.
+   */
+  private boolean hasHcpcsAndSamhsaCptCode(CodeableConcept procedureConcept) {
+    /*
+     * Note: CPT codes represent a subset of possible HCPCS codes (but are the only
+     * subset that we blacklist from).
+     */
+    Set<String> codingSystems =
+        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
+
+    return codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)
+        && procedureConcept.getCoding().stream().anyMatch(this::isSamhsaCptCode);
+  }
+
+  /**
+   * @param procedureConcept the procedure {@link CodeableConcept} to check
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains at least
+   *     one {@link Coding} and only contains {@link Coding}s that have known coding systems <code>
+   *     false</code> otherwise
+   */
+  private boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
+    Set<String> codingSystems =
+        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
+
+    String hcpcsCdSystem =
+        TransformerUtilsV2.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
+
+    // Valid system url for productOrService coding
+    Set<String> hcpcsSystem = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
+
+    // Additional valid coding system URL for backwards-compatibility
+    // See: https://jira.cms.gov/browse/BFD-1345
+    Set<String> backwardsCompatibleHcpcsSystems =
+        Set.of(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsCdSystem);
+
+    return codingSystems.equals(hcpcsSystem)
+        || codingSystems.equals(backwardsCompatibleHcpcsSystems);
   }
 
   protected boolean isSamhsaPackageCode(CodeableConcept packageConcept) {
-    if (packageConcept != null) {
-      for (Coding packageCoding : packageConcept.getCoding()) {
-        if (AbstractSamhsaMatcher.DRG.equals(packageCoding.getSystem())) {
-          if (isSamhsaDrgCode(packageCoding)) return true;
-        } else {
-          // Fail safe: if we don't know the package coding system, assume the code is
-          // SAMHSA.
-          return true;
-        }
-      }
-    }
-
-    return false;
+    return packageConcept != null
+        && packageConcept.getCoding().stream()
+            .anyMatch(
+                coding ->
+                    !AbstractSamhsaMatcher.DRG.equals(coding.getSystem())
+                        || isSamhsaDrgCode(coding));
   }
 
   /**
@@ -136,9 +171,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   @VisibleForTesting
   boolean isSamhsaDrgCode(Coding coding) {
-    // Per the CCW Codebook DRG codes in the CCW are already normalized to the 3
-    // digit code.
-    return coding.getCode() != null && drgCodes.contains(coding.getCode());
+    return isSamhsaCodingForSystem(coding, drgCodes, AbstractSamhsaMatcher.DRG);
   }
 
   /**
@@ -148,11 +181,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   @VisibleForTesting
   boolean isSamhsaIcd9Diagnosis(Coding coding) {
-    /*
-     * Note: per XXX all codes in icd9DiagnosisCodes are already normalized.
-     */
-    return coding.getCode() != null
-        && icd9DiagnosisCodes.contains(normalizeIcdCode(coding.getCode()));
+    return isSamhsaCodingForSystem(coding, icd9DiagnosisCodes, IcdCode.CODING_SYSTEM_ICD_9);
   }
 
   /**
@@ -162,8 +191,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   @VisibleForTesting
   boolean isSamhsaIcd9Procedure(Coding coding) {
-    return coding.getCode() != null
-        && icd9ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
+    return isSamhsaCodingForSystem(coding, icd9ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_9);
   }
 
   /**
@@ -173,17 +201,26 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   @VisibleForTesting
   boolean isSamhsaIcd10Diagnosis(Coding coding) {
-    /*
-     * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
-     */
-    return coding.getCode() != null
-        && icd10DiagnosisCodes.contains(normalizeIcdCode(coding.getCode()));
+    return isSamhsaCodingForSystem(coding, icd10DiagnosisCodes, IcdCode.CODING_SYSTEM_ICD_10);
+  }
+
+  /**
+   * @param coding the diagnosis {@link Coding} to check
+   * @return <code>true</code> if the specified precedure {@link Coding} matches one of the {@link
+   *     AbstractSamhsaMatcher#icd10ProcedureCodes} entries, <code>false</code> if it does not
+   */
+  @VisibleForTesting
+  boolean isSamhsaIcd10Procedure(Coding coding) {
+    return isSamhsaCodingForSystem(coding, icd10ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_10);
   }
 
   @VisibleForTesting
-  boolean isSamhsaIcd10Procedure(Coding coding) {
-    return coding.getCode() != null
-        && icd10ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
+  boolean isSamhsaCodingForSystem(Coding coding, List<String> samhsaCodes, String system) {
+    if (!system.equals(coding.getSystem())) {
+      throw new IllegalArgumentException("Illegal coding system: '" + coding.getSystem() + "'");
+    }
+
+    return coding.getCode() != null && samhsaCodes.contains(normalizeIcdCode(coding.getCode()));
   }
 
   /**
@@ -222,8 +259,6 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
                       return icd9Check.test(coding);
                     } else if (IcdCode.CODING_SYSTEM_ICD_10.equals(coding.getSystem())) {
                       return icd10Check.test(coding);
-                    } else if (TransformerConstants.CODING_SYSTEM_CPT.equals(coding.getSystem())) {
-                      return isSamhsaCptCode(coding);
                     } else {
                       // Fail safe: if we don't know the ICD version, assume the code is SAMHSA.
                       return true;
