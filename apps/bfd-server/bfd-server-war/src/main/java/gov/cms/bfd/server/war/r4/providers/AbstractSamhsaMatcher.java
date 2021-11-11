@@ -101,10 +101,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *     {@link Coding}s that match any of the {@link #cptCodes} or has unkonwn coding systems,
    *     <code>false</code> otherwise.
    */
-  protected boolean containsSamhsaProcedureCode(
-      CodeableConcept
-          procedureConcept) { // If there are no procedure codes, then we cannot have any
-    // blacklisted codes
+  protected boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
     return !procedureConcept.getCoding().isEmpty()
         && (hasHcpcsAndSamhsaCptCode(procedureConcept)
             || !containsOnlyKnownSystems(procedureConcept));
