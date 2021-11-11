@@ -23,4 +23,3 @@
           - git
           - ansible
           - amazon-cloudwatch-agent
-          - amazon-efs-utils

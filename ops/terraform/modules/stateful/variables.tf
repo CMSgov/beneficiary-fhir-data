@@ -23,16 +23,6 @@ variable "medicare_opt_out_config" {
   type        = object({ read_roles = list(string), write_accts = list(string), admin_users = list(string) })
 }
 
-variable "partner_acct_nums" {
-  description = "Map of partner account numbers accessing EFT EFS file systems"
-  type        = map
-}
-
-variable "partner_subnets" {
-  description = "Map of partner subnets requiring access to EFT EFS file systems"
-  type        = map(map(list(string)))
-}
-
 # add module feature toggles here
 variable "module_features" {
   type = map(bool)

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.war.r4.providers;
 
 import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import java.io.IOException;
@@ -10,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -26,7 +26,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader();
 
   protected static final String DRG =
-      TransformerUtilsV2.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
+      CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
   protected final List<String> drgCodes;
   protected final List<String> cptCodes;
@@ -37,7 +37,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
 
   /**
    * Constructs a new {@link AbstractSamhsaMatcher}, loading the lists of SAMHSA-related codes from
-   * the classpath.
+   * the classpath. The list data is normalized as it is loaded.
    */
   protected AbstractSamhsaMatcher() {
     this.drgCodes =
@@ -45,8 +45,9 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
             .map(AbstractSamhsaMatcher::normalizeDrgCode)
             .collect(Collectors.toUnmodifiableList());
     this.cptCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code"));
+        resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
+            .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
+            .collect(Collectors.toUnmodifiableList());
     this.icd9ProcedureCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
             .stream()
@@ -98,7 +99,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
-   *     {@link Coding}s that match any of the {@link #cptCodes} or has unkonwn coding systems,
+   *     {@link Coding}s that match any of the {@link #cptCodes} or has unknown coding systems,
    *     <code>false</code> otherwise.
    */
   protected boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
@@ -108,7 +109,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Checks if the given concept contains any HCPCS system as well as a CPT samhsa code.
+   * Checks that for a {@link CodeableConcept} the {@link Coding}s contain a HCPCS system and at
+   * least one blacklisted CPT code.
    *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains a HCPCS
@@ -123,6 +125,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
+    // If no HCPCS system, it may be DME
     return codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)
         && procedureConcept.getCoding().stream().anyMatch(this::isSamhsaCptCode);
   }
@@ -137,8 +140,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
-    String hcpcsCdSystem =
-        TransformerUtilsV2.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
+    String hcpcsCdSystem = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
 
     // Valid system url for productOrService coding
     Set<String> hcpcsSystem = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
