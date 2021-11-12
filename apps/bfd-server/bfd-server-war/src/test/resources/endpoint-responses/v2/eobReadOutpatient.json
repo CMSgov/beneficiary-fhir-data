@@ -90,7 +90,7 @@
   },
   "use" : "claim",
   "patient" : {
-    "reference" : "Patient/567834"
+    "reference" : "Patient/-88888888888888"
   },
   "billablePeriod" : {
     "extension" : [ {
@@ -383,7 +383,7 @@
   } ],
   "insurance" : [ {
     "coverage" : {
-      "reference" : "Coverage/part-b-567834"
+      "reference" : "Coverage/part-b--88888888888888"
     }
   } ],
   "item" : [ {

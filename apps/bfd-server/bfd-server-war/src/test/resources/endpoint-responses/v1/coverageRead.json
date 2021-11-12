@@ -1,6 +1,6 @@
 {
   "resourceType" : "Coverage",
-  "id" : "part-a-567834",
+  "id" : "part-a--88888888888888",
   "meta" : {
     "lastUpdated" : "IGNORED_FIELD"
   },
@@ -218,7 +218,7 @@
     } ]
   },
   "beneficiary" : {
-    "reference" : "Patient/567834"
+    "reference" : "Patient/-88888888888888"
   },
   "period" : {
     "start" : "1963-10-03"

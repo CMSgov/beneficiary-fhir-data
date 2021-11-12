@@ -8,12 +8,12 @@
   "total" : 1,
   "link" : [ {
     "relation" : "self",
-    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Patient?_format=json&_id=%7C567834"
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Patient?_format=json&_id=%7C-88888888888888"
   } ],
   "entry" : [ {
     "resource" : {
       "resourceType" : "Patient",
-      "id" : "567834",
+      "id" : "-88888888888888",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient" ]
@@ -156,7 +156,7 @@
           } ]
         },
         "system" : "https://bluebutton.cms.gov/resources/variables/bene_id",
-        "value" : "567834"
+        "value" : "-88888888888888"
       } ],
       "name" : [ {
         "use" : "usual",

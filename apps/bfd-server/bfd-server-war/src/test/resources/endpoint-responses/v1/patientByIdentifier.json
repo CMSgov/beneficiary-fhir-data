@@ -13,7 +13,7 @@
   "entry" : [ {
     "resource" : {
       "resourceType" : "Patient",
-      "id" : "567834",
+      "id" : "-88888888888888",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD"
       },
@@ -120,7 +120,7 @@
         }
       }, {
         "system" : "https://bluebutton.cms.gov/resources/variables/bene_id",
-        "value" : "567834"
+        "value" : "-88888888888888"
       } ],
       "name" : [ {
         "use" : "usual",

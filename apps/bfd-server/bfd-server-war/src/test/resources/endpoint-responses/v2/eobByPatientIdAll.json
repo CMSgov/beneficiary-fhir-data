@@ -8,7 +8,7 @@
   "total" : 8,
   "link" : [ {
     "relation" : "self",
-    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ExplanationOfBenefit?_format=json&patient=Patient%2F567834"
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/ExplanationOfBenefit?_format=json&patient=Patient%2F-88888888888888"
   } ],
   "entry" : [ {
     "resource" : {
@@ -103,7 +103,7 @@
       },
       "use" : "claim",
       "patient" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "billablePeriod" : {
         "extension" : [ {
@@ -396,7 +396,7 @@
       } ],
       "insurance" : [ {
         "coverage" : {
-          "reference" : "Coverage/part-b-567834"
+          "reference" : "Coverage/part-b--88888888888888"
         }
       } ],
       "item" : [ {
@@ -903,7 +903,7 @@
       },
       "use" : "claim",
       "patient" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "billablePeriod" : {
         "start" : "2014-02-03",
@@ -1069,7 +1069,7 @@
       } ],
       "insurance" : [ {
         "coverage" : {
-          "reference" : "Coverage/part-a-567834"
+          "reference" : "Coverage/part-a--88888888888888"
         }
       } ],
       "item" : [ {
@@ -1598,7 +1598,7 @@
       },
       "use" : "claim",
       "patient" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "billablePeriod" : {
         "start" : "2015-06-23",
@@ -1884,7 +1884,7 @@
       } ],
       "insurance" : [ {
         "coverage" : {
-          "reference" : "Coverage/part-b-567834"
+          "reference" : "Coverage/part-b--88888888888888"
         }
       } ],
       "item" : [ {
@@ -2159,7 +2159,7 @@
       },
       "use" : "claim",
       "patient" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "billablePeriod" : {
         "extension" : [ {
@@ -2710,7 +2710,7 @@
       } ],
       "insurance" : [ {
         "coverage" : {
-          "reference" : "Coverage/part-a-567834"
+          "reference" : "Coverage/part-a--88888888888888"
         }
       } ],
       "item" : [ {
@@ -3164,7 +3164,7 @@
       },
       "use" : "claim",
       "patient" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "billablePeriod" : {
         "extension" : [ {
@@ -3635,7 +3635,7 @@
       } ],
       "insurance" : [ {
         "coverage" : {
-          "reference" : "Coverage/part-a-567834"
+          "reference" : "Coverage/part-a--88888888888888"
         }
       } ],
       "item" : [ {
@@ -3972,7 +3972,7 @@
       },
       "use" : "claim",
       "patient" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "billablePeriod" : {
         "start" : "2015-05-12",
@@ -4316,7 +4316,7 @@
               "value" : "020"
             }
           } ],
-          "reference" : "Coverage/part-d-567834"
+          "reference" : "Coverage/part-d--88888888888888"
         }
       } ],
       "item" : [ {
@@ -4591,7 +4591,7 @@
       },
       "use" : "claim",
       "patient" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "billablePeriod" : {
         "start" : "1999-10-27",
@@ -4834,7 +4834,7 @@
       } ],
       "insurance" : [ {
         "coverage" : {
-          "reference" : "Coverage/part-b-567834"
+          "reference" : "Coverage/part-b--88888888888888"
         }
       } ],
       "item" : [ {
@@ -5289,7 +5289,7 @@
       },
       "use" : "claim",
       "patient" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "billablePeriod" : {
         "start" : "2014-01-01",
@@ -5541,7 +5541,7 @@
       } ],
       "insurance" : [ {
         "coverage" : {
-          "reference" : "Coverage/part-a-567834"
+          "reference" : "Coverage/part-a--88888888888888"
         }
       } ],
       "item" : [ {

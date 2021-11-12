@@ -200,7 +200,7 @@
     } ]
   },
   "patient" : {
-    "reference" : "Patient/567834"
+    "reference" : "Patient/-88888888888888"
   },
   "billablePeriod" : {
     "extension" : [ {
@@ -659,7 +659,7 @@
   } ],
   "insurance" : {
     "coverage" : {
-      "reference" : "Coverage/part-a-567834"
+      "reference" : "Coverage/part-a--88888888888888"
     }
   },
   "hospitalization" : {

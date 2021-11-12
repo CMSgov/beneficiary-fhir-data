@@ -26,7 +26,7 @@
     } ]
   },
   "patient" : {
-    "reference" : "Patient/567834"
+    "reference" : "Patient/-88888888888888"
   },
   "billablePeriod": {
     "start": "2015-05-12",
@@ -293,7 +293,7 @@
           "value" : "020"
         }
       } ],
-      "reference" : "Coverage/part-d-567834"
+      "reference" : "Coverage/part-d--88888888888888"
     }
   },
   "item" : [ {

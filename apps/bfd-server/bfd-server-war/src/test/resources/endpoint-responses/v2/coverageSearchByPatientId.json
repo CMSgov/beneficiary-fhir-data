@@ -8,12 +8,12 @@
   "total" : 4,
   "link" : [ {
     "relation" : "self",
-    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Coverage?_format=json&beneficiary=Patient%2F567834"
+    "url" : "https://localhost:IGNORED_FIELD/v2/fhir/Coverage?_format=json&beneficiary=Patient%2F-88888888888888"
   } ],
   "entry" : [ {
     "resource" : {
       "resourceType" : "Coverage",
-      "id" : "part-a-567834",
+      "id" : "part-a--88888888888888",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage" ]
@@ -233,7 +233,7 @@
       },
       "subscriberId" : "3456789",
       "beneficiary" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "relationship" : {
         "coding" : [ {
@@ -278,7 +278,7 @@
   }, {
     "resource" : {
       "resourceType" : "Coverage",
-      "id" : "part-b-567834",
+      "id" : "part-b--88888888888888",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage" ]
@@ -478,7 +478,7 @@
       },
       "subscriberId" : "3456789",
       "beneficiary" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "relationship" : {
         "coding" : [ {
@@ -518,7 +518,7 @@
   }, {
     "resource" : {
       "resourceType" : "Coverage",
-      "id" : "part-c-567834",
+      "id" : "part-c--88888888888888",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage" ]
@@ -896,7 +896,7 @@
       },
       "subscriberId" : "3456789",
       "beneficiary" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "relationship" : {
         "coding" : [ {
@@ -933,7 +933,7 @@
   }, {
     "resource" : {
       "resourceType" : "Coverage",
-      "id" : "part-d-567834",
+      "id" : "part-d--88888888888888",
       "meta" : {
         "lastUpdated" : "IGNORED_FIELD",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage" ]
@@ -1488,7 +1488,7 @@
       },
       "subscriberId" : "3456789",
       "beneficiary" : {
-        "reference" : "Patient/567834"
+        "reference" : "Patient/-88888888888888"
       },
       "relationship" : {
         "coding" : [ {
