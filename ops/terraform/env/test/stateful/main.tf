@@ -44,4 +44,6 @@ module "stateful" {
   victor_ops_url = var.victor_ops_url
 
   medicare_opt_out_config = var.medicare_opt_out_config
+
+  mpm_rda_cidr_block = var.mpm_rda_cidr_block
 }
