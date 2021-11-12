@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import gov.cms.bfd.server.war.r4.providers.AbstractSamhsaMatcher;
+import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
+import gov.cms.bfd.server.war.r4.providers.AbstractR4SamhsaMatcher;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.List;
 import java.util.function.Predicate;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
  * as a singleton.
  */
 @Component
-public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
+public final class R4ClaimSamhsaMatcher extends AbstractR4SamhsaMatcher<Claim> {
 
   /** @see Predicate#test(Object) */
   @Override

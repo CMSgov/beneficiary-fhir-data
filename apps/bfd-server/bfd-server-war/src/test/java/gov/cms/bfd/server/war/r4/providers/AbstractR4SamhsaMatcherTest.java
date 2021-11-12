@@ -9,6 +9,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.utils.ReflectionTestUtils;
@@ -25,30 +27,21 @@ import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
 
 @RunWith(Enclosed.class)
-public class AbstractSamhsaMatcherTest {
+public class AbstractR4SamhsaMatcherTest {
 
   @FunctionalInterface
   public interface SamhsaFilterMethod<T> {
-    boolean apply(AbstractSamhsaMatcher<IBaseResource> matcher, T coding);
+    boolean apply(AbstractR4SamhsaMatcher<IBaseResource> matcher, T coding);
   }
 
   public static class NonParameterizedTests {
-
-    @Test
-    public void shouldReturnColumnValues() {
-      List<String> expected = List.of("1", "2", "3", "4");
-      List<String> actual =
-          AbstractSamhsaMatcher.resourceCsvColumnToList("test_file.csv", "columnB");
-
-      assertEquals(expected, actual);
-    }
 
     @Test
     public void shouldCorrectlyInvokeIsSamhsaCodingForDiagnosis() {
       CodeableConcept mockConcept = mock(CodeableConcept.class);
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
-      AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+      AbstractR4SamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractR4SamhsaMatcher.class);
 
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
@@ -89,7 +82,7 @@ public class AbstractSamhsaMatcherTest {
       CodeableConcept mockConcept = mock(CodeableConcept.class);
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
-      AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+      AbstractR4SamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractR4SamhsaMatcher.class);
 
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
@@ -242,7 +235,7 @@ public class AbstractSamhsaMatcherTest {
 
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
-      AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+      AbstractR4SamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractR4SamhsaMatcher.class);
 
       doReturn(false).when(matcherSpy).isSamhsaCptCode(any(Coding.class));
 
@@ -277,7 +270,7 @@ public class AbstractSamhsaMatcherTest {
               "unknown system",
               false,
               (SamhsaFilterMethod<CodeableConcept>)
-                  AbstractSamhsaMatcher::containsSamhsaProcedureCode,
+                  AbstractR4SamhsaMatcher::containsSamhsaProcedureCode,
               true,
               "Unknown system not correctly filtered."
             },
@@ -285,7 +278,7 @@ public class AbstractSamhsaMatcherTest {
               TransformerConstants.CODING_SYSTEM_HCPCS,
               true,
               (SamhsaFilterMethod<CodeableConcept>)
-                  AbstractSamhsaMatcher::containsSamhsaProcedureCode,
+                  AbstractR4SamhsaMatcher::containsSamhsaProcedureCode,
               true,
               "Samhsa data for known system not correctly filtered."
             },
@@ -293,28 +286,28 @@ public class AbstractSamhsaMatcherTest {
               TransformerConstants.CODING_SYSTEM_HCPCS,
               false,
               (SamhsaFilterMethod<CodeableConcept>)
-                  AbstractSamhsaMatcher::containsSamhsaProcedureCode,
+                  AbstractR4SamhsaMatcher::containsSamhsaProcedureCode,
               false,
               "Non samhsa data for known system incorrectly filtered."
             },
             {
               "unknown system",
               false,
-              (SamhsaFilterMethod<CodeableConcept>) AbstractSamhsaMatcher::isSamhsaPackageCode,
+              (SamhsaFilterMethod<CodeableConcept>) AbstractR4SamhsaMatcher::isSamhsaPackageCode,
               true,
               "Unknown system not correctly filtered."
             },
             {
-              AbstractSamhsaMatcher.DRG,
+              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD),
               true,
-              (SamhsaFilterMethod<CodeableConcept>) AbstractSamhsaMatcher::isSamhsaPackageCode,
+              (SamhsaFilterMethod<CodeableConcept>) AbstractR4SamhsaMatcher::isSamhsaPackageCode,
               true,
               "Samhsa data for known system not correctly filtered."
             },
             {
-              AbstractSamhsaMatcher.DRG,
+              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD),
               false,
-              (SamhsaFilterMethod<CodeableConcept>) AbstractSamhsaMatcher::isSamhsaPackageCode,
+              (SamhsaFilterMethod<CodeableConcept>) AbstractR4SamhsaMatcher::isSamhsaPackageCode,
               false,
               "Non samhsa data for known system incorrectly filtered."
             },
@@ -347,7 +340,7 @@ public class AbstractSamhsaMatcherTest {
 
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
-      AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+      AbstractR4SamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractR4SamhsaMatcher.class);
 
       doReturn(false).when(matcherSpy).isSamhsaCptCode(any(Coding.class));
 
@@ -373,7 +366,7 @@ public class AbstractSamhsaMatcherTest {
               "drgCodes",
               "some code",
               "some code",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaDrgCode,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaDrgCode,
               "Samhsa DRG code evaluated incorrectly",
               true
             },
@@ -381,7 +374,7 @@ public class AbstractSamhsaMatcherTest {
               "drgCodes",
               "wrong code",
               "some code",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaDrgCode,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaDrgCode,
               "Non samhsa DRG code evaluated incorrectly",
               false
             },
@@ -389,7 +382,7 @@ public class AbstractSamhsaMatcherTest {
               "drgCodes",
               null,
               "some code",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaDrgCode,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaDrgCode,
               "Null coding not evaluated correctly",
               false
             },
@@ -397,7 +390,7 @@ public class AbstractSamhsaMatcherTest {
               "icd9DiagnosisCodes",
               "some code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd9Diagnosis,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd9Diagnosis,
               "Samhsa ICD 9 diagnosis code evaluated incorrectly",
               true
             },
@@ -405,7 +398,7 @@ public class AbstractSamhsaMatcherTest {
               "icd9DiagnosisCodes",
               "wrong code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd9Diagnosis,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd9Diagnosis,
               "Non samhsa ICD 9 diagnosis code evaluated incorrectly",
               false
             },
@@ -413,7 +406,7 @@ public class AbstractSamhsaMatcherTest {
               "icd9DiagnosisCodes",
               null,
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd9Diagnosis,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd9Diagnosis,
               "Null coding not evaluated correctly",
               false
             },
@@ -421,7 +414,7 @@ public class AbstractSamhsaMatcherTest {
               "icd9ProcedureCodes",
               "some code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd9Procedure,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd9Procedure,
               "Samhsa ICD 9 procedure code evaluated incorrectly",
               true
             },
@@ -429,7 +422,7 @@ public class AbstractSamhsaMatcherTest {
               "icd9ProcedureCodes",
               "wrong code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd9Procedure,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd9Procedure,
               "Non samhsa ICD 9 procedure code evaluated incorrectly",
               false
             },
@@ -437,7 +430,7 @@ public class AbstractSamhsaMatcherTest {
               "icd9ProcedureCodes",
               null,
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd9Procedure,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd9Procedure,
               "Null coding not evaluated correctly",
               false
             },
@@ -445,7 +438,7 @@ public class AbstractSamhsaMatcherTest {
               "icd10DiagnosisCodes",
               "some code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10Diagnosis,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd10Diagnosis,
               "Samhsa ICD 10 diagnosis code evaluated incorrectly",
               true
             },
@@ -453,7 +446,7 @@ public class AbstractSamhsaMatcherTest {
               "icd10DiagnosisCodes",
               "wrong code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10Diagnosis,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd10Diagnosis,
               "Non samhsa ICD 10 diagnosis code evaluated incorrectly",
               false
             },
@@ -461,7 +454,7 @@ public class AbstractSamhsaMatcherTest {
               "icd10DiagnosisCodes",
               null,
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10Diagnosis,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd10Diagnosis,
               "Null coding not evaluated correctly",
               false
             },
@@ -469,7 +462,7 @@ public class AbstractSamhsaMatcherTest {
               "icd10ProcedureCodes",
               "some code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10Procedure,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd10Procedure,
               "Samhsa ICD 10 procedure code evaluated incorrectly",
               true
             },
@@ -477,7 +470,7 @@ public class AbstractSamhsaMatcherTest {
               "icd10ProcedureCodes",
               "wrong code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10Procedure,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd10Procedure,
               "Non samhsa ICD 10 procedure code evaluated incorrectly",
               false
             },
@@ -485,7 +478,7 @@ public class AbstractSamhsaMatcherTest {
               "icd10ProcedureCodes",
               null,
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaIcd10Procedure,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaIcd10Procedure,
               "Null coding not evaluated correctly",
               false
             },
@@ -493,7 +486,7 @@ public class AbstractSamhsaMatcherTest {
               "cptCodes",
               "some code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaCptCode,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaCptCode,
               "Samhsa CPT code evaluated incorrectly",
               true
             },
@@ -501,7 +494,7 @@ public class AbstractSamhsaMatcherTest {
               "cptCodes",
               "wrong code",
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaCptCode,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaCptCode,
               "Non samhsa CPT code evaluated incorrectly",
               false
             },
@@ -509,7 +502,7 @@ public class AbstractSamhsaMatcherTest {
               "cptCodes",
               null,
               "SOME CODE",
-              (SamhsaFilterMethod<Coding>) AbstractSamhsaMatcher::isSamhsaCptCode,
+              (SamhsaFilterMethod<Coding>) AbstractR4SamhsaMatcher::isSamhsaCptCode,
               "Null coding not evaluated correctly",
               false
             },
@@ -544,7 +537,7 @@ public class AbstractSamhsaMatcherTest {
 
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
-      AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+      AbstractR4SamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractR4SamhsaMatcher.class);
 
       // unchecked - This is ok for making a mock.
       //noinspection unchecked

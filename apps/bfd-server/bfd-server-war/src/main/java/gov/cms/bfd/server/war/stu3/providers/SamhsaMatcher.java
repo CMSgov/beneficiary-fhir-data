@@ -1,22 +1,11 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
-import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -36,92 +25,7 @@ import org.springframework.stereotype.Component;
  * as a singleton.
  */
 @Component
-public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
-  /** The {@link CSVFormat} used to parse the SAMHSA-related code CSV files. */
-  private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader();
-
-  private static final String DRG =
-      CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
-
-  private final List<String> drgCodes;
-  private final List<String> cptCodes;
-  private final List<String> icd9ProcedureCodes;
-  private final List<String> icd9DiagnosisCodes;
-  private final List<String> icd10ProcedureCodes;
-  private final List<String> icd10DiagnosisCodes;
-
-  /**
-   * Constructs a new {@link SamhsaMatcher}, loading the lists of SAMHSA-related codes from the
-   * classpath.
-   */
-  public SamhsaMatcher() {
-    this.drgCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList("samhsa-related-codes/codes-drg.csv", "MS-DRGs").stream()
-                .map(SamhsaMatcher::normalizeDrgCode)
-                .collect(Collectors.toList()));
-    this.cptCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code"));
-    this.icd9ProcedureCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
-                .stream()
-                .map(SamhsaMatcher::normalizeIcd9Code)
-                .collect(Collectors.toList()));
-    this.icd9DiagnosisCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList(
-                    "samhsa-related-codes/codes-icd-9-diagnosis.csv", "ICD-9-CM Diagnosis Code")
-                .stream()
-                .map(SamhsaMatcher::normalizeIcd9Code)
-                .collect(Collectors.toList()));
-    this.icd10ProcedureCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList(
-                    "samhsa-related-codes/codes-icd-10-procedure.csv", "ICD-10-PCS Code")
-                .stream()
-                .map(SamhsaMatcher::normalizeIcd10Code)
-                .collect(Collectors.toList()));
-    this.icd10DiagnosisCodes =
-        Collections.unmodifiableList(
-            resourceCsvColumnToList(
-                    "samhsa-related-codes/codes-icd-10-diagnosis.csv", "ICD-10-CM Diagnosis Code")
-                .stream()
-                .map(SamhsaMatcher::normalizeIcd10Code)
-                .collect(Collectors.toList()));
-  }
-
-  /**
-   * @param csvResourceName the classpath resource name of the CSV file to parse
-   * @param columnToReturn the name of the column to return from the CSV file
-   * @return a {@link List} of values from the specified column of the specified CSV file
-   */
-  private static List<String> resourceCsvColumnToList(
-      String csvResourceName, String columnToReturn) {
-    CSVParser csvParser = null;
-    try (InputStream csvStream =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(csvResourceName);
-        InputStreamReader csvReader = new InputStreamReader(csvStream, StandardCharsets.UTF_8); ) {
-      csvParser = new CSVParser(csvReader, CSV_FORMAT);
-      List<String> columnValues = new ArrayList<>();
-      csvParser.forEach(
-          record -> {
-            columnValues.add(record.get(columnToReturn));
-          });
-      return columnValues;
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    } finally {
-      if (csvParser != null) {
-        try {
-          csvParser.close();
-        } catch (IOException e) {
-          throw new UncheckedIOException(e);
-        }
-      }
-    }
-  }
+public final class SamhsaMatcher extends AbstractSamhsaMatcher<ExplanationOfBenefit> {
 
   /** @see java.util.function.Predicate#test(java.lang.Object) */
   @Override
@@ -394,7 +298,7 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     /*
      * Note: per XXX all codes in icd9DiagnosisCodes are already normalized.
      */
-    return icd9DiagnosisCodes.contains(normalizeIcd9Code(diagnosisCoding.getCode()));
+    return icd9DiagnosisCodes.contains(normalizeIcdCode(diagnosisCoding.getCode()));
   }
 
   /**
@@ -406,20 +310,7 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     if (!IcdCode.CODING_SYSTEM_ICD_9.equals(coding.getSystem()))
       throw new IllegalArgumentException();
 
-    return icd9ProcedureCodes.contains(normalizeIcd9Code(coding.getCode()));
-  }
-
-  /**
-   * @param icd9Code the ICD-9 diagnosis code to normalize
-   * @return the specified ICD-9 code, but with whitespace trimmed, the first (if any) decimal point
-   *     removed, and converted to all-caps
-   */
-  private static String normalizeIcd9Code(String icd9Code) {
-    icd9Code = icd9Code.trim();
-    icd9Code = icd9Code.replaceFirst("\\.", "");
-    icd9Code = icd9Code.toUpperCase();
-
-    return icd9Code;
+    return icd9ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
   }
 
   /**
@@ -436,18 +327,6 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   }
 
   /**
-   * Example input: MS-DRG 522 Example output: 522
-   *
-   * @param code
-   * @return the specified DRG code, but with the "MS-DRG" prefix and space removed.
-   */
-  private static String normalizeDrgCode(String code) {
-    code = code.trim();
-    code = code.replace("MS-DRG ", "");
-    return code;
-  }
-
-  /**
    * @param diagnosisCoding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
    *     #icd10DiagnosisCodes} entries, <code>false</code> if it does not
@@ -459,27 +338,14 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     /*
      * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
      */
-    return icd10DiagnosisCodes.contains(normalizeIcd10Code(diagnosisCoding.getCode()));
+    return icd10DiagnosisCodes.contains(normalizeIcdCode(diagnosisCoding.getCode()));
   }
 
   private boolean isSamhsaIcd10Procedure(Coding coding) {
     if (!IcdCode.CODING_SYSTEM_ICD_10.equals(coding.getSystem()))
       throw new IllegalArgumentException();
 
-    return icd10ProcedureCodes.contains(normalizeIcd10Code(coding.getCode()));
-  }
-
-  /**
-   * @param icd10DiagnosisCode the ICD-10 diagnosis code to normalize
-   * @return the specified ICD-10 code, but with whitespace trimmed, the first (if any) decimal
-   *     point removed, and converted to all-caps
-   */
-  private static String normalizeIcd10Code(String icd10DiagnosisCode) {
-    icd10DiagnosisCode = icd10DiagnosisCode.trim();
-    icd10DiagnosisCode = icd10DiagnosisCode.replaceFirst("\\.", "");
-    icd10DiagnosisCode = icd10DiagnosisCode.toUpperCase();
-
-    return icd10DiagnosisCode;
+    return icd10ProcedureCodes.contains(normalizeIcdCode(coding.getCode()));
   }
 
   /**
@@ -522,16 +388,5 @@ public final class SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
      * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
      */
     return cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode()));
-  }
-
-  /**
-   * @param hcpcsCode the HCPCS code to normalize
-   * @return the specified HCPCS code, but with whitespace trimmed and converted to all-caps
-   */
-  private static String normalizeHcpcsCode(String hcpcsCode) {
-    hcpcsCode = hcpcsCode.trim();
-    hcpcsCode = hcpcsCode.toUpperCase();
-
-    return hcpcsCode;
   }
 }

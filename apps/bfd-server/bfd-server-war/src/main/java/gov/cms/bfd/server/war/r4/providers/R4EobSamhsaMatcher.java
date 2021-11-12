@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import gov.cms.bfd.server.war.commons.AbstractSamhsaMatcher;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.List;
 import java.util.function.Predicate;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
  * as a singleton.
  */
 @Component
-public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationOfBenefit> {
+public final class R4EobSamhsaMatcher extends AbstractR4SamhsaMatcher<ExplanationOfBenefit> {
 
   /** @see java.util.function.Predicate#test(java.lang.Object) */
   // S128 - Fallthrough is intentional.
