@@ -26,5 +26,5 @@ variable "git_commit_id" {
 variable "mpm_rda_cidr_block" {
   description = "CIDR block of hosts available through the MPM VPC Peered environment"
   type        = string
-  default     = null
+  default     = "10.234.232.0/21"
 }
