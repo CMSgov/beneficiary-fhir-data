@@ -12,13 +12,13 @@ BEGIN
 	loop
 		-- randomly select a "beneficiaryId" from original table
 		SELECT cast("parentBeneficiary" as bigint) into v_bene_id
-		FROM public."BeneficiaryMonthly" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "BeneficiaryMonthly" TABLESAMPLE SYSTEM_ROWS(40)
 		limit 1;
 
 		select into curr
-			bene_id as f_1,
-			year_month as f_2,
-			partd_contract_number_id as f_3,
+			year_month as f_1,
+			partd_contract_number_id as f_2,
+			bene_id as f_3,
 			partc_contract_number_id as f_4,
 			fips_state_cnty_code as f_5,
 			medicare_status_code as f_6,
@@ -32,15 +32,15 @@ BEGIN
 			partd_low_income_cost_share_group_code as f_14,
 			medicaid_dual_eligibility_code as f_15
 		from
-			public.beneficiary_monthly
+			beneficiary_monthly
 		WHERE
 			bene_id = v_bene_id;
 		
 
 		SELECT INTO orig
-			cast("parentBeneficiary" as bigint) as f_1,
-			"yearMonth" as f_2,
-			"partDContractNumberId" as f_3,
+			"yearMonth" as f_1,
+			"partDContractNumberId" as f_2,
+			cast("parentBeneficiary" as bigint) as f_3,
 			"partCContractNumberId" as f_4,
 			"fipsStateCntyCode" as f_5,
 			"medicareStatusCode" as f_6,
@@ -54,7 +54,7 @@ BEGIN
 			"partDLowIncomeCostShareGroupCode" as f_14,
 			"medicaidDualEligibilityCode" as f_15
 		from
-			public."BeneficiaryMonthly"
+			"BeneficiaryMonthly"
 		WHERE
 			"parentBeneficiary" = v_bene_id::text;
 		

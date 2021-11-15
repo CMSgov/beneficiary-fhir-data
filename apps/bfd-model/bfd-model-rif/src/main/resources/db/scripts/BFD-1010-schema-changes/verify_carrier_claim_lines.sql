@@ -14,61 +14,61 @@ begin
 	loop
 		-- randomly select a "beneficiaryid" from original table
 		select cast("beneficiaryId" as bigint) into v_bene_id
-		from public."CarrierClaims" tablesample system_rows(40)
+		from "CarrierClaims" tablesample system_rows(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."CarrierClaims"
+			"CarrierClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 			
 		-- need a claim line number for that claim
 		select cast(max("lineNumber") as smallint) into v_line_num
 		from
-			public."CarrierClaimLines"
+			"CarrierClaimLines"
 		where
 			cast("parentClaim" as bigint) = v_bene_id;
 			
 		select into curr		
 			parent_claim as f_1,
 			clm_line_num as f_2,
-			line_pmt_amt as f_3,
+			line_nch_pmt_amt as f_3,
 			line_1st_expns_dt as f_4,
 			line_alowd_chrg_amt as f_5,
 			line_bene_pmt_amt as f_6,
 			line_bene_prmry_pyr_cd as f_7,
-			line_bene_ptb_ddctbl_amt as f_8,
-			line_cms_type_srvc_cd as f_9,
-			line_coinsrnc_amt as f_10,
-			line_hct_hgb_rslt_num as f_11,
-			line_hct_hgb_type_cd as f_12,
-			line_icd_dgns_cd as f_13,
-			line_icd_dgns_vrsn_cd as f_14,
-			line_last_expns_dt as f_15,
-			line_ndc_cd as f_16,
-			line_place_of_srvc_cd as f_17,
-			line_pmt_80_100_cd as f_18,
-			line_prcsg_ind_cd as f_19,
-			line_sbmtd_chrg_amt as f_20,
-			line_service_deductible as f_21,
-			line_srvc_cnt as f_22,
-			dmerc_line_mtus_cd as f_23,
-			betos_cd as f_24,
-			carr_line_ansthsa_unit_cnt as f_25,
-			carr_line_clia_lab_num as f_26,
-			carr_line_prcng_lclty_cd as f_27,
-			carr_line_prvdr_type_cd as f_28,
-			carr_line_rdcd_pmt_phys_astn_c as f_29,
-			carr_line_rx_num as f_30,
-			carr_prfrng_pin_num as f_31,
-			dmerc_line_mtus_cnt as f_32,
-			hcpcs_1st_mdfr_cd as f_33,
-			hcpcs_2nd_mdfr_cd as f_34,
-			hcpcs_cd as f_35,
-			hpsa_scrcty_ind_cd as f_36,
-			nch_prmry_pyr_clm_pd_amt as f_37,
+			line_bene_prmry_pyr_pd_amt as f_8,
+			line_bene_ptb_ddctbl_amt as f_9,
+			line_cms_type_srvc_cd as f_10,
+			line_coinsrnc_amt as f_11,
+			line_hct_hgb_rslt_num as f_12,
+			line_hct_hgb_type_cd as f_13,
+			line_icd_dgns_cd as f_14,
+			line_icd_dgns_vrsn_cd as f_15,
+			line_last_expns_dt as f_16,
+			line_ndc_cd as f_17,
+			line_place_of_srvc_cd as f_18,
+			line_pmt_80_100_cd as f_19,
+			line_prcsg_ind_cd as f_20,
+			line_sbmtd_chrg_amt as f_21,
+			line_service_deductible as f_22,
+			line_srvc_cnt as f_23,
+			carr_line_mtus_cd as f_24,
+			carr_line_mtus_cnt as f_25,
+			betos_cd as f_26,
+			carr_line_ansthsa_unit_cnt as f_27,
+			carr_line_clia_lab_num as f_28,
+			carr_line_prcng_lclty_cd as f_29,
+			carr_line_prvdr_type_cd as f_30,
+			carr_line_rdcd_pmt_phys_astn_c as f_31,
+			carr_line_rx_num as f_32,
+			carr_prfrng_pin_num as f_33,
+			hcpcs_1st_mdfr_cd as f_34,
+			hcpcs_2nd_mdfr_cd as f_35,
+			hcpcs_cd as f_36,
+			hpsa_scrcty_ind_cd as f_37,
 			org_npi_num as f_38,
 			prf_physn_npi as f_39,
 			prf_physn_upin as f_40,
@@ -77,9 +77,9 @@ begin
 			prvdr_state_cd as f_43,
 			prvdr_zip as f_44,
 			prvdr_tax_num as f_45,
-			rev_cntr_prvdr_pmt_amt as f_46		
+			line_prvdr_pmt_amt as f_46		
 		from
-			public.carrier_claim_lines
+			carrier_claim_lines
 		where
 			parent_claim = v_clm_id
 		and
@@ -87,43 +87,43 @@ begin
 		
 
 		select into orig
-			Cast("parentClaim" as bigint) as f_1,
+			Cast("parentClaim" as bigint) as f__1,
 			"lineNumber" as f_2,
 			"paymentAmount" as f_3,
 			"firstExpenseDate" as f_4,
 			"allowedChargeAmount" as f_5,
 			"beneficiaryPaymentAmount" as f_6,
 			"primaryPayerCode" as f_7,
-			"beneficiaryPartBDeductAmount" as f_8,
-			"cmsServiceTypeCode" as f_9,
-			"coinsuranceAmount" as f_10,
-			"hctHgbTestResult" as f_11,
-			"hctHgbTestTypeCode" as f_12,
-			"diagnosisCode" as f_13,
-			"diagnosisCodeVersion" as f_14,
-			"lastExpenseDate" as f_15,
-			"nationalDrugCode" as f_16,
-			"placeOfServiceCode" as f_17,
-			"paymentCode" as f_18,
-			"processingIndicatorCode" as f_19,
-			"submittedChargeAmount" as f_20,
-			"serviceDeductibleCode" as f_21,
-			"serviceCount" as f_22,
-			"mtusCode" as f_23,
-			"betosCode" as f_24,
-			"anesthesiaUnitCount" as f_25,
-			"cliaLabNumber" as f_26,
-			"linePricingLocalityCode" as f_27,
-			"providerTypeCode" as f_28,
-			"reducedPaymentPhysicianAsstCode" as f_29,
-			"rxNumber" as f_30,
-			"performingProviderIdNumber" as f_31,
-			"mtusCount" as f_32,
-			"hcpcsInitialModifierCode" as f_33,
-			"hcpcsSecondModifierCode" as f_34,
-			"hcpcsCode" as f_35,
-			"hpsaScarcityCode" as f_36,
-			"primaryPayerPaidAmount" as f_37,
+			"primaryPayerPaidAmount" as f_8,
+			"beneficiaryPartBDeductAmount" as f_9,
+			"cmsServiceTypeCode" as f_10,
+			"coinsuranceAmount" as f_11,
+			"hctHgbTestResult" as f_12,
+			"hctHgbTestTypeCode" as f_13,
+			"diagnosisCode" as f_14,
+			"diagnosisCodeVersion" as f_15,
+			"lastExpenseDate" as f_16,
+			"nationalDrugCode" as f_17,
+			"placeOfServiceCode" as f_18,
+			"paymentCode" as f_19,
+			"processingIndicatorCode" as f_20,
+			"submittedChargeAmount" as f_21,
+			"serviceDeductibleCode" as f_22,
+			"serviceCount" as f_23,
+			"mtusCode" as f_24,
+			"mtusCount" as f_25,
+			"betosCode" as f_26,
+			"anesthesiaUnitCount" as f_27,
+			"cliaLabNumber" as f_28,
+			"linePricingLocalityCode" as f_29,
+			"providerTypeCode" as f_30,
+			"reducedPaymentPhysicianAsstCode" as f_31,
+			"rxNumber" as f_32,
+			"performingProviderIdNumber" as f_33,
+			"hcpcsInitialModifierCode" as f_34,
+			"hcpcsSecondModifierCode" as f_35,
+			"hcpcsCode" as f_36,
+			"hpsaScarcityCode" as f_37,
 			"organizationNpi" as f_38,
 			"performingPhysicianNpi" as f_39,
 			"performingPhysicianUpin" as f_40,
@@ -132,9 +132,9 @@ begin
 			"providerStateCode" as f_43,
 			"providerZipCode" as f_44,
 			"providerTaxNumber" as f_45,
-			"providerPaymentAmount" as f_46		
+			"providerPaymentAmount" as f_46	
 		from
-			public."CarrierClaimLines"
+			"CarrierClaimLines"
 		where
 			"parentClaim" = v_clm_id::text
 		and

@@ -1,7 +1,7 @@
-insert into public.dme_claim_lines(
+insert into dme_claim_lines (
 	parent_claim,
 	clm_line_num,
-	line_pmt_amt,
+	line_nch_pmt_amt,
 	line_sbmtd_chrg_amt,
 	line_alowd_chrg_amt,
 	line_bene_ptb_ddctbl_amt,
@@ -34,14 +34,14 @@ insert into public.dme_claim_lines(
 	dmerc_line_prcng_state_cd,
 	dmerc_line_scrn_svgs_amt,
 	dmerc_line_supplr_type_cd,
-	nch_prmry_pyr_clm_pd_amt,
+	line_bene_prmry_pyr_pd_amt,
 	prvdr_num,
 	prvdr_npi,
 	prvdr_spclty,
 	prvdr_state_cd,
 	prvdr_tax_num,
 	prtcptng_ind_cd,
-	rev_cntr_prvdr_pmt_amt
+	line_prvdr_pmt_amt
 )
 select
 	cast("parentClaim" as bigint),
@@ -88,7 +88,7 @@ select
 	"providerParticipatingIndCode",
 	"providerPaymentAmount"
 from
-	public."DMEClaimLines"
+	"DMEClaimLines"
 on conflict on constraint
 	dme_claim_lines_pkey
 do nothing;

@@ -1,4 +1,4 @@
-insert into public.beneficiaries (
+insert into beneficiaries (
 	bene_id,
 	last_updated,
 	bene_birth_dt,
@@ -202,13 +202,13 @@ insert into public.beneficiaries (
 	city_name,
 	state_cd,
 	state_cnty_zip_cd,
-	mbi_efctv_bgn_dt,
-	mbi_efctv_end_dt,
+	efctv_bgn_dt,
+	efctv_end_dt,
 	bene_link_key
 )
 select
 	Cast("beneficiaryId" as bigint),
-	"lastupdated"
+	"lastupdated",
 	"birthDate",
 	"countyCode",
 	"endStageRenalDiseaseCode",
@@ -414,7 +414,7 @@ select
 	"mbiObsoleteDate",
 	"beneLinkKey"
 from
-	public."Beneficiaries"
+	"Beneficiaries"
 on conflict on constraint
 	beneficiaries_pkey
 do nothing;

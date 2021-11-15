@@ -1,11 +1,12 @@
-insert into public.carrier_claim_lines(
+insert into carrier_claim_lines(
 	parent_claim,
 	clm_line_num,
-	line_pmt_amt,
+	line_nch_pmt_amt,
 	line_1st_expns_dt,
 	line_alowd_chrg_amt,
 	line_bene_pmt_amt,
 	line_bene_prmry_pyr_cd,
+	line_bene_prmry_pyr_pd_amt,
 	line_bene_ptb_ddctbl_amt,
 	line_cms_type_srvc_cd,
 	line_coinsrnc_amt,
@@ -21,7 +22,8 @@ insert into public.carrier_claim_lines(
 	line_sbmtd_chrg_amt,
 	line_service_deductible,
 	line_srvc_cnt,
-	dmerc_line_mtus_cd,
+	carr_line_mtus_cd,
+	carr_line_mtus_cnt,
 	betos_cd,
 	carr_line_ansthsa_unit_cnt,
 	carr_line_clia_lab_num,
@@ -30,12 +32,10 @@ insert into public.carrier_claim_lines(
 	carr_line_rdcd_pmt_phys_astn_c,
 	carr_line_rx_num,
 	carr_prfrng_pin_num,
-	dmerc_line_mtus_cnt,
 	hcpcs_1st_mdfr_cd,
 	hcpcs_2nd_mdfr_cd,
 	hcpcs_cd,
 	hpsa_scrcty_ind_cd,
-	nch_prmry_pyr_clm_pd_amt,
 	org_npi_num,
 	prf_physn_npi,
 	prf_physn_upin,
@@ -44,7 +44,7 @@ insert into public.carrier_claim_lines(
 	prvdr_state_cd,
 	prvdr_zip,
 	prvdr_tax_num,
-	rev_cntr_prvdr_pmt_amt
+	line_prvdr_pmt_amt
 )
 select
 	cast("parentClaim" as bigint),
@@ -54,6 +54,7 @@ select
 	"allowedChargeAmount",
 	"beneficiaryPaymentAmount",
 	"primaryPayerCode",
+	"primaryPayerPaidAmount",
 	"beneficiaryPartBDeductAmount",
 	"cmsServiceTypeCode",
 	"coinsuranceAmount",
@@ -70,6 +71,7 @@ select
 	"serviceDeductibleCode",
 	"serviceCount",
 	"mtusCode",
+	"mtusCount",
 	"betosCode",
 	"anesthesiaUnitCount",
 	"cliaLabNumber",
@@ -78,12 +80,10 @@ select
 	"reducedPaymentPhysicianAsstCode",
 	"rxNumber",
 	"performingProviderIdNumber",
-	"mtusCount",
 	"hcpcsInitialModifierCode",
 	"hcpcsSecondModifierCode",
 	"hcpcsCode",
 	"hpsaScarcityCode",
-	"primaryPayerPaidAmount",
 	"organizationNpi",
 	"performingPhysicianNpi",
 	"performingPhysicianUpin",
@@ -94,7 +94,7 @@ select
 	"providerTaxNumber",
 	"providerPaymentAmount"
 from
-	public."CarrierClaimLines"
+	"CarrierClaimLines"
 on conflict on constraint
 	carrier_claim_lines_pkey
 do nothing;

@@ -1,4 +1,4 @@
-insert into public.carrier_claims(
+insert into carrier_claims(
 	clm_id,
 	bene_id,
 	clm_grp_id,
@@ -16,17 +16,17 @@ insert into public.carrier_claims(
 	carr_clm_rfrng_pin_num,
 	carr_num,
 	final_action,
-	nch_clm_alowd_amt,
-	nch_clm_sbmtd_chrg_amt,
+	nch_carr_clm_alowd_amt,
+	nch_carr_clm_sbmtd_chrg_amt,
 	nch_clm_bene_pmt_amt,
-	nch_clm_bene_ptb_ddctbl_amt,
+	nch_clm_prvdr_pmt_amt,
+	carr_clm_cash_ddctbl_apld_amt,
 	nch_clm_type_cd,
 	nch_near_line_rec_ident_cd,
-	nch_prmry_pyr_clm_pd_amt,
+	carr_clm_prmry_pyr_pd_amt,
 	nch_wkly_proc_dt,
 	prncpal_dgns_cd,
 	prncpal_dgns_vrsn_cd,
-	rev_cntr_prvdr_pmt_amt,
 	rfr_physn_npi,
 	rfr_physn_upin,
 	icd_dgns_cd1,
@@ -52,7 +52,7 @@ insert into public.carrier_claims(
 	icd_dgns_vrsn_cd9,
 	icd_dgns_vrsn_cd10,
 	icd_dgns_vrsn_cd11,
-	icd_dgns_vrsn_cd12
+	icd_dgns_vrsn_cd12	
 )
 select
     cast("claimId" as bigint),
@@ -75,6 +75,7 @@ select
 	"allowedChargeAmount",
 	"submittedChargeAmount",
 	"beneficiaryPaymentAmount",
+	"providerPaymentAmount",
 	"beneficiaryPartBDeductAmount",
 	"claimTypeCode",
 	"nearLineRecordIdCode",
@@ -82,7 +83,6 @@ select
 	"weeklyProcessDate",
 	"diagnosisPrincipalCode",
 	"diagnosisPrincipalCodeVersion",
-	"providerPaymentAmount",
 	"referringPhysicianNpi",
 	"referringPhysicianUpin",
 	"diagnosis1Code",
@@ -110,7 +110,7 @@ select
 	"diagnosis11CodeVersion",
 	"diagnosis12CodeVersion"
 from
-	public."CarrierClaims"
+	"CarrierClaims"
 on conflict on constraint
 	carrier_claims_pkey
 do nothing; 

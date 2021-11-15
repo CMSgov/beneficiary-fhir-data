@@ -1,4 +1,4 @@
-insert into public.snf_claims (
+insert into snf_claims (
 	clm_id,
 	bene_id,
 	clm_grp_id,
@@ -67,7 +67,7 @@ insert into public.snf_claims (
 	prvdr_num,
 	prvdr_state_cd,
 	ptnt_dschrg_stus_cd,
-	rev_cntr_tot_chrg_amt,
+	clm_tot_chrg_amt,
 	icd_dgns_cd1,
 	icd_dgns_cd2,
 	icd_dgns_cd3,
@@ -438,7 +438,7 @@ select
 	"procedure24Date",
 	"procedure25Date"
 from
-	public."SNFClaims"
+	"SNFClaims"
 on conflict on constraint
 	snf_claims_pkey
 do nothing;

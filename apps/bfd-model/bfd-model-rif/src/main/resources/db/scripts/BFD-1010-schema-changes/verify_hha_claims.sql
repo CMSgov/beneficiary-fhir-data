@@ -13,13 +13,13 @@ BEGIN
 	loop
 		-- randomly select a "beneficiaryId" from original table
 		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM public."HHAClaims" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "HHAClaims" TABLESAMPLE SYSTEM_ROWS(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."HHAClaims"
+			"HHAClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 
@@ -58,7 +58,7 @@ BEGIN
 			prvdr_num as f_32,
 			prvdr_state_cd as f_33,
 			ptnt_dschrg_stus_cd as f_34,
-			rev_cntr_tot_chrg_amt as f_35,
+			clm_tot_chrg_amt as f_35,
 			at_physn_npi as f_36,
 			at_physn_upin as f_37,
 			icd_dgns_cd1 as f_38,
@@ -136,7 +136,7 @@ BEGIN
 			icd_dgns_vrsn_cd24 as f_110,
 			icd_dgns_vrsn_cd25 as f_111
 		from
-			public.hha_claims
+			hha_claims
 		WHERE
 			clm_id = v_clm_id
 		AND
@@ -254,9 +254,9 @@ BEGIN
 			"diagnosis22CodeVersion" as f_108,
 			"diagnosis23CodeVersion" as f_109,
 			"diagnosis24CodeVersion" as f_110,
-			"diagnosis25CodeVersion" as f_111		
+			"diagnosis25CodeVersion" as f_111
 		from
-			public."HHAClaims"
+			"HHAClaims"
 		WHERE
 			"claimId" = v_clm_id::text
 		AND

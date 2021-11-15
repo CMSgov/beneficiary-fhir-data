@@ -14,27 +14,27 @@ begin
 	loop
 		-- randomly select a "beneficiaryid" from original table
 		select cast("beneficiaryId" as bigint) into v_bene_id
-		from public."DMEClaims" tablesample system_rows(40)
+		from "DMEClaims" tablesample system_rows(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."DMEClaims"
+			"DMEClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 			
 		-- need a claim line number for that claim
 		select cast(max("lineNumber") as smallint) into v_line_num
 		from
-			public."DMEClaimLines"
+			"DMEClaimLines"
 		where
 			cast("parentClaim" as bigint) = v_bene_id;
 			
-		select into curr		
+		select into curr
 			parent_claim as f_1,
 			clm_line_num as f_2,
-			line_pmt_amt as f_3,
+			line_nch_pmt_amt as f_3,
 			line_sbmtd_chrg_amt as f_4,
 			line_alowd_chrg_amt as f_5,
 			line_bene_ptb_ddctbl_amt as f_6,
@@ -67,16 +67,16 @@ begin
 			dmerc_line_prcng_state_cd as f_33,
 			dmerc_line_scrn_svgs_amt as f_34,
 			dmerc_line_supplr_type_cd as f_35,
-			nch_prmry_pyr_clm_pd_amt as f_36,
+			line_bene_prmry_pyr_pd_amt as f_36,
 			prvdr_num as f_37,
 			prvdr_npi as f_38,
 			prvdr_spclty as f_39,
 			prvdr_state_cd as f_40,
 			prvdr_tax_num as f_41,
 			prtcptng_ind_cd as f_42,
-			rev_cntr_prvdr_pmt_amt as f_43
+			line_prvdr_pmt_amt as f_43
 		from
-			public.dme_claim_lines
+			dme_claim_lines
 		where
 			parent_claim = v_clm_id
 		and
@@ -84,7 +84,7 @@ begin
 		
 
 		select into orig
-			Cast("parentClaim" as bigint) as f_1,
+			Cast("parentClaim" as bigint) as f__1,
 			"lineNumber" as f_2,
 			"paymentAmount" as f_3,
 			"submittedChargeAmount" as f_4,
@@ -126,9 +126,9 @@ begin
 			"providerStateCode" as f_40,
 			"providerTaxNumber" as f_41,
 			"providerParticipatingIndCode" as f_42,
-			"providerPaymentAmount" as f_43	
+			"providerPaymentAmount" as f_43
 		from
-			public."DMEClaimLines"
+			"DMEClaimLines"
 		where
 			"parentClaim" = v_clm_id::text
 		and

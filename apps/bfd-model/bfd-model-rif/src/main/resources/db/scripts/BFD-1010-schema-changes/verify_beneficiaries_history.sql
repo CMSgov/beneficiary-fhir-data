@@ -12,23 +12,22 @@ BEGIN
 	loop
 		-- randomly select a "beneficiaryId" from original table
 		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM public."BeneficiariesHistory" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "BeneficiariesHistory" TABLESAMPLE SYSTEM_ROWS(40)
 		limit 1;
 
 		select into curr
-			beneficiary_history_id as f_1,
+			bene_history_id as f_1,
 			bene_id as f_2,
-			last_updated as f_3,
-			bene_crnt_hic_num as f_4,
-			hicn_unhashed as f_5,
+			bene_birth_dt as f_3,
+			bene_sex_ident_cd as f_4,
+			bene_crnt_hic_num as f_5,
 			mbi_num as f_6,
-			mbi_hash as f_7,
-			mbi_efctv_bgn_dt as f_8,
-			mbi_efctv_end_dt as f_9,
-			bene_sex_ident_cd as f_10,
-			bene_birth_dt as f_11
+			hicn_unhashed as f_7,
+			mbi_hash as f_8,
+			mbi_efctv_bgn_dt as f_9,
+			last_updated as f_10
 		from
-			public.beneficiaries_history
+			beneficiaries_history
 		WHERE
 			bene_id = v_bene_id;
 		
@@ -36,17 +35,16 @@ BEGIN
 		SELECT INTO orig
 			"beneficiaryHistoryId" as f_1,
 			cast("beneficiaryId" as bigint) as f_2,
-			"lastupdated" as f_3,
-			"hicn" as f_4,
-			"hicnUnhashed" as f_5,
+			"birthDate" as f_3,
+			"sex" as f_4,
+			"hicn" as f_5,
 			"medicareBeneficiaryId" as f_6,
-			"mbiHash" as f_7,
-			"mbiEffectiveDate" as f_8,
-			"mbiObsoleteDate" as f_9,
-			"sex" as f_10,
-			"birthDate" as f_11
+			"hicnUnhashed" as f_7,
+			"mbiHash" as f_8,
+			"mbiEffectiveDate" as f_9,
+			"lastupdated" as f_10
 		from
-			public."BeneficiariesHistory"
+			"BeneficiariesHistory"
 		WHERE
 			"beneficiaryId" = v_bene_id::text;
 		
@@ -60,7 +58,6 @@ BEGIN
 		if curr.f_8 <> orig.f_8 then err_cnt := err_cnt + 1; end if;
 		if curr.f_9 <> orig.f_9 then err_cnt := err_cnt + 1; end if;
 		if curr.f_10 <> orig.f_10 then err_cnt := err_cnt + 1; end if;
-		if curr.f_11 <> orig.f_11 then err_cnt := err_cnt + 1; end if;
 	
 		if err_cnt > 0 then
 			insert into migration_errors values(v_tbl_name, v_bene_id, null, null, err_cnt);

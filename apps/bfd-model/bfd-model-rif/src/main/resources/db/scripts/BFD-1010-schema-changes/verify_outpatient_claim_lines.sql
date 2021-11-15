@@ -14,27 +14,27 @@ begin
 	loop
 		-- randomly select a "beneficiaryid" from original table
 		select cast("beneficiaryId" as bigint) into v_bene_id
-		from public."OutpatientClaims" tablesample system_rows(40)
+		from "OutpatientClaims" tablesample system_rows(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."OutpatientClaims"
+			"OutpatientClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 			
 		-- need a claim line number for that claim
 		select cast(max("lineNumber") as smallint) into v_line_num
 		from
-			public."OutpatientClaimLines"
+			"OutpatientClaimLines"
 		where
 			cast("parentClaim" as bigint) = v_bene_id;
 			
 		select into curr		
 			parent_claim as f_1,
 			clm_line_num as f_2,
-			line_ndc_cd as f_3,
+			rev_cntr_ide_ndc_upc_num as f_3,
 			hcpcs_cd as f_4,
 			hcpcs_1st_mdfr_cd as f_5,
 			hcpcs_2nd_mdfr_cd as f_6,
@@ -42,7 +42,7 @@ begin
 			rndrng_physn_upin as f_8,
 			rev_cntr as f_9,
 			rev_cntr_dt as f_10,
-			rev_cntr_pmt_amt as f_11,
+			rev_cntr_pmt_amt_amt as f_11,
 			rev_cntr_apc_hipps_cd as f_12,
 			rev_cntr_bene_pmt_amt as f_13,
 			rev_cntr_blood_ddctbl_amt as f_14,
@@ -69,7 +69,7 @@ begin
 			rev_cntr_unit_cnt as f_35,
 			rev_cntr_coinsrnc_wge_adjstd_amt as f_36
 		from
-			public.outpatient_claim_lines
+			outpatient_claim_lines
 		where
 			parent_claim = v_clm_id
 		and
@@ -112,9 +112,9 @@ begin
 			"statusCode" as f_33,
 			"totalChargeAmount" as f_34,
 			"unitCount" as f_35,
-			"wageAdjustedCoinsuranceAmount" as f_36
+			"wageAdjustedCoinsuranceAmount" as f_36			
 		from
-			public."OutpatientClaimLines"
+			"OutpatientClaimLines"
 		where
 			"parentClaim" = v_clm_id::text
 		and

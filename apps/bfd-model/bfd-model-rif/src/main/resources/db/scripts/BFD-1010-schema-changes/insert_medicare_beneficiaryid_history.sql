@@ -1,6 +1,7 @@
-insert into public.medicare_beneficiaryid_history (
-	medicare_beneficiaryid_key,
+insert into medicare_beneficiaryid_history (
+	bene_mbi_id,
 	bene_id,
+	last_updated,
 	bene_clm_acnt_num,
 	bene_ident_cd,
 	bene_crnt_rec_ind_id,
@@ -14,12 +15,12 @@ insert into public.medicare_beneficiaryid_history (
 	creat_user_id,
 	creat_ts,
 	updt_user_id,
-	updt_ts,
-	last_updated
+	updt_ts
 )
 select
 	"medicareBeneficiaryIdKey",
 	cast("beneficiaryId" as bigint),
+	"lastupdated",
 	"claimAccountNumber",
 	"beneficiaryIdCode",
 	"mbiCrntRecIndId",
@@ -33,10 +34,9 @@ select
 	"mbiAddUser",
 	"mbiAddDate",
 	"mbiUpdateUser",
-	"mbiUpdateDate",
-	"lastupdated"
+	"mbiUpdateDate"
 from
-	public."MedicareBeneficiaryIdHistory"
+	"MedicareBeneficiaryIdHistory"
 on conflict on constraint
 	medicare_beneficiaryid_history_pkey
 do nothing;

@@ -1,4 +1,4 @@
-insert into public.dme_claims(
+insert into dme_claims(
 	clm_id,
 	bene_id,
 	clm_grp_id,
@@ -14,17 +14,17 @@ insert into public.dme_claims(
 	carr_clm_prvdr_asgnmt_ind_sw,
 	carr_clm_hcpcs_yr_cd,
 	carr_clm_pmt_dnl_cd,
-	alowd_chrg_amt,
-	sbmtd_chrg_amt,
-	bene_ptb_ddctbl_amt,
-	bene_pmt_amt,
+	nch_carr_clm_alowd_amt,
+	nch_carr_clm_sbmtd_chrg_amt,
+	carr_clm_cash_ddctbl_apld_amt,
+	nch_clm_bene_pmt_amt,
 	nch_clm_type_cd,
 	nch_near_line_rec_ident_cd,
 	nch_wkly_proc_dt,
-	nch_prmry_pyr_clm_pd_amt,
+	carr_clm_prmry_pyr_pd_amt,
 	prncpal_dgns_cd,
 	prncpal_dgns_vrsn_cd,
-	rev_cntr_prvdr_pmt_amt,
+	nch_clm_prvdr_pmt_amt,
 	rfr_physn_npi,
 	rfr_physn_upin,
 	final_action,
@@ -106,9 +106,9 @@ select
 	"diagnosis9CodeVersion",
 	"diagnosis10CodeVersion",
 	"diagnosis11CodeVersion",
-	"diagnosis12CodeVersion"
+	"diagnosis12CodeVersion"	
 from
-	public."DMEClaims"
+	"DMEClaims"
 on conflict on constraint
 	dme_claims_pkey
 do nothing;

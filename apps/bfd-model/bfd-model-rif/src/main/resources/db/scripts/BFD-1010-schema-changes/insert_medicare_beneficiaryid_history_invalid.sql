@@ -1,5 +1,5 @@
-insert into public.medicare_beneficiaryid_history_invalid_beneficiaries (
-	medicare_beneficiaryid_key,
+insert into medicare_beneficiaryid_history_invalid_beneficiaries (
+	bene_mbi_id,
 	bene_id,
 	bene_clm_acnt_num,
 	bene_ident_cd,
@@ -34,7 +34,7 @@ select
 	"mbiUpdateUser",
 	"mbiUpdateDate"
 from
-	public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
+	"MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
 on conflict on constraint
 	medicare_beneficiaryid_history_invalid_beneficiaries_pkey
 do nothing;

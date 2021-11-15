@@ -13,13 +13,13 @@ BEGIN
 	loop
 		-- randomly select a "beneficiaryId" from original table
 		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM public."CarrierClaims" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "CarrierClaims" TABLESAMPLE SYSTEM_ROWS(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."CarrierClaims"
+			"CarrierClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 
@@ -41,17 +41,17 @@ BEGIN
 			carr_clm_rfrng_pin_num as f_15,
 			carr_num as f_16,
 			final_action as f_17,
-			nch_clm_alowd_amt as f_18,
-			nch_clm_sbmtd_chrg_amt as f_19,
+			nch_carr_clm_alowd_amt as f_18,
+			nch_carr_clm_sbmtd_chrg_amt as f_19,
 			nch_clm_bene_pmt_amt as f_20,
-			nch_clm_bene_ptb_ddctbl_amt as f_21,
-			nch_clm_type_cd as f_22,
-			nch_near_line_rec_ident_cd as f_23,
-			nch_prmry_pyr_clm_pd_amt as f_24,
-			nch_wkly_proc_dt as f_25,
-			prncpal_dgns_cd as f_26,
-			prncpal_dgns_vrsn_cd as f_27,
-			rev_cntr_prvdr_pmt_amt as f_28,
+			nch_clm_prvdr_pmt_amt as f_21,
+			carr_clm_cash_ddctbl_apld_amt as f_22,
+			nch_clm_type_cd as f_23,
+			nch_near_line_rec_ident_cd as f_24,
+			carr_clm_prmry_pyr_pd_amt as f_25,
+			nch_wkly_proc_dt as f_26,
+			prncpal_dgns_cd as f_27,
+			prncpal_dgns_vrsn_cd as f_28,
 			rfr_physn_npi as f_29,
 			rfr_physn_upin as f_30,
 			icd_dgns_cd1 as f_31,
@@ -79,17 +79,16 @@ BEGIN
 			icd_dgns_vrsn_cd11 as f_53,
 			icd_dgns_vrsn_cd12 as f_54
 		from
-			public.carrier_claims
+			carrier_claims
 		WHERE
 			clm_id = v_clm_id
 		AND
 			bene_id = v_bene_id;
 		
-
 		SELECT INTO orig
-			cast("claimId" as bigint) as f_1,
-			cast("beneficiaryId" as bigint) as f_2,
-			cast("claimGroupId" as bigint) as f_3,
+			cast("claimId" as bigint) as f__1,
+			cast("beneficiaryId" as bigint) as f__2,
+			cast("claimGroupId" as bigint) as f__3,
 			"lastupdated" as f_4,
 			"dateFrom" as f_5,
 			"dateThrough" as f_6,
@@ -107,14 +106,14 @@ BEGIN
 			"allowedChargeAmount" as f_18,
 			"submittedChargeAmount" as f_19,
 			"beneficiaryPaymentAmount" as f_20,
-			"beneficiaryPartBDeductAmount" as f_21,
-			"claimTypeCode" as f_22,
-			"nearLineRecordIdCode" as f_23,
-			"primaryPayerPaidAmount" as f_24,
-			"weeklyProcessDate" as f_25,
-			"diagnosisPrincipalCode" as f_26,
-			"diagnosisPrincipalCodeVersion" as f_27,
-			"providerPaymentAmount" as f_28,
+			"providerPaymentAmount" as f_21,
+			"beneficiaryPartBDeductAmount" as f_22,
+			"claimTypeCode" as f_23,
+			"nearLineRecordIdCode" as f_24,
+			"primaryPayerPaidAmount" as f_25,
+			"weeklyProcessDate" as f_26,
+			"diagnosisPrincipalCode" as f_27,
+			"diagnosisPrincipalCodeVersion" as f_28,
 			"referringPhysicianNpi" as f_29,
 			"referringPhysicianUpin" as f_30,
 			"diagnosis1Code" as f_31,
@@ -142,7 +141,7 @@ BEGIN
 			"diagnosis11CodeVersion" as f_53,
 			"diagnosis12CodeVersion" as f_54
 		from
-			public."CarrierClaims"
+			"CarrierClaims"
 		WHERE
 			"claimId" = v_clm_id::text
 		AND

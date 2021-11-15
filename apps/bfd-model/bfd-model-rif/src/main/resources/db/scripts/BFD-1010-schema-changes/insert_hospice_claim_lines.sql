@@ -1,8 +1,8 @@
-insert into public.hospice_claim_lines (
+insert into hospice_claim_lines (
 	parent_claim,
 	clm_line_num,
-	line_pmt_amt,
 	rev_cntr,
+	rev_cntr_pmt_amt_amt,
 	rev_cntr_dt,
 	rev_cntr_tot_chrg_amt,
 	rev_cntr_unit_cnt,
@@ -22,8 +22,8 @@ insert into public.hospice_claim_lines (
 select
 	cast("parentClaim" as bigint),
 	"lineNumber",
-	"paymentAmount",
 	"revenueCenterCode",
+	"paymentAmount",
 	"revenueCenterDate",
 	"totalChargeAmount",
 	"unitCount",
@@ -40,7 +40,7 @@ select
 	"revenueCenterRenderingPhysicianNPI",
 	"revenueCenterRenderingPhysicianUPIN"
 from
-	public."HospiceClaimLines"
+	"HospiceClaimLines"
 on conflict on constraint
 	hospice_claim_lines_pkey
 do nothing;

@@ -1,4 +1,4 @@
-insert into public.outpatient_claims (
+insert into outpatient_claims (
 	clm_id,
 	bene_id,
 	clm_grp_id,
@@ -21,10 +21,10 @@ insert into public.outpatient_claims (
 	final_action,
 	fst_dgns_e_cd,
 	fst_dgns_e_vrsn_cd,
-	line_bene_pmt_amt,
-	line_coinsrnc_amt,
+	clm_op_bene_pmt_amt,
+	nch_bene_ptb_coinsrnc_amt,
 	nch_bene_blood_ddctbl_lblty_am,
-	nch_bene_ip_ddctbl_amt,
+	nch_bene_ptb_ddctbl_amt,
 	nch_clm_type_cd,
 	nch_near_line_rec_ident_cd,
 	nch_prmry_pyr_cd,
@@ -41,8 +41,8 @@ insert into public.outpatient_claims (
 	prvdr_num,
 	prvdr_state_cd,
 	ptnt_dschrg_stus_cd,
-	rev_cntr_prvdr_pmt_amt,
-	rev_cntr_tot_chrg_amt,
+	clm_op_prvdr_pmt_amt,
+	clm_tot_chrg_amt,
 	rsn_visit_cd1,
 	rsn_visit_vrsn_cd1,
 	rsn_visit_cd2,
@@ -400,7 +400,7 @@ select
 	"procedure24Date",
 	"procedure25Date"
 from 
-	public."OutpatientClaims"
+	"OutpatientClaims"
 on conflict on constraint
 	outpatient_claims_pkey
 do nothing;

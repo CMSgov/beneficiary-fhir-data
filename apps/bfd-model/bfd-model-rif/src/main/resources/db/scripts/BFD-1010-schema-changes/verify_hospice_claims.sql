@@ -13,13 +13,13 @@ BEGIN
 	loop
 		-- randomly select a "beneficiaryId" from original table
 		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM public."HospiceClaims" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "HospiceClaims" TABLESAMPLE SYSTEM_ROWS(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."HospiceClaims"
+			"HospiceClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 
@@ -60,7 +60,7 @@ BEGIN
 			prvdr_num as f_34,
 			prvdr_state_cd as f_35,
 			ptnt_dschrg_stus_cd as f_36,
-			rev_cntr_tot_chrg_amt as f_37,
+			clm_tot_chrg_amt as f_37,
 			icd_dgns_cd1 as f_38,
 			icd_dgns_cd2 as f_39,
 			icd_dgns_cd3 as f_40,
@@ -136,7 +136,7 @@ BEGIN
 			icd_dgns_vrsn_cd24 as f_110,
 			icd_dgns_vrsn_cd25 as f_111
 		from
-			public.hospice_claims
+			hospice_claims
 		WHERE
 			clm_id = v_clm_id
 		AND
@@ -146,7 +146,7 @@ BEGIN
 		SELECT INTO orig
 			cast("claimId" as bigint) as f_1,
 			cast("beneficiaryId" as bigint) as f_2,
-			cast("claimGroupId" as bigint) as f_3,	
+			cast("claimGroupId" as bigint) as f_3,
 			"lastupdated" as f_4,
 			"dateFrom" as f_5,
 			"dateThrough" as f_6,
@@ -256,7 +256,7 @@ BEGIN
 			"diagnosis24CodeVersion" as f_110,
 			"diagnosis25CodeVersion" as f_111
 		from
-			public."HospiceClaims"
+			publ."HospiceClaims"
 		where
 			"claimId" = v_clm_id::text
 		AND

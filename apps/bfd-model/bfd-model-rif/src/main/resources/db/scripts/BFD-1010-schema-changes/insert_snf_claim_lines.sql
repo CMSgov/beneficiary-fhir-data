@@ -1,4 +1,4 @@
-insert into public.snf_claim_lines (
+insert into snf_claim_lines (
 	parent_claim,
 	clm_line_num,
 	hcpcs_cd,
@@ -28,7 +28,7 @@ select
 	"revenueCenterRenderingPhysicianNPI",
 	"revenueCenterRenderingPhysicianUPIN"
 from
-	public."SNFClaimLines"
+	"SNFClaimLines"
 on conflict on constraint
 	snf_claim_lines_pkey
 do nothing;

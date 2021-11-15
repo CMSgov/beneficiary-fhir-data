@@ -1,6 +1,6 @@
-insert into public.loaded_batches (
-	loaded_batch_id,
-	loaded_file_id,
+insert into loaded_batches (
+	loaded_batchid,
+	loaded_fileid,
 	beneficiaries,
 	created
 )
@@ -10,13 +10,13 @@ select
 	"beneficiaries",
 	"created"
 from
-	public."LoadedBatches"
+	"LoadedBatches"
 on conflict on constraint
 	loaded_batches_pkey
 do nothing;
 
-insert into public.loaded_files (
-    loaded_file_id,
+insert into loaded_files (
+    loaded_fileid,
     rif_type,
     created
 )
@@ -25,7 +25,7 @@ select
 	"rifType",
 	"created"
 from
-	public."LoadedFiles"
+	"LoadedFiles"
 on conflict on constraint
 	loaded_files_pkey
 do nothing;

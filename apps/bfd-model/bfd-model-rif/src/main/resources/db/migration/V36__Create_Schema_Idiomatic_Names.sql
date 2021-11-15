@@ -35,9 +35,8 @@
  * [1]: https://www.postgresql.org/docs/10/datatype-character.html
  * [2]: https://www.postgresql.org/docs/10/datatype-numeric.html
  */
-${logic.tablespaces-escape} SET default_tablespace = fhirdb_ts2;
 
-create table beneficiaries (
+create table if not exists beneficiaries (
     bene_id                                  bigint not null,                          -- beneficiaryId
     last_updated                             timestamp with time zone,                 -- lastupdated
     bene_birth_dt                            date not null,                            -- birthDate
@@ -59,8 +58,8 @@ create table beneficiaries (
     hicn_unhashed                            character varying(11),                    -- hicnUnhashed
     mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
     mbi_hash                                 character varying(64),                    -- mbiHash
-    mbi_efctv_bgn_dt                         date,                                     -- mbiEffectiveDate
-    mbi_efctv_end_dt                         date,                                     -- mbiObsoleteDate
+    efctv_bgn_dt                             date,                                     -- mbiEffectiveDate
+    efctv_end_dt                             date,                                     -- mbiObsoleteDate
     death_dt                                 date,                                     -- beneficiaryDateOfDeath
     v_dod_sw                                 character(1),                             -- validDateOfDeathSw
     rfrnc_yr                                 smallint,                                 -- beneEnrollmentReferenceYear
@@ -244,41 +243,58 @@ create table beneficiaries (
     state_cd                                 character varying(2),                     -- derivedStateCode
     state_cnty_zip_cd                        character varying(9),                     -- derivedZipCode
     bene_link_key                            bigint,                                   -- beneLinkKey
-    constraint beneficiaries_pkey primary key (bene_id)
-)
+    constraint beneficiaries_pkey
+        primary key (bene_id)
+);
 
+create index if not exists beneficiaries_hicn_idx
+	on beneficiaries (bene_crnt_hic_num);
 
-create table beneficiaries_history (
-    beneficiary_history_id                   bigint not null,                          -- beneficiaryHistoryId
+create table if not exists beneficiaries_history (
+    bene_history_id                          bigint not null,                          -- beneficiaryHistoryId
     bene_id                                  bigint not null,                          -- beneficiaryId
-    last_updated                             timestamp with time zone,                 -- lastupdated
+    bene_birth_dt                            date not null,                            -- birthDate
+    bene_sex_ident_cd                        character(1) not null,                    -- sex
     bene_crnt_hic_num                        character varying(64) not null,           -- hicn
-    hicn_unhashed                            character varying(11),                    -- hicnUnhashed
     mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
+    hicn_unhashed                            character varying(11),                    -- hicnUnhashed
     mbi_hash                                 character varying(64),                    -- mbiHash
-    mbi_efctv_bgn_dt                         date,                                     -- mbiEffectiveDate
-    mbi_efctv_end_dt                         date,                                     -- mbiObsoleteDate
-    bene_sex_ident_cd                        character(1) not null,                    -- sex
-    bene_birth_dt                            date not null,                            -- birthDate
-    constraint beneficiaries_history_pkey primary key (beneficiary_history_id)
-)
+    efctv_bgn_dt                             date,                                     -- mbiEffectiveDate
+    last_updated                             timestamp with time zone,                 -- lastupdated
+    constraint beneficiaries_history_pkey
+        primary key (bene_history_id),
+ 
+    constraint beneficiaries_history_bene_id_to_beneficiaries
+        foreign key (bene_id)
+            references beneficiaries (bene_id) match simple
+            on update no action
+            on delete no action
+);
 
+create index if not exists beneficiaries_history_bene_id_idx
+	on beneficiaries_history (bene_id);
 
-create table beneficiaries_history_invalid_beneficiaries (
-    beneficiary_history_id                   bigint not null,                          -- beneficiaryHistoryId
+create index if not exists beneficiaries_history_hicn_idx
+	on beneficiaries_history (bene_crnt_hic_num);
+
+create index if not exists beneficiaries_history_mbi_hash_idx
+	on beneficiaries_history (mbi_hash);
+
+create table if not exists beneficiaries_history_invalid_beneficiaries (
+    bene_history_id                          bigint not null,                          -- beneficiaryHistoryId
     bene_id                                  bigint,                                   -- beneficiaryId
-    bene_crnt_hic_num                        character varying(64) not null,           -- hicn
-    hicn_unhashed                            character varying(11),                    -- hicnUnhashed
-    mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
-    bene_sex_ident_cd                        character(1) not null,                    -- sex
     bene_birth_dt                            date not null,                            -- birthDate
-    constraint beneficiaries_history_invalid_beneficiaries_pkey primary key (beneficiary_history_id)
-)
+    bene_sex_ident_cd                        character(1) not null,                    -- sex
+    bene_crnt_hic_num                        character varying(64) not null,           -- hicn
+    mbi_num                                  character varying(11),                    -- medicareBeneficiaryId
+    hicn_unhashed                            character varying(11),                    -- hicnUnhashed
+    constraint beneficiaries_history_invalid_beneficiaries_pkey
+        primary key (bene_history_id)
+);
 
-
-create table beneficiary_monthly (
-    bene_id                                  bigint not null,                          -- parentBeneficiary
+create table if not exists beneficiary_monthly (
     year_month                               date not null,                            -- yearMonth
+    parent_beneficiary                       bigint not null,                          -- parentBeneficiary
     partd_contract_number_id                 character varying(5),                     -- partDContractNumberId
     partc_contract_number_id                 character varying(5),                     -- partCContractNumberId
     fips_state_cnty_code                     character varying(5),                     -- fipsStateCntyCode
@@ -292,30 +308,42 @@ create table beneficiary_monthly (
     partd_retiree_drug_subsidy_ind           character(1),                             -- partDRetireeDrugSubsidyInd
     partd_low_income_cost_share_group_code   character varying(2),                     -- partDLowIncomeCostShareGroupCode
     medicaid_dual_eligibility_code           character varying(2),                     -- medicaidDualEligibilityCode
-    constraint beneficiary_monthly_pkey primary key (bene_id, year_month)
-)
+    constraint beneficiary_monthly_pkey
+        primary key (year_month, parent_beneficiary),
 
+    constraint beneficiary_monthly_parent_beneficiary_to_beneficiary
+        foreign key (parent_beneficiary) references beneficiaries(bene_id)
+);
 
-create table loaded_batches (
-    loaded_batch_id                          bigint not null,                          -- loadedBatchId
-    loaded_file_id                           bigint not null,                          -- loadedFileId
-    beneficiaries                            character varying(20000) not null,        -- beneficiaries
-    created                                  timestamp with time zone not null,        -- created
-    constraint loaded_batches_pkey primary key (loaded_batch_id)
-)
+create index if not exists beneficiary_monthly_partdcontractnumid_yearmonth_parentbene_idx
+	on beneficiary_monthly (year_month, partd_contract_number_id asc, parent_beneficiary asc);
 
-
-create table loaded_files (
-    loaded_file_id                           bigint not null,                          -- loadedFileId
+create table if not exists loaded_files (
+    loaded_fileid                            bigint not null,                          -- loadedFileId
     rif_type                                 character varying(48) not null,           -- rifType
     created                                  timestamp with time zone not null,        -- created
-    constraint loaded_files_pkey primary key (loaded_file_id)
-)
+    constraint loaded_files_pkey
+        primary key (loaded_fileid)
+);
 
+create table if not exists loaded_batches (
+    loaded_batchid                           bigint not null,                          -- loadedBatchId
+    loaded_fileid                            bigint not null,                          -- loadedFileId
+    beneficiaries                            character varying(20000) not null,        -- beneficiaries
+    created                                  timestamp with time zone not null,        -- created
+    constraint loaded_batches_pkey
+        primary key (loaded_batchid),
 
-create table medicare_beneficiaryid_history (
-    medicare_beneficiaryid_key               bigint not null,                          -- medicareBeneficiaryIdKey
-    bene_id                                  bigint,                                   -- beneficiaryId
+    constraint loaded_batches_loaded_fileid
+        foreign key (loaded_fileid)
+            references loaded_files (loaded_fileid) match simple
+            on update no action
+            on delete no action
+);
+
+create table if not exists medicare_beneficiaryid_history (
+    bene_mbi_id                              bigint not null,                          -- medicareBeneficiaryIdKey
+    bene_id                                  bigint not null,                          -- beneficiaryId
     last_updated                             timestamp with time zone,                 -- lastupdated
     bene_clm_acnt_num                        character varying(9),                     -- claimAccountNumber
     bene_ident_cd                            character varying(2),                     -- beneficiaryIdCode
@@ -331,14 +359,22 @@ create table medicare_beneficiaryid_history (
     creat_ts                                 timestamp without time zone,              -- mbiAddDate
     updt_user_id                             character varying(30),                    -- mbiUpdateUser
     updt_ts                                  timestamp without time zone,              -- mbiUpdateDate
+    constraint medicare_beneficiaryid_history_pkey
+        primary key (bene_mbi_id),
 
-    constraint medicare_beneficiaryid_history_pkey primary key (medicare_beneficiaryid_key)
-)
+    constraint medicare_beneficiaryid_history_bene_id_to_beneficiaries
+        foreign key (bene_id)
+            references beneficiaries (bene_id) match simple
+            on update no action
+            on delete no action
+);
 
+create index if not exists medicare_beneficiaryid_history_bene_id_idx
+	on medicare_beneficiaryid_history (bene_id);
 
-create table medicare_beneficiaryid_history_invalid_beneficiaries (
-    medicare_beneficiaryid_key               bigint not null,                          -- medicareBeneficiaryIdKey
-    bene_id                                  bigint,                                   -- beneficiaryId
+create table if not exists medicare_beneficiaryid_history_invalid_beneficiaries (
+    bene_mbi_id                              bigint not null,                          -- medicareBeneficiaryIdKey
+    bene_id                                  bigint not null,                          -- beneficiaryId
     bene_clm_acnt_num                        character varying(9),                     -- claimAccountNumber
     bene_ident_cd                            character varying(2),                     -- beneficiaryIdCode
     bene_crnt_rec_ind_id                     integer,                                  -- mbiCrntRecIndId
@@ -353,11 +389,11 @@ create table medicare_beneficiaryid_history_invalid_beneficiaries (
     creat_ts                                 timestamp without time zone,              -- mbiAddDate
     updt_user_id                             character varying(30),                    -- mbiUpdateUser
     updt_ts                                  timestamp without time zone,              -- mbiUpdateDate
-    constraint medicare_beneficiaryid_history_invalid_beneficiaries_pkey primary key (medicare_beneficiaryid_key)
-)
+    constraint medicare_beneficiaryid_history_invalid_beneficiaries_pkey
+        primary key (bene_mbi_id)
+);
 
-
-create table carrier_claims (
+create table if not exists carrier_claims (
     clm_id                                   bigint not null,                          -- claimId
 	bene_id                                  bigint not null,                          -- beneficiaryId
 	clm_grp_id                               bigint not null,                          -- claimGroupId
@@ -375,17 +411,17 @@ create table carrier_claims (
 	carr_clm_rfrng_pin_num                   character varying(14) not null,           -- referringProviderIdNumber
 	carr_num                                 character varying(5) not null,            -- carrierNumber
 	final_action                             character(1) not null,                    -- finalAction
-	nch_clm_alowd_amt                        numeric(10,2) not null,                   -- allowedChargeAmount
-    nch_clm_sbmtd_chrg_amt                   numeric(10,2) not null,                   -- submittedChargeAmount
+	nch_carr_clm_alowd_amt                   numeric(10,2) not null,                   -- allowedChargeAmount
+    nch_carr_clm_sbmtd_chrg_amt              numeric(10,2) not null,                   -- submittedChargeAmount
 	nch_clm_bene_pmt_amt                     numeric(10,2) not null,                   -- beneficiaryPaymentAmount
-	nch_clm_bene_ptb_ddctbl_amt              numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
+    nch_clm_prvdr_pmt_amt                    numeric(10,2) not null,                   -- providerPaymentAmount
+	carr_clm_cash_ddctbl_apld_amt            numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
 	nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
 	nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
-	nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+	carr_clm_prmry_pyr_pd_amt                numeric(10,2) not null,                   -- primaryPayerPaidAmount
 	nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
 	prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
 	prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
-	rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
 	rfr_physn_npi                            character varying(12),                    -- referringPhysicianNpi
 	rfr_physn_upin                           character varying(12),                    -- referringPhysicianUpin
 	icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
@@ -412,18 +448,25 @@ create table carrier_claims (
 	icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
 	icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
 	icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    constraint carrier_claims_pkey primary key (clm_id)
-)
+    constraint carrier_claims_pkey
+        primary key (clm_id),
 
+    constraint carrier_claims_bene_id_to_beneficiary
+        foreign key (bene_id) references beneficiaries(bene_id)
+);
 
-create table carrier_claim_lines (
+create index if not exists carrier_claims_bene_id_idx
+	on carrier_claims (bene_id);
+
+create table if not exists carrier_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    line_pmt_amt                             numeric(10,2) not null,                   -- paymentAmount
+    line_nch_pmt_amt                         numeric(10,2) not null,                   -- paymentAmount
     line_1st_expns_dt                        date,                                     -- firstExpenseDate
     line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
     line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
     line_bene_prmry_pyr_cd                   character(1),                             -- primaryPayerCode
+    line_bene_prmry_pyr_pd_amt               numeric(10,2) not null,                   -- primaryPayerPaidAmount
     line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
     line_cms_type_srvc_cd                    character(1) not null,                    -- cmsServiceTypeCode
     line_coinsrnc_amt                        numeric(10,2) not null,                   -- coinsuranceAmount
@@ -439,7 +482,8 @@ create table carrier_claim_lines (
     line_sbmtd_chrg_amt                      numeric(10,2) not null,                   -- submittedChargeAmount
     line_service_deductible                  character(1),                             -- serviceDeductibleCode
     line_srvc_cnt                            smallint not null,                        -- serviceCount
-    dmerc_line_mtus_cd                       character(1),                             -- mtusCode
+    carr_line_mtus_cd                        character(1),                             -- mtusCode
+    carr_line_mtus_cnt                       integer not null,                         -- mtusCount
     betos_cd                                 character varying(3),                     -- betosCode
     carr_line_ansthsa_unit_cnt               smallint not null,                        -- anesthesiaUnitCount
     carr_line_clia_lab_num                   character varying(10),                    -- cliaLabNumber
@@ -448,12 +492,10 @@ create table carrier_claim_lines (
     carr_line_rdcd_pmt_phys_astn_c           character(1) not null,                    -- reducedPaymentPhysicianAsstCode
     carr_line_rx_num                         character varying(30),                    -- rxNumber
     carr_prfrng_pin_num                      character varying(15) not null,           -- performingProviderIdNumber
-    dmerc_line_mtus_cnt                      integer not null,                         -- mtusCount
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     hpsa_scrcty_ind_cd                       character(1),                             -- hpsaScarcityCode
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
     org_npi_num                              character varying(10),                    -- organizationNpi
     prf_physn_npi                            character varying(12),                    -- performingPhysicianNpi
     prf_physn_upin                           character varying(12),                    -- performingPhysicianUpin
@@ -462,13 +504,15 @@ create table carrier_claim_lines (
     prvdr_state_cd                           character varying(2),                     -- providerStateCode
     prvdr_zip                                character varying(9),                     -- providerZipCode
     prvdr_tax_num                            character varying(10) not null,           -- providerTaxNumber  
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+    line_prvdr_pmt_amt                       numeric(10,2) not null,                   -- providerPaymentAmount
+    constraint carrier_claim_lines_pkey
+        primary key (parent_claim, clm_line_num),
 
-    constraint carrier_claim_lines_pkey primary key (parent_claim, clm_line_num)
-)
+    constraint carrier_claim_lines_parent_claim_to_carrier_claims
+        foreign key (parent_claim) references carrier_claims(clm_id)
+);
 
-
-create table dme_claims (
+create table if not exists dme_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
@@ -484,17 +528,17 @@ create table dme_claims (
     carr_clm_prvdr_asgnmt_ind_sw             character(1) not null,                    -- providerAssignmentIndicator
     carr_clm_hcpcs_yr_cd                     character(1),                             -- hcpcsYearCode
     carr_clm_pmt_dnl_cd                      character varying(2) not null,            -- paymentDenialCode
-    alowd_chrg_amt                           numeric(10,2) not null,                   -- allowedChargeAmount
-    sbmtd_chrg_amt                           numeric(10,2) not null,                   -- submittedChargeAmount
-    bene_ptb_ddctbl_amt                      numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
-    bene_pmt_amt                             numeric(10,2) not null,                   -- beneficiaryPaymentAmount
+    nch_carr_clm_alowd_amt                   numeric(10,2) not null,                   -- allowedChargeAmount
+    nch_carr_clm_sbmtd_chrg_amt              numeric(10,2) not null,                   -- submittedChargeAmount
+    carr_clm_cash_ddctbl_apld_amt            numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
+    nch_clm_bene_pmt_amt                     numeric(10,2) not null,                   -- beneficiaryPaymentAmount
     nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
     nch_wkly_proc_dt                         date not null,                            -- weeklyProcessDate
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    carr_clm_prmry_pyr_pd_amt                numeric(10,2) not null,                   -- primaryPayerPaidAmount
     prncpal_dgns_cd                          character varying(7),                     -- diagnosisPrincipalCode
     prncpal_dgns_vrsn_cd                     character(1),                             -- diagnosisPrincipalCodeVersion
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
+    nch_clm_prvdr_pmt_amt                    numeric(10,2) not null,                   -- providerPaymentAmount
     rfr_physn_npi                            character varying(12),                    -- referringPhysicianNpi
     rfr_physn_upin                           character varying(12),                    -- referringPhysicianUpin
     final_action                             character(1) not null,                    -- finalAction
@@ -522,14 +566,20 @@ create table dme_claims (
     icd_dgns_vrsn_cd10                       character(1),                             -- diagnosis10CodeVersion
     icd_dgns_vrsn_cd11                       character(1),                             -- diagnosis11CodeVersion
     icd_dgns_vrsn_cd12                       character(1),                             -- diagnosis12CodeVersion
-    constraint dme_claims_pkey primary key (clm_id)
-)
+    constraint dme_claims_pkey
+        primary key (clm_id),
 
+    constraint dme_claims_bene_id_to_beneficiary
+        foreign key (bene_id) references beneficiaries(bene_id)
+);
 
-create table dme_claim_lines (
+create index if not exists dme_claims_bene_id_idx
+	on dme_claims (bene_id);
+
+create table if not exists dme_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    line_pmt_amt                             numeric(10,2) not null,                   -- paymentAmount
+    line_nch_pmt_amt                         numeric(10,2) not null,                   -- paymentAmount
     line_sbmtd_chrg_amt                      numeric(10,2) not null,                   -- submittedChargeAmount
     line_alowd_chrg_amt                      numeric(10,2) not null,                   -- allowedChargeAmount
     line_bene_ptb_ddctbl_amt                 numeric(10,2) not null,                   -- beneficiaryPartBDeductAmount
@@ -562,19 +612,22 @@ create table dme_claim_lines (
     dmerc_line_prcng_state_cd                character varying(2),                     -- pricingStateCode
     dmerc_line_scrn_svgs_amt                 numeric(10,2),                            -- screenSavingsAmount
     dmerc_line_supplr_type_cd                character(1),                             -- supplierTypeCode
-    nch_prmry_pyr_clm_pd_amt                 numeric(10,2) not null,                   -- primaryPayerPaidAmount
+    line_bene_prmry_pyr_pd_amt               numeric(10,2) not null,                   -- primaryPayerPaidAmount
     prvdr_num                                character varying(10),                    -- providerBillingNumber
     prvdr_npi                                character varying(12),                    -- providerNPI
     prvdr_spclty                             character varying(3),                     -- providerSpecialityCode
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     prvdr_tax_num                            character varying(10) not null,           -- providerTaxNumber   
     prtcptng_ind_cd                          character(1),                             -- providerParticipatingIndCode
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
-    constraint dme_claim_lines_pkey primary key (parent_claim, clm_line_num)
-)
+    line_prvdr_pmt_amt                       numeric(10,2) not null,                   -- providerPaymentAmount
+    constraint dme_claim_lines_pkey
+        primary key (parent_claim, clm_line_num),
 
+    constraint dme_claim_lines_parent_claim_to_dme_claims
+        foreign key (parent_claim) references dme_claims(clm_id)
+);
 
-create table hha_claims (
+create table if not exists hha_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
@@ -609,7 +662,7 @@ create table hha_claims (
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    clm_tot_chrg_amt                         numeric(10,2) not null,                   -- totalChargeAmount
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
     icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
@@ -686,14 +739,19 @@ create table hha_claims (
     icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
     icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
     icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    constraint hha_claims_pkey primary key (clm_id)
-)
+    constraint hha_claims_pkey
+        primary key (clm_id),
 
+    constraint hha_claims_bene_id_to_beneficiary
+        foreign key (bene_id) references beneficiaries(bene_id)
+);
 
-create table hha_claim_lines (
+create index if not exists hha_claims_bene_id_idx
+	on hha_claims (bene_id);
+
+create table if not exists hha_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    line_pmt_amt                             numeric(10,2) not null,                   -- paymentAmount
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
@@ -706,17 +764,21 @@ create table hha_claim_lines (
     rev_cntr_ndc_qty_qlfr_cd                 character varying(2),                     -- nationalDrugCodeQualifierCode
     rev_cntr_ndc_qty                         integer,                                  -- nationalDrugCodeQuantity
     rev_cntr_ncvrd_chrg_amt                  numeric(10,2) not null,                   -- nonCoveredChargeAmount
+    rev_cntr_pmt_amt_amt                     numeric(10,2) not null,                   -- paymentAmount
     rev_cntr_pmt_mthd_ind_cd                 character varying(2),                     -- paymentMethodCode
     rev_cntr_rate_amt                        numeric(10,2) not null,                   -- rateAmount
     rev_cntr_1st_ansi_cd                     character varying(5),                     -- revCntr1stAnsiCd
     rev_cntr_stus_ind_cd                     character varying(2),                     -- statusCode
     rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null,                        -- unitCount
-    constraint hha_claim_lines_pkey primary key (parent_claim, clm_line_num)
-)
+    constraint hha_claim_lines_pkey
+        primary key (parent_claim, clm_line_num),
 
+    constraint hha_claim_lines_parent_claim_to_hha_claims
+        foreign key (parent_claim) references hha_claims(clm_id)
+);
 
-create table hospice_claims (
+create table if not exists hospice_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
@@ -753,7 +815,7 @@ create table hospice_claims (
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    clm_tot_chrg_amt                         numeric(10,2) not null,                   -- totalChargeAmount
     icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
 	icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
 	icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
@@ -828,15 +890,21 @@ create table hospice_claims (
 	icd_dgns_vrsn_cd23                       character(1),                             -- diagnosis23CodeVersion
 	icd_dgns_vrsn_cd24                       character(1),                             -- diagnosis24CodeVersion
 	icd_dgns_vrsn_cd25                       character(1),                             -- diagnosis25CodeVersion
-    constraint hospice_claims_pkey primary key (clm_id)
-)
+    constraint hospice_claims_pkey
+        primary key (clm_id),
 
+    constraint hospice_claims_bene_id_to_beneficiary
+        foreign key (bene_id) references beneficiaries(bene_id)
+);
 
-create table hospice_claim_lines (
+create index if not exists hospice_claims_bene_id_idx
+	on hospice_claims (bene_id);
+
+create table if not exists hospice_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
-    line_pmt_amt                             numeric(10,2) not null,                   -- paymentAmount
     rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
+    rev_cntr_pmt_amt_amt                     numeric(10,2) not null,                   -- paymentAmount
     rev_cntr_dt                              date,                                     -- revenueCenterDate
     rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null,                        -- unitCount
@@ -852,11 +920,14 @@ create table hospice_claim_lines (
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
-    constraint hospice_claim_lines_pkey primary key (parent_claim, clm_line_num)
-)
+    constraint hospice_claim_lines_pkey
+        primary key (parent_claim, clm_line_num),
 
+    constraint hospice_claim_lines_parent_claim_to_hospice_claims
+        foreign key (parent_claim) references hospice_claims(clm_id)
+);
 
-create table inpatient_claims (
+create table if not exists inpatient_claims (
 	clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
@@ -891,7 +962,7 @@ create table inpatient_claims (
     admtg_dgns_vrsn_cd                       character(1),                             -- diagnosisAdmittingCodeVersion
     at_physn_npi                             character varying(10),                    -- attendingPhysicianNpi
     at_physn_upin                            character varying(9),                     -- attendingPhysicianUpin
-    bene_lrd_used_cnt                        smallint,                                  -- lifetimeReservedDaysUsedCount
+    bene_lrd_used_cnt                        smallint,                                 -- lifetimeReservedDaysUsedCount
     bene_tot_coinsrnc_days_cnt               smallint not null,                        -- coinsuranceDayCount
     claim_query_code                         character(1) not null,                    -- claimQueryCode
     dsh_op_clm_val_amt                       numeric(10,2),                            -- disproportionateShareAmount
@@ -933,7 +1004,7 @@ create table inpatient_claims (
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    clm_tot_chrg_amt                         numeric(10,2) not null,                   -- totalChargeAmount
 	clm_e_poa_ind_sw1                        character(1),                             -- diagnosisExternal1PresentOnAdmissionCode
 	clm_e_poa_ind_sw2                        character(1),                             -- diagnosisExternal2PresentOnAdmissionCode
 	clm_e_poa_ind_sw3                        character(1),                             -- diagnosisExternal3PresentOnAdmissionCode
@@ -1120,11 +1191,17 @@ create table inpatient_claims (
 	prcdr_dt23                               date,                                     -- procedure23Date
 	prcdr_dt24                               date,                                     -- procedure24Date
 	prcdr_dt25                               date,                                     -- procedure25Date
-    constraint inpatient_claims_pkey primary key (clm_id)
-)
+    constraint inpatient_claims_pkey
+        primary key (clm_id),
 
+    constraint inpatient_claims_bene_id_to_beneficiary
+        foreign key (bene_id) references beneficiaries(bene_id)
+);
 
-create table inpatient_claim_lines (
+create index if not exists inpatient_claims_bene_id_idx
+	on inpatient_claims (bene_id);
+
+create table if not exists inpatient_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     rev_cntr_ddctbl_coinsrnc_cd              character(1),                             -- deductibleCoinsuranceCd
@@ -1138,11 +1215,14 @@ create table inpatient_claim_lines (
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
-    constraint inpatient_claim_lines_pkey primary key (parent_claim, clm_line_num)
-)
+    constraint inpatient_claim_lines_pkey
+        primary key (parent_claim, clm_line_num),
 
+    constraint inpatient_claim_lines_parent_claim_to_inpatient_claims
+        foreign key (parent_claim) references inpatient_claims(clm_id)
+);
 
-create table outpatient_claims (
+create table if not exists outpatient_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
@@ -1165,10 +1245,10 @@ create table outpatient_claims (
     final_action                             character(1) not null,                    -- finalAction
     fst_dgns_e_cd                            character varying(7),                     -- diagnosisExternalFirstCode
     fst_dgns_e_vrsn_cd                       character(1),                             -- diagnosisExternalFirstCodeVersion
-    line_bene_pmt_amt                        numeric(10,2) not null,                   -- beneficiaryPaymentAmount
-    line_coinsrnc_amt                        numeric(10,2) not null,                   -- coinsuranceAmount
+    clm_op_bene_pmt_amt                      numeric(10,2) not null,                   -- beneficiaryPaymentAmount
+    nch_bene_ptb_coinsrnc_amt                numeric(10,2) not null,                   -- coinsuranceAmount
     nch_bene_blood_ddctbl_lblty_am           numeric(10,2) not null,                   -- bloodDeductibleLiabilityAmount
-    nch_bene_ip_ddctbl_amt                   numeric(10,2) not null,                   -- deductibleAmount
+    nch_bene_ptb_ddctbl_amt                  numeric(10,2) not null,                   -- deductibleAmount
     nch_clm_type_cd                          character varying(2) not null,            -- claimTypeCode
     nch_near_line_rec_ident_cd               character(1) not null,                    -- nearLineRecordIdCode
     nch_prmry_pyr_cd                         character(1),                             -- claimPrimaryPayerCode
@@ -1185,8 +1265,8 @@ create table outpatient_claims (
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     ptnt_dschrg_stus_cd                      character varying(2),                     -- patientDischargeStatusCode
-    rev_cntr_prvdr_pmt_amt                   numeric(10,2) not null,                   -- providerPaymentAmount
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    clm_op_prvdr_pmt_amt                     numeric(10,2) not null,                   -- providerPaymentAmount
+    clm_tot_chrg_amt                         numeric(10,2) not null,                   -- totalChargeAmount
     rsn_visit_cd1                            character varying(7),                     -- diagnosisAdmission1Code
     rsn_visit_vrsn_cd1                       character(1),                             -- diagnosisAdmission1CodeVersion
     rsn_visit_cd2                            character varying(7),                     -- diagnosisAdmission2Code
@@ -1342,14 +1422,20 @@ create table outpatient_claims (
     prcdr_dt23                               date,                                     -- procedure23Date
     prcdr_dt24                               date,                                     -- procedure24Date
     prcdr_dt25                               date,                                     -- procedure25Date    
-    constraint outpatient_claims_pkey primary key (clm_id)
-)
+    constraint outpatient_claims_pkey
+        primary key (clm_id),
 
+    constraint outpatient_claims_bene_id_to_beneficiary
+        foreign key (bene_id) references beneficiaries(bene_id)
+);
 
-create table outpatient_claim_lines (
+create index if not exists outpatient_claims_bene_id_idx
+	on outpatient_claims (bene_id);
+
+create table if not exists outpatient_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber 
-    line_ndc_cd                              character varying(24),                    -- nationalDrugCode
+    rev_cntr_ide_ndc_upc_num                 character varying(24),                    -- nationalDrugCode
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
     hcpcs_1st_mdfr_cd                        character varying(5),                     -- hcpcsInitialModifierCode
     hcpcs_2nd_mdfr_cd                        character varying(5),                     -- hcpcsSecondModifierCode
@@ -1357,7 +1443,7 @@ create table outpatient_claim_lines (
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
     rev_cntr                                 character varying(4) not null,            -- revenueCenterCode
     rev_cntr_dt                              date,                                     -- revenueCenterDate
-    rev_cntr_pmt_amt                         numeric(10,2) not null,                   -- paymentAmount
+    rev_cntr_pmt_amt_amt                     numeric(10,2) not null,                   -- paymentAmount
     rev_cntr_apc_hipps_cd                    character varying(5),                     -- apcOrHippsCode
     rev_cntr_bene_pmt_amt                    numeric(10,2) not null,                   -- benficiaryPaymentAmount
     rev_cntr_blood_ddctbl_amt                numeric(10,2) not null,                   -- bloodDeductibleAmount
@@ -1383,10 +1469,14 @@ create table outpatient_claim_lines (
     rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
     rev_cntr_unit_cnt                        smallint not null,                        -- unitCount
     rev_cntr_coinsrnc_wge_adjstd_amt         numeric(10,2) not null,                   -- wageAdjustedCoinsuranceAmount
-    constraint outpatient_claim_lines_pkey primary key (parent_claim, clm_line_num)
-)
+    constraint outpatient_claim_lines_pkey
+        primary key (parent_claim, clm_line_num),
 
-create table partd_events (
+    constraint outpatient_claim_lines_parent_claim_to_outpatient_claims
+        foreign key (parent_claim) references outpatient_claims(clm_id)
+);
+
+create table if not exists partd_events (
     clm_id                                   bigint not null,                          -- eventId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
@@ -1405,7 +1495,7 @@ create table partd_events (
     gdc_abv_oopt_amt                         numeric(10,2) not null,                   -- grossCostAboveOutOfPocketThreshold
     gdc_blw_oopt_amt                         numeric(10,2) not null,                   -- grossCostBelowOutOfPocketThreshold
     lics_amt                                 numeric(10,2) not null,                   -- lowIncomeSubsidyPaidAmount
-    line_ndc_cd                              character varying(19) not null,           -- nationalDrugCode
+    prod_srvc_id                             character varying(19) not null,           -- nationalDrugCode
     ncvrd_plan_pd_amt                        numeric(10,2) not null,                   -- partDPlanNonCoveredPaidAmount
     nstd_frmt_cd                             character(1),                             -- nonstandardFormatCode
     othr_troop_amt                           numeric(10,2) not null,                   -- otherTrueOutOfPocketPaidAmount
@@ -1428,11 +1518,17 @@ create table partd_events (
     srvc_prvdr_id_qlfyr_cd                   character varying(2) not null,            -- serviceProviderIdQualiferCode
     submsn_clr_cd                            character varying(2),                     -- submissionClarificationCode
     tot_rx_cst_amt                           numeric(10,2) not null,                   -- totalPrescriptionCost
-    constraint partd_events_pkey primary key (clm_id)
-)
+    constraint partd_events_pkey
+        primary key (clm_id),
 
+    constraint partd_events_bene_id_to_beneficiaries
+        foreign key (bene_id) references beneficiaries(bene_id)
+);
 
-create table snf_claims (
+create index if not exists partd_events_bene_id_idx
+	on partd_events (bene_id);
+
+create table if not exists snf_claims (
     clm_id                                   bigint not null,                          -- claimId
     bene_id                                  bigint not null,                          -- beneficiaryId
     clm_grp_id                               bigint not null,                          -- claimGroupId
@@ -1501,7 +1597,7 @@ create table snf_claims (
     prvdr_num                                character varying(9) not null,            -- providerNumber
     prvdr_state_cd                           character varying(2) not null,            -- providerStateCode
     ptnt_dschrg_stus_cd                      character varying(2) not null,            -- patientDischargeStatusCode
-    rev_cntr_tot_chrg_amt                    numeric(10,2) not null,                   -- totalChargeAmount
+    clm_tot_chrg_amt                         numeric(10,2) not null,                   -- totalChargeAmount
     icd_dgns_cd1                             character varying(7),                     -- diagnosis1Code
     icd_dgns_cd2                             character varying(7),                     -- diagnosis2Code
     icd_dgns_cd3                             character varying(7),                     -- diagnosis3Code
@@ -1648,14 +1744,20 @@ create table snf_claims (
     prcdr_dt20                               date,                                     -- procedure20Date
     prcdr_dt21                               date,                                     -- procedure21Date
     prcdr_dt22                               date,                                     -- procedure22Date
-    prcdr_dt23                               date,                                     -- procedure23Date
+    prcdr_dt23                               date,                                       -- procedure23Date
     prcdr_dt24                               date,                                     -- procedure24Date
     prcdr_dt25                               date,                                     -- procedure25Date    
-    constraint snf_claims_pkey primary key (clm_id)
-)
+    constraint snf_claims_pkey
+        primary key (clm_id),
 
+    constraint snf_claims_bene_id_to_beneficiary
+        foreign key (bene_id) references beneficiaries(bene_id)
+);
 
-create table snf_claim_lines (
+create index if not exists snf_claims_bene_id_idx
+	on snf_claims (bene_id);
+
+create table if not exists snf_claim_lines (
     parent_claim                             bigint not null,                          -- parentClaim
     clm_line_num                             smallint not null,                        -- lineNumber
     hcpcs_cd                                 character varying(5),                     -- hcpcsCode
@@ -1669,5 +1771,15 @@ create table snf_claim_lines (
     rev_cntr_unit_cnt                        smallint not null ,                       -- unitCount
     rndrng_physn_npi                         character varying(12),                    -- revenueCenterRenderingPhysicianNPI
     rndrng_physn_upin                        character varying(12),                    -- revenueCenterRenderingPhysicianUPIN
-    constraint snf_claim_lines_pkey primary key (parent_claim, clm_line_num)
-)
+    constraint snf_claim_lines_pkey
+        primary key (parent_claim, clm_line_num),
+
+    constraint snf_claim_lines_parent_claim_to_snf_claims
+        foreign key (parent_claim) references snf_claims(clm_id)
+);
+
+create sequence if not exists beneficiaryhistory_bene_history_id_seq START with 1 INCREMENT by 50;
+
+create sequence if not exists loaded_batches_loaded_batchid_seq START with 1 INCREMENT by 1 cycle;
+
+create sequence if not exists loaded_files_loaded_fileid_seq  START with 1 INCREMENT by 1;

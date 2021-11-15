@@ -1,21 +1,22 @@
-insert into public.beneficiaries_history_invalid_beneficiaries (
-	beneficiary_history_id, 
-	bene_id, 
-	bene_crnt_hic_num,
-	hicn_unhashed,
-	mbi_num,
+insert into beneficiaries_history_invalid_beneficiaries (
+	bene_history_id, 
+	bene_id,
+	bene_birth_dt,
 	bene_sex_ident_cd,
-	bene_birth_dt )
+	bene_crnt_hic_num,
+	mbi_num,
+	hicn_unhashed
+)
 select
 	"beneficiaryHistoryId", 
-	Cast("beneficiaryId" as bigint), 
-	"hicn", 
-	"hicnUnhashed", 
+	Cast("beneficiaryId" as bigint),
+	"birthDate",
+	"sex",
+	"hicn",
 	"medicareBeneficiaryId",
-	"sex", 
-	"birthDate"
+	"hicnUnhashed"
 from
-	public."BeneficiariesHistoryInvalidBeneficiaries"
+	"BeneficiariesHistoryInvalidBeneficiaries"
 on conflict on constraint
 	beneficiaries_history_invalid_beneficiaries_pkey
 do nothing;

@@ -1,4 +1,4 @@
-insert into public.hospice_claims (
+insert into hospice_claims (
 	clm_id,
 	bene_id,
 	clm_grp_id,
@@ -35,7 +35,7 @@ insert into public.hospice_claims (
 	prvdr_num,
 	prvdr_state_cd,
 	ptnt_dschrg_stus_cd,
-	rev_cntr_tot_chrg_amt,
+	clm_tot_chrg_amt,
 	icd_dgns_cd1,
 	icd_dgns_cd2,
 	icd_dgns_cd3,
@@ -224,7 +224,7 @@ select
 	"diagnosis24CodeVersion",
 	"diagnosis25CodeVersion"
 from
-	public."HospiceClaims"
+	"HospiceClaims"
 on conflict on constraint
 	hospice_claims_pkey
 do nothing;

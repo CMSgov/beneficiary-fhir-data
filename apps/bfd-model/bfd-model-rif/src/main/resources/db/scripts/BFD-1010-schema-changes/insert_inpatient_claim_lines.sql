@@ -1,4 +1,4 @@
-insert into public.inpatient_claim_lines (
+insert into inpatient_claim_lines (
 	parent_claim,
 	clm_line_num,
 	rev_cntr_ddctbl_coinsrnc_cd,
@@ -28,7 +28,7 @@ select
 	"revenueCenterRenderingPhysicianNPI",
 	"revenueCenterRenderingPhysicianUPIN"
 from
-	public."InpatientClaimLines"
+	"InpatientClaimLines"
 on conflict on constraint
 	inpatient_claim_lines_pkey
 do nothing;

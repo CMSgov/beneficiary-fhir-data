@@ -13,13 +13,13 @@ BEGIN
 	loop
 		-- randomly select a "beneficiaryId" from original table
 		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM public."InpatientClaims" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "InpatientClaims" TABLESAMPLE SYSTEM_ROWS(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."InpatientClaims"
+			"InpatientClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 
@@ -100,7 +100,7 @@ BEGIN
 			prvdr_num as f_74,
 			prvdr_state_cd as f_75,
 			ptnt_dschrg_stus_cd as f_76,
-			rev_cntr_tot_chrg_amt as f_77,
+			clm_tot_chrg_amt as f_77,
 			clm_e_poa_ind_sw1 as f_78,
 			clm_e_poa_ind_sw2 as f_79,
 			clm_e_poa_ind_sw3 as f_80,
@@ -288,7 +288,7 @@ BEGIN
 			prcdr_dt24 as f_262,
 			prcdr_dt25 as f_263
 		from
-			public.inpatient_claims
+			inpatient_claims
 		WHERE
 			clm_id = v_clm_id
 		AND
@@ -298,7 +298,7 @@ BEGIN
 		SELECT INTO orig
 			cast("claimId" as bigint) as f_1,
 			cast("beneficiaryId" as bigint) as f_2,
-			cast("claimGroupId" as bigint) as f_3,	
+			cast("claimGroupId" as bigint) as f_3,
 			"lastupdated" as f_4,
 			"dateFrom" as f_5,
 			"dateThrough" as f_6,
@@ -560,7 +560,7 @@ BEGIN
 			"procedure24Date" as f_262,
 			"procedure25Date" as f_263
 		from
-			public."InpatientClaims"
+			"InpatientClaims"
 		where
 			"claimId" = v_clm_id::text
 		AND

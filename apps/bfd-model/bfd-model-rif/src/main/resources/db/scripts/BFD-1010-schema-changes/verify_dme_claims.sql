@@ -13,13 +13,13 @@ BEGIN
 	loop
 		-- randomly select a "beneficiaryId" from original table
 		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM public."DMEClaims" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "DMEClaims" TABLESAMPLE SYSTEM_ROWS(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."DMEClaims"
+			"DMEClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 
@@ -39,17 +39,17 @@ BEGIN
 			carr_clm_prvdr_asgnmt_ind_sw as f_13,
 			carr_clm_hcpcs_yr_cd as f_14,
 			carr_clm_pmt_dnl_cd as f_15,
-			alowd_chrg_amt as f_16,
-			sbmtd_chrg_amt as f_17,
-			bene_ptb_ddctbl_amt as f_18,
-			bene_pmt_amt as f_19,
+			nch_carr_clm_alowd_amt as f_16,
+			nch_carr_clm_sbmtd_chrg_amt as f_17,
+			carr_clm_cash_ddctbl_apld_amt as f_18,
+			nch_clm_bene_pmt_amt as f_19,
 			nch_clm_type_cd as f_20,
 			nch_near_line_rec_ident_cd as f_21,
 			nch_wkly_proc_dt as f_22,
-			nch_prmry_pyr_clm_pd_amt as f_23,
+			carr_clm_prmry_pyr_pd_amt as f_23,
 			prncpal_dgns_cd as f_24,
 			prncpal_dgns_vrsn_cd as f_25,
-			rev_cntr_prvdr_pmt_amt as f_26,
+			nch_clm_prvdr_pmt_amt as f_26,
 			rfr_physn_npi as f_27,
 			rfr_physn_upin as f_28,
 			final_action as f_29,
@@ -78,7 +78,7 @@ BEGIN
 			icd_dgns_vrsn_cd11 as f_52,
 			icd_dgns_vrsn_cd12 as f_53
 		from
-			public.dme_claims
+			dme_claims
 		WHERE
 			clm_id = v_clm_id
 		AND
@@ -86,9 +86,9 @@ BEGIN
 		
 
 		SELECT INTO orig
-			cast("claimId" as bigint) as f_1,
-			cast("beneficiaryId" as bigint) as f_2,
-			cast("claimGroupId" as bigint) as f_3,
+			cast("claimId" as bigint) as f__1,
+			cast("beneficiaryId" as bigint) as f__2,
+			cast("claimGroupId" as bigint) as f__3,
 			"lastupdated" as f_4,
 			"dateFrom" as f_5,
 			"dateThrough" as f_6,
@@ -138,9 +138,9 @@ BEGIN
 			"diagnosis9CodeVersion" as f_50,
 			"diagnosis10CodeVersion" as f_51,
 			"diagnosis11CodeVersion" as f_52,
-			"diagnosis12CodeVersion" as f_53		
+			"diagnosis12CodeVersion" as f_53	
 		from
-			public."DMEClaims"
+			"DMEClaims"
 		WHERE
 			"claimId" = v_clm_id::text
 		AND

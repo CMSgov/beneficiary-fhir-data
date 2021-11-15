@@ -1,4 +1,4 @@
-insert into public.hha_claims ( 
+insert into hha_claims ( 
 	clm_id,
 	bene_id,
 	clm_grp_id,
@@ -33,7 +33,7 @@ insert into public.hha_claims (
 	prvdr_num,
 	prvdr_state_cd,
 	ptnt_dschrg_stus_cd,
-	rev_cntr_tot_chrg_amt,
+	clm_tot_chrg_amt,
 	at_physn_npi,
 	at_physn_upin,
 	icd_dgns_cd1,
@@ -224,7 +224,7 @@ select
 	"diagnosis24CodeVersion",
 	"diagnosis25CodeVersion"
 from
-	public."HHAClaims"
+	"HHAClaims"
 on conflict on constraint
 	hha_claims_pkey
 do nothing;

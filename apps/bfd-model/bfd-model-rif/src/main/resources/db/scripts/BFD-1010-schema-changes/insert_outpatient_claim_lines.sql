@@ -1,7 +1,7 @@
-insert into  public.outpatient_claim_lines (
+insert into outpatient_claim_lines (
 	parent_claim,
 	clm_line_num,
-	line_ndc_cd,
+	rev_cntr_ide_ndc_upc_num,
 	hcpcs_cd,
 	hcpcs_1st_mdfr_cd,
 	hcpcs_2nd_mdfr_cd,
@@ -9,7 +9,7 @@ insert into  public.outpatient_claim_lines (
 	rndrng_physn_upin,
 	rev_cntr,
 	rev_cntr_dt,
-	rev_cntr_pmt_amt,
+	rev_cntr_pmt_amt_amt,
 	rev_cntr_apc_hipps_cd,
 	rev_cntr_bene_pmt_amt,
 	rev_cntr_blood_ddctbl_amt,
@@ -74,7 +74,7 @@ select
 	"unitCount",
 	"wageAdjustedCoinsuranceAmount"
 from
-	public."OutpatientClaimLines"
+	"OutpatientClaimLines"
 on conflict on constraint
 	outpatient_claim_lines_pkey
 do nothing;

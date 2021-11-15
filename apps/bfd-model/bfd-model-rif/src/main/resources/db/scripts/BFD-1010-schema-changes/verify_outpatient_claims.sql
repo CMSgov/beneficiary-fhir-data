@@ -13,13 +13,13 @@ BEGIN
 	loop
 		-- randomly select a "beneficiaryId" from original table
 		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM public."OutpatientClaims" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "OutpatientClaims" TABLESAMPLE SYSTEM_ROWS(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."OutpatientClaims"
+			"OutpatientClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 
@@ -46,10 +46,10 @@ BEGIN
 			final_action as f_20,
 			fst_dgns_e_cd as f_21,
 			fst_dgns_e_vrsn_cd as f_22,
-			line_bene_pmt_amt as f_23,
-			line_coinsrnc_amt as f_24,
+			clm_op_bene_pmt_amt as f_23,
+			nch_bene_ptb_coinsrnc_amt as f_24,
 			nch_bene_blood_ddctbl_lblty_am as f_25,
-			nch_bene_ip_ddctbl_amt as f_26,
+			nch_bene_ptb_ddctbl_amt as f_26,
 			nch_clm_type_cd as f_27,
 			nch_near_line_rec_ident_cd as f_28,
 			nch_prmry_pyr_cd as f_29,
@@ -66,8 +66,8 @@ BEGIN
 			prvdr_num as f_40,
 			prvdr_state_cd as f_41,
 			ptnt_dschrg_stus_cd as f_42,
-			rev_cntr_prvdr_pmt_amt as f_43,
-			rev_cntr_tot_chrg_amt as f_44,
+			clm_op_prvdr_pmt_amt as f_43,
+			clm_tot_chrg_amt as f_44,
 			rsn_visit_cd1 as f_45,
 			rsn_visit_vrsn_cd1 as f_46,
 			rsn_visit_cd2 as f_47,
@@ -224,7 +224,7 @@ BEGIN
 			prcdr_dt24 as f_198,
 			prcdr_dt25 as f_199
 		from
-			public.outpatient_claims
+			outpatient_claims
 		WHERE
 			clm_id = v_clm_id
 		AND
@@ -432,7 +432,7 @@ BEGIN
 			"procedure24Date" as f_198,
 			"procedure25Date" as f_199
 		from
-			public."OutpatientClaims"
+			"OutpatientClaims"
 		where
 			"claimId" = v_clm_id::text
 		AND

@@ -14,28 +14,28 @@ begin
 	loop
 		-- randomly select a "beneficiaryid" from original table
 		select cast("beneficiaryId" as bigint) into v_bene_id
-		from public."HospiceClaims" tablesample system_rows(40)
+		from "HospiceClaims" tablesample system_rows(40)
 		limit 1;
 		
 		-- need a claim for that bene
 		select cast(max("claimId") as bigint) into v_clm_id
 		from
-			public."HospiceClaims"
+			"HospiceClaims"
 		where
 			cast("beneficiaryId" as bigint) = v_bene_id;
 			
 		-- need a claim line number for that claim
 		select cast(max("lineNumber") as smallint) into v_line_num
 		from
-			public."HospiceClaimLines"
+			"HospiceClaimLines"
 		where
 			cast("parentClaim" as bigint) = v_bene_id;
 			
 		select into curr		
 			parent_claim as f_1,
 			clm_line_num as f_2,
-			line_pmt_amt as f_3,
-			rev_cntr as f_4,
+			rev_cntr as f_3,
+			rev_cntr_pmt_amt_amt as f_4,
 			rev_cntr_dt as f_5,
 			rev_cntr_tot_chrg_amt as f_6,
 			rev_cntr_unit_cnt as f_7,
@@ -52,7 +52,7 @@ begin
 			rndrng_physn_npi as f_18,
 			rndrng_physn_upin as f_19
 		from
-			public.hospice_claim_lines
+			hospice_claim_lines
 		where
 			parent_claim = v_clm_id
 		and
@@ -62,8 +62,8 @@ begin
 		select into orig
 			Cast("parentClaim" as bigint) as f_1,
 			"lineNumber" as f_2,
-			"paymentAmount" as f_3,
-			"revenueCenterCode" as f_4,
+			"revenueCenterCode" as f_3,
+			"paymentAmount" as f_4,
 			"revenueCenterDate" as f_5,
 			"totalChargeAmount" as f_6,
 			"unitCount" as f_7,
@@ -78,9 +78,9 @@ begin
 			"hcpcsInitialModifierCode" as f_16,
 			"hcpcsSecondModifierCode" as f_17,
 			"revenueCenterRenderingPhysicianNPI" as f_18,
-			"revenueCenterRenderingPhysicianUPIN" as f_19		
+			"revenueCenterRenderingPhysicianUPIN" as f_19
 		from
-			public."HospiceClaimLines"
+			"HospiceClaimLines"
 		where
 			"parentClaim" = v_clm_id::text
 		and
