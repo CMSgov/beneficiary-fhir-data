@@ -214,15 +214,6 @@ module "medicare_opt_out" {
   }
 }
 
-## RDA Network Access Control List
-#
-module "rda_nacl" {
-  source             = "../resources/rda_nacl"
-  env_config         = local.env_config
-  mpm_rda_cidr_block = var.mpm_rda_cidr_block
-  mpm_enabled        = var.mpm_enabled
-}
-
 ## CloudWatch Log Groups
 #
 
