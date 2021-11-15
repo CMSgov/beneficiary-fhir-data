@@ -40,7 +40,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
   private Stu3EobSamhsaMatcher samhsaMatcher;
   private static final String DRG_SYSTEM =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
-  private static final String BLACKLISTED_HCPCS_CODE = "M1034";
+  private static final String BLACKLISTED_HCPCS_CODE = "G2215";
   private static final String NON_SAMHSA_HCPCS_CODE = "11111";
   private static final String BLACKLISTED_IC9_DIAGNOSIS_CODE = "291.0";
   private static final String BLACKLISTED_IC10_DIAGNOSIS_CODE = "F10.10";
