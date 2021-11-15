@@ -47,7 +47,10 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
 
     @Override
     public CodeableConcept getProcedureCodeableConcept() {
-      return new CodeableConceptAdapter(procedureComponent.getProcedureCodeableConcept());
+      // The STU3 versions seem to have less protections for null items, so we need a null check
+      return procedureComponent.getProcedureCodeableConcept() == null
+          ? null
+          : new CodeableConceptAdapter(procedureComponent.getProcedureCodeableConcept());
     }
   }
 
@@ -61,7 +64,10 @@ public class ExplanationOfBenefitAdapter implements FhirResource {
 
     @Override
     public CodeableConcept getDiagnosisCodeableConcept() {
-      return new CodeableConceptAdapter(diagnosisComponent.getDiagnosisCodeableConcept());
+      // The STU3 versions seem to have less protections for null items, so we need a null check
+      return diagnosisComponent.getDiagnosisCodeableConcept() == null
+          ? null
+          : new CodeableConceptAdapter(diagnosisComponent.getDiagnosisCodeableConcept());
     }
 
     @Override

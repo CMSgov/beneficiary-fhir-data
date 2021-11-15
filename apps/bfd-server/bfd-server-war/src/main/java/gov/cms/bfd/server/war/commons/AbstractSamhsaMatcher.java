@@ -318,7 +318,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
       final Predicate<Coding> icd10Check) {
     boolean containsSamhsa = false;
 
-    if (concept != null) {
+    if (concept != null && concept.getCoding() != null) {
       containsSamhsa =
           concept.getCoding().stream()
               .anyMatch(
