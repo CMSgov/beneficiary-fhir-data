@@ -30,12 +30,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   protected static final String DRG =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
-  protected final List<String> drgCodes;
-  protected final List<String> cptCodes;
-  protected final List<String> icd9ProcedureCodes;
-  protected final List<String> icd9DiagnosisCodes;
-  protected final List<String> icd10ProcedureCodes;
-  protected final List<String> icd10DiagnosisCodes;
+  private final List<String> drgCodes;
+  private final List<String> cptCodes;
+  private final List<String> icd9ProcedureCodes;
+  private final List<String> icd9DiagnosisCodes;
+  private final List<String> icd10ProcedureCodes;
+  private final List<String> icd10DiagnosisCodes;
 
   /**
    * Constructs a new {@link AbstractSamhsaMatcher}, loading the lists of SAMHSA-related codes from
@@ -110,11 +110,11 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *     {@link AbstractSamhsaMatcher#icd9DiagnosisCodes} or {@link
    *     AbstractSamhsaMatcher#icd10DiagnosisCodes} entries, <code>false</code> if they all do not
    */
-  protected boolean containsSamhsaIcdCode(List<DiagnosisComponent> diagnoses) {
+  protected boolean containsSamhsaIcdDiagnosisCode(List<DiagnosisComponent> diagnoses) {
     return diagnoses.stream().anyMatch(this::isSamhsaDiagnosis);
   }
 
-  protected boolean containsSamhsaLineItems(List<ItemComponent> items) {
+  protected boolean containsSamhsaLineItem(List<ItemComponent> items) {
     return items.stream().anyMatch(c -> containsSamhsaProcedureCode(c.getProductOrService()));
   }
 
@@ -124,7 +124,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *     AbstractSamhsaMatcher#icd9ProcedureCodes} or {@link
    *     AbstractSamhsaMatcher#icd10ProcedureCodes} entries, <code>false</code> if it does not
    */
-  private boolean isSamhsaIcdProcedure(ProcedureComponent procedure) {
+  @VisibleForTesting
+  boolean isSamhsaIcdProcedure(ProcedureComponent procedure) {
     try {
       return isSamhsaIcdProcedure(procedure.getProcedureCodeableConcept());
     } catch (FHIRException e) {
@@ -144,7 +145,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *     entries, <code>
    *     false</code> if it does not
    */
-  private boolean isSamhsaDiagnosis(DiagnosisComponent diagnosis) {
+  @VisibleForTesting
+  boolean isSamhsaDiagnosis(DiagnosisComponent diagnosis) {
     try {
       return isSamhsaDiagnosis(diagnosis.getDiagnosisCodeableConcept())
           || isSamhsaPackageCode(diagnosis.getPackageCode());
@@ -169,7 +171,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   protected boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
     return !procedureConcept.getCoding().isEmpty()
-        && (hasHcpcsAndSamhsaCptCode(procedureConcept)
+        && (hasHcpcsSystemAndSamhsaCptCode(procedureConcept)
             || !containsOnlyKnownSystems(procedureConcept));
   }
 
@@ -182,7 +184,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *     system as well as a CPT samhsa coding, (matched with {@link #cptCodes}), <code>false</code>
    *     otherwise.
    */
-  private boolean hasHcpcsAndSamhsaCptCode(CodeableConcept procedureConcept) {
+  @VisibleForTesting
+  boolean hasHcpcsSystemAndSamhsaCptCode(CodeableConcept procedureConcept) {
     /*
      * Note: CPT codes represent a subset of possible HCPCS codes (but are the only
      * subset that we blacklist from).
@@ -201,7 +204,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    *     one {@link Coding} and only contains {@link Coding}s that have known coding systems <code>
    *     false</code> otherwise
    */
-  private boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
+  @VisibleForTesting
+  boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
     Set<String> codingSystems =
         procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
@@ -279,8 +283,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   @VisibleForTesting
-  boolean isSamhsaCodingForSystem(Coding coding, List<String> samhsaCodes, String system) {
-    if (!system.equals(coding.getSystem())) {
+  boolean isSamhsaCodingForSystem(Coding coding, List<String> samhsaCodes, String requireeSystem) {
+    if (!requireeSystem.equals(coding.getSystem())) {
       throw new IllegalArgumentException("Illegal coding system: '" + coding.getSystem() + "'");
     }
 
@@ -339,7 +343,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @param code The drg code to normalize.
    * @return the specified DRG code, but with the "MS-DRG" prefix and space removed.
    */
-  protected static String normalizeDrgCode(String code) {
+  @VisibleForTesting
+  static String normalizeDrgCode(String code) {
     code = code.trim();
     code = code.replace("MS-DRG ", "");
     return code;
@@ -350,7 +355,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @return the specified ICD-9 or ICD-10 code, but with whitespace trimmed, the first (if any)
    *     decimal point removed, and converted to all-caps
    */
-  protected static String normalizeIcdCode(String icdCode) {
+  @VisibleForTesting
+  static String normalizeIcdCode(String icdCode) {
     icdCode = icdCode.trim();
     icdCode = icdCode.replaceFirst("\\.", "");
     icdCode = icdCode.toUpperCase();
@@ -362,7 +368,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * @param hcpcsCode the HCPCS code to normalize
    * @return the specified HCPCS code, but with whitespace trimmed and converted to all-caps
    */
-  protected static String normalizeHcpcsCode(String hcpcsCode) {
+  @VisibleForTesting
+  static String normalizeHcpcsCode(String hcpcsCode) {
     hcpcsCode = hcpcsCode.trim();
     hcpcsCode = hcpcsCode.toUpperCase();
 

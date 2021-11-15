@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class SamhsaMatcherFromClaimTransformerTest {
 
-  private SamhsaMatcher samhsaMatcher;
+  private Stu3EobSamhsaMatcher samhsaMatcher;
   private static final String DRG_SYSTEM =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
   private static final String BLACKLISTED_HCPCS_CODE = "M1034";
@@ -62,7 +62,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
   /** Sets up the test. */
   @Before
   public void setup() {
-    samhsaMatcher = new SamhsaMatcher();
+    samhsaMatcher = new Stu3EobSamhsaMatcher();
   }
 
   /**

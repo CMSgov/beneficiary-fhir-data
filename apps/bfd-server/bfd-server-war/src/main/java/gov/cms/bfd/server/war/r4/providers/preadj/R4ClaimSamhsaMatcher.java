@@ -25,7 +25,7 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
     ClaimAdapter adapter = new ClaimAdapter(claim);
 
     return containsSamhsaIcdProcedureCode(adapter.getProcedure())
-        || containsSamhsaIcdCode(adapter.getDiagnosis())
-        || containsSamhsaLineItems(adapter.getItem());
+        || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
+        || containsSamhsaLineItem(adapter.getItem());
   }
 }

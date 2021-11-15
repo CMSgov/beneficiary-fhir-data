@@ -42,8 +42,8 @@ public final class R4EobSamhsaMatcher extends AbstractSamhsaMatcher<ExplanationO
       case HOSPICE:
         containsSamhsa =
             containsSamhsa
-                || containsSamhsaIcdCode(adapter.getDiagnosis())
-                || containsSamhsaLineItems(adapter.getItem());
+                || containsSamhsaIcdDiagnosisCode(adapter.getDiagnosis())
+                || containsSamhsaLineItem(adapter.getItem());
       case PDE:
         // There are no SAMHSA fields in PDE claims
         break;

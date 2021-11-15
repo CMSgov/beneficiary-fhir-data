@@ -20,12 +20,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link SamhsaMatcherTest}. Integration with {@link
- * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider} is covered by {@link
+ * Unit tests for {@link Stu3EobSamhsaMatcherTest}. Integration with {@link
+ * ExplanationOfBenefitResourceProvider} is covered by {@link
  * ExplanationOfBenefitResourceProviderIT#searchForEobsWithSamhsaFiltering()} and related
  * integration tests.
  */
-public final class SamhsaMatcherTest {
+public final class Stu3EobSamhsaMatcherTest {
   // TODO complete and verify that these exactly match real values in our DB
   public static final String SAMPLE_SAMHSA_CPT_CODE = "4320F";
   public static final String SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE = "29189";
@@ -39,12 +39,13 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * false</code> for claims that have no SAMHSA-related codes.
    */
   @Test
   public void nonSamhsaRelatedClaims() {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     // Note: none of our SAMPLE_A claims have SAMHSA-related codes (by default).
     List<Object> sampleRifRecords =
@@ -71,7 +72,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -79,7 +81,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchCarrierClaimsByIcd9Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
     Coding sampleEobDiagnosis =
@@ -93,7 +95,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -101,7 +104,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchCarrierClaimsByIcd10Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
     Coding sampleEobDiagnosis =
@@ -115,7 +118,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
    *
@@ -123,7 +127,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchCarrierClaimsByCptProcedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
     Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -134,7 +138,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#CARRIER} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
    *
@@ -142,7 +147,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchCarrierClaimsByCptProcedureForNewCodes() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
     String SAMPLE_SAMHSA_CPT_NEW_CODE = "G2067";
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.CARRIER);
@@ -154,7 +159,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#DME} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -162,7 +168,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchDmeClaimsByIcd9Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
     Coding sampleEobDiagnosis =
@@ -176,7 +182,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#DME} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -184,7 +191,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchDmeClaimsByIcd10Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
     Coding sampleEobDiagnosis =
@@ -198,7 +205,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#DME} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
    *
@@ -206,7 +214,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchDmeClaimsByCptProcedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.DME);
     Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -217,7 +225,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -225,7 +234,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchInpatientClaimsByIcd9Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
     Coding sampleEobDiagnosis =
@@ -239,7 +248,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -247,7 +257,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchInpatientClaimsByIcd10Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
     Coding sampleEobDiagnosis =
@@ -261,7 +271,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -269,7 +280,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchInpatientClaimsByIcd9Procedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
     Coding sampleEobDiagnosis =
@@ -283,7 +294,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -291,7 +303,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchInpatientClaimsByIcd10Procedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
     Coding sampleEobDiagnosis =
@@ -305,7 +317,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#INPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related drg codes.
    *
@@ -313,14 +326,14 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchInpatientClaimsByDrg() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.INPATIENT);
     sampleEob
         .getDiagnosisFirstRep()
         .getPackageCode()
         .addCoding()
-        .setSystem(SamhsaMatcherTest.DRG)
+        .setSystem(Stu3EobSamhsaMatcherTest.DRG)
         .setCode(SAMPLE_SAMHSA_DRG_CODE);
 
     Assert.assertTrue(matcher.test(sampleEob));
@@ -328,7 +341,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -336,7 +350,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchOutpatientClaimsByIcd9Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
     Coding sampleEobDiagnosis =
@@ -350,7 +364,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -358,7 +373,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchOutpatientClaimsByIcd10Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
     Coding sampleEobDiagnosis =
@@ -372,7 +387,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
    *
@@ -380,7 +396,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchOutpatientClaimsByCptProcedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
     Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -391,7 +407,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -399,7 +416,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchOutpatientClaimsByIcd9Procedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
     Coding sampleEobDiagnosis =
@@ -413,7 +430,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#OUTPATIENT} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -421,7 +439,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchOutpatientClaimsByIcd10Procedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.OUTPATIENT);
     Coding sampleEobDiagnosis =
@@ -435,7 +453,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HHA} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -443,7 +462,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchHhaClaimsByIcd9Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
     Coding sampleEobDiagnosis =
@@ -457,7 +476,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HHA} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -465,7 +485,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchHhaClaimsByIcd10Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
     Coding sampleEobDiagnosis =
@@ -479,7 +499,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HHA} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
    *
@@ -487,7 +508,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchHhaClaimsByCptProcedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HHA);
     Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -498,7 +519,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HOSPICE} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -506,7 +528,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchHospiceClaimsByIcd9Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
     Coding sampleEobDiagnosis =
@@ -520,7 +542,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HOSPICE} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -528,7 +551,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchHospiceClaimsByIcd10Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
     Coding sampleEobDiagnosis =
@@ -542,7 +565,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#HOSPICE} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
    *
@@ -550,7 +574,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchHospiceClaimsByCptProcedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.HOSPICE);
     Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -561,7 +585,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -569,7 +594,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchSnfClaimsByIcd9Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
     Coding sampleEobDiagnosis =
@@ -583,7 +608,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -591,7 +617,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchSnfClaimsByIcd10Diagnosis() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
     Coding sampleEobDiagnosis =
@@ -605,7 +631,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related CPT procedure codes.
    *
@@ -613,7 +640,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchSnfClaimsByCptProcedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
     Coding sampleEobService = sampleEob.getItemFirstRep().getService().getCodingFirstRep();
@@ -624,7 +651,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 9 diagnosis codes.
    *
@@ -632,7 +660,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchSnfClaimsByIcd9Procedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
     Coding sampleEobDiagnosis =
@@ -646,7 +674,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related ICD 10 diagnosis codes.
    *
@@ -654,7 +683,7 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchSnfClaimsByIcd10Procedure() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
     Coding sampleEobDiagnosis =
@@ -668,7 +697,8 @@ public final class SamhsaMatcherTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.SamhsaMatcher#test(ExplanationOfBenefit)} returns <code>
+   * gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcher#test(ExplanationOfBenefit)} returns
+   * <code>
    * true</code> for {@link gov.cms.bfd.server.war.stu3.providers.ClaimType#SNF} {@link
    * ExplanationOfBenefit}s that have SAMHSA-related drg codes.
    *
@@ -676,14 +706,14 @@ public final class SamhsaMatcherTest {
    */
   @Test
   public void matchSnfClaimsByDrg() throws FHIRException {
-    SamhsaMatcher matcher = new SamhsaMatcher();
+    Stu3EobSamhsaMatcher matcher = new Stu3EobSamhsaMatcher();
 
     ExplanationOfBenefit sampleEob = getSampleAClaim(ClaimType.SNF);
     sampleEob
         .getDiagnosisFirstRep()
         .getPackageCode()
         .addCoding()
-        .setSystem(SamhsaMatcherTest.DRG)
+        .setSystem(Stu3EobSamhsaMatcherTest.DRG)
         .setCode(SAMPLE_SAMHSA_DRG_CODE);
 
     Assert.assertTrue(matcher.test(sampleEob));
