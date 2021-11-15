@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -x
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 bfdServerLauncherJar="$(echo ${scriptDirectory}/bfd-server-launcher-*.jar)"
 classpath="${bfdServerLauncherJar}:${scriptDirectory}/lib/*"
