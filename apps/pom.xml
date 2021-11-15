@@ -44,6 +44,14 @@
 		<tag>HEAD</tag>
 	</scm>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub CMSgov Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/CMSgov/beneficiary-fhir-data</url>
+		</repository>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
 			<id>ossrh-snapshots</id>
@@ -74,7 +82,7 @@
 		<project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
 
 		<!-- The version of Java that we'll use for everything. -->
-		<javaSourceVersion>1.8</javaSourceVersion>
+		<javaSourceVersion>11</javaSourceVersion>
 
 		<!-- Configure Sonar such that projects evaluated by it against it will 
 			use JaCoCo to compute the code coverage of any unit and integration tests. -->
@@ -95,6 +103,9 @@
 
 		<!-- Whether the V2 endpoints should be enabled -->
 		<local.v2.enabled>true</local.v2.enabled>
+
+		<!-- Whether the preadj endpoints should be enabled -->
+		<local.preadj.enabled>true</local.preadj.enabled>
 	</properties>
 
 	<dependencyManagement>
@@ -211,7 +222,28 @@
 			</dependency>
 
 			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>2.3.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.annotation</groupId>
+				<artifactId>jakarta.annotation-api</artifactId>
+				<version>1.3.5</version>
+			</dependency>
+
+			<dependency>
+				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>42.2.16</version>
@@ -290,8 +322,8 @@
 					<configuration>
 						<toolchains>
 							<jdk>
-								<!-- Use a Java 8 JDK, by default. -->
-								<version>1.8</version>
+								<!-- Use a Java 11 JDK, by default. -->
+								<version>11</version>
 							</jdk>
 						</toolchains>
 					</configuration>
@@ -385,7 +417,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.6.1</version>
+					<version>3.8.1</version>
 					<configuration>
 						<!-- Set the Java source version used by the compiler. -->
 						<source>${javaSourceVersion}</source>
@@ -395,7 +427,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>3.0.0-M5</version>
 					<configuration>
 						<!-- The intent here is to provide a property that can be set in `settings.xml`,
 							to specify environment-specific JVM arguments for tests. For example, one
@@ -476,15 +508,9 @@ checkJavaFormat
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>2.8.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.6.7</version>
 					<configuration>
-						<serverId>ossrh</serverId>
-						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-						<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						<!-- Delay deployment of build artifacts until after all modules build successfully. -->
+						<deployAtEnd>true</deployAtEnd>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -547,15 +573,6 @@ checkJavaFormat
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<!-- Specifying this plugin here replaces the default deploy plugin in 
-					the lifecycle: this plugin will be used to deploy artifacts. This is great 
-					for interacting with OSSRH and deploying to Maven Central. However, it can 
-					be disabled in descendant projects by setting 'extensions' to false. -->
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<extensions>true</extensions>
 			</plugin>
 			<plugin>
 				<groupId>com.coveo</groupId>
@@ -630,6 +647,15 @@ checkJavaFormat
 				</executions>
 			</plugin>
 		</plugins>
+		<extensions>
+			<extension>
+				<!-- Used by the bfd-pipeline-rda-grpc-server and bfd-pipeline-rda-grpc modules, but
+				defined here to workaround https://issues.apache.org/jira/browse/MDEPLOY-193. -->
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>1.6.2</version>
+			</extension>
+		</extensions>
 	</build>
 
 	<profiles>

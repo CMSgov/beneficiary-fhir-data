@@ -7,7 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.flipkart.zjsonpatch.JsonDiff;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -47,6 +48,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -66,9 +68,28 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 /**
- * Integration tests for comparing changes in the JSON from our endpoint responses. This test code
- * relies on the assumption that SAMPLE_A will have at least one bene and that every bene in it will
- * have >= 1 EOB of every type.
+ * This set of tests compare the application's current responses to a set of previously-recorded
+ * responses. This achieves several goals:
+ *
+ * <ul>
+ *   <li>It helps us to ensure that we're not accidentally changing the application's responses
+ *   <li>It helps us to maintain backwards compatibility.
+ *   <li>As any changes in an operation's output will have to include a change to the recorded
+ *       response, it makes it much easier to tell what our PRs are actually doing.
+ * </ul>
+ *
+ * <p>There SHALL be a 1:1 relationship between test cases here and the application's operations;
+ * every supported operation should have a test case.
+ *
+ * <p>Note that our responses include timestamps and have other differences from request to request
+ * (e.g. element ordering). Each test case must ignore or otherwise work around such differences so
+ * that tests work reliably.
+ *
+ * <p>To re-generate the recorded responses, re-enable the {@link
+ * EndpointJsonResponseComparatorIT#generateApprovedResponseFiles()} "test case" and run it. It will
+ * regenerate ALL operation recordings. It's then your responsibility to ensure that only MEANINGFUL
+ * differences to those responses are included in your PR, by clearing out any incidental noise,
+ * e.g. timestamps.
  */
 @RunWith(Parameterized.class)
 public final class EndpointJsonResponseComparatorV2IT {
@@ -139,6 +160,23 @@ public final class EndpointJsonResponseComparatorV2IT {
   private final Supplier<String> endpointOperation;
   private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
 
+  private static final Set<String> IGNORED_PATHS =
+      ImmutableSet.of(
+          "\"/id\"",
+          "\"/date\"",
+          "\"/created\"",
+          "\"/link/[0-9]/url\"",
+          "\"/implementation/url\"",
+          "\"/entry/[0-9]/fullUrl\"",
+          "\"/meta\"",
+          "\"/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta/lastUpdated\"",
+          "\"/entry/[0-9]/resource/meta\"",
+          "\"/entry/[0-9]/resource/created\"",
+          "\"/procedure/[0-9]/date\"",
+          "\"/entry/[0-9]/resource/procedure/[0-9]/date\"",
+          "\"/software/version\"");
+
   /**
    * Parameterized test constructor: JUnit will construct a new instance of this class for every
    * top-level element returned by the {@link #data()} {@link Parameters} test data generator, and
@@ -203,7 +241,7 @@ public final class EndpointJsonResponseComparatorV2IT {
     replaceIgnoredFieldsWithFillerText(jsonNode, "lastUpdated", Optional.empty());
     replaceIgnoredFieldsWithFillerText(jsonNode, "created", Optional.empty());
 
-    if (endpointId == "metadata")
+    if (endpointId.equals("metadata"))
       replaceIgnoredFieldsWithFillerText(jsonNode, "date", Optional.empty());
 
     String jsonResponse = null;
@@ -229,7 +267,7 @@ public final class EndpointJsonResponseComparatorV2IT {
         Pattern p = pattern.get();
         Matcher m = p.matcher(parent.get(fieldName).toString());
         if (m.find())
-          if (fieldName == "url") {
+          if (fieldName.equals("url")) {
             // Only replace the port numbers (m.group(2)) on urls
             String replacementUrl = m.group(1) + IGNORED_FIELD_TEXT + m.group(3);
             ((ObjectNode) parent)
@@ -250,7 +288,7 @@ public final class EndpointJsonResponseComparatorV2IT {
     JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
 
     fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
-    return sortMetadataSearchParamArray(jsonInterceptor.getResponse());
+    return sortMetadataResponse(jsonInterceptor.getResponse());
   }
 
   /**
@@ -272,7 +310,7 @@ public final class EndpointJsonResponseComparatorV2IT {
    * @param unsortedResponse the JSON string with an unsorted searchParam array
    * @return the JSON string with the sorted searchParam array
    */
-  private static String sortMetadataSearchParamArray(String unsortedResponse) {
+  private static String sortMetadataResponse(String unsortedResponse) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.writerWithDefaultPrettyPrinter();
     JsonNode parsedJson = null;
@@ -283,33 +321,9 @@ public final class EndpointJsonResponseComparatorV2IT {
           "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
     }
 
-    // This returns the searchParam node for the resource type='Patient' from
-    // metadata.json
-    JsonNode searchParamsArray = parsedJson.at("/rest/0/resource/3/searchParam");
+    sortMetaDataResources(parsedJson.at("/rest/0/resource"));
 
-    Iterator<JsonNode> searchParamsArrayIterator = searchParamsArray.elements();
-    List<JsonNode> searchParams = new ArrayList<JsonNode>();
-    while (searchParamsArrayIterator.hasNext()) {
-      searchParams.add(searchParamsArrayIterator.next());
-    }
-
-    Collections.sort(
-        searchParams,
-        new Comparator<JsonNode>() {
-          @Override
-          public int compare(JsonNode node1, JsonNode node2) {
-            String name1 = node1.get("name").toString();
-            String name2 = node2.get("name").toString();
-            return name1.compareTo(name2);
-          }
-        });
-
-    ((ArrayNode) searchParamsArray).removeAll();
-    for (int i = 0; i < searchParams.size(); i++) {
-      ((ArrayNode) searchParamsArray).add(searchParams.get(i));
-    }
-
-    String jsonResponse = null;
+    String jsonResponse;
     try {
       jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsedJson);
     } catch (JsonProcessingException e) {
@@ -317,6 +331,32 @@ public final class EndpointJsonResponseComparatorV2IT {
           "Unable to deserialize the following JSON content as tree: " + unsortedResponse, e);
     }
     return jsonResponse;
+  }
+
+  static void sortMetaDataResources(JsonNode resources) {
+    for (JsonNode resource : resources) {
+      sortMetaDataSearchParamArray(resource);
+    }
+
+    List<JsonNode> resourceList = Lists.newArrayList(resources.elements());
+
+    resourceList.sort(Comparator.comparing(node -> node.get("type").toString()));
+
+    ((ArrayNode) resources).removeAll();
+    resourceList.forEach(((ArrayNode) resources)::add);
+  }
+
+  static void sortMetaDataSearchParamArray(JsonNode resource) {
+    if (resource.has("searchParam")) {
+      JsonNode searchParamsArray = resource.at("/searchParam");
+
+      List<JsonNode> searchParams = Lists.newArrayList(searchParamsArray.elements());
+
+      searchParams.sort(Comparator.comparing(node -> node.get("name").toString()));
+
+      ((ArrayNode) searchParamsArray).removeAll();
+      searchParams.forEach(((ArrayNode) searchParamsArray)::add);
+    }
   }
 
   /**
@@ -1057,64 +1097,7 @@ public final class EndpointJsonResponseComparatorV2IT {
     String approvedJson = readFile(generateFileName(approvedResponseDir, endpointId));
     String newJson = readFile(generateFileName(targetResponseDir, endpointId));
 
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode beforeNode = null;
-    try {
-      beforeNode = mapper.readTree(approvedJson);
-    } catch (IOException e) {
-      throw new UncheckedIOException(
-          "Unable to deserialize the following JSON content as tree: " + approvedJson, e);
-    }
-
-    JsonNode afterNode = null;
-    try {
-      afterNode = mapper.readTree(newJson);
-    } catch (IOException e) {
-      throw new UncheckedIOException(
-          "Unable to deserialize the following JSON content as tree: " + newJson, e);
-    }
-    JsonNode diff = JsonDiff.asJson(beforeNode, afterNode);
-
-    // Filter out diffs that we don't care about (due to changing with each call)
-    // such as "lastUpdated" fields, the port on URLs, etc. ...
-    NodeFilteringConsumer consumer =
-        new NodeFilteringConsumer(
-            new NodeFilter() {
-              @Override
-              public boolean apply(JsonNode node) {
-                Pattern p = getIgnoredPathsRegex();
-                Matcher m = p.matcher(node.get("path").toString());
-                return m.matches();
-              }
-            });
-
-    diff.forEach(consumer);
-    if (diff.size() > 0) {
-      for (int i = 0; i < diff.size(); i++) {
-        Assert.assertEquals("{}", diff.get(i).toString());
-      }
-    }
-  }
-
-  /** @return a regex pattern for ignored JSON paths */
-  private static Pattern getIgnoredPathsRegex() {
-    StringBuilder pattern = new StringBuilder();
-    pattern.append("\"/id\"");
-    pattern.append("|\"/date\"");
-    pattern.append("|\"/created\"");
-    pattern.append("|\"/link/[0-9]/url\"");
-    pattern.append("|\"/implementation/url\"");
-    pattern.append("|\"/entry/[0-9]/fullUrl\"");
-    pattern.append("|\"/meta\"");
-    pattern.append("|\"/meta/lastUpdated\"");
-    pattern.append("|\"/entry/[0-9]/resource/meta/lastUpdated\"");
-    pattern.append("|\"/entry/[0-9]/resource/meta\"");
-    pattern.append("|\"/entry/[0-9]/resource/created\"");
-    pattern.append("|\"/procedure/[0-9]/date\"");
-    pattern.append("|\"/entry/[0-9]/resource/procedure/[0-9]/date\"");
-    pattern.append("|\"/software/version\"");
-
-    return Pattern.compile(pattern.toString());
+    AssertUtils.assertJsonEquals(approvedJson, newJson, IGNORED_PATHS);
   }
 
   /** @return a new {@link IGenericClient} fhirClient after setting the encoding to JSON */

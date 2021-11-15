@@ -8,6 +8,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -20,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the PreAdjFissClaims table */
+/** JPA class for the FissClaims table */
 @Entity
 @Getter
 @Setter
@@ -35,6 +37,9 @@ public class PreAdjFissClaim {
   @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
   private String dcn;
+
+  @Column(name = "`sequenceNumber`", nullable = false)
+  private Long sequenceNumber;
 
   @Column(name = "`hicNo`", length = 12, nullable = false)
   private String hicNo;
@@ -105,6 +110,37 @@ public class PreAdjFissClaim {
   @Column(name = "`stmtCovToDate`")
   private LocalDate stmtCovToDate;
 
+  @Column(name = "`lobCd`", length = 1)
+  private String lobCd;
+
+  public enum ServTypeCdMapping {
+    Normal,
+    Clinic,
+    SpecialFacility,
+    Unrecognized
+  }
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "`servTypeCdMapping`", length = 20)
+  private ServTypeCdMapping servTypeCdMapping;
+
+  @Column(name = "`servTypeCd`", length = 1)
+  private String servTypeCd;
+
+  @Column(name = "`freqCd`", length = 1)
+  private String freqCd;
+
+  @Column(name = "`billTypCd`", length = 3)
+  private String billTypCd;
+
+  /**
+   * String specifying the source of the data contained in this record. Generally this will be the
+   * version string returned by the RDA API server but when populating data from mock server it will
+   * also include information about the mode the server was running in.
+   */
+  @Column(name = "`apiSource`", length = 24)
+  private String apiSource;
+
   @OneToMany(
       mappedBy = "dcn",
       fetch = FetchType.EAGER,
@@ -120,4 +156,12 @@ public class PreAdjFissClaim {
       cascade = CascadeType.ALL)
   @Builder.Default
   private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
+
+  @OneToMany(
+      mappedBy = "dcn",
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @Builder.Default
+  private Set<PreAdjFissPayer> payers = new HashSet<>();
 }

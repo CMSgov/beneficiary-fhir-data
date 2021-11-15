@@ -8,12 +8,6 @@ exec > >(
 	done
 )
 
-# Extend gold image defined root partition with all available free space
-sudo growpart /dev/nvme0n1 2
-sudo pvresize /dev/nvme0n1p2
-sudo lvextend -l +100%FREE /dev/VolGroup00/rootVol
-sudo xfs_growfs /
-
 git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBranchName} --single-branch
 
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
@@ -29,7 +23,7 @@ aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 cat <<EOF >> extra_vars.json
 {
     "env":"${env}",
-    "data_pipeline_jar":"/bluebutton-data-pipeline/bfd-pipeline-app-1.0.0-SNAPSHOT-capsule-fat.jar"
+    "data_pipeline_zip":"/bluebutton-data-pipeline/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
 }
 EOF
 

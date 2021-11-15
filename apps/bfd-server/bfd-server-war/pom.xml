@@ -103,7 +103,6 @@
 			<!-- Needed for JEE/Servlet support -->
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -287,22 +286,20 @@
 					<version>1.12</version>
 				</plugin>
 				<plugin>
-					<!-- Configure the dependency plugin such that it can be used to grab 
-						the test dependency artifacts, for manual testing or for use in integration 
-						tests. -->
+					<!-- Use the dependency plugin to copy the test dependency artifacts, 
+						for use in ITs. -->
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.10</version>
 					<configuration>
 						<artifactItems>
 							<artifactItem>
-								<!-- Copy the BFD Server Launcher (whitelabeled Jetty) capsule JAR into
+								<!-- Unpack the BFD Server Launcher (whitelabeled Jetty) assembly zip into
 									this project's build directory, for use in ITs. -->
 								<groupId>${project.groupId}</groupId>
 								<artifactId>bfd-server-launcher</artifactId>
 								<version>${project.version}</version>
-								<classifier>capsule-fat</classifier>
-								<type>jar</type>
+								<type>zip</type>
 								<outputDirectory>${project.build.directory}/server-work</outputDirectory>
 							</artifactItem>
 						</artifactItems>
@@ -328,7 +325,7 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Use the dependency plugin to copy the test dependency artifacts, 
+				<!-- Use the dependency plugin to copy and unpack the test dependency artifacts, 
 					for use in ITs. -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -337,7 +334,7 @@
 						<id>server-copy-artifacts</id>
 						<phase>pre-integration-test</phase>
 						<goals>
-							<goal>copy</goal>
+							<goal>unpack</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -395,6 +392,8 @@
 								<argument>${its.db.url}</argument>
 								<argument>-e</argument>
 								<argument>${local.v2.enabled}</argument>
+								<argument>-p</argument>
+								<argument>${local.preadj.enabled}</argument>
 							</arguments>
 
 							<!-- Don't start/stop the server if the ITs are being skipped. -->

@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * Interface for objects that process incoming objects. At least one of the methods must be
@@ -14,6 +15,19 @@ import java.util.Collections;
  * @param <T> the type of objects processed
  */
 public interface RdaSink<T> extends AutoCloseable {
+  /**
+   * The pipeline job passes a starting sequence number to the RDA API call to get a stream of
+   * change objects for processing. This method allows the sink to provide the next logical starting
+   * sequence number for the call. An Optional is returned to handle the case when no records have
+   * been added to the database yet.
+   *
+   * @return Possibly empty Optional containing highest recorded sequence number.
+   * @throws ProcessingException if the operation fails
+   */
+  default Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
+    return Optional.empty();
+  }
+
   /**
    * Write the object to the data store and return the number of objects successfully written.
    *
@@ -50,7 +64,8 @@ public interface RdaSink<T> extends AutoCloseable {
       try {
         processedCount += writeObject(object);
       } catch (ProcessingException ex) {
-        throw new ProcessingException(ex.getCause(), processedCount + ex.getProcessedCount());
+        throw new ProcessingException(
+            (Exception) ex.getCause(), processedCount + ex.getProcessedCount());
       } catch (Exception ex) {
         throw new ProcessingException(ex, processedCount);
       }

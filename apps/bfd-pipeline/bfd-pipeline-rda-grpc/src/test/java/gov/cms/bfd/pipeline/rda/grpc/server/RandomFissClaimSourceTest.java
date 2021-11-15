@@ -1,8 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.util.NoSuchElementException;
 import org.junit.Test;
@@ -34,17 +35,27 @@ public class RandomFissClaimSourceTest {
 
     assertEquals(true, source.hasNext());
     claim = source.next();
-    assertEquals("12793", claim.getDcn());
+    assertTrue(claim.getDcn().length() > 0);
 
     assertEquals(true, source.hasNext());
     claim = source.next();
-    assertEquals("8099001", claim.getDcn());
+    assertTrue(claim.getDcn().length() > 0);
 
     assertEquals(false, source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
-  private void assertNextPastEndOfDataThrowsException(ClaimSource source) throws Exception {
+  @Test
+  public void sequenceNumbers() throws Exception {
+    MessageSource<FissClaimChange> source =
+        new RandomFissClaimSource(0, 7).toClaimChanges().skip(4);
+    assertEquals(4L, source.next().getSeq());
+    assertEquals(5L, source.next().getSeq());
+    assertEquals(6L, source.next().getSeq());
+    assertEquals(false, source.hasNext());
+  }
+
+  private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {
     try {
       source.next();
       fail("expected exception");

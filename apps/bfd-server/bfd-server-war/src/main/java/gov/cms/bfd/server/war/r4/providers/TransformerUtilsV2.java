@@ -5,6 +5,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import com.google.common.base.Strings;
 import gov.cms.bfd.model.codebook.data.CcwCodebookMissingVariable;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -13,6 +14,7 @@ import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
 import gov.cms.bfd.server.war.FDADrugDataUtilityApp;
 import gov.cms.bfd.server.war.commons.CCWProcedure;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
@@ -45,6 +47,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,6 +92,7 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.codesystems.ClaimCareteamrole;
@@ -318,7 +322,7 @@ public final class TransformerUtilsV2 {
 
     Identifier identifier = createIdentifier(ccwVariable, identifierValue.get());
 
-    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, identifier);
 
     return extension;
@@ -347,7 +351,7 @@ public final class TransformerUtilsV2 {
 
     Identifier identifier =
         new Identifier()
-            .setSystem(calculateVariableReferenceUrl(ccwVariable))
+            .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue);
     return identifier;
   }
@@ -390,7 +394,7 @@ public final class TransformerUtilsV2 {
 
     Identifier identifier =
         new Identifier()
-            .setSystem(calculateVariableReferenceUrl(ccwVariable))
+            .setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable))
             .setValue(identifierValue)
             .setType(createC4BBClaimCodeableConcept());
 
@@ -413,7 +417,7 @@ public final class TransformerUtilsV2 {
     try {
       String stringDate = String.format("%04d", dateYear.get().intValue());
       DateType dateYearValue = new DateType(stringDate);
-      String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+      String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
       extension = new Extension(extensionUrl, dateYearValue);
     } catch (DataFormatException e) {
       throw new InvalidRifValueException(
@@ -442,7 +446,7 @@ public final class TransformerUtilsV2 {
       throw new BadCodeMonkeyException();
     }
 
-    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, quantity);
 
     return extension;
@@ -475,7 +479,7 @@ public final class TransformerUtilsV2 {
       Quantity quantity) {
     if (!unitCode.isPresent()) return;
 
-    quantity.setSystem(calculateVariableReferenceUrl(ccwVariable));
+    quantity.setSystem(CCWUtils.calculateVariableReferenceUrl(ccwVariable));
 
     String unitCodeString;
     if (unitCode.get() instanceof String) unitCodeString = (String) unitCode.get();
@@ -505,7 +509,7 @@ public final class TransformerUtilsV2 {
 
     Coding coding = createCoding(rootResource, ccwVariable, code.get());
 
-    String extensionUrl = calculateVariableReferenceUrl(ccwVariable);
+    String extensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Extension extension = new Extension(extensionUrl, coding);
 
     return extension;
@@ -529,7 +533,7 @@ public final class TransformerUtilsV2 {
     Coding coding = createCoding(rootResource, ccwVariable, yearMonth, code.get());
 
     String extensionUrl =
-        String.format("%s/%s", calculateVariableReferenceUrl(ccwVariable), yearMonth);
+        String.format("%s/%s", CCWUtils.calculateVariableReferenceUrl(ccwVariable), yearMonth);
     Extension extension = new Extension(extensionUrl, coding);
 
     return extension;
@@ -617,7 +621,7 @@ public final class TransformerUtilsV2 {
    */
   private static CodeableConcept createCodeableConceptForFieldId(
       IAnyResource rootResource, String codingSystem, CcwCodebookInterface ccwVariable) {
-    String code = calculateVariableReferenceUrl(ccwVariable);
+    String code = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
 
     Coding carinCoding =
         new Coding()
@@ -651,7 +655,7 @@ public final class TransformerUtilsV2 {
     else if (code instanceof String) codeString = code.toString().trim();
     else throw new BadCodeMonkeyException("Unsupported: " + code);
 
-    String system = calculateVariableReferenceUrl(ccwVariable);
+    String system = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
 
     String display;
     if (ccwVariable.getVariable().getValueGroups().isPresent())
@@ -675,18 +679,6 @@ public final class TransformerUtilsV2 {
 
   /**
    * @param ccwVariable the {@link CcwCodebookInterface} being mapped
-   * @return the public URL at which documentation for the specified {@link CcwCodebookInterface} is
-   *     published
-   */
-  static String calculateVariableReferenceUrl(CcwCodebookInterface ccwVariable) {
-    return String.format(
-        "%s/%s",
-        TransformerConstants.BASE_URL_CCW_VARIABLES,
-        ccwVariable.getVariable().getId().toLowerCase());
-  }
-
-  /**
-   * @param ccwVariable the {@link CcwCodebookInterface} being mapped
    * @return the {@link AdjudicationComponent#getCategory()} {@link CodeableConcept} to use for the
    *     specified {@link CcwCodebookInterface}
    */
@@ -698,7 +690,7 @@ public final class TransformerUtilsV2 {
      * about what the specific adjudication they're looking at means.
      */
 
-    String conceptCode = calculateVariableReferenceUrl(ccwVariable);
+    String conceptCode = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     CodeableConcept categoryConcept =
         createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, conceptCode);
     categoryConcept.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
@@ -719,7 +711,7 @@ public final class TransformerUtilsV2 {
      * about what the specific adjudication they're looking at means.
      */
 
-    String conceptCode = calculateVariableReferenceUrl(ccwVariable);
+    String conceptCode = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     CodeableConcept categoryConcept =
         createCodeableConcept(TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY, conceptCode);
     categoryConcept.getCodingFirstRep().setDisplay(ccwVariable.getVariable().getLabel());
@@ -864,7 +856,7 @@ public final class TransformerUtilsV2 {
         .addCoding(
             new Coding(
                 TransformerConstants.CODING_CCW_ADJUDICATION_CATEGORY,
-                calculateVariableReferenceUrl(ccwVariable),
+                CCWUtils.calculateVariableReferenceUrl(ccwVariable),
                 ccwVariable.getVariable().getLabel()));
   }
 
@@ -1019,7 +1011,7 @@ public final class TransformerUtilsV2 {
                       .addCoding(
                           new Coding(
                               TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
-                              calculateVariableReferenceUrl(ccwVariable),
+                              CCWUtils.calculateVariableReferenceUrl(ccwVariable),
                               ccwVariable.getVariable().getLabel())))
               .setTiming(new DateType(convertToDate(d)));
         });
@@ -1564,11 +1556,49 @@ public final class TransformerUtilsV2 {
    *     Patient}s, which may contain multiple matching resources, or may also be empty.
    */
   public static Bundle addResourcesToBundle(Bundle bundle, List<IBaseResource> resources) {
+    Set<String> beneIds = new HashSet<String>();
     for (IBaseResource res : resources) {
       BundleEntryComponent entry = bundle.addEntry();
       entry.setResource((Resource) res);
+
+      if (entry.getResource().getResourceType() == ResourceType.ExplanationOfBenefit) {
+        ExplanationOfBenefit eob = ((ExplanationOfBenefit) entry.getResource());
+        if (eob != null
+            && eob.getPatient() != null
+            && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
+          String reference = eob.getPatient().getReference().replace("Patient/", "");
+          if (!Strings.isNullOrEmpty(reference)) {
+            beneIds.add(reference);
+          }
+        }
+      } else if (entry.getResource().getResourceType() == ResourceType.Patient) {
+        Patient patient = ((Patient) entry.getResource());
+        if (patient != null && !Strings.isNullOrEmpty(patient.getId())) {
+          beneIds.add(patient.getId());
+        }
+
+      } else if (entry.getResource().getResourceType() == ResourceType.Coverage) {
+        Coverage coverage = ((Coverage) entry.getResource());
+        if (coverage != null
+            && coverage.getBeneficiary() != null
+            && !Strings.isNullOrEmpty(coverage.getBeneficiary().getReference())) {
+          String reference = coverage.getBeneficiary().getReference().replace("Patient/", "");
+          if (!Strings.isNullOrEmpty(reference)) {
+            beneIds.add(reference);
+          }
+        }
+      }
     }
+
+    logBeneIdToMdc(beneIds);
+
     return bundle;
+  }
+
+  public static void logBeneIdToMdc(Collection<String> beneIds) {
+    if (!beneIds.isEmpty()) {
+      MDC.put("bene_id", String.join(", ", beneIds));
+    }
   }
 
   /**
@@ -1709,7 +1739,7 @@ public final class TransformerUtilsV2 {
     else if (code instanceof String) codeString = code.toString().trim();
     else throw new BadCodeMonkeyException("Unsupported: " + code);
 
-    String system = calculateVariableReferenceUrl(ccwVariable);
+    String system = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
 
     String display;
     if (ccwVariable.getVariable().getValueGroups().isPresent())
@@ -1741,8 +1771,8 @@ public final class TransformerUtilsV2 {
    * @param claimType {@link ClaimTypeV2} to process
    * @param claimGroupId CLM_GRP_ID
    * @param coverageType {@link MedicareSegment}
-   * @param dateFrom CLM_FROM_DT
-   * @param dateThrough CLM_THRU_DT
+   * @param dateFrom CLM_FROM_DT || SRVC_DT (For Part D Events)
+   * @param dateThrough CLM_THRU_DT || SRVC_DT (For Part D Events)
    * @param paymentAmount CLM_PMT_AMT
    * @param finalAction FINAL_ACTION
    */
@@ -1808,8 +1838,8 @@ public final class TransformerUtilsV2 {
         throw new BadCodeMonkeyException();
     }
 
-    // CLM_FROM_DT => ExplanationOfBenefit.billablePeriod.start
-    // CLM_THRU_DT => ExplanationOfBenefit.billablePeriod.end
+    // CLM_FROM_DT || SRVC_DT (For Part D Events) => ExplanationOfBenefit.billablePeriod.start
+    // CLM_THRU_DT || SRVC_DT (For Part D Events) => ExplanationOfBenefit.billablePeriod.end
     if (dateFrom.isPresent()) {
       validatePeriodDates(dateFrom, dateThrough);
       setPeriodStart(eob.getBillablePeriod(), dateFrom.get());
@@ -2521,7 +2551,7 @@ public final class TransformerUtilsV2 {
       Optional<? extends Number> amountValue) {
 
     if (amountValue.isPresent()) {
-      String extensionUrl = calculateVariableReferenceUrl(categoryVariable);
+      String extensionUrl = CCWUtils.calculateVariableReferenceUrl(categoryVariable);
       Money adjudicationTotalAmount = createMoney(amountValue);
       Extension adjudicationTotalEextension = new Extension(extensionUrl, adjudicationTotalAmount);
 
@@ -2579,7 +2609,7 @@ public final class TransformerUtilsV2 {
     CodeableConcept financialTypeConcept =
         TransformerUtilsV2.createCodeableConcept(
             TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-            calculateVariableReferenceUrl(financialType));
+            CCWUtils.calculateVariableReferenceUrl(financialType));
 
     financialTypeConcept.getCodingFirstRep().setDisplay(financialType.getVariable().getLabel());
 

@@ -56,7 +56,7 @@ public class FissClaimResponseTransformerV2 {
             .put('d', ClaimResponse.RemittanceOutcome.COMPLETE)
             .put('i', ClaimResponse.RemittanceOutcome.PARTIAL)
             .put('r', ClaimResponse.RemittanceOutcome.COMPLETE)
-            .put('t', ClaimResponse.RemittanceOutcome.COMPLETE)
+            .put('t', ClaimResponse.RemittanceOutcome.PARTIAL)
             .put('m', ClaimResponse.RemittanceOutcome.PARTIAL)
             .build();
   }

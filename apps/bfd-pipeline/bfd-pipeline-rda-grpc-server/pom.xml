@@ -43,6 +43,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <!-- this allows the construction of POJOs without a lot of boilerplate code -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->
         <dependency>
             <groupId>io.grpc</groupId>
@@ -135,7 +142,7 @@
         </dependency>
 
         <dependency>
-            <!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+            <!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
@@ -176,13 +183,6 @@
             <plugins>
             </plugins>
         </pluginManagement>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.6.2</version>
-            </extension>
-        </extensions>
         <plugins>
             <plugin>
                 <!-- Will run the `*IT.java` integration tests in this project, as part
@@ -220,5 +220,41 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Runs the LoadRdaJsonApp to set up a test database with pre-adjudicated (RDA API) data from JSON files.
+        The JSON files can be specified by setting the loader.fiss and/or loader.mcs properties on the command line.
+        Also must specify the loader.config property to tell the program where to find its config file.
+        Finally, also specify the json-to-db property (no value needed) to activate this profile.
+        Sample command line: mvn -pl :bfd-pipeline-rda-grpc-server exec:java -Djson-to-db -Dconfig.properties=load-json.properties -Dfile.fiss=FISS.ndjson
+        Alternatively you can use -P json-to-db instead of using the system property.
+        -->
+        <profile>
+            <id>json-to-db</id>
+            <activation>
+                <property>
+                    <name>json-to-db</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>gov.cms.bfd.pipeline.rda.grpc.sink.LoadRdaJsonApp</mainClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

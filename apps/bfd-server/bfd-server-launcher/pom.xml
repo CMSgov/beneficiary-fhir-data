@@ -12,11 +12,12 @@
 	<packaging>jar</packaging>
 
 	<description>
-		A Java Capsule JAR application that packages up a Jetty runtime/launcher for the BFD Server WAR.
+		A Java JAR and assembly zip that packages up a Jetty runtime/launcher for the BFD Server WAR.
 	</description>
 
 	<properties>
-		<jetty.version>9.4.43.v20210629</jetty.version>
+		<!-- Using Jetty 10 LTS over Jetty 11 because Jetty 11 moves to the jakarta namespace for the servlet API which causes a problem for HAPI-->
+		<jetty.version>10.0.7</jetty.version>
 	</properties>
 
 	<dependencies>
@@ -71,11 +72,6 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Provides an HTTP request log for Jetty. -->
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-access</artifactId>
-		</dependency>
-		<dependency>
 			<!-- Provides a JSON layout (i.e. output format) for Logback. Provides
 				ch.qos.logback.contrib.json.classic.JsonLayout, which is used in our logback.xml. -->
 			<groupId>ch.qos.logback.contrib</groupId>
@@ -122,6 +118,11 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<!-- Used for launching the server with Jetty 10. -->
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+		<dependency>
 			<!-- Used in tests to help with managing asynchronous behavior. Reference:
 				https://github.com/awaitility/awaitility -->
 			<groupId>org.awaitility</groupId>
@@ -135,6 +136,17 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.3.0</version>
+					<configuration>
+						<appendAssemblyId>false</appendAssemblyId>
+						<descriptors>
+							<descriptor>src/main/assembly/zip.xml</descriptor>
+						</descriptors>
+					</configuration>
+				</plugin>
+				<plugin>
 					<!-- Configure the dependency plugin such that it can be used to grab
 						the test dependency artifacts, for manual testing or for use in integration
 						tests. -->
@@ -142,46 +154,8 @@
 					<artifactId>maven-dependency-plugin</artifactId>
 					<version>2.10</version>
 					<configuration>
-						<artifactItems>
-							<artifactItem>
-								<groupId>${project.groupId}</groupId>
-								<artifactId>${project.artifactId}-sample</artifactId>
-								<version>${project.version}</version>
-								<type>war</type>
-								<outputDirectory>${project.build.directory}/sample</outputDirectory>
-							</artifactItem>
-						</artifactItems>
 						<overWriteReleases>false</overWriteReleases>
 						<overWriteSnapshots>true</overWriteSnapshots>
-					</configuration>
-				</plugin>
-				<plugin>
-					<!-- Used to build executable JARs, with all dependencies included in
-						them. -->
-					<groupId>com.github.chrischristo</groupId>
-					<artifactId>capsule-maven-plugin</artifactId>
-					<version>1.0.1</version>
-					<configuration>
-						<appClass>gov.cms.bfd.server.launcher.DataServerLauncherApp</appClass>
-
-						<!-- Building the "really executable" .x files is tempting, but ultimately
-							not very useful, as there's no way to pass JVM args into such launchers,
-							which prevents customizing the heap size at runtime. -->
-						<chmod>false</chmod>
-
-						<types>fat</types>
-						<manifest>
-							<entry>
-								<!-- This will almost certainly be overridden on the command line;
-									think of this as a bare-minimum default. -->
-								<key>JVM-Args</key>
-								<value>-Xmx1g</value>
-							</entry>
-							<entry>
-								<key>Min-Java-Version</key>
-								<value>1.8.0</value>
-							</entry>
-						</manifest>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -189,28 +163,57 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
+				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<!-- Use the dependency plugin to copy the test dependency artifacts,
-							for use in ITs. -->
-						<id>server-copy-artifacts</id>
-						<phase>pre-integration-test</phase>
+						<id>build-assembly</id>
+						<phase>package</phase>
 						<goals>
-							<goal>copy</goal>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Used to build executable JARs, with all dependencies included in
-					them. -->
-				<groupId>com.github.chrischristo</groupId>
-				<artifactId>capsule-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
+						<!-- Copy the BFD war file dependency for use in ITs. -->
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}-sample</artifactId>
+									<version>${project.version}</version>
+									<type>war</type>
+									<outputDirectory>${project.build.directory}/sample</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+						<id>server-copy-war</id>
+						<phase>pre-integration-test</phase>
 						<goals>
-							<goal>build</goal>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+					<execution>
+						<!-- Unpack the assembly for use in ITs. -->
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}</version>
+									<type>zip</type>
+									<outputDirectory>${project.build.directory}/server-work</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+						<id>server-unpack-assembly</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>unpack</goal>
 						</goals>
 					</execution>
 				</executions>

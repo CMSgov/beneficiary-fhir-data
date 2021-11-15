@@ -35,6 +35,9 @@ public class PreAdjMcsClaim {
   @EqualsAndHashCode.Include
   private String idrClmHdIcn;
 
+  @Column(name = "`sequenceNumber`", nullable = false)
+  private Long sequenceNumber;
+
   @Column(name = "`idrContrId`", length = 5, nullable = false)
   private String idrContrId;
 
@@ -124,6 +127,14 @@ public class PreAdjMcsClaim {
 
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
+
+  /**
+   * String specifying the source of the data contained in this record. Generally this will be the
+   * version string returned by the RDA API server but when populating data from mock server it will
+   * also include information about the mode the server was running in.
+   */
+  @Column(name = "`apiSource`", length = 24)
+  private String apiSource;
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
