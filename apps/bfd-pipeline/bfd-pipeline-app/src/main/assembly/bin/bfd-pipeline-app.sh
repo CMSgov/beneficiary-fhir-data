@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -x
+echo "Starting bfd-pipeline"
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 bfdPipelineAppJar="$(echo ${scriptDirectory}/bfd-pipeline-app-*.jar)"
 classpath="${bfdPipelineAppJar}:${scriptDirectory}/lib/*"
