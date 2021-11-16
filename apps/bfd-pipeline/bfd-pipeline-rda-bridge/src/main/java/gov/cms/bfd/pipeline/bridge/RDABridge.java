@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.bridge;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.MessageOrBuilder;
@@ -39,7 +41,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
-import org.yaml.snakeyaml.Yaml;
 
 @Slf4j
 public class RDABridge {
@@ -264,8 +265,8 @@ public class RDABridge {
   @VisibleForTesting
   static ConfigLoader createYamlConfig(String yamlFilePath) throws IOException {
     try (FileReader reader = new FileReader(yamlFilePath)) {
-      Yaml yaml = new Yaml();
-      AppConfig appConfig = yaml.loadAs(reader, AppConfig.class);
+      ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+      AppConfig appConfig = mapper.readValue(reader, AppConfig.class);
 
       Map<String, Collection<String>> mapConfig =
           ImmutableMap.<String, Collection<String>>builder()

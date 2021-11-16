@@ -264,6 +264,13 @@
 				<version>3.3.0</version>
 			</dependency>
 
+			<dependency>
+				<!-- Add YAML support to jackson -->
+				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<artifactId>jackson-dataformat-yaml</artifactId>
+				<version>2.9.7</version>
+			</dependency>
+
 			 <dependency>
 				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
 				 <groupId>org.projectlombok</groupId>

@@ -17,7 +17,6 @@
     <description>Utility project for creating RDA data</description>
 
     <properties>
-        <snakeyml.version>1.29</snakeyml.version>
         <commons-cli.version>1.4</commons-cli.version>
 
         <bfd-shared-utils.version>1.0.0-SNAPSHOT</bfd-shared-utils.version>
@@ -36,9 +35,9 @@
         </dependency>
         <!-- Utility -->
         <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>${snakeyml.version}</version>
+            <!-- Add YAML support to jackson -->
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
         <!-- Common -->
         <dependency>
