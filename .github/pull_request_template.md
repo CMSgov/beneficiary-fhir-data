@@ -63,7 +63,7 @@ Submitters should complete the following questionnaire:
       * [ ] Yes
       * [ ] No
 
-* If the answer to any of the questions below is **Yes**, then please add \@StewGoin as a reviewer, and note that this PR **should not be merged** unless/until he also approves it.
+* If the answer to any of the questions below is **Yes**, then please add @<!-- -->StewGoin as a reviewer, and note that this PR **should not be merged** unless/until he also approves it.
     * Do you think this PR requires additional review of its security implications for other reasons?
       * [ ] Yes
       * [ ] No
