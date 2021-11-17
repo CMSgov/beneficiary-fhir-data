@@ -76,6 +76,7 @@ public final class PipelineApplicationIT {
 
     // Read the app's output.
     ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
+    Assert.assertEquals(2, appRunConsumer.stdoutContents.size());
     Thread appRunConsumerThread = new Thread(appRunConsumer);
     appRunConsumerThread.start();
 
