@@ -34,7 +34,4 @@ select
 	"mbiUpdateUser",
 	"mbiUpdateDate"
 from
-	"MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
-on conflict on constraint
-	medicare_beneficiaryid_history_invalid_beneficiaries_pkey
-do nothing;
+	"MedicareBeneficiaryIdHistoryInvalidBeneficiaries";

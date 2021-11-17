@@ -528,7 +528,4 @@ select
 	"procedure24Date",
 	"procedure25Date"
 from
-	"InpatientClaims"
-on conflict on constraint
-	inpatient_claims_pkey
-do nothing;
+	"InpatientClaims";

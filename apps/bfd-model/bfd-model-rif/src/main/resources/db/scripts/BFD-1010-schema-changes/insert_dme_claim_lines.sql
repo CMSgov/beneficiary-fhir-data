@@ -88,7 +88,4 @@ select
 	"providerParticipatingIndCode",
 	"providerPaymentAmount"
 from
-	"DMEClaimLines"
-on conflict on constraint
-	dme_claim_lines_pkey
-do nothing;
+	"DMEClaimLines";

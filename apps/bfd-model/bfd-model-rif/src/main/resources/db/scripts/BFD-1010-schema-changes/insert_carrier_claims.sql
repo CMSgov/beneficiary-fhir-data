@@ -110,7 +110,4 @@ select
 	"diagnosis11CodeVersion",
 	"diagnosis12CodeVersion"
 from
-	"CarrierClaims"
-on conflict on constraint
-	carrier_claims_pkey
-do nothing; 
+	"CarrierClaims";

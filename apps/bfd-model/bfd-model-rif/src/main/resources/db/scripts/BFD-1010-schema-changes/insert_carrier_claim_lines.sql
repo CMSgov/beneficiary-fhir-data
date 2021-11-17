@@ -94,7 +94,4 @@ select
 	"providerTaxNumber",
 	"providerPaymentAmount"
 from
-	"CarrierClaimLines"
-on conflict on constraint
-	carrier_claim_lines_pkey
-do nothing;
+	"CarrierClaimLines";

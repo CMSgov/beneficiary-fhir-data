@@ -438,7 +438,4 @@ select
 	"procedure24Date",
 	"procedure25Date"
 from
-	"SNFClaims"
-on conflict on constraint
-	snf_claims_pkey
-do nothing;
+	"SNFClaims";

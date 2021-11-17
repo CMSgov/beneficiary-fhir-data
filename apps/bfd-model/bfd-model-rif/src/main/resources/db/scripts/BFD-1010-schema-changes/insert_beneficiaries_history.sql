@@ -22,7 +22,4 @@ select
 	"mbiEffectiveDate",
 	"lastupdated"
 from
-	"BeneficiariesHistory"
-on conflict on constraint
-	beneficiaries_history_pkey
-do nothing;
+	"BeneficiariesHistory";

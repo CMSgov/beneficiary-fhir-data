@@ -74,7 +74,4 @@ select
 	"unitCount",
 	"wageAdjustedCoinsuranceAmount"
 from
-	"OutpatientClaimLines"
-on conflict on constraint
-	outpatient_claim_lines_pkey
-do nothing;
+	"OutpatientClaimLines";

@@ -224,7 +224,4 @@ select
 	"diagnosis24CodeVersion",
 	"diagnosis25CodeVersion"
 from
-	"HospiceClaims"
-on conflict on constraint
-	hospice_claims_pkey
-do nothing;
+	"HospiceClaims";

@@ -16,7 +16,4 @@ select
 	"medicareBeneficiaryId",
 	"hicnUnhashed"
 from
-	"BeneficiariesHistoryInvalidBeneficiaries"
-on conflict on constraint
-	beneficiaries_history_invalid_beneficiaries_pkey
-do nothing;
+	"BeneficiariesHistoryInvalidBeneficiaries";

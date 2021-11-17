@@ -400,7 +400,4 @@ select
 	"procedure24Date",
 	"procedure25Date"
 from 
-	"OutpatientClaims"
-on conflict on constraint
-	outpatient_claims_pkey
-do nothing;
+	"OutpatientClaims";

@@ -84,7 +84,4 @@ select
 	"submissionClarificationCode",
 	"totalPrescriptionCost"
 from
-	"PartDEvents"
-on conflict on constraint
-	partd_events_pkey
-do nothing;
+	"PartDEvents";

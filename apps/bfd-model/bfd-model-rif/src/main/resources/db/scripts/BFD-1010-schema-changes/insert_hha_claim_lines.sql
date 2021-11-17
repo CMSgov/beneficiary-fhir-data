@@ -44,7 +44,4 @@ select
 	"totalChargeAmount",
 	"unitCount"
 from
-	"HHAClaimLines"
-on conflict on constraint
-	hha_claim_lines_pkey
-do nothing;
+	"HHAClaimLines";

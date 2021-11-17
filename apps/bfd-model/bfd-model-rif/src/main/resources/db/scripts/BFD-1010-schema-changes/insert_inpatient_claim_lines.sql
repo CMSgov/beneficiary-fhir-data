@@ -28,7 +28,4 @@ select
 	"revenueCenterRenderingPhysicianNPI",
 	"revenueCenterRenderingPhysicianUPIN"
 from
-	"InpatientClaimLines"
-on conflict on constraint
-	inpatient_claim_lines_pkey
-do nothing;
+	"InpatientClaimLines";

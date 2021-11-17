@@ -224,7 +224,4 @@ select
 	"diagnosis24CodeVersion",
 	"diagnosis25CodeVersion"
 from
-	"HHAClaims"
-on conflict on constraint
-	hha_claims_pkey
-do nothing;
+	"HHAClaims";

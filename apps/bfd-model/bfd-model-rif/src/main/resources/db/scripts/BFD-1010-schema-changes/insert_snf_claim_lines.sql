@@ -28,7 +28,4 @@ select
 	"revenueCenterRenderingPhysicianNPI",
 	"revenueCenterRenderingPhysicianUPIN"
 from
-	"SNFClaimLines"
-on conflict on constraint
-	snf_claim_lines_pkey
-do nothing;
+	"SNFClaimLines";

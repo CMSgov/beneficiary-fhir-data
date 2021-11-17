@@ -108,7 +108,4 @@ select
 	"diagnosis11CodeVersion",
 	"diagnosis12CodeVersion"	
 from
-	"DMEClaims"
-on conflict on constraint
-	dme_claims_pkey
-do nothing;
+	"DMEClaims";
