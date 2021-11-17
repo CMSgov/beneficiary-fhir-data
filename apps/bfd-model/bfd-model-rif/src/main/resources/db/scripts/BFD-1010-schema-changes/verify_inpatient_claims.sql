@@ -1,6 +1,6 @@
 do $$
 DECLARE
-  MAX_TESTS		INTEGER := 500000;		-- hopefully .5M tests are sufficient
+  MAX_TESTS		INTEGER := 500;		-- hopefully .5M tests are sufficient
   v_claims		BIGINT[];
   orig			record;
   curr			record;
@@ -13,7 +13,7 @@ BEGIN
 	v_claims := ARRAY(
 		SELECT cast("claimId" as bigint)
 		FROM "InpatientClaims" TABLESAMPLE BERNOULLI(50)	-- bernoulli sample using 50% of table rows
-		limit MAX_TESTS;
+		limit MAX_TESTS);
 
 	for counter in 1..MAX_TESTS
 	loop
