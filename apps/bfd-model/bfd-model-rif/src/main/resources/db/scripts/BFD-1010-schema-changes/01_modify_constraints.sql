@@ -1,3 +1,6 @@
+-- need to drop primary key as PG does not allow us to alter
+-- an existing primary key with deferrable options.
+
 -- -----------------------------
 -- drop all secondary indexes
 -- -----------------------------
@@ -15,7 +18,6 @@ drop index if exists inpatient_claims_bene_id_idx;
 drop index if exists outpatient_claims_bene_id_idx;
 drop index if exists partd_events_bene_id_idx;
 drop index if exists snf_claims_bene_id_idx;
-
 
 -- ---------------------
 -- beneficiaries_history

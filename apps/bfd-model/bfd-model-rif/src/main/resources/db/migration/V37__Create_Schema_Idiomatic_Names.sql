@@ -1746,7 +1746,7 @@ create table if not exists snf_claims (
     prcdr_dt20                               date,                                     -- procedure20Date
     prcdr_dt21                               date,                                     -- procedure21Date
     prcdr_dt22                               date,                                     -- procedure22Date
-    prcdr_dt23                               date,                                       -- procedure23Date
+    prcdr_dt23                               date,                                     -- procedure23Date
     prcdr_dt24                               date,                                     -- procedure24Date
     prcdr_dt25                               date,                                     -- procedure25Date    
     constraint snf_claims_pkey

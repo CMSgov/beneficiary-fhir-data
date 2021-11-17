@@ -1,12 +1,3 @@
--- need to drop primary key as PG does not allow us to alter
--- an existing primary key with deferrable options.
-alter table beneficiaries
-drop constraint if exists beneficiaries_pkey;
-
--- re-create our primary key with deferrable options.
-alter table beneficiaries
-add constraint beneficiaries_pkey primary key (bene_id) deferrable initially deferred;
-
 -- setup for parallel processing
 SET max_parallel_workers = 6;
 SET max_parallel_workers_per_gather = 6;

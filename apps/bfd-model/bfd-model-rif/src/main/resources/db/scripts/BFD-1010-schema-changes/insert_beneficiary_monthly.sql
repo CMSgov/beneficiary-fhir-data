@@ -1,12 +1,3 @@
--- need to drop primary key as PG does not allow us to alter
--- an existing primary key with deferrable options.
-alter table beneficiary_monthly
-drop constraint if exists beneficiary_monthly_pkey;
-
--- re-create our primary key with deferrable options.
-alter table beneficiary_monthly
-add constraint beneficiary_monthly_pkey primary key (year_month, parent_beneficiary) deferrable initially deferred;
-
 -- setup for parallel processing
 SET max_parallel_workers = 6;
 SET max_parallel_workers_per_gather = 6;
