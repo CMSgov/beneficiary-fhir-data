@@ -1,6 +1,7 @@
 do $$
 DECLARE
-  MAX_TESTS		INTEGER := 20000;
+  MAX_TESTS		INTEGER := 500000;		-- hopefully .5M tests are sufficient
+  v_beneIds		BIGINT[];
   orig			record;
   curr			record;
   err_cnt	    INTEGER := 0;
@@ -9,12 +10,14 @@ DECLARE
   v_tbl_name	varchar(40) := 'beneficiaries_history';
 
 BEGIN
+	v_beneIds := ARRAY(
+		SELECT distinct cast("beneficiaryId" as bigint)
+		FROM "BeneficiariesHistory" TABLESAMPLE BERNOULLI(50)	-- bernoulli sample using 50% of table rows
+		limit MAX_TESTS);
+
 	for counter in 1..MAX_TESTS
 	loop
-		-- randomly select a "beneficiaryId" from original table
-		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM "BeneficiariesHistory" TABLESAMPLE SYSTEM_ROWS(40)
-		limit 1;
+		v_bene_id := v_beneIds[counter - 1];
 
 		select into curr
 			bene_history_id as f_1,

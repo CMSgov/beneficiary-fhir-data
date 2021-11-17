@@ -21,16 +21,18 @@
  *
  * Overall, it is expected that these migrations will be in steps:
  *
- * 1. Create the new tables in the same schema as the current database schema.
- * 2. Migrate current data to new tables (i.e., Insert-Select)
- * 3. apply indeces as needed; based on some of the known queries that have proven probabmatic,
+ * 1. Create the new tables in the same schema as the current database schema via flyway script.
+ * 2. run the psql script, configure_constraints, to remove all indexes and foreign key constraints; also
+ *    drop primary key in all table and re-create with 'deferrable initially deferred' (have to do it
+ *    this way as flyway does not support the deferrable keyword).
+ * 3. Migrate current data to new tables (i.e., Insert-Select) using postgres parallel processing.
+ * 4. Verify all data in new tables post-migration via verify sql scripts.
+ * 5. apply indeces as needed; based on some of the known queries that have proven probabmatic,
  *    final disposition of all indeces will not be defined in this file.
- * 3. Deploy a new version of the application that only uses those new tables.
- * 4. Remove the original tables.
+ * 6. Deploy a new version of the application that only uses those new tables.
+ * 7. Remove the original tables.
  * 
  * This script is for Step 1.
- *
- * NOTE: Steps 1 and 2 may be combined as a single step depending on final strategic paln.
  *
  * [1]: https://www.postgresql.org/docs/10/datatype-character.html
  * [2]: https://www.postgresql.org/docs/10/datatype-numeric.html

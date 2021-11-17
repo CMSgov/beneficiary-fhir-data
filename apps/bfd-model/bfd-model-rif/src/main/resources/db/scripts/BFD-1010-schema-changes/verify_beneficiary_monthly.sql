@@ -1,6 +1,7 @@
 do $$
 DECLARE
-  MAX_TESTS		INTEGER := 30000;
+  MAX_TESTS		INTEGER := 500000;		-- hopefully .5M tests are sufficient
+  v_beneIds		BIGINT[];
   orig			record;
   curr			record;
   err_cnt	    INTEGER := 0;
@@ -12,14 +13,16 @@ DECLARE
   yrMon Date;
 
 BEGIN
+	v_beneIds := ARRAY(
+		SELECT distinct cast("parentBeneficiary" as bigint)
+		FROM "BeneficiaryMonthly" TABLESAMPLE BERNOULLI(50)	-- bernoulli sample using 50% of table rows
+		limit MAX_TESTS);
+
 	for counter in 1..MAX_TESTS
 	loop
-		-- randomly select a "beneficiaryId" from original table
-		SELECT cast("parentBeneficiary" as bigint) into v_bene_id
-		FROM "BeneficiaryMonthly" TABLESAMPLE SYSTEM_ROWS(40)
-		limit 1;
+		v_bene_id := v_beneIds[counter - 1];
 
-		select (YM)[floor(random() * 9 + 1)] into yrMon;
+		select (YM)[floor(random() * 9 + 1)] into yrMon;	-- pick random date from array YM
 
 		select into curr
 			year_month as f_1,

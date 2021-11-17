@@ -1,36 +1,32 @@
 do $$
 declare
-  MAX_TESTS		INTEGER := 40000;
+  MAX_TESTS		INTEGER := 500000;		-- hopefully .5M tests are sufficient
+  v_claims		BIGINT[];
   orig			record;
   curr			record;
   err_cnt	    integer := 0;
   tot_err_cnt	integer := 0;
-  v_bene_id		bigint  := 0;
   v_clm_id      bigint  := 0;
   v_line_num	smallint := 0;
   v_tbl_name	varchar(40) := 'snf_claim_lines';
 
 begin
+	v_claims := ARRAY(
+		SELECT cast("claimId" as bigint)
+		FROM "SNFClaims" TABLESAMPLE BERNOULLI(50)	-- bernoulli sample using 50% of table rows
+		limit MAX_TESTS;
+
 	for counter in 1..MAX_TESTS
 	loop
-		-- randomly select a "beneficiaryid" from original table
-		select cast("beneficiaryId" as bigint) into v_bene_id
-		from "SNFClaims" tablesample system_rows(40)
-		limit 1;
-		
-		-- need a claim for that bene
-		select cast(max("claimId") as bigint) into v_clm_id
-		from
-			"SNFClaims"
-		where
-			cast("beneficiaryId" as bigint) = v_bene_id;
-			
-		-- need a claim line number for that claim
-		select cast(max("lineNumber") as smallint) into v_line_num
+		v_clm_id := v_claims[counter - 1];
+
+		-- need a claim line # for the test
+		select
+			cast(max("lineNumber") as smallint) into v_line_num
 		from
 			"SNFClaimLines"
 		where
-			cast("parentClaim" as bigint) = v_bene_id;
+			"parentClaim" = v_clm_id::text;
 			
 		select into curr		
 			parent_claim as f_1,

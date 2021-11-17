@@ -1,3 +1,20 @@
+-- need to drop primary key as PG does not allow us to alter
+-- an existing primary key with deferrable options.
+alter table beneficiary_monthly
+drop constraint if exists beneficiary_monthly_pkey;
+
+-- re-create our primary key with deferrable options.
+alter table beneficiary_monthly
+add constraint beneficiary_monthly_pkey primary key (year_month, parent_beneficiary) deferrable initially deferred;
+
+-- setup for parallel processing
+SET max_parallel_workers = 6;
+SET max_parallel_workers_per_gather = 6;
+SET parallel_leader_participation = off;
+SET parallel_tuple_cost = 0;
+SET parallel_setup_cost = 0;
+SET min_parallel_table_scan_size = 0;
+
 insert into beneficiary_monthly (
 	year_month,
 	parent_beneficiary,
@@ -32,7 +49,4 @@ select
 	"partDLowIncomeCostShareGroupCode",
 	"medicaidDualEligibilityCode"
 from
-	"BeneficiaryMonthly"
-on conflict on constraint
-	beneficiary_monthly_pkey
-do nothing;
+	"BeneficiaryMonthly";

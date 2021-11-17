@@ -1,28 +1,23 @@
 do $$
 DECLARE
-  MAX_TESTS		INTEGER := 30000;
+  MAX_TESTS		INTEGER := 500000;		-- hopefully .5M tests are sufficient
+  v_claims		BIGINT[];
   orig			record;
   curr			record;
   err_cnt	    INTEGER := 0;
   tot_err_cnt	INTEGER := 0;
-  v_bene_id		bigint  := 0;
   v_clm_id      bigint  := 0;
   v_tbl_name	varchar(40) := 'carrier_claims';
 
 BEGIN
+	v_claims := ARRAY(
+		SELECT cast("claimId" as bigint)
+		FROM "CarrierClaims" TABLESAMPLE BERNOULLI(50)	-- bernoulli sample using 50% of table rows
+		limit MAX_TESTS;
+
 	for counter in 1..MAX_TESTS
 	loop
-		-- randomly select a "beneficiaryId" from original table
-		SELECT cast("beneficiaryId" as bigint) into v_bene_id
-		FROM "CarrierClaims" TABLESAMPLE SYSTEM_ROWS(40)
-		limit 1;
-		
-		-- need a claim for that bene
-		select cast(max("claimId") as bigint) into v_clm_id
-		from
-			"CarrierClaims"
-		where
-			cast("beneficiaryId" as bigint) = v_bene_id;
+		v_clm_id := v_claims[counter - 1];
 
 		select into curr
 			clm_id as f_1,
@@ -82,9 +77,7 @@ BEGIN
 		from
 			carrier_claims
 		WHERE
-			clm_id = v_clm_id
-		AND
-			bene_id = v_bene_id;
+			clm_id = v_clm_id;
 		
 		SELECT INTO orig
 			cast("claimId" as bigint) as f_1,
@@ -144,9 +137,7 @@ BEGIN
 		from
 			"CarrierClaims"
 		WHERE
-			"claimId" = v_clm_id::text
-		AND
-			"beneficiaryId" = v_bene_id::text;
+			"claimId" = v_clm_id::text;
 		
 		if curr.f_1 <> orig.f_1 then err_cnt := err_cnt + 1; end if;
 		if curr.f_2 <> orig.f_2 then err_cnt := err_cnt + 1; end if;

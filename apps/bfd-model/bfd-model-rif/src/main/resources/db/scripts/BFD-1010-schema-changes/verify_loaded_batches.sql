@@ -13,7 +13,7 @@ BEGIN
 	loop
 		-- randomly select a "loadedBatchId" from original table
 		SELECT "loadedBatchId" into v_batch_id
-		FROM "LoadedBatches" TABLESAMPLE SYSTEM_ROWS(40)
+		FROM "LoadedBatches" TABLESAMPLE BERNOULLI(40)
 		limit 1;
 
 		select into curr
