@@ -28,17 +28,6 @@ data_pipeline_rda_job_batch_size: 20
 # How long to allow the RDA API stream to be idle before closing the connection.
 data_pipeline_rda_grpc_max_idle_seconds: 600
 
-
-## EFT EFS 
-#
-# EFT base directory - partners file systems will be mounted in this directory (no trailing /)
-eft_efs_base_dir: /mnt/eft
-
-# Partner EFT EFS mount points. Each partner should be matched to the posix user and group
-# id's defined in their respective eft efs declaration in `ops/terraform/modules/stateful/main.tf`.
-# EFS file systems will be mounted under the eft_efs_base_dir variable, e.g., /mnt/eft/bcda
-eft_efs_mounts:
-  - { name: 'bcda',
-      posix_uid: '1500',
-      posix_gid: '1500',
-    }
+# By default call the RDA API with no token.  Override this value in env specific vault
+# to enable authentication.
+data_pipeline_rda_grpc_auth_token: ''

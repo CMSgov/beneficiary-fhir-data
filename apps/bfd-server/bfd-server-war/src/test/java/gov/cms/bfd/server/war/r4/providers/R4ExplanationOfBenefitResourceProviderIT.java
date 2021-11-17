@@ -59,7 +59,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
+/** R4ExplanationOfBenefitResourceProviderIT. */
 public final class R4ExplanationOfBenefitResourceProviderIT {
+
+  public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
@@ -900,20 +904,52 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * with <code>excludeSAMHSA=true</code> properly filters out SAMHSA-related claims.
+   * Load the SAMPLE_A resources and then tweak each of the claim types that support SAMHSA (all
+   * except PDE) to have a SAMHSA diagnosis code.
    *
-   * @throws FHIRException (indicates test failure)
+   * @return the beneficary record loaded by Sample A
    */
-  @Test
-  public void searchForEobsWithSamhsaFiltering() throws FHIRException {
+  private Beneficiary loadSampleAWithSamhsa() {
     // Load the SAMPLE_A resources normally.
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    // Tweak the SAMPLE_A Carrier claim such that it's SAMHSA-related.
+    EntityManager entityManager = null;
+
+    try {
+      EntityManagerFactory entityManagerFactory =
+          PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+      entityManager = entityManagerFactory.createEntityManager();
+
+      // Tweak the SAMPLE_A claims such that they are SAMHSA-related.
+      adjustCarrierClaimForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustInpatientRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustOutpatientRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustHhaRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustSnfRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustHospiceRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustDmeRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+
+    } finally {
+      if (entityManager != null && entityManager.getTransaction().isActive())
+        entityManager.getTransaction().rollback();
+      if (entityManager != null) entityManager.close();
+    }
+
+    // Return beneficiary information
+    return findFirstBeneficary(loadedRecords);
+  }
+
+  /**
+   * Adjusts the carrier claim to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustCarrierClaimForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
     CarrierClaim carrierRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
@@ -921,105 +957,176 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
 
-    EntityManagerFactory entityManagerFactory =
-        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
-    EntityManager entityManager = null;
-    try {
-      entityManager = entityManagerFactory.createEntityManager();
+    entityManager.getTransaction().begin();
+    carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
+    carrierRifRecord.setDiagnosis2Code(
+        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(carrierRifRecord);
+    entityManager.getTransaction().commit();
+  }
 
-      entityManager.getTransaction().begin();
-      carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
-      carrierRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(carrierRifRecord);
-      entityManager.getTransaction().commit();
+  /**
+   * Adjusts the first inpatient record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustInpatientRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
 
-      // Tweak the SAMPLE_A Inpatient claim such that it's SAMHSA-related.
-      InpatientClaim inpatientRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof InpatientClaim)
-              .map(r -> (InpatientClaim) r)
-              .findFirst()
-              .get();
+    InpatientClaim inpatientRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof InpatientClaim)
+            .map(r -> (InpatientClaim) r)
+            .findFirst()
+            .get();
 
-      entityManager.getTransaction().begin();
-      inpatientRifRecord =
-          entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
-      inpatientRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(inpatientRifRecord);
-      entityManager.getTransaction().commit();
+    entityManager.getTransaction().begin();
+    inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
+    inpatientRifRecord.setDiagnosis2Code(
+        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(inpatientRifRecord);
+    entityManager.getTransaction().commit();
+  }
 
-      // Tweak the SAMPLE_A Outpatient claim such that it's SAMHSA-related.
-      OutpatientClaim outpatientRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof OutpatientClaim)
-              .map(r -> (OutpatientClaim) r)
-              .findFirst()
-              .get();
+  /**
+   * Adjusts the first outpatient record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustOutpatientRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
 
-      entityManager.getTransaction().begin();
-      outpatientRifRecord =
-          entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
-      outpatientRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(outpatientRifRecord);
-      entityManager.getTransaction().commit();
+    OutpatientClaim outpatientRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof OutpatientClaim)
+            .map(r -> (OutpatientClaim) r)
+            .findFirst()
+            .get();
 
-      // Tweak the SAMPLE_A HHA claim such that it's SAMHSA-related.
-      HHAClaim hhaRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof HHAClaim)
-              .map(r -> (HHAClaim) r)
-              .findFirst()
-              .get();
+    entityManager.getTransaction().begin();
+    outpatientRifRecord =
+        entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
+    outpatientRifRecord.setDiagnosis2Code(
+        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(outpatientRifRecord);
+    entityManager.getTransaction().commit();
+  }
 
-      entityManager.getTransaction().begin();
-      hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
-      hhaRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(hhaRifRecord);
-      entityManager.getTransaction().commit();
+  /**
+   * Adjusts the first HHA record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustHhaRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
 
-      // Tweak the SAMPLE_A Hospice claim such that it's SAMHSA-related.
-      HospiceClaim hospiceRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof HospiceClaim)
-              .map(r -> (HospiceClaim) r)
-              .findFirst()
-              .get();
+    HHAClaim hhaRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(r -> (HHAClaim) r)
+            .findFirst()
+            .get();
 
-      entityManager.getTransaction().begin();
-      hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
-      hospiceRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(hospiceRifRecord);
-      entityManager.getTransaction().commit();
+    entityManager.getTransaction().begin();
+    hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
+    hhaRifRecord.setDiagnosis2Code(
+        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(hhaRifRecord);
+    entityManager.getTransaction().commit();
+  }
 
-      // Tweak the SAMPLE_A SNF claim such that it's SAMHSA-related.
-      SNFClaim snfRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof SNFClaim)
-              .map(r -> (SNFClaim) r)
-              .findFirst()
-              .get();
+  /**
+   * Adjusts the first SNF record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustSnfRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
 
-      entityManager.getTransaction().begin();
-      snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
-      snfRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(snfRifRecord);
-      entityManager.getTransaction().commit();
-    } finally {
-      if (entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
-      if (entityManager != null) entityManager.close();
-    }
+    SNFClaim snfRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof SNFClaim)
+            .map(r -> (SNFClaim) r)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
+    snfRifRecord.setDiagnosis2Code(
+        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(snfRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first Hospice record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustHospiceRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    HospiceClaim hospiceRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof HospiceClaim)
+            .map(r -> (HospiceClaim) r)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
+    hospiceRifRecord.setDiagnosis2Code(
+        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(hospiceRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first DME record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustDmeRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    DMEClaim dmeRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
+    dmeRifRecord.setDiagnosis2Code(
+        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(dmeRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider#findByPatient} with
+   * <code>excludeSAMHSA=true</code> properly filters out SAMHSA-related claims.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchForSamhsaEobsWithExcludeSamhsaTrue() throws FHIRException {
+    Beneficiary beneficiary = loadSampleAWithSamhsa();
 
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
@@ -1029,33 +1136,119 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
             .forResource(ExplanationOfBenefit.class)
             .where(
                 ExplanationOfBenefit.PATIENT.hasId(
-                    TransformerUtilsV2.buildPatientId(carrierRifRecord.getBeneficiaryId())))
-            .and(new StringClientParam("excludeSAMHSA").matches().value("true"))
+                    TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
+            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("true"))
             .returnBundle(Bundle.class)
             .execute();
     Assert.assertNotNull(searchResults);
     for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
       /*
-       * First, verify that the claims that should have been filtered out, were. Then
-       * in the `else` clause, verify that everything was **not** filtered out.
+       * SAMHSA fields are present on all claim types except for PDE so we should not
+       * get any claims back in the results except for PDE.
        */
-      // FIXME remove the `else if`s once filtering fully supports all claim types
-      if (claimType.equals(ClaimTypeV2.CARRIER))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimTypeV2.HHA))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimTypeV2.HOSPICE))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimTypeV2.INPATIENT))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimTypeV2.OUTPATIENT))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimTypeV2.SNF))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimTypeV2.PDE))
-        // PDE Claims do not contain SAMHSA fields and thus won't be filtered.
+      if (claimType == ClaimTypeV2.PDE) {
         Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
-      else Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
+      } else {
+        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+      }
+    }
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider#findByPatient} with
+   * <code>excludeSAMHSA=false</code> does not filter out SAMHSA-related claims.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchForSamhsaEobsWithExcludeSamhsaFalse() throws FHIRException {
+    Beneficiary beneficiary = loadSampleAWithSamhsa();
+
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(
+                    TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
+            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("false"))
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertNotNull(searchResults);
+    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
+      // Without filtering we expect one claim for each claim type.
+      Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
+    }
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider#findByPatient} with
+   * <code>excludeSAMHSA=true</code> properly returns claims that are not SAMHSA-related.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchForNonSamhsaEobsWithExcludeSamhsaTrue() throws FHIRException {
+    // Load the SAMPLE_A resources normally.
+    Beneficiary beneficiary = loadSampleA();
+
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(
+                    TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
+            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("true"))
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertNotNull(searchResults);
+    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
+      // None of the claims are SAMHSA so we expect one record per claim type in the results.
+      Assert.assertEquals(
+          String.format("Verify claims of type '%s' are present", claimType),
+          1,
+          filterToClaimType(searchResults, claimType).size());
+    }
+  }
+
+  /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider#findByPatient} with
+   * <code>excludeSAMHSA=false</code> properly returns claims that are not SAMHSA-related.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchForNonSamhsaEobsWithExcludeSamhsaFalse() throws FHIRException {
+    // Load the SAMPLE_A resources normally.
+    Beneficiary beneficiary = loadSampleA();
+
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(
+                    TransformerUtilsV2.buildPatientId(beneficiary.getBeneficiaryId())))
+            .and(new StringClientParam(EXCLUDE_SAMHSA_PARAM).matches().value("false"))
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertNotNull(searchResults);
+    for (ClaimTypeV2 claimType : ClaimTypeV2.values()) {
+      // None of the claims are SAMHSA so we expect one record per claim type in the results.
+      Assert.assertEquals(
+          String.format("Verify claims of type '%s' are present", claimType),
+          1,
+          filterToClaimType(searchResults, claimType).size());
     }
   }
 
@@ -1442,7 +1635,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * Find the first Beneficiary from a record list returned by {@link ServerTestUtils#loadData(List}
    *
    * @param loadedRecords to use
-   * @return the first Beneficiary
+   * @return the first Beneficiary*
    */
   private static Beneficiary findFirstBeneficary(List<Object> loadedRecords) {
     return loadedRecords.stream()
@@ -1479,6 +1672,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * @param fhirClient to use
    * @param id the bene id to use
    * @param lastUpdatedParam to added to the fetch
+   * @return the bundle
    */
   private Bundle fetchWithLastUpdated(
       IGenericClient fhirClient, String id, String lastUpdatedParam) {
@@ -1490,9 +1684,12 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     return fhirClient.search().byUrl(url).returnBundle(Bundle.class).execute();
   }
 
-  /*
-   * Verify that each of the expected claims (one for every claim type) is present
-   * and looks correct.
+  /**
+   * Verify that each of the expected claims (one for every claim type) is present and looks
+   * correct.
+   *
+   * @param searchResults the search results
+   * @param loadedRecords the loaded records
    */
   private static void assertEachEob(Bundle searchResults, List<Object> loadedRecords) {
     compareEob(ClaimTypeV2.CARRIER, searchResults, loadedRecords);
@@ -1508,8 +1705,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   /**
    * Asserts that two Money values ignoring differences like "0" vs "0.0"
    *
-   * @param expected
-   * @param actual
+   * @param expected the expected
+   * @param actual the actual
    */
   private static void assertEquals(Money expected, Money actual) {
     Assert.assertEquals(expected.getCurrency(), actual.getCurrency());
@@ -1528,8 +1725,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * Compares two ExplanationOfBenefit objects in detail while working around serialization issues
    * like comparing "0" and "0.0" or creation differences like using "Quantity" vs "SimpleQuantity"
    *
-   * @param expected
-   * @param actual
+   * @param expected the expected
+   * @param actual the actual
    */
   private static void assertEquals(ExplanationOfBenefit expected, ExplanationOfBenefit actual) {
     // ID in the bundle will have `ExplanationOfBenefit/` in front, so make sure the last bit
@@ -1702,6 +1899,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
+   * Filter to claim type list.
+   *
    * @param bundle the {@link Bundle} to filter
    * @param claimType the {@link gov.cms.bfd.server.war.r4.providers.ClaimType} to use as a filter
    * @return a filtered {@link List} of the {@link ExplanationOfBenefit}s from the specified {@link
@@ -1731,9 +1930,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
    * Compares two {@link ExplanationOfBenefit} objects, one from a service response and one passed
    * through the transformer
    *
-   * @param claimType
-   * @param searchResults
-   * @param loadedRecords
+   * @param claimType the claim type
+   * @param searchResults the search results
+   * @param loadedRecords the loaded records
    */
   public static void compareEob(
       ClaimTypeV2 claimType, ExplanationOfBenefit searchResults, List<Object> loadedRecords) {
@@ -1757,9 +1956,9 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   /**
    * Compares two {@link ExplanationOfBenefit} objects where one is in a bundle
    *
-   * @param claimType
-   * @param searchResults
-   * @param loadedRecords
+   * @param claimType the claim type
+   * @param searchResults the search results
+   * @param loadedRecords the loaded records
    */
   public static void compareEob(
       ClaimTypeV2 claimType, Bundle searchResults, List<Object> loadedRecords) {
@@ -1771,6 +1970,14 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     compareEob(claimType, eobs.get(0), loadedRecords);
   }
 
+  /**
+   * Fetch with service date bundle.
+   *
+   * @param fhirClient the fhir client
+   * @param id the id
+   * @param serviceEndParam the service end param
+   * @return the bundle
+   */
   private Bundle fetchWithServiceDate(
       IGenericClient fhirClient, String id, String serviceEndParam) {
     String url =
