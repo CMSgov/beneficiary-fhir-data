@@ -214,7 +214,6 @@ module "medicare_opt_out" {
   }
 }
 
-
 ## CloudWatch Log Groups
 #
 
