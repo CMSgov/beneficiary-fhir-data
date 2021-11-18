@@ -1,0 +1,188 @@
+==========================================
+INSTRUCTIONS for BFD-1010 Schema Migration
+==========================================
+
+Obviously, this is a big deal, and going about this schema migration needs to be done
+VERY CAREFULLY!
+
+To that end, some notes on why/how things are setup for the migration and verification of
+data:
+
+a) The script, V37__Create_Schema_Idiomatic_Names.sql, is built to be able to run as a
+   flyway script; it is done with the intention that when Integration Tests (ITs) happen
+   as part of a build, that the in-memory db can be created and testing performed vs.
+   that in-memory db. In addition, this allows flyway to maintain its view of the db is
+   consistent with its internal context.
+   
+   Now, that being said, flyway (or at least our version of it) is brain-dead; it does not
+   support some postgres database keywords and/or actions. In particular, it does not
+   allow the use of 'deferrable initially deferred' constraints. This is a big deal
+   because the data we need to migrate is H-U-G-E !!! In testing various ways to migrate
+   the data in the most expedient manner, the use of 'deferrable initially deferred'
+   showed about a 30% increase in throughput performance when using postgres parallel
+   processing via 'parallel_workers'. However, if a table has foreign key constraints
+   or indexe(es), then postgres will revert to single worker processing (make sense since
+   the workers could not know what other workers might be doing to the table, i.e., writing
+   to an index, etc.).
+   
+b) To get around the flyway issue, some steps need to be performed to remove indexes and
+   constraints applied during the execution of V37__Create_Schema_Idiomatic_Names.sql.
+   
+   NOTE: During the real schema setup, flyway will not be used; the schema will be created
+         out-of-band via psql executing V37__Create_Schema_Idiomatic_Names.sql. In a real
+         subsequent production release, the V37__Create_Schema_Idiomatic_Names.sql would
+         be invoked, but all db operations would be noops since all sql directives are
+         wrapped with 'if not exists'.
+         
+   Also, it is worth noting that even though we are referring to it as a 'new schema', it
+   is in fact in the same 'public' schema as the current BFD tables. What will be dif-
+   ferent will be the table names; for example the "Beneficiaries" table will become
+   beneficiaaries, "CarrierClaims" will become carrier_claims, etc. In affect, we will
+   have two sets of data, one using the current came-case naming convention, and the
+   new one using more standard SQL naming convention.
+   
+c) The new set of tables will be created in a clone of the current database; the AWS
+   RDS instance is:
+   
+   bfd-prod-aurora-cluster-2021-10-28-05-10.cluster-clyryngdhnko.us-east-1.rds.amazonaws.com
+   
+   The database credentials are the same as current production and, as usual, you will
+   need to be on the VPN or on an EC2 instance access the cluster.
+   
+With that introduction, it is time to get down to execution steps.
+
+Step 1:
+=======
+Perform a git clone of BFD master; while it is not necessary to do an actual build prior
+to beginning the db work, it's probably a good idea to do so just in case.
+
+The V37__Create_Schema_Idiomatic_Names.sql will be found in:
+
+apps/bfd-model/bfd-model-rif/src/main/resources/db/migration
+
+And all the other SQL and shell scripts can be found in:
+
+apps/bfd-model/bfd-model-rif/src/main/resources/db/scripts/BFD-1010-schema-changes
+
+
+Step 2:
+-------
+The next step is to create a psql session and execute the V37__Create_Schema_Idiomatic_Names.sql
+script. That psql session can either be from your workstation or from an AWS EC2 ssh session.
+The actual script will execute in about 30 seconds since all it is doing is creating empty
+tables.
+
+A listing of the tables should show the following new tables:
+
+beneficiaries
+beneficiaries_history
+beneficiaries_history_invalid_beneficiaries
+beneficiary_monthly
+loaded_files
+loaded_batches
+medicare_beneficiaryid_history
+medicare_beneficiaryid_history_invalid_beneficiaries
+carrier_claims
+carrier_claim_lines
+dme_claims
+dme_claim_lines
+hha_claims
+hha_claim_lines
+hospice_claims
+hospice_claim_lines
+inpatient_claims
+inpatient_claim_lines
+outpatient_claims
+outpatient_claim_lines
+partd_events
+snf_claims
+snf_claim_lines
+
+
+Step 3:
+=======
+The next step is to remove any indexes, foreign key constraints, and set each table's
+primary key to allow for 'deferrable initially deferred' which will allow us to
+load table data using postgres parallel processing.
+
+Again, this step can be executed from a psql session either from your workstation or from
+an AWS EC2 ssh session. Again, since these are being applied to empty tables the actual
+processing time will be well under a minute.
+
+The SQL script to execute is:
+
+BFD-1010-schema-changes/01_modify_constraints.sql
+
+
+Step 4:
+=======
+Now comes the fun part.....it'll be like watching paint dry!
+
+We are going to migrate data from current tables into the new tables (and column names).
+This is DEFINITELY going to take some time so running the shell script from an AWS EC2 ssh
+session is essential; The script that will be run is:
+
+02_migrate_data.sh
+
+The script will require database credentials to be provided either as environment variables
+or within a .pgpass file. Since there is a definite hierarchy to our data (i.e, beneficiary
+is a top of hierarchy) the tables are broken into 3 broad categories:
+
+a) beneficiary table loads first
+b) claims tables (but not claims line items) are loaded next
+c) all other tables that have a dependency on tables created in a) and b) run last
+
+It is suggested that you familiarize yourself with the script (it can be executed as a
+'dry run' if so desired).
+
+To give you a rough idea, the beneficiary table will probably load about 67M records
+in 30 minutes or so; but that will be the 'easy one'! A given claims table will probably
+take days so it is important to run the script in a nohup session not subject to screen
+session timeouts, etc.
+
+It would not be surprising to see the data migration taking over a week to process all
+the tables. Babysitting (or at least monitoring write IOPS from the AWS console) is
+encouraged.
+
+If for whatever reason. something goes wrong, you may be able to perform remediation on a
+table whose data has not been fully migrated. This would involve performing a 'truncate'
+on the table, edit the 02_migrate_data.sh and comment out those tables that you know have
+successfully had their data migrated, and then restart the migration shell script.
+
+Step 5:
+=======
+Hopefully we arrive at this step without too much pain and suffering. Now it's time to
+verify our migrated data. There is a series of table data verification scripts; each script
+essentially does the following:
+
+a) will check 500,000 records, comparing the current table data vs. the migrated table
+   data.
+   
+b) each script initially creates an array of 500k beneficiary IDs or 500k of claims IDs
+   based on data in the current table(s) generated via a Bernoulli randomization of some
+   percent of the table rows.
+   
+c) a record that matches the claim or beneficiary ID is retrieved from both the current
+   table and the newly created (migrated) table, and every column is then compared for
+   exactness; any instance in which the values don't match triggers two things:
+   
+   1) a log message is written out to SYSOUT (which will be written to a log file)
+   2) a record is written to a table (migration_errors) which will capture the
+      beneficiary or claim ID for the discrepancy as well as the verification being
+      performed (i.e., "CarrierClaims" vs. carrier_claims).
+
+d) any discrepancies captured in the migration_errors table require the developer to
+   determine the root cause of the issue, truncate that table's data, and re-run the
+   appropriate migration script to re-populate the new table; for an example, say a
+   discrepancy was discovered between "BeneficiaryMonthly" vs. beneficiary_monthly:
+   
+   1) determine root cause and remediate migration script (insert_beneficiary_monthly.sql)
+   2) truncate beneficiary_monthly
+   3) execute insert_beneficiary_monthly.sql
+   4) re-run the verification (verify_beneficiary_monthly.sql)
+   
+   This data verifcation process should have ZERO discrpancies in order to assert that the
+   data was successfully migrated.
+   
+
+
