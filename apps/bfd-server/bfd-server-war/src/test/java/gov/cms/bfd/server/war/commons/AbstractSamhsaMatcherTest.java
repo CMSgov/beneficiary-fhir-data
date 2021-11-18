@@ -33,7 +33,7 @@ import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
 
 @RunWith(Enclosed.class)
-public class AbsttSamhsaMatcherTest {
+public class AbstractSamhsaMatcherTest {
 
   private static final IllegalStateException INVOCATION_EXCEPTION =
       new IllegalStateException("Method was not called with expected arguments for test");
@@ -49,7 +49,7 @@ public class AbsttSamhsaMatcherTest {
     public void shouldReturnColumnValues() {
       List<String> expected = List.of("1", "2", "3", "4");
       List<String> actual =
-          AbstractSamhsaMatcher.resourceCsvColumnToList("test_file.csv", "columnB");
+          AbstractSamhsaMatcher.resourceCsvColumnToList("samhsa_codes_test_file.csv", "columnB");
 
       assertEquals(expected, actual);
     }

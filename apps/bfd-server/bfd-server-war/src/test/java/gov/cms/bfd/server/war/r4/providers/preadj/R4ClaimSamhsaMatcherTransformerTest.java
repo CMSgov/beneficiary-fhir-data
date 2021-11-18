@@ -41,7 +41,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     public static Iterable<Object[]> parameters() {
       return List.of(
           new Object[][] {
-            // TODO: ICD 9 codes not implemented yet, enable this test case when it is
+            // TODO: [PACA-263] ICD 9 codes not implemented yet, enable this test case when it is
             // {
             //      "SAMHSA ICD 9 Diagnosis code (Admitting)",
             //      NON_SAMHSA_CODE,
@@ -74,7 +74,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
               true,
               "not correctly detected."
             },
-            // TODO: ICD 9 codes not implemented yet, enable this test case when it is
+            // TODO: [PACA-263] ICD 9 codes not implemented yet, enable this test case when it is
             // {
             //      "SAMHSA ICD 9 Proc code",
             //      NON_SAMHSA_CODE,
@@ -181,7 +181,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
               true,
               "not correctly detected."
             },
-            // TODO: Proc codes for MCS claims will be altered in a future ticket to use ICD
+            // TODO: [PACA-323] Proc codes for MCS claims will be altered in a future ticket to use
+            // ICD
             //  code systems, add these test cases when they are
             // {
             //  "SAMHSA ICD 9 Proc code",
