@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.shared;
+package gov.cms.bfd.sharedutils.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -7,7 +7,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -22,7 +26,9 @@ import java.util.function.Function;
  * default values but allow environment variables to override anything in the Map.
  */
 public class ConfigLoader {
-  private final Function<String, String> source;
+  private final Function<String, Collection<String>> source;
+
+  private static final String NOT_VALID_INTEGER = "not a valid integer";
 
   /**
    * Constructs a ConfigLoader that uses the provided Function as the source of key/value
@@ -31,7 +37,7 @@ public class ConfigLoader {
    *
    * @param source function used to obtain key/value configuration data
    */
-  public ConfigLoader(Function<String, String> source) {
+  public ConfigLoader(Function<String, Collection<String>> source) {
     this.source = source;
   }
 
@@ -45,6 +51,24 @@ public class ConfigLoader {
     return new Builder();
   }
 
+  public List<String> stringValues(String name) {
+    final Collection<String> values = source.apply(name);
+
+    if (values == null || values.isEmpty()) {
+      throw new ConfigException(name, "required option not provided");
+    } else {
+      return new ArrayList<>(values);
+    }
+  }
+
+  public List<String> stringValues(String name, Collection<String> defaults) {
+    final Collection<String> values = source.apply(name);
+
+    return (values == null || values.isEmpty())
+        ? new ArrayList<>(defaults)
+        : new ArrayList<>(values);
+  }
+
   /**
    * Gets a required configuration value.
    *
@@ -53,12 +77,7 @@ public class ConfigLoader {
    * @throws ConfigException if there is no non-empty value
    */
   public String stringValue(String name) {
-    final String value = source.apply(name);
-    if (Strings.isNullOrEmpty(value)) {
-      throw new ConfigException(name, "required option not provided");
-    } else {
-      return value;
-    }
+    return stringValues(name).get(0);
   }
 
   /**
@@ -68,8 +87,15 @@ public class ConfigLoader {
    * @return either the non-empty string value or defaultValue
    */
   public String stringValue(String name, String defaultValue) {
-    final String value = source.apply(name);
-    return Strings.isNullOrEmpty(value) ? defaultValue : value;
+    return stringValues(name, Collections.singletonList(defaultValue)).get(0);
+  }
+
+  public Optional<List<String>> stringsOption(String name) {
+    final Collection<String> values = source.apply(name);
+
+    return (values == null || values.isEmpty())
+        ? Optional.empty()
+        : Optional.of(new ArrayList<>(values));
   }
 
   /**
@@ -79,8 +105,9 @@ public class ConfigLoader {
    * @return empty Option if there is no non-empty value, otherwise Option holding the value
    */
   public Optional<String> stringOption(String name) {
-    final String value = source.apply(name);
-    return Strings.isNullOrEmpty(value) ? Optional.empty() : Optional.of(value);
+    Optional<List<String>> optional = stringsOption(name);
+
+    return optional.map(strings -> strings.get(0));
   }
 
   /**
@@ -91,14 +118,12 @@ public class ConfigLoader {
    * @throws ConfigException if there is no valid integer value
    */
   public int intValue(String name) {
-    final String value = source.apply(name);
-    if (Strings.isNullOrEmpty(value)) {
-      throw new ConfigException(name, "required option not provided");
-    }
+    final String value = stringValue(name);
+
     try {
       return Integer.parseInt(value);
     } catch (Exception ex) {
-      throw new ConfigException(name, "not a valid integer", ex);
+      throw new ConfigException(name, NOT_VALID_INTEGER, ex);
     }
   }
 
@@ -110,14 +135,16 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but was not a valid integer
    */
   public int intValue(String name, int defaultValue) {
-    final String value = source.apply(name);
-    if (Strings.isNullOrEmpty(value)) {
+    Optional<String> optional = stringOption(name);
+
+    if (!optional.isPresent()) {
       return defaultValue;
     }
+
     try {
-      return Integer.parseInt(value);
+      return Integer.parseInt(optional.get());
     } catch (Exception ex) {
-      throw new ConfigException(name, "not a valid integer", ex);
+      throw new ConfigException(name, NOT_VALID_INTEGER, ex);
     }
   }
 
@@ -129,14 +156,10 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but was not a valid integer
    */
   public Optional<Integer> intOption(String name) {
-    final String value = source.apply(name);
-    if (Strings.isNullOrEmpty(value)) {
-      return Optional.empty();
-    }
     try {
-      return Optional.of(Integer.parseInt(value));
+      return stringOption(name).map(Integer::parseInt);
     } catch (Exception ex) {
-      throw new ConfigException(name, "not a valid integer", ex);
+      throw new ConfigException(name, NOT_VALID_INTEGER, ex);
     }
   }
 
@@ -148,12 +171,8 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but was not a valid long
    */
   public Optional<Long> longOption(String name) {
-    final String value = source.apply(name);
-    if (Strings.isNullOrEmpty(value)) {
-      return Optional.empty();
-    }
     try {
-      return Optional.of(Long.parseLong(value));
+      return stringOption(name).map(Long::parseLong);
     } catch (Exception ex) {
       throw new ConfigException(name, "not a valid long", ex);
     }
@@ -233,11 +252,13 @@ public class ConfigLoader {
    * @throws ConfigException if a value existed but it wasn't a valid boolean
    */
   public boolean booleanValue(String name, boolean defaultValue) {
-    String value = source.apply(name);
-    if (Strings.isNullOrEmpty(value)) {
+    Optional<String> value = stringOption(name);
+
+    if (!value.isPresent()) {
       return defaultValue;
     }
-    switch (value.toLowerCase()) {
+
+    switch (value.get().toLowerCase()) {
       case "true":
         return true;
       case "false":
@@ -313,30 +334,41 @@ public class ConfigLoader {
    * that calls can be chained.
    */
   public static class Builder {
-    private Function<String, String> source = ignored -> null;
+    private Function<String, Collection<String>> source = ignored -> null;
 
     public ConfigLoader build() {
       return new ConfigLoader(source);
     }
 
-    public Builder add(Function<String, String> newSource) {
-      Function<String, String> oldSource = this.source;
+    public Builder add(Function<String, Collection<String>> newSource) {
+      Function<String, Collection<String>> oldSource = this.source;
       this.source =
           name -> {
-            String value = newSource.apply(name);
-            return Strings.isNullOrEmpty(value) ? oldSource.apply(name) : value;
+            Collection<String> values = newSource.apply(name);
+            return (values == null || values.isEmpty()) ? oldSource.apply(name) : values;
           };
       return this;
     }
 
+    public Builder addSingle(Function<String, String> newSource) {
+      Function<String, Collection<String>> wrappedNewSource =
+          name -> {
+            String value = newSource.apply(name);
+
+            return (Strings.isNullOrEmpty(value)) ? null : Collections.singletonList(value);
+          };
+
+      return add(wrappedNewSource);
+    }
+
     /** Adds a source that pulls values from environment variables. */
     public Builder addEnvironmentVariables() {
-      return add(System::getenv);
+      return addSingle(System::getenv);
     }
 
     /** Adds a source that pulls values from system properties. */
     public Builder addSystemProperties() {
-      return add(System::getProperty);
+      return addSingle(System::getProperty);
     }
 
     /**
@@ -345,7 +377,7 @@ public class ConfigLoader {
      * @param properties source of properties
      */
     public Builder addProperties(Properties properties) {
-      return add(properties::getProperty);
+      return addSingle(properties::getProperty);
     }
 
     /**
@@ -378,7 +410,7 @@ public class ConfigLoader {
           map.put(arg.substring(0, prefixEnd), arg.substring(prefixEnd + 1));
         }
       }
-      return add(map::get);
+      return addSingle(map::get);
     }
   }
 }
