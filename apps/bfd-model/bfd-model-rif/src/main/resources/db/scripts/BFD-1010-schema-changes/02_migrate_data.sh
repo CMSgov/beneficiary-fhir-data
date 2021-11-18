@@ -174,7 +174,7 @@ bene_end=$SECONDS; duration=$(( bene_end - bene_start ))
 echo "beneficiaries loaded after ~$((duration / 60)) minutes"
 echo
 
-# parent tables
+# parent tables...these are run synchronously
 echo "LOADING PARENT TABLES..."
 parent_start=$SECONDS
 for t in "${parent_tables[@]}"; do
