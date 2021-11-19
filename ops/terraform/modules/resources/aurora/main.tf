@@ -88,7 +88,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
   master_username = "bfduser"
   master_password = random_password.aurora_cluster.result
 
-  tags                  = merge({ Layer = "data" }, var.env_config.tags)
+  tags                  = merge({ Layer = "data", "cpm backup" = "Weekly Monthly" }, var.env_config.tags)
   copy_tags_to_snapshot = true
 
   lifecycle {
