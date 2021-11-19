@@ -11,10 +11,11 @@ import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -91,8 +92,9 @@ public class FissClaimTransformerV2 {
     claim.setId("f-" + claimGroup.getDcn());
     claim.setContained(List.of(getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
     claim.setIdentifier(getIdentifier(claimGroup));
+    claim.setExtension(getExtension(claimGroup));
     claim.setStatus(Claim.ClaimStatus.ACTIVE);
-    claim.setType(getType(claimGroup));
+    claim.setType(getType());
     claim.setSupportingInfo(getSupportingInfo(claimGroup));
     claim.setBillablePeriod(getBillablePeriod(claimGroup));
     claim.setUse(Claim.Use.CLAIM);
@@ -100,6 +102,7 @@ public class FissClaimTransformerV2 {
     claim.setTotal(getTotal(claimGroup));
     claim.setProvider(new Reference("#provider-org"));
     claim.setPatient(new Reference("#patient"));
+    claim.setFacility(getFacility(claimGroup));
     claim.setDiagnosis(getDiagnosis(claimGroup, isIcd9));
     claim.setProcedure(getProcedure(claimGroup, isIcd9));
     claim.setInsurance(getInsurance(claimGroup));
@@ -133,14 +136,22 @@ public class FissClaimTransformerV2 {
             .setValue(claimGroup.getDcn()));
   }
 
-  private static CodeableConcept getType(PreAdjFissClaim claimGroup) {
+  private static List<Extension> getExtension(PreAdjFissClaim claimGroup) {
+    return claimGroup.getServTypeCd() == null
+        ? null
+        : List.of(
+            new Extension("https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd")
+                .setValue(
+                    new Coding(
+                        "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+                        claimGroup.getServTypeCd(),
+                        null)));
+  }
+
+  private static CodeableConcept getType() {
     return new CodeableConcept()
         .setCoding(
             List.of(
-                new Coding(
-                    "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
-                    claimGroup.getServTypeCd(),
-                    null),
                 new Coding(
                     ClaimType.INSTITUTIONAL.getSystem(),
                     ClaimType.INSTITUTIONAL.toCode(),
@@ -149,21 +160,23 @@ public class FissClaimTransformerV2 {
 
   private static List<Claim.SupportingInformationComponent> getSupportingInfo(
       PreAdjFissClaim claimGroup) {
-    return List.of(
-        new Claim.SupportingInformationComponent()
-            .setCategory(
-                new CodeableConcept(
-                    new Coding(
-                        "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-                        "typeofbill",
-                        "Type of Bill")))
-            .setCode(
-                new CodeableConcept(
-                    new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
-                        claimGroup.getFreqCd(),
-                        null)))
-            .setSequence(1));
+    return claimGroup.getFreqCd() == null
+        ? null
+        : List.of(
+            new Claim.SupportingInformationComponent()
+                .setCategory(
+                    new CodeableConcept(
+                        new Coding(
+                            "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+                            "typeofbill",
+                            "Type of Bill")))
+                .setCode(
+                    new CodeableConcept(
+                        new Coding(
+                            "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
+                            claimGroup.getFreqCd(),
+                            null)))
+                .setSequence(1));
   }
 
   private static Period getBillablePeriod(PreAdjFissClaim claimGroup) {
@@ -181,7 +194,18 @@ public class FissClaimTransformerV2 {
   }
 
   private static Money getTotal(PreAdjFissClaim claimGroup) {
-    return new Money().setValue(claimGroup.getTotalChargeAmount()).setCurrency("USD");
+    Money total;
+
+    if (claimGroup.getTotalChargeAmount() != null) {
+      total = new Money();
+
+      total.setValue(claimGroup.getTotalChargeAmount());
+      total.setCurrency("USD");
+    } else {
+      total = null;
+    }
+
+    return total;
   }
 
   private static Resource getContainedPatient(PreAdjFissClaim claimGroup) {
@@ -204,14 +228,7 @@ public class FissClaimTransformerV2 {
                                 "Patient's Medicare Number")))
                     .setSystem("http://hl7.org/fhir/sid/us-mbi")
                     .setValue(claimGroup.getMbi())))
-        .setName(
-            List.of(
-                new HumanName()
-                    .setFamily(benePayer.getBeneLastName())
-                    .setGiven(
-                        List.of(
-                            new StringType(benePayer.getBeneFirstName()),
-                            new StringType(benePayer.getBeneMidInit())))))
+        .setName(getBeneName(benePayer))
         .setBirthDate(localDateToDate(benePayer.getBeneDob()))
         .setGender(
             benePayer.getBeneSex() == null
@@ -220,30 +237,93 @@ public class FissClaimTransformerV2 {
         .setId("patient");
   }
 
+  private static List<HumanName> getBeneName(PreAdjFissPayer benePayer) {
+    HumanName name = new HumanName().setFamily(benePayer.getBeneLastName());
+
+    if (benePayer.getBeneFirstName() != null || benePayer.getBeneMidInit() != null) {
+      name.setGiven(
+          List.of(
+              new StringType(benePayer.getBeneFirstName()),
+              new StringType(benePayer.getBeneMidInit())));
+    }
+
+    return List.of(name);
+  }
+
   private static Resource getContainedProvider(PreAdjFissClaim claimGroup) {
     return new Organization()
         .setIdentifier(
             List.of(
                 new Identifier()
+                    .setType(
+                        new CodeableConcept(
+                            new Coding(
+                                C4BBOrganizationIdentifierType.PRN.getSystem(),
+                                C4BBOrganizationIdentifierType.PRN.toCode(),
+                                C4BBOrganizationIdentifierType.PRN.getDisplay())))
                     .setSystem("https://bluebutton.cms.gov/resources/variables/prvdr_num")
                     .setValue(claimGroup.getMedaProvId()),
                 new Identifier()
+                    .setType(
+                        new CodeableConcept(
+                            new Coding(
+                                C4BBOrganizationIdentifierType.TAX.getSystem(),
+                                C4BBOrganizationIdentifierType.TAX.toCode(),
+                                C4BBOrganizationIdentifierType.TAX.getDisplay())))
                     .setSystem("hps://bluebutton.cms.gov/resources/variables/tax_num")
                     .setValue(claimGroup.getFedTaxNumber()),
                 new Identifier()
+                    .setType(
+                        new CodeableConcept(
+                            new Coding(
+                                C4BBIdentifierType.NPI.getSystem(),
+                                C4BBIdentifierType.NPI.toCode(),
+                                C4BBIdentifierType.NPI.getDisplay())))
                     .setSystem("http://hl7.org/fhir/sid/us-npi")
                     .setValue(claimGroup.getNpiNumber())))
         .setId("provider-org");
   }
 
+  private static Reference getFacility(PreAdjFissClaim claimGroup) {
+    if (claimGroup.getLobCd() != null || claimGroup.getNpiNumber() != null) {
+      Reference reference = new Reference();
+
+      if (claimGroup.getNpiNumber() != null) {
+        reference.setIdentifier(
+            new Identifier()
+                .setType(
+                    new CodeableConcept(
+                        new Coding(
+                            "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+                            "npi",
+                            null)))
+                .setSystem("http://hl7.org/fhir/sid/us-npi")
+                .setValue(claimGroup.getNpiNumber()));
+      }
+
+      if (claimGroup.getLobCd() != null) {
+        reference.setExtension(
+            List.of(
+                new Extension("https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd")
+                    .setValue(
+                        new Coding(
+                            "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+                            claimGroup.getLobCd(),
+                            null))));
+      }
+
+      return reference;
+    }
+
+    return null;
+  }
+
   private static List<Claim.DiagnosisComponent> getDiagnosis(
       PreAdjFissClaim claimGroup, boolean isIcd9) {
-    List<PreAdjFissDiagnosisCode> diagnosisCodes = new ArrayList<>(claimGroup.getDiagCodes());
-    diagnosisCodes.sort(Comparator.comparing(PreAdjFissDiagnosisCode::getPriority));
-
     final String systemSuffix = isIcd9 ? "9-cm" : "10";
 
-    return diagnosisCodes.stream()
+    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<PreAdjFissDiagnosisCode>of())
+        .stream()
         .map(
             diagnosisCode -> {
               Claim.DiagnosisComponent component =
@@ -258,7 +338,7 @@ public class FissClaimTransformerV2 {
                                           diagnosisCode.getDiagCd2(),
                                           null))));
 
-              if (diagnosisCode.getDiagPoaInd() != null
+              if (diagnosisCode.getDiagPoaInd() != null // Present on Admission
                   && WHITE_LISTED_POA.contains(diagnosisCode.getDiagPoaInd().toLowerCase())) {
                 component.setOnAdmission(
                     new CodeableConcept(
@@ -284,18 +364,16 @@ public class FissClaimTransformerV2 {
 
               return component;
             })
+        .sorted(Comparator.comparing(Claim.DiagnosisComponent::getSequence))
         .collect(Collectors.toList());
   }
 
   private static List<Claim.ProcedureComponent> getProcedure(
       PreAdjFissClaim claimGroup, boolean isIcd9) {
-    List<PreAdjFissProcCode> procCodes =
-        new ArrayList<>(ObjectUtils.defaultIfNull(claimGroup.getProcCodes(), List.of()));
-    procCodes.sort(Comparator.comparingInt(PreAdjFissProcCode::getPriority));
-
     final String systemSuffix = isIcd9 ? "9-cm" : "10";
 
-    return procCodes.stream()
+    return ObjectUtils.defaultIfNull(claimGroup.getProcCodes(), List.<PreAdjFissProcCode>of())
+        .stream()
         .map(
             procCode ->
                 new Claim.ProcedureComponent()
@@ -312,6 +390,7 @@ public class FissClaimTransformerV2 {
                                         "http://hl7.org/fhir/sid/icd-" + systemSuffix,
                                         procCode.getProcCode(),
                                         null)))))
+        .sorted(Comparator.comparing(Claim.ProcedureComponent::getSequence))
         .collect(Collectors.toList());
   }
 
@@ -332,6 +411,7 @@ public class FissClaimTransformerV2 {
 
               return component;
             })
+        .sorted(Comparator.comparing(Claim.InsuranceComponent::getSequence))
         .collect(Collectors.toList());
   }
 
