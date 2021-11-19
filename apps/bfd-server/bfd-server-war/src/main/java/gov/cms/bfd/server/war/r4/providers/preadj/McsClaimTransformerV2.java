@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -300,7 +299,7 @@ public class McsClaimTransformerV2 {
                             claimGroup.getDiagCodes().stream()
                                 .filter(
                                     diagnosisCode ->
-                                        Objects.equals(
+                                        codesAreEqual(
                                             diagnosisCode.getIdrDiagCode(), detailDiagnosisCode))
                                 .findFirst();
 
@@ -343,5 +342,15 @@ public class McsClaimTransformerV2 {
     return localDate == null
         ? null
         : Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+  }
+
+  private static String normalizeIcdCode(String code) {
+    return code.trim().replace(".", "").toUpperCase();
+  }
+
+  private static boolean codesAreEqual(String code1, String code2) {
+    return code1 != null
+        && code2 != null
+        && normalizeIcdCode(code1).equals(normalizeIcdCode(code2));
   }
 }

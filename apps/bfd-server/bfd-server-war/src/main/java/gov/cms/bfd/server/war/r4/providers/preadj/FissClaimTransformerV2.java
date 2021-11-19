@@ -350,7 +350,7 @@ public class FissClaimTransformerV2 {
               }
 
               if (claimGroup.getAdmitDiagCode() != null
-                  && claimGroup.getAdmitDiagCode().equals(diagnosisCode.getDiagCd2())) {
+                  && codesAreEqual(claimGroup.getAdmitDiagCode(), diagnosisCode.getDiagCd2())) {
                 component.setType(
                     List.of(
                         new CodeableConcept()
@@ -419,5 +419,15 @@ public class FissClaimTransformerV2 {
     return localDate == null
         ? null
         : Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+  }
+
+  private static String normalizeIcdCode(String code) {
+    return code.trim().replace(".", "").toUpperCase();
+  }
+
+  private static boolean codesAreEqual(String code1, String code2) {
+    return code1 != null
+        && code2 != null
+        && normalizeIcdCode(code1).equals(normalizeIcdCode(code2));
   }
 }
