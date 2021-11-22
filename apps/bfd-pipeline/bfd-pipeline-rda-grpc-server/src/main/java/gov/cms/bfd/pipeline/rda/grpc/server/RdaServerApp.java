@@ -2,8 +2,8 @@ package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
 import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.Server;
@@ -39,7 +39,12 @@ public class RdaServerApp {
     final Config config = new Config(args);
     LOGGER.info("Starting server on port {}.", config.getPort());
     Server server =
-        RdaServer.startLocal(config.getPort(), config::createFissClaims, config::createMcsClaims);
+        RdaServer.startLocal(
+            RdaServer.LocalConfig.builder()
+                .port(config.getPort())
+                .fissSourceFactory(config::createFissClaims)
+                .mcsSourceFactory(config::createMcsClaims)
+                .build());
     server.awaitTermination();
     LOGGER.info("server stopping.");
   }
@@ -67,7 +72,8 @@ public class RdaServerApp {
                 .enumOption("s3Region", Regions::fromName)
                 .orElse(SharedS3Utilities.REGION_DEFAULT);
         final AmazonS3 s3Client = SharedS3Utilities.createS3Client(s3Region);
-        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get());
+        final String s3Directory = config.stringOption("s3Directory").orElse("");
+        s3Sources = new S3JsonMessageSources(s3Client, s3Bucket.get(), s3Directory);
       } else {
         s3Sources = null;
       }

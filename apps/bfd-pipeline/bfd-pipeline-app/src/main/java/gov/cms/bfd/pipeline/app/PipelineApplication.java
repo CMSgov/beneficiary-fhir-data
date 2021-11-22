@@ -18,6 +18,7 @@ import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetMonitorListener;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.S3TaskManager;
 import gov.cms.bfd.pipeline.ccw.rif.load.RifLoader;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -26,6 +27,7 @@ import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecord;
 import gov.cms.bfd.pipeline.sharedutils.jobs.store.PipelineJobRecordStore;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +50,7 @@ public final class PipelineApplication {
    * This {@link System#exit(int)} value should be used when the application exits due to an
    * unhandled exception.
    */
-  // TODO rename this to EXIT_CODE_JOB_FAILED
-  static final int EXIT_CODE_MONITOR_ERROR = PipelineManager.EXIT_CODE_MONITOR_ERROR;
+  static final int EXIT_CODE_JOB_FAILED = PipelineManager.EXIT_CODE_MONITOR_ERROR;
 
   /**
    * This method is the one that will get called when users launch the application from the command
@@ -166,6 +167,14 @@ public final class PipelineApplication {
               Clock.systemUTC());
 
       final RdaLoadOptions rdaLoadOptions = appConfig.getRdaLoadOptions().get();
+
+      final Optional<RdaServerJob> mockServerJob = rdaLoadOptions.createRdaServerJob();
+      if (mockServerJob.isPresent()) {
+        pipelineManager.registerJob(mockServerJob.get());
+        LOGGER.warn("Registered RdaServerJob.");
+      } else {
+        LOGGER.info("Skipping RdaServerJob registration - not enabled in app configuration.");
+      }
 
       pipelineManager.registerJob(rdaLoadOptions.createFissClaimsLoadJob(rdaAppState));
       LOGGER.info("Registered RdaFissClaimLoadJob.");
@@ -326,6 +335,6 @@ public final class PipelineApplication {
      * and 2) the shutdown monitor will call PipelineManager.stop(). Pack it up: we're going home,
      * folks.
      */
-    System.exit(EXIT_CODE_MONITOR_ERROR);
+    System.exit(EXIT_CODE_JOB_FAILED);
   }
 }

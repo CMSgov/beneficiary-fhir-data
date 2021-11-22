@@ -8,19 +8,25 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSource;
+import io.grpc.CallOptions;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+import javax.annotation.Nullable;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +49,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   private final GrpcStreamCaller<TResponse> caller;
   private final String claimType;
   private final Optional<Long> startingSequenceNumber;
+  private final Supplier<CallOptions> callOptionsFactory;
   private final Metrics metrics;
   private ManagedChannel channel;
 
@@ -61,7 +68,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
-    this(config.createChannel(), caller, appMetrics, claimType, startingSequenceNumber);
+    this(
+        config.createChannel(),
+        caller,
+        config::createCallOptions,
+        appMetrics,
+        claimType,
+        startingSequenceNumber);
   }
 
   /**
@@ -78,11 +91,13 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   GrpcRdaSource(
       ManagedChannel channel,
       GrpcStreamCaller<TResponse> caller,
+      Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
     this.caller = Preconditions.checkNotNull(caller);
     this.claimType = Preconditions.checkNotNull(claimType);
+    this.callOptionsFactory = callOptionsFactory;
     this.channel = Preconditions.checkNotNull(channel);
     this.startingSequenceNumber = Preconditions.checkNotNull(startingSequenceNumber);
     metrics = new Metrics(appMetrics, claimType);
@@ -112,7 +127,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
           claimType,
           startingSequenceNumber);
       final GrpcResponseStream<TResponse> responseStream =
-          caller.callService(channel, startingSequenceNumber);
+          caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);
       final List<TResponse> batch = new ArrayList<>();
       try {
         while (responseStream.hasNext()) {
@@ -233,30 +248,88 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   }
 
   /** This class contains the configuration settings specific to the RDA rRPC service. */
+  @Getter
+  @EqualsAndHashCode
   public static class Config implements Serializable {
     private static final long serialVersionUID = 6667857735839524L;
 
+    /** The type of RDA API server to connect to. */
+    private final ServerType serverType;
+    /** The hostname or IP address of the host running the RDA API. */
     private final String host;
+    /** The port on which the RDA API listens for connections. */
     private final int port;
+    /** The name used to connect to an in-process mock RDA API server. */
+    private final String inProcessServerName;
+    /** The maximum time the stream is allowed to remain idle before being automatically closed. */
     private final Duration maxIdle;
+    /** The token to pass to the RDA API server to authenticate the client. */
+    @Nullable private final String authenticationToken;
 
-    public Config(String host, int port, Duration maxIdle) {
-      this.host = Preconditions.checkNotNull(host);
+    /**
+     * Specifies which type of server we want to connect to. {@code Remote} is the normal
+     * configuration. {@code InProcess} is used when populating an environment with synthetic data
+     * served by a mock RDA API server running as a pipeline job.
+     */
+    public enum ServerType {
+      Remote,
+      InProcess
+    }
+
+    @Builder
+    private Config(
+        ServerType serverType,
+        String host,
+        int port,
+        String inProcessServerName,
+        Duration maxIdle,
+        String authenticationToken) {
+      this.serverType = Preconditions.checkNotNull(serverType, "serverType is required");
+      this.host = host;
       this.port = port;
+      this.inProcessServerName = inProcessServerName;
       this.maxIdle = maxIdle;
-      Preconditions.checkArgument(host.length() >= 1, "host name is empty");
-      Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
+      if (serverType == ServerType.Remote) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(host), "host name is required");
+        Preconditions.checkArgument(port >= 1, "port is negative (%s)", port);
+      } else {
+        Preconditions.checkArgument(
+            !Strings.isNullOrEmpty(inProcessServerName), "inProcessServerName is required");
+      }
+      this.authenticationToken =
+          Strings.isNullOrEmpty(authenticationToken) ? null : authenticationToken;
       Preconditions.checkArgument(maxIdle.toMillis() >= 1_000, "maxIdle less than 1 second");
     }
 
-    /** @return the hostname or IP address of the host running the RDA API. */
-    public String getHost() {
-      return host;
+    private ManagedChannel createChannel() {
+      return createChannelBuilder()
+          .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS)
+          .enableRetry()
+          .build();
     }
 
-    /** @return the port on which the RDA API listens for connections. */
-    public int getPort() {
-      return port;
+    private ManagedChannelBuilder<?> createChannelBuilder() {
+      if (serverType == ServerType.InProcess) {
+        return createInProcessChannelBuilder();
+      } else {
+        return createRemoteChannelBuilder();
+      }
+    }
+
+    /**
+     * Creates a CallOptions object for an API call. Will be {@link CallOptions.DEFAULT} if no token
+     * has been defined or a BearerToken if one has been defined.
+     *
+     * @return a valid CallOptions object
+     */
+    public CallOptions createCallOptions() {
+      CallOptions answer = CallOptions.DEFAULT;
+      if (authenticationToken != null) {
+        answer = answer.withCallCredentials(new BearerToken(authenticationToken));
+      } else {
+        LOGGER.warn("authenticationToken has not been set - calling server with no token");
+      }
+      return answer;
     }
 
     /**
@@ -271,34 +344,16 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
       return maxIdle;
     }
 
-    private ManagedChannel createChannel() {
-      final ManagedChannelBuilder<?> builder =
-          ManagedChannelBuilder.forAddress(host, port)
-              .idleTimeout(maxIdle.toMillis(), TimeUnit.MILLISECONDS)
-              .enableRetry();
+    private ManagedChannelBuilder<?> createRemoteChannelBuilder() {
+      final ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forAddress(host, port);
       if (host.equals("localhost")) {
         builder.usePlaintext();
       }
-      return builder.build();
+      return builder;
     }
 
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (!(o instanceof Config)) {
-        return false;
-      }
-      Config config = (Config) o;
-      return port == config.port
-          && Objects.equals(host, config.host)
-          && Objects.equals(maxIdle, config.maxIdle);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(host, port, maxIdle);
+    private ManagedChannelBuilder<?> createInProcessChannelBuilder() {
+      return InProcessChannelBuilder.forName(inProcessServerName);
     }
   }
 

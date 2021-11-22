@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
 import javax.annotation.Nullable;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -174,15 +175,16 @@ public abstract class AbstractRdaLoadJob<TResponse>
      */
     @Nullable private final Long startingMcsSeqNum;
 
-    public Config(
+    @Builder
+    private Config(
         Duration runInterval,
         int batchSize,
-        Optional<Long> startingFissSeqNum,
-        Optional<Long> startingMcsSeqNum) {
+        @Nullable Long startingFissSeqNum,
+        @Nullable Long startingMcsSeqNum) {
       this.runInterval = Preconditions.checkNotNull(runInterval);
       this.batchSize = batchSize;
-      this.startingFissSeqNum = startingFissSeqNum.orElse(null);
-      this.startingMcsSeqNum = startingMcsSeqNum.orElse(null);
+      this.startingFissSeqNum = startingFissSeqNum;
+      this.startingMcsSeqNum = startingMcsSeqNum;
       Preconditions.checkArgument(runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s");
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s");
     }
