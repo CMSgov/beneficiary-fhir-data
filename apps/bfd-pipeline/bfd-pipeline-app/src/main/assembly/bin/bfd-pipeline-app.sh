@@ -8,13 +8,11 @@ echo "JENKINS HOME: "
 echo $JENKINS_HOME
 echo "JENKINS URL: "
 echo JENKINS_URL
-+if [[ -z "${JAVA_HOME}" ]]; then
-+    JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
-+    javaExecutable=${JAVA_HOME}/bin/java
-+else
-+    javaExecutable=java
-+fi
+    JAVA_HOME=$1
+
 echo "JAVA HOME: "
 echo $JAVA_HOME
+echo $(dirname $(readlink -f $(which javac)))
+[ -n "${JAVA_HOME}" ] && javaExecutable=${JAVA_HOME}/bin/java || javaExecutable=java
 
 exec "${javaExecutable}" -cp "${classpath}" "$@" "${mainClass}"

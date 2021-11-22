@@ -626,6 +626,9 @@ public final class PipelineApplicationIT {
               .findFirst()
               .get();
       Path pipelineAppScript = assemblyDirectory.resolve("bfd-pipeline-app.sh");
+      String javaHome = System.getenv("JAVA_HOME");
+
+      String script = pipelineAppScript.toAbsolutePath().toString() + " " + javaHome;
 
       S3MinioConfig minioConfig = S3MinioConfig.Singleton();
       if (minioConfig.useMinio) {
@@ -637,7 +640,7 @@ public final class PipelineApplicationIT {
           String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress)
         };
       }
-      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
+      return new String[] {script};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
