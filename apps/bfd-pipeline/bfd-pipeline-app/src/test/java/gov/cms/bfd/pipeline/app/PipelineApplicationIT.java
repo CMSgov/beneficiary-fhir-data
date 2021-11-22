@@ -78,10 +78,10 @@ public final class PipelineApplicationIT {
     ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
     Thread appRunConsumerThread = new Thread(appRunConsumer);
     appRunConsumerThread.start();
+
     // Wait for it to exit with an error.
     appProcess.waitFor(1, TimeUnit.MINUTES);
     appRunConsumerThread.join();
-
     // Verify that the application exited as expected.
     Assert.assertEquals(PipelineApplication.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
   }
