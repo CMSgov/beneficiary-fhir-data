@@ -9,9 +9,11 @@ echo "JENKINS HOME: "
 echo $JENKINS_HOME
 echo "JENKINS URL: "
 echo JENKINS_URL
-if [[ ! -z "${JENKINS_HOME}" ]] && [[ ! -z "${JENKINS_URL}" ]]; then
-	export JAVA_HOME=/usr/local/openjdk-11/
-    export PATH="${JAVA_HOME}/bin:$PATH"
+if [[ -z "${JAVA_HOME}" ]]; then
+    JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
+    javaExecutable=${JAVA_HOME}/bin/java
+else
+    javaExecutable=java
 fi
 echo "JAVA HOME: "
 echo $JAVA_HOME
