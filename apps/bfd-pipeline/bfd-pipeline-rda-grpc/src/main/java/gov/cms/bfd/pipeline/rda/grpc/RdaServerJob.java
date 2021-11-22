@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import static gov.cms.bfd.pipeline.rda.grpc.server.RdaService.RDA_PROTO_VERSION;
+import static java.lang.String.format;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.annotations.VisibleForTesting;
@@ -9,6 +12,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.S3JsonMessageSources;
 import gov.cms.bfd.pipeline.sharedutils.NullPipelineJobArguments;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -69,7 +73,12 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
       LOGGER.info("starting server with name {} and mode {}", config.serverName, config.serverMode);
       final Server server =
           RdaServer.startInProcess(
-              config.serverName, config::createFissClaims, config::createMcsClaims);
+              RdaServer.InProcessConfig.builder()
+                  .serverName(config.serverName)
+                  .version(config.createVersion())
+                  .fissSourceFactory(config::createFissClaims)
+                  .mcsSourceFactory(config::createMcsClaims)
+                  .build());
       try {
         running.incrementAndGet();
         try {
@@ -184,6 +193,16 @@ public class RdaServerJob implements PipelineJob<NullPipelineJobArguments> {
         final String directory = s3Directory == null ? "" : s3Directory;
         s3Sources = new S3JsonMessageSources(s3Client, s3Bucket, directory);
       }
+    }
+
+    private RdaService.Version createVersion() {
+      RdaService.Version.VersionBuilder versionBuilder = RdaService.Version.builder();
+      if (serverMode == ServerMode.S3) {
+        versionBuilder.version(format("S3:%d:%s", System.currentTimeMillis(), RDA_PROTO_VERSION));
+      } else {
+        versionBuilder.version(format("Random:%d:%s", randomSeed, RDA_PROTO_VERSION));
+      }
+      return versionBuilder.build();
     }
 
     private MessageSource<FissClaimChange> createFissClaims(long sequenceNumber) throws Exception {

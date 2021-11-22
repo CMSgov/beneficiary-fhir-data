@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.shared;
+package gov.cms.bfd.sharedutils.config;
 
 /**
  * These exceptions are thrown by the {@link ConfigLoader} class when it encounters a requirement
