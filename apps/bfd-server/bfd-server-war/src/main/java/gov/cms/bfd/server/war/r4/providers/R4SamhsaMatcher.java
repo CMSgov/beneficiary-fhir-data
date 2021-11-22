@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.r4.providers;
 
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.IcdCode;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.csv.CSVFormat;
@@ -40,8 +42,9 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   private static final CSVFormat CSV_FORMAT = CSVFormat.EXCEL.withHeader();
 
   private static final String DRG =
-      TransformerUtilsV2.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
+      CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
+  // normalized list of ICD9/ICD10/CPT codes
   private final List<String> drgCodes;
   private final List<String> cptCodes;
   private final List<String> icd9ProcedureCodes;
@@ -51,7 +54,7 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
 
   /**
    * Constructs a new {@link R4SamhsaMatcher}, loading the lists of SAMHSA-related codes from the
-   * classpath.
+   * classpath. The list data is normalized as it is loaded.
    */
   public R4SamhsaMatcher() {
     this.drgCodes =
@@ -61,7 +64,9 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
                 .collect(Collectors.toList()));
     this.cptCodes =
         Collections.unmodifiableList(
-            resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code"));
+            resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
+                .map(R4SamhsaMatcher::normalizeHcpcsCode)
+                .collect(Collectors.toList()));
     this.icd9ProcedureCodes =
         Collections.unmodifiableList(
             resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
@@ -428,9 +433,6 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     if (!IcdCode.CODING_SYSTEM_ICD_9.equals(diagnosisCoding.getSystem()))
       throw new IllegalArgumentException();
 
-    /*
-     * Note: per XXX all codes in icd9DiagnosisCodes are already normalized.
-     */
     return icd9DiagnosisCodes.contains(normalizeIcd9Code(diagnosisCoding.getCode()));
   }
 
@@ -493,9 +495,6 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
     if (!IcdCode.CODING_SYSTEM_ICD_10.equals(diagnosisCoding.getSystem()))
       throw new IllegalArgumentException();
 
-    /*
-     * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
-     */
     return icd10DiagnosisCodes.contains(normalizeIcd10Code(diagnosisCoding.getCode()));
   }
 
@@ -520,45 +519,75 @@ public final class R4SamhsaMatcher implements Predicate<ExplanationOfBenefit> {
   }
 
   /**
+   * Checks that for the specified {@link CodeableConcept} the Codings (if any) within contain a
+   * blacklisted SAMHSA procedure code. If any of the systems within the {@link CodeableConcept} are
+   * not known/expected, returns {@code true} and assumes the system is SAMHSA as a safety fallback.
+   *
+   * @param procedureConcept the procedure {@link CodeableConcept} to check
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
+   *     {@link Coding}s that match any of the {@link #cptCodes} or has unknown coding systems,
+   *     <code>false</code> otherwise
+   */
+  private boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
+    // If there are no procedure codes, then we cannot have any blacklisted codes
+    if (procedureConcept.getCoding().isEmpty()) {
+      return false;
+    }
+
+    return hasHcpcsAndSamhsaCptCode(procedureConcept)
+        || !containsOnlyKnownSystems(procedureConcept);
+  }
+
+  /**
+   * @param procedureConcept the procedure {@link CodeableConcept} to check
+   * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains at least
+   *     one {@link Coding} and only contains {@link Coding}s that have known coding systems <code>
+   *     false</code> otherwise
+   */
+  private boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
+    Set<String> codingSystems =
+        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
+
+    String hcpcsCdSystem = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
+
+    // Valid system url for productOrService coding
+    Set<String> hcpcsSystem = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
+
+    // Additional valid coding system URL for backwards-compatibility
+    // See: https://jira.cms.gov/browse/BFD-1345
+    Set<String> backwardsCompatibleHcpcsSystems =
+        Set.of(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsCdSystem);
+
+    return codingSystems.equals(hcpcsSystem)
+        || codingSystems.equals(backwardsCompatibleHcpcsSystems);
+  }
+
+  /**
+   * Checks that for a {@link CodeableConcept} the {@link Coding}s contain a HCPCS system and at
+   * least one blacklisted CPT code.
+   *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
    *     {@link Coding}s that match any of the {@link #cptCodes}, <code>false</code> if they all do
    *     not
    */
-  private boolean containsSamhsaProcedureCode(CodeableConcept procedureConcept) {
-    for (Coding procedureCoding : procedureConcept.getCoding()) {
-      if (TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem())) {
-        if (isSamhsaCptCode(procedureCoding)) return true;
-      } else {
-        /*
-         * Fail safe: if we don't know the procedure Coding system, assume the code is
-         * SAMHSA.
-         */
-        return true;
-      }
-    }
-
-    // No blacklisted procedure Codings found: this procedure isn't SAMHSA-related.
-    return false;
-  }
-
-  /**
-   * @param procedureCoding the procedure {@link Coding} to check
-   * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
-   *     #cptCodes} entries, <code>false</code> if it does not
-   */
-  private boolean isSamhsaCptCode(Coding procedureCoding) {
+  private boolean hasHcpcsAndSamhsaCptCode(CodeableConcept procedureConcept) {
     /*
      * Note: CPT codes represent a subset of possible HCPCS codes (but are the only
      * subset that we blacklist from).
      */
-    if (!TransformerConstants.CODING_SYSTEM_HCPCS.equals(procedureCoding.getSystem()))
-      throw new IllegalArgumentException();
+    Set<String> codingSystems =
+        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
 
-    /*
-     * Note: per XXX all codes in icd10DiagnosisCodes are already normalized.
-     */
-    return cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode()));
+    /* Does the CodeableConcept have a legit HCPCS Coding?
+    DME can have other types, so return false if SAMHSA doesnt apply */
+    if (!codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)) {
+      return false;
+    }
+
+    return procedureConcept.getCoding().stream()
+        .anyMatch(
+            procedureCoding -> cptCodes.contains(normalizeHcpcsCode(procedureCoding.getCode())));
   }
 
   /**

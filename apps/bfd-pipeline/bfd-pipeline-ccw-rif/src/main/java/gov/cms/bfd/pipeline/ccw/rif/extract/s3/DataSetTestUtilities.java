@@ -2,18 +2,13 @@ package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
-import com.amazonaws.services.s3.model.HeadBucketRequest;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.amazonaws.waiters.WaiterParameters;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.exceptions.ChecksumException;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.task.ManifestEntryDownloadTask;
+import gov.cms.bfd.pipeline.sharedutils.s3.SharedS3Utilities;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,7 +18,6 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Random;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -40,24 +34,7 @@ public class DataSetTestUtilities {
    * @return a new, random {@link Bucket} for use in an integration test
    */
   public static Bucket createTestBucket(AmazonS3 s3Client) {
-    String username = System.getProperty("user.name");
-    if (username == null || username.isEmpty()) username = "anonymous";
-    username.replaceAll("@", "-");
-    username.replaceAll("\\\\", "-");
-    int randomId = new Random().nextInt(100000);
-    String bucketName = String.format("bb-test-%s-%d", username, randomId);
-
-    Bucket bucket = s3Client.createBucket(bucketName);
-    /*
-     * Note: S3's API is eventually consistent, so we want to wait for this new bucket to be
-     * available everywhere.
-     */
-    s3Client
-        .waiters()
-        .bucketExists()
-        .run(new WaiterParameters<HeadBucketRequest>(new HeadBucketRequest(bucketName)));
-
-    return bucket;
+    return SharedS3Utilities.createTestBucket(s3Client);
   }
 
   /**
@@ -67,28 +44,7 @@ public class DataSetTestUtilities {
    * @param bucket the {@link Bucket} to empty and delete
    */
   public static void deleteObjectsAndBucket(AmazonS3 s3Client, Bucket bucket) {
-    ListObjectsV2Request s3BucketListRequest = new ListObjectsV2Request();
-    s3BucketListRequest.setBucketName(bucket.getName());
-    ListObjectsV2Result s3ObjectListing;
-    do {
-      s3ObjectListing = s3Client.listObjectsV2(s3BucketListRequest);
-      for (S3ObjectSummary objectSummary : s3ObjectListing.getObjectSummaries()) {
-        s3Client.deleteObject(bucket.getName(), objectSummary.getKey());
-        /*
-         * Note: S3's API is eventually consistent, so we want to wait for the deletes to be
-         * consistent globally.
-         */
-        s3Client
-            .waiters()
-            .objectNotExists()
-            .run(
-                new WaiterParameters<GetObjectMetadataRequest>(
-                    new GetObjectMetadataRequest(bucket.getName(), objectSummary.getKey())));
-      }
-
-      s3BucketListRequest.setContinuationToken(s3ObjectListing.getNextContinuationToken());
-    } while (s3ObjectListing.isTruncated());
-    s3Client.deleteBucket(bucket.getName());
+    SharedS3Utilities.deleteTestBucket(s3Client, bucket);
   }
 
   /**
