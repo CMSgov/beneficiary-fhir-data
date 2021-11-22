@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,6 +47,8 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.AssumptionViolatedException;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Integration tests for {@link PipelineApplication}.
@@ -59,6 +62,7 @@ public final class PipelineApplicationIT {
   /** The POSIX signal number for the <code>SIGTERM</code> signal. */
   private static final int SIGTERM = 15;
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(PipelineApplicationIT.class);
   /**
    * Verifies that {@link PipelineApplication} exits as expected when launched with no configuration
    * environment variables.
@@ -73,12 +77,16 @@ public final class PipelineApplicationIT {
     appRunBuilder.environment().clear();
     appRunBuilder.redirectErrorStream(true);
     Process appProcess = appRunBuilder.start();
+    String text = new String(appProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
+    LOGGER.info("Debug PipelineAppIT  Tests Checkpoint 1: " + text);
     // Read the app's output.
     ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
     Thread appRunConsumerThread = new Thread(appRunConsumer);
     appRunConsumerThread.start();
+    text = new String(appProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
+    LOGGER.info("Debug PipelineAppIT  Tests Checkpoint 2: " + text);
     // Wait for it to exit with an error.
     appProcess.waitFor(1, TimeUnit.MINUTES);
     appRunConsumerThread.join();
