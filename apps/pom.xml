@@ -221,6 +221,7 @@
 				<version>${hibernate.version}</version>
 			</dependency>
 
+			<!-- JavaEE dependencies that were included in the JRE prior to Java 11 -->
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>activation</artifactId>
@@ -271,7 +272,14 @@
 				<version>2.9.7</version>
 			</dependency>
 
-			 <dependency>
+			<dependency>
+				<!-- Just useful. -->
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>31.0.1-jre</version>
+			</dependency>
+
+			<dependency>
 				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
 				 <groupId>org.projectlombok</groupId>
 				 <artifactId>lombok</artifactId>

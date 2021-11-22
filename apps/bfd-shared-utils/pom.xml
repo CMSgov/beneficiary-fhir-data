@@ -20,9 +20,8 @@
 				<!-- Just useful. -->
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>29.0-jre</version>
 			</dependency>
-		<!-- Complie time only -->
+		<!-- Compile time only -->
 		<dependency>
 			<!-- this allows the construction of POJOs without a lot of boilerplate code -->
 			<groupId>org.projectlombok</groupId>
@@ -30,7 +29,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Provide the api and implementation for XML binf which are used by many BFD modules. -->
+		<!-- Provide the api and implementation for XML bind which are used by many BFD modules. -->
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
