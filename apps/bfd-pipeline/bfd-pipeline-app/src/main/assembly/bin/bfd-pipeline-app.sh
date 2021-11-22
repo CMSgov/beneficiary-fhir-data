@@ -14,6 +14,7 @@ if [[ ! -z "${JENKINS_HOME}" ]] && [[ ! -z "${JENKINS_URL}" ]]; then
 fi
 echo "JAVA HOME: "
 echo $JAVA_HOME
+echo dirname $(dirname $(readlink -f $(which javac)))
 [ -n "${JAVA_HOME}" ] && javaExecutable=${JAVA_HOME}/bin/java || javaExecutable=java
 
 exec "${javaExecutable}" -cp "${classpath}" "$@" "${mainClass}"
