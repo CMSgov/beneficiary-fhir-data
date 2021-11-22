@@ -573,6 +573,7 @@ public final class PipelineApplicationIT {
         .put(
             AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
             String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
+    appRunBuilder.environment().put("JAVA_HOME", System.getenv("JAVA_HOME"));
     /*
      * Note: Not explicitly providing AWS credentials here, as the child
      * process will inherit any that are present in this build/test process.
@@ -626,9 +627,6 @@ public final class PipelineApplicationIT {
               .findFirst()
               .get();
       Path pipelineAppScript = assemblyDirectory.resolve("bfd-pipeline-app.sh");
-      String javaHome = System.getenv("JAVA_HOME");
-
-      String script = pipelineAppScript.toAbsolutePath().toString() + " " + javaHome;
 
       S3MinioConfig minioConfig = S3MinioConfig.Singleton();
       if (minioConfig.useMinio) {
@@ -640,7 +638,7 @@ public final class PipelineApplicationIT {
           String.format("-Ds3.localAddress=%s", minioConfig.minioEndpointAddress)
         };
       }
-      return new String[] {script};
+      return new String[] {pipelineAppScript.toAbsolutePath().toString()};
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
