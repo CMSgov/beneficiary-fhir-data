@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -87,7 +88,9 @@ public class FissClaimTransformerV2 {
   private static Claim transformClaim(PreAdjFissClaim claimGroup) {
     Claim claim = new Claim();
 
-    boolean isIcd9 = claimGroup.getStmtCovToDate().isBefore(ICD_9_CUTOFF_DATE);
+    boolean isIcd9 =
+        claimGroup.getStmtCovToDate() != null
+            && claimGroup.getStmtCovToDate().isBefore(ICD_9_CUTOFF_DATE);
 
     claim.setId("f-" + claimGroup.getDcn());
     claim.setContained(List.of(getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
@@ -251,37 +254,56 @@ public class FissClaimTransformerV2 {
   }
 
   private static Resource getContainedProvider(PreAdjFissClaim claimGroup) {
-    return new Organization()
-        .setIdentifier(
-            List.of(
-                new Identifier()
-                    .setType(
-                        new CodeableConcept(
-                            new Coding(
-                                C4BBOrganizationIdentifierType.PRN.getSystem(),
-                                C4BBOrganizationIdentifierType.PRN.toCode(),
-                                C4BBOrganizationIdentifierType.PRN.getDisplay())))
-                    .setSystem("https://bluebutton.cms.gov/resources/variables/prvdr_num")
-                    .setValue(claimGroup.getMedaProvId()),
-                new Identifier()
-                    .setType(
-                        new CodeableConcept(
-                            new Coding(
-                                C4BBOrganizationIdentifierType.TAX.getSystem(),
-                                C4BBOrganizationIdentifierType.TAX.toCode(),
-                                C4BBOrganizationIdentifierType.TAX.getDisplay())))
-                    .setSystem("hps://bluebutton.cms.gov/resources/variables/tax_num")
-                    .setValue(claimGroup.getFedTaxNumber()),
-                new Identifier()
-                    .setType(
-                        new CodeableConcept(
-                            new Coding(
-                                C4BBIdentifierType.NPI.getSystem(),
-                                C4BBIdentifierType.NPI.toCode(),
-                                C4BBIdentifierType.NPI.getDisplay())))
-                    .setSystem("http://hl7.org/fhir/sid/us-npi")
-                    .setValue(claimGroup.getNpiNumber())))
-        .setId("provider-org");
+    Organization organization = new Organization();
+
+    if (claimGroup.getMedaProvId() != null) {
+      organization
+          .getIdentifier()
+          .add(
+              new Identifier()
+                  .setType(
+                      new CodeableConcept(
+                          new Coding(
+                              C4BBOrganizationIdentifierType.PRN.getSystem(),
+                              C4BBOrganizationIdentifierType.PRN.toCode(),
+                              C4BBOrganizationIdentifierType.PRN.getDisplay())))
+                  .setSystem("https://bluebutton.cms.gov/resources/variables/prvdr_num")
+                  .setValue(claimGroup.getMedaProvId()));
+    }
+
+    if (claimGroup.getFedTaxNumber() != null) {
+      organization
+          .getIdentifier()
+          .add(
+              new Identifier()
+                  .setType(
+                      new CodeableConcept(
+                          new Coding(
+                              C4BBOrganizationIdentifierType.TAX.getSystem(),
+                              C4BBOrganizationIdentifierType.TAX.toCode(),
+                              C4BBOrganizationIdentifierType.TAX.getDisplay())))
+                  .setSystem("hps://bluebutton.cms.gov/resources/variables/tax_num")
+                  .setValue(claimGroup.getFedTaxNumber()));
+    }
+
+    if (claimGroup.getNpiNumber() != null) {
+      organization
+          .getIdentifier()
+          .add(
+              new Identifier()
+                  .setType(
+                      new CodeableConcept(
+                          new Coding(
+                              C4BBIdentifierType.NPI.getSystem(),
+                              C4BBIdentifierType.NPI.toCode(),
+                              C4BBIdentifierType.NPI.getDisplay())))
+                  .setSystem("http://hl7.org/fhir/sid/us-npi")
+                  .setValue(claimGroup.getNpiNumber()));
+    }
+
+    organization.setId("provider-org");
+
+    return organization;
   }
 
   private static Reference getFacility(PreAdjFissClaim claimGroup) {
@@ -401,13 +423,15 @@ public class FissClaimTransformerV2 {
               Claim.InsuranceComponent component =
                   new Claim.InsuranceComponent()
                       .setSequence(payer.getPriority())
-                      .setFocal(payer.getPayersName().equals(MEDICARE));
+                      .setFocal(Objects.equals(payer.getPayersName(), MEDICARE));
 
-              component.setExtension(
-                  List.of(
-                      new Extension(
-                          "https://bluebutton.cms.gov/resources/variables/fiss/payers-name/",
-                          new StringType(payer.getPayersName()))));
+              if (payer.getPayersName() != null) {
+                component.setExtension(
+                    List.of(
+                        new Extension(
+                            "https://bluebutton.cms.gov/resources/variables/fiss/payers-name/",
+                            new StringType(payer.getPayersName()))));
+              }
 
               return component;
             })
