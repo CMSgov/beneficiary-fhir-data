@@ -9,10 +9,13 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.CommonCodings;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
+import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -135,7 +138,7 @@ public class FissClaimTransformerV2 {
                         C4BBClaimIdentifierType.UC.getSystem(),
                         C4BBClaimIdentifierType.UC.toCode(),
                         C4BBClaimIdentifierType.UC.getDisplay())))
-            .setSystem("https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntrl_num/")
+            .setSystem(BBCodingSystems.FI_DOC_CLM_CONTROL_NUM)
             .setValue(claimGroup.getDcn()));
   }
 
@@ -143,10 +146,10 @@ public class FissClaimTransformerV2 {
     return claimGroup.getServTypeCd() == null
         ? null
         : List.of(
-            new Extension("https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd")
+            new Extension(BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE)
                 .setValue(
                     new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+                        BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE,
                         claimGroup.getServTypeCd(),
                         null)));
   }
@@ -170,15 +173,12 @@ public class FissClaimTransformerV2 {
                 .setCategory(
                     new CodeableConcept(
                         new Coding(
-                            "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-                            "typeofbill",
-                            "Type of Bill")))
+                            C4BBSupportingInfoType.TYPE_OF_BILL.getSystem(),
+                            C4BBSupportingInfoType.TYPE_OF_BILL.toCode(),
+                            C4BBSupportingInfoType.TYPE_OF_BILL.getDisplay())))
                 .setCode(
                     new CodeableConcept(
-                        new Coding(
-                            "https://bluebutton.cms.gov/resources/variables/clm_freq_cd",
-                            claimGroup.getFreqCd(),
-                            null)))
+                        new Coding(BBCodingSystems.CLM_FREQ_CODE, claimGroup.getFreqCd(), null)))
                 .setSequence(1));
   }
 
@@ -226,10 +226,10 @@ public class FissClaimTransformerV2 {
                     .setType(
                         new CodeableConcept(
                             new Coding(
-                                TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-                                "MC",
-                                "Patient's Medicare Number")))
-                    .setSystem("http://hl7.org/fhir/sid/us-mbi")
+                                CommonCodings.MC.getSystem(),
+                                CommonCodings.MC.getCode(),
+                                CommonCodings.MC.getDisplay())))
+                    .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
                     .setValue(claimGroup.getMbi())))
         .setName(getBeneName(benePayer))
         .setBirthDate(localDateToDate(benePayer.getBeneDob()))
@@ -267,7 +267,7 @@ public class FissClaimTransformerV2 {
                               C4BBOrganizationIdentifierType.PRN.getSystem(),
                               C4BBOrganizationIdentifierType.PRN.toCode(),
                               C4BBOrganizationIdentifierType.PRN.getDisplay())))
-                  .setSystem("https://bluebutton.cms.gov/resources/variables/prvdr_num")
+                  .setSystem(BBCodingSystems.PROVIDER_NUM)
                   .setValue(claimGroup.getMedaProvId()));
     }
 
@@ -282,7 +282,7 @@ public class FissClaimTransformerV2 {
                               C4BBOrganizationIdentifierType.TAX.getSystem(),
                               C4BBOrganizationIdentifierType.TAX.toCode(),
                               C4BBOrganizationIdentifierType.TAX.getDisplay())))
-                  .setSystem("hps://bluebutton.cms.gov/resources/variables/tax_num")
+                  .setSystem(BBCodingSystems.TAX_NUM)
                   .setValue(claimGroup.getFedTaxNumber()));
     }
 
@@ -297,7 +297,7 @@ public class FissClaimTransformerV2 {
                               C4BBIdentifierType.NPI.getSystem(),
                               C4BBIdentifierType.NPI.toCode(),
                               C4BBIdentifierType.NPI.getDisplay())))
-                  .setSystem("http://hl7.org/fhir/sid/us-npi")
+                  .setSystem(TransformerConstants.CODING_NPI_US)
                   .setValue(claimGroup.getNpiNumber()));
     }
 
@@ -316,22 +316,20 @@ public class FissClaimTransformerV2 {
                 .setType(
                     new CodeableConcept(
                         new Coding(
-                            "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                            "npi",
-                            null)))
-                .setSystem("http://hl7.org/fhir/sid/us-npi")
+                            C4BBIdentifierType.NPI.getSystem(),
+                            C4BBIdentifierType.NPI.toCode(),
+                            C4BBIdentifierType.NPI.getDisplay())))
+                .setSystem(TransformerConstants.CODING_NPI_US)
                 .setValue(claimGroup.getNpiNumber()));
       }
 
       if (claimGroup.getLobCd() != null) {
         reference.setExtension(
             List.of(
-                new Extension("https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd")
+                new Extension(BBCodingSystems.CLM_FACILITY_TYPE_CODE)
                     .setValue(
                         new Coding(
-                            "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
-                            claimGroup.getLobCd(),
-                            null))));
+                            BBCodingSystems.CLM_FACILITY_TYPE_CODE, claimGroup.getLobCd(), null))));
       }
 
       return reference;
@@ -429,7 +427,7 @@ public class FissClaimTransformerV2 {
                 component.setExtension(
                     List.of(
                         new Extension(
-                            "https://bluebutton.cms.gov/resources/variables/fiss/payers-name/",
+                            BBCodingSystems.FISS_PAYERS_NAME,
                             new StringType(payer.getPayersName()))));
               }
 

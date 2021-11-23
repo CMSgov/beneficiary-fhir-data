@@ -8,6 +8,8 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.server.war.commons.BBCodingSystems;
+import gov.cms.bfd.server.war.commons.CommonCodings;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
@@ -125,10 +127,10 @@ public class McsClaimTransformerV2 {
                     .setType(
                         new CodeableConcept(
                             new Coding(
-                                TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
-                                "MC",
-                                "Patient's Medicare Number")))
-                    .setSystem("http://hl7.org/fhir/sid/us-mbi")
+                                CommonCodings.MC.getSystem(),
+                                CommonCodings.MC.getCode(),
+                                CommonCodings.MC.getDisplay())))
+                    .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
                     .setValue(claimGroup.getIdrClaimMbi())))
         .setName(getBeneName(claimGroup))
         .setGender(
@@ -158,10 +160,10 @@ public class McsClaimTransformerV2 {
       organization
           .getExtension()
           .add(
-              new Extension("https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-type")
+              new Extension(BBCodingSystems.MCS_IDR_BILL_PROV_TYPE)
                   .setValue(
                       new Coding(
-                          "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-type",
+                          BBCodingSystems.MCS_IDR_BILL_PROV_TYPE,
                           claimGroup.getIdrBillProvType(),
                           null)));
     }
@@ -170,10 +172,10 @@ public class McsClaimTransformerV2 {
       organization
           .getExtension()
           .add(
-              new Extension("https://bluebutton.cms.gov/resources/variables/prvdr_spclty")
+              new Extension(BBCodingSystems.PROVIDER_SPECIALTY)
                   .setValue(
                       new Coding(
-                          "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+                          BBCodingSystems.PROVIDER_SPECIALTY,
                           claimGroup.getIdrBillProvSpec(),
                           null)));
     }
@@ -189,7 +191,7 @@ public class McsClaimTransformerV2 {
                               C4BBOrganizationIdentifierType.TAX.getSystem(),
                               C4BBOrganizationIdentifierType.TAX.toCode(),
                               C4BBOrganizationIdentifierType.TAX.getDisplay())))
-                  .setSystem("https://bluebutton.cms.gov/resources/variables/tax_num")
+                  .setSystem(BBCodingSystems.TAX_NUM)
                   .setValue(claimGroup.getIdrBillProvEin()));
     }
 
@@ -204,7 +206,7 @@ public class McsClaimTransformerV2 {
                               C4BBIdentifierType.NPI.getSystem(),
                               C4BBIdentifierType.NPI.toCode(),
                               C4BBIdentifierType.NPI.getDisplay())))
-                  .setSystem("http://hl7.org/fhir/sid/us-npi")
+                  .setSystem(TransformerConstants.CODING_NPI_US)
                   .setValue(claimGroup.getIdrBillProvNpi()));
     }
 
@@ -217,12 +219,10 @@ public class McsClaimTransformerV2 {
     return claimGroup.getIdrClaimType() == null
         ? null
         : List.of(
-            new Extension("https://bluebutton.cms.gov/resources/variables/mcs/idr-clm-type")
+            new Extension(BBCodingSystems.MCS_IDR_CLM_TYPE)
                 .setValue(
                     new Coding(
-                        "https://bluebutton.cms.gov/resources/variables/mcs/idr-clm-type",
-                        claimGroup.getIdrClaimType(),
-                        null)));
+                        BBCodingSystems.MCS_IDR_CLM_TYPE, claimGroup.getIdrClaimType(), null)));
   }
 
   private static List<Identifier> getIdentifier(PreAdjMcsClaim claimGroup) {
@@ -236,7 +236,7 @@ public class McsClaimTransformerV2 {
                             C4BBIdentifierType.UC.getSystem(),
                             C4BBIdentifierType.UC.toCode(),
                             C4BBIdentifierType.UC.getDisplay())))
-                .setSystem("https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num")
+                .setSystem(BBCodingSystems.CARR_CLM_CONTROL_NUM)
                 .setValue(claimGroup.getIdrClmHdIcn()));
   }
 
@@ -310,10 +310,7 @@ public class McsClaimTransformerV2 {
                       .setSequence(detail.getPriority())
                       .setProductOrService(
                           new CodeableConcept(
-                              new Coding(
-                                  "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
-                                  detail.getIdrProcCode(),
-                                  null)))
+                              new Coding(BBCodingSystems.HCPCS, detail.getIdrProcCode(), null)))
                       .setServiced(
                           new Period()
                               .setStart(localDateToDate(detail.getIdrDtlFromDate()))
@@ -360,10 +357,7 @@ public class McsClaimTransformerV2 {
         .mapToObj(
             index ->
                 new CodeableConcept(
-                    new Coding(
-                            "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
-                            mods.get(index).get(),
-                            null)
+                    new Coding(BBCodingSystems.HCPCS, mods.get(index).get(), null)
                         .setVersion(String.valueOf(index + 1))))
         .collect(Collectors.toList());
   }
