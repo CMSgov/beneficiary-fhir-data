@@ -30,12 +30,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   protected static final String DRG =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
 
-  private final List<String> drgCodes;
-  private final List<String> cptCodes;
-  private final List<String> icd9ProcedureCodes;
-  private final List<String> icd9DiagnosisCodes;
-  private final List<String> icd10ProcedureCodes;
-  private final List<String> icd10DiagnosisCodes;
+  private final Set<String> drgCodes;
+  private final Set<String> cptCodes;
+  private final Set<String> icd9ProcedureCodes;
+  private final Set<String> icd9DiagnosisCodes;
+  private final Set<String> icd10ProcedureCodes;
+  private final Set<String> icd10DiagnosisCodes;
 
   /**
    * Constructs a new {@link AbstractSamhsaMatcher}, loading the lists of SAMHSA-related codes from
@@ -45,34 +45,34 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     this.drgCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-drg.csv", "MS-DRGs").stream()
             .map(AbstractSamhsaMatcher::normalizeDrgCode)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toUnmodifiableSet());
     this.cptCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-cpt.csv", "CPT Code").stream()
             .map(AbstractSamhsaMatcher::normalizeHcpcsCode)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toUnmodifiableSet());
     this.icd9ProcedureCodes =
         resourceCsvColumnToList("samhsa-related-codes/codes-icd-9-procedure.csv", "ICD-9-CM")
             .stream()
             .map(AbstractSamhsaMatcher::normalizeIcdCode)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toUnmodifiableSet());
     this.icd9DiagnosisCodes =
         resourceCsvColumnToList(
                 "samhsa-related-codes/codes-icd-9-diagnosis.csv", "ICD-9-CM Diagnosis Code")
             .stream()
             .map(AbstractSamhsaMatcher::normalizeIcdCode)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toUnmodifiableSet());
     this.icd10ProcedureCodes =
         resourceCsvColumnToList(
                 "samhsa-related-codes/codes-icd-10-procedure.csv", "ICD-10-PCS Code")
             .stream()
             .map(AbstractSamhsaMatcher::normalizeIcdCode)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toUnmodifiableSet());
     this.icd10DiagnosisCodes =
         resourceCsvColumnToList(
                 "samhsa-related-codes/codes-icd-10-diagnosis.csv", "ICD-10-CM Diagnosis Code")
             .stream()
             .map(AbstractSamhsaMatcher::normalizeIcdCode)
-            .collect(Collectors.toUnmodifiableList());
+            .collect(Collectors.toUnmodifiableSet());
   }
 
   /**
@@ -186,15 +186,11 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   @VisibleForTesting
   boolean hasHcpcsSystemAndSamhsaCptCode(CodeableConcept procedureConcept) {
-    /*
-     * Note: CPT codes represent a subset of possible HCPCS codes (but are the only
-     * subset that we blacklist from).
-     */
-    Set<String> codingSystems =
-        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
+    // CPT codes are a subset of HCPCS codes, but they are the only ones we blacklist
 
-    // If no HCPCS system, it may be DME
-    return codingSystems.contains(TransformerConstants.CODING_SYSTEM_HCPCS)
+    // If there is no HCPCS system, it may be a DME claim, which should return false for SAMHSA
+    return procedureConcept.getCoding().stream()
+            .anyMatch(code -> TransformerConstants.CODING_SYSTEM_HCPCS.equals(code.getSystem()))
         && procedureConcept.getCoding().stream().anyMatch(this::isSamhsaCptCode);
   }
 
@@ -212,7 +208,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     String hcpcsCdSystem = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
 
     // Valid system url for productOrService coding
-    Set<String> hcpcsSystem = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
+    final Set<String> hcpcsSystem = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
 
     // Additional valid coding system URL for backwards-compatibility
     // See: https://jira.cms.gov/browse/BFD-1345
@@ -283,7 +279,7 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   @VisibleForTesting
-  boolean isSamhsaCodingForSystem(Coding coding, List<String> samhsaCodes, String requireeSystem) {
+  boolean isSamhsaCodingForSystem(Coding coding, Set<String> samhsaCodes, String requireeSystem) {
     if (!requireeSystem.equals(coding.getSystem())) {
       throw new IllegalArgumentException("Illegal coding system: '" + coding.getSystem() + "'");
     }

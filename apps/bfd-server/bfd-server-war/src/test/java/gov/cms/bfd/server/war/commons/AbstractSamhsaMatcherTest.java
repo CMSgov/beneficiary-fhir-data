@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -24,6 +24,7 @@ import gov.cms.bfd.server.war.adapters.ProcedureComponent;
 import gov.cms.bfd.server.war.utils.ReflectionTestUtils;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
@@ -711,7 +712,7 @@ public class AbstractSamhsaMatcherTest {
 
       doReturn(system).when(mockCoding).getSystem();
 
-      List<String> samhsaCodes = List.of("ABC");
+      Set<String> samhsaCodes = Set.of("ABC");
 
       try {
         boolean result =
@@ -796,12 +797,12 @@ public class AbstractSamhsaMatcherTest {
 
       doReturn(false)
           .when(matcherSpy)
-          .isSamhsaCodingForSystem(any(Coding.class), anyList(), anyString());
+          .isSamhsaCodingForSystem(any(Coding.class), anySet(), anyString());
 
       // unchecked - This is fine for testing.
       //noinspection unchecked
-      List<String> codeList =
-          (List<String>) ReflectionTestUtils.getField(matcherSpy, codePropertyName);
+      Set<String> codeList =
+          (Set<String>) ReflectionTestUtils.getField(matcherSpy, codePropertyName);
 
       doReturn(true).when(matcherSpy).isSamhsaCodingForSystem(mockCoding, codeList, system);
 
