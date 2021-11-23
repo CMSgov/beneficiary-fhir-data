@@ -145,7 +145,7 @@ public final class PipelineApplicationState implements AutoCloseable {
 
     Map<String, Object> hibernateProperties = new HashMap<>();
     hibernateProperties.put(org.hibernate.cfg.AvailableSettings.DATASOURCE, pooledDataSource);
-    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.VALIDATE);
+    hibernateProperties.put(org.hibernate.cfg.AvailableSettings.HBM2DDL_AUTO, Action.NONE);
     hibernateProperties.put(
         org.hibernate.cfg.AvailableSettings.STATEMENT_BATCH_SIZE, jdbcBatchSize);
 
