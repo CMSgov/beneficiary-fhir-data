@@ -659,7 +659,7 @@ public class AbstractSamhsaMatcherTest {
 
       doReturn(code).when(mockCoding).getCode();
 
-      List<String> mockCptCodes = List.of("ABC");
+      Set<String> mockCptCodes = Set.of("ABC");
 
       ReflectionTestUtils.setField(matcherSpy, "cptCodes", mockCptCodes);
 
