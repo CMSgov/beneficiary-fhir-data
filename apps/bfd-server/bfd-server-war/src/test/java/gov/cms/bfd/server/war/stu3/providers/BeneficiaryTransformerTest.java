@@ -401,6 +401,7 @@ public final class BeneficiaryTransformerTest {
       Assert.assertEquals(
           beneficiary.getNameMiddleInitial().get().toString(),
           patient.getName().get(0).getGiven().get(1).toString());
+    System.out.println("CHECKING PATIENT NAME LIST SIZE: " + patient.getName().size());
     Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());
 
     if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
