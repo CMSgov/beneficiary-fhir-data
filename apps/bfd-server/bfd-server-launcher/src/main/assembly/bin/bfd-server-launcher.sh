@@ -5,17 +5,13 @@ bfdServerLauncherJar="$(echo ${scriptDirectory}/bfd-server-launcher-*.jar)"
 classpath="${bfdServerLauncherJar}:${scriptDirectory}/lib/*"
 mainClass="gov.cms.bfd.server.launcher.DataServerLauncherApp"
 
-echo "JENKINS HOME: "
-echo $JENKINS_HOME
-echo "JENKINS URL: "
-echo JENKINS_URL
+env
+
 if [[ -z "${JAVA_HOME}" ]]; then
     JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))
     javaExecutable=${JAVA_HOME}/bin/java
 else
     javaExecutable=java
 fi
-echo "JAVA HOME: "
-echo $JAVA_HOME
 
 exec "${javaExecutable}" -cp "${classpath}" "$@" "${mainClass}"

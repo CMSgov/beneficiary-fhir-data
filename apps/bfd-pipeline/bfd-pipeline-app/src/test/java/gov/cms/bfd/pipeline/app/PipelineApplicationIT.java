@@ -573,7 +573,6 @@ public final class PipelineApplicationIT {
         .put(
             AppConfiguration.ENV_VAR_KEY_IDEMPOTENCY_REQUIRED,
             String.valueOf(CcwRifLoadTestUtils.IDEMPOTENCY_REQUIRED));
-    appRunBuilder.environment().put("JAVA_HOME", System.getenv("JAVA_HOME"));
     /*
      * Note: Not explicitly providing AWS credentials here, as the child
      * process will inherit any that are present in this build/test process.
