@@ -21,6 +21,4 @@ module "stateless" {
   git_branch_name = var.git_branch_name
   git_commit_id   = var.git_commit_id
   is_public       = true
-
-  mpm_rda_cidr_block = var.mpm_rda_cidr_block
 }
