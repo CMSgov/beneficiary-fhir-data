@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -31,6 +32,11 @@ public final class LoadedFilterManagerIT {
 
   private static final String SAMPLE_BENE = "567834";
   private static final String INVALID_BENE = "1";
+
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
 
   @Test
   public void emptyFilters() {
