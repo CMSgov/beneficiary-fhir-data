@@ -191,7 +191,7 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getPort()} ()} value.
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getPort()} value.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_PORT = "RDA_GRPC_PORT";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_PORT}. */
@@ -209,12 +209,20 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMaxIdle()} ()} value. This variable value
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getMaxIdle()} value. This variable value
    * should be in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS = "RDA_GRPC_MAX_IDLE_SECONDS";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS}. */
   public static final int DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS = Integer.MAX_VALUE;
+
+  /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getAuthenticationToken()} value.
+   */
+  public static final String ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN = "RDA_GRPC_AUTH_TOKEN";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN}. */
+  public static final String DEFAULT_RDA_GRPC_AUTH_TOKEN = null;
 
   /**
    * The name of the environment variable that should be used to provide the {@link
@@ -509,6 +517,9 @@ public final class AppConfiguration implements Serializable {
                 Duration.ofSeconds(
                     readEnvParsedOptional(ENV_VAR_KEY_RDA_GRPC_MAX_IDLE_SECONDS, Integer::parseInt)
                         .orElse(DEFAULT_RDA_GRPC_MAX_IDLE_SECONDS)))
+            .authenticationToken(
+                readEnvStringOptional(ENV_VAR_KEY_RDA_GRPC_AUTH_TOKEN)
+                    .orElse(DEFAULT_RDA_GRPC_AUTH_TOKEN))
             .build();
     final RdaServerJob.Config.ConfigBuilder mockServerConfig = RdaServerJob.Config.builder();
     mockServerConfig.serverMode(

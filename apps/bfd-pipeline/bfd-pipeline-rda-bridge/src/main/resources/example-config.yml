@@ -1,0 +1,13 @@
+inputDirPath: path/to/rif/data/
+outputDirPath: output/
+fissOutputFile: rda-fiss.ndjson
+mcsOutputFile: rda-mcs.ndjson
+fissSources:
+  - inpatient.csv
+  - outpatient.csv
+  - home.csv
+  - hospice.csv
+  - snf.csv
+mcsSources:
+  - carrier.csv
+mbiSource: beneficiary_history.csv
