@@ -8,7 +8,6 @@ import gov.cms.bfd.model.rif.MedicareBeneficiaryIdHistory;
 import gov.cms.bfd.model.rif.samples.StaticRifResource;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.ServerTestUtils;
-import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.Sex;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -19,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Assert;
@@ -44,7 +44,9 @@ public final class BeneficiaryTransformerTest {
 
     // Verify identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
   }
@@ -65,7 +67,9 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
@@ -98,7 +102,9 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
@@ -132,7 +138,9 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals("Number of identifiers should be 6", 6, patient.getIdentifier().size());
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
@@ -172,7 +180,9 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals("Number of identifiers should be 4", 4, patient.getIdentifier().size());
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
-        patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
+        patient,
+        TransformerUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID),
+        "567834");
     assertValuesInPatientIdentifiers(
         patient, TransformerConstants.CODING_BBAPI_BENE_MBI_HASH, "someMBIhash");
     assertValuesInPatientIdentifiers(
@@ -212,7 +222,7 @@ public final class BeneficiaryTransformerTest {
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
-   * a lastUpdated field set.
+   * a last_updated field set.
    */
   @Test
   public void transformSampleARecordWithLastUpdated() {
@@ -234,7 +244,7 @@ public final class BeneficiaryTransformerTest {
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer#transform(Beneficiary)} works as
    * expected when run against the {@link StaticRifResource#SAMPLE_A_BENES} {@link Beneficiary} with
-   * a lastUpdated field not set.
+   * a last_updated field not set.
    */
   @Test
   public void transformSampleARecordWithoutLastUpdated() {
@@ -270,10 +280,10 @@ public final class BeneficiaryTransformerTest {
         parsedRecords.stream()
             .filter(r -> r instanceof BeneficiaryHistory)
             .map(r -> (BeneficiaryHistory) r)
-            .filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId()))
+            .filter(r -> beneficiary.getBeneficiaryId() == r.getBeneficiaryId())
             .collect(Collectors.toSet());
-    beneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
-    for (BeneficiaryHistory beneficiaryHistory : beneficiary.getBeneficiaryHistories()) {
+    beneficiary.getBeneficiariesHistory().addAll(beneficiaryHistories);
+    for (BeneficiaryHistory beneficiaryHistory : beneficiary.getBeneficiariesHistory()) {
       beneficiaryHistory.setHicnUnhashed(Optional.of(beneficiaryHistory.getHicn()));
       beneficiaryHistory.setHicn("someHICNhash");
     }
@@ -283,9 +293,9 @@ public final class BeneficiaryTransformerTest {
         parsedRecords.stream()
             .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
             .map(r -> (MedicareBeneficiaryIdHistory) r)
-            .filter(r -> beneficiary.getBeneficiaryId().equals(r.getBeneficiaryId().orElse(null)))
+            .filter(r -> beneficiary.getBeneficiaryId() == r.getBeneficiaryId())
             .collect(Collectors.toSet());
-    beneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
+    beneficiary.getMedicareBeneficiaryidHistory().addAll(beneficiaryMbis);
 
     return beneficiary;
   }
@@ -383,7 +393,8 @@ public final class BeneficiaryTransformerTest {
       Beneficiary beneficiary, Patient patient, RequestHeaders requestHeader) {
     TransformerTestUtils.assertNoEncodedOptionals(patient);
 
-    Assert.assertEquals(beneficiary.getBeneficiaryId(), patient.getIdElement().getIdPart());
+    Assert.assertEquals(
+        String.format("%d", beneficiary.getBeneficiaryId()), patient.getIdElement().getIdPart());
 
     Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
@@ -395,14 +406,21 @@ public final class BeneficiaryTransformerTest {
           AdministrativeGender.FEMALE.toString(), patient.getGender().toString().trim());
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
-    Assert.assertEquals(
+    List<HumanName> name = patient.getName();
+    Assert.assertNotNull(name);
+    Assert.assertEquals(1, name.size());
+    HumanName hn = name.get(0);
+    Assert.assertEquals(HumanName.NameUse.USUAL, hn.getUse());
+    Assert.assertEquals("Doe", hn.getFamily().toString());
+    Assert.assertEquals("John", hn.getGiven().get(0).toString());
+    Assert.assertEquals("A", hn.getGiven().get(1).toString());
+    /*Assert.assertEquals(
         beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
     if (beneficiary.getNameMiddleInitial().isPresent())
       Assert.assertEquals(
           beneficiary.getNameMiddleInitial().get().toString(),
           patient.getName().get(0).getGiven().get(1).toString());
-    System.out.println("CHECKING PATIENT NAME LIST SIZE: " + patient.getName().size());
-    Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());
+    Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());*/
 
     if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(
