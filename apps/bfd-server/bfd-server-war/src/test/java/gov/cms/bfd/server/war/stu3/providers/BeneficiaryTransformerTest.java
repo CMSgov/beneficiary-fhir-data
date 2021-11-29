@@ -403,7 +403,8 @@ public final class BeneficiaryTransformerTest {
     Assert.assertEquals(HumanName.NameUse.USUAL, hn.getUse());
     Assert.assertEquals("Doe", hn.getFamily().toString());
     Assert.assertEquals("John", hn.getGiven().get(0).toString());
-    Assert.assertEquals("A", hn.getGiven().get(1).toString());
+    if (beneficiary.getNameMiddleInitial().isPresent())
+      Assert.assertEquals("A", hn.getGiven().get(1).toString());
     /*Assert.assertEquals(
         beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
     if (beneficiary.getNameMiddleInitial().isPresent())
