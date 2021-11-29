@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 scriptDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 bfdPipelineAppJar="$(echo ${scriptDirectory}/bfd-pipeline-app-*.jar)"
 classpath="${bfdPipelineAppJar}:${scriptDirectory}/lib/*"
