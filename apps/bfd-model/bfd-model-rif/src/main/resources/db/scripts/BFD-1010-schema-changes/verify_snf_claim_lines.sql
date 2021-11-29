@@ -1,6 +1,6 @@
 do $$
 declare
-  MAX_TESTS		INTEGER := 500;		-- hopefully .5M tests are sufficient
+  MAX_TESTS		INTEGER := 500000;		-- hopefully .5M tests are sufficient
   v_claims		BIGINT[];
   orig			record;
   curr			record;
