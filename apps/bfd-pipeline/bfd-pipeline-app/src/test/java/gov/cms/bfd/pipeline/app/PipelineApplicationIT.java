@@ -74,7 +74,9 @@ public final class PipelineApplicationIT {
   public void missingConfig() throws IOException, InterruptedException {
     // Start the app with no config env vars.
     ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
+    String javaHome = System.getenv("JAVA_HOME");
     appRunBuilder.environment().clear();
+    appRunBuilder.environment().put("JAVA_HOME", javaHome);
     appRunBuilder.redirectErrorStream(true);
     Process appProcess = appRunBuilder.start();
     String text = new String(appProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
