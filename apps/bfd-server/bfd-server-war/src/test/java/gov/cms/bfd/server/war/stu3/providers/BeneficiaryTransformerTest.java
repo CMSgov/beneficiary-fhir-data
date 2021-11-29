@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Assert;
@@ -395,13 +396,21 @@ public final class BeneficiaryTransformerTest {
           AdministrativeGender.FEMALE.toString(), patient.getGender().toString().trim());
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
-    Assert.assertEquals(
+    List<HumanName> name = patient.getName();
+    Assert.assertNotNull(name);
+    Assert.assertEquals(1, name.size());
+    HumanName hn = name.get(0);
+    Assert.assertEquals(HumanName.NameUse.USUAL, hn.getUse());
+    Assert.assertEquals("Doe", hn.getFamily().toString());
+    Assert.assertEquals("John", hn.getGiven().get(0).toString());
+    Assert.assertEquals("A", hn.getGiven().get(1).toString());
+    /*Assert.assertEquals(
         beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
     if (beneficiary.getNameMiddleInitial().isPresent())
       Assert.assertEquals(
           beneficiary.getNameMiddleInitial().get().toString(),
           patient.getName().get(0).getGiven().get(1).toString());
-    Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());
+    Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());*/
 
     if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(
