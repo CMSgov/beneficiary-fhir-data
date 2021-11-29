@@ -82,7 +82,7 @@ restorePg() {
 
 testDbConnection() {
   echo "Testing db connectivity..."
-  now=$(psql -h $PGHOST -U $PGUSER -d $PGDATABASE --quiet --tuples-only -c "select NOW();")
+  now=$(psql -h "${PGHOST}" -U "${PGUSER}" -d "${PGDATABASE}" --quiet --tuples-only -c "select NOW();")
   if [[ "$now" == *"20"* ]]; then
     echo "db connectivity: OK"
   else

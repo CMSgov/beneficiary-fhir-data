@@ -4,20 +4,20 @@
 -- -----------------------------
 -- drop all secondary indexes
 -- -----------------------------
-drop index if exists beneficiaries_hicn_idx;
-drop index if exists beneficiaries_history_bene_id_idx;
-drop index if exists beneficiaries_history_hicn_idx;
-drop index if exists beneficiaries_history_mbi_hash_idx;
-drop index if exists beneficiary_monthly_partdcontractnumid_yearmonth_parentbene_idx;
-drop index if exists medicare_beneficiaryid_history_bene_id_idx;
-drop index if exists carrier_claims_bene_id_idx;
-drop index if exists dme_claims_bene_id_idx;
-drop index if exists hha_claims_bene_id_idx;
-drop index if exists hospice_claims_bene_id_idx;
-drop index if exists inpatient_claims_bene_id_idx;
-drop index if exists outpatient_claims_bene_id_idx;
-drop index if exists partd_events_bene_id_idx;
-drop index if exists snf_claims_bene_id_idx;
+drop index if exists beneficiaries_benecrnthicnum_idx;
+drop index if exists beneficiaries_history_beneid_idx;
+drop index if exists beneficiaries_history_benecrnthicnum_idx;
+drop index if exists beneficiaries_history_mbihash_idx;
+drop index if exists beneficiary_monthly_yearmonth_partdcontract_parentbene_idx;
+drop index if exists medicare_beneficiaryid_history_beneid_idx;
+drop index if exists carrier_claims_beneid_idx;
+drop index if exists dme_claims_beneid_idx;
+drop index if exists hha_claims_beneid_idx;
+drop index if exists hospice_claims_beneid_idx;
+drop index if exists inpatient_claims_beneid_idx;
+drop index if exists outpatient_claims_beneid_idx;
+drop index if exists partd_events_beneid_idx;
+drop index if exists snf_claims_beneid_idx;
 
 -- ---------------------
 -- beneficiaries_history
