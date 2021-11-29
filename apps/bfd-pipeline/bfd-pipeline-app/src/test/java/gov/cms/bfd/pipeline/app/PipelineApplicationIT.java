@@ -75,10 +75,12 @@ public final class PipelineApplicationIT {
     appRunBuilder.environment().put("JAVA_HOME", javaHome);
     appRunBuilder.redirectErrorStream(true);
     Process appProcess = appRunBuilder.start();
+
     // Read the app's output.
     ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
     Thread appRunConsumerThread = new Thread(appRunConsumer);
     appRunConsumerThread.start();
+
     // Wait for it to exit with an error.
     appProcess.waitFor(1, TimeUnit.MINUTES);
     appRunConsumerThread.join();
@@ -103,10 +105,12 @@ public final class PipelineApplicationIT {
       ProcessBuilder appRunBuilder = createCcwRifAppProcessBuilder(new Bucket("foo"));
       appRunBuilder.redirectErrorStream(true);
       appProcess = appRunBuilder.start();
+
       // Read the app's output.
       ProcessOutputConsumer appRunConsumer = new ProcessOutputConsumer(appProcess);
       Thread appRunConsumerThread = new Thread(appRunConsumer);
       appRunConsumerThread.start();
+
       // Wait for it to start scanning.
       Awaitility.await()
           .atMost(Duration.ONE_MINUTE)
