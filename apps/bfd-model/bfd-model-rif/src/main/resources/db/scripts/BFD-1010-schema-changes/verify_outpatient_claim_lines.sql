@@ -64,7 +64,7 @@ begin
 			rev_cntr_stus_ind_cd as f_33,
 			rev_cntr_tot_chrg_amt as f_34,
 			rev_cntr_unit_cnt as f_35,
-			rev_cntr_coinsrnc_wge_adjstd_amt as f_36
+			rev_cntr_coinsrnc_wge_adjstd_c as f_36
 		from
 			outpatient_claim_lines
 		where
