@@ -247,7 +247,7 @@ public class FissClaimTransformerV2 {
       name.setGiven(
           List.of(
               new StringType(benePayer.getBeneFirstName()),
-              new StringType(benePayer.getBeneMidInit())));
+              new StringType(benePayer.getBeneMidInit() + ".")));
     }
 
     return List.of(name);
@@ -348,7 +348,7 @@ public class FissClaimTransformerV2 {
             diagnosisCode -> {
               Claim.DiagnosisComponent component =
                   new Claim.DiagnosisComponent()
-                      .setSequence(diagnosisCode.getPriority())
+                      .setSequence(diagnosisCode.getPriority() + 1)
                       .setDiagnosis(
                           new CodeableConcept()
                               .setCoding(
@@ -397,7 +397,7 @@ public class FissClaimTransformerV2 {
         .map(
             procCode ->
                 new Claim.ProcedureComponent()
-                    .setSequence((procCode.getPriority()))
+                    .setSequence((procCode.getPriority() + 1))
                     .setDate(
                         procCode.getProcDate() == null
                             ? null
@@ -420,7 +420,7 @@ public class FissClaimTransformerV2 {
             payer -> {
               Claim.InsuranceComponent component =
                   new Claim.InsuranceComponent()
-                      .setSequence(payer.getPriority())
+                      .setSequence(payer.getPriority() + 1)
                       .setFocal(Objects.equals(payer.getPayersName(), MEDICARE));
 
               if (payer.getPayersName() != null) {

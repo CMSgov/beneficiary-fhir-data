@@ -2,7 +2,7 @@
   "resourceType": "Claim",
   "id": "m-654321",
   "meta": {
-    "versionId": "f-654321-1018b97e2bb5eba8af402efcb72cb2500d858d13",
+    "versionId": "f-654321-e4225b8660031f9205b893546e30d446be007117",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
@@ -26,10 +26,10 @@
       ],
       "name": [
         {
-          "family": "SMITH",
+          "family": "S.",
           "given": [
-            "J",
-            "D"
+            "J.",
+            "D."
           ]
         }
       ],
@@ -126,7 +126,7 @@
     "start": "1970-07-30T00:00:00+00:00",
     "end": "1970-07-30T00:00:00+00:00"
   },
-  "created": "2021-11-22T18:59:55+00:00",
+  "created": "2021-11-30T14:19:16+00:00",
   "provider": {
     "reference": "#provider-org"
   },
@@ -141,7 +141,7 @@
   },
   "diagnosis": [
     {
-      "sequence": 0,
+      "sequence": 1,
       "diagnosisCodeableConcept": {
         "coding": [
           {
@@ -152,7 +152,7 @@
       }
     },
     {
-      "sequence": 1,
+      "sequence": 2,
       "diagnosisCodeableConcept": {
         "coding": [
           {
@@ -165,7 +165,7 @@
   ],
   "item": [
     {
-      "sequence": 0,
+      "sequence": 1,
       "productOrService": {
         "coding": [
           {
@@ -190,7 +190,7 @@
       }
     },
     {
-      "sequence": 1,
+      "sequence": 2,
       "productOrService": {
         "coding": [
           {

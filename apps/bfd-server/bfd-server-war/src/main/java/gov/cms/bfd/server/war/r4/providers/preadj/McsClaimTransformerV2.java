@@ -141,13 +141,24 @@ public class McsClaimTransformerV2 {
   }
 
   private static List<HumanName> getBeneName(PreAdjMcsClaim claimGroup) {
-    HumanName name = new HumanName().setFamily(claimGroup.getIdrBeneLast_1_6());
+    HumanName name =
+        new HumanName()
+            .setFamily(
+                claimGroup.getIdrBeneLast_1_6() == null || claimGroup.getIdrBeneLast_1_6().isEmpty()
+                    ? null
+                    : claimGroup.getIdrBeneLast_1_6().charAt(0) + ".");
 
     if (claimGroup.getIdrBeneFirstInit() != null || claimGroup.getIdrBeneMidInit() != null) {
       name.setGiven(
           List.of(
-              new StringType(claimGroup.getIdrBeneFirstInit()),
-              new StringType(claimGroup.getIdrBeneMidInit())));
+              new StringType(
+                  claimGroup.getIdrBeneFirstInit() == null
+                      ? null
+                      : claimGroup.getIdrBeneFirstInit() + "."),
+              new StringType(
+                  claimGroup.getIdrBeneMidInit() == null
+                      ? null
+                      : claimGroup.getIdrBeneMidInit() + ".")));
     }
 
     return List.of(name);
@@ -287,7 +298,7 @@ public class McsClaimTransformerV2 {
               String icdVersion = diagCode.getIdrDiagIcdType().equals("0") ? "10" : "9-cm";
 
               return new Claim.DiagnosisComponent()
-                  .setSequence(diagCode.getPriority())
+                  .setSequence(diagCode.getPriority() + 1)
                   .setDiagnosis(
                       new CodeableConcept()
                           .setCoding(
@@ -307,7 +318,7 @@ public class McsClaimTransformerV2 {
             detail -> {
               Claim.ItemComponent item =
                   new Claim.ItemComponent()
-                      .setSequence(detail.getPriority())
+                      .setSequence(detail.getPriority() + 1)
                       .setProductOrService(
                           new CodeableConcept(
                               new Coding(BBCodingSystems.HCPCS, detail.getIdrProcCode(), null)))
@@ -333,7 +344,7 @@ public class McsClaimTransformerV2 {
                         matchingCode.ifPresent(
                             diagnosisCode ->
                                 item.setDiagnosisSequence(
-                                    List.of(new PositiveIntType(diagnosisCode.getPriority()))));
+                                    List.of(new PositiveIntType(diagnosisCode.getPriority() + 1))));
                       });
 
               return item;

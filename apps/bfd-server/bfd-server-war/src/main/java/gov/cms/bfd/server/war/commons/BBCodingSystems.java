@@ -16,7 +16,7 @@ public class BBCodingSystems {
   public static final String FI_DOC_CLM_CONTROL_NUM =
       BB_BASE_URL + "/variables/fi_doc_clm_cntrl_num";
 
-  public static final String FISS_PAYERS_NAME = BB_BASE_URL + "/variables/fiss/payers-name/";
+  public static final String FISS_PAYERS_NAME = BB_BASE_URL + "/variables/fiss/payers-name";
 
   public static final String HCPCS = BB_BASE_URL + "/codesystem/hcpcs";
 

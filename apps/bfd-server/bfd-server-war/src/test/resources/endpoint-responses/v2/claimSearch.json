@@ -1,14 +1,14 @@
 {
   "resourceType": "Bundle",
-  "id": "2f59f8c6-4a46-4424-88b7-31c1b1b4e33f",
+  "id": "841827de-13e2-4e36-a87b-297cd4d93c93",
   "meta": {
-    "lastUpdated": "2021-11-22T18:28:01.100+00:00"
+    "lastUpdated": "2021-11-30T14:19:17.522+00:00"
   },
   "type": "searchset",
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:9840/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+      "url": "https://localhost:9899/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
     }
   ],
   "entry": [
@@ -17,7 +17,7 @@
         "resourceType": "Claim",
         "id": "f-123456",
         "meta": {
-          "versionId": "f-123456-64586a268f21c852fea4d6d4f4aef27775d73ae7",
+          "versionId": "f-123456-588a3babf80bd2fee56222fa7470ec4da39c6ac2",
           "lastUpdated": "1970-01-01T00:00:00.000+00:00"
         },
         "contained": [
@@ -44,7 +44,7 @@
                 "family": "baker",
                 "given": [
                   "jim",
-                  "k"
+                  "k."
                 ]
               }
             ],
@@ -139,7 +139,7 @@
           "start": "1970-07-20T00:00:00+00:00",
           "end": "1970-07-20T00:00:00+00:00"
         },
-        "created": "2021-11-22T18:28:01+00:00",
+        "created": "2021-11-30T14:19:17+00:00",
         "provider": {
           "reference": "#provider-org"
         },
@@ -153,6 +153,15 @@
           ]
         },
         "facility": {
+          "extension": [
+            {
+              "url": "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+              "valueCoding": {
+                "system": "https://bluebutton.cms.gov/resources/variables/clm_fac_type_cd",
+                "code": "r"
+              }
+            }
+          ],
           "identifier": {
             "type": {
               "coding": [
@@ -191,7 +200,7 @@
         ],
         "diagnosis": [
           {
-            "sequence": 0,
+            "sequence": 1,
             "diagnosisCodeableConcept": {
               "coding": [
                 {
@@ -213,7 +222,7 @@
             ]
           },
           {
-            "sequence": 1,
+            "sequence": 2,
             "diagnosisCodeableConcept": {
               "coding": [
                 {
@@ -232,7 +241,7 @@
             }
           },
           {
-            "sequence": 2,
+            "sequence": 3,
             "diagnosisCodeableConcept": {
               "coding": [
                 {
@@ -253,7 +262,7 @@
         ],
         "procedure": [
           {
-            "sequence": 0,
+            "sequence": 1,
             "date": "1970-07-20T00:00:00+00:00",
             "procedureCodeableConcept": {
               "coding": [
@@ -265,7 +274,7 @@
             }
           },
           {
-            "sequence": 1,
+            "sequence": 2,
             "procedureCodeableConcept": {
               "coding": [
                 {
@@ -280,21 +289,21 @@
           {
             "extension": [
               {
-                "url": "https://bluebutton.cms.gov/resources/variables/fiss/payers-name/",
+                "url": "https://bluebutton.cms.gov/resources/variables/fiss/payers-name",
                 "valueString": "MEDICARE"
               }
             ],
-            "sequence": 0,
+            "sequence": 1,
             "focal": true
           },
           {
             "extension": [
               {
-                "url": "https://bluebutton.cms.gov/resources/variables/fiss/payers-name/",
+                "url": "https://bluebutton.cms.gov/resources/variables/fiss/payers-name",
                 "valueString": "BCBS KC"
               }
             ],
-            "sequence": 1,
+            "sequence": 2,
             "focal": false
           }
         ],
