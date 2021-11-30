@@ -402,16 +402,10 @@ public final class BeneficiaryTransformerTest {
     HumanName hn = name.get(0);
     Assert.assertEquals(HumanName.NameUse.USUAL, hn.getUse());
     Assert.assertEquals(beneficiary.getNameSurname(), hn.getFamily());
-    Assert.assertEquals("John", hn.getGiven().get(0).toString());
-    if (beneficiary.getNameMiddleInitial().isPresent())
-      Assert.assertEquals("A", hn.getGiven().get(1).toString());
-    /*Assert.assertEquals(
-        beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
+    Assert.assertEquals(beneficiary.getNameGiven().toString(), hn.getGiven().get(0).toString());
     if (beneficiary.getNameMiddleInitial().isPresent())
       Assert.assertEquals(
-          beneficiary.getNameMiddleInitial().get().toString(),
-          patient.getName().get(0).getGiven().get(1).toString());
-    Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());*/
+          beneficiary.getNameMiddleInitial().get().toString(), hn.getGiven().get(1).toString());
 
     if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(
