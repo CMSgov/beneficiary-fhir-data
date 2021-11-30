@@ -36,8 +36,8 @@ import javax.persistence.criteria.Root;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
@@ -1919,7 +1919,7 @@ public final class PatientResourceProviderIT {
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
    * case.
    */
-  @After
+  @Before
   public void cleanDatabaseServerAfterEachTestCase() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
