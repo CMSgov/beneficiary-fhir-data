@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -211,10 +212,19 @@ public final class LoadedFilterManagerIT {
   }
 
   /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
    * case.
    */
   @Before
+  public void cleanDatabaseServerBeforeEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
   public void cleanDatabaseServerAfterEachTestCase() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }

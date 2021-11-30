@@ -59,6 +59,7 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -1203,7 +1204,16 @@ public final class EndpointJsonResponseComparatorIT {
     }
   }
 
-  /**
+   /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
+   * case.
+   */
+  @Before
+  public void cleanDatabaseServerBeforeEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+   /**
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
    * case.
    */
@@ -1211,4 +1221,3 @@ public final class EndpointJsonResponseComparatorIT {
   public void cleanDatabaseServerAfterEachTestCase() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
-}

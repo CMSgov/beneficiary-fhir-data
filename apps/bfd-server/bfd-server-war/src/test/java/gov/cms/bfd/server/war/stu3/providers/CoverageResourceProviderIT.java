@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -385,6 +386,15 @@ public final class CoverageResourceProviderIT {
             .execute();
     Assert.assertNotNull(searchOutOfBoundsResult);
     Assert.assertEquals(0, searchOutOfBoundsResult.getTotal());
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
+   * case.
+   */
+  @Before
+  public void cleanDatabaseServerBeforeEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

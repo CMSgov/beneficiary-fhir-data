@@ -57,6 +57,7 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /** R4ExplanationOfBenefitResourceProviderIT. */
@@ -1606,6 +1607,15 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           Assert.assertEquals(
               testCase.getLeft(), testCase.getRight().intValue(), bundle.getTotal());
         });
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
+   * case.
+   */
+  @Before
+  public void cleanDatabaseServerBeforeEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

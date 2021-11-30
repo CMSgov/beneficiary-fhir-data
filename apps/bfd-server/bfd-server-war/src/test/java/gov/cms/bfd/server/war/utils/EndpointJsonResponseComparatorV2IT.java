@@ -61,6 +61,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1212,6 +1213,15 @@ public final class EndpointJsonResponseComparatorV2IT {
         node.removeAll();
       }
     }
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
+   * case.
+   */
+  @Before
+  public void cleanDatabaseServerBeforeEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**
