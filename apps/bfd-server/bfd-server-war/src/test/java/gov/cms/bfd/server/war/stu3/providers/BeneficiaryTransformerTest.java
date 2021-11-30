@@ -396,6 +396,7 @@ public final class BeneficiaryTransformerTest {
           AdministrativeGender.FEMALE.toString(), patient.getGender().toString().trim());
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
+
     List<HumanName> name = patient.getName();
     Assert.assertNotNull(name);
     Assert.assertEquals(1, name.size());
