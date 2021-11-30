@@ -66,8 +66,8 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
 
   /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
-   * case.
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to
+   * initialize data in the test suite.
    */
   @BeforeClass
   public static void cleanupDatabaseBeforeTestSuite() {

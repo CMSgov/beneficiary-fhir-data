@@ -29,8 +29,8 @@ public final class R4CoverageResourceProviderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(R4CoverageResourceProviderIT.class);
 
   /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
-   * case.
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to
+   * initialize data in the test suite.
    */
   @BeforeClass
   public static void cleanupDatabaseBeforeTestSuite() {
