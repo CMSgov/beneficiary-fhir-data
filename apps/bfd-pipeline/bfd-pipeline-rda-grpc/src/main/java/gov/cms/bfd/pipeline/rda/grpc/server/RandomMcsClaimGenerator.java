@@ -121,8 +121,8 @@ public class RandomMcsClaimGenerator extends AbstractRandomClaimGenerator {
       code.setIdrClmHdIcn(idrClmHdIcn);
       oneOf(
           () -> code.setIdrDiagIcdTypeEnum(randomEnum(DIAG_ICD_TYPES)),
-          () -> code.setIdrDiagIcdTypeEnumUnrecognized(randomLetter(1, 1)));
-      optional(() -> code.setIdrDiagCode(randomAlphaNumeric(1, 7)));
+          () -> code.setIdrDiagIcdTypeUnrecognized(randomLetter(1, 1)));
+      code.setIdrDiagCode(randomAlphaNumeric(1, 7));
       claim.addMcsDiagnosisCodes(code.build());
     }
   }

@@ -21,7 +21,7 @@ public class RandomFissClaimGeneratorTest {
         "{\n"
             + "  \"dcn\": \"9845557\",\n"
             + "  \"hicNo\": \"904843533707\",\n"
-            + "  \"currStatusEnum\": \"CLAIM_STATUS_MOVE\",\n"
+            + "  \"currStatusEnum\": \"CLAIM_STATUS_ROUTING\",\n"
             + "  \"currLoc1Enum\": \"PROCESSING_TYPE_OFFLINE\",\n"
             + "  \"currLoc2Enum\": \"CURRENT_LOCATION_2_POST_PAY_7563\",\n"
             + "  \"totalChargeAmount\": \"8.83\",\n"

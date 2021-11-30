@@ -265,7 +265,9 @@ public class McsClaimTransformerTest {
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
               new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
               new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrClmHdIcn", "invalid length: expected=[1,15] actual=0")),
+                  "diagCode-0-idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
+              new DataTransformer.ErrorMessage(
+                  "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0")),
           ex.getErrors());
     }
   }
@@ -501,7 +503,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testBadDiagnosisCodeIdrDiagIcdType() {
     assertDiagnosisCodeTransformationError(
-        codeBuilder -> codeBuilder.setIdrDiagIcdTypeEnumUnrecognized("sdjbfdskjbdfskjbsdf---"),
+        codeBuilder -> codeBuilder.setIdrDiagIcdTypeUnrecognized("sdjbfdskjbdfskjbsdf---"),
         new DataTransformer.ErrorMessage(
             "diagCode-0-idrDiagIcdType", "invalid length: expected=[1,1] actual=22"));
   }
@@ -684,6 +686,7 @@ public class McsClaimTransformerTest {
         () -> {
           final McsDiagnosisCode.Builder codeBuilder = McsDiagnosisCode.newBuilder();
           codeBuilder.setIdrClmHdIcn("123456789012345");
+          codeBuilder.setIdrDiagCode("7777777");
           updater.accept(codeBuilder);
           claimBuilder.addMcsDiagnosisCodes(codeBuilder.build());
         },

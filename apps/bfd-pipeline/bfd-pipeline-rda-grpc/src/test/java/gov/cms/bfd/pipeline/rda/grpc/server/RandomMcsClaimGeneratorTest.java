@@ -61,7 +61,7 @@ public class RandomMcsClaimGeneratorTest {
             + "  }, {\n"
             + "    \"idrClmHdIcn\": \"84555\",\n"
             + "    \"idrDiagCode\": \"f24\",\n"
-            + "    \"idrDiagIcdTypeEnumUnrecognized\": \"k\"\n"
+            + "    \"idrDiagIcdTypeUnrecognized\": \"k\"\n"
             + "  }, {\n"
             + "    \"idrClmHdIcn\": \"84555\",\n"
             + "    \"idrDiagIcdTypeEnum\": \"DIAGNOSIS_ICD_TYPE_ICD9\",\n"

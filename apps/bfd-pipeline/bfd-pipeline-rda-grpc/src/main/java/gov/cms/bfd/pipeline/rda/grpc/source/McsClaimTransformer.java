@@ -73,8 +73,8 @@ public class McsClaimTransformer {
       new EnumStringExtractor<>(
           McsDiagnosisCode::hasIdrDiagIcdTypeEnum,
           McsDiagnosisCode::getIdrDiagIcdTypeEnum,
-          McsDiagnosisCode::hasIdrDiagIcdTypeEnumUnrecognized,
-          McsDiagnosisCode::getIdrDiagIcdTypeEnumUnrecognized,
+          McsDiagnosisCode::hasIdrDiagIcdTypeUnrecognized,
+          McsDiagnosisCode::getIdrDiagIcdTypeUnrecognized,
           McsDiagnosisIcdType.UNRECOGNIZED,
           ImmutableSet.of(),
           ImmutableSet.of());
@@ -354,12 +354,12 @@ public class McsClaimTransformer {
             1,
             idrDiagIcdType.getEnumString(from),
             to::setIdrDiagIcdType)
-        .copyOptionalString(
+        .copyString(
             fieldPrefix + PreAdjMcsDiagnosisCode.Fields.idrDiagCode,
+            false,
             1,
             7,
-            from::hasIdrDiagCode,
-            from::getIdrDiagCode,
+            from.getIdrDiagCode(),
             to::setIdrDiagCode);
     to.setPriority(priority);
     to.setLastUpdated(now);
