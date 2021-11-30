@@ -34,9 +34,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public final class R4PatientResourceProviderIT {
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
+   * case.
+   */
   @BeforeClass
-  public static void beforeAll() {
-    // Call truncateTablesInDataSource() before any tests
+  public static void cleanupDatabaseBeforeTestSuite() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 

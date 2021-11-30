@@ -34,9 +34,12 @@ public final class LoadedFilterManagerIT {
   private static final String SAMPLE_BENE = "567834";
   private static final String INVALID_BENE = "1";
 
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
+   * case.
+   */
   @BeforeClass
-  public static void beforeAll() {
-    // Call truncateTablesInDataSource() before any tests
+  public static void cleanupDatabaseBeforeTestSuite() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 

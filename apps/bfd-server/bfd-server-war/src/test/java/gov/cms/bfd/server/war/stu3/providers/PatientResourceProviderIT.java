@@ -43,9 +43,12 @@ import org.junit.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
 public final class PatientResourceProviderIT {
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
+   * case.
+   */
   @BeforeClass
-  public static void beforeAll() {
-    // Call truncateTablesInDataSource() before any tests
+  public static void cleanupDatabaseBeforeTestSuite() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
