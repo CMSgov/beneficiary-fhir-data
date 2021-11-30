@@ -247,7 +247,8 @@ public class FissClaimTransformerV2 {
       name.setGiven(
           List.of(
               new StringType(benePayer.getBeneFirstName()),
-              new StringType(benePayer.getBeneMidInit() + ".")));
+              new StringType(
+                  benePayer.getBeneMidInit() == null ? null : benePayer.getBeneMidInit() + ".")));
     }
 
     return List.of(name);
