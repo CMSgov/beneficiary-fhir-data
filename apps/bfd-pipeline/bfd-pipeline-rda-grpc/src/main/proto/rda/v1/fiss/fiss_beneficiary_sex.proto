@@ -8,12 +8,9 @@ import "rda/v1/enum_options.proto";
 
 // FISS Beneficiary Sex
 enum FissBeneficiarySex {
-  // ASCII F
   BENEFIXIARY_SEX_FEMALE = 0  [(string_value) = "F"];
 
-  // ASCII M
   BENEFICIARY_SEX_MALE = 1    [(string_value) = "M"];
 
-  // ASCII U
   BENEFICIARY_SEX_UNKNOWN = 2 [(string_value) = "U"];
 }

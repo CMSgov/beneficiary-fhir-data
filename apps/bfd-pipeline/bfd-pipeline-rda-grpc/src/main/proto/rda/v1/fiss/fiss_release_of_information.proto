@@ -8,12 +8,9 @@ import "rda/v1/enum_options.proto";
 
 // Release of Information
 enum FissReleaseOfInformation {
-  // ASCII N
   RELEASE_OF_INFORMATION_NO_RELEASE_ON_FILE = 0                         [(string_value) = "N"];
 
-  // ASCII R
   RELEASE_OF_INFORMATION_SIGNED_STATEMENT_IS_RESTRICTED_OR_LIMITED = 1  [(string_value) = "R"];
 
-  // ASCII Y
   RELEASE_OF_INFORMATION_SIGNED_STATEMENT_WAS_OBTAINED = 2              [(string_value) = "Y"];
 }
