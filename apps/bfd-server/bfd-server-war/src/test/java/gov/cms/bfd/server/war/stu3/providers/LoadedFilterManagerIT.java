@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,6 +208,15 @@ public final class LoadedFilterManagerIT {
                   "Expected date range to not have a matching filter",
                   filterManager.isResultSetEmpty(INVALID_BENE, aroundSampleU));
             });
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @Before
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /** @param sampleResources the sample RIF resources to load */

@@ -1916,11 +1916,11 @@ public final class PatientResourceProviderIT {
   }
 
   /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
    * case.
    */
   @Before
-  public void cleanDatabaseServerAfterEachTestCase() {
+  public void cleanDatabaseServerBeforeEachTestCase() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
