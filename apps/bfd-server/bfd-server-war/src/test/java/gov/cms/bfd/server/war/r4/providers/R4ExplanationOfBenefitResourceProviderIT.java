@@ -57,13 +57,19 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /** R4ExplanationOfBenefitResourceProviderIT. */
 public final class R4ExplanationOfBenefitResourceProviderIT {
 
   public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
+
+  @BeforeClass
+  public static void beforeAll() {
+    // Call truncateTablesInDataSource() before any tests
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
 
   /**
    * Verifies that {@link
@@ -1607,15 +1613,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           Assert.assertEquals(
               testCase.getLeft(), testCase.getRight().intValue(), bundle.getTotal());
         });
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
-   * case.
-   */
-  @Before
-  public void cleanDatabaseServerBeforeEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

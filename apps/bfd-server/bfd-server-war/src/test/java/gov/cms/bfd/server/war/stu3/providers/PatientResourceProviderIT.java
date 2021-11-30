@@ -38,11 +38,17 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /** Integration tests for {@link gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider}. */
 public final class PatientResourceProviderIT {
+  @BeforeClass
+  public static void beforeAll() {
+    // Call truncateTablesInDataSource() before any tests
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.stu3.providers.PatientResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
@@ -1914,15 +1920,6 @@ public final class PatientResourceProviderIT {
           expectedValue,
           searchResults.getTotal());
     }
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
-   * case.
-   */
-  @Before
-  public void cleanDatabaseServerBeforeEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

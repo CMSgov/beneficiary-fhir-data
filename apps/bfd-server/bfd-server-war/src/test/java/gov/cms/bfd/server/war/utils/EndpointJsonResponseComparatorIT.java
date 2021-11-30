@@ -60,7 +60,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -178,6 +178,12 @@ public final class EndpointJsonResponseComparatorIT {
   public EndpointJsonResponseComparatorIT(String endpointId, Supplier<String> endpointOperation) {
     this.endpointId = endpointId;
     this.endpointOperation = endpointOperation;
+  }
+
+  @BeforeClass
+  public static void beforeAll() {
+    // Call truncateTablesInDataSource() before any tests
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**
@@ -1202,15 +1208,6 @@ public final class EndpointJsonResponseComparatorIT {
         node.removeAll();
       }
     }
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
-   * case.
-   */
-  @Before
-  public void cleanDatabaseServerBeforeEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

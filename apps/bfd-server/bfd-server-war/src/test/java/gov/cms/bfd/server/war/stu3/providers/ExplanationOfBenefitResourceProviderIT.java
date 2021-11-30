@@ -50,7 +50,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +62,12 @@ import org.slf4j.LoggerFactory;
 public final class ExplanationOfBenefitResourceProviderIT {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ExplanationOfBenefitResourceProviderIT.class);
+
+  @BeforeClass
+  public static void beforeAll() {
+    // Call truncateTablesInDataSource() before any tests
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
 
   /**
    * Verifies that {@link
@@ -1972,15 +1978,6 @@ public final class ExplanationOfBenefitResourceProviderIT {
           Assert.assertEquals(
               testCase.getLeft(), testCase.getRight().intValue(), bundle.getTotal());
         });
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
-   * case.
-   */
-  @Before
-  public void cleanDatabaseServerBeforeEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

@@ -30,10 +30,16 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public final class R4PatientResourceProviderIT {
+  @BeforeClass
+  public static void beforeAll() {
+    // Call truncateTablesInDataSource() before any tests
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
   /**
    * Verifies that {@link
    * gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider#read(org.hl7.fhir.r4.model.IdType)}
@@ -1538,15 +1544,6 @@ public final class R4PatientResourceProviderIT {
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, "mbi");
     return createFhirClient(requestHeader);
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called before each test
-   * case.
-   */
-  @Before
-  public void cleanDatabaseServerBeforeEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**
