@@ -14,7 +14,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.server.war.adapters.CodeableConcept;
 import gov.cms.bfd.server.war.adapters.Coding;
 import gov.cms.bfd.server.war.adapters.DiagnosisComponent;
@@ -22,16 +21,19 @@ import gov.cms.bfd.server.war.adapters.FhirResource;
 import gov.cms.bfd.server.war.adapters.ItemComponent;
 import gov.cms.bfd.server.war.adapters.ProcedureComponent;
 import gov.cms.bfd.server.war.utils.ReflectionTestUtils;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 @RunWith(Enclosed.class)
 public class AbstractSamhsaMatcherTest {
@@ -46,6 +48,10 @@ public class AbstractSamhsaMatcherTest {
 
   public static class NonParameterizedTests {
 
+    /**
+     * Test to see that {@link AbstractSamhsaMatcher#resourceCsvColumnToList(String, String)} pulls
+     * the expected column data from the given file.
+     */
     @Test
     public void shouldReturnColumnValues() {
       List<String> expected = List.of("1", "2", "3", "4");
@@ -55,21 +61,26 @@ public class AbstractSamhsaMatcherTest {
       assertEquals(expected, actual);
     }
 
+    /**
+     * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaIcdProcedureCode(List)} returns
+     * true if at least one of the {@link ProcedureComponent}s in the given list contains a SAMHSA
+     * {@link Coding}.
+     */
     @Test
-    public void shouldReturnTrueForSamhsaProcedureComponent() {
+    public void shouldReturnTrueIfAtLeastOneProcedureComponentContainsSamhsa() {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
 
-      ProcedureComponent mockComponentA = mock(ProcedureComponent.class);
-      ProcedureComponent mockComponentB = mock(ProcedureComponent.class);
-
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION)
           .when(matcherSpy)
           .isSamhsaIcdProcedure(any(ProcedureComponent.class));
 
+      ProcedureComponent mockComponentA = mock(ProcedureComponent.class);
       doReturn(false).when(matcherSpy).isSamhsaIcdProcedure(mockComponentA);
 
+      ProcedureComponent mockComponentB = mock(ProcedureComponent.class);
       doReturn(true).when(matcherSpy).isSamhsaIcdProcedure(mockComponentB);
 
       assertTrue(
@@ -77,21 +88,26 @@ public class AbstractSamhsaMatcherTest {
           matcherSpy.containsSamhsaIcdProcedureCode(List.of(mockComponentA, mockComponentB)));
     }
 
+    /**
+     * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaIcdProcedureCode(List)} returns
+     * false if none of the {@link ProcedureComponent}s in the given list contains a SAMHSA {@link
+     * Coding}.
+     */
     @Test
     public void shouldReturnFalseForNonSamhsaProcedureComponent() {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
 
-      ProcedureComponent mockComponentA = mock(ProcedureComponent.class);
-      ProcedureComponent mockComponentB = mock(ProcedureComponent.class);
-
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION)
           .when(matcherSpy)
           .isSamhsaIcdProcedure(any(ProcedureComponent.class));
 
+      ProcedureComponent mockComponentA = mock(ProcedureComponent.class);
       doReturn(false).when(matcherSpy).isSamhsaIcdProcedure(mockComponentA);
 
+      ProcedureComponent mockComponentB = mock(ProcedureComponent.class);
       doReturn(false).when(matcherSpy).isSamhsaIcdProcedure(mockComponentB);
 
       assertFalse(
@@ -99,21 +115,26 @@ public class AbstractSamhsaMatcherTest {
           matcherSpy.containsSamhsaIcdProcedureCode(List.of(mockComponentA, mockComponentB)));
     }
 
+    /**
+     * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaIcdDiagnosisCode(List)} returns
+     * true if at least one of the {@link DiagnosisComponent}s in the given list contains a SAMHSA
+     * {@link Coding}.
+     */
     @Test
     public void shouldReturnTrueForSamhsaDiagnosisComponent() {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
 
-      DiagnosisComponent mockComponentA = mock(DiagnosisComponent.class);
-      DiagnosisComponent mockComponentB = mock(DiagnosisComponent.class);
-
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION)
           .when(matcherSpy)
           .isSamhsaDiagnosis(any(DiagnosisComponent.class));
 
+      DiagnosisComponent mockComponentA = mock(DiagnosisComponent.class);
       doReturn(false).when(matcherSpy).isSamhsaDiagnosis(mockComponentA);
 
+      DiagnosisComponent mockComponentB = mock(DiagnosisComponent.class);
       doReturn(true).when(matcherSpy).isSamhsaDiagnosis(mockComponentB);
 
       assertTrue(
@@ -121,21 +142,26 @@ public class AbstractSamhsaMatcherTest {
           matcherSpy.containsSamhsaIcdDiagnosisCode(List.of(mockComponentA, mockComponentB)));
     }
 
+    /**
+     * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaIcdDiagnosisCode(List)} returns
+     * false if none of the {@link DiagnosisComponent}s in the given list contains a SAMHSA {@link
+     * Coding}.
+     */
     @Test
     public void shouldReturnFalseForNonSamhsaDiagnosisComponent() {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
 
-      DiagnosisComponent mockComponentA = mock(DiagnosisComponent.class);
-      DiagnosisComponent mockComponentB = mock(DiagnosisComponent.class);
-
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION)
           .when(matcherSpy)
           .isSamhsaDiagnosis(any(DiagnosisComponent.class));
 
+      DiagnosisComponent mockComponentA = mock(DiagnosisComponent.class);
       doReturn(false).when(matcherSpy).isSamhsaDiagnosis(mockComponentA);
 
+      DiagnosisComponent mockComponentB = mock(DiagnosisComponent.class);
       doReturn(false).when(matcherSpy).isSamhsaDiagnosis(mockComponentB);
 
       assertFalse(
@@ -143,28 +169,30 @@ public class AbstractSamhsaMatcherTest {
           matcherSpy.containsSamhsaIcdDiagnosisCode(List.of(mockComponentA, mockComponentB)));
     }
 
+    /**
+     * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaLineItem(List)} returns true if
+     * at least one of the {@link ItemComponent}s in the given list contains a SAMHSA {@link
+     * Coding}.
+     */
     @Test
     public void shouldReturnTrueForSamhsaLineItem() {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
 
-      ItemComponent mockComponentA = mock(ItemComponent.class);
-      ItemComponent mockComponentB = mock(ItemComponent.class);
-
-      CodeableConcept mockConceptA = mock(CodeableConcept.class);
-      CodeableConcept mockConceptB = mock(CodeableConcept.class);
-
-      doReturn(mockConceptA).when(mockComponentA).getProductOrService();
-
-      doReturn(mockConceptB).when(mockComponentB).getProductOrService();
-
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION)
           .when(matcherSpy)
           .containsSamhsaProcedureCode(any(CodeableConcept.class));
 
+      ItemComponent mockComponentA = mock(ItemComponent.class);
+      CodeableConcept mockConceptA = mock(CodeableConcept.class);
+      doReturn(mockConceptA).when(mockComponentA).getProductOrService();
       doReturn(false).when(matcherSpy).containsSamhsaProcedureCode(mockConceptA);
 
+      ItemComponent mockComponentB = mock(ItemComponent.class);
+      CodeableConcept mockConceptB = mock(CodeableConcept.class);
+      doReturn(mockConceptB).when(mockComponentB).getProductOrService();
       doReturn(true).when(matcherSpy).containsSamhsaProcedureCode(mockConceptB);
 
       assertTrue(
@@ -172,28 +200,29 @@ public class AbstractSamhsaMatcherTest {
           matcherSpy.containsSamhsaLineItem(List.of(mockComponentA, mockComponentB)));
     }
 
+    /**
+     * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaLineItem(List)} returns false if
+     * none of the {@link ItemComponent}s in the given list contains a SAMHSA {@link Coding}.
+     */
     @Test
     public void shouldReturnFalseForNonSamhsaLineItems() {
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
 
-      ItemComponent mockComponentA = mock(ItemComponent.class);
-      ItemComponent mockComponentB = mock(ItemComponent.class);
-
-      CodeableConcept mockConceptA = mock(CodeableConcept.class);
-      CodeableConcept mockConceptB = mock(CodeableConcept.class);
-
-      doReturn(mockConceptA).when(mockComponentA).getProductOrService();
-
-      doReturn(mockConceptB).when(mockComponentB).getProductOrService();
-
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION)
           .when(matcherSpy)
           .containsSamhsaProcedureCode(any(CodeableConcept.class));
 
+      ItemComponent mockComponentA = mock(ItemComponent.class);
+      CodeableConcept mockConceptA = mock(CodeableConcept.class);
+      doReturn(mockConceptA).when(mockComponentA).getProductOrService();
       doReturn(false).when(matcherSpy).containsSamhsaProcedureCode(mockConceptA);
 
+      ItemComponent mockComponentB = mock(ItemComponent.class);
+      CodeableConcept mockConceptB = mock(CodeableConcept.class);
+      doReturn(mockConceptB).when(mockComponentB).getProductOrService();
       doReturn(false).when(matcherSpy).containsSamhsaProcedureCode(mockConceptB);
 
       assertFalse(
@@ -201,6 +230,11 @@ public class AbstractSamhsaMatcherTest {
           matcherSpy.containsSamhsaLineItem(List.of(mockComponentA, mockComponentB)));
     }
 
+    /**
+     * Test to see if {@link AbstractSamhsaMatcher#isSamhsaIcdProcedure(ProcedureComponent)} returns
+     * true if the given {@link ProcedureComponent} contains a {@link CodeableConcept} with SAMHSA
+     * data.
+     */
     @Test
     public void shouldReturnTrueForIsSamhsaIcdProcedure() {
       // unchecked - This is ok for making a mock.
@@ -212,6 +246,7 @@ public class AbstractSamhsaMatcherTest {
 
       doReturn(mockConcept).when(mockComponent).getProcedureCodeableConcept();
 
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION)
           .when(matcherSpy)
           .isSamhsaIcdProcedure(any(CodeableConcept.class));
@@ -223,6 +258,11 @@ public class AbstractSamhsaMatcherTest {
           matcherSpy.isSamhsaIcdProcedure(mockComponent));
     }
 
+    /**
+     * Test to see if {@link AbstractSamhsaMatcher#isSamhsaIcdProcedure(ProcedureComponent)} returns
+     * false if the given {@link ProcedureComponent} contains no {@link CodeableConcept} with SAMHSA
+     * data.
+     */
     @Test
     public void shouldReturnFalseForIsSamhsaIcdProcedure() {
       // unchecked - This is ok for making a mock.
@@ -234,6 +274,7 @@ public class AbstractSamhsaMatcherTest {
 
       doReturn(mockConcept).when(mockComponent).getProcedureCodeableConcept();
 
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION)
           .when(matcherSpy)
           .isSamhsaIcdProcedure(any(CodeableConcept.class));
@@ -245,6 +286,12 @@ public class AbstractSamhsaMatcherTest {
           matcherSpy.isSamhsaIcdProcedure(mockComponent));
     }
 
+    /**
+     * Test to see if {@link AbstractSamhsaMatcher#isSamhsaDiagnosis(CodeableConcept)} correctly
+     * invokes the expected sibling method ({@link
+     * AbstractSamhsaMatcher#isSamhsaCoding(CodeableConcept, Predicate, Predicate)}) with the
+     * expected parameters.
+     */
     @Test
     public void shouldCorrectlyInvokeIsSamhsaCodingForDiagnosis() {
       CodeableConcept mockConcept = mock(CodeableConcept.class);
@@ -336,11 +383,27 @@ public class AbstractSamhsaMatcherTest {
     }
   }
 
+  /**
+   * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaDiagnosis(DiagnosisComponent)}
+   *
+   * <p>The parameterized tests check to see if either/both the Diagnosis Codeable Concept and/or
+   * Packaging Code contains SAMHSA data
+   *
+   * <p>Two different calls are made to {@link
+   * AbstractSamhsaMatcher#isSamhsaDiagnosis(CodeableConcept)} and {@link
+   * AbstractSamhsaMatcher#isSamhsaPackageCode(CodeableConcept)} from the primary method, which are
+   * both mocked within the test
+   */
   @RunWith(Parameterized.class)
   public static class IsSamhsaDiagnosisTests {
 
+    private final boolean expectedIsSamhsaDiagnosis;
+    private final boolean expectedIsSamhsaPackage;
+    private final boolean expectedResult;
+    private final String errorMessage;
+
     @Parameterized.Parameters(
-        name = "{index}: IsSamhsaDiagnosis(\"{0}\"), IsSamhsaPackage(\"{1}\")")
+        name = "{index}: IsSamhsaDiagnosis(\"{0}\"), IsSamhsaPackage(\"{1}\"), Expected(\"{2}\")")
     public static Iterable<Object[]> parameters() {
       return List.of(
           new Object[][] {
@@ -350,11 +413,6 @@ public class AbstractSamhsaMatcherTest {
             {true, true, true, "Samhsa diagnosis & package not correctly filtered"},
           });
     }
-
-    private final boolean expectedIsSamhsaDiagnosis;
-    private final boolean expectedIsSamhsaPackage;
-    private final boolean expectedResult;
-    private final String errorMessage;
 
     public IsSamhsaDiagnosisTests(
         boolean expectedIsSamhsaDiagnosis,
@@ -382,6 +440,7 @@ public class AbstractSamhsaMatcherTest {
 
       doReturn(mockPackageConcept).when(mockComponent).getPackageCode();
 
+      // Prevent default logic from executing
       doThrow(INVOCATION_EXCEPTION).when(matcherSpy).isSamhsaDiagnosis(any(CodeableConcept.class));
 
       doThrow(INVOCATION_EXCEPTION)
@@ -396,12 +455,27 @@ public class AbstractSamhsaMatcherTest {
     }
   }
 
+  /**
+   * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCoding(CodeableConcept, Predicate,
+   * Predicate)}
+   *
+   * <p>The target method takes a {@link CodeableConcept} and two {@link Predicate}s (one for ICD9
+   * checks and one for ICD10 checks). The test checks each combination of coding system/predicate
+   * result.
+   */
   @RunWith(Parameterized.class)
   public static class SamhsaCodingTests {
 
+    private final String system;
+    private final CodeableConcept concept;
+    private final boolean isIcd9Code;
+    private final boolean isIcd10Code;
+    private final boolean expectedResult;
+    private final String errorMessage;
+
     @Parameterized.Parameters(
         name =
-            "{index}: System(\"{0}\"), isSamsaICD9(\"{2}\"), isSamsaICD10(\"{3}\"), isSamsaCPT(\"{4}\")")
+            "{index}: System(\"{0}\"), isSamsaICD9(\"{2}\"), isSamsaICD10(\"{3}\"), Expected(\"{4}\")")
     public static Iterable<Object[]> parameters() {
       return List.of(
           new Object[][] {
@@ -409,7 +483,6 @@ public class AbstractSamhsaMatcherTest {
               IcdCode.CODING_SYSTEM_ICD_9,
               mock(CodeableConcept.class),
               true,
-              false,
               false,
               true,
               "ICD9 System Coding not correctly marked samhsa."
@@ -420,7 +493,6 @@ public class AbstractSamhsaMatcherTest {
               false,
               false,
               false,
-              false,
               "ICD9 System Coding incorrectly marked samhsa."
             },
             {
@@ -428,7 +500,6 @@ public class AbstractSamhsaMatcherTest {
               mock(CodeableConcept.class),
               false,
               true,
-              false,
               true,
               "ICD10 System Coding not correctly marked samhsa."
             },
@@ -438,13 +509,11 @@ public class AbstractSamhsaMatcherTest {
               false,
               false,
               false,
-              false,
               "ICD10 System Coding incorrectly marked samhsa."
             },
             {
               "other/unknown system",
               mock(CodeableConcept.class),
-              false,
               false,
               false,
               true,
@@ -456,33 +525,22 @@ public class AbstractSamhsaMatcherTest {
               false,
               false,
               false,
-              false,
               "Missing concept incorrectly marked samhsa"
             },
           });
     }
-
-    private final String system;
-    private final CodeableConcept concept;
-    private final boolean isIcd9Code;
-    private final boolean isIcd10Code;
-    private final boolean isCptCode;
-    private final boolean expectedResult;
-    private final String errorMessage;
 
     public SamhsaCodingTests(
         String system,
         CodeableConcept concept,
         boolean isIcd9Code,
         boolean isIcd10Code,
-        boolean isCptCode,
         boolean expectedResult,
         String errorMessage) {
       this.system = system;
       this.concept = concept;
       this.isIcd9Code = isIcd9Code;
       this.isIcd10Code = isIcd10Code;
-      this.isCptCode = isCptCode;
       this.expectedResult = expectedResult;
       this.errorMessage = errorMessage;
     }
@@ -504,17 +562,14 @@ public class AbstractSamhsaMatcherTest {
 
       doReturn(false).when(matcherSpy).isSamhsaCptCode(any(Coding.class));
 
-      doReturn(isCptCode).when(matcherSpy).isSamhsaCptCode(mockCoding);
-
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       Predicate<Coding> mockPredicateIcd9 = mock(Predicate.class);
+      doReturn(isIcd9Code).when(mockPredicateIcd9).test(mockCoding);
+
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
       Predicate<Coding> mockPredicateIcd10 = mock(Predicate.class);
-
-      doReturn(isIcd9Code).when(mockPredicateIcd9).test(mockCoding);
-
       doReturn(isIcd10Code).when(mockPredicateIcd10).test(mockCoding);
 
       assertEquals(
@@ -524,110 +579,363 @@ public class AbstractSamhsaMatcherTest {
     }
   }
 
+  /**
+   * Parameterized tests for {@link
+   * AbstractSamhsaMatcher#containsSamhsaProcedureCode(CodeableConcept)}
+   *
+   * <p>Tests to see if every combination of coding list size, hcpcs result and known system check
+   * returns the expected result.
+   *
+   * <p>If the codings list is empty, it should return false. If the concept contains a HCPCS samhsa
+   * code or any unknown systems, it should return true.
+   */
   @RunWith(Parameterized.class)
-  public static class CodeableConceptTests {
+  public static class ContainsSamhsaProcedureCodeTests {
 
-    @Parameterized.Parameters(name = "{index}: System(\"{0}\"), IsSamhsaCode(\"{1}\")")
+    private final String name;
+    private final boolean codingsListEmpty;
+    private final boolean hasHcpcsSystemAndSmahsaCptCode;
+    private final boolean containsOnlyKnownSystems;
+    private final boolean expectedResult;
+    private final String errorMessage;
+
+    @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> parameters() {
       return List.of(
           new Object[][] {
+            {"Empty codings", true, true, false, false, "should NOT be filtered, but WAS."},
             {
-              "unknown system",
+              "Non-empty codings with only known systems with no SAMHSA codes",
               false,
-              (SamhsaFilterMethod<CodeableConcept>)
-                  AbstractSamhsaMatcher::containsSamhsaProcedureCode,
+              false,
               true,
-              "Unknown system not correctly filtered."
+              false,
+              "should NOT be filtered, but WAS."
             },
             {
-              TransformerConstants.CODING_SYSTEM_HCPCS,
+              "Non-empty codings with SAMHSA codes",
+              false,
               true,
-              (SamhsaFilterMethod<CodeableConcept>)
-                  AbstractSamhsaMatcher::containsSamhsaProcedureCode,
               true,
-              "Samhsa data for known system not correctly filtered."
+              true,
+              "SHOULD be filtered, but was NOT."
             },
             {
-              TransformerConstants.CODING_SYSTEM_HCPCS,
+              "Non-empty codings with unknown system containing no SAMHSA codes",
               false,
-              (SamhsaFilterMethod<CodeableConcept>)
-                  AbstractSamhsaMatcher::containsSamhsaProcedureCode,
               false,
-              "Non samhsa data for known system incorrectly filtered."
+              false,
+              true,
+              "SHOULD be filtered, but was NOT."
             },
             {
-              "unknown system",
+              "Non-empty codings with unknown system containing SAMHSA codes",
               false,
-              (SamhsaFilterMethod<CodeableConcept>) AbstractSamhsaMatcher::isSamhsaPackageCode,
               true,
-              "Unknown system not correctly filtered."
-            },
-            {
-              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD),
-              true,
-              (SamhsaFilterMethod<CodeableConcept>) AbstractSamhsaMatcher::isSamhsaPackageCode,
-              true,
-              "Samhsa data for known system not correctly filtered."
-            },
-            {
-              CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD),
               false,
-              (SamhsaFilterMethod<CodeableConcept>) AbstractSamhsaMatcher::isSamhsaPackageCode,
-              false,
-              "Non samhsa data for known system incorrectly filtered."
+              true,
+              "SHOULD be filtered, but was NOT."
             },
           });
     }
 
-    private final String system;
-    private final boolean codingIsSamhsa;
-    private final SamhsaFilterMethod<CodeableConcept> method;
-    private final boolean expectedResult;
-    private final String errorMessage;
-
-    public CodeableConceptTests(
-        String system,
-        boolean codingIsSamhsa,
-        SamhsaFilterMethod<CodeableConcept> method,
+    public ContainsSamhsaProcedureCodeTests(
+        String name,
+        boolean codingsListEmpty,
+        boolean hasHcpcsSystemAndSmahsaCptCode,
+        boolean containsOnlyKnownSystems,
         boolean expectedResult,
         String errorMessage) {
-      this.system = system;
-      this.codingIsSamhsa = codingIsSamhsa;
-      this.method = method;
+      this.name = name;
+      this.codingsListEmpty = codingsListEmpty;
+      this.hasHcpcsSystemAndSmahsaCptCode = hasHcpcsSystemAndSmahsaCptCode;
+      this.containsOnlyKnownSystems = containsOnlyKnownSystems;
       this.expectedResult = expectedResult;
       this.errorMessage = errorMessage;
     }
 
     @Test
     public void test() {
-      Coding mockCoding = mock(Coding.class);
-
-      doReturn(system).when(mockCoding).getSystem();
-
-      doReturn("some code").when(mockCoding).getCode();
+      // unchecked - This is ok for making a mock.
+      //noinspection unchecked
+      List<Coding> mockList = mock(List.class);
+      doReturn(codingsListEmpty).when(mockList).isEmpty();
 
       CodeableConcept mockConcept = mock(CodeableConcept.class);
-
-      doReturn(List.of(mockCoding)).when(mockConcept).getCoding();
+      doReturn(mockList).when(mockConcept).getCoding();
 
       // unchecked - This is ok for making a mock.
       //noinspection unchecked
-      AbstractSamhsaMatcher<IBaseResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+      AbstractSamhsaMatcher<FhirResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
 
-      doReturn(false).when(matcherSpy).isSamhsaCptCode(any(Coding.class));
+      // Prevent default logic from executing
+      doThrow(INVOCATION_EXCEPTION)
+          .when(matcherSpy)
+          .hasHcpcsSystemAndSamhsaCptCode(any(CodeableConcept.class));
 
-      doReturn(codingIsSamhsa).when(matcherSpy).isSamhsaCptCode(mockCoding);
+      doThrow(INVOCATION_EXCEPTION)
+          .when(matcherSpy)
+          .containsOnlyKnownSystems(any(CodeableConcept.class));
 
-      doReturn(false).when(matcherSpy).isSamhsaDrgCode(any(Coding.class));
+      doReturn(hasHcpcsSystemAndSmahsaCptCode)
+          .when(matcherSpy)
+          .hasHcpcsSystemAndSamhsaCptCode(mockConcept);
+      doReturn(containsOnlyKnownSystems).when(matcherSpy).containsOnlyKnownSystems(mockConcept);
 
-      doReturn(codingIsSamhsa).when(matcherSpy).isSamhsaDrgCode(mockCoding);
-
-      assertEquals(errorMessage, expectedResult, method.apply(matcherSpy, mockConcept));
+      assertEquals(
+          name + " " + errorMessage,
+          expectedResult,
+          matcherSpy.containsSamhsaProcedureCode(mockConcept));
     }
   }
 
+  /**
+   * Parameterized tests for {@link
+   * AbstractSamhsaMatcher#hasHcpcsSystemAndSamhsaCptCode(CodeableConcept)}
+   *
+   * <p>Tests to see if every combination of coding list size, HCPCS system existence, and CPT
+   * SAMHSA codes generates the expected result.
+   *
+   * <p>Empty coding lists and ones without a HCPCS system are not considered SAMHSA by the tested
+   * method.
+   */
+  @RunWith(Parameterized.class)
+  public static class HasHcpcsSystemAndSamhsaCptCodeTests {
+
+    private static final Coding HCPCS_CODING = mock(Coding.class);
+    private static final Coding SAMHSA_CODING = mock(Coding.class);
+    private static final Coding OTHER_CODING = mock(Coding.class);
+
+    private static final List<Coding> CODINGS_WITH_HCPCS =
+        List.of(OTHER_CODING, HCPCS_CODING, SAMHSA_CODING, OTHER_CODING);
+    private static final List<Coding> CODINGS_WITHOUT_HCPCS =
+        List.of(OTHER_CODING, SAMHSA_CODING, OTHER_CODING);
+
+    private final String name;
+    private final List<Coding> codings;
+    private final boolean isSamhsaCptCode;
+    private final boolean expectedResult;
+    private final String errorMessage;
+
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Iterable<Object[]> parameters() {
+      return List.of(
+          new Object[][] {
+            {
+              "Empty coding list with obviously no SAMHSA CPT code",
+              Collections.emptyList(),
+              false,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "Empty coding list, with SAMHSA CPT code (should not be possible)",
+              Collections.emptyList(),
+              true,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "Non-HCPCS system with no SAMHSA CPT code",
+              CODINGS_WITHOUT_HCPCS,
+              false,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "Non-HCPCS system with SAMHSA CPT code",
+              CODINGS_WITHOUT_HCPCS,
+              true,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "HCPCS system with no SAMHSA CPT code",
+              CODINGS_WITH_HCPCS,
+              false,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "HCPCS system with SAMHSA CPT code",
+              CODINGS_WITH_HCPCS,
+              true,
+              true,
+              "SHOULD be filtered, but was NOT."
+            },
+          });
+    }
+
+    @Before
+    public void setUp() {
+      Mockito.reset(HCPCS_CODING, SAMHSA_CODING, OTHER_CODING);
+
+      doReturn(TransformerConstants.CODING_SYSTEM_HCPCS).when(HCPCS_CODING).getSystem();
+    }
+
+    public HasHcpcsSystemAndSamhsaCptCodeTests(
+        String name,
+        List<Coding> codings,
+        boolean isSamhsaCptCode,
+        boolean expectedResult,
+        String errorMessage) {
+      this.name = name;
+      this.codings = codings;
+      this.isSamhsaCptCode = isSamhsaCptCode;
+      this.expectedResult = expectedResult;
+      this.errorMessage = errorMessage;
+    }
+
+    @Test
+    public void test() {
+      // unchecked - This is ok for making a mock.
+      //noinspection unchecked
+      AbstractSamhsaMatcher<FhirResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+
+      doReturn(false).when(matcherSpy).isSamhsaCptCode(any(Coding.class));
+
+      doReturn(isSamhsaCptCode).when(matcherSpy).isSamhsaCptCode(SAMHSA_CODING);
+
+      CodeableConcept mockConcept = mock(CodeableConcept.class);
+
+      doReturn(codings).when(mockConcept).getCoding();
+
+      assertEquals(
+          name + " " + errorMessage,
+          expectedResult,
+          matcherSpy.hasHcpcsSystemAndSamhsaCptCode(mockConcept));
+    }
+  }
+
+  /**
+   * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaPackageCode(CodeableConcept)}
+   *
+   * <p>Tests to see if every combination of concept/coding creates the expected result.
+   *
+   * <p>If the concept is null, there is no SAMHSA.
+   *
+   * <p>If the concept's coding list has any non-DRG codes, or DRG SAMHSA codes, the coding is
+   * SAMHSA
+   */
+  @RunWith(Parameterized.class)
+  public static class IsSamhsaPackageCodeTests {
+
+    private static final Coding NON_DRG_CODING = mock(Coding.class);
+    private static final Coding DRG_NON_SAMHSA_CODING = mock(Coding.class);
+    private static final Coding DRG_SAMHSA_CODING = mock(Coding.class);
+
+    private static final CodeableConcept PACKAGING_CONCEPT = mock(CodeableConcept.class);
+
+    private final String name;
+    private final List<Coding> codings;
+    private final CodeableConcept concept;
+    private final boolean expectedResult;
+    private final String errorMessage;
+
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Iterable<Object[]> parameters() {
+      return List.of(
+          new Object[][] {
+            {
+              "Null concept with expected empty coding list",
+              Collections.emptyList(),
+              null,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "Null concept with SAMHSA DRG system code (should not be possible)",
+              List.of(DRG_SAMHSA_CODING),
+              null,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "Concept with empty coding list",
+              Collections.emptyList(),
+              PACKAGING_CONCEPT,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "Concept with non-SAMHSA DRG codes",
+              List.of(DRG_NON_SAMHSA_CODING, DRG_NON_SAMHSA_CODING, DRG_NON_SAMHSA_CODING),
+              PACKAGING_CONCEPT,
+              false,
+              "should NOT be filtered, but WAS."
+            },
+            {
+              "Concept with SAMHSA DRG code",
+              List.of(DRG_NON_SAMHSA_CODING, DRG_SAMHSA_CODING, DRG_NON_SAMHSA_CODING),
+              PACKAGING_CONCEPT,
+              true,
+              "SHOULD be filtered, but was NOT."
+            },
+            {
+              "Concept with Non-DRG System code",
+              List.of(DRG_NON_SAMHSA_CODING, NON_DRG_CODING, DRG_NON_SAMHSA_CODING),
+              PACKAGING_CONCEPT,
+              true,
+              "SHOULD be filtered, but was NOT."
+            },
+            {
+              "Concept with Non-DRG System Code and SAMHSA DRG code",
+              List.of(
+                  DRG_NON_SAMHSA_CODING, DRG_SAMHSA_CODING, NON_DRG_CODING, DRG_NON_SAMHSA_CODING),
+              PACKAGING_CONCEPT,
+              true,
+              "SHOULD be filtered, but was NOT."
+            },
+          });
+    }
+
+    @Before
+    public void setUp() {
+      Mockito.reset(DRG_NON_SAMHSA_CODING, NON_DRG_CODING, DRG_SAMHSA_CODING, PACKAGING_CONCEPT);
+
+      doReturn(AbstractSamhsaMatcher.DRG).when(DRG_NON_SAMHSA_CODING).getSystem();
+      doReturn(AbstractSamhsaMatcher.DRG).when(DRG_SAMHSA_CODING).getSystem();
+      doReturn("Other system").when(NON_DRG_CODING).getSystem();
+
+      doReturn(codings).when(PACKAGING_CONCEPT).getCoding();
+    }
+
+    public IsSamhsaPackageCodeTests(
+        String name,
+        List<Coding> codings,
+        CodeableConcept concept,
+        boolean expectedResult,
+        String errorMessage) {
+      this.name = name;
+      this.codings = codings;
+      this.concept = concept;
+      this.expectedResult = expectedResult;
+      this.errorMessage = errorMessage;
+    }
+
+    @Test
+    public void test() {
+      // unchecked - This is ok for making a mock.
+      //noinspection unchecked
+      AbstractSamhsaMatcher<FhirResource> matcherSpy = spy(AbstractSamhsaMatcher.class);
+
+      doReturn(false).when(matcherSpy).isSamhsaCptCode(any(Coding.class));
+
+      doReturn(false).when(matcherSpy).isSamhsaDrgCode(any(Coding.class));
+      doReturn(true).when(matcherSpy).isSamhsaDrgCode(DRG_SAMHSA_CODING);
+
+      assertEquals(
+          name + " " + errorMessage, expectedResult, matcherSpy.isSamhsaPackageCode(concept));
+    }
+  }
+
+  /** Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCptCode(Coding)} */
   @RunWith(Parameterized.class)
   public static class CptCodingTests {
+
+    private final String code;
+    private final boolean expectedResult;
+    private final String errorMessage;
 
     @Parameterized.Parameters(name = "{index}: List(\"{0}\"), System(\"{1}\")")
     public static Iterable<Object[]> parameters() {
@@ -638,10 +946,6 @@ public class AbstractSamhsaMatcherTest {
             {"123", false, "Non-samhsa code incorrectly filtered"},
           });
     }
-
-    private final String code;
-    private final boolean expectedResult;
-    private final String errorMessage;
 
     public CptCodingTests(String code, boolean expectedResult, String errorMessage) {
       this.code = code;
@@ -667,8 +971,18 @@ public class AbstractSamhsaMatcherTest {
     }
   }
 
+  /**
+   * Parameterized tests for {@link AbstractSamhsaMatcher#isSamhsaCodingForSystem(Coding, Set,
+   * String)}
+   */
   @RunWith(Parameterized.class)
   public static class IsSamhsaCodingForSystemTests {
+
+    private final String code;
+    private final String system;
+    private final boolean shouldThrow;
+    private final boolean expectedResult;
+    private final String errorMessage;
 
     @Parameterized.Parameters(name = "{index}: Code(\"{0}\"), System(\"{1}\")")
     public static Iterable<Object[]> parameters() {
@@ -680,12 +994,6 @@ public class AbstractSamhsaMatcherTest {
             {"123", "invalid system", true, false, null},
           });
     }
-
-    private final String code;
-    private final String system;
-    private final boolean shouldThrow;
-    private final boolean expectedResult;
-    private final String errorMessage;
 
     public IsSamhsaCodingForSystemTests(
         String code,
@@ -731,6 +1039,7 @@ public class AbstractSamhsaMatcherTest {
     }
   }
 
+  /** Parameterized tests for various isSamhsaX() methods. */
   @RunWith(Parameterized.class)
   public static class CodingTests {
 

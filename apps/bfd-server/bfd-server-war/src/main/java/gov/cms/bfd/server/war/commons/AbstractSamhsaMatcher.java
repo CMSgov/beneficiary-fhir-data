@@ -161,8 +161,9 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
 
   /**
    * Checks that for the specified {@link CodeableConcept}, the Codings (if any) within, contain a
-   * blacklisted MHSA procedure code. If any of the systemms within th {@link CodeableConcept} are
-   * not known/expected, returns {@code true} and assuems the system is SAMHSA as a safety fallback.
+   * blacklisted SAMHSA procedure code. If any of the systems within the {@link CodeableConcept} are
+   * not known/expected, it assumes the system is SAMHSA and returns {@code true} as a safety
+   * fallback.
    *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains any
@@ -179,6 +180,10 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    * Checks that for a {@link CodeableConcept} the {@link Coding}s contain a HCPCS system and at
    * least one blacklisted CPT code.
    *
+   * <p>CPT codes are a subset of HCPCS codes, but they are the only ones we blacklist
+   *
+   * <p>If there is no HCPCS system, it may be a DME claim, which should return false for SAMHSA
+   *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains a HCPCS
    *     system as well as a CPT samhsa coding, (matched with {@link #cptCodes}), <code>false</code>
@@ -186,38 +191,20 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   @VisibleForTesting
   boolean hasHcpcsSystemAndSamhsaCptCode(CodeableConcept procedureConcept) {
-    // CPT codes are a subset of HCPCS codes, but they are the only ones we blacklist
-
-    // If there is no HCPCS system, it may be a DME claim, which should return false for SAMHSA
     return procedureConcept.getCoding().stream()
             .anyMatch(code -> TransformerConstants.CODING_SYSTEM_HCPCS.equals(code.getSystem()))
         && procedureConcept.getCoding().stream().anyMatch(this::isSamhsaCptCode);
   }
 
   /**
+   * Checks if the given {@link CodeableConcept} contains only known coding systems.
+   *
    * @param procedureConcept the procedure {@link CodeableConcept} to check
    * @return <code>true</code> if the specified procedure {@link CodeableConcept} contains at least
-   *     one {@link Coding} and only contains {@link Coding}s that have known coding systems <code>
+   *     one {@link Coding} and only contains {@link Coding}s that have known coding systems, <code>
    *     false</code> otherwise
    */
-  @VisibleForTesting
-  boolean containsOnlyKnownSystems(CodeableConcept procedureConcept) {
-    Set<String> codingSystems =
-        procedureConcept.getCoding().stream().map(Coding::getSystem).collect(Collectors.toSet());
-
-    String hcpcsCdSystem = CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.HCPCS_CD);
-
-    // Valid system url for productOrService coding
-    final Set<String> hcpcsSystem = Set.of(TransformerConstants.CODING_SYSTEM_HCPCS);
-
-    // Additional valid coding system URL for backwards-compatibility
-    // See: https://jira.cms.gov/browse/BFD-1345
-    Set<String> backwardsCompatibleHcpcsSystems =
-        Set.of(TransformerConstants.CODING_SYSTEM_HCPCS, hcpcsCdSystem);
-
-    return codingSystems.equals(hcpcsSystem)
-        || codingSystems.equals(backwardsCompatibleHcpcsSystems);
-  }
+  protected abstract boolean containsOnlyKnownSystems(CodeableConcept procedureConcept);
 
   protected boolean isSamhsaPackageCode(CodeableConcept packageConcept) {
     return packageConcept != null
