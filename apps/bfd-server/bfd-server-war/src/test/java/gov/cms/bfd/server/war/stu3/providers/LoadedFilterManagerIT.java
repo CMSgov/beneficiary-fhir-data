@@ -35,11 +35,20 @@ public final class LoadedFilterManagerIT {
   private static final String INVALID_BENE = "1";
 
   /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to
-   * initialize data in the test suite.
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
    */
   @BeforeClass
   public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
@@ -218,15 +227,6 @@ public final class LoadedFilterManagerIT {
                   "Expected date range to not have a matching filter",
                   filterManager.isResultSetEmpty(INVALID_BENE, aroundSampleU));
             });
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /** @param sampleResources the sample RIF resources to load */

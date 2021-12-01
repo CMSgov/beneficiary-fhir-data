@@ -31,11 +31,20 @@ public final class CoverageResourceProviderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProviderIT.class);
 
   /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to
-   * initialize data in the test suite.
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
    */
   @BeforeClass
   public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
@@ -395,14 +404,5 @@ public final class CoverageResourceProviderIT {
             .execute();
     Assert.assertNotNull(searchOutOfBoundsResult);
     Assert.assertEquals(0, searchOutOfBoundsResult.getTotal());
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 }

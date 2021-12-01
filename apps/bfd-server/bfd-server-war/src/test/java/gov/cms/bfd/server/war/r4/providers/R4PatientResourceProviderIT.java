@@ -35,11 +35,20 @@ import org.junit.Test;
 
 public final class R4PatientResourceProviderIT {
   /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to
-   * initialize data in the test suite.
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
    */
   @BeforeClass
   public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
@@ -1547,14 +1556,5 @@ public final class R4PatientResourceProviderIT {
         RequestHeaders.getHeaderWrapper(
             R4PatientResourceProvider.HEADER_NAME_INCLUDE_IDENTIFIERS, "mbi");
     return createFhirClient(requestHeader);
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 }
