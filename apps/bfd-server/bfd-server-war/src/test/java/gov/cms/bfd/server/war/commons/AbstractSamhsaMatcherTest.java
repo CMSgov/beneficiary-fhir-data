@@ -65,6 +65,9 @@ public class AbstractSamhsaMatcherTest {
      * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaIcdProcedureCode(List)} returns
      * true if at least one of the {@link ProcedureComponent}s in the given list contains a SAMHSA
      * {@link Coding}.
+     *
+     * <p>For terseness, this test only checks the scenario of 3 components, with the middle
+     * possible containing SAMHSA, expecting the logic should hold for a list of any size.
      */
     @Test
     public void shouldReturnTrueIfAtLeastOneProcedureComponentContainsSamhsa() {
@@ -83,15 +86,22 @@ public class AbstractSamhsaMatcherTest {
       ProcedureComponent mockComponentB = mock(ProcedureComponent.class);
       doReturn(true).when(matcherSpy).isSamhsaIcdProcedure(mockComponentB);
 
+      ProcedureComponent mockComponentC = mock(ProcedureComponent.class);
+      doReturn(false).when(matcherSpy).isSamhsaIcdProcedure(mockComponentC);
+
       assertTrue(
           "Samhsa procedure not correctly filtered",
-          matcherSpy.containsSamhsaIcdProcedureCode(List.of(mockComponentA, mockComponentB)));
+          matcherSpy.containsSamhsaIcdProcedureCode(
+              List.of(mockComponentA, mockComponentB, mockComponentC)));
     }
 
     /**
      * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaIcdProcedureCode(List)} returns
      * false if none of the {@link ProcedureComponent}s in the given list contains a SAMHSA {@link
      * Coding}.
+     *
+     * <p>For terseness, this test only checks the scenario of 3 components, with the middle
+     * possible containing SAMHSA, expecting the logic should hold for a list of any size.
      */
     @Test
     public void shouldReturnFalseForNonSamhsaProcedureComponent() {
@@ -110,15 +120,22 @@ public class AbstractSamhsaMatcherTest {
       ProcedureComponent mockComponentB = mock(ProcedureComponent.class);
       doReturn(false).when(matcherSpy).isSamhsaIcdProcedure(mockComponentB);
 
+      ProcedureComponent mockComponentC = mock(ProcedureComponent.class);
+      doReturn(false).when(matcherSpy).isSamhsaIcdProcedure(mockComponentC);
+
       assertFalse(
           "Non-Samhsa procedure incorrectly filtered",
-          matcherSpy.containsSamhsaIcdProcedureCode(List.of(mockComponentA, mockComponentB)));
+          matcherSpy.containsSamhsaIcdProcedureCode(
+              List.of(mockComponentA, mockComponentB, mockComponentC)));
     }
 
     /**
      * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaIcdDiagnosisCode(List)} returns
      * true if at least one of the {@link DiagnosisComponent}s in the given list contains a SAMHSA
      * {@link Coding}.
+     *
+     * <p>For terseness, this test only checks the scenario of 3 components, with the middle
+     * possible containing SAMHSA, expecting the logic should hold for a list of any size.
      */
     @Test
     public void shouldReturnTrueForSamhsaDiagnosisComponent() {
@@ -137,15 +154,22 @@ public class AbstractSamhsaMatcherTest {
       DiagnosisComponent mockComponentB = mock(DiagnosisComponent.class);
       doReturn(true).when(matcherSpy).isSamhsaDiagnosis(mockComponentB);
 
+      DiagnosisComponent mockComponentC = mock(DiagnosisComponent.class);
+      doReturn(false).when(matcherSpy).isSamhsaDiagnosis(mockComponentC);
+
       assertTrue(
           "Samhsa diagnosis not correctly filtered",
-          matcherSpy.containsSamhsaIcdDiagnosisCode(List.of(mockComponentA, mockComponentB)));
+          matcherSpy.containsSamhsaIcdDiagnosisCode(
+              List.of(mockComponentA, mockComponentB, mockComponentC)));
     }
 
     /**
      * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaIcdDiagnosisCode(List)} returns
      * false if none of the {@link DiagnosisComponent}s in the given list contains a SAMHSA {@link
      * Coding}.
+     *
+     * <p>For terseness, this test only checks the scenario of 3 components, with the middle
+     * possible containing SAMHSA, expecting the logic should hold for a list of any size.
      */
     @Test
     public void shouldReturnFalseForNonSamhsaDiagnosisComponent() {
@@ -164,15 +188,22 @@ public class AbstractSamhsaMatcherTest {
       DiagnosisComponent mockComponentB = mock(DiagnosisComponent.class);
       doReturn(false).when(matcherSpy).isSamhsaDiagnosis(mockComponentB);
 
+      DiagnosisComponent mockComponentC = mock(DiagnosisComponent.class);
+      doReturn(false).when(matcherSpy).isSamhsaDiagnosis(mockComponentC);
+
       assertFalse(
           "Non-Samhsa diagnosis incorrectly filtered",
-          matcherSpy.containsSamhsaIcdDiagnosisCode(List.of(mockComponentA, mockComponentB)));
+          matcherSpy.containsSamhsaIcdDiagnosisCode(
+              List.of(mockComponentA, mockComponentB, mockComponentC)));
     }
 
     /**
      * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaLineItem(List)} returns true if
      * at least one of the {@link ItemComponent}s in the given list contains a SAMHSA {@link
      * Coding}.
+     *
+     * <p>For terseness, this test only checks the scenario of 3 components, with the middle
+     * possible containing SAMHSA, expecting the logic should hold for a list of any size.
      */
     @Test
     public void shouldReturnTrueForSamhsaLineItem() {
@@ -195,14 +226,23 @@ public class AbstractSamhsaMatcherTest {
       doReturn(mockConceptB).when(mockComponentB).getProductOrService();
       doReturn(true).when(matcherSpy).containsSamhsaProcedureCode(mockConceptB);
 
+      ItemComponent mockComponentC = mock(ItemComponent.class);
+      CodeableConcept mockConceptC = mock(CodeableConcept.class);
+      doReturn(mockConceptC).when(mockComponentC).getProductOrService();
+      doReturn(false).when(matcherSpy).containsSamhsaProcedureCode(mockConceptC);
+
       assertTrue(
           "Samhsa line item not correctly filtered",
-          matcherSpy.containsSamhsaLineItem(List.of(mockComponentA, mockComponentB)));
+          matcherSpy.containsSamhsaLineItem(
+              List.of(mockComponentA, mockComponentB, mockComponentC)));
     }
 
     /**
      * Test to see that {@link AbstractSamhsaMatcher#containsSamhsaLineItem(List)} returns false if
      * none of the {@link ItemComponent}s in the given list contains a SAMHSA {@link Coding}.
+     *
+     * <p>For terseness, this test only checks the scenario of 3 components, with the middle
+     * possible containing SAMHSA, expecting the logic should hold for a list of any size.
      */
     @Test
     public void shouldReturnFalseForNonSamhsaLineItems() {
@@ -225,9 +265,15 @@ public class AbstractSamhsaMatcherTest {
       doReturn(mockConceptB).when(mockComponentB).getProductOrService();
       doReturn(false).when(matcherSpy).containsSamhsaProcedureCode(mockConceptB);
 
+      ItemComponent mockComponentC = mock(ItemComponent.class);
+      CodeableConcept mockConceptC = mock(CodeableConcept.class);
+      doReturn(mockConceptC).when(mockComponentC).getProductOrService();
+      doReturn(false).when(matcherSpy).containsSamhsaProcedureCode(mockConceptC);
+
       assertFalse(
           "Non-Samhsa line items inorrectly filtered",
-          matcherSpy.containsSamhsaLineItem(List.of(mockComponentA, mockComponentB)));
+          matcherSpy.containsSamhsaLineItem(
+              List.of(mockComponentA, mockComponentB, mockComponentC)));
     }
 
     /**
