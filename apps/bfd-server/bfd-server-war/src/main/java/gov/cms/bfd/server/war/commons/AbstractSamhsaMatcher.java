@@ -22,6 +22,17 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.hl7.fhir.exceptions.FHIRException;
 
+/**
+ * Common SAMHSA check logic that can be used by all current FHIR resources and resource verions.
+ *
+ * <p>The common logic is based off abstract wrappers ({@link gov.cms.bfd.server.war.adapters}) that
+ * make the checks agnostic toward the specific resource type or version.
+ *
+ * <p>Individual implementations of this class will define specifically which resource/version is
+ * being checked, and what attributes are checked for it.
+ *
+ * @param <T> The FHIR resource type being checked.
+ */
 public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
 
   /** The {@link CSVFormat} used to parse the SAMHSA-related code CSV files. */
@@ -76,6 +87,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Pulls codes from the given column of the given file, returning them as a list.
+   *
    * @param csvResourceName the classpath resource name of the CSV file to parse
    * @param columnToReturn the name of the column to return from the CSV file
    * @return a {@link List} of values from the specified column of the specified CSV file
@@ -95,6 +108,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link ProcedureComponent} list contains any SAMHSA data.
+   *
    * @param procedure the {@link ProcedureComponent}s to check
    * @return <code>true</code> if any of the specified {@link ProcedureComponent}s match any of the
    *     {@link AbstractSamhsaMatcher#icd9ProcedureCodes} or {@link
@@ -105,6 +120,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link DiagnosisComponent} list contains any SAMHSA data.
+   *
    * @param diagnoses the {@link DiagnosisComponent}s to check
    * @return <code>true</code> if any of the specified {@link DiagnosisComponent}s match any of the
    *     {@link AbstractSamhsaMatcher#icd9DiagnosisCodes} or {@link
@@ -114,11 +131,20 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     return diagnoses.stream().anyMatch(this::isSamhsaDiagnosis);
   }
 
+  /**
+   * Checks if the given {@link ItemComponent} list contains any SAMHSA data.
+   *
+   * @param items The {@link ItemComponent} list to check
+   * @return <code>true</code> if any {@link ItemComponent} contains SAMHSA data, <code>false</code>
+   *     > otherwise.
+   */
   protected boolean containsSamhsaLineItem(List<ItemComponent> items) {
     return items.stream().anyMatch(c -> containsSamhsaProcedureCode(c.getProductOrService()));
   }
 
   /**
+   * Checks if the given {@link ProcedureComponent} contains SAMHSA data.
+   *
    * @param procedure the {@link ProcedureComponent} to check
    * @return <code>true</code> if the specified {@link ProcedureComponent} matches one of the {@link
    *     AbstractSamhsaMatcher#icd9ProcedureCodes} or {@link
@@ -138,6 +164,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link DiagnosisComponent} contains SAMHSA data.
+   *
    * @param diagnosis the {@link DiagnosisComponent} to check
    * @return <code>true</code> if the specified {@link DiagnosisComponent} matches one of the {@link
    *     AbstractSamhsaMatcher#icd9DiagnosisCodes} or {@link
@@ -206,6 +234,13 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
    */
   protected abstract boolean containsOnlyKnownSystems(CodeableConcept procedureConcept);
 
+  /**
+   * Checks if the given {@link CodeableConcept} contains any SAMHSA data.
+   *
+   * @param packageConcept The {@link CodeableConcept} to check.
+   * @return <code>true</code> if the given {@link CodeableConcept} is not null and has any non-DRG
+   *     codes or SAMHSA DRG codes. <code>false</code> otherwise.
+   */
   protected boolean isSamhsaPackageCode(CodeableConcept packageConcept) {
     return packageConcept != null
         && packageConcept.getCoding().stream()
@@ -216,9 +251,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link Coding} contains a SAMHSA DRG Code
+   *
    * @param coding the code {@link Coding} to check
    * @return <code>true</code> if the specified code {@link Coding} matches one of the {@link
    *     #drgCodes} entries, <code>false</code> if it does not
+   * @throws IllegalArgumentException if the given {@link Coding} system is not DRG
    */
   @VisibleForTesting
   boolean isSamhsaDrgCode(Coding coding) {
@@ -226,9 +264,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link Coding} contains a SAMHSA ICD9 Diagnosis Code
+   *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
    *     AbstractSamhsaMatcher#icd9DiagnosisCodes} entries, <code>false</code> if it does not
+   * @throws IllegalArgumentException if the given {@link Coding} system is not ICD9
    */
   @VisibleForTesting
   boolean isSamhsaIcd9Diagnosis(Coding coding) {
@@ -236,9 +277,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link Coding} contains a SAMHSA ICD9 Procedure Code
+   *
    * @param coding the procedure {@link Coding} to check
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
    *     #icd9ProcedureCodes} entries, <code>false</code> if it does not
+   * @throws IllegalArgumentException if the given {@link Coding} system is not ICD9
    */
   @VisibleForTesting
   boolean isSamhsaIcd9Procedure(Coding coding) {
@@ -246,9 +290,12 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Diagnosis Code
+   *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified diagnosis {@link Coding} matches one of the {@link
    *     AbstractSamhsaMatcher#icd10DiagnosisCodes} entries, <code>false</code> if it does not
+   * @throws IllegalArgumentException if the given {@link Coding} system is not ICD10
    */
   @VisibleForTesting
   boolean isSamhsaIcd10Diagnosis(Coding coding) {
@@ -256,15 +303,29 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link Coding} contains a SAMHSA ICD10 Procedure Code
+   *
    * @param coding the diagnosis {@link Coding} to check
    * @return <code>true</code> if the specified precedure {@link Coding} matches one of the {@link
    *     AbstractSamhsaMatcher#icd10ProcedureCodes} entries, <code>false</code> if it does not
+   * @throws IllegalArgumentException if the given {@link Coding} system is not ICD10
    */
   @VisibleForTesting
   boolean isSamhsaIcd10Procedure(Coding coding) {
     return isSamhsaCodingForSystem(coding, icd10ProcedureCodes, IcdCode.CODING_SYSTEM_ICD_10);
   }
 
+  /**
+   * Checks if the given {@link Coding} is in the given {@link Set<String>} of SAMHSA codes.
+   *
+   * @param coding The {@link Coding} to check.
+   * @param samhsaCodes The {@link Set<String>} of defined SAMHSA codes to compare against.
+   * @param requireeSystem The expected {@link Coding} system of the given {@link Coding}.
+   * @return <code>true</code> if the given {@link Set<String>} of SAMHSA codes includes the given
+   *     {@link Coding} code. <code>false</code> otherwise.
+   * @throws IllegalArgumentException if the given {@link Coding} system is not the same as the
+   *     given requiredSystem
+   */
   @VisibleForTesting
   boolean isSamhsaCodingForSystem(Coding coding, Set<String> samhsaCodes, String requireeSystem) {
     if (!requireeSystem.equals(coding.getSystem())) {
@@ -275,9 +336,11 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Checks if the given {@link Coding} contains a SAMHSA CPT code.
+   *
    * @param coding the procedure {@link Coding} to check
    * @return <code>true</code> if the specified procedure {@link Coding} matches one of the {@link
-   *     AbstractSamhsaMatcher#cptCodes} entries, <code>false</code> if it does not
+   *     AbstractSamhsaMatcher#cptCodes} entries, <code>false</code> if it does not or is null.
    */
   protected boolean isSamhsaCptCode(Coding coding) {
     /*
@@ -286,14 +349,45 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
     return coding.getCode() != null && cptCodes.contains(normalizeHcpcsCode(coding.getCode()));
   }
 
+  /**
+   * Checks if the given {@link CodeableConcept} contains SAMHSA diagnosis data.
+   *
+   * <p>ICD version specific codes are checked based on the given {@link CodeableConcept}'s {@link
+   * Coding} system.
+   *
+   * @param concept The diagnosis related {@link CodeableConcept} to check.
+   * @return <code>true</code> if the given {@link CodeableConcept} contains diagnosis related
+   *     SAMHSA data, <code>false</code> otherwise.
+   */
   protected boolean isSamhsaDiagnosis(CodeableConcept concept) {
     return isSamhsaCoding(concept, this::isSamhsaIcd9Diagnosis, this::isSamhsaIcd10Diagnosis);
   }
 
+  /**
+   * Checks if the given {@link CodeableConcept} contains SAMHSA procedure data.
+   *
+   * <p>ICD version specific codes are checked based on the given {@link CodeableConcept}'s {@link
+   * Coding} system.
+   *
+   * @param concept The procedure related {@link CodeableConcept} to check.
+   * @return <code>true</code> if the given {@link CodeableConcept} contains procedure related
+   *     SAMHSA data, <code>false</code> otherwise.
+   */
   protected boolean isSamhsaIcdProcedure(CodeableConcept concept) {
     return isSamhsaCoding(concept, this::isSamhsaIcd9Procedure, this::isSamhsaIcd10Procedure);
   }
 
+  /**
+   * Checks if the given {@link CodeableConcept} contains SAMHSA data based on it's inner {@link
+   * Coding}s system types.
+   *
+   * @param concept The {@link CodeableConcept} to check.
+   * @param icd9Check The ICD-9 based SAMHSA check logic to use.
+   * @param icd10Check The ICD-10 based SAMHSA check logic to use.
+   * @return <code>true</code> if the given {@link CodeableConcept} contains any {@link Coding}s
+   *     with SAMHSA data for it's respective system, or if the system is not ICD9/10. <code>false
+   *     </code> otherwise.
+   */
   @VisibleForTesting
   boolean isSamhsaCoding(
       CodeableConcept concept,
@@ -321,7 +415,9 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
-   * Example input: MS-DRG 522 Example output: 522
+   * Normalizes the DRG code to make for easier and more consistent comparisons.
+   *
+   * <p>Example input: MS-DRG 522 Example output: 522
    *
    * @param code The drg code to normalize.
    * @return the specified DRG code, but with the "MS-DRG" prefix and space removed.
@@ -334,6 +430,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Normalizes the ICD code to make for easier and more consistent comparisons.
+   *
    * @param icdCode the ICD-9 or ICD-10 diagnosis code to normalize
    * @return the specified ICD-9 or ICD-10 code, but with whitespace trimmed, the first (if any)
    *     decimal point removed, and converted to all-caps
@@ -348,6 +446,8 @@ public abstract class AbstractSamhsaMatcher<T> implements Predicate<T> {
   }
 
   /**
+   * Normalizes the HCPCS code to make for easier and more consistent comparisons.
+   *
    * @param hcpcsCode the HCPCS code to normalize
    * @return the specified HCPCS code, but with whitespace trimmed and converted to all-caps
    */
