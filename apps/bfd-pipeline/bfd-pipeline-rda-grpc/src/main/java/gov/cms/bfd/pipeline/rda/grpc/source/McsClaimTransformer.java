@@ -22,80 +22,27 @@ import java.time.Instant;
 import java.util.List;
 
 public class McsClaimTransformer {
-  private static final EnumStringExtractor<McsClaim, McsClaimType> idrClaimType =
-      new EnumStringExtractor<>(
-          McsClaim::hasIdrClaimTypeEnum,
-          McsClaim::getIdrClaimTypeEnum,
-          McsClaim::hasIdrClaimTypeUnrecognized,
-          McsClaim::getIdrClaimTypeUnrecognized,
-          McsClaimType.UNRECOGNIZED,
-          ImmutableSet.of(),
-          ImmutableSet.of());
-  private static final EnumStringExtractor<McsClaim, McsBeneficiarySex> idrBeneSex =
-      new EnumStringExtractor<>(
-          McsClaim::hasIdrBeneSexEnum,
-          McsClaim::getIdrBeneSexEnum,
-          McsClaim::hasIdrBeneSexUnrecognized,
-          McsClaim::getIdrBeneSexUnrecognized,
-          McsBeneficiarySex.UNRECOGNIZED,
-          ImmutableSet.of(),
-          ImmutableSet.of());
-  private static final EnumStringExtractor<McsClaim, McsStatusCode> idrStatusCode =
-      new EnumStringExtractor<>(
-          McsClaim::hasIdrStatusCodeEnum,
-          McsClaim::getIdrStatusCodeEnum,
-          McsClaim::hasIdrStatusCodeUnrecognized,
-          McsClaim::getIdrStatusCodeUnrecognized,
-          McsStatusCode.UNRECOGNIZED,
-          ImmutableSet.of(McsStatusCode.STATUS_CODE_NOT_USED),
-          ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
-  private static final EnumStringExtractor<McsClaim, McsBillingProviderIndicator>
-      idrBillProvGroupInd =
-          new EnumStringExtractor<>(
-              McsClaim::hasIdrBillProvGroupIndEnum,
-              McsClaim::getIdrBillProvGroupIndEnum,
-              McsClaim::hasIdrBillProvGroupIndUnrecognized,
-              McsClaim::getIdrBillProvGroupIndUnrecognized,
-              McsBillingProviderIndicator.UNRECOGNIZED,
-              ImmutableSet.of(),
-              ImmutableSet.of());
-  private static final EnumStringExtractor<McsClaim, McsBillingProviderStatusCode>
-      idrBillProvStatusCd =
-          new EnumStringExtractor<>(
-              McsClaim::hasIdrBillProvStatusCdEnum,
-              McsClaim::getIdrBillProvStatusCdEnum,
-              McsClaim::hasIdrBillProvStatusCdUnrecognized,
-              McsClaim::getIdrBillProvStatusCdUnrecognized,
-              McsBillingProviderStatusCode.UNRECOGNIZED,
-              ImmutableSet.of(),
-              ImmutableSet.of());
-  private static final EnumStringExtractor<McsDiagnosisCode, McsDiagnosisIcdType> idrDiagIcdType =
-      new EnumStringExtractor<>(
-          McsDiagnosisCode::hasIdrDiagIcdTypeEnum,
-          McsDiagnosisCode::getIdrDiagIcdTypeEnum,
-          McsDiagnosisCode::hasIdrDiagIcdTypeUnrecognized,
-          McsDiagnosisCode::getIdrDiagIcdTypeUnrecognized,
-          McsDiagnosisIcdType.UNRECOGNIZED,
-          ImmutableSet.of(),
-          ImmutableSet.of());
-  private static final EnumStringExtractor<McsDetail, McsDetailStatus> idrDtlStatus =
-      new EnumStringExtractor<>(
-          McsDetail::hasIdrDtlStatusEnum,
-          McsDetail::getIdrDtlStatusEnum,
-          McsDetail::hasIdrDtlStatusUnrecognized,
-          McsDetail::getIdrDtlStatusUnrecognized,
-          McsDetailStatus.UNRECOGNIZED,
-          ImmutableSet.of(),
-          ImmutableSet.of());
-  private static final EnumStringExtractor<McsDetail, McsDiagnosisIcdType> idrDtlDiagIcdType =
-      new EnumStringExtractor<>(
-          McsDetail::hasIdrDtlDiagIcdTypeEnum,
-          McsDetail::getIdrDtlDiagIcdTypeEnum,
-          McsDetail::hasIdrDtlDiagIcdTypeUnrecognized,
-          McsDetail::getIdrDtlDiagIcdTypeUnrecognized,
-          McsDiagnosisIcdType.UNRECOGNIZED,
-          ImmutableSet.of(),
-          ImmutableSet.of());
+  private final EnumStringExtractor<McsClaim, McsClaimType> PreAdjMcsClaim_idrClaimType_Extractor;
+
+  private final EnumStringExtractor<McsClaim, McsBeneficiarySex>
+      PreAdjMcsClaim_idrBeneSex_Extractor;
+
+  private final EnumStringExtractor<McsClaim, McsStatusCode> PreAdjMcsClaim_idrStatusCode_Extractor;
+
+  private final EnumStringExtractor<McsClaim, McsBillingProviderIndicator>
+      PreAdjMcsClaim_idrBillProvGroupInd_Extractor;
+
+  private final EnumStringExtractor<McsClaim, McsBillingProviderStatusCode>
+      PreAdjMcsClaim_idrBillProvStatusCd_Extractor;
+
+  private final EnumStringExtractor<McsDetail, McsDetailStatus>
+      PreAdjMcsDetail_idrDtlStatus_Extractor;
+
+  private final EnumStringExtractor<McsDetail, McsDiagnosisIcdType>
+      PreAdjMcsDetail_idrDtlDiagIcdType_Extractor;
+
+  private final EnumStringExtractor<McsDiagnosisCode, McsDiagnosisIcdType>
+      PreAdjMcsDiagnosisCode_idrDiagIcdType_Extractor;
 
   private final Clock clock;
   private final IdHasher idHasher;
@@ -103,16 +50,88 @@ public class McsClaimTransformer {
   public McsClaimTransformer(Clock clock, IdHasher idHasher) {
     this.clock = clock;
     this.idHasher = idHasher;
+    PreAdjMcsClaim_idrClaimType_Extractor =
+        new EnumStringExtractor<>(
+            McsClaim::hasIdrClaimTypeEnum,
+            McsClaim::getIdrClaimTypeEnum,
+            McsClaim::hasIdrClaimTypeUnrecognized,
+            McsClaim::getIdrClaimTypeUnrecognized,
+            McsClaimType.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjMcsClaim_idrBeneSex_Extractor =
+        new EnumStringExtractor<>(
+            McsClaim::hasIdrBeneSexEnum,
+            McsClaim::getIdrBeneSexEnum,
+            McsClaim::hasIdrBeneSexUnrecognized,
+            McsClaim::getIdrBeneSexUnrecognized,
+            McsBeneficiarySex.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjMcsClaim_idrStatusCode_Extractor =
+        new EnumStringExtractor<>(
+            McsClaim::hasIdrStatusCodeEnum,
+            McsClaim::getIdrStatusCodeEnum,
+            McsClaim::hasIdrStatusCodeUnrecognized,
+            McsClaim::getIdrStatusCodeUnrecognized,
+            McsStatusCode.UNRECOGNIZED,
+            ImmutableSet.of(McsStatusCode.STATUS_CODE_NOT_USED),
+            ImmutableSet.of(EnumStringExtractor.Options.RejectUnrecognized));
+    PreAdjMcsClaim_idrBillProvGroupInd_Extractor =
+        new EnumStringExtractor<>(
+            McsClaim::hasIdrBillProvGroupIndEnum,
+            McsClaim::getIdrBillProvGroupIndEnum,
+            McsClaim::hasIdrBillProvGroupIndUnrecognized,
+            McsClaim::getIdrBillProvGroupIndUnrecognized,
+            McsBillingProviderIndicator.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjMcsClaim_idrBillProvStatusCd_Extractor =
+        new EnumStringExtractor<>(
+            McsClaim::hasIdrBillProvStatusCdEnum,
+            McsClaim::getIdrBillProvStatusCdEnum,
+            McsClaim::hasIdrBillProvStatusCdUnrecognized,
+            McsClaim::getIdrBillProvStatusCdUnrecognized,
+            McsBillingProviderStatusCode.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjMcsDetail_idrDtlStatus_Extractor =
+        new EnumStringExtractor<>(
+            McsDetail::hasIdrDtlStatusEnum,
+            McsDetail::getIdrDtlStatusEnum,
+            McsDetail::hasIdrDtlStatusUnrecognized,
+            McsDetail::getIdrDtlStatusUnrecognized,
+            McsDetailStatus.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjMcsDetail_idrDtlDiagIcdType_Extractor =
+        new EnumStringExtractor<>(
+            McsDetail::hasIdrDtlDiagIcdTypeEnum,
+            McsDetail::getIdrDtlDiagIcdTypeEnum,
+            McsDetail::hasIdrDtlDiagIcdTypeUnrecognized,
+            McsDetail::getIdrDtlDiagIcdTypeUnrecognized,
+            McsDiagnosisIcdType.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjMcsDiagnosisCode_idrDiagIcdType_Extractor =
+        new EnumStringExtractor<>(
+            McsDiagnosisCode::hasIdrDiagIcdTypeEnum,
+            McsDiagnosisCode::getIdrDiagIcdTypeEnum,
+            McsDiagnosisCode::hasIdrDiagIcdTypeUnrecognized,
+            McsDiagnosisCode::getIdrDiagIcdTypeUnrecognized,
+            McsDiagnosisIcdType.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
   }
 
   public RdaChange<PreAdjMcsClaim> transformClaim(McsClaimChange change) {
     McsClaim from = change.getClaim();
 
     final DataTransformer transformer = new DataTransformer();
-    final PreAdjMcsClaim to = transformClaim(from, transformer);
+    final PreAdjMcsClaim to = transformMessage(from, transformer, clock.instant());
     to.setSequenceNumber(change.getSeq());
 
-    List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
+    final List<DataTransformer.ErrorMessage> errors = transformer.getErrors();
     if (errors.size() > 0) {
       String message =
           String.format(
@@ -127,399 +146,386 @@ public class McsClaimTransformer {
         transformer.instant(change.getTimestamp()));
   }
 
-  private PreAdjMcsClaim transformClaim(McsClaim from, DataTransformer transformer) {
-    final Instant now = clock.instant();
+  private PreAdjMcsClaim transformMessage(McsClaim from, DataTransformer transformer, Instant now) {
+    final PreAdjMcsClaim to = transformMessageImpl(from, transformer, now, "");
+    transformMessageArrays(from, to, transformer, now, "");
+    return to;
+  }
+
+  private PreAdjMcsClaim transformMessageImpl(
+      McsClaim from, DataTransformer transformer, Instant now, String namePrefix) {
     final PreAdjMcsClaim to = new PreAdjMcsClaim();
-    transformer
-        .copyString(
-            PreAdjMcsClaim.Fields.idrClmHdIcn,
-            false,
-            1,
-            15,
-            from.getIdrClmHdIcn(),
-            to::setIdrClmHdIcn)
-        .copyString(
-            PreAdjMcsClaim.Fields.idrContrId, false, 1, 5, from.getIdrContrId(), to::setIdrContrId)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrHic, 1, 12, from::hasIdrHic, from::getIdrHic, to::setIdrHic)
-        .copyEnumAsString(
-            PreAdjMcsClaim.Fields.idrClaimType,
-            false,
-            1,
-            1,
-            idrClaimType.getEnumString(from),
-            to::setIdrClaimType)
-        .copyOptionalInt(from::hasIdrDtlCnt, from::getIdrDtlCnt, to::setIdrDtlCnt)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBeneLast_1_6,
-            1,
-            6,
-            from::hasIdrBeneLast16,
-            from::getIdrBeneLast16,
-            to::setIdrBeneLast_1_6)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBeneFirstInit,
-            1,
-            1,
-            from::hasIdrBeneFirstInit,
-            from::getIdrBeneFirstInit,
-            to::setIdrBeneFirstInit)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBeneMidInit,
-            1,
-            1,
-            from::hasIdrBeneMidInit,
-            from::getIdrBeneMidInit,
-            to::setIdrBeneMidInit)
-        .copyEnumAsString(
-            PreAdjMcsClaim.Fields.idrBeneSex,
-            true,
-            1,
-            1,
-            idrBeneSex.getEnumString(from),
-            to::setIdrBeneSex)
-        .copyEnumAsString(
-            PreAdjMcsClaim.Fields.idrStatusCode,
-            true,
-            1,
-            1,
-            idrStatusCode.getEnumString(from),
-            to::setIdrStatusCode)
-        .copyOptionalDate(
-            PreAdjMcsClaim.Fields.idrStatusDate,
-            from::hasIdrStatusDate,
-            from::getIdrStatusDate,
-            to::setIdrStatusDate)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvNpi,
-            1,
-            10,
-            from::hasIdrBillProvNpi,
-            from::getIdrBillProvNpi,
-            to::setIdrBillProvNpi)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvNum,
-            1,
-            10,
-            from::hasIdrBillProvNum,
-            from::getIdrBillProvNum,
-            to::setIdrBillProvNum)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvEin,
-            1,
-            10,
-            from::hasIdrBillProvEin,
-            from::getIdrBillProvEin,
-            to::setIdrBillProvEin)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvType,
-            1,
-            2,
-            from::hasIdrBillProvType,
-            from::getIdrBillProvType,
-            to::setIdrBillProvType)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvSpec,
-            1,
-            2,
-            from::hasIdrBillProvSpec,
-            from::getIdrBillProvSpec,
-            to::setIdrBillProvSpec)
-        .copyEnumAsString(
-            PreAdjMcsClaim.Fields.idrBillProvGroupInd,
-            true,
-            1,
-            1,
-            idrBillProvGroupInd.getEnumString(from),
-            to::setIdrBillProvGroupInd)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvPriceSpec,
-            1,
-            2,
-            from::hasIdrBillProvPriceSpec,
-            from::getIdrBillProvPriceSpec,
-            to::setIdrBillProvPriceSpec)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvCounty,
-            1,
-            2,
-            from::hasIdrBillProvCounty,
-            from::getIdrBillProvCounty,
-            to::setIdrBillProvCounty)
-        .copyOptionalString(
-            PreAdjMcsClaim.Fields.idrBillProvLoc,
-            1,
-            2,
-            from::hasIdrBillProvLoc,
-            from::getIdrBillProvLoc,
-            to::setIdrBillProvLoc)
-        .copyOptionalAmount(
-            PreAdjMcsClaim.Fields.idrTotAllowed,
-            from::hasIdrTotAllowed,
-            from::getIdrTotAllowed,
-            to::setIdrTotAllowed)
-        .copyOptionalAmount(
-            PreAdjMcsClaim.Fields.idrCoinsurance,
-            from::hasIdrCoinsurance,
-            from::getIdrCoinsurance,
-            to::setIdrCoinsurance)
-        .copyOptionalAmount(
-            PreAdjMcsClaim.Fields.idrDeductible,
-            from::hasIdrDeductible,
-            from::getIdrDeductible,
-            to::setIdrDeductible)
-        .copyEnumAsString(
-            PreAdjMcsClaim.Fields.idrBillProvStatusCd,
-            true,
-            1,
-            1,
-            idrBillProvStatusCd.getEnumString(from),
-            to::setIdrBillProvStatusCd)
-        .copyOptionalAmount(
-            PreAdjMcsClaim.Fields.idrTotBilledAmt,
-            from::hasIdrTotBilledAmt,
-            from::getIdrTotBilledAmt,
-            to::setIdrTotBilledAmt)
-        .copyOptionalDate(
-            PreAdjMcsClaim.Fields.idrClaimReceiptDate,
-            from::hasIdrClaimReceiptDate,
-            from::getIdrClaimReceiptDate,
-            to::setIdrClaimReceiptDate);
-    if (from.hasIdrClaimMbi()) {
-      final String mbi = from.getIdrClaimMbi();
-      transformer
-          .copyString(PreAdjMcsClaim.Fields.idrClaimMbi, true, 1, 13, mbi, to::setIdrClaimMbi)
-          .copyString(
-              PreAdjMcsClaim.Fields.idrClaimMbiHash,
-              true,
-              64,
-              64,
-              idHasher.computeIdentifierHash(mbi),
-              to::setIdrClaimMbiHash);
-    }
-    transformer
-        .copyOptionalDate(
-            PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc,
-            from::hasIdrHdrFromDos,
-            from::getIdrHdrFromDos,
-            to::setIdrHdrFromDateOfSvc)
-        .copyOptionalDate(
-            PreAdjMcsClaim.Fields.idrHdrToDateOfSvc,
-            from::hasIdrHdrToDos,
-            from::getIdrHdrToDos,
-            to::setIdrHdrToDateOfSvc);
-
-    to.setLastUpdated(now);
-
-    transformDiagnosisCodes(transformer, now, from, to);
-    transformDetails(transformer, now, from, to);
-
-    return to;
-  }
-
-  private void transformDiagnosisCodes(
-      DataTransformer transformer, Instant now, McsClaim from, PreAdjMcsClaim to) {
-    short priority = 0;
-    for (McsDiagnosisCode fromDiagnosisCode : from.getMcsDiagnosisCodesList()) {
-      String fieldPrefix = "diagCode-" + priority + "-";
-      PreAdjMcsDiagnosisCode toDiagnosisCode =
-          transformDiagnosisCode(
-              transformer, now, fromDiagnosisCode, from.getIdrClmHdIcn(), priority, fieldPrefix);
-      to.getDiagCodes().add(toDiagnosisCode);
-      priority += 1;
-    }
-  }
-
-  private PreAdjMcsDiagnosisCode transformDiagnosisCode(
-      DataTransformer transformer,
-      Instant now,
-      McsDiagnosisCode from,
-      String idrClmHdIcn,
-      short priority,
-      String fieldPrefix) {
-    final PreAdjMcsDiagnosisCode to = new PreAdjMcsDiagnosisCode();
-    transformer
-        .copyStringWithExpectedValue(
-            fieldPrefix + PreAdjMcsDiagnosisCode.Fields.idrClmHdIcn,
-            false,
-            1,
-            15,
-            idrClmHdIcn,
-            from.getIdrClmHdIcn(),
-            to::setIdrClmHdIcn)
-        .copyEnumAsString(
-            fieldPrefix + PreAdjMcsDiagnosisCode.Fields.idrDiagIcdType,
-            true,
-            1,
-            1,
-            idrDiagIcdType.getEnumString(from),
-            to::setIdrDiagIcdType)
-        .copyString(
-            fieldPrefix + PreAdjMcsDiagnosisCode.Fields.idrDiagCode,
-            false,
-            1,
-            7,
-            from.getIdrDiagCode(),
-            to::setIdrDiagCode);
-    to.setPriority(priority);
+    transformer.copyString(
+        namePrefix + PreAdjMcsClaim.Fields.idrClmHdIcn,
+        false,
+        1,
+        15,
+        from.getIdrClmHdIcn(),
+        to::setIdrClmHdIcn);
+    transformer.copyString(
+        namePrefix + PreAdjMcsClaim.Fields.idrContrId,
+        false,
+        1,
+        5,
+        from.getIdrContrId(),
+        to::setIdrContrId);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrHic,
+        1,
+        12,
+        from::hasIdrHic,
+        from::getIdrHic,
+        to::setIdrHic);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjMcsClaim.Fields.idrClaimType,
+        false,
+        1,
+        1,
+        PreAdjMcsClaim_idrClaimType_Extractor.getEnumString(from),
+        to::setIdrClaimType);
+    transformer.copyOptionalInt(from::hasIdrDtlCnt, from::getIdrDtlCnt, to::setIdrDtlCnt);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBeneLast_1_6,
+        1,
+        6,
+        from::hasIdrBeneLast16,
+        from::getIdrBeneLast16,
+        to::setIdrBeneLast_1_6);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBeneFirstInit,
+        1,
+        1,
+        from::hasIdrBeneFirstInit,
+        from::getIdrBeneFirstInit,
+        to::setIdrBeneFirstInit);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBeneMidInit,
+        1,
+        1,
+        from::hasIdrBeneMidInit,
+        from::getIdrBeneMidInit,
+        to::setIdrBeneMidInit);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBeneSex,
+        true,
+        1,
+        1,
+        PreAdjMcsClaim_idrBeneSex_Extractor.getEnumString(from),
+        to::setIdrBeneSex);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjMcsClaim.Fields.idrStatusCode,
+        true,
+        1,
+        1,
+        PreAdjMcsClaim_idrStatusCode_Extractor.getEnumString(from),
+        to::setIdrStatusCode);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjMcsClaim.Fields.idrStatusDate,
+        from::hasIdrStatusDate,
+        from::getIdrStatusDate,
+        to::setIdrStatusDate);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvNpi,
+        1,
+        10,
+        from::hasIdrBillProvNpi,
+        from::getIdrBillProvNpi,
+        to::setIdrBillProvNpi);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvNum,
+        1,
+        10,
+        from::hasIdrBillProvNum,
+        from::getIdrBillProvNum,
+        to::setIdrBillProvNum);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvEin,
+        1,
+        10,
+        from::hasIdrBillProvEin,
+        from::getIdrBillProvEin,
+        to::setIdrBillProvEin);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvType,
+        1,
+        2,
+        from::hasIdrBillProvType,
+        from::getIdrBillProvType,
+        to::setIdrBillProvType);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvSpec,
+        1,
+        2,
+        from::hasIdrBillProvSpec,
+        from::getIdrBillProvSpec,
+        to::setIdrBillProvSpec);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvGroupInd,
+        true,
+        1,
+        1,
+        PreAdjMcsClaim_idrBillProvGroupInd_Extractor.getEnumString(from),
+        to::setIdrBillProvGroupInd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvPriceSpec,
+        1,
+        2,
+        from::hasIdrBillProvPriceSpec,
+        from::getIdrBillProvPriceSpec,
+        to::setIdrBillProvPriceSpec);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvCounty,
+        1,
+        2,
+        from::hasIdrBillProvCounty,
+        from::getIdrBillProvCounty,
+        to::setIdrBillProvCounty);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvLoc,
+        1,
+        2,
+        from::hasIdrBillProvLoc,
+        from::getIdrBillProvLoc,
+        to::setIdrBillProvLoc);
+    transformer.copyOptionalAmount(
+        namePrefix + PreAdjMcsClaim.Fields.idrTotAllowed,
+        from::hasIdrTotAllowed,
+        from::getIdrTotAllowed,
+        to::setIdrTotAllowed);
+    transformer.copyOptionalAmount(
+        namePrefix + PreAdjMcsClaim.Fields.idrCoinsurance,
+        from::hasIdrCoinsurance,
+        from::getIdrCoinsurance,
+        to::setIdrCoinsurance);
+    transformer.copyOptionalAmount(
+        namePrefix + PreAdjMcsClaim.Fields.idrDeductible,
+        from::hasIdrDeductible,
+        from::getIdrDeductible,
+        to::setIdrDeductible);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjMcsClaim.Fields.idrBillProvStatusCd,
+        true,
+        1,
+        1,
+        PreAdjMcsClaim_idrBillProvStatusCd_Extractor.getEnumString(from),
+        to::setIdrBillProvStatusCd);
+    transformer.copyOptionalAmount(
+        namePrefix + PreAdjMcsClaim.Fields.idrTotBilledAmt,
+        from::hasIdrTotBilledAmt,
+        from::getIdrTotBilledAmt,
+        to::setIdrTotBilledAmt);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjMcsClaim.Fields.idrClaimReceiptDate,
+        from::hasIdrClaimReceiptDate,
+        from::getIdrClaimReceiptDate,
+        to::setIdrClaimReceiptDate);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi,
+        1,
+        13,
+        from::hasIdrClaimMbi,
+        from::getIdrClaimMbi,
+        to::setIdrClaimMbi);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrClaimMbiHash,
+        1,
+        64,
+        from::hasIdrClaimMbi,
+        () -> idHasher.computeIdentifierHash(from.getIdrClaimMbi()),
+        to::setIdrClaimMbiHash);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc,
+        from::hasIdrHdrFromDos,
+        from::getIdrHdrFromDos,
+        to::setIdrHdrFromDateOfSvc);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjMcsClaim.Fields.idrHdrToDateOfSvc,
+        from::hasIdrHdrToDos,
+        from::getIdrHdrToDos,
+        to::setIdrHdrToDateOfSvc);
     to.setLastUpdated(now);
     return to;
   }
 
-  private void transformDetails(
-      DataTransformer transformer, Instant now, McsClaim from, PreAdjMcsClaim to) {
-    short priority = 0;
-    for (McsDetail fromDetail : from.getMcsDetailsList()) {
-      String fieldPrefix = "detail-" + priority + "-";
-      PreAdjMcsDetail toDetail =
-          transformDetail(
-              transformer, now, from.getIdrClmHdIcn(), fromDetail, priority, fieldPrefix);
-      to.getDetails().add(toDetail);
-      priority += 1;
+  private void transformMessageArrays(
+      McsClaim from,
+      PreAdjMcsClaim to,
+      DataTransformer transformer,
+      Instant now,
+      String namePrefix) {
+    for (short index = 0; index < from.getMcsDetailsCount(); ++index) {
+      final String itemNamePrefix = namePrefix + "detail" + "-" + index + "-";
+      final McsDetail itemFrom = from.getMcsDetails(index);
+      final PreAdjMcsDetail itemTo =
+          transformMessageImpl(itemFrom, transformer, now, itemNamePrefix);
+      itemTo.setIdrClmHdIcn(from.getIdrClmHdIcn());
+      itemTo.setPriority(index);
+      to.getDetails().add(itemTo);
+    }
+    for (short index = 0; index < from.getMcsDiagnosisCodesCount(); ++index) {
+      final String itemNamePrefix = namePrefix + "diagCode" + "-" + index + "-";
+      final McsDiagnosisCode itemFrom = from.getMcsDiagnosisCodes(index);
+      final PreAdjMcsDiagnosisCode itemTo =
+          transformMessageImpl(itemFrom, transformer, now, itemNamePrefix);
+      itemTo.setIdrClmHdIcn(from.getIdrClmHdIcn());
+      itemTo.setPriority(index);
+      to.getDiagCodes().add(itemTo);
     }
   }
 
-  private PreAdjMcsDetail transformDetail(
-      DataTransformer transformer,
-      Instant now,
-      String idrClmHdIcn,
-      McsDetail from,
-      short priority,
-      String fieldPrefix) {
+  private PreAdjMcsDetail transformMessageImpl(
+      McsDetail from, DataTransformer transformer, Instant now, String namePrefix) {
     final PreAdjMcsDetail to = new PreAdjMcsDetail();
-    transformer
-        .copyEnumAsString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrDtlStatus,
-            true,
-            1,
-            1,
-            idrDtlStatus.getEnumString(from),
-            to::setIdrDtlStatus)
-        .copyOptionalDate(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrDtlFromDate,
-            from::hasIdrDtlFromDate,
-            from::getIdrDtlFromDate,
-            to::setIdrDtlFromDate)
-        .copyOptionalDate(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrDtlToDate,
-            from::hasIdrDtlToDate,
-            from::getIdrDtlToDate,
-            to::setIdrDtlToDate)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrProcCode,
-            1,
-            5,
-            from::hasIdrProcCode,
-            from::getIdrProcCode,
-            to::setIdrProcCode)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrModOne,
-            1,
-            2,
-            from::hasIdrModOne,
-            from::getIdrModOne,
-            to::setIdrModOne)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrModTwo,
-            1,
-            2,
-            from::hasIdrModTwo,
-            from::getIdrModTwo,
-            to::setIdrModTwo)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrModThree,
-            1,
-            2,
-            from::hasIdrModThree,
-            from::getIdrModThree,
-            to::setIdrModThree)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrModFour,
-            1,
-            2,
-            from::hasIdrModFour,
-            from::getIdrModFour,
-            to::setIdrModFour)
-        .copyEnumAsString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrDtlDiagIcdType,
-            true,
-            1,
-            1,
-            idrDtlDiagIcdType.getEnumString(from),
-            to::setIdrDtlDiagIcdType)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrDtlPrimaryDiagCode,
-            1,
-            7,
-            from::hasIdrDtlPrimaryDiagCode,
-            from::getIdrDtlPrimaryDiagCode,
-            to::setIdrDtlPrimaryDiagCode)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosLnameOrg,
-            1,
-            60,
-            from::hasIdrKPosLnameOrg,
-            from::getIdrKPosLnameOrg,
-            to::setIdrKPosLnameOrg)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosFname,
-            1,
-            35,
-            from::hasIdrKPosFname,
-            from::getIdrKPosFname,
-            to::setIdrKPosFname)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosMname,
-            1,
-            25,
-            from::hasIdrKPosMname,
-            from::getIdrKPosMname,
-            to::setIdrKPosMname)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosAddr1,
-            1,
-            55,
-            from::hasIdrKPosAddr1,
-            from::getIdrKPosAddr1,
-            to::setIdrKPosAddr1)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosAddr2_1st,
-            1,
-            30,
-            from::hasIdrKPosAddr21St,
-            from::getIdrKPosAddr21St,
-            to::setIdrKPosAddr2_1st)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosAddr2_2nd,
-            1,
-            25,
-            from::hasIdrKPosAddr22Nd,
-            from::getIdrKPosAddr22Nd,
-            to::setIdrKPosAddr2_2nd)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosCity,
-            1,
-            30,
-            from::hasIdrKPosCity,
-            from::getIdrKPosCity,
-            to::setIdrKPosCity)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosState,
-            1,
-            2,
-            from::hasIdrKPosState,
-            from::getIdrKPosState,
-            to::setIdrKPosState)
-        .copyOptionalString(
-            fieldPrefix + PreAdjMcsDetail.Fields.idrKPosZip,
-            1,
-            15,
-            from::hasIdrKPosZip,
-            from::getIdrKPosZip,
-            to::setIdrKPosZip);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlStatus,
+        true,
+        1,
+        1,
+        PreAdjMcsDetail_idrDtlStatus_Extractor.getEnumString(from),
+        to::setIdrDtlStatus);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlFromDate,
+        from::hasIdrDtlFromDate,
+        from::getIdrDtlFromDate,
+        to::setIdrDtlFromDate);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlToDate,
+        from::hasIdrDtlToDate,
+        from::getIdrDtlToDate,
+        to::setIdrDtlToDate);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrProcCode,
+        1,
+        5,
+        from::hasIdrProcCode,
+        from::getIdrProcCode,
+        to::setIdrProcCode);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrModOne,
+        1,
+        2,
+        from::hasIdrModOne,
+        from::getIdrModOne,
+        to::setIdrModOne);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrModTwo,
+        1,
+        2,
+        from::hasIdrModTwo,
+        from::getIdrModTwo,
+        to::setIdrModTwo);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrModThree,
+        1,
+        2,
+        from::hasIdrModThree,
+        from::getIdrModThree,
+        to::setIdrModThree);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrModFour,
+        1,
+        2,
+        from::hasIdrModFour,
+        from::getIdrModFour,
+        to::setIdrModFour);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlDiagIcdType,
+        true,
+        1,
+        1,
+        PreAdjMcsDetail_idrDtlDiagIcdType_Extractor.getEnumString(from),
+        to::setIdrDtlDiagIcdType);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlPrimaryDiagCode,
+        1,
+        7,
+        from::hasIdrDtlPrimaryDiagCode,
+        from::getIdrDtlPrimaryDiagCode,
+        to::setIdrDtlPrimaryDiagCode);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosLnameOrg,
+        1,
+        60,
+        from::hasIdrKPosLnameOrg,
+        from::getIdrKPosLnameOrg,
+        to::setIdrKPosLnameOrg);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosFname,
+        1,
+        35,
+        from::hasIdrKPosFname,
+        from::getIdrKPosFname,
+        to::setIdrKPosFname);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosMname,
+        1,
+        25,
+        from::hasIdrKPosMname,
+        from::getIdrKPosMname,
+        to::setIdrKPosMname);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosAddr1,
+        1,
+        55,
+        from::hasIdrKPosAddr1,
+        from::getIdrKPosAddr1,
+        to::setIdrKPosAddr1);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosAddr2_1st,
+        1,
+        30,
+        from::hasIdrKPosAddr21St,
+        from::getIdrKPosAddr21St,
+        to::setIdrKPosAddr2_1st);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosAddr2_2nd,
+        1,
+        25,
+        from::hasIdrKPosAddr22Nd,
+        from::getIdrKPosAddr22Nd,
+        to::setIdrKPosAddr2_2nd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosCity,
+        1,
+        30,
+        from::hasIdrKPosCity,
+        from::getIdrKPosCity,
+        to::setIdrKPosCity);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosState,
+        1,
+        2,
+        from::hasIdrKPosState,
+        from::getIdrKPosState,
+        to::setIdrKPosState);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrKPosZip,
+        1,
+        15,
+        from::hasIdrKPosZip,
+        from::getIdrKPosZip,
+        to::setIdrKPosZip);
+    to.setLastUpdated(now);
+    return to;
+  }
 
-    to.setIdrClmHdIcn(idrClmHdIcn);
-    to.setPriority(priority);
+  private PreAdjMcsDiagnosisCode transformMessageImpl(
+      McsDiagnosisCode from, DataTransformer transformer, Instant now, String namePrefix) {
+    final PreAdjMcsDiagnosisCode to = new PreAdjMcsDiagnosisCode();
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjMcsDiagnosisCode.Fields.idrDiagIcdType,
+        true,
+        1,
+        1,
+        PreAdjMcsDiagnosisCode_idrDiagIcdType_Extractor.getEnumString(from),
+        to::setIdrDiagIcdType);
+    transformer.copyString(
+        namePrefix + PreAdjMcsDiagnosisCode.Fields.idrDiagCode,
+        false,
+        1,
+        7,
+        from.getIdrDiagCode(),
+        to::setIdrDiagCode);
     to.setLastUpdated(now);
     return to;
   }

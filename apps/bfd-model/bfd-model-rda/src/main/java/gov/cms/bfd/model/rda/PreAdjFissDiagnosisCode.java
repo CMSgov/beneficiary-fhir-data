@@ -24,23 +24,23 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjFissDiagnosisCode.PK.class)
 @Table(name = "`FissDiagnosisCodes`", schema = "`pre_adj`")
+@IdClass(PreAdjFissDiagnosisCode.PK.class)
 public class PreAdjFissDiagnosisCode {
   @Id
-  @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
+  @Column(name = "`dcn`", nullable = false, length = 23)
   private String dcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
   @EqualsAndHashCode.Include
+  @Column(name = "`priority`", nullable = false)
   private short priority;
 
-  @Column(name = "`diagCd2`", length = 7, nullable = false)
+  @Column(name = "`diagCd2`", nullable = false, length = 7)
   private String diagCd2;
 
-  @Column(name = "`diagPoaInd`", length = 1, nullable = false)
+  @Column(name = "`diagPoaInd`", nullable = false, length = 1)
   private String diagPoaInd;
 
   @Column(name = "`bitFlags`", length = 4)
@@ -49,12 +49,13 @@ public class PreAdjFissDiagnosisCode {
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
+  /** PK class for the FissDiagnosisCodes table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the FissDiagnosisCodes table */
-  public static class PK implements Serializable {
+  public static final class PK implements Serializable {
     private String dcn;
+
     private short priority;
   }
 }

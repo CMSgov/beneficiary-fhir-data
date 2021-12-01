@@ -706,14 +706,14 @@ public class FissClaimTransformerTest {
   public void testBadBeneZPayerPriorPmt() {
     assertBeneZPayerTransformationError(
         codeBuilder -> codeBuilder.setPriorPmt("not-a-number"),
-        new DataTransformer.ErrorMessage("priorPmt", "invalid amount"));
+        new DataTransformer.ErrorMessage("payer-0-priorPmt", "invalid amount"));
   }
 
   @Test
   public void testBadBeneZPayerEstAmtDue() {
     assertBeneZPayerTransformationError(
         codeBuilder -> codeBuilder.setEstAmtDue("not-a-number"),
-        new DataTransformer.ErrorMessage("estAmtDue", "invalid amount"));
+        new DataTransformer.ErrorMessage("payer-0-estAmtDue", "invalid amount"));
   }
 
   @Test
@@ -858,14 +858,14 @@ public class FissClaimTransformerTest {
   public void testBadInsuredPayerPriorPmt() {
     assertInsuredPayerTransformationError(
         codeBuilder -> codeBuilder.setPriorPmt("not-a-number"),
-        new DataTransformer.ErrorMessage("priorPmt", "invalid amount"));
+        new DataTransformer.ErrorMessage("payer-0-priorPmt", "invalid amount"));
   }
 
   @Test
   public void testBadInsuredPayerEstAmtDue() {
     assertInsuredPayerTransformationError(
         codeBuilder -> codeBuilder.setEstAmtDue("not-a-number"),
-        new DataTransformer.ErrorMessage("estAmtDue", "invalid amount"));
+        new DataTransformer.ErrorMessage("payer-0-estAmtDue", "invalid amount"));
   }
 
   @Test

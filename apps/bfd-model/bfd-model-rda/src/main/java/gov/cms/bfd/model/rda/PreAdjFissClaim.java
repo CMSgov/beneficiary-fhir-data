@@ -22,7 +22,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the FissClaims table */
 @Entity
 @Getter
 @Setter
@@ -34,14 +33,14 @@ import lombok.experimental.FieldNameConstants;
 @Table(name = "`FissClaims`", schema = "`pre_adj`")
 public class PreAdjFissClaim {
   @Id
-  @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
+  @Column(name = "`dcn`", nullable = false, length = 23)
   private String dcn;
 
   @Column(name = "`sequenceNumber`", nullable = false)
   private Long sequenceNumber;
 
-  @Column(name = "`hicNo`", length = 12, nullable = false)
+  @Column(name = "`hicNo`", nullable = false, length = 12)
   private String hicNo;
 
   @Column(name = "`currStatus`", nullable = false)
@@ -50,7 +49,7 @@ public class PreAdjFissClaim {
   @Column(name = "`currLoc1`", nullable = false)
   private char currLoc1;
 
-  @Column(name = "`currLoc2`", length = 5, nullable = false)
+  @Column(name = "`currLoc2`", nullable = false, length = 5)
   private String currLoc2;
 
   @Column(name = "`medaProvId`", length = 13)
@@ -113,13 +112,6 @@ public class PreAdjFissClaim {
   @Column(name = "`lobCd`", length = 1)
   private String lobCd;
 
-  public enum ServTypeCdMapping {
-    Normal,
-    Clinic,
-    SpecialFacility,
-    Unrecognized
-  }
-
   @Enumerated(EnumType.STRING)
   @Column(name = "`servTypeCdMapping`", length = 20)
   private ServTypeCdMapping servTypeCdMapping;
@@ -164,4 +156,14 @@ public class PreAdjFissClaim {
       cascade = CascadeType.ALL)
   @Builder.Default
   private Set<PreAdjFissPayer> payers = new HashSet<>();
+
+  public enum ServTypeCdMapping {
+    Normal,
+
+    Clinic,
+
+    SpecialFacility,
+
+    Unrecognized
+  }
 }

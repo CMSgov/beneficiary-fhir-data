@@ -25,17 +25,17 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsDetail.PK.class)
 @Table(name = "`McsDetails`", schema = "`pre_adj`")
+@IdClass(PreAdjMcsDetail.PK.class)
 public class PreAdjMcsDetail {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
   @EqualsAndHashCode.Include
+  @Column(name = "`idrClmHdIcn`", nullable = false, length = 15)
   private String idrClmHdIcn;
 
   @Id
-  @Column(name = "`priority`", nullable = false)
   @EqualsAndHashCode.Include
+  @Column(name = "`priority`", nullable = false)
   private short priority;
 
   @Column(name = "`idrDtlStatus`", length = 1)
@@ -98,12 +98,13 @@ public class PreAdjMcsDetail {
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
+  /** PK class for the McsDetails table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the McsDetails table */
-  public static class PK implements Serializable {
+  public static final class PK implements Serializable {
     private String idrClmHdIcn;
+
     private short priority;
   }
 }

@@ -31,20 +31,20 @@ import lombok.experimental.FieldNameConstants;
 @Table(name = "`McsClaims`", schema = "`pre_adj`")
 public class PreAdjMcsClaim {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
   @EqualsAndHashCode.Include
+  @Column(name = "`idrClmHdIcn`", nullable = false, length = 15)
   private String idrClmHdIcn;
 
   @Column(name = "`sequenceNumber`", nullable = false)
   private Long sequenceNumber;
 
-  @Column(name = "`idrContrId`", length = 5, nullable = false)
+  @Column(name = "`idrContrId`", nullable = false, length = 5)
   private String idrContrId;
 
   @Column(name = "`idrHic`", length = 12)
   private String idrHic;
 
-  @Column(name = "`idrClaimType`", length = 1, nullable = false)
+  @Column(name = "`idrClaimType`", nullable = false, length = 1)
   private String idrClaimType;
 
   @Column(name = "`idrDtlCnt`")

@@ -265,8 +265,6 @@ public class McsClaimTransformerTest {
                   "idrContrId", "invalid length: expected=[1,5] actual=0"),
               new DataTransformer.ErrorMessage("idrClaimType", "no value set"),
               new DataTransformer.ErrorMessage(
-                  "diagCode-0-idrClmHdIcn", "invalid length: expected=[1,15] actual=0"),
-              new DataTransformer.ErrorMessage(
                   "diagCode-0-idrDiagCode", "invalid length: expected=[1,7] actual=0")),
           ex.getErrors());
     }
@@ -482,14 +480,6 @@ public class McsClaimTransformerTest {
     assertClaimTransformationError(
         () -> claimBuilder.setIdrHdrToDos("2020-01-14---"),
         new DataTransformer.ErrorMessage("idrHdrToDateOfSvc", "invalid date"));
-  }
-
-  @Test
-  public void testBadDiagnosisCodeIdrClmHdIcn() {
-    assertDiagnosisCodeTransformationError(
-        codeBuilder -> codeBuilder.setIdrClmHdIcn("123456789012345---"),
-        new DataTransformer.ErrorMessage(
-            "diagCode-0-idrClmHdIcn", "invalid length: expected=[1,15] actual=18"));
   }
 
   @Test
