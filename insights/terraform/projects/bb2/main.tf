@@ -17,6 +17,7 @@ module "firehose" {
 
 module "cwl_destination" {
   source = "./modules/cwl_destination"
+  bb2_acct      = var.bb2_acct
 
   for_each      = var.firehose
   firehose_name = each.key

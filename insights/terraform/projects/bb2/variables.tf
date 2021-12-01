@@ -9,11 +9,11 @@ variable "firehose" {
       project    = "bb2"
       database   = "bb2"
     }
-    # impl-perf-mon = {
-    #   table_name = "events_impl_perf_mon"
-    #   project = "bb2"
-    #   database = "bb2"
-    # }
+    impl-perf-mon = {
+      table_name = "events_impl_perf_mon"
+      project = "bb2"
+      database = "bb2"
+    }
   }
 }
 
@@ -27,4 +27,8 @@ variable "buffer_interval" {
   description = "The interval of buffer refresh in SEC"
   type        = number
   default     = 300
+}
+
+variable "bb2_acct" {
+  type        = string
 }

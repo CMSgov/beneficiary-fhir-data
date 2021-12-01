@@ -5,3 +5,7 @@ variable "firehose_name" {
 variable "project" {
   type = string
 }
+
+variable "bb2_acct" {
+  type = string
+}
