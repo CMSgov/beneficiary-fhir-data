@@ -14,6 +14,11 @@ variable "firehose" {
       project = "bb2"
       database = "bb2"
     }
+    prod-perf-mon = {
+      table_name = "events_prod_perf_mon"
+      project = "bb2"
+      database = "bb2"
+    }
   }
 }
 
