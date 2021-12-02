@@ -75,8 +75,6 @@ module "bb2_events" {
 }
 
 
-## Firehose for putting simulated data into the events table
-
 module "firehose" {
   source          = "../../../modules/firehose"
   stream          = local.table
