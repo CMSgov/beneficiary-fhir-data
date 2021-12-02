@@ -1,3 +1,0 @@
-# We don't want to commit the results files, as they will be tens of megabytes large.
-*.csv
-*.zip

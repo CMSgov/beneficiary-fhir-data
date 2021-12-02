@@ -1,2 +1,0 @@
-# Apache Commons CSV always uses CRLF for CSV files.
-dev/benchmark-data.csv -text

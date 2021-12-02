@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jboss-web>
-
-	<!-- The name of the <security-realm /> (from the JBoss/Wildfly standalone.xml
-		configuration file) that this application should use for its authentication. -->
-	<security-domain>bluebutton-data-server</security-domain>
-
-</jboss-web>
