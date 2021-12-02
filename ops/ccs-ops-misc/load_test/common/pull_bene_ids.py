@@ -11,8 +11,16 @@ def loadData():
     if configFile is None:
         return -1
 
-    fileName = "ids.txt"
-    beneQuery = "SELECT \"beneficiaryId\" FROM \"Beneficiaries\" TABLESAMPLE SYSTEM (0.25) LIMIT 100000;"
+    ## FUTURE: calculate the limit needed based on test duration * maxUsers, throw error if not enough data
+    fileLimit = "100000"
+
+    ## Use this until the data is cleaned up; right now there are tons of benes with null ref year which return 404 if we use them
+    beneQuery = "SELECT \"beneficiaryId\" FROM \"Beneficiaries\" WHERE \"beneEnrollmentReferenceYear\" IS NOT NULL LIMIT " + fileLimit + ";"
+
+    ## Use this query once the data is cleaned up, which will use random benes to avoid caching issues
+    ## beneQuery = "SELECT \"beneficiaryId\" FROM \"Beneficiaries\" TABLESAMPLE SYSTEM (0.25) LIMIT 100000;"
+
+    print("Collecting test data...")
 
     ## Make the query to the DB
     conn = p.connect(

@@ -30,8 +30,12 @@ last_updated = prior_date.strftime('%Y-%m-%d')
 class BFDUser(HttpUser):
     @task
     def explanation_of_benefit(self):
+        if len(eod_ids) == 0
+            print("Ran out of data, stopping test...")
+            raise StopLocust()
+
         id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/ExplanationOfBenefit?_count=10&patient={id}&_format=application%2Ffhir%2Bjson&_lastUpdated=gt{last_updated}',
+        self.client.get(f'/v2/fhir/ExplanationOfBenefit?patient={id}&_count=10&_format=application%2Ffhir%2Bjson&_lastUpdated=gt{last_updated}',
                 cert=client_cert,
                 verify=server_public_key,
                 name='/v2/fhir/ExplanationOfBenefit')
