@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -212,32 +213,39 @@ public class FissClaimTransformerV2 {
   }
 
   private static Resource getContainedPatient(PreAdjFissClaim claimGroup) {
-    PreAdjFissPayer benePayer =
+    Optional<PreAdjFissPayer> optional =
         claimGroup.getPayers().stream()
             .filter(p -> p.getPayerType() == PreAdjFissPayer.PayerType.BeneZ)
-            .findFirst()
-            .orElseThrow(
-                () -> new IllegalStateException("No BeneZ payer found, this should not happen"));
+            .findFirst();
 
-    return new Patient()
-        .setIdentifier(
-            List.of(
-                new Identifier()
-                    .setType(
-                        new CodeableConcept(
-                            new Coding(
-                                CommonCodings.MC.getSystem(),
-                                CommonCodings.MC.getCode(),
-                                CommonCodings.MC.getDisplay())))
-                    .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
-                    .setValue(claimGroup.getMbi())))
-        .setName(getBeneName(benePayer))
-        .setBirthDate(localDateToDate(benePayer.getBeneDob()))
-        .setGender(
-            benePayer.getBeneSex() == null
-                ? null
-                : GENDER_MAP.get(benePayer.getBeneSex().toLowerCase()))
-        .setId("patient");
+    Patient patient =
+        new Patient()
+            .setIdentifier(
+                List.of(
+                    new Identifier()
+                        .setType(
+                            new CodeableConcept(
+                                new Coding(
+                                    CommonCodings.MC.getSystem(),
+                                    CommonCodings.MC.getCode(),
+                                    CommonCodings.MC.getDisplay())))
+                        .setSystem(
+                            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
+                        .setValue(claimGroup.getMbi())));
+    patient.setId("patient");
+
+    if (optional.isPresent()) {
+      PreAdjFissPayer benePayer = optional.get();
+      patient
+          .setName(getBeneName(benePayer))
+          .setBirthDate(localDateToDate(benePayer.getBeneDob()))
+          .setGender(
+              benePayer.getBeneSex() == null
+                  ? null
+                  : GENDER_MAP.get(benePayer.getBeneSex().toLowerCase()));
+    }
+
+    return patient;
   }
 
   private static List<HumanName> getBeneName(PreAdjFissPayer benePayer) {
