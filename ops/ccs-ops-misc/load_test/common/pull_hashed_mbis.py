@@ -14,6 +14,8 @@ def loadData():
     fileName = "mbis.txt"
     beneQuery = "SELECT \"mbiHash\" FROM \"Beneficiaries\" WHERE \"mbiHash\" IS NOT NULL LIMIT 100000;"
 
+    print("Collecting test data...")
+
     ## Make the query to the DB
     conn = p.connect(
             user = configFile["dbUsername"],

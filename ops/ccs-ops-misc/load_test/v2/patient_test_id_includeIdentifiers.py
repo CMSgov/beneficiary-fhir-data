@@ -22,6 +22,10 @@ client_cert = setup.getClientCert()
 class BFDUser(HttpUser):
     @task
     def patient(self):
+        if len(eob_ids) == 0
+            print("Ran out of data, stopping test...")
+            raise StopLocust()
+
         id = eob_ids.pop()
         self.client.get(f'/v2/fhir/Patient?_id={id}&_format=application%2Ffhir%2Bjson&_IncludeIdentifiers=true',
                 cert=client_cert,

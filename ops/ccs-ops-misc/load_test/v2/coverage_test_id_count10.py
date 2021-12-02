@@ -22,8 +22,12 @@ client_cert = setup.getClientCert()
 class BFDUser(HttpUser):
     @task
     def coverage(self):
+        if len(eod_ids) == 0
+            print("Ran out of data, stopping test...")
+            raise StopLocust()
+
         id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/Coverage?_count=10&beneficiary={id}',
+        self.client.get(f'/v2/fhir/Coverage?beneficiary={id}&_count=10',
                 cert=client_cert,
                 verify=server_public_key,
                 name='/v2/fhir/Coverage')

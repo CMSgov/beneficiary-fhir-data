@@ -153,6 +153,9 @@ def run_with_params(argv):
             configData.testCreatedClientsPerSecond = arg
         elif opt == "--testFile":
             testFile = arg
+        else:
+            print(helpString)
+            sys.exit()
 
     ## Check if all required params are set
     if not all([configData.homePath, configData.clientCertPath, configData.dbHost, configData.dbUsername, configData.dbPassword, configData.testHost, testFile]):
