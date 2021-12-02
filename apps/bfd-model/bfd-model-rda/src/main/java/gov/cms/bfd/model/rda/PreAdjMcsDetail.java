@@ -95,6 +95,48 @@ public class PreAdjMcsDetail {
   @Column(name = "`idrKPosZip`", length = 15)
   private String idrKPosZip;
 
+  @Column(name = "`idrTos`", length = 1)
+  private String idrTos;
+
+  @Column(name = "`idrTwoDigitPos`", length = 2)
+  private String idrTwoDigitPos;
+
+  @Column(name = "`idrDtlRendType`", length = 2)
+  private String idrDtlRendType;
+
+  @Column(name = "`idrDtlRendSpec`", length = 2)
+  private String idrDtlRendSpec;
+
+  @Column(name = "`idrDtlRendNpi`", length = 10)
+  private String idrDtlRendNpi;
+
+  @Column(name = "`idrDtlRendProv`", length = 10)
+  private String idrDtlRendProv;
+
+  @Column(name = "`idrKDtlFacProvNpi`", length = 10)
+  private String idrKDtlFacProvNpi;
+
+  @Column(name = "`idrDtlAmbPickupCity`", length = 20)
+  private String idrDtlAmbPickupCity;
+
+  @Column(name = "`idrDtlAmbPickupState`", length = 2)
+  private String idrDtlAmbPickupState;
+
+  @Column(name = "`idrDtlAmbPickupZipcode`", length = 9)
+  private String idrDtlAmbPickupZipcode;
+
+  @Column(name = "`idrDtlAmbDropoffName`", length = 24)
+  private String idrDtlAmbDropoffName;
+
+  @Column(name = "`idrDtlAmbDropoffCity`", length = 20)
+  private String idrDtlAmbDropoffCity;
+
+  @Column(name = "`idrDtlAmbDropoffState`", length = 2)
+  private String idrDtlAmbDropoffState;
+
+  @Column(name = "`idrDtlAmbDropoffZipcode`", length = 9)
+  private String idrDtlAmbDropoffZipcode;
+
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 

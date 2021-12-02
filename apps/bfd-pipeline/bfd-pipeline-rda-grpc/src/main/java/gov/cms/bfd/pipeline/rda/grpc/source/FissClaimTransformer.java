@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.collect.ImmutableSet;
+import gov.cms.bfd.model.rda.PreAdjFissAuditTrail;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
@@ -8,24 +9,33 @@ import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentRequestorCode;
 import gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissAuditTrail;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex;
 import gov.cms.mpsm.rda.v1.fiss.FissBillClassification;
 import gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForClinics;
 import gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForSpecialFacilities;
 import gov.cms.mpsm.rda.v1.fiss.FissBillFacilityType;
 import gov.cms.mpsm.rda.v1.fiss.FissBillFrequency;
+import gov.cms.mpsm.rda.v1.fiss.FissCancelAdjustmentCode;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier;
 import gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
+import gov.cms.mpsm.rda.v1.fiss.FissPhysicianFlag;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import gov.cms.mpsm.rda.v1.fiss.FissProcessNewHealthInsuranceClaimNumberIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
 import gov.cms.mpsm.rda.v1.fiss.FissReleaseOfInformation;
+import gov.cms.mpsm.rda.v1.fiss.FissRepositoryIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -61,6 +71,40 @@ public class FissClaimTransformer {
       PreAdjFissClaim_servTypeCdForSpecialFacilities_Extractor;
 
   private final EnumStringExtractor<FissClaim, FissBillFrequency> PreAdjFissClaim_freqCd_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissAdjustmentRequestorCode>
+      PreAdjFissClaim_adjReqCd_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissCancelAdjustmentCode>
+      PreAdjFissClaim_cancAdjCd_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissSourceOfAdmission>
+      PreAdjFissClaim_admSource_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissPayersCode>
+      PreAdjFissClaim_primaryPayerCode_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissPhysicianFlag>
+      PreAdjFissClaim_attendPhysFlag_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissPhysicianFlag>
+      PreAdjFissClaim_operPhysFlag_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissPhysicianFlag>
+      PreAdjFissClaim_othPhysFlag_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissProcessNewHealthInsuranceClaimNumberIndicator>
+      PreAdjFissClaim_procNewHicInd_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissRepositoryIndicator>
+      PreAdjFissClaim_reposInd_Extractor;
+
+  private final EnumStringExtractor<
+          FissClaim, FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier>
+      PreAdjFissClaim_mbiSubmBeneInd_Extractor;
+
+  private final EnumStringExtractor<FissClaim, FissAdjustmentMedicareBeneficiaryIdentifierIndicator>
+      PreAdjFissClaim_adjMbiInd_Extractor;
 
   private final EnumStringExtractor<FissDiagnosisCode, FissDiagnosisPresentOnAdmissionIndicator>
       PreAdjFissDiagnosisCode_diagPoaInd_Extractor;
@@ -103,6 +147,9 @@ public class FissClaimTransformer {
 
   private final EnumStringExtractor<FissPayer, FissPatientRelationshipCode>
       PreAdjFissPayer_beneZPayer_insuredRelX12_Extractor;
+
+  private final EnumStringExtractor<FissAuditTrail, FissClaimStatus>
+      PreAdjFissAuditTrail_badtStatus_Extractor;
 
   private final Clock clock;
   private final IdHasher idHasher;
@@ -180,6 +227,105 @@ public class FissClaimTransformer {
             FissClaim::hasFreqCdUnrecognized,
             FissClaim::getFreqCdUnrecognized,
             FissBillFrequency.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_adjReqCd_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasAdjReqCdEnum,
+            FissClaim::getAdjReqCdEnum,
+            FissClaim::hasAdjReqCdUnrecognized,
+            FissClaim::getAdjReqCdUnrecognized,
+            FissAdjustmentRequestorCode.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_cancAdjCd_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasCancAdjCdEnum,
+            FissClaim::getCancAdjCdEnum,
+            FissClaim::hasCancAdjCdUnrecognized,
+            FissClaim::getCancAdjCdUnrecognized,
+            FissCancelAdjustmentCode.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_admSource_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasAdmSourceEnum,
+            FissClaim::getAdmSourceEnum,
+            FissClaim::hasAdmSourceUnrecognized,
+            FissClaim::getAdmSourceUnrecognized,
+            FissSourceOfAdmission.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_primaryPayerCode_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasPrimaryPayerCodeEnum,
+            FissClaim::getPrimaryPayerCodeEnum,
+            FissClaim::hasPrimaryPayerCodeUnrecognized,
+            FissClaim::getPrimaryPayerCodeUnrecognized,
+            FissPayersCode.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_attendPhysFlag_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasAttendPhysFlagEnum,
+            FissClaim::getAttendPhysFlagEnum,
+            FissClaim::hasAttendPhysFlagUnrecognized,
+            FissClaim::getAttendPhysFlagUnrecognized,
+            FissPhysicianFlag.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_operPhysFlag_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasOperPhysFlagEnum,
+            FissClaim::getOperPhysFlagEnum,
+            FissClaim::hasOperPhysFlagUnrecognized,
+            FissClaim::getOperPhysFlagUnrecognized,
+            FissPhysicianFlag.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_othPhysFlag_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasOthPhysFlagEnum,
+            FissClaim::getOthPhysFlagEnum,
+            FissClaim::hasOthPhysFlagUnrecognized,
+            FissClaim::getOthPhysFlagUnrecognized,
+            FissPhysicianFlag.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_procNewHicInd_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasProcNewHicIndEnum,
+            FissClaim::getProcNewHicIndEnum,
+            FissClaim::hasProcNewHicIndUnrecognized,
+            FissClaim::getProcNewHicIndUnrecognized,
+            FissProcessNewHealthInsuranceClaimNumberIndicator.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_reposInd_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasReposIndEnum,
+            FissClaim::getReposIndEnum,
+            FissClaim::hasReposIndUnrecognized,
+            FissClaim::getReposIndUnrecognized,
+            FissRepositoryIndicator.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_mbiSubmBeneInd_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasMbiSubmBeneIndEnum,
+            FissClaim::getMbiSubmBeneIndEnum,
+            FissClaim::hasMbiSubmBeneIndUnrecognized,
+            FissClaim::getMbiSubmBeneIndUnrecognized,
+            FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissClaim_adjMbiInd_Extractor =
+        new EnumStringExtractor<>(
+            FissClaim::hasAdjMbiIndEnum,
+            FissClaim::getAdjMbiIndEnum,
+            FissClaim::hasAdjMbiIndUnrecognized,
+            FissClaim::getAdjMbiIndUnrecognized,
+            FissAdjustmentMedicareBeneficiaryIdentifierIndicator.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
     PreAdjFissDiagnosisCode_diagPoaInd_Extractor =
@@ -317,6 +463,15 @@ public class FissClaimTransformer {
                 message.hasBeneZPayer() && message.getBeneZPayer().hasInsuredRelX12Unrecognized(),
             message -> message.getBeneZPayer().getInsuredRelX12Unrecognized(),
             FissPatientRelationshipCode.UNRECOGNIZED,
+            ImmutableSet.of(),
+            ImmutableSet.of());
+    PreAdjFissAuditTrail_badtStatus_Extractor =
+        new EnumStringExtractor<>(
+            FissAuditTrail::hasBadtStatusEnum,
+            FissAuditTrail::getBadtStatusEnum,
+            FissAuditTrail::hasBadtStatusUnrecognized,
+            FissAuditTrail::getBadtStatusUnrecognized,
+            FissClaimStatus.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
   }
@@ -542,6 +697,266 @@ public class FissClaimTransformer {
         from::hasBillTypCd,
         from::getBillTypCd,
         to::setBillTypCd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.rejectCd,
+        1,
+        5,
+        from::hasRejectCd,
+        from::getRejectCd,
+        to::setRejectCd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.fullPartDenInd,
+        1,
+        1,
+        from::hasFullPartDenInd,
+        from::getFullPartDenInd,
+        to::setFullPartDenInd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.nonPayInd,
+        1,
+        2,
+        from::hasNonPayInd,
+        from::getNonPayInd,
+        to::setNonPayInd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.xrefDcnNbr,
+        1,
+        23,
+        from::hasXrefDcnNbr,
+        from::getXrefDcnNbr,
+        to::setXrefDcnNbr);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.adjReqCd,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_adjReqCd_Extractor.getEnumString(from),
+        to::setAdjReqCd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.adjReasCd,
+        1,
+        2,
+        from::hasAdjReasCd,
+        from::getAdjReasCd,
+        to::setAdjReasCd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.cancelXrefDcn,
+        1,
+        23,
+        from::hasCancelXrefDcn,
+        from::getCancelXrefDcn,
+        to::setCancelXrefDcn);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjFissClaim.Fields.cancelDate,
+        from::hasCancelDateCymd,
+        from::getCancelDateCymd,
+        to::setCancelDate);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.cancAdjCd,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_cancAdjCd_Extractor.getEnumString(from),
+        to::setCancAdjCd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.originalXrefDcn,
+        1,
+        23,
+        from::hasOriginalXrefDcn,
+        from::getOriginalXrefDcn,
+        to::setOriginalXrefDcn);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjFissClaim.Fields.paidDt,
+        from::hasPaidDtCymd,
+        from::getPaidDtCymd,
+        to::setPaidDt);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjFissClaim.Fields.admDate,
+        from::hasAdmDateCymd,
+        from::getAdmDateCymd,
+        to::setAdmDate);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.admSource,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_admSource_Extractor.getEnumString(from),
+        to::setAdmSource);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.primaryPayerCode,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_primaryPayerCode_Extractor.getEnumString(from),
+        to::setPrimaryPayerCode);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.attendPhysId,
+        1,
+        16,
+        from::hasAttendPhysId,
+        from::getAttendPhysId,
+        to::setAttendPhysId);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.attendPhysLname,
+        1,
+        17,
+        from::hasAttendPhysLname,
+        from::getAttendPhysLname,
+        to::setAttendPhysLname);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.attendPhysFname,
+        1,
+        18,
+        from::hasAttendPhysFname,
+        from::getAttendPhysFname,
+        to::setAttendPhysFname);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.attendPhysMint,
+        1,
+        1,
+        from::hasAttendPhysMint,
+        from::getAttendPhysMint,
+        to::setAttendPhysMint);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.attendPhysFlag,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_attendPhysFlag_Extractor.getEnumString(from),
+        to::setAttendPhysFlag);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.operatingPhysId,
+        1,
+        16,
+        from::hasOperatingPhysId,
+        from::getOperatingPhysId,
+        to::setOperatingPhysId);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.operPhysLname,
+        1,
+        17,
+        from::hasOperPhysLname,
+        from::getOperPhysLname,
+        to::setOperPhysLname);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.operPhysFname,
+        1,
+        18,
+        from::hasOperPhysFname,
+        from::getOperPhysFname,
+        to::setOperPhysFname);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.operPhysMint,
+        1,
+        1,
+        from::hasOperPhysMint,
+        from::getOperPhysMint,
+        to::setOperPhysMint);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.operPhysFlag,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_operPhysFlag_Extractor.getEnumString(from),
+        to::setOperPhysFlag);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.othPhysId,
+        1,
+        16,
+        from::hasOthPhysId,
+        from::getOthPhysId,
+        to::setOthPhysId);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.othPhysLname,
+        1,
+        17,
+        from::hasOthPhysLname,
+        from::getOthPhysLname,
+        to::setOthPhysLname);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.othPhysFname,
+        1,
+        18,
+        from::hasOthPhysFname,
+        from::getOthPhysFname,
+        to::setOthPhysFname);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.othPhysMint,
+        1,
+        1,
+        from::hasOthPhysMint,
+        from::getOthPhysMint,
+        to::setOthPhysMint);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.othPhysFlag,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_othPhysFlag_Extractor.getEnumString(from),
+        to::setOthPhysFlag);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.xrefHicNbr,
+        1,
+        12,
+        from::hasXrefHicNbr,
+        from::getXrefHicNbr,
+        to::setXrefHicNbr);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.procNewHicInd,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_procNewHicInd_Extractor.getEnumString(from),
+        to::setProcNewHicInd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.newHic,
+        1,
+        12,
+        from::hasNewHic,
+        from::getNewHic,
+        to::setNewHic);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.reposInd,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_reposInd_Extractor.getEnumString(from),
+        to::setReposInd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.reposHic,
+        1,
+        12,
+        from::hasReposHic,
+        from::getReposHic,
+        to::setReposHic);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.mbiSubmBeneInd,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_mbiSubmBeneInd_Extractor.getEnumString(from),
+        to::setMbiSubmBeneInd);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissClaim.Fields.adjMbiInd,
+        true,
+        1,
+        1,
+        PreAdjFissClaim_adjMbiInd_Extractor.getEnumString(from),
+        to::setAdjMbiInd);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.adjMbi,
+        1,
+        11,
+        from::hasAdjMbi,
+        from::getAdjMbi,
+        to::setAdjMbi);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissClaim.Fields.medicalRecordNo,
+        1,
+        17,
+        from::hasMedicalRecordNo,
+        from::getMedicalRecordNo,
+        to::setMedicalRecordNo);
     to.setLastUpdated(now);
     return to;
   }
@@ -578,6 +993,15 @@ public class FissClaimTransformer {
       itemTo.setDcn(from.getDcn());
       itemTo.setPriority(index);
       to.getPayers().add(itemTo);
+    }
+    for (short index = 0; index < from.getFissAuditTrailCount(); ++index) {
+      final String itemNamePrefix = namePrefix + "auditTrail" + "-" + index + "-";
+      final FissAuditTrail itemFrom = from.getFissAuditTrail(index);
+      final PreAdjFissAuditTrail itemTo =
+          transformMessageImpl(itemFrom, transformer, now, itemNamePrefix);
+      itemTo.setDcn(from.getDcn());
+      itemTo.setPriority(index);
+      to.getAuditTrail().add(itemTo);
     }
   }
 
@@ -892,6 +1316,46 @@ public class FissClaimTransformer {
         PreAdjFissPayer_beneZPayer_insuredRelX12_Extractor.getEnumString(from),
         to::setInsuredRelX12);
     to.setLastUpdated(now);
+    return to;
+  }
+
+  private PreAdjFissAuditTrail transformMessageImpl(
+      FissAuditTrail from, DataTransformer transformer, Instant now, String namePrefix) {
+    final PreAdjFissAuditTrail to = new PreAdjFissAuditTrail();
+    to.setLastUpdated(now);
+    transformer.copyEnumAsString(
+        namePrefix + PreAdjFissAuditTrail.Fields.badtStatus,
+        true,
+        1,
+        1,
+        PreAdjFissAuditTrail_badtStatus_Extractor.getEnumString(from),
+        to::setBadtStatus);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissAuditTrail.Fields.badtLoc,
+        1,
+        5,
+        from::hasBadtLoc,
+        from::getBadtLoc,
+        to::setBadtLoc);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissAuditTrail.Fields.badtOperId,
+        1,
+        9,
+        from::hasBadtOperId,
+        from::getBadtOperId,
+        to::setBadtOperId);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjFissAuditTrail.Fields.badtReas,
+        1,
+        5,
+        from::hasBadtReas,
+        from::getBadtReas,
+        to::setBadtReas);
+    transformer.copyOptionalDate(
+        namePrefix + PreAdjFissAuditTrail.Fields.badtCurrDate,
+        from::hasBadtCurrDateCymd,
+        from::getBadtCurrDateCymd,
+        to::setBadtCurrDate);
     return to;
   }
 }
