@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.Assert.*;
 
 import com.google.common.collect.ImmutableList;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.model.rda.PreAdjFissAuditTrail;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
@@ -52,9 +51,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -1253,7 +1250,7 @@ public class FissClaimTransformerTest {
   // region InsuredPayer tests
 
   @Test
-  public void testBadInsuredPayerPayersId() {
+  public void testInsuredPayerPayersId() {
     new InsuredPayerFieldTester()
         .enumField(
             FissInsuredPayer.Builder::setPayersIdEnum,
@@ -1268,7 +1265,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerPayersName() {
+  public void testInsuredPayerPayersName() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setPayersName,
@@ -1278,7 +1275,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerRelInd() {
+  public void testInsuredPayerRelInd() {
     new InsuredPayerFieldTester()
         .enumField(
             FissInsuredPayer.Builder::setRelIndEnum,
@@ -1293,7 +1290,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerAssignInd() {
+  public void testInsuredPayerAssignInd() {
     new InsuredPayerFieldTester()
         .enumField(
             FissInsuredPayer.Builder::setAssignIndEnum,
@@ -1308,7 +1305,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerProviderNumber() {
+  public void testInsuredPayerProviderNumber() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setProviderNumber,
@@ -1318,28 +1315,28 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerAdjDcnIcn() {
+  public void testInsuredPayerAdjDcnIcn() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setAdjDcnIcn, PreAdjFissPayer::getAdjDcnIcn, "adjDcnIcn", 23);
   }
 
   @Test
-  public void testBadInsuredPayerPriorPmt() {
+  public void testInsuredPayerPriorPmt() {
     new InsuredPayerFieldTester()
         .amountField(
             FissInsuredPayer.Builder::setPriorPmt, PreAdjFissPayer::getPriorPmt, "priorPmt");
   }
 
   @Test
-  public void testBadInsuredPayerEstAmtDue() {
+  public void testInsuredPayerEstAmtDue() {
     new InsuredPayerFieldTester()
         .amountField(
             FissInsuredPayer.Builder::setEstAmtDue, PreAdjFissPayer::getEstAmtDue, "estAmtDue");
   }
 
   @Test
-  public void testBadInsuredPayerInsuredRel() {
+  public void testInsuredPayerInsuredRel() {
     new InsuredPayerFieldTester()
         .enumField(
             FissInsuredPayer.Builder::setInsuredRelEnum,
@@ -1354,7 +1351,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerInsuredName() {
+  public void testInsuredPayerInsuredName() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setInsuredName,
@@ -1364,7 +1361,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerInsuredSsnHic() {
+  public void testInsuredPayerInsuredSsnHic() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setInsuredSsnHic,
@@ -1374,7 +1371,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerInsuredGroupName() {
+  public void testInsuredPayerInsuredGroupName() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setInsuredGroupName,
@@ -1384,7 +1381,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerInsuredGroupNbr() {
+  public void testInsuredPayerInsuredGroupNbr() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setInsuredGroupNbr,
@@ -1394,7 +1391,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerTreatAuthCd() {
+  public void testInsuredPayerTreatAuthCd() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setTreatAuthCd,
@@ -1404,7 +1401,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerInsuredSex() {
+  public void testInsuredPayerInsuredSex() {
     new InsuredPayerFieldTester()
         .enumField(
             FissInsuredPayer.Builder::setInsuredSexEnum,
@@ -1419,7 +1416,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerInsuredRelX12() {
+  public void testInsuredPayerInsuredRelX12() {
     new InsuredPayerFieldTester()
         .enumField(
             FissInsuredPayer.Builder::setInsuredRelX12Enum,
@@ -1434,14 +1431,14 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void testBadInsuredPayerInsuredDob() {
+  public void testInsuredPayerInsuredDob() {
     new InsuredPayerFieldTester()
         .dateField(
             FissInsuredPayer.Builder::setInsuredDob, PreAdjFissPayer::getInsuredDob, "insuredDob");
   }
 
   @Test
-  public void testBadInsuredPayerInsuredDobText() {
+  public void testInsuredPayerInsuredDobText() {
     new InsuredPayerFieldTester()
         .stringField(
             FissInsuredPayer.Builder::setInsuredDobText,
@@ -1628,82 +1625,11 @@ public class FissClaimTransformerTest {
     assertThat(changed.getClaim(), samePropertyValuesAs(claim));
   }
 
-  @CanIgnoreReturnValue
-  abstract class AbstractFieldTester<TBuilder, TEntity> {
-    AbstractFieldTester<TBuilder, TEntity> stringField(
-        BiConsumer<TBuilder, String> setter,
-        Function<TEntity, String> getter,
-        String fieldLabel,
-        int maxLength) {
-      BiConsumer<FissClaim.Builder, String> setter1 =
-          (claimBuilder, value) -> setter.accept(getBuilder(claimBuilder), value);
-      String fieldLabel1 = getLabel(fieldLabel);
-      verifyStringFieldTransformationCorrect(
-          setter1, claim1 -> getter.apply(getEntity(claim1)), maxLength);
-      verifyStringFieldLengthLimitsEnforced(setter1, fieldLabel1, maxLength, 0);
-      verifyStringFieldLengthLimitsEnforced(setter1, fieldLabel1, maxLength, maxLength + 1);
-      return this;
-    }
-
-    @CanIgnoreReturnValue
-    AbstractFieldTester<TBuilder, TEntity> dateField(
-        BiConsumer<TBuilder, String> setter,
-        Function<TEntity, LocalDate> getter,
-        String fieldLabel) {
-      BiConsumer<FissClaim.Builder, String> setter1 =
-          (claimBuilder, value) -> setter.accept(getBuilder(claimBuilder), value);
-      verifyFieldTransformationSucceeds(
-          claimBuilder1 -> setter1.accept(claimBuilder1, "2021-12-01"),
-          claim1 -> getter.apply(getEntity(claim1)),
-          LocalDate.of(2021, 12, 1));
-      verifyFieldTransformationFails(
-          claimBuilder1 -> setter1.accept(claimBuilder1, "not-a-date"),
-          getLabel(fieldLabel),
-          "invalid date");
-      return this;
-    }
-
-    @CanIgnoreReturnValue
-    AbstractFieldTester<TBuilder, TEntity> amountField(
-        BiConsumer<TBuilder, String> setter,
-        Function<TEntity, BigDecimal> getter,
-        String fieldLabel) {
-      BiConsumer<FissClaim.Builder, String> setter1 =
-          (claimBuilder, value) -> setter.accept(getBuilder(claimBuilder), value);
-      verifyFieldTransformationSucceeds(
-          claimBuilder1 -> setter1.accept(claimBuilder1, "1234.50"),
-          claim1 -> getter.apply(getEntity(claim1)),
-          new BigDecimal("1234.50"));
-      verifyFieldTransformationFails(
-          claimBuilder1 -> setter1.accept(claimBuilder1, "not-a-number"),
-          getLabel(fieldLabel),
-          "invalid amount");
-      return this;
-    }
-
-    @CanIgnoreReturnValue
-    <TEnum extends Enum<?>> AbstractFieldTester<TBuilder, TEntity> enumField(
-        BiConsumer<TBuilder, TEnum> setter,
-        Function<TEntity, String> getter,
-        TEnum enumValue,
-        String stringValue) {
-      verifyFieldTransformationSucceeds(
-          claimBuilder1 ->
-              ((BiConsumer<FissClaim.Builder, TEnum>)
-                      (claimBuilder2, value) -> setter.accept(getBuilder(claimBuilder2), value))
-                  .accept(claimBuilder1, enumValue),
-          claim1 -> getter.apply(getEntity(claim1)),
-          stringValue);
-      return this;
-    }
-
-    abstract TBuilder getBuilder(FissClaim.Builder claimBuilder);
-
-    abstract TEntity getEntity(PreAdjFissClaim claim);
-
-    abstract String getLabel(String basicLabel);
-
-    FissClaim.Builder createFissClaimBuilderWithRequiredFields() {
+  private abstract class AbstractFieldTester<TBuilder, TEntity>
+      extends ClaimTransformerFieldTester<
+          FissClaim.Builder, FissClaim, PreAdjFissClaim, TBuilder, TEntity> {
+    @Override
+    FissClaim.Builder createClaimBuilder() {
       return FissClaim.newBuilder()
           .setDcn("dcn")
           .setHicNo("hicn")
@@ -1712,6 +1638,7 @@ public class FissClaimTransformerTest {
           .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
     }
 
+    @Override
     RdaChange<PreAdjFissClaim> transformClaim(FissClaim claim) {
       var changeBuilder =
           FissClaimChange.newBuilder()
@@ -1721,86 +1648,28 @@ public class FissClaimTransformerTest {
       return transformer.transformClaim(changeBuilder.build());
     }
 
-    private void verifyStringFieldTransformationCorrect(
-        BiConsumer<FissClaim.Builder, String> setter,
-        Function<PreAdjFissClaim, String> getter,
-        int maxLength) {
-      final var value = createString(maxLength);
-      verifyFieldTransformationSucceeds(
-          claimBuilder -> setter.accept(claimBuilder, value), getter, value);
-    }
-
-    private void verifyStringFieldLengthLimitsEnforced(
-        BiConsumer<FissClaim.Builder, String> setter,
-        String fieldLabel,
-        int maxLength,
-        int length) {
-      verifyFieldTransformationFails(
-          claimBuilder -> setter.accept(claimBuilder, createString(length)),
-          fieldLabel,
-          String.format("invalid length: expected=[1,%d] actual=%d", maxLength, length));
-    }
-
-    private <T> void verifyFieldTransformationSucceeds(
-        Consumer<FissClaim.Builder> setter, Function<PreAdjFissClaim, T> getter, T expectedValue) {
-      var claimBuilder = createFissClaimBuilderWithRequiredFields();
-
-      setter.accept(claimBuilder);
-
-      final var change = transformClaim(claimBuilder.build());
-      assertEquals(expectedValue, getter.apply(change.getClaim()));
-    }
-
-    private void verifyFieldTransformationFails(
-        Consumer<FissClaim.Builder> setter, String fieldLabel, String... errorMessages) {
-      try {
-        var claimBuilder = createFissClaimBuilderWithRequiredFields();
-
-        setter.accept(claimBuilder);
-
-        transformClaim(claimBuilder.build());
-        fail("should have thrown");
-      } catch (DataTransformer.TransformationException ex) {
-        var errors = ImmutableList.builder();
-        for (String errorMessage : errorMessages) {
-          errors.add(new DataTransformer.ErrorMessage(fieldLabel, errorMessage));
-        }
-        assertEquals(errors.build(), ex.getErrors());
-      }
-    }
-
-    private String createString(int length) {
-      StringBuilder sb = new StringBuilder();
-      var digit = 1;
-      while (sb.length() < length) {
-        sb.append(digit);
-        digit = (digit + 1) % 10;
-      }
-      return sb.toString();
+    @Override
+    FissClaim buildClaim(FissClaim.Builder builder) {
+      return builder.build();
     }
   }
 
   class ClaimFieldTester extends AbstractFieldTester<FissClaim.Builder, PreAdjFissClaim> {
     @Override
-    FissClaim.Builder getBuilder(FissClaim.Builder claimBuilder) {
+    FissClaim.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       return claimBuilder;
     }
 
     @Override
-    PreAdjFissClaim getEntity(PreAdjFissClaim claim) {
+    PreAdjFissClaim getTestEntity(PreAdjFissClaim claim) {
       return claim;
-    }
-
-    @Override
-    String getLabel(String basicLabel) {
-      return basicLabel;
     }
   }
 
   class AuditTrailFieldTester
       extends AbstractFieldTester<FissAuditTrail.Builder, PreAdjFissAuditTrail> {
     @Override
-    FissAuditTrail.Builder getBuilder(FissClaim.Builder claimBuilder) {
+    FissAuditTrail.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       if (claimBuilder.getFissAuditTrailBuilderList().isEmpty()) {
         claimBuilder.addFissAuditTrailBuilder();
       }
@@ -1808,7 +1677,7 @@ public class FissClaimTransformerTest {
     }
 
     @Override
-    PreAdjFissAuditTrail getEntity(PreAdjFissClaim claim) {
+    PreAdjFissAuditTrail getTestEntity(PreAdjFissClaim claim) {
       assertEquals(1, claim.getAuditTrail().size());
       return claim.getAuditTrail().iterator().next();
     }
@@ -1822,7 +1691,7 @@ public class FissClaimTransformerTest {
   class InsuredPayerFieldTester
       extends AbstractFieldTester<FissInsuredPayer.Builder, PreAdjFissPayer> {
     @Override
-    FissInsuredPayer.Builder getBuilder(FissClaim.Builder claimBuilder) {
+    FissInsuredPayer.Builder getTestEntityBuilder(FissClaim.Builder claimBuilder) {
       if (claimBuilder.getFissPayersBuilderList().isEmpty()) {
         claimBuilder.addFissPayersBuilder();
       }
@@ -1830,7 +1699,7 @@ public class FissClaimTransformerTest {
     }
 
     @Override
-    PreAdjFissPayer getEntity(PreAdjFissClaim claim) {
+    PreAdjFissPayer getTestEntity(PreAdjFissClaim claim) {
       assertEquals(1, claim.getPayers().size());
       return claim.getPayers().iterator().next();
     }
