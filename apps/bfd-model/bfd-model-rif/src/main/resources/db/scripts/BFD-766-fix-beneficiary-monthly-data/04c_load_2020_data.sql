@@ -1,1 +1,0 @@
-\copy public.ccw_load_temp FROM './BB_MBSF_2020.csv' DELIMITER ',' CSV QUOTE as '"';
