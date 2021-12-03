@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.Assert.*;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.model.rda.PreAdjFissAuditTrail;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
@@ -681,334 +682,393 @@ public class FissClaimTransformerTest {
 
   @Test
   public void testFissClaimRejectCd() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setRejectCd, PreAdjFissClaim::getRejectCd, "rejectCd", 5);
+    new ClaimFieldTester()
+        .stringField(FissClaim.Builder::setRejectCd, PreAdjFissClaim::getRejectCd, "rejectCd", 5);
   }
 
   @Test
   public void testFissClaimFullPartDenInd() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setFullPartDenInd,
-        PreAdjFissClaim::getFullPartDenInd,
-        "fullPartDenInd",
-        1);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setFullPartDenInd,
+            PreAdjFissClaim::getFullPartDenInd,
+            "fullPartDenInd",
+            1);
   }
 
   @Test
   public void testFissClaimNonPayInd() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setNonPayInd, PreAdjFissClaim::getNonPayInd, "nonPayInd", 2);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setNonPayInd, PreAdjFissClaim::getNonPayInd, "nonPayInd", 2);
   }
 
   @Test
   public void testFissClaimXrefDcnNbr() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setXrefDcnNbr, PreAdjFissClaim::getXrefDcnNbr, "xrefDcnNbr", 23);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setXrefDcnNbr, PreAdjFissClaim::getXrefDcnNbr, "xrefDcnNbr", 23);
   }
 
   @Test
   public void testFissClaimAdjReqCd() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setAdjReqCdEnum,
-        PreAdjFissClaim::getAdjReqCd,
-        FissAdjustmentRequestorCode.ADJUSTMENT_REQUESTOR_CODE_FISCAL_INTERMEDIARY,
-        "F");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAdjReqCdUnrecognized, PreAdjFissClaim::getAdjReqCd, "adjReqCd", 1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setAdjReqCdEnum,
+            PreAdjFissClaim::getAdjReqCd,
+            FissAdjustmentRequestorCode.ADJUSTMENT_REQUESTOR_CODE_FISCAL_INTERMEDIARY,
+            "F")
+        .stringField(
+            FissClaim.Builder::setAdjReqCdUnrecognized,
+            PreAdjFissClaim::getAdjReqCd,
+            "adjReqCd",
+            1);
   }
 
   @Test
   public void testFissClaimAdjReasCd() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAdjReasCd, PreAdjFissClaim::getAdjReasCd, "adjReasCd", 2);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setAdjReasCd, PreAdjFissClaim::getAdjReasCd, "adjReasCd", 2);
   }
 
   @Test
   public void testFissClaimCancelXrefDcn() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setCancelXrefDcn,
-        PreAdjFissClaim::getCancelXrefDcn,
-        "cancelXrefDcn",
-        23);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setCancelXrefDcn,
+            PreAdjFissClaim::getCancelXrefDcn,
+            "cancelXrefDcn",
+            23);
   }
 
   @Test
   public void testFissClaimCancelDate() {
-    verifyDateFieldTransformation(
-        FissClaim.Builder::setCancelDateCymd, PreAdjFissClaim::getCancelDate, "cancelDate");
+    new ClaimFieldTester()
+        .dateField(
+            FissClaim.Builder::setCancelDateCymd, PreAdjFissClaim::getCancelDate, "cancelDate");
   }
 
   @Test
   public void testFissClaimCancAdjCd() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setCancAdjCdEnum,
-        PreAdjFissClaim::getCancAdjCd,
-        FissCancelAdjustmentCode.CANCEL_ADJUSTMENT_CODE_COVERAGE,
-        "C");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setCancAdjCdUnrecognized, PreAdjFissClaim::getCancAdjCd, "cancAdjCd", 1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setCancAdjCdEnum,
+            PreAdjFissClaim::getCancAdjCd,
+            FissCancelAdjustmentCode.CANCEL_ADJUSTMENT_CODE_COVERAGE,
+            "C")
+        .stringField(
+            FissClaim.Builder::setCancAdjCdUnrecognized,
+            PreAdjFissClaim::getCancAdjCd,
+            "cancAdjCd",
+            1);
   }
 
   @Test
   public void testFissClaimOriginalXrefDcn() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOriginalXrefDcn,
-        PreAdjFissClaim::getOriginalXrefDcn,
-        "originalXrefDcn",
-        23);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOriginalXrefDcn,
+            PreAdjFissClaim::getOriginalXrefDcn,
+            "originalXrefDcn",
+            23);
   }
 
   @Test
   public void testFissClaimPaidDt() {
-    verifyDateFieldTransformation(
-        FissClaim.Builder::setPaidDtCymd, PreAdjFissClaim::getPaidDt, "paidDt");
+    new ClaimFieldTester()
+        .dateField(FissClaim.Builder::setPaidDtCymd, PreAdjFissClaim::getPaidDt, "paidDt");
   }
 
   @Test
   public void testFissClaimAdmDate() {
-    verifyDateFieldTransformation(
-        FissClaim.Builder::setAdmDateCymd, PreAdjFissClaim::getAdmDate, "admDate");
+    new ClaimFieldTester()
+        .dateField(FissClaim.Builder::setAdmDateCymd, PreAdjFissClaim::getAdmDate, "admDate");
   }
 
   @Test
   public void testFissClaimAdmSource() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setAdmSourceEnum,
-        PreAdjFissClaim::getAdmSource,
-        FissSourceOfAdmission.SOURCE_OF_ADMISSION_CLINIC_REFERRAL,
-        "2");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAdmSourceUnrecognized, PreAdjFissClaim::getAdmSource, "admSource", 1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setAdmSourceEnum,
+            PreAdjFissClaim::getAdmSource,
+            FissSourceOfAdmission.SOURCE_OF_ADMISSION_CLINIC_REFERRAL,
+            "2")
+        .stringField(
+            FissClaim.Builder::setAdmSourceUnrecognized,
+            PreAdjFissClaim::getAdmSource,
+            "admSource",
+            1);
   }
 
   @Test
   public void testFissClaimPrimaryPayerCode() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setPrimaryPayerCodeEnum,
-        PreAdjFissClaim::getPrimaryPayerCode,
-        FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
-        "D");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setPrimaryPayerCodeUnrecognized,
-        PreAdjFissClaim::getPrimaryPayerCode,
-        "primaryPayerCode",
-        1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setPrimaryPayerCodeEnum,
+            PreAdjFissClaim::getPrimaryPayerCode,
+            FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
+            "D")
+        .stringField(
+            FissClaim.Builder::setPrimaryPayerCodeUnrecognized,
+            PreAdjFissClaim::getPrimaryPayerCode,
+            "primaryPayerCode",
+            1);
   }
 
   @Test
   public void testFissClaimAttendPhysId() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAttendPhysId, PreAdjFissClaim::getAttendPhysId, "attendPhysId", 16);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setAttendPhysId,
+            PreAdjFissClaim::getAttendPhysId,
+            "attendPhysId",
+            16);
   }
 
   @Test
   public void testFissClaimAttendPhysLname() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAttendPhysLname,
-        PreAdjFissClaim::getAttendPhysLname,
-        "attendPhysLname",
-        17);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setAttendPhysLname,
+            PreAdjFissClaim::getAttendPhysLname,
+            "attendPhysLname",
+            17);
   }
 
   @Test
   public void testFissClaimAttendPhysFname() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAttendPhysFname,
-        PreAdjFissClaim::getAttendPhysFname,
-        "attendPhysFname",
-        18);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setAttendPhysFname,
+            PreAdjFissClaim::getAttendPhysFname,
+            "attendPhysFname",
+            18);
   }
 
   @Test
   public void testFissClaimAttendPhysMint() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAttendPhysMint,
-        PreAdjFissClaim::getAttendPhysMint,
-        "attendPhysMint",
-        1);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setAttendPhysMint,
+            PreAdjFissClaim::getAttendPhysMint,
+            "attendPhysMint",
+            1);
   }
 
   @Test
   public void testFissClaimAttendPhysFlag() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setAttendPhysFlagEnum,
-        PreAdjFissClaim::getAttendPhysFlag,
-        FissPhysicianFlag.PHYSICIAN_FLAG_NO,
-        "N");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAttendPhysFlagUnrecognized,
-        PreAdjFissClaim::getAttendPhysFlag,
-        "attendPhysFlag",
-        1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setAttendPhysFlagEnum,
+            PreAdjFissClaim::getAttendPhysFlag,
+            FissPhysicianFlag.PHYSICIAN_FLAG_NO,
+            "N")
+        .stringField(
+            FissClaim.Builder::setAttendPhysFlagUnrecognized,
+            PreAdjFissClaim::getAttendPhysFlag,
+            "attendPhysFlag",
+            1);
   }
 
   @Test
   public void testFissClaimOperatingPhysId() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOperatingPhysId,
-        PreAdjFissClaim::getOperatingPhysId,
-        "operatingPhysId",
-        16);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOperatingPhysId,
+            PreAdjFissClaim::getOperatingPhysId,
+            "operatingPhysId",
+            16);
   }
 
   @Test
   public void testFissClaimOperPhysLname() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOperPhysLname,
-        PreAdjFissClaim::getOperPhysLname,
-        "operPhysLname",
-        17);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOperPhysLname,
+            PreAdjFissClaim::getOperPhysLname,
+            "operPhysLname",
+            17);
   }
 
   @Test
   public void testFissClaimOperPhysFname() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOperPhysFname,
-        PreAdjFissClaim::getOperPhysFname,
-        "operPhysFname",
-        18);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOperPhysFname,
+            PreAdjFissClaim::getOperPhysFname,
+            "operPhysFname",
+            18);
   }
 
   @Test
   public void testFissClaimOperPhysMint() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOperPhysMint, PreAdjFissClaim::getOperPhysMint, "operPhysMint", 1);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOperPhysMint,
+            PreAdjFissClaim::getOperPhysMint,
+            "operPhysMint",
+            1);
   }
 
   @Test
   public void testFissClaimOperPhysFlag() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setOperPhysFlagEnum,
-        PreAdjFissClaim::getOperPhysFlag,
-        FissPhysicianFlag.PHYSICIAN_FLAG_NO,
-        "N");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOperPhysFlagUnrecognized,
-        PreAdjFissClaim::getOperPhysFlag,
-        "operPhysFlag",
-        1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setOperPhysFlagEnum,
+            PreAdjFissClaim::getOperPhysFlag,
+            FissPhysicianFlag.PHYSICIAN_FLAG_NO,
+            "N")
+        .stringField(
+            FissClaim.Builder::setOperPhysFlagUnrecognized,
+            PreAdjFissClaim::getOperPhysFlag,
+            "operPhysFlag",
+            1);
   }
 
   @Test
   public void testFissClaimOthPhysId() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOthPhysId, PreAdjFissClaim::getOthPhysId, "othPhysId", 16);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOthPhysId, PreAdjFissClaim::getOthPhysId, "othPhysId", 16);
   }
 
   @Test
   public void testFissClaimOthPhysLname() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOthPhysLname, PreAdjFissClaim::getOthPhysLname, "othPhysLname", 17);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOthPhysLname,
+            PreAdjFissClaim::getOthPhysLname,
+            "othPhysLname",
+            17);
   }
 
   @Test
   public void testFissClaimOthPhysFname() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOthPhysFname, PreAdjFissClaim::getOthPhysFname, "othPhysFname", 18);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOthPhysFname,
+            PreAdjFissClaim::getOthPhysFname,
+            "othPhysFname",
+            18);
   }
 
   @Test
   public void testFissClaimOthPhysMint() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOthPhysMint, PreAdjFissClaim::getOthPhysMint, "othPhysMint", 1);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setOthPhysMint, PreAdjFissClaim::getOthPhysMint, "othPhysMint", 1);
   }
 
   @Test
   public void testFissClaimOthPhysFlag() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setOthPhysFlagEnum,
-        PreAdjFissClaim::getOthPhysFlag,
-        FissPhysicianFlag.PHYSICIAN_FLAG_NO,
-        "N");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setOthPhysFlagUnrecognized,
-        PreAdjFissClaim::getOthPhysFlag,
-        "othPhysFlag",
-        1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setOthPhysFlagEnum,
+            PreAdjFissClaim::getOthPhysFlag,
+            FissPhysicianFlag.PHYSICIAN_FLAG_NO,
+            "N")
+        .stringField(
+            FissClaim.Builder::setOthPhysFlagUnrecognized,
+            PreAdjFissClaim::getOthPhysFlag,
+            "othPhysFlag",
+            1);
   }
 
   @Test
   public void testFissClaimXrefHicNbr() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setXrefHicNbr, PreAdjFissClaim::getXrefHicNbr, "xrefHicNbr", 12);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setXrefHicNbr, PreAdjFissClaim::getXrefHicNbr, "xrefHicNbr", 12);
   }
 
   @Test
   public void testFissClaimProcNewHicInd() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setProcNewHicIndEnum,
-        PreAdjFissClaim::getProcNewHicInd,
-        FissProcessNewHealthInsuranceClaimNumberIndicator.PROCESS_NEW_HIC_INDICATOR_Y,
-        "Y");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setProcNewHicIndUnrecognized,
-        PreAdjFissClaim::getProcNewHicInd,
-        "procNewHicInd",
-        1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setProcNewHicIndEnum,
+            PreAdjFissClaim::getProcNewHicInd,
+            FissProcessNewHealthInsuranceClaimNumberIndicator.PROCESS_NEW_HIC_INDICATOR_Y,
+            "Y")
+        .stringField(
+            FissClaim.Builder::setProcNewHicIndUnrecognized,
+            PreAdjFissClaim::getProcNewHicInd,
+            "procNewHicInd",
+            1);
   }
 
   @Test
   public void testFissClaimNewHic() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setNewHic, PreAdjFissClaim::getNewHic, "newHic", 12);
+    new ClaimFieldTester()
+        .stringField(FissClaim.Builder::setNewHic, PreAdjFissClaim::getNewHic, "newHic", 12);
   }
 
   @Test
   public void testFissClaimReposInd() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setReposIndEnum,
-        PreAdjFissClaim::getReposInd,
-        FissRepositoryIndicator.REPOSITORY_INDICATOR_HIC_HAS_BEEN_MOVED,
-        "Y");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setReposIndUnrecognized, PreAdjFissClaim::getReposInd, "reposInd", 1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setReposIndEnum,
+            PreAdjFissClaim::getReposInd,
+            FissRepositoryIndicator.REPOSITORY_INDICATOR_HIC_HAS_BEEN_MOVED,
+            "Y")
+        .stringField(
+            FissClaim.Builder::setReposIndUnrecognized,
+            PreAdjFissClaim::getReposInd,
+            "reposInd",
+            1);
   }
 
   @Test
   public void testFissClaimReposHic() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setReposHic, PreAdjFissClaim::getReposHic, "reposHic", 12);
+    new ClaimFieldTester()
+        .stringField(FissClaim.Builder::setReposHic, PreAdjFissClaim::getReposHic, "reposHic", 12);
   }
 
   @Test
   public void testFissClaimMbiSubmBeneInd() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setMbiSubmBeneIndEnum,
-        PreAdjFissClaim::getMbiSubmBeneInd,
-        FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.FISS_HIC_OR_MBI_IS_HIC,
-        "H");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setMbiSubmBeneIndUnrecognized,
-        PreAdjFissClaim::getMbiSubmBeneInd,
-        "mbiSubmBeneInd",
-        1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setMbiSubmBeneIndEnum,
+            PreAdjFissClaim::getMbiSubmBeneInd,
+            FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.FISS_HIC_OR_MBI_IS_HIC,
+            "H")
+        .stringField(
+            FissClaim.Builder::setMbiSubmBeneIndUnrecognized,
+            PreAdjFissClaim::getMbiSubmBeneInd,
+            "mbiSubmBeneInd",
+            1);
   }
 
   @Test
   public void testFissClaimAdjMbiInd() {
-    verifyEnumFieldTransformation(
-        FissClaim.Builder::setAdjMbiIndEnum,
-        PreAdjFissClaim::getAdjMbiInd,
-        FissAdjustmentMedicareBeneficiaryIdentifierIndicator
-            .ADJUSTMENT_MBI_INDICATOR_HIC_SUBMITTED_ON_ADJUSTMENT_OR_CANCEL_CLAIM,
-        "H");
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAdjMbiIndUnrecognized, PreAdjFissClaim::getAdjMbiInd, "adjMbiInd", 1);
+    new ClaimFieldTester()
+        .enumField(
+            FissClaim.Builder::setAdjMbiIndEnum,
+            PreAdjFissClaim::getAdjMbiInd,
+            FissAdjustmentMedicareBeneficiaryIdentifierIndicator
+                .ADJUSTMENT_MBI_INDICATOR_HIC_SUBMITTED_ON_ADJUSTMENT_OR_CANCEL_CLAIM,
+            "H")
+        .stringField(
+            FissClaim.Builder::setAdjMbiIndUnrecognized,
+            PreAdjFissClaim::getAdjMbiInd,
+            "adjMbiInd",
+            1);
   }
 
   @Test
   public void testFissClaimAdjMbi() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setAdjMbi, PreAdjFissClaim::getAdjMbi, "adjMbi", 11);
+    new ClaimFieldTester()
+        .stringField(FissClaim.Builder::setAdjMbi, PreAdjFissClaim::getAdjMbi, "adjMbi", 11);
   }
 
   @Test
   public void testFissClaimMedicalRecordNo() {
-    verifyStringFieldTransformation(
-        FissClaim.Builder::setMedicalRecordNo,
-        PreAdjFissClaim::getMedicalRecordNo,
-        "medicalRecordNo",
-        17);
+    new ClaimFieldTester()
+        .stringField(
+            FissClaim.Builder::setMedicalRecordNo,
+            PreAdjFissClaim::getMedicalRecordNo,
+            "medicalRecordNo",
+            17);
   }
 
   // endregion Claim tests
@@ -1194,185 +1254,200 @@ public class FissClaimTransformerTest {
 
   @Test
   public void testBadInsuredPayerPayersId() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setPayersIdUnrecognized("12"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-payersId", "invalid length: expected=[1,1] actual=2"));
+    new InsuredPayerFieldTester()
+        .enumField(
+            FissInsuredPayer.Builder::setPayersIdEnum,
+            PreAdjFissPayer::getPayersId,
+            FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
+            "D")
+        .stringField(
+            FissInsuredPayer.Builder::setPayersIdUnrecognized,
+            PreAdjFissPayer::getPayersId,
+            "payersId",
+            1);
   }
 
   @Test
   public void testBadInsuredPayerPayersName() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setPayersName("123456789012345678901234567890123"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-payersName", "invalid length: expected=[1,32] actual=33"));
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setPayersName,
+            PreAdjFissPayer::getPayersName,
+            "payersName",
+            32);
   }
 
   @Test
   public void testBadInsuredPayerRelInd() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setRelIndUnrecognized("12"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-relInd", "invalid length: expected=[1,1] actual=2"));
+    new InsuredPayerFieldTester()
+        .enumField(
+            FissInsuredPayer.Builder::setRelIndEnum,
+            PreAdjFissPayer::getRelInd,
+            FissReleaseOfInformation.RELEASE_OF_INFORMATION_NO_RELEASE_ON_FILE,
+            "N")
+        .stringField(
+            FissInsuredPayer.Builder::setRelIndUnrecognized,
+            PreAdjFissPayer::getRelInd,
+            "relInd",
+            1);
   }
 
   @Test
   public void testBadInsuredPayerAssignInd() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setAssignIndUnrecognized("12"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-assignInd", "invalid length: expected=[1,1] actual=2"));
+    new InsuredPayerFieldTester()
+        .enumField(
+            FissInsuredPayer.Builder::setAssignIndEnum,
+            PreAdjFissPayer::getAssignInd,
+            FissAssignmentOfBenefitsIndicator.ASSIGNMENT_OF_BENEFITS_INDICATOR_BENEFITS_ASSIGNED,
+            "Y")
+        .stringField(
+            FissInsuredPayer.Builder::setAssignIndUnrecognized,
+            PreAdjFissPayer::getAssignInd,
+            "assignInd",
+            1);
   }
 
   @Test
   public void testBadInsuredPayerProviderNumber() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setProviderNumber("12345678901234"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-providerNumber", "invalid length: expected=[1,13] actual=14"));
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setProviderNumber,
+            PreAdjFissPayer::getProviderNumber,
+            "providerNumber",
+            13);
   }
 
   @Test
   public void testBadInsuredPayerAdjDcnIcn() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setAdjDcnIcn("123456789012345678901234"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-adjDcnIcn", "invalid length: expected=[1,23] actual=24"));
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setAdjDcnIcn, PreAdjFissPayer::getAdjDcnIcn, "adjDcnIcn", 23);
   }
 
   @Test
   public void testBadInsuredPayerPriorPmt() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setPriorPmt("not-a-number"),
-        new DataTransformer.ErrorMessage("payer-0-priorPmt", "invalid amount"));
+    new InsuredPayerFieldTester()
+        .amountField(
+            FissInsuredPayer.Builder::setPriorPmt, PreAdjFissPayer::getPriorPmt, "priorPmt");
   }
 
   @Test
   public void testBadInsuredPayerEstAmtDue() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setEstAmtDue("not-a-number"),
-        new DataTransformer.ErrorMessage("payer-0-estAmtDue", "invalid amount"));
+    new InsuredPayerFieldTester()
+        .amountField(
+            FissInsuredPayer.Builder::setEstAmtDue, PreAdjFissPayer::getEstAmtDue, "estAmtDue");
   }
 
   @Test
   public void testBadInsuredPayerInsuredRel() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredRelUnrecognized("123"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-insuredRel", "invalid length: expected=[1,2] actual=3"));
+    new InsuredPayerFieldTester()
+        .enumField(
+            FissInsuredPayer.Builder::setInsuredRelEnum,
+            PreAdjFissPayer::getInsuredRel,
+            FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_EMPLOYEE,
+            "08")
+        .stringField(
+            FissInsuredPayer.Builder::setInsuredRelUnrecognized,
+            PreAdjFissPayer::getInsuredRel,
+            "insuredRel",
+            2);
   }
 
   @Test
   public void testBadInsuredPayerInsuredName() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredName("12345678901234567890123456"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-insuredName", "invalid length: expected=[1,25] actual=26"));
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setInsuredName,
+            PreAdjFissPayer::getInsuredName,
+            "insuredName",
+            25);
   }
 
   @Test
   public void testBadInsuredPayerInsuredSsnHic() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredSsnHic("12345678901234567890"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-insuredSsnHic", "invalid length: expected=[1,19] actual=20"));
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setInsuredSsnHic,
+            PreAdjFissPayer::getInsuredSsnHic,
+            "insuredSsnHic",
+            19);
   }
 
   @Test
   public void testBadInsuredPayerInsuredGroupName() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredGroupName("123456789012345678"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-insuredGroupName", "invalid length: expected=[1,17] actual=18"));
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setInsuredGroupName,
+            PreAdjFissPayer::getInsuredGroupName,
+            "insuredGroupName",
+            17);
   }
 
   @Test
   public void testBadInsuredPayerInsuredGroupNbr() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredGroupNbr("123456789012345678901"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-insuredGroupNbr", "invalid length: expected=[1,20] actual=21"));
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setInsuredGroupNbr,
+            PreAdjFissPayer::getInsuredGroupNbr,
+            "insuredGroupNbr",
+            20);
   }
 
   @Test
   public void testBadInsuredPayerTreatAuthCd() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setTreatAuthCd("1234567890123456789"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-treatAuthCd", "invalid length: expected=[1,18] actual=19"));
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setTreatAuthCd,
+            PreAdjFissPayer::getTreatAuthCd,
+            "treatAuthCd",
+            18);
   }
 
   @Test
   public void testBadInsuredPayerInsuredSex() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredSexUnrecognized("12"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-insuredSex", "invalid length: expected=[1,1] actual=2"));
+    new InsuredPayerFieldTester()
+        .enumField(
+            FissInsuredPayer.Builder::setInsuredSexEnum,
+            PreAdjFissPayer::getInsuredSex,
+            FissBeneficiarySex.BENEFICIARY_SEX_UNKNOWN,
+            "U")
+        .stringField(
+            FissInsuredPayer.Builder::setInsuredSexUnrecognized,
+            PreAdjFissPayer::getInsuredSex,
+            "insuredSex",
+            1);
   }
 
   @Test
   public void testBadInsuredPayerInsuredRelX12() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredRelX12Unrecognized("123"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-insuredRelX12", "invalid length: expected=[1,2] actual=3"));
+    new InsuredPayerFieldTester()
+        .enumField(
+            FissInsuredPayer.Builder::setInsuredRelX12Enum,
+            PreAdjFissPayer::getInsuredRelX12,
+            FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_DEFAULT,
+            "00")
+        .stringField(
+            FissInsuredPayer.Builder::setInsuredRelX12Unrecognized,
+            PreAdjFissPayer::getInsuredRelX12,
+            "insuredRelX12",
+            2);
   }
 
   @Test
   public void testBadInsuredPayerInsuredDob() {
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredDob("not-a-date"),
-        new DataTransformer.ErrorMessage("payer-0-insuredDob", "invalid date"));
+    new InsuredPayerFieldTester()
+        .dateField(
+            FissInsuredPayer.Builder::setInsuredDob, PreAdjFissPayer::getInsuredDob, "insuredDob");
   }
 
   @Test
   public void testBadInsuredPayerInsuredDobText() {
-    //    verifyPayerDateFieldTransformation(FissPayer.Builder::setInsuredPayer)
-    assertInsuredPayerTransformationError(
-        codeBuilder -> codeBuilder.setInsuredDobText("1234567890"),
-        new DataTransformer.ErrorMessage(
-            "payer-0-insuredDobText", "invalid length: expected=[1,9] actual=10"));
-  }
-
-  private void verifyPayerStringFieldTransformation(
-      BiConsumer<FissPayer.Builder, String> setter,
-      Function<PreAdjFissPayer, String> getter,
-      String fieldLabel,
-      int maxLength) {
-    verifyStringFieldTransformation(
-        (claimBuilder, value) -> setter.accept(getFissPayerBuilder(claimBuilder), value),
-        claim -> getter.apply(claim.getPayers().iterator().next()),
-        "payer-0-" + fieldLabel,
-        maxLength);
-  }
-
-  private void verifyPayerDateFieldTransformation(
-      BiConsumer<FissPayer.Builder, String> setter,
-      Function<PreAdjFissPayer, LocalDate> getter,
-      String fieldLabel) {
-    verifyDateFieldTransformation(
-        (claimBuilder, value) -> setter.accept(getFissPayerBuilder(claimBuilder), value),
-        claim -> getter.apply(claim.getPayers().iterator().next()),
-        "payer-0-" + fieldLabel);
-  }
-
-  private <T extends Enum<?>> void verifyPayerEnumFieldTransformation(
-      BiConsumer<FissPayer.Builder, T> setter,
-      Function<PreAdjFissPayer, String> getter,
-      T enumValue,
-      String stringValue) {
-    verifyEnumFieldTransformation(
-        (claimBuilder, value) -> setter.accept(getFissPayerBuilder(claimBuilder), value),
-        claim -> getter.apply(claim.getPayers().iterator().next()),
-        enumValue,
-        stringValue);
-  }
-
-  private FissPayer.Builder getFissPayerBuilder(FissClaim.Builder claimBuilder) {
-    if (claimBuilder.getFissPayersBuilderList().size() == 0) {
-      claimBuilder.addFissPayersBuilder();
-    }
-    return claimBuilder.getFissPayersBuilder(0);
+    new InsuredPayerFieldTester()
+        .stringField(
+            FissInsuredPayer.Builder::setInsuredDobText,
+            PreAdjFissPayer::getInsuredDobText,
+            "insuredDobText",
+            9);
   }
 
   // endregion InsuredPayer tests
@@ -1380,188 +1455,48 @@ public class FissClaimTransformerTest {
 
   @Test
   public void testFissAuditTrailBadtStatus() {
-    verifyAuditTrailEnumFieldTransformation(
-        FissAuditTrail.Builder::setBadtStatusEnum,
-        PreAdjFissAuditTrail::getBadtStatus,
-        FissClaimStatus.CLAIM_STATUS_BLANK,
-        " ");
+    new AuditTrailFieldTester()
+        .enumField(
+            FissAuditTrail.Builder::setBadtStatusEnum,
+            PreAdjFissAuditTrail::getBadtStatus,
+            FissClaimStatus.CLAIM_STATUS_BLANK,
+            " ");
   }
 
   @Test
   public void testFissAudiTrailBadtLoc() {
-    verifyAuditTrailStringFieldTransformation(
-        FissAuditTrail.Builder::setBadtLoc, PreAdjFissAuditTrail::getBadtLoc, "badtLoc", 5);
+    new AuditTrailFieldTester()
+        .stringField(
+            FissAuditTrail.Builder::setBadtLoc, PreAdjFissAuditTrail::getBadtLoc, "badtLoc", 5);
   }
 
   @Test
   public void testFissAudiTrailBadtOperId() {
-    verifyAuditTrailStringFieldTransformation(
-        FissAuditTrail.Builder::setBadtOperId,
-        PreAdjFissAuditTrail::getBadtOperId,
-        "badtOperId",
-        9);
+    new AuditTrailFieldTester()
+        .stringField(
+            FissAuditTrail.Builder::setBadtOperId,
+            PreAdjFissAuditTrail::getBadtOperId,
+            "badtOperId",
+            9);
   }
 
   @Test
   public void testFissAudiTrailBadtReas() {
-    verifyAuditTrailStringFieldTransformation(
-        FissAuditTrail.Builder::setBadtReas, PreAdjFissAuditTrail::getBadtReas, "badtReas", 5);
+    new AuditTrailFieldTester()
+        .stringField(
+            FissAuditTrail.Builder::setBadtReas, PreAdjFissAuditTrail::getBadtReas, "badtReas", 5);
   }
 
   @Test
   public void testFissAudiTrailBadtCurrDate() {
-    verifyAuditTrailDateFieldTransformation(
-        FissAuditTrail.Builder::setBadtCurrDateCymd,
-        PreAdjFissAuditTrail::getBadtCurrDate,
-        "badtCurrDate");
-  }
-
-  private void verifyAuditTrailStringFieldTransformation(
-      BiConsumer<FissAuditTrail.Builder, String> setter,
-      Function<PreAdjFissAuditTrail, String> getter,
-      String fieldLabel,
-      int maxLength) {
-    verifyStringFieldTransformation(
-        (claimBuilder, value) -> setter.accept(getFissAuditTrailBuilder(claimBuilder), value),
-        claim -> getter.apply(claim.getAuditTrail().iterator().next()),
-        "auditTrail-0-" + fieldLabel,
-        maxLength);
-  }
-
-  private void verifyAuditTrailDateFieldTransformation(
-      BiConsumer<FissAuditTrail.Builder, String> setter,
-      Function<PreAdjFissAuditTrail, LocalDate> getter,
-      String fieldLabel) {
-    verifyDateFieldTransformation(
-        (claimBuilder, value) -> setter.accept(getFissAuditTrailBuilder(claimBuilder), value),
-        claim -> getter.apply(claim.getAuditTrail().iterator().next()),
-        "auditTrail-0-" + fieldLabel);
-  }
-
-  private <T extends Enum<?>> void verifyAuditTrailEnumFieldTransformation(
-      BiConsumer<FissAuditTrail.Builder, T> setter,
-      Function<PreAdjFissAuditTrail, String> getter,
-      T enumValue,
-      String stringValue) {
-    verifyEnumFieldTransformation(
-        (claimBuilder, value) -> setter.accept(getFissAuditTrailBuilder(claimBuilder), value),
-        claim -> getter.apply(claim.getAuditTrail().iterator().next()),
-        enumValue,
-        stringValue);
-  }
-
-  private FissAuditTrail.Builder getFissAuditTrailBuilder(FissClaim.Builder claimBuilder) {
-    if (claimBuilder.getFissAuditTrailBuilderList().size() == 0) {
-      claimBuilder.addFissAuditTrailBuilder();
-    }
-    return claimBuilder.getFissAuditTrailBuilder(0);
+    new AuditTrailFieldTester()
+        .dateField(
+            FissAuditTrail.Builder::setBadtCurrDateCymd,
+            PreAdjFissAuditTrail::getBadtCurrDate,
+            "badtCurrDate");
   }
 
   // endregion AuditTrail tests
-
-  private void verifyStringFieldTransformation(
-      BiConsumer<FissClaim.Builder, String> setter,
-      Function<PreAdjFissClaim, String> getter,
-      String fieldLabel,
-      int maxLength) {
-    verifyStringFieldTransformationCorrect(setter, getter, maxLength);
-    verifyStringFieldLengthLimitsEnforced(setter, fieldLabel, maxLength, 0);
-    verifyStringFieldLengthLimitsEnforced(setter, fieldLabel, maxLength, maxLength + 1);
-  }
-
-  private void verifyDateFieldTransformation(
-      BiConsumer<FissClaim.Builder, String> setter,
-      Function<PreAdjFissClaim, LocalDate> getter,
-      String fieldLabel) {
-    verifyFieldTransformationSucceeds(
-        claimBuilder -> setter.accept(claimBuilder, "2021-12-01"),
-        getter,
-        LocalDate.of(2021, 12, 1));
-    verifyFieldTransformationFails(
-        claimBuilder -> setter.accept(claimBuilder, "not-a-date"), fieldLabel, "invalid date");
-  }
-
-  private <T extends Enum<?>> void verifyEnumFieldTransformation(
-      BiConsumer<FissClaim.Builder, T> setter,
-      Function<PreAdjFissClaim, String> getter,
-      T enumValue,
-      String stringValue) {
-    verifyFieldTransformationSucceeds(
-        claimBuilder -> setter.accept(claimBuilder, enumValue), getter, stringValue);
-  }
-
-  private void verifyStringFieldTransformationCorrect(
-      BiConsumer<FissClaim.Builder, String> setter,
-      Function<PreAdjFissClaim, String> getter,
-      int maxLength) {
-    final var value = createString(maxLength);
-    verifyFieldTransformationSucceeds(
-        claimBuilder -> setter.accept(claimBuilder, value), getter, value);
-  }
-
-  private void verifyStringFieldLengthLimitsEnforced(
-      BiConsumer<FissClaim.Builder, String> setter, String fieldLabel, int maxLength, int length) {
-    verifyFieldTransformationFails(
-        claimBuilder -> setter.accept(claimBuilder, createString(length)),
-        fieldLabel,
-        String.format("invalid length: expected=[1,%d] actual=%d", maxLength, length));
-  }
-
-  private <T> void verifyFieldTransformationSucceeds(
-      Consumer<FissClaim.Builder> setter, Function<PreAdjFissClaim, T> getter, T expectedValue) {
-    var claimBuilder = createFissClaimBuilderWithRequiredFields();
-
-    setter.accept(claimBuilder);
-
-    final var change = transformClaim(claimBuilder.build());
-    assertEquals(expectedValue, getter.apply(change.getClaim()));
-  }
-
-  private void verifyFieldTransformationFails(
-      Consumer<FissClaim.Builder> setter, String fieldLabel, String... errorMessages) {
-    try {
-      var claimBuilder = createFissClaimBuilderWithRequiredFields();
-
-      setter.accept(claimBuilder);
-
-      transformClaim(claimBuilder.build());
-      fail("should have thrown");
-    } catch (DataTransformer.TransformationException ex) {
-      var errors = ImmutableList.builder();
-      for (String errorMessage : errorMessages) {
-        errors.add(new DataTransformer.ErrorMessage(fieldLabel, errorMessage));
-      }
-      assertEquals(errors.build(), ex.getErrors());
-    }
-  }
-
-  private FissClaim.Builder createFissClaimBuilderWithRequiredFields() {
-    return FissClaim.newBuilder()
-        .setDcn("dcn")
-        .setHicNo("hicn")
-        .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
-        .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
-        .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
-  }
-
-  private RdaChange<PreAdjFissClaim> transformClaim(FissClaim claim) {
-    var changeBuilder =
-        FissClaimChange.newBuilder()
-            .setSeq(MIN_SEQUENCE_NUM)
-            .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
-            .setClaim(claim);
-    return transformer.transformClaim(changeBuilder.build());
-  }
-
-  private String createString(int length) {
-    StringBuilder sb = new StringBuilder();
-    var digit = 1;
-    while (sb.length() < length) {
-      sb.append(digit);
-      digit = (digit + 1) % 10;
-    }
-    return sb.toString();
-  }
 
   private void assertClaimTransformationError(
       Runnable claimUpdate, DataTransformer.ErrorMessage... expectedErrors) {
@@ -1594,17 +1529,6 @@ public class FissClaimTransformerTest {
           codeBuilder.setProcCd("1234567890");
           updater.accept(codeBuilder);
           claimBuilder.addFissProcCodes(codeBuilder.build());
-        },
-        expectedErrors);
-  }
-
-  private void assertInsuredPayerTransformationError(
-      Consumer<FissInsuredPayer.Builder> updater, DataTransformer.ErrorMessage... expectedErrors) {
-    assertClaimTransformationError(
-        () -> {
-          final FissInsuredPayer.Builder codeBuilder = FissInsuredPayer.newBuilder();
-          updater.accept(codeBuilder);
-          claimBuilder.addFissPayers(FissPayer.newBuilder().setInsuredPayer(codeBuilder.build()));
         },
         expectedErrors);
   }
@@ -1702,5 +1626,218 @@ public class FissClaimTransformerTest {
     RdaChange<PreAdjFissClaim> changed = transformer.transformClaim(changeBuilder.build());
     assertEquals(changeType, changed.getType());
     assertThat(changed.getClaim(), samePropertyValuesAs(claim));
+  }
+
+  @CanIgnoreReturnValue
+  abstract class AbstractFieldTester<TBuilder, TEntity> {
+    AbstractFieldTester<TBuilder, TEntity> stringField(
+        BiConsumer<TBuilder, String> setter,
+        Function<TEntity, String> getter,
+        String fieldLabel,
+        int maxLength) {
+      BiConsumer<FissClaim.Builder, String> setter1 =
+          (claimBuilder, value) -> setter.accept(getBuilder(claimBuilder), value);
+      String fieldLabel1 = getLabel(fieldLabel);
+      verifyStringFieldTransformationCorrect(
+          setter1, claim1 -> getter.apply(getEntity(claim1)), maxLength);
+      verifyStringFieldLengthLimitsEnforced(setter1, fieldLabel1, maxLength, 0);
+      verifyStringFieldLengthLimitsEnforced(setter1, fieldLabel1, maxLength, maxLength + 1);
+      return this;
+    }
+
+    @CanIgnoreReturnValue
+    AbstractFieldTester<TBuilder, TEntity> dateField(
+        BiConsumer<TBuilder, String> setter,
+        Function<TEntity, LocalDate> getter,
+        String fieldLabel) {
+      BiConsumer<FissClaim.Builder, String> setter1 =
+          (claimBuilder, value) -> setter.accept(getBuilder(claimBuilder), value);
+      verifyFieldTransformationSucceeds(
+          claimBuilder1 -> setter1.accept(claimBuilder1, "2021-12-01"),
+          claim1 -> getter.apply(getEntity(claim1)),
+          LocalDate.of(2021, 12, 1));
+      verifyFieldTransformationFails(
+          claimBuilder1 -> setter1.accept(claimBuilder1, "not-a-date"),
+          getLabel(fieldLabel),
+          "invalid date");
+      return this;
+    }
+
+    @CanIgnoreReturnValue
+    AbstractFieldTester<TBuilder, TEntity> amountField(
+        BiConsumer<TBuilder, String> setter,
+        Function<TEntity, BigDecimal> getter,
+        String fieldLabel) {
+      BiConsumer<FissClaim.Builder, String> setter1 =
+          (claimBuilder, value) -> setter.accept(getBuilder(claimBuilder), value);
+      verifyFieldTransformationSucceeds(
+          claimBuilder1 -> setter1.accept(claimBuilder1, "1234.50"),
+          claim1 -> getter.apply(getEntity(claim1)),
+          new BigDecimal("1234.50"));
+      verifyFieldTransformationFails(
+          claimBuilder1 -> setter1.accept(claimBuilder1, "not-a-number"),
+          getLabel(fieldLabel),
+          "invalid amount");
+      return this;
+    }
+
+    @CanIgnoreReturnValue
+    <TEnum extends Enum<?>> AbstractFieldTester<TBuilder, TEntity> enumField(
+        BiConsumer<TBuilder, TEnum> setter,
+        Function<TEntity, String> getter,
+        TEnum enumValue,
+        String stringValue) {
+      verifyFieldTransformationSucceeds(
+          claimBuilder1 ->
+              ((BiConsumer<FissClaim.Builder, TEnum>)
+                      (claimBuilder2, value) -> setter.accept(getBuilder(claimBuilder2), value))
+                  .accept(claimBuilder1, enumValue),
+          claim1 -> getter.apply(getEntity(claim1)),
+          stringValue);
+      return this;
+    }
+
+    abstract TBuilder getBuilder(FissClaim.Builder claimBuilder);
+
+    abstract TEntity getEntity(PreAdjFissClaim claim);
+
+    abstract String getLabel(String basicLabel);
+
+    FissClaim.Builder createFissClaimBuilderWithRequiredFields() {
+      return FissClaim.newBuilder()
+          .setDcn("dcn")
+          .setHicNo("hicn")
+          .setCurrStatusEnum(FissClaimStatus.CLAIM_STATUS_RTP)
+          .setCurrLoc1Enum(FissProcessingType.PROCESSING_TYPE_MANUAL)
+          .setCurrLoc2Enum(FissCurrentLocation2.CURRENT_LOCATION_2_CABLE);
+    }
+
+    RdaChange<PreAdjFissClaim> transformClaim(FissClaim claim) {
+      var changeBuilder =
+          FissClaimChange.newBuilder()
+              .setSeq(MIN_SEQUENCE_NUM)
+              .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+              .setClaim(claim);
+      return transformer.transformClaim(changeBuilder.build());
+    }
+
+    private void verifyStringFieldTransformationCorrect(
+        BiConsumer<FissClaim.Builder, String> setter,
+        Function<PreAdjFissClaim, String> getter,
+        int maxLength) {
+      final var value = createString(maxLength);
+      verifyFieldTransformationSucceeds(
+          claimBuilder -> setter.accept(claimBuilder, value), getter, value);
+    }
+
+    private void verifyStringFieldLengthLimitsEnforced(
+        BiConsumer<FissClaim.Builder, String> setter,
+        String fieldLabel,
+        int maxLength,
+        int length) {
+      verifyFieldTransformationFails(
+          claimBuilder -> setter.accept(claimBuilder, createString(length)),
+          fieldLabel,
+          String.format("invalid length: expected=[1,%d] actual=%d", maxLength, length));
+    }
+
+    private <T> void verifyFieldTransformationSucceeds(
+        Consumer<FissClaim.Builder> setter, Function<PreAdjFissClaim, T> getter, T expectedValue) {
+      var claimBuilder = createFissClaimBuilderWithRequiredFields();
+
+      setter.accept(claimBuilder);
+
+      final var change = transformClaim(claimBuilder.build());
+      assertEquals(expectedValue, getter.apply(change.getClaim()));
+    }
+
+    private void verifyFieldTransformationFails(
+        Consumer<FissClaim.Builder> setter, String fieldLabel, String... errorMessages) {
+      try {
+        var claimBuilder = createFissClaimBuilderWithRequiredFields();
+
+        setter.accept(claimBuilder);
+
+        transformClaim(claimBuilder.build());
+        fail("should have thrown");
+      } catch (DataTransformer.TransformationException ex) {
+        var errors = ImmutableList.builder();
+        for (String errorMessage : errorMessages) {
+          errors.add(new DataTransformer.ErrorMessage(fieldLabel, errorMessage));
+        }
+        assertEquals(errors.build(), ex.getErrors());
+      }
+    }
+
+    private String createString(int length) {
+      StringBuilder sb = new StringBuilder();
+      var digit = 1;
+      while (sb.length() < length) {
+        sb.append(digit);
+        digit = (digit + 1) % 10;
+      }
+      return sb.toString();
+    }
+  }
+
+  class ClaimFieldTester extends AbstractFieldTester<FissClaim.Builder, PreAdjFissClaim> {
+    @Override
+    FissClaim.Builder getBuilder(FissClaim.Builder claimBuilder) {
+      return claimBuilder;
+    }
+
+    @Override
+    PreAdjFissClaim getEntity(PreAdjFissClaim claim) {
+      return claim;
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return basicLabel;
+    }
+  }
+
+  class AuditTrailFieldTester
+      extends AbstractFieldTester<FissAuditTrail.Builder, PreAdjFissAuditTrail> {
+    @Override
+    FissAuditTrail.Builder getBuilder(FissClaim.Builder claimBuilder) {
+      if (claimBuilder.getFissAuditTrailBuilderList().isEmpty()) {
+        claimBuilder.addFissAuditTrailBuilder();
+      }
+      return claimBuilder.getFissAuditTrailBuilder(0);
+    }
+
+    @Override
+    PreAdjFissAuditTrail getEntity(PreAdjFissClaim claim) {
+      assertEquals(1, claim.getAuditTrail().size());
+      return claim.getAuditTrail().iterator().next();
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "auditTrail-0-" + basicLabel;
+    }
+  }
+
+  class InsuredPayerFieldTester
+      extends AbstractFieldTester<FissInsuredPayer.Builder, PreAdjFissPayer> {
+    @Override
+    FissInsuredPayer.Builder getBuilder(FissClaim.Builder claimBuilder) {
+      if (claimBuilder.getFissPayersBuilderList().isEmpty()) {
+        claimBuilder.addFissPayersBuilder();
+      }
+      return claimBuilder.getFissPayersBuilder(0).getInsuredPayerBuilder();
+    }
+
+    @Override
+    PreAdjFissPayer getEntity(PreAdjFissClaim claim) {
+      assertEquals(1, claim.getPayers().size());
+      return claim.getPayers().iterator().next();
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "payer-0-" + basicLabel;
+    }
   }
 }
