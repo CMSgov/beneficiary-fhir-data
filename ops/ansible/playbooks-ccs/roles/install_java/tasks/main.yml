@@ -1,8 +1,0 @@
----
-##
-# Install Java (JKD and JRE)
-##
-- name: Install latest version of Java (openjdk-devel)
-  yum:
-    name: java-1.8.0-openjdk-devel
-    state: latest
