@@ -1,9 +1,0 @@
-ansible==2.9.20
-boto
-boto3
-cryptography
-pycrypto
-awscli
-boto
-boto3
-rsa>=4.7 # not directly required, pinned by Snyk to avoid a vulnerability

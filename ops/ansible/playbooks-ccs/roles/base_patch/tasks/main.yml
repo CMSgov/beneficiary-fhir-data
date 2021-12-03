@@ -1,9 +1,0 @@
----
-###
-# Here we are installing the minimal security updates. Set warn to false. Unable to use yum module for minimal sec updates. 
-###
-- name: Apply security patches
-  become: yes
-  shell: yum update-minimal --security -y
-  args:
-    warn: no
