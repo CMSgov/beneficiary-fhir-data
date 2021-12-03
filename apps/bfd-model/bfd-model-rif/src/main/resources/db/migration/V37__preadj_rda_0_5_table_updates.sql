@@ -57,8 +57,8 @@ CREATE TABLE "pre_adj"."McsAudits" (
     "priority" smallint NOT NULL,
     "lastUpdated" timestamp with time zone,
     "idrJAuditNum" smallint,
-    "idrJAuditInd"varchar(1),
-    "idrJAuditDisp"varchar(1),
+    "idrJAuditInd" varchar(1),
+    "idrJAuditDisp" varchar(1),
     CONSTRAINT "McsAudits_key" PRIMARY KEY ("idrClmHdIcn", "priority"),
     CONSTRAINT "McsAudits_parent" FOREIGN KEY ("idrClmHdIcn") REFERENCES "pre_adj"."McsClaims"("idrClmHdIcn")
 );
@@ -73,7 +73,7 @@ CREATE TABLE "pre_adj"."McsLocations" (
     "idrLocClerk" varchar(4),
     "idrLocCode" varchar(3),
     "idrLocDate" date,
-    "idrLocActvCode"varchar(1),
+    "idrLocActvCode" varchar(1),
     CONSTRAINT "McsLocations_key" PRIMARY KEY ("idrClmHdIcn", "priority"),
     CONSTRAINT "McsLocations_parent" FOREIGN KEY ("idrClmHdIcn") REFERENCES "pre_adj"."McsClaims"("idrClmHdIcn")
 );
@@ -87,49 +87,49 @@ ALTER TABLE "pre_adj"."FissClaims" ADD "rejectCd" varchar(5);
 ALTER TABLE "pre_adj"."FissClaims" ADD "fullPartDenInd" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "nonPayInd" varchar(2);
 ALTER TABLE "pre_adj"."FissClaims" ADD "xrefDcnNbr" varchar(23);
-ALTER TABLE "pre_adj"."FissClaims" ADD "adjReqCd"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "adjReqCd" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "adjReasCd" varchar(2);
 ALTER TABLE "pre_adj"."FissClaims" ADD "cancelXrefDcn" varchar(23);
 ALTER TABLE "pre_adj"."FissClaims" ADD "cancelDate" date;
-ALTER TABLE "pre_adj"."FissClaims" ADD "cancAdjCd"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "cancAdjCd" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "originalXrefDcn" varchar(23);
 ALTER TABLE "pre_adj"."FissClaims" ADD "paidDt" date;
 ALTER TABLE "pre_adj"."FissClaims" ADD "admDate" date;
-ALTER TABLE "pre_adj"."FissClaims" ADD "admSource"varchar(1);
-ALTER TABLE "pre_adj"."FissClaims" ADD "primaryPayerCode"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "admSource" varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "primaryPayerCode" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "attendPhysId" varchar(16);
 ALTER TABLE "pre_adj"."FissClaims" ADD "attendPhysLname" varchar(17);
 ALTER TABLE "pre_adj"."FissClaims" ADD "attendPhysFname" varchar(18);
 ALTER TABLE "pre_adj"."FissClaims" ADD "attendPhysMint" varchar(1);
-ALTER TABLE "pre_adj"."FissClaims" ADD "attendPhysFlag"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "attendPhysFlag" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "operatingPhysId" varchar(16);
 ALTER TABLE "pre_adj"."FissClaims" ADD "operPhysLname" varchar(17);
 ALTER TABLE "pre_adj"."FissClaims" ADD "operPhysFname" varchar(18);
 ALTER TABLE "pre_adj"."FissClaims" ADD "operPhysMint" varchar(1);
-ALTER TABLE "pre_adj"."FissClaims" ADD "operPhysFlag"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "operPhysFlag" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "othPhysId" varchar(16);
 ALTER TABLE "pre_adj"."FissClaims" ADD "othPhysLname" varchar(17);
 ALTER TABLE "pre_adj"."FissClaims" ADD "othPhysFname" varchar(18);
 ALTER TABLE "pre_adj"."FissClaims" ADD "othPhysMint" varchar(1);
-ALTER TABLE "pre_adj"."FissClaims" ADD "othPhysFlag"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "othPhysFlag" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "xrefHicNbr" varchar(12);
-ALTER TABLE "pre_adj"."FissClaims" ADD "procNewHicInd"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "procNewHicInd" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "newHic" varchar(12);
-ALTER TABLE "pre_adj"."FissClaims" ADD "reposInd"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "reposInd" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "reposHic" varchar(12);
-ALTER TABLE "pre_adj"."FissClaims" ADD "mbiSubmBeneInd"varchar(1);
-ALTER TABLE "pre_adj"."FissClaims" ADD "adjMbiInd"varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "mbiSubmBeneInd" varchar(1);
+ALTER TABLE "pre_adj"."FissClaims" ADD "adjMbiInd" varchar(1);
 ALTER TABLE "pre_adj"."FissClaims" ADD "adjMbi" varchar(11);
 ALTER TABLE "pre_adj"."FissClaims" ADD "medicalRecordNo" varchar(17);
 
 /*
  * McsClaims
  */
-ALTER TABLE "pre_adj"."McsClaims" ADD "idrAssignment"varchar(1);
-ALTER TABLE "pre_adj"."McsClaims" ADD "idrClmLevelInd"varchar(1);
+ALTER TABLE "pre_adj"."McsClaims" ADD "idrAssignment" varchar(1);
+ALTER TABLE "pre_adj"."McsClaims" ADD "idrClmLevelInd" varchar(1);
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrHdrAudit" smallint;
-ALTER TABLE "pre_adj"."McsClaims" ADD "idrHdrAuditInd"varchar(1);
-ALTER TABLE "pre_adj"."McsClaims" ADD "idrUSplitReason"varchar(1);
+ALTER TABLE "pre_adj"."McsClaims" ADD "idrHdrAuditInd" varchar(1);
+ALTER TABLE "pre_adj"."McsClaims" ADD "idrUSplitReason" varchar(1);
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrJReferringProvNpi" varchar(10);
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrJFacProvNpi" varchar(10);
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrUDemoProvNpi" varchar(10);
@@ -146,7 +146,7 @@ ALTER TABLE "pre_adj"."McsClaims" ADD "idrAmbDropoffZipcode" varchar(9);
 /*
  * McsDetails
  */
-ALTER TABLE "pre_adj"."McsDetails" ADD "idrTos"varchar(1);
+ALTER TABLE "pre_adj"."McsDetails" ADD "idrTos" varchar(1);
 ALTER TABLE "pre_adj"."McsDetails" ADD "idrTwoDigitPos" varchar(2);
 ALTER TABLE "pre_adj"."McsDetails" ADD "idrDtlRendType" varchar(2);
 ALTER TABLE "pre_adj"."McsDetails" ADD "idrDtlRendSpec" varchar(2);
