@@ -7,13 +7,18 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.Assert.*;
 
 import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
+import gov.cms.bfd.model.rda.PreAdjMcsAudit;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.PreAdjMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
+import gov.cms.mpsm.rda.v1.mcs.McsAudit;
 import gov.cms.mpsm.rda.v1.mcs.McsAuditIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsBeneficiarySex;
 import gov.cms.mpsm.rda.v1.mcs.McsBillingProviderStatusCode;
@@ -21,10 +26,14 @@ import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimAssignmentCode;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimLevelIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
+import gov.cms.mpsm.rda.v1.mcs.McsCutbackAuditDisposition;
+import gov.cms.mpsm.rda.v1.mcs.McsCutbackAuditIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDetailStatus;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
+import gov.cms.mpsm.rda.v1.mcs.McsLocation;
+import gov.cms.mpsm.rda.v1.mcs.McsLocationActivityCode;
 import gov.cms.mpsm.rda.v1.mcs.McsSplitReasonCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import gov.cms.mpsm.rda.v1.mcs.McsTwoDigitPlanOfService;
@@ -278,6 +287,7 @@ public class McsClaimTransformerTest {
   }
 
   // region McsClaim
+
   @Test
   public void testBadIdrClmHdIcn() {
     assertClaimTransformationError(
@@ -712,9 +722,119 @@ public class McsClaimTransformerTest {
             "idrAmbDropoffZipcode",
             9);
   }
+
   // endregion McsClaim
 
+  // region McsAdjustments
+
+  @Test
+  public void testAdjustmentIdrAdjDate() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .dateField(
+            McsAdjustment.Builder::setIdrAdjDate, PreAdjMcsAdjustment::getIdrAdjDate, "idrAdjDate");
+  }
+
+  @Test
+  public void testAdjustmentIdrXrefIcn() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .stringField(
+            McsAdjustment.Builder::setIdrXrefIcn,
+            PreAdjMcsAdjustment::getIdrXrefIcn,
+            "idrXrefIcn",
+            15);
+  }
+
+  @Test
+  public void testAdjustmentIdrAdjClerk() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .stringField(
+            McsAdjustment.Builder::setIdrAdjClerk,
+            PreAdjMcsAdjustment::getIdrAdjClerk,
+            "idrAdjClerk",
+            4);
+  }
+
+  @Test
+  public void testAdjustmentIdrInitCcn() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .stringField(
+            McsAdjustment.Builder::setIdrInitCcn,
+            PreAdjMcsAdjustment::getIdrInitCcn,
+            "idrInitCcn",
+            15);
+  }
+
+  @Test
+  public void testAdjustmentIdrAdjChkWrtDt() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .dateField(
+            McsAdjustment.Builder::setIdrAdjChkWrtDt,
+            PreAdjMcsAdjustment::getIdrAdjChkWrtDt,
+            "idrAdjChkWrtDt");
+  }
+
+  @Test
+  public void testAdjustmentIdrAdjBEombAmt() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .amountField(
+            McsAdjustment.Builder::setIdrAdjBEombAmt,
+            PreAdjMcsAdjustment::getIdrAdjBEombAmt,
+            "idrAdjBEombAmt");
+  }
+
+  @Test
+  public void testAdjustmentIdrAdjPEombAmt() {
+    new McsClaimTransformerTest.AdjustmentFieldTester()
+        .amountField(
+            McsAdjustment.Builder::setIdrAdjPEombAmt,
+            PreAdjMcsAdjustment::getIdrAdjPEombAmt,
+            "idrAdjPEombAmt");
+  }
+
+  // endregion McsAdjustments
+
+  // region McsAudit
+
+  @Test
+  public void testAuditIdrJAuditNum() {
+    new McsClaimTransformerTest.AuditFieldTester()
+        .intField(McsAudit.Builder::setIdrJAuditNum, PreAdjMcsAudit::getIdrJAuditNum);
+  }
+
+  @Test
+  public void testAuditIdrJAuditInd() {
+    new McsClaimTransformerTest.AuditFieldTester()
+        .enumField(
+            McsAudit.Builder::setIdrJAuditIndEnum,
+            PreAdjMcsAudit::getIdrJAuditInd,
+            McsCutbackAuditIndicator.CUTBACK_AUDIT_INDICATOR_AUDIT_NUMBER,
+            "A")
+        .stringField(
+            McsAudit.Builder::setIdrJAuditIndUnrecognized,
+            PreAdjMcsAudit::getIdrJAuditInd,
+            "idrJAuditInd",
+            1);
+  }
+
+  @Test
+  public void testAuditIdrJAuditDisp() {
+    new McsClaimTransformerTest.AuditFieldTester()
+        .enumField(
+            McsAudit.Builder::setIdrJAuditDispEnum,
+            PreAdjMcsAudit::getIdrJAuditDisp,
+            McsCutbackAuditDisposition.CUTBACK_AUDIT_DISPOSITION_ADS_LETTER,
+            "S")
+        .stringField(
+            McsAudit.Builder::setIdrJAuditDispUnrecognized,
+            PreAdjMcsAudit::getIdrJAuditDisp,
+            "idrJAuditDisp",
+            1);
+  }
+
+  // endregion McsAudit
+
   // region McsDiagnosisCode
+
   @Test
   public void testBadDiagnosisCodeIdrDiagCode() {
     assertDiagnosisCodeTransformationError(
@@ -1075,7 +1195,51 @@ public class McsClaimTransformerTest {
             "idrDtlAmbDropoffZipcode",
             9);
   }
+
   // endregion McsDetail
+
+  // region McsLocation
+
+  @Test
+  public void testLocationIdrLocClerk() {
+    new McsClaimTransformerTest.LocationFieldTester()
+        .stringField(
+            McsLocation.Builder::setIdrLocClerk,
+            PreAdjMcsLocation::getIdrLocClerk,
+            "idrLocClerk",
+            4);
+  }
+
+  @Test
+  public void testLocationIdrLocCode() {
+    new McsClaimTransformerTest.LocationFieldTester()
+        .stringField(
+            McsLocation.Builder::setIdrLocCode, PreAdjMcsLocation::getIdrLocCode, "idrLocCode", 3);
+  }
+
+  @Test
+  public void testLocationIdrLocDate() {
+    new McsClaimTransformerTest.LocationFieldTester()
+        .dateField(
+            McsLocation.Builder::setIdrLocDate, PreAdjMcsLocation::getIdrLocDate, "idrLocDate");
+  }
+
+  @Test
+  public void testLocationIdrLocActvCode() {
+    new McsClaimTransformerTest.LocationFieldTester()
+        .enumField(
+            McsLocation.Builder::setIdrLocActvCodeEnum,
+            PreAdjMcsLocation::getIdrLocActvCode,
+            McsLocationActivityCode.LOCATION_ACTIVITY_CODE_CAS_ACTIVITY,
+            "Q")
+        .stringField(
+            McsLocation.Builder::setIdrLocActvCodeUnrecognized,
+            PreAdjMcsLocation::getIdrLocActvCode,
+            "idrLocActvCode",
+            1);
+  }
+
+  // endregion McsLocation
 
   private void assertClaimTransformationError(
       Runnable claimUpdate, DataTransformer.ErrorMessage... expectedErrors) {
@@ -1161,6 +1325,8 @@ public class McsClaimTransformerTest {
     assertThat(changed.getClaim(), samePropertyValuesAs(claim));
   }
 
+  // region Field Tester Classes
+
   private abstract class AbstractFieldTester<TBuilder, TEntity>
       extends ClaimTransformerFieldTester<
           McsClaim.Builder, McsClaim, PreAdjMcsClaim, TBuilder, TEntity> {
@@ -1201,6 +1367,51 @@ public class McsClaimTransformerTest {
     }
   }
 
+  class AdjustmentFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<
+          McsAdjustment.Builder, PreAdjMcsAdjustment> {
+    @Override
+    McsAdjustment.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsAdjustmentsBuilderList().isEmpty()) {
+        claimBuilder.addMcsAdjustmentsBuilder();
+      }
+      return claimBuilder.getMcsAdjustmentsBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsAdjustment getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getAdjustments().size());
+      return claim.getAdjustments().iterator().next();
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "adjustment-0-" + basicLabel;
+    }
+  }
+
+  class AuditFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<McsAudit.Builder, PreAdjMcsAudit> {
+    @Override
+    McsAudit.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsAuditsBuilderList().isEmpty()) {
+        claimBuilder.addMcsAuditsBuilder();
+      }
+      return claimBuilder.getMcsAuditsBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsAudit getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getAudits().size());
+      return claim.getAudits().iterator().next();
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "audit-0-" + basicLabel;
+    }
+  }
+
   class DetailFieldTester
       extends McsClaimTransformerTest.AbstractFieldTester<McsDetail.Builder, PreAdjMcsDetail> {
     @Override
@@ -1222,4 +1433,28 @@ public class McsClaimTransformerTest {
       return "detail-0-" + basicLabel;
     }
   }
+
+  class LocationFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<McsLocation.Builder, PreAdjMcsLocation> {
+    @Override
+    McsLocation.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsLocationsBuilderList().isEmpty()) {
+        claimBuilder.addMcsLocationsBuilder();
+      }
+      return claimBuilder.getMcsLocationsBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsLocation getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getLocations().size());
+      return claim.getLocations().iterator().next();
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "location-0-" + basicLabel;
+    }
+  }
+
+  // endregion Field Tester Classes
 }
