@@ -116,6 +116,12 @@ public class PreAdjMcsDetail {
   @Column(name = "`idrKDtlFacProvNpi`", length = 10)
   private String idrKDtlFacProvNpi;
 
+  @Column(name = "`idrDtlAmbPickupAddres1`", length = 25)
+  private String idrDtlAmbPickupAddres1;
+
+  @Column(name = "`idrDtlAmbPickupAddres2`", length = 20)
+  private String idrDtlAmbPickupAddres2;
+
   @Column(name = "`idrDtlAmbPickupCity`", length = 20)
   private String idrDtlAmbPickupCity;
 
@@ -127,6 +133,12 @@ public class PreAdjMcsDetail {
 
   @Column(name = "`idrDtlAmbDropoffName`", length = 24)
   private String idrDtlAmbDropoffName;
+
+  @Column(name = "`idrDtlAmbDropoffAddrL1`", length = 25)
+  private String idrDtlAmbDropoffAddrL1;
+
+  @Column(name = "`idrDtlAmbDropoffAddrL2`", length = 20)
+  private String idrDtlAmbDropoffAddrL2;
 
   @Column(name = "`idrDtlAmbDropoffCity`", length = 20)
   private String idrDtlAmbDropoffCity;

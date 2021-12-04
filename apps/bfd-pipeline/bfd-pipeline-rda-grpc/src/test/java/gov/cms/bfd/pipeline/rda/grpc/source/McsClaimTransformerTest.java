@@ -27,6 +27,8 @@ import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
 import gov.cms.mpsm.rda.v1.mcs.McsSplitReasonCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
+import gov.cms.mpsm.rda.v1.mcs.McsTwoDigitPlanOfService;
+import gov.cms.mpsm.rda.v1.mcs.McsTypeOfService;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -275,6 +277,7 @@ public class McsClaimTransformerTest {
     }
   }
 
+  // region McsClaim
   @Test
   public void testBadIdrClmHdIcn() {
     assertClaimTransformationError(
@@ -488,6 +491,231 @@ public class McsClaimTransformerTest {
   }
 
   @Test
+  public void testClaimIdrAssignment() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .enumField(
+            McsClaim.Builder::setIdrAssignmentEnum,
+            PreAdjMcsClaim::getIdrAssignment,
+            McsClaimAssignmentCode.CLAIM_ASSIGNMENT_CODE,
+            "A")
+        .stringField(
+            McsClaim.Builder::setIdrAssignmentUnrecognized,
+            PreAdjMcsClaim::getIdrAssignment,
+            "idrAssignment",
+            1);
+  }
+
+  @Test
+  public void testClaimIdrClmLevelInd() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .enumField(
+            McsClaim.Builder::setIdrClmLevelIndEnum,
+            PreAdjMcsClaim::getIdrClmLevelInd,
+            McsClaimLevelIndicator.CLAIM_LEVEL_INDICATOR_ORIGINAL,
+            "O")
+        .stringField(
+            McsClaim.Builder::setIdrClmLevelIndUnrecognized,
+            PreAdjMcsClaim::getIdrClmLevelInd,
+            "idrClmLevelInd",
+            1);
+  }
+
+  @Test
+  public void testClaimIdrHdrAudit() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .intField(McsClaim.Builder::setIdrHdrAudit, PreAdjMcsClaim::getIdrHdrAudit);
+  }
+
+  @Test
+  public void testClaimIdrHdrAuditInd() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .enumField(
+            McsClaim.Builder::setIdrHdrAuditIndEnum,
+            PreAdjMcsClaim::getIdrHdrAuditInd,
+            McsAuditIndicator.AUDIT_INDICATOR_AUDIT_NUMBER,
+            "A")
+        .stringField(
+            McsClaim.Builder::setIdrHdrAuditIndUnrecognized,
+            PreAdjMcsClaim::getIdrHdrAuditInd,
+            "idrHdrAuditInd",
+            1);
+  }
+
+  @Test
+  public void testClaimIdrUSplitReason() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .enumField(
+            McsClaim.Builder::setIdrUSplitReasonEnum,
+            PreAdjMcsClaim::getIdrUSplitReason,
+            McsSplitReasonCode.SPLIT_REASON_CODE_GHI_SPLIT,
+            "4")
+        .stringField(
+            McsClaim.Builder::setIdrUSplitReasonUnrecognized,
+            PreAdjMcsClaim::getIdrUSplitReason,
+            "idrUSplitReason",
+            1);
+  }
+
+  @Test
+  public void testClaimIdrJReferringProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrJReferringProvNpi,
+            PreAdjMcsClaim::getIdrJReferringProvNpi,
+            "idrJReferringProvNpi",
+            10);
+  }
+
+  @Test
+  public void testClaimIdrJFacProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrJFacProvNpi,
+            PreAdjMcsClaim::getIdrJFacProvNpi,
+            "idrJFacProvNpi",
+            10);
+  }
+
+  @Test
+  public void testClaimIdrUDemoProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrUDemoProvNpi,
+            PreAdjMcsClaim::getIdrUDemoProvNpi,
+            "idrUDemoProvNpi",
+            10);
+  }
+
+  @Test
+  public void testClaimIdrUSuperNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrUSuperNpi, PreAdjMcsClaim::getIdrUSuperNpi, "idrUSuperNpi", 10);
+  }
+
+  @Test
+  public void testClaimIdrUFcadjBilNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrUFcadjBilNpi,
+            PreAdjMcsClaim::getIdrUFcadjBilNpi,
+            "idrUFcadjBilNpi",
+            10);
+  }
+
+  @Test
+  public void testClaimIdrAmbPickupAddresLine1() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbPickupAddresLine1,
+            PreAdjMcsClaim::getIdrAmbPickupAddresLine1,
+            "idrAmbPickupAddresLine1",
+            25);
+  }
+
+  @Test
+  public void testClaimIdrAmbPickupAddresLine2() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbPickupAddresLine2,
+            PreAdjMcsClaim::getIdrAmbPickupAddresLine2,
+            "idrAmbPickupAddresLine2",
+            20);
+  }
+
+  @Test
+  public void testClaimIdrAmbPickupCity() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbPickupCity,
+            PreAdjMcsClaim::getIdrAmbPickupCity,
+            "idrAmbPickupCity",
+            20);
+  }
+
+  @Test
+  public void testClaimIdrAmbPickupState() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbPickupState,
+            PreAdjMcsClaim::getIdrAmbPickupState,
+            "idrAmbPickupState",
+            2);
+  }
+
+  @Test
+  public void testClaimIdrAmbPickupZipcode() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbPickupZipcode,
+            PreAdjMcsClaim::getIdrAmbPickupZipcode,
+            "idrAmbPickupZipcode",
+            9);
+  }
+
+  @Test
+  public void testClaimIdrAmbDropoffName() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffName,
+            PreAdjMcsClaim::getIdrAmbDropoffName,
+            "idrAmbDropoffName",
+            24);
+  }
+
+  @Test
+  public void testClaimIdrAmbDropoffAddrLine1() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffAddrLine1,
+            PreAdjMcsClaim::getIdrAmbDropoffAddrLine1,
+            "idrAmbDropoffAddrLine1",
+            25);
+  }
+
+  @Test
+  public void testClaimIdrAmbDropoffAddrLine2() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffAddrLine2,
+            PreAdjMcsClaim::getIdrAmbDropoffAddrLine2,
+            "idrAmbDropoffAddrLine2",
+            20);
+  }
+
+  @Test
+  public void testClaimIdrAmbDropoffCity() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffCity,
+            PreAdjMcsClaim::getIdrAmbDropoffCity,
+            "idrAmbDropoffCity",
+            20);
+  }
+
+  @Test
+  public void testClaimIdrAmbDropoffState() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffState,
+            PreAdjMcsClaim::getIdrAmbDropoffState,
+            "idrAmbDropoffState",
+            2);
+  }
+
+  @Test
+  public void testClaimIdrAmbDropoffZipcode() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffZipcode,
+            PreAdjMcsClaim::getIdrAmbDropoffZipcode,
+            "idrAmbDropoffZipcode",
+            9);
+  }
+  // endregion McsClaim
+
+  // region McsDiagnosisCode
+  @Test
   public void testBadDiagnosisCodeIdrDiagCode() {
     assertDiagnosisCodeTransformationError(
         codeBuilder -> codeBuilder.setIdrDiagCode("1234567---"),
@@ -510,7 +738,9 @@ public class McsClaimTransformerTest {
         new DataTransformer.ErrorMessage(
             "detail-0-idrDtlStatus", "invalid length: expected=[1,1] actual=3"));
   }
+  // endregion McsDiagnosisCode
 
+  // region McsDetail
   @Test
   public void testBadDetailIdrDtlFromDate() {
     assertDetailTransformationError(
@@ -660,187 +890,192 @@ public class McsClaimTransformerTest {
   }
 
   @Test
-  public void testIdrAssignment() {
-    new McsClaimTransformerTest.ClaimFieldTester()
+  public void testDetailIdrTos() {
+    new McsClaimTransformerTest.DetailFieldTester()
         .enumField(
-            McsClaim.Builder::setIdrAssignmentEnum,
-            PreAdjMcsClaim::getIdrAssignment,
-            McsClaimAssignmentCode.CLAIM_ASSIGNMENT_CODE,
-            "A")
+            McsDetail.Builder::setIdrTosEnum,
+            PreAdjMcsDetail::getIdrTos,
+            McsTypeOfService.TYPE_OF_SERVICE_ANESTHESIA,
+            "7")
         .stringField(
-            McsClaim.Builder::setIdrAssignmentUnrecognized,
-            PreAdjMcsClaim::getIdrAssignment,
-            "idrAssignment",
-            1);
+            McsDetail.Builder::setIdrTosUnrecognized, PreAdjMcsDetail::getIdrTos, "idrTos", 1);
   }
 
   @Test
-  public void testIdrClmLevelInd() {
-    new McsClaimTransformerTest.ClaimFieldTester()
+  public void testDetailIdrTwoDigitPos() {
+    new McsClaimTransformerTest.DetailFieldTester()
         .enumField(
-            McsClaim.Builder::setIdrClmLevelIndEnum,
-            PreAdjMcsClaim::getIdrClmLevelInd,
-            McsClaimLevelIndicator.CLAIM_LEVEL_INDICATOR_ORIGINAL,
-            "O")
+            McsDetail.Builder::setIdrTwoDigitPosEnum,
+            PreAdjMcsDetail::getIdrTwoDigitPos,
+            McsTwoDigitPlanOfService.TWO_DIGIT_PLAN_OF_SERVICE_AMBULANCE_LAND,
+            "41")
         .stringField(
-            McsClaim.Builder::setIdrClmLevelIndUnrecognized,
-            PreAdjMcsClaim::getIdrClmLevelInd,
-            "idrClmLevelInd",
-            1);
-  }
-
-  @Test
-  public void testIdrHdrAudit() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .intField(McsClaim.Builder::setIdrHdrAudit, PreAdjMcsClaim::getIdrHdrAudit);
-  }
-
-  @Test
-  public void testIdrHdrAuditInd() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
-            McsClaim.Builder::setIdrHdrAuditIndEnum,
-            PreAdjMcsClaim::getIdrHdrAuditInd,
-            McsAuditIndicator.AUDIT_INDICATOR_AUDIT_NUMBER,
-            "A")
-        .stringField(
-            McsClaim.Builder::setIdrHdrAuditIndUnrecognized,
-            PreAdjMcsClaim::getIdrHdrAuditInd,
-            "idrHdrAuditInd",
-            1);
-  }
-
-  @Test
-  public void testIdrUSplitReason() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
-            McsClaim.Builder::setIdrUSplitReasonEnum,
-            PreAdjMcsClaim::getIdrUSplitReason,
-            McsSplitReasonCode.SPLIT_REASON_CODE_GHI_SPLIT,
-            "4")
-        .stringField(
-            McsClaim.Builder::setIdrUSplitReasonUnrecognized,
-            PreAdjMcsClaim::getIdrUSplitReason,
-            "idrUSplitReason",
-            1);
-  }
-
-  @Test
-  public void testIdrJReferringProvNpi() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
-            McsClaim.Builder::setIdrJReferringProvNpi,
-            PreAdjMcsClaim::getIdrJReferringProvNpi,
-            "idrJReferringProvNpi",
-            10);
-  }
-
-  @Test
-  public void testIdrJFacProvNpi() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
-            McsClaim.Builder::setIdrJFacProvNpi,
-            PreAdjMcsClaim::getIdrJFacProvNpi,
-            "idrJFacProvNpi",
-            10);
-  }
-
-  @Test
-  public void testIdrUDemoProvNpi() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
-            McsClaim.Builder::setIdrUDemoProvNpi,
-            PreAdjMcsClaim::getIdrUDemoProvNpi,
-            "idrUDemoProvNpi",
-            10);
-  }
-
-  @Test
-  public void testIdrUSuperNpi() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
-            McsClaim.Builder::setIdrUSuperNpi, PreAdjMcsClaim::getIdrUSuperNpi, "idrUSuperNpi", 10);
-  }
-
-  @Test
-  public void testIdrUFcadjBilNpi() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
-            McsClaim.Builder::setIdrUFcadjBilNpi,
-            PreAdjMcsClaim::getIdrUFcadjBilNpi,
-            "idrUFcadjBilNpi",
-            10);
-  }
-
-  @Test
-  public void testIdrAmbPickupCity() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
-            McsClaim.Builder::setIdrAmbPickupCity,
-            PreAdjMcsClaim::getIdrAmbPickupCity,
-            "idrAmbPickupCity",
-            20);
-  }
-
-  @Test
-  public void testIdrAmbPickupState() {
-    new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
-            McsClaim.Builder::setIdrAmbPickupState,
-            PreAdjMcsClaim::getIdrAmbPickupState,
-            "idrAmbPickupState",
+            McsDetail.Builder::setIdrTwoDigitPosUnrecognized,
+            PreAdjMcsDetail::getIdrTwoDigitPos,
+            "idrTwoDigitPos",
             2);
   }
 
   @Test
-  public void testIdrAmbPickupZipcode() {
-    new McsClaimTransformerTest.ClaimFieldTester()
+  public void testDetailIdrDtlRendType() {
+    new McsClaimTransformerTest.DetailFieldTester()
         .stringField(
-            McsClaim.Builder::setIdrAmbPickupZipcode,
-            PreAdjMcsClaim::getIdrAmbPickupZipcode,
-            "idrAmbPickupZipcode",
+            McsDetail.Builder::setIdrDtlRendType,
+            PreAdjMcsDetail::getIdrDtlRendType,
+            "idrDtlRendType",
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlRendSpec() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlRendSpec,
+            PreAdjMcsDetail::getIdrDtlRendSpec,
+            "idrDtlRendSpec",
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlRendNpi() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlRendNpi,
+            PreAdjMcsDetail::getIdrDtlRendNpi,
+            "idrDtlRendNpi",
+            10);
+  }
+
+  @Test
+  public void testDetailIdrDtlRendProv() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlRendProv,
+            PreAdjMcsDetail::getIdrDtlRendProv,
+            "idrDtlRendProv",
+            10);
+  }
+
+  @Test
+  public void testDetailIdrKDtlFacProvNpi() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrKDtlFacProvNpi,
+            PreAdjMcsDetail::getIdrKDtlFacProvNpi,
+            "idrKDtlFacProvNpi",
+            10);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupAddres1() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlAmbPickupAddres1,
+            PreAdjMcsDetail::getIdrDtlAmbPickupAddres1,
+            "idrDtlAmbPickupAddres1",
+            25);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupAddres2() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlAmbPickupAddres2,
+            PreAdjMcsDetail::getIdrDtlAmbPickupAddres2,
+            "idrDtlAmbPickupAddres2",
+            20);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupCity() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlAmbPickupCity,
+            PreAdjMcsDetail::getIdrDtlAmbPickupCity,
+            "idrDtlAmbPickupCity",
+            20);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupState() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlAmbPickupState,
+            PreAdjMcsDetail::getIdrDtlAmbPickupState,
+            "idrDtlAmbPickupState",
+            2);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbPickupZipcode() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlAmbPickupZipcode,
+            PreAdjMcsDetail::getIdrDtlAmbPickupZipcode,
+            "idrDtlAmbPickupZipcode",
             9);
   }
 
   @Test
-  public void testIdrAmbDropoffName() {
-    new McsClaimTransformerTest.ClaimFieldTester()
+  public void testDetailIdrDtlAmbDropoffName() {
+    new McsClaimTransformerTest.DetailFieldTester()
         .stringField(
-            McsClaim.Builder::setIdrAmbDropoffName,
-            PreAdjMcsClaim::getIdrAmbDropoffName,
-            "idrAmbDropoffName",
+            McsDetail.Builder::setIdrDtlAmbDropoffName,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffName,
+            "idrDtlAmbDropoffName",
             24);
   }
 
   @Test
-  public void testIdrAmbDropoffCity() {
-    new McsClaimTransformerTest.ClaimFieldTester()
+  public void testDetailIdrDtlAmbDropoffAddrL1() {
+    new McsClaimTransformerTest.DetailFieldTester()
         .stringField(
-            McsClaim.Builder::setIdrAmbDropoffCity,
-            PreAdjMcsClaim::getIdrAmbDropoffCity,
-            "idrAmbDropoffCity",
+            McsDetail.Builder::setIdrDtlAmbDropoffAddrL1,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffAddrL1,
+            "idrDtlAmbDropoffAddrL1",
+            25);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbDropoffAddrL2() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlAmbDropoffAddrL2,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffAddrL2,
+            "idrDtlAmbDropoffAddrL2",
             20);
   }
 
   @Test
-  public void testIdrAmbDropoffState() {
-    new McsClaimTransformerTest.ClaimFieldTester()
+  public void testDetailIdrDtlAmbDropoffCity() {
+    new McsClaimTransformerTest.DetailFieldTester()
         .stringField(
-            McsClaim.Builder::setIdrAmbDropoffState,
-            PreAdjMcsClaim::getIdrAmbDropoffState,
-            "idrAmbDropoffState",
+            McsDetail.Builder::setIdrDtlAmbDropoffCity,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffCity,
+            "idrDtlAmbDropoffCity",
+            20);
+  }
+
+  @Test
+  public void testDetailIdrDtlAmbDropoffState() {
+    new McsClaimTransformerTest.DetailFieldTester()
+        .stringField(
+            McsDetail.Builder::setIdrDtlAmbDropoffState,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffState,
+            "idrDtlAmbDropoffState",
             2);
   }
 
   @Test
-  public void testIdrAmbDropoffZipcode() {
-    new McsClaimTransformerTest.ClaimFieldTester()
+  public void testDetailIdrDtlAmbDropoffZipcode() {
+    new McsClaimTransformerTest.DetailFieldTester()
         .stringField(
-            McsClaim.Builder::setIdrAmbDropoffZipcode,
-            PreAdjMcsClaim::getIdrAmbDropoffZipcode,
-            "idrAmbDropoffZipcode",
+            McsDetail.Builder::setIdrDtlAmbDropoffZipcode,
+            PreAdjMcsDetail::getIdrDtlAmbDropoffZipcode,
+            "idrDtlAmbDropoffZipcode",
             9);
   }
+  // endregion McsDetail
 
   private void assertClaimTransformationError(
       Runnable claimUpdate, DataTransformer.ErrorMessage... expectedErrors) {
@@ -963,6 +1198,28 @@ public class McsClaimTransformerTest {
     @Override
     PreAdjMcsClaim getTestEntity(PreAdjMcsClaim claim) {
       return claim;
+    }
+  }
+
+  class DetailFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<McsDetail.Builder, PreAdjMcsDetail> {
+    @Override
+    McsDetail.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      if (claimBuilder.getMcsDetailsBuilderList().isEmpty()) {
+        claimBuilder.addMcsDetailsBuilder();
+      }
+      return claimBuilder.getMcsDetailsBuilder(0);
+    }
+
+    @Override
+    PreAdjMcsDetail getTestEntity(PreAdjMcsClaim claim) {
+      assertEquals(1, claim.getDetails().size());
+      return claim.getDetails().iterator().next();
+    }
+
+    @Override
+    String getLabel(String basicLabel) {
+      return "detail-0-" + basicLabel;
     }
   }
 }

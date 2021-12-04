@@ -166,6 +166,12 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrUFcadjBilNpi`", length = 10)
   private String idrUFcadjBilNpi;
 
+  @Column(name = "`idrAmbPickupAddresLine1`", length = 25)
+  private String idrAmbPickupAddresLine1;
+
+  @Column(name = "`idrAmbPickupAddresLine2`", length = 20)
+  private String idrAmbPickupAddresLine2;
+
   @Column(name = "`idrAmbPickupCity`", length = 20)
   private String idrAmbPickupCity;
 
@@ -177,6 +183,12 @@ public class PreAdjMcsClaim {
 
   @Column(name = "`idrAmbDropoffName`", length = 24)
   private String idrAmbDropoffName;
+
+  @Column(name = "`idrAmbDropoffAddrLine1`", length = 25)
+  private String idrAmbDropoffAddrLine1;
+
+  @Column(name = "`idrAmbDropoffAddrLine2`", length = 20)
+  private String idrAmbDropoffAddrLine2;
 
   @Column(name = "`idrAmbDropoffCity`", length = 20)
   private String idrAmbDropoffCity;

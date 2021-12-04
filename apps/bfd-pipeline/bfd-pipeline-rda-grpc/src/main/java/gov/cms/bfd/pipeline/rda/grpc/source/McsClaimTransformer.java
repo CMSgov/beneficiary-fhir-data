@@ -530,6 +530,20 @@ public class McsClaimTransformer {
         from::getIdrUFcadjBilNpi,
         to::setIdrUFcadjBilNpi);
     transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrAmbPickupAddresLine1,
+        1,
+        25,
+        from::hasIdrAmbPickupAddresLine1,
+        from::getIdrAmbPickupAddresLine1,
+        to::setIdrAmbPickupAddresLine1);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrAmbPickupAddresLine2,
+        1,
+        20,
+        from::hasIdrAmbPickupAddresLine2,
+        from::getIdrAmbPickupAddresLine2,
+        to::setIdrAmbPickupAddresLine2);
+    transformer.copyOptionalString(
         namePrefix + PreAdjMcsClaim.Fields.idrAmbPickupCity,
         1,
         20,
@@ -557,6 +571,20 @@ public class McsClaimTransformer {
         from::hasIdrAmbDropoffName,
         from::getIdrAmbDropoffName,
         to::setIdrAmbDropoffName);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrAmbDropoffAddrLine1,
+        1,
+        25,
+        from::hasIdrAmbDropoffAddrLine1,
+        from::getIdrAmbDropoffAddrLine1,
+        to::setIdrAmbDropoffAddrLine1);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsClaim.Fields.idrAmbDropoffAddrLine2,
+        1,
+        20,
+        from::hasIdrAmbDropoffAddrLine2,
+        from::getIdrAmbDropoffAddrLine2,
+        to::setIdrAmbDropoffAddrLine2);
     transformer.copyOptionalString(
         namePrefix + PreAdjMcsClaim.Fields.idrAmbDropoffCity,
         1,
@@ -817,6 +845,20 @@ public class McsClaimTransformer {
         from::getIdrKDtlFacProvNpi,
         to::setIdrKDtlFacProvNpi);
     transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlAmbPickupAddres1,
+        1,
+        25,
+        from::hasIdrDtlAmbPickupAddres1,
+        from::getIdrDtlAmbPickupAddres1,
+        to::setIdrDtlAmbPickupAddres1);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlAmbPickupAddres2,
+        1,
+        20,
+        from::hasIdrDtlAmbPickupAddres2,
+        from::getIdrDtlAmbPickupAddres2,
+        to::setIdrDtlAmbPickupAddres2);
+    transformer.copyOptionalString(
         namePrefix + PreAdjMcsDetail.Fields.idrDtlAmbPickupCity,
         1,
         20,
@@ -844,6 +886,20 @@ public class McsClaimTransformer {
         from::hasIdrDtlAmbDropoffName,
         from::getIdrDtlAmbDropoffName,
         to::setIdrDtlAmbDropoffName);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlAmbDropoffAddrL1,
+        1,
+        25,
+        from::hasIdrDtlAmbDropoffAddrL1,
+        from::getIdrDtlAmbDropoffAddrL1,
+        to::setIdrDtlAmbDropoffAddrL1);
+    transformer.copyOptionalString(
+        namePrefix + PreAdjMcsDetail.Fields.idrDtlAmbDropoffAddrL2,
+        1,
+        20,
+        from::hasIdrDtlAmbDropoffAddrL2,
+        from::getIdrDtlAmbDropoffAddrL2,
+        to::setIdrDtlAmbDropoffAddrL2);
     transformer.copyOptionalString(
         namePrefix + PreAdjMcsDetail.Fields.idrDtlAmbDropoffCity,
         1,
