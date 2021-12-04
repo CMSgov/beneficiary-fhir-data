@@ -479,6 +479,7 @@ public class McsClaimTransformer {
         1,
         PreAdjMcsClaim_idrClmLevelInd_Extractor.getEnumString(from),
         to::setIdrClmLevelInd);
+    transformer.copyOptionalInt(from::hasIdrHdrAudit, from::getIdrHdrAudit, to::setIdrHdrAudit);
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsClaim.Fields.idrHdrAuditInd,
         true,
@@ -941,6 +942,7 @@ public class McsClaimTransformer {
       McsAudit from, DataTransformer transformer, Instant now, String namePrefix) {
     final PreAdjMcsAudit to = new PreAdjMcsAudit();
     to.setLastUpdated(now);
+    transformer.copyOptionalInt(from::hasIdrJAuditNum, from::getIdrJAuditNum, to::setIdrJAuditNum);
     transformer.copyEnumAsString(
         namePrefix + PreAdjMcsAudit.Fields.idrJAuditInd,
         true,

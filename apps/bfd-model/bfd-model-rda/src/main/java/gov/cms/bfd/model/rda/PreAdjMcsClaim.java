@@ -143,7 +143,7 @@ public class PreAdjMcsClaim {
   private String idrClmLevelInd;
 
   @Column(name = "`idrHdrAudit`")
-  private Short idrHdrAudit;
+  private Integer idrHdrAudit;
 
   @Column(name = "`idrHdrAuditInd`", length = 1)
   private String idrHdrAuditInd;

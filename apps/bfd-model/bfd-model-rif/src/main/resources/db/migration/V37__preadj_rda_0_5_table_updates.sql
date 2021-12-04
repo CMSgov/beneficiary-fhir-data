@@ -56,7 +56,7 @@ CREATE TABLE "pre_adj"."McsAudits" (
     "idrClmHdIcn" varchar(15) NOT NULL,
     "priority" smallint NOT NULL,
     "lastUpdated" timestamp with time zone,
-    "idrJAuditNum" smallint,
+    "idrJAuditNum" int,
     "idrJAuditInd" varchar(1),
     "idrJAuditDisp" varchar(1),
     CONSTRAINT "McsAudits_key" PRIMARY KEY ("idrClmHdIcn", "priority"),
@@ -127,7 +127,7 @@ ALTER TABLE "pre_adj"."FissClaims" ADD "medicalRecordNo" varchar(17);
  */
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrAssignment" varchar(1);
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrClmLevelInd" varchar(1);
-ALTER TABLE "pre_adj"."McsClaims" ADD "idrHdrAudit" smallint;
+ALTER TABLE "pre_adj"."McsClaims" ADD "idrHdrAudit" int;
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrHdrAuditInd" varchar(1);
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrUSplitReason" varchar(1);
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrJReferringProvNpi" varchar(10);

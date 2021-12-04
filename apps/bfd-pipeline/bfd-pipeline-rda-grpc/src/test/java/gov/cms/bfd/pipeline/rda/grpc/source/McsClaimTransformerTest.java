@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
+import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static gov.cms.bfd.pipeline.rda.grpc.source.TransformerTestUtils.assertListContentsHaveSamePropertyValues;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
@@ -13,14 +14,18 @@ import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
+import gov.cms.mpsm.rda.v1.mcs.McsAuditIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsBeneficiarySex;
 import gov.cms.mpsm.rda.v1.mcs.McsBillingProviderStatusCode;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
+import gov.cms.mpsm.rda.v1.mcs.McsClaimAssignmentCode;
+import gov.cms.mpsm.rda.v1.mcs.McsClaimLevelIndicator;
 import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDetailStatus;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisIcdType;
+import gov.cms.mpsm.rda.v1.mcs.McsSplitReasonCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -654,6 +659,189 @@ public class McsClaimTransformerTest {
             "detail-0-idrKPosZip", "invalid length: expected=[1,15] actual=18"));
   }
 
+  @Test
+  public void testIdrAssignment() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .enumField(
+            McsClaim.Builder::setIdrAssignmentEnum,
+            PreAdjMcsClaim::getIdrAssignment,
+            McsClaimAssignmentCode.CLAIM_ASSIGNMENT_CODE,
+            "A")
+        .stringField(
+            McsClaim.Builder::setIdrAssignmentUnrecognized,
+            PreAdjMcsClaim::getIdrAssignment,
+            "idrAssignment",
+            1);
+  }
+
+  @Test
+  public void testIdrClmLevelInd() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .enumField(
+            McsClaim.Builder::setIdrClmLevelIndEnum,
+            PreAdjMcsClaim::getIdrClmLevelInd,
+            McsClaimLevelIndicator.CLAIM_LEVEL_INDICATOR_ORIGINAL,
+            "O")
+        .stringField(
+            McsClaim.Builder::setIdrClmLevelIndUnrecognized,
+            PreAdjMcsClaim::getIdrClmLevelInd,
+            "idrClmLevelInd",
+            1);
+  }
+
+  @Test
+  public void testIdrHdrAudit() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .intField(McsClaim.Builder::setIdrHdrAudit, PreAdjMcsClaim::getIdrHdrAudit);
+  }
+
+  @Test
+  public void testIdrHdrAuditInd() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .enumField(
+            McsClaim.Builder::setIdrHdrAuditIndEnum,
+            PreAdjMcsClaim::getIdrHdrAuditInd,
+            McsAuditIndicator.AUDIT_INDICATOR_AUDIT_NUMBER,
+            "A")
+        .stringField(
+            McsClaim.Builder::setIdrHdrAuditIndUnrecognized,
+            PreAdjMcsClaim::getIdrHdrAuditInd,
+            "idrHdrAuditInd",
+            1);
+  }
+
+  @Test
+  public void testIdrUSplitReason() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .enumField(
+            McsClaim.Builder::setIdrUSplitReasonEnum,
+            PreAdjMcsClaim::getIdrUSplitReason,
+            McsSplitReasonCode.SPLIT_REASON_CODE_GHI_SPLIT,
+            "4")
+        .stringField(
+            McsClaim.Builder::setIdrUSplitReasonUnrecognized,
+            PreAdjMcsClaim::getIdrUSplitReason,
+            "idrUSplitReason",
+            1);
+  }
+
+  @Test
+  public void testIdrJReferringProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrJReferringProvNpi,
+            PreAdjMcsClaim::getIdrJReferringProvNpi,
+            "idrJReferringProvNpi",
+            10);
+  }
+
+  @Test
+  public void testIdrJFacProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrJFacProvNpi,
+            PreAdjMcsClaim::getIdrJFacProvNpi,
+            "idrJFacProvNpi",
+            10);
+  }
+
+  @Test
+  public void testIdrUDemoProvNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrUDemoProvNpi,
+            PreAdjMcsClaim::getIdrUDemoProvNpi,
+            "idrUDemoProvNpi",
+            10);
+  }
+
+  @Test
+  public void testIdrUSuperNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrUSuperNpi, PreAdjMcsClaim::getIdrUSuperNpi, "idrUSuperNpi", 10);
+  }
+
+  @Test
+  public void testIdrUFcadjBilNpi() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrUFcadjBilNpi,
+            PreAdjMcsClaim::getIdrUFcadjBilNpi,
+            "idrUFcadjBilNpi",
+            10);
+  }
+
+  @Test
+  public void testIdrAmbPickupCity() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbPickupCity,
+            PreAdjMcsClaim::getIdrAmbPickupCity,
+            "idrAmbPickupCity",
+            20);
+  }
+
+  @Test
+  public void testIdrAmbPickupState() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbPickupState,
+            PreAdjMcsClaim::getIdrAmbPickupState,
+            "idrAmbPickupState",
+            2);
+  }
+
+  @Test
+  public void testIdrAmbPickupZipcode() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbPickupZipcode,
+            PreAdjMcsClaim::getIdrAmbPickupZipcode,
+            "idrAmbPickupZipcode",
+            9);
+  }
+
+  @Test
+  public void testIdrAmbDropoffName() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffName,
+            PreAdjMcsClaim::getIdrAmbDropoffName,
+            "idrAmbDropoffName",
+            24);
+  }
+
+  @Test
+  public void testIdrAmbDropoffCity() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffCity,
+            PreAdjMcsClaim::getIdrAmbDropoffCity,
+            "idrAmbDropoffCity",
+            20);
+  }
+
+  @Test
+  public void testIdrAmbDropoffState() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffState,
+            PreAdjMcsClaim::getIdrAmbDropoffState,
+            "idrAmbDropoffState",
+            2);
+  }
+
+  @Test
+  public void testIdrAmbDropoffZipcode() {
+    new McsClaimTransformerTest.ClaimFieldTester()
+        .stringField(
+            McsClaim.Builder::setIdrAmbDropoffZipcode,
+            PreAdjMcsClaim::getIdrAmbDropoffZipcode,
+            "idrAmbDropoffZipcode",
+            9);
+  }
+
   private void assertClaimTransformationError(
       Runnable claimUpdate, DataTransformer.ErrorMessage... expectedErrors) {
     try {
@@ -736,5 +924,45 @@ public class McsClaimTransformerTest {
     RdaChange<PreAdjMcsClaim> changed = transformer.transformClaim(changeBuilder.build());
     assertEquals(changeType, changed.getType());
     assertThat(changed.getClaim(), samePropertyValuesAs(claim));
+  }
+
+  private abstract class AbstractFieldTester<TBuilder, TEntity>
+      extends ClaimTransformerFieldTester<
+          McsClaim.Builder, McsClaim, PreAdjMcsClaim, TBuilder, TEntity> {
+    @Override
+    McsClaim.Builder createClaimBuilder() {
+      return McsClaim.newBuilder()
+          .setIdrClmHdIcn("123456789012345")
+          .setIdrContrId("12345")
+          .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL);
+    }
+
+    @Override
+    RdaChange<PreAdjMcsClaim> transformClaim(McsClaim claim) {
+      var changeBuilder =
+          McsClaimChange.newBuilder()
+              .setSeq(MIN_SEQUENCE_NUM)
+              .setChangeType(ChangeType.CHANGE_TYPE_INSERT)
+              .setClaim(claim);
+      return transformer.transformClaim(changeBuilder.build());
+    }
+
+    @Override
+    McsClaim buildClaim(McsClaim.Builder builder) {
+      return builder.build();
+    }
+  }
+
+  private class ClaimFieldTester
+      extends McsClaimTransformerTest.AbstractFieldTester<McsClaim.Builder, PreAdjMcsClaim> {
+    @Override
+    McsClaim.Builder getTestEntityBuilder(McsClaim.Builder claimBuilder) {
+      return claimBuilder;
+    }
+
+    @Override
+    PreAdjMcsClaim getTestEntity(PreAdjMcsClaim claim) {
+      return claim;
+    }
   }
 }

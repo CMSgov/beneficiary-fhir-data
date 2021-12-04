@@ -41,7 +41,7 @@ public class PreAdjMcsAudit {
   private Instant lastUpdated;
 
   @Column(name = "`idrJAuditNum`")
-  private Short idrJAuditNum;
+  private Integer idrJAuditNum;
 
   @Column(name = "`idrJAuditInd`", length = 1)
   private String idrJAuditInd;

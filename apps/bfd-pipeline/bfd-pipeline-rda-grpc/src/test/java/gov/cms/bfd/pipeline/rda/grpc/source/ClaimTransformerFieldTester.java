@@ -89,6 +89,19 @@ public abstract class ClaimTransformerFieldTester<
   }
 
   @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      intField(
+          BiConsumer<TTestEntityBuilder, Integer> setter, Function<TTestEntity, Integer> getter) {
+    final BiConsumer<TClaimBuilder, Integer> wrappedSetter =
+        (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
+    final Function<TClaimEntity, Integer> wrappedGetter =
+        claim -> getter.apply(getTestEntity(claim));
+    verifyFieldTransformationSucceeds(
+        claimBuilder -> wrappedSetter.accept(claimBuilder, 1234), wrappedGetter, 1234);
+    return this;
+  }
+
+  @CanIgnoreReturnValue
   <TEnum extends Enum<?>>
       ClaimTransformerFieldTester<
               TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
