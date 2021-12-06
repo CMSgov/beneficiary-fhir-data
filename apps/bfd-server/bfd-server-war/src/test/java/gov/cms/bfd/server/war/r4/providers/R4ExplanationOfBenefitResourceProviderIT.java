@@ -28,7 +28,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.SamhsaMatcherTest;
+import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -979,7 +979,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
     carrierRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(carrierRifRecord);
     entityManager.getTransaction().commit();
@@ -1004,7 +1004,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
     inpatientRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(inpatientRifRecord);
     entityManager.getTransaction().commit();
@@ -1030,7 +1030,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     outpatientRifRecord =
         entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
     outpatientRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(outpatientRifRecord);
     entityManager.getTransaction().commit();
@@ -1055,7 +1055,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
     hhaRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(hhaRifRecord);
     entityManager.getTransaction().commit();
@@ -1080,7 +1080,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
     snfRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(snfRifRecord);
     entityManager.getTransaction().commit();
@@ -1105,7 +1105,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
     hospiceRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(hospiceRifRecord);
     entityManager.getTransaction().commit();
@@ -1130,7 +1130,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
     dmeRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(dmeRifRecord);
     entityManager.getTransaction().commit();

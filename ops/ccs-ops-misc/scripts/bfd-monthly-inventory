@@ -3,7 +3,8 @@ set -eo pipefail
 
 # global variables
 PROGNAME=${0##*/}
-INVENTORY_DIR="${INVENTORY_DIR:- ~/Desktop/monthly_inventory}"
+DEFAULT_INVENTORY_DIR=~/Desktop/monthly_inventory
+INVENTORY_DIR="${INVENTORY_DIR:-${DEFAULT_INVENTORY_DIR}}"
 APPS_DIR=${APPS_DIR:-../../../apps}
 BUILD_APPS="${BUILD_APPS:-true}"
 BFD_SSH_USER=${BFD_SSH_USER:-} # must be set to ssh
@@ -185,7 +186,7 @@ git_pull(){
 
 get_java_dependencies(){
   echo
-  mkdir -p "$java_inv_dir"
+  mkdir -p "${java_inv_dir}"
   cd "$APPS_DIR" || error_exit "could not access apps directory"
   if $BUILD_APPS; then
     printf "We need to build apps before getting dependencies (this may take a few minutes)... "

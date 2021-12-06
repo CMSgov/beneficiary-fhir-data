@@ -82,7 +82,7 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private R4SamhsaMatcher samhsaMatcher;
+  private R4EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
@@ -97,9 +97,9 @@ public final class R4ExplanationOfBenefitResourceProvider implements IResourcePr
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param samhsaMatcher the {@link R4SamhsaMatcher} to use */
+  /** @param samhsaMatcher the {@link R4EobSamhsaMatcher} to use */
   @Inject
-  public void setSamhsaFilterer(R4SamhsaMatcher samhsaMatcher) {
+  public void setSamhsaFilterer(R4EobSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 

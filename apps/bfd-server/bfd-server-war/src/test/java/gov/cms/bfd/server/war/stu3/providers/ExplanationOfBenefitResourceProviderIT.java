@@ -3,10 +3,13 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ImmutableList;
@@ -52,20 +55,13 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * Integration tests for {@link
- * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider}.
- */
+/** Integration tests for {@link ExplanationOfBenefitResourceProvider}. */
 public final class ExplanationOfBenefitResourceProviderIT {
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(ExplanationOfBenefitResourceProviderIT.class);
 
   /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
-   * that any existing data is deleted from the tables before running the test suite.
+   * <<<<<<< HEAD Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once
+   * to make sure that any existing data is deleted from the tables before running the test suite.
    */
   @BeforeClass
   public static void cleanupDatabaseBeforeTestSuite() {
@@ -82,10 +78,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does exist in
+   * the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -114,10 +109,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist
+   * in the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingCarrierClaim() {
@@ -132,10 +126,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist
-   * in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist in the
+   * DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -164,10 +157,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingDMEClaim() {
@@ -182,10 +174,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does exist
-   * in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does exist in the
+   * DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -214,10 +205,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingHHAClaim() {
@@ -232,10 +222,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does exist in
+   * the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -264,10 +253,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingHospiceClaim() {
@@ -282,10 +270,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in
+   * the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -314,10 +301,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does
-   * not exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist
+   * in the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingInpatientClaim() {
@@ -332,10 +318,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in
+   * the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -364,10 +349,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does
-   * not exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does not
+   * exist in the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingOutpatientClaim() {
@@ -382,10 +366,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does exist
-   * in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does exist in the
+   * DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -414,10 +397,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingPartDEvent() {
@@ -432,10 +414,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB using a negative ID.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB using a negative ID.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingNegativePartDEvent() {
@@ -450,11 +431,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an
-   * invalid {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#IdParam} parameter.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an invalid
+   * {@link ExplanationOfBenefitResourceProvider#IdParam} parameter.
    */
   @Test(expected = InvalidRequestException.class)
   public void readEobForInvalidIdParamPartDEvent() {
@@ -469,10 +448,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does exist
-   * in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does exist in the
+   * DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -501,10 +479,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingSNFClaim() {
@@ -519,9 +496,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -648,11 +624,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging. This test uses a
-   * count of 2 to verify our code will not run into an IndexOutOfBoundsException on odd bundle
-   * sizes.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging. This test uses a count of 2 to verify
+   * our code will not run into an IndexOutOfBoundsException on odd bundle sizes.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -818,11 +792,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging. This test uses a
-   * count of 3 to verify our code will not run into an IndexOutOfBoundsException on even bundle
-   * sizes.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging. This test uses a count of 3 to verify
+   * our code will not run into an IndexOutOfBoundsException on even bundle sizes.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -864,10 +836,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging, providing the
-   * startIndex but not the pageSize (count).
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging, providing the startIndex but not the
+   * pageSize (count).
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -934,9 +905,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging on a page size of 0.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging on a page size of 0.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1072,10 +1042,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with a page size of 50 with fewer
-   * (8) results.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with a page size of 50 with fewer (8) results.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1205,11 +1173,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging, using negative values
-   * for page size and start index parameters. This test expects to receive a BadRequestException,
-   * as negative values should result in an HTTP 400.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging, using negative values for page size
+   * and start index parameters. This test expects to receive a BadRequestException, as negative
+   * values should result in an HTTP 400.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1254,9 +1221,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * doesn't return duplicate results.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
+   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} doesn't
+   * return duplicate results.
    *
    * <p>This is a regression test case for TODO.
    *
@@ -1301,9 +1268,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
+   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} works as
+   * expected for a {@link Patient} that does not exist in the DB.
    */
   @Test
   public void searchForEobsByMissingPatient() {
@@ -1379,7 +1346,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
     carrierRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(carrierRifRecord);
     entityManager.getTransaction().commit();
@@ -1404,7 +1371,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
     inpatientRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(inpatientRifRecord);
     entityManager.getTransaction().commit();
@@ -1430,7 +1397,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
     outpatientRifRecord =
         entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
     outpatientRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(outpatientRifRecord);
     entityManager.getTransaction().commit();
@@ -1455,7 +1422,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
     hhaRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(hhaRifRecord);
     entityManager.getTransaction().commit();
@@ -1480,7 +1447,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
     snfRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(snfRifRecord);
     entityManager.getTransaction().commit();
@@ -1505,7 +1472,7 @@ public final class ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
     hospiceRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(hospiceRifRecord);
     entityManager.getTransaction().commit();
@@ -1530,16 +1497,15 @@ public final class ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
     dmeRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(dmeRifRecord);
     entityManager.getTransaction().commit();
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} with
-   * <code>excludeSAMHSA=true</code> properly filters out SAMHSA-related claims.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=true</code> properly filters out SAMHSA-related claims.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1574,9 +1540,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} with
-   * <code>excludeSAMHSA=false</code> does not filter out SAMHSA-related claims.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=false</code> does not filter out SAMHSA-related claims.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1604,9 +1569,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} with
-   * <code>excludeSAMHSA=true</code> properly returns claims that are not SAMHSA-related.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=true</code> properly returns claims that are not SAMHSA-related.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1638,9 +1602,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} with
-   * <code>excludeSAMHSA=false</code> properly returns claims that are not SAMHSA-related.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=false</code> properly returns claims that are not SAMHSA-related.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1672,10 +1635,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * handles the {@link ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} header
-   * properly.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
+   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} handles the
+   * {@link ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} header properly.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1757,10 +1719,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, with filtering by claim
-   * type.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
+   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} works as
+   * expected for a {@link Patient} that does exist in the DB, with filtering by claim type.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1810,9 +1771,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as with a lastUpdated parameter after yesterday.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
+   * lastUpdated parameter after yesterday.
    *
    * <p>See https://www.hl7.org/fhir/search.html#lastUpdated for explanation of possible types
    * lastUpdatedQueries
@@ -1843,9 +1803,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as with a lastUpdated parameter after yesterday.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
+   * lastUpdated parameter after yesterday.
    *
    * @throws FHIRException (indicates test failure)
    */
