@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
-  private R4SamhsaMatcher samhsaMatcherV2;
+  private R4EobSamhsaMatcher samhsaMatcherV2;
   private static final String CODING_SYSTEM_HCPCS_CD =
       TransformerConstants.BASE_URL_CCW_VARIABLES
           + "/"
@@ -66,7 +66,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   /** Sets up the test. */
   @Before
   public void setup() {
-    samhsaMatcherV2 = new R4SamhsaMatcher();
+    samhsaMatcherV2 = new R4EobSamhsaMatcher();
   }
 
   /**
