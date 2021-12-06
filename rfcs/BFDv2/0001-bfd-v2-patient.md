@@ -27,7 +27,7 @@ This RFC proposes that our team migrate from BFD v1 STU3 Patient FHIR resource t
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
-
+* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation
@@ -273,3 +273,9 @@ No future possibilities are being seriously considered at this time.
 
 The following addendums are required reading before voting on this proposal: None
 
+## Implementation
+[Implementation]: #implementation
+
+* Implementation Status: Done
+* JIRA Ticket(s):
+    * [BFD-293](https://jira.cms.gov/browse/BFD-293)

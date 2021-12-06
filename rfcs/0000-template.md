@@ -27,6 +27,7 @@ For any such not-needed section, simply write in "N/A".
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
+* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation
@@ -133,3 +134,10 @@ The following addendums are required reading before voting on this proposal:
 * (none at this time)
 
 Please note that some of these addendums may be encrypted. If you are unable to decrypt the files, you are not authorized to vote on this proposal.
+
+## Implementation
+[Implementation]: #implementation
+
+* Implementation Status: (Done/Not Yet)
+* JIRA Ticket(s):
+    * [BLUEBUTTON-0001](https://jira.cms.gov/browse/BLUEBUTTON-0001)

@@ -28,6 +28,7 @@ The proposal discusses these new features as well as the logic that BFD's partne
     * [Alternatives Considered](#alternatives-considered)
 * [Future Possibilities](#future-possibilities)
 * [References](#references)
+* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation
@@ -242,3 +243,10 @@ The following references are required to fully understand and implement this pro
 
 <a id="ref8"></a>
 [8] Bloom Filter: <https://en.wikipedia.org/wiki/Bloom_filter>
+
+## Implementation
+[Implementation]: #implementation
+
+* Implementation Status: Done
+* JIRA Ticket(s):
+    * [BLUEBUTTON-1506](https://jira.cms.gov/browse/BLUEBUTTON-1506)

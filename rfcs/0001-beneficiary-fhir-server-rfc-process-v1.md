@@ -21,6 +21,7 @@
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
+* [Implementation](#implementation)
 
 The Blue Button Data/backend team should have an informal-as-is-reasonable process for managing and evaluating major proposals.
 
@@ -142,3 +143,10 @@ The following addendums are required reading before voting on this proposal:
 * (none at this time)
 
 Please note that some of these addendums may be encrypted. If you are unable to decrypt the files, you are not authorized to vote on this proposal.
+
+## Implementation
+[Implementation]: #implementation
+
+* Implementation Status: Done
+* JIRA Ticket(s):
+    * [BLUEBUTTON-949](https://jira.cms.gov/browse/BLUEBUTTON-949)

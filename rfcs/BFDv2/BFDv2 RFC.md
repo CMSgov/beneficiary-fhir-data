@@ -34,7 +34,7 @@ This RFC proposes that our team migrate from BFD v1 platform currently on FHIR S
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
-
+* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation
@@ -238,3 +238,10 @@ No future possibilities are being seriously considered at this time.
 [Addendums]: #addendums
 
 The following addendums are required reading before voting on this proposal: None
+
+## Implementation
+[Implementation]: #implementation
+
+* Implementation Status: Done
+* JIRA Ticket(s):
+    * [BFD-907](https://jira.cms.gov/browse/BFD-907)
