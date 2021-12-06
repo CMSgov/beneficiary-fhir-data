@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.function.BiConsumer;
@@ -12,10 +13,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * The claim transformers need to apply specific tests based on the type of field being converted.
- * These tests have a lot of commonality but work on different protobuf and JPA objects that aren't
- * connected through inheritance or any interfaces. This class allows derived classes specific to
- * each transformer's test class to implement specific methods required to run the field tests.
+ * The claim transformers {@link FissClaimTransformer and }{@link McsClaimTransformer} combined
+ * populate 11 different JPA entity classes with data from corresponding gRPC API message objects.
+ * The tests for these transformations need to apply specific checks for every field based on the
+ * type of field being converted. These tests have a lot of commonality but work on different
+ * protobuf and JPA objects that aren't connected through inheritance or any interfaces.
+ *
+ * <p>This abstract class implements the field checks using a set of abstract methods overridden by
+ * entity specific derived classes to instantiate message and entity objects of the correct type.
  *
  * @param <TClaimBuilder> class of the protobuf message object's builder (e.g. FissClaim.Builder)
  * @param <TClaim> class of the protobuf message object (e.g. FissClaim)
@@ -27,6 +32,21 @@ import java.util.function.Function;
  */
 public abstract class ClaimTransformerFieldTester<
     TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity> {
+  /**
+   * Verifies that a string field transformation is working properly. This includes verifying that a
+   * value is properly copied from the message object to the entity object and that minimum and
+   * maximum length validations are performed.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @param maxLength maximum valid length for the string field
+   * @return this object so that calls can be chained
+   */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
       stringField(
@@ -39,13 +59,62 @@ public abstract class ClaimTransformerFieldTester<
     final Function<TClaimEntity, String> wrappedGetter =
         claim -> getter.apply(getTestEntity(claim));
     final String wrappedFieldLabel = getLabel(fieldLabel);
-    verifyStringFieldTransformationCorrect(wrappedSetter, wrappedGetter, maxLength);
+    // limits the length os string tested for clob/text fields
+    verifyStringFieldTransformationCorrect(
+        wrappedSetter, wrappedGetter, Math.min(10000, maxLength));
     verifyStringFieldLengthLimitsEnforced(wrappedSetter, wrappedFieldLabel, maxLength, 0);
-    verifyStringFieldLengthLimitsEnforced(
-        wrappedSetter, wrappedFieldLabel, maxLength, maxLength + 1);
+    if (maxLength < Integer.MAX_VALUE) {
+      verifyStringFieldLengthLimitsEnforced(
+          wrappedSetter, wrappedFieldLabel, maxLength, maxLength + 1);
+    }
     return this;
   }
 
+  /**
+   * Verifies that a string field transformation always sets a certain field to the hashed value of
+   * another field.
+   *
+   * @param setter method reference or lambda to set a value of the field being hashed on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the hashed value field from an
+   *     entity object
+   * @param maxLength maximum valid length for the string field being hashed
+   * @param idHasher {@link gov.cms.bfd.pipeline.sharedutils.IdHasher} object used to compute a
+   *     hashed value
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      hashField(
+          BiConsumer<TTestEntityBuilder, String> setter,
+          Function<TTestEntity, String> getter,
+          int maxLength,
+          IdHasher hasher) {
+    final BiConsumer<TClaimBuilder, String> wrappedSetter =
+        (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
+    final Function<TClaimEntity, String> wrappedGetter =
+        claim -> getter.apply(getTestEntity(claim));
+    final String valueToHash = createString(maxLength);
+    final String hashValue = hasher.computeIdentifierHash(valueToHash);
+    verifyFieldTransformationSucceeds(
+        claimBuilder -> wrappedSetter.accept(claimBuilder, valueToHash), wrappedGetter, hashValue);
+    return this;
+  }
+
+  /**
+   * Verifies that a date field transformation is working properly. This includes verifying that a
+   * value is properly copied from the message object to the entity object and that invalid date
+   * strings generate exceptions.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @return this object so that calls can be chained
+   */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
       dateField(
@@ -67,6 +136,20 @@ public abstract class ClaimTransformerFieldTester<
     return this;
   }
 
+  /**
+   * Verifies that an amount field transformation is working properly. This includes verifying that
+   * a value is properly copied from the message object to the entity object and that invalid
+   * decimal strings generate exceptions.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @return this object so that calls can be chained
+   */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
       amountField(
@@ -88,6 +171,16 @@ public abstract class ClaimTransformerFieldTester<
     return this;
   }
 
+  /**
+   * Verifies that a date field transformation is working properly. This includes verifying that a
+   * value is properly copied from the message object to the entity object.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @return this object so that calls can be chained
+   */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
       intField(
@@ -101,6 +194,19 @@ public abstract class ClaimTransformerFieldTester<
     return this;
   }
 
+  /**
+   * Verifies that a date field transformation is working properly. This includes verifying that a
+   * value is properly copied from the message object to the entity object and that the copied value
+   * matches the expected string value associated with the enum.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param getter method reference of lambda to get a value of the field being tested from an
+   *     entity object
+   * @param enumValue a valid enum value to be set on the message object
+   * @param stringValue the expected matching string value associated with the provided enumValue
+   * @return this object so that calls can be chained
+   */
   @CanIgnoreReturnValue
   <TEnum extends Enum<?>>
       ClaimTransformerFieldTester<
@@ -118,8 +224,32 @@ public abstract class ClaimTransformerFieldTester<
   }
 
   /**
-   * Overridden to access a builder object from the claimBuilder so that it can be used to assign
-   * values in a test.
+   * Verifies that an enum field transformation that has been configured to reject unrecognized
+   * values throws a proper error.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param badStringValue a string value that should throw an error indicating the value is
+   *     unsupported by the field
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+      enumFieldRejectsUnrecognizedValue(
+          BiConsumer<TTestEntityBuilder, String> setter, String badStringValue, String fieldLabel) {
+    verifyFieldTransformationFails(
+        claimBuilder -> setter.accept(getTestEntityBuilder(claimBuilder), badStringValue),
+        getLabel(fieldLabel),
+        "unsupported enum value");
+    return this;
+  }
+
+  /**
+   * Overridden by entity specific derived classes to obtain an appropriate builder object that can
+   * be used to create TTestEntity object for testing.
    *
    * @param claimBuilder the builder being used to construct a claim
    * @return a builder for the object within the claim that we want to test
@@ -127,7 +257,8 @@ public abstract class ClaimTransformerFieldTester<
   abstract TTestEntityBuilder getTestEntityBuilder(TClaimBuilder claimBuilder);
 
   /**
-   * Overridden to access an entity object within a claim entity so that it can be tested.
+   * Overridden by entity specific derived classes to obtain a TTestEntity instance from the claim
+   * for testing.
    *
    * @param claim the claim entity
    * @return the entity within the claim that we want to be able to test
@@ -136,7 +267,7 @@ public abstract class ClaimTransformerFieldTester<
 
   /**
    * Adds any necessary prefix to the provided error label. This is generally something like
-   * "payer-0-".
+   * "payer-0-" though for claim objects it will simply be the unmodified label.
    *
    * @param basicLabel generally the raw field name
    * @return the label with any necessary prefix
