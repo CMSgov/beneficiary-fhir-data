@@ -229,21 +229,48 @@ public abstract class ClaimTransformerFieldTester<
    *
    * @param setter method reference or lambda to set a value of the field being tested on a message
    *     object
+   * @param fieldLabel text identifying the field in {@link DataTransformer.TransformationException
+   *     error messages}
    * @param badStringValue a string value that should throw an error indicating the value is
    *     unsupported by the field
-   * @param fieldLabel text identifying the field in {@link
-   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
-   *     messages}
    * @return this object so that calls can be chained
    */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
       enumFieldRejectsUnrecognizedValue(
-          BiConsumer<TTestEntityBuilder, String> setter, String badStringValue, String fieldLabel) {
+          BiConsumer<TTestEntityBuilder, String> setter, String fieldLabel, String badStringValue) {
     verifyFieldTransformationFails(
         claimBuilder -> setter.accept(getTestEntityBuilder(claimBuilder), badStringValue),
         getLabel(fieldLabel),
         "unsupported enum value");
+    return this;
+  }
+
+  /**
+   * Verifies that an enum field transformation that has been configured to reject specific values
+   * throws a proper error.
+   *
+   * @param setter method reference or lambda to set a value of the field being tested on a message
+   *     object
+   * @param fieldLabel text identifying the field in {@link
+   *     gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer.TransformationException error
+   *     messages}
+   * @param badValues a variadic list of values that should throw an error indicating the value is
+   *     unsupported by the field
+   * @return this object so that calls can be chained
+   */
+  @CanIgnoreReturnValue
+  <TEnum extends Enum<?>>
+      ClaimTransformerFieldTester<
+              TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
+          enumFieldRejectsSpecificValues(
+              BiConsumer<TTestEntityBuilder, TEnum> setter, String fieldLabel, TEnum... badValues) {
+    for (TEnum badValue : badValues) {
+      verifyFieldTransformationFails(
+          claimBuilder -> setter.accept(getTestEntityBuilder(claimBuilder), badValue),
+          getLabel(fieldLabel),
+          "unsupported enum value");
+    }
     return this;
   }
 

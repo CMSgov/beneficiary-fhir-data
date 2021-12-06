@@ -504,7 +504,7 @@ public class FissClaimTransformerTest {
             FissClaimStatus.CLAIM_STATUS_MOVE,
             "M")
         .enumFieldRejectsUnrecognizedValue(
-            FissClaim.Builder::setCurrStatusUnrecognized, "ZZZ", PreAdjFissClaim.Fields.currStatus);
+            FissClaim.Builder::setCurrStatusUnrecognized, PreAdjFissClaim.Fields.currStatus, "ZZZ");
   }
 
   @Test
