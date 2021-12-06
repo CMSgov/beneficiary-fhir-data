@@ -21,12 +21,12 @@
 CREATE TABLE "pre_adj"."FissAuditTrails" (
     "dcn" varchar(23) NOT NULL,
     "priority" smallint NOT NULL,
+    "lastUpdated" timestamp with time zone,
     "badtStatus" varchar(1),
     "badtLoc" varchar(5),
     "badtOperId" varchar(9),
     "badtReas" varchar(5),
     "badtCurrDate" date,
-    "lastUpdated" timestamp with time zone,
     CONSTRAINT "FissAuditTrails_key" PRIMARY KEY ("dcn", "priority"),
     CONSTRAINT "FissAuditTrails_parent" FOREIGN KEY ("dcn") REFERENCES "pre_adj"."FissClaims"("dcn")
 );

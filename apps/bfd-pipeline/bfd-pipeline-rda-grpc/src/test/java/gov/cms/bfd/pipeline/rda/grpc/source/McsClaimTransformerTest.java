@@ -52,7 +52,7 @@ public class McsClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
   private final IdHasher idHasher =
-      new IdHasher(new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
+      new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
   private final McsClaimTransformer transformer = new McsClaimTransformer(clock, idHasher);
   private McsClaimChange.Builder changeBuilder;
   private McsClaim.Builder claimBuilder;
@@ -110,7 +110,7 @@ public class McsClaimTransformerTest {
     claim.setIdrTotBilledAmt(new BigDecimal("67591.96"));
     claim.setIdrClaimReceiptDate(LocalDate.of(2020, 2, 1));
     claim.setIdrClaimMbi("5467891245678");
-    claim.setIdrClaimMbiHash("8033928eb4cf902474141065280c51791663e86d760da5a0fadf354daffb4b01");
+    claim.setIdrClaimMbiHash("c0755c7a103d9d8556778f64cc45766686d6c02151ebfcc4639dcaeedbf00ca1");
     claim.setIdrHdrFromDateOfSvc(LocalDate.of(2020, 1, 7));
     claim.setIdrHdrToDateOfSvc(LocalDate.of(2020, 1, 14));
     claim.setLastUpdated(clock.instant());

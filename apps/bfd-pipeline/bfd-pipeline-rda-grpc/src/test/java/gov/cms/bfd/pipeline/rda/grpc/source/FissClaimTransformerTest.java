@@ -57,7 +57,7 @@ public class FissClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
   private final IdHasher idHasher =
-      new IdHasher(new IdHasher.Config(1000, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
+      new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
   private final FissClaimTransformer transformer = new FissClaimTransformer(clock, idHasher);
   private FissClaimChange.Builder changeBuilder;
   private FissClaim.Builder claimBuilder;
@@ -109,7 +109,7 @@ public class FissClaimTransformerTest {
     claim.setPrincipleDiag("7654321");
     claim.setNpiNumber("npi-123456");
     claim.setMbi("1234567890123");
-    claim.setMbiHash("d51b083f91c62eff93b6245bc8203bafa566f41b3553314d049059b8e55eea0d");
+    claim.setMbiHash("50ad6d78d3b8bb1a8195896c7479f04f4af76e8b42011a24146a943ede9321a0");
     claim.setFedTaxNumber("1234567890");
     claim.setPracLocAddr1("loc-address-1");
     claim.setPracLocAddr2("loc-address-2");
