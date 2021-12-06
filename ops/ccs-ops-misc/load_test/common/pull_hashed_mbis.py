@@ -11,7 +11,6 @@ def loadData():
     if configFile is None:
         return -1
 
-    fileName = "mbis.txt"
     beneQuery = "SELECT \"mbiHash\" FROM \"Beneficiaries\" WHERE \"mbiHash\" IS NOT NULL LIMIT 100000;"
 
     print("Collecting test data...")

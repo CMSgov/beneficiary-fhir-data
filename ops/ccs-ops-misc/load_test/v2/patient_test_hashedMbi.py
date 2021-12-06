@@ -5,6 +5,7 @@ import sys
 import urllib3
 import common.config as config
 import common.test_setup as setup
+import locust.exception as locust_exception
 from locust import HttpUser, task
 
 server_public_key = setup.loadServerPublicKey()
@@ -22,9 +23,9 @@ client_cert = setup.getClientCert()
 class BFDUser(HttpUser):
     @task
     def patient(self):
-        if len(mbis) == 0
+        if len(mbis) == 0:
             print("Ran out of data, stopping test...")
-            raise StopLocust()
+            raise locust_exception.StopUser()
 
         hashed_mbi = mbis.pop()
         self.client.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C%0A{hashed_mbi}',
