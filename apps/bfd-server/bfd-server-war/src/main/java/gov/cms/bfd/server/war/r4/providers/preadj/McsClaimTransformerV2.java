@@ -171,10 +171,10 @@ public class McsClaimTransformerV2 {
       organization
           .getExtension()
           .add(
-              new Extension(BBCodingSystems.MCS_IDR_BILL_PROV_TYPE)
+              new Extension(BBCodingSystems.MCS.IDR_BILL_PROV_TYPE)
                   .setValue(
                       new Coding(
-                          BBCodingSystems.MCS_IDR_BILL_PROV_TYPE,
+                          BBCodingSystems.MCS.IDR_BILL_PROV_TYPE,
                           claimGroup.getIdrBillProvType(),
                           null)));
     }
@@ -183,10 +183,10 @@ public class McsClaimTransformerV2 {
       organization
           .getExtension()
           .add(
-              new Extension(BBCodingSystems.PROVIDER_SPECIALTY)
+              new Extension(BBCodingSystems.MCS.PROVIDER_SPECIALTY)
                   .setValue(
                       new Coding(
-                          BBCodingSystems.PROVIDER_SPECIALTY,
+                          BBCodingSystems.MCS.PROVIDER_SPECIALTY,
                           claimGroup.getIdrBillProvSpec(),
                           null)));
     }
@@ -202,7 +202,7 @@ public class McsClaimTransformerV2 {
                               C4BBOrganizationIdentifierType.TAX.getSystem(),
                               C4BBOrganizationIdentifierType.TAX.toCode(),
                               C4BBOrganizationIdentifierType.TAX.getDisplay())))
-                  .setSystem(BBCodingSystems.TAX_NUM)
+                  .setSystem(BBCodingSystems.MCS.IDR_BILL_PROV_EIN)
                   .setValue(claimGroup.getIdrBillProvEin()));
     }
 
@@ -230,10 +230,10 @@ public class McsClaimTransformerV2 {
     return claimGroup.getIdrClaimType() == null
         ? null
         : List.of(
-            new Extension(BBCodingSystems.MCS_IDR_CLM_TYPE)
+            new Extension(BBCodingSystems.MCS.IDR_CLM_TYPE)
                 .setValue(
                     new Coding(
-                        BBCodingSystems.MCS_IDR_CLM_TYPE, claimGroup.getIdrClaimType(), null)));
+                        BBCodingSystems.MCS.IDR_CLM_TYPE, claimGroup.getIdrClaimType(), null)));
   }
 
   private static List<Identifier> getIdentifier(PreAdjMcsClaim claimGroup) {

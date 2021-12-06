@@ -16,20 +16,33 @@ public class BBCodingSystems {
   public static final String FI_DOC_CLM_CONTROL_NUM =
       BB_BASE_URL + "/variables/fi_doc_clm_cntrl_num";
 
-  public static final String FISS_PAYERS_NAME = BB_BASE_URL + "/variables/fiss/payers-name";
-
   public static final String HCPCS = BB_BASE_URL + "/codesystem/hcpcs";
-
-  public static final String MCS_IDR_BILL_PROV_TYPE =
-      BB_BASE_URL + "/variables/mcs/idr-bill-prov-type";
-
-  public static final String MCS_IDR_CLM_TYPE = BB_BASE_URL + "/variables/mcs/idr-clm-type";
 
   public static final String PROVIDER_NUM = BB_BASE_URL + "/variables/prvdr_num";
 
-  public static final String PROVIDER_SPECIALTY = BB_BASE_URL + "/variables/prvdr_spclty";
-
-  public static final String TAX_NUM = BB_BASE_URL + "/variables/tax_num";
-
   private BBCodingSystems() {}
+
+  public static class FISS {
+
+    public static final String PAYERS_NAME = BB_BASE_URL + "/variables/fiss/payers-name";
+
+    public static final String TAX_NUM = BB_BASE_URL + "/variables/fiss/fed-tax-nb";
+
+    private FISS() {}
+  }
+
+  public static class MCS {
+
+    public static final String IDR_BILL_PROV_EIN = BB_BASE_URL + "/variables/mcs/idr-bill-prov-ein";
+
+    public static final String IDR_BILL_PROV_TYPE =
+        BB_BASE_URL + "/variables/mcs/idr-bill-prov-type";
+
+    public static final String IDR_CLM_TYPE = BB_BASE_URL + "/variables/prvdr_num";
+
+    public static final String PROVIDER_SPECIALTY =
+        BB_BASE_URL + "/variables/mcs/idr-bill-prov-spec";
+
+    private MCS() {}
+  }
 }

@@ -41,7 +41,9 @@ public final class DataServerLauncherAppIT {
     ProcessBuilder appRunBuilder =
         ServerProcess.createAppProcessBuilder(
             ServerTestUtils.getSampleWar(), new JvmDebugOptions(JvmDebugEnableMode.DISABLED));
+    String javaHome = System.getenv("JAVA_HOME");
     appRunBuilder.environment().clear();
+    appRunBuilder.environment().put("JAVA_HOME", javaHome);
     appRunBuilder.redirectErrorStream(true);
     Process appProcess = appRunBuilder.start();
 

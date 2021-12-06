@@ -291,7 +291,7 @@ public class FissClaimTransformerV2 {
                               C4BBOrganizationIdentifierType.TAX.getSystem(),
                               C4BBOrganizationIdentifierType.TAX.toCode(),
                               C4BBOrganizationIdentifierType.TAX.getDisplay())))
-                  .setSystem(BBCodingSystems.TAX_NUM)
+                  .setSystem(BBCodingSystems.FISS.TAX_NUM)
                   .setValue(claimGroup.getFedTaxNumber()));
     }
 
@@ -436,7 +436,7 @@ public class FissClaimTransformerV2 {
                 component.setExtension(
                     List.of(
                         new Extension(
-                            BBCodingSystems.FISS_PAYERS_NAME,
+                            BBCodingSystems.FISS.PAYERS_NAME,
                             new StringType(payer.getPayersName()))));
               }
 
