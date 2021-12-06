@@ -2,7 +2,7 @@
   "resourceType": "Claim",
   "id": "m-654321",
   "meta": {
-    "versionId": "f-654321-e4225b8660031f9205b893546e30d446be007117",
+    "versionId": "f-654321-7640a4213fccee89e2d8a7a3eb80eee64f3bff9c",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
@@ -47,9 +47,9 @@
           }
         },
         {
-          "url": "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+          "url": "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-spec",
           "valueCoding": {
-            "system": "https://bluebutton.cms.gov/resources/variables/prvdr_spclty",
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-spec",
             "code": "BA"
           }
         }
@@ -65,7 +65,7 @@
               }
             ]
           },
-          "system": "https://bluebutton.cms.gov/resources/variables/tax_num",
+          "system": "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-ein",
           "value": "1231231231"
         },
         {
@@ -126,7 +126,7 @@
     "start": "1970-07-30T00:00:00+00:00",
     "end": "1970-07-30T00:00:00+00:00"
   },
-  "created": "2021-11-30T14:19:16+00:00",
+  "created": "2021-12-06T18:43:01+00:00",
   "provider": {
     "reference": "#provider-org"
   },

@@ -1,14 +1,14 @@
 {
   "resourceType": "Bundle",
-  "id": "841827de-13e2-4e36-a87b-297cd4d93c93",
+  "id": "d24acebc-2239-41a7-91ee-4f1e38202453",
   "meta": {
-    "lastUpdated": "2021-11-30T14:19:17.522+00:00"
+    "lastUpdated": "2021-12-06T18:43:02.797+00:00"
   },
   "type": "searchset",
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:9899/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+      "url": "https://localhost:9327/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
     }
   ],
   "entry": [
@@ -17,7 +17,7 @@
         "resourceType": "Claim",
         "id": "f-123456",
         "meta": {
-          "versionId": "f-123456-588a3babf80bd2fee56222fa7470ec4da39c6ac2",
+          "versionId": "f-123456-e31e02683b608ca7291998ad5062f0008bec495d",
           "lastUpdated": "1970-01-01T00:00:00.000+00:00"
         },
         "contained": [
@@ -78,7 +78,7 @@
                     }
                   ]
                 },
-                "system": "https://bluebutton.cms.gov/resources/variables/tax_num",
+                "system": "https://bluebutton.cms.gov/resources/variables/fiss/fed-tax-nb",
                 "value": "abc123"
               },
               {
@@ -139,7 +139,7 @@
           "start": "1970-07-20T00:00:00+00:00",
           "end": "1970-07-20T00:00:00+00:00"
         },
-        "created": "2021-11-30T14:19:17+00:00",
+        "created": "2021-12-06T18:43:02+00:00",
         "provider": {
           "reference": "#provider-org"
         },

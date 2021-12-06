@@ -38,7 +38,7 @@ public class BBCodingSystems {
     public static final String IDR_BILL_PROV_TYPE =
         BB_BASE_URL + "/variables/mcs/idr-bill-prov-type";
 
-    public static final String IDR_CLM_TYPE = BB_BASE_URL + "/variables/prvdr_num";
+    public static final String IDR_CLM_TYPE = BB_BASE_URL + "/variables/mcs/idr-clm-type";
 
     public static final String PROVIDER_SPECIALTY =
         BB_BASE_URL + "/variables/mcs/idr-bill-prov-spec";
