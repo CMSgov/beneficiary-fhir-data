@@ -1,99 +1,13 @@
 import os
 import sys
 import getopt
-import common.pull_bene_ids
 import common.config as config
+import common.test_setup as setup
 from locust.main import main
 
-def set_locust_env(configFile, testFileName):
-    os.environ['LOCUST_HOST'] = configFile["testHost"]
-    os.environ['LOCUST_RUN_TIME'] = configFile["testRunTime"]
-    os.environ['LOCUST_HEADLESS'] = "True"
-    os.environ['LOCUST_LOCUSTFILE'] = testFileName
-    os.environ['LOCUST_USERS'] = configFile["testNumTotalClients"]
-    os.environ['LOCUST_SPAWN_RATE'] = configFile["testCreatedClientsPerSecond"]
-    os.environ['LOCUST_LOGLEVEL'] = "INFO"
-
-def run_tests():
-    print(" --- BFD Load Tests ---")
-    choice = ''
-    configFile = {}
-
-    while choice.upper() != 'Q':
-        if choice.upper() == '1':
-            configFile = config.create()
-            choice = ''
-        elif choice.upper() == '2':
-            configFile = config.load()
-            while choice.upper() != 'Q':
-                print(" -- Individual Test List (v1) --")
-                print("1: Explanation of Benefit (EOB) by ID \n2: Patient by ID \nQ: return to main menu")
-                choice = input()
-                if choice.upper() == '1':
-                    set_locust_env(configFile, "./v1/eob_test.py")
-                    main()
-                elif choice.upper() == '2':
-                    set_locust_env(configFile, "./v1/patient_test.py")
-                    main()
-            choice = ''
-        elif choice.upper() == '3':
-            configFile = config.load()
-            print(" -- Individual Test List (v2) --")
-            print("1: Coverage by ID - Count 10 \n2: Coverage by ID - Count 100 - last Updated 2 weeks"
-            + "\n3: Coverage by ID - last Updated 2 weeks \n4: Explanation of Benefit (EOB) by ID - Count 10"
-            + "\n5: Explanation of Benefit (EOB) by ID - Count 10 - last Updated 2 weeks"
-            + "\n6: Explanation of Benefit (EOB) by ID - Include tax numbers - last Updated 2 weeks"
-            + "\n7: Explanation of Benefit (EOB) by ID - minimal response"
-            + "\n8: Patient - hashed MBI"
-            + "\n9: Patient - ID"
-            + "\n10: Patient - ID - IncludeIdentifiers=true"
-            + "\n11: Patient - ID - IncludeIdentifiers=mbi - last updated 2 weeks"
-            + "\n12: Patient - Coverage Contract - IncludeIdentifiers=mbi - Count 500"
-            + "\nQ: return to main menu")
-            choice = input()
-            if choice.upper() == '1':
-                set_locust_env(configFile, "./v2/coverage_test_id_count10.py")
-                main()
-            elif choice.upper() == '2':
-                set_locust_env(configFile, "./v2/coverage_test_id_count100_lastUpdated.py")
-                main()
-            elif choice.upper() == '3':
-                set_locust_env(configFile, "./v2/coverage_test_id_lastUpdated.py")
-                main()
-            elif choice.upper() == '4':
-                set_locust_env(configFile, "./v2/eob_test_id_count10.py")
-                main()
-            elif choice.upper() == '5':
-                set_locust_env(configFile, "./v2/eob_test_id_count10_lastUpdated.py")
-                main()
-            elif choice.upper() == '6':
-                set_locust_env(configFile, "./v2/eob_test_id_includeTaxNumbers_lastUpdated.py")
-                main()
-            elif choice.upper() == '7':
-                set_locust_env(configFile, "./v2/eob_test_id_params_false.py")
-                main()
-            elif choice.upper() == '8':
-                set_locust_env(configFile, "./v2/patient_test_hashedMbi.py")
-                main()
-            elif choice.upper() == '9':
-                set_locust_env(configFile, "./v2/patient_test_id.py")
-                main()
-            elif choice.upper() == '10':
-                set_locust_env(configFile, "./v2/patient_test_id_includeIdentifiers.py")
-                main()
-            elif choice.upper() == '11':
-                set_locust_env(configFile, "./v2/patient_test_id_includeMbiIdentifiers_lastUpdated.py")
-                main()
-            elif choice.upper() == '12':
-                set_locust_env(configFile, "./v2/patient_test_coverageContract_includeMbiIdentifiers_count500.py")
-                main()
-            choice = ''
-        else:
-            print("Please select an option: ")
-            print("1: Setup config file (change target environment) \n2: Run single v1 test \n3: Run single v2 test \nQ: quit")
-            choice = input()
-
-
+'''
+Runs a specified test via the input args.
+'''
 def run_with_params(argv):
 
     testFile = ''
@@ -164,18 +78,13 @@ def run_with_params(argv):
 
     ## write out config file
     config.save(configData)
+    setup.set_locust_test_name(testFile)
 
-    ## set up locust params
-    set_locust_env(config.load(), testFile)
     # strip off extra command line params for locust, or else it tries to parse them
     sys.argv = sys.argv[:1]
     # call locust to run test
     main()
 
-
-## Run either single-line mode, or interactive command-line mode based on if args were passed
+## Runs the test via run args when this file is run
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        run_with_params(sys.argv[1:])
-    else:
-        run_tests()
+    run_with_params(sys.argv[1:])

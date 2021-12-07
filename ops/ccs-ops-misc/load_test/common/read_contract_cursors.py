@@ -3,15 +3,19 @@ import sys
 import yaml
 from common import config
 
-def loaddata():
+'''
+Returns a list of cursor urls by looking for an expected file (named by endpoint version) and returning the
+patient by contract search urls with all relevant pages (via cursor links).
+'''
+def loaddata(version):
     ## Load configuration data, like db creds
     config_file = config.load()
 
     ## if we failed to load the config, bail out
     if config_file is None:
-        return -1
+        return []
 
-    file_path = config_file["homePath"] + "contract_cursors.txt"
+    file_path = config_file["homePath"] + f"{version}_contract_cursors.txt"
 
     try:
         cursor_file = open(file_path, "r")

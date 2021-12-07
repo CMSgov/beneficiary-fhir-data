@@ -19,6 +19,7 @@ if not server_public_key:
 
 eob_ids = setup.generateAndLoadIds()
 client_cert = setup.getClientCert()
+setup.set_locust_env(config.load())
 
 class BFDUser(HttpUser):
     @task
@@ -28,7 +29,7 @@ class BFDUser(HttpUser):
             raise locust_exception.StopUser()
 
         id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/ExplanationOfBenefit?_IncludeTaxNumbers=false&_lastUpdated=false&service-date=false&patient={id}&_format=application%2Ffhir%2Bjson',
+        self.client.get(f'/v2/fhir/ExplanationOfBenefit?patient={id}&_count=10&_format=application%2Ffhir%2Bjson',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/ExplanationOfBenefit')
+                name='/v2/fhir/ExplanationOfBenefit search by id / count=10')

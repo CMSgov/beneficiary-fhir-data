@@ -19,6 +19,7 @@ if not server_public_key:
 
 mbis = setup.generateAndLoadMbis()
 client_cert = setup.getClientCert()
+setup.set_locust_env(config.load())
 
 class BFDUser(HttpUser):
     @task
@@ -31,4 +32,4 @@ class BFDUser(HttpUser):
         self.client.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C%0A{hashed_mbi}',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/Patient')
+                name='/v2/fhir/Patient search by hashed mbi')

@@ -19,6 +19,7 @@ if not server_public_key:
 
 eob_ids = setup.generateAndLoadIds()
 client_cert = setup.getClientCert()
+setup.set_locust_env(config.load())
 
 '''
 The lastUpdated field defaults to two weeks before when the script is run. The time delta can be modified.
@@ -39,4 +40,4 @@ class BFDUser(HttpUser):
         self.client.get(f'/v2/fhir/ExplanationOfBenefit?_IncludeTaxNumbers=true&patient={id}&_format=application%2Ffhir%2Bjson&_lastUpdated=gt{last_updated}',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/ExplanationOfBenefit')
+                name='/v2/fhir/ExplanationOfBenefit search by id / lastUpdated (2 weeks) / _IncludeTaxNumbers=true')

@@ -1,6 +1,9 @@
 import os
 import yaml
 
+'''
+Saves a config file using the input file data.
+'''
 def save(fileData):
     configFile = open("config.yml", 'w')
     configFile.write("homePath: \"%s\"\n" % fileData.homePath)
@@ -15,8 +18,14 @@ def save(fileData):
     configFile.write("testCreatedClientsPerSecond: \"%s\"\n" % fileData.testCreatedClientsPerSecond)
     configFile.close()
 
+'''
+Requests config data from the user and creates a new test config file using that data.
+
+Returns the loaded config, or None if nothing could be loaded or an error occurred.
+'''
 def create():
 
+    ## Create a small data object for holding the input data
     class fileData: pass
     ## Prompt user for 4 config values and write to file
     fileData.homePath = input("Input full path to the home directory: ")
@@ -41,7 +50,7 @@ def create():
         print("Could not read the new file; please try again.")
 
 '''
-Loads a config from the config file; if none exists, will attempt to create one via user prompts.
+Loads a config from the config file; if no file exists, will attempt to create one via user prompts.
 
 Returns the loaded config, or None if nothing could be loaded or an error occurred.
 '''

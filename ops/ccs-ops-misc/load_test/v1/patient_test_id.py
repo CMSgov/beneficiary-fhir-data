@@ -5,6 +5,7 @@ import sys
 import urllib3
 import common.config as config
 import common.test_setup as setup
+import locust.exception as locust_exception
 from locust import HttpUser, task
 
 server_public_key = setup.loadServerPublicKey()
@@ -18,10 +19,15 @@ if not server_public_key:
 
 bene_ids = setup.generateAndLoadIds()
 client_cert = setup.getClientCert()
+setup.set_locust_env(config.load())
 
 class BFDUser(HttpUser):
     @task
     def patient_by_id(self):
+        if len(bene_ids) == 0:
+            print("Ran out of data, stopping test...")
+            raise locust_exception.StopUser()
+
         id = bene_ids.pop()
         self.client.get(f'/v1/fhir/Patient/{id}',
                 cert=client_cert,

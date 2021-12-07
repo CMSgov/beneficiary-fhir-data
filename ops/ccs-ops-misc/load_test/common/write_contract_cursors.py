@@ -8,6 +8,11 @@ import requests
 import json
 from common import config
 
+'''
+Takes the args (expected from calling this file directly as a standalone script) and makes a database call
+to get n number of contract search urls and all page cursor urls for those contracts. After the database call
+writes the urls to a file for later test execution.
+'''
 def loadDataFromArgs(argv):
 
     ## Load configuration data, like db creds
@@ -22,14 +27,16 @@ def loadDataFromArgs(argv):
     month = ""
     year = ""
     count = ""
+    version = ""
 
     helpString = ('write_contract_cursors.py \n--contracts="List of contract IDs to look up cursors for, 1-n contract ids separated by commas, no spaces" (Required) '
          '\n--year="year of the contract" (Required)'
          '\n--month="month of the contract, must be in MM format (ex. 01)" (Required)'
-         '\n--count="number of results to pull per cursor" (Required)')
+         '\n--count="number of results to pull per cursor" (Required)',
+         '\n--version="which endpoint version to use (v1 or v2)" (Required)')
 
     try:
-        opts, args = getopt.getopt(argv,"h",["contracts=", "year=", "month=", "count="])
+        opts, args = getopt.getopt(argv,"h",["contracts=", "year=", "month=", "count=", "version="])
     except getopt.GetoptError:
         print("Missing required arg. ")
         print(helpString)
@@ -47,30 +54,35 @@ def loadDataFromArgs(argv):
             month = arg
         elif opt == "--count":
             count = arg
+        elif opt == "--version":
+            version = arg
         else:
             print("Invalid arg passed, exiting...")
             sys.exit()
 
-    cursorFile = open(configFile["homePath"] + "contract_cursors.txt", "w")
+    cursorFile = open(configFile["homePath"] + f"{version}_contract_cursors.txt", "w")
     certFile = configFile["clientCertPath"]
 
     # disable noisy warnings when making requests
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    count = 0
+    totalContractCount = 0
 
     print("Collecting cursors for each contract...")
     for contractId in contractIds:
         print(f'[ContractId: {contractId}]')
         contractCount = 0
-        url = envHost + ('/v2/fhir/Patient'
-                      f'?_has%3ACoverage.extension=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fvariables%2Fptdcntrct{month}%7C{contractId}'
-                      f'&_has%3ACoverage.rfrncyr=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fvariables%2Frfrnc_yr%7C{year}'
-                      f'&_count={count}'
-                      '&_format=json')
+        url = envHost + (f'/{version}/fhir/Patient'
+                      f'?_has%3ACoverage.extension=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fvariables%2Fptdcntrct{month}%7C{contractId}')
+
+        ## v2 has coverage by year
+        if version is "v2":
+            url += f'&_has%3ACoverage.rfrncyr=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fvariables%2Frfrnc_yr%7C{year}'
+
+        url += (f'&_count={count}&_format=json')
 
         # Write in the initial (first page) request
         cursorFile.write(f"{url}\n")
-        count += 1
+        totalContractCount += 1
         # keep writing cursors to the file as long as the response has "next" cursor entries
         while url:
             contents = requests.get(url, cert=certFile, verify="", headers={"IncludeIdentifiers": "mbi"})
@@ -86,7 +98,7 @@ def loadDataFromArgs(argv):
                         if link["relation"] == "next":
                             url = link["url"]
                             cursorFile.write(f"{url}\n")
-                            count += 1
+                            totalContractCount += 1
                             contractCount += 1
                             break
             # Give some indication the script is running every once in a while
@@ -94,7 +106,7 @@ def loadDataFromArgs(argv):
                 print(f"Still collecting... (currently at {contractCount} cursors)")
         print(f"Wrote {contractCount} cursor links from contract id {contractId}")
 
-    print(f"Wrote {count} total links to file")
+    print(f"Wrote {totalContractCount} total links to file")
     cursorFile.close()
 
 if __name__ == "__main__":

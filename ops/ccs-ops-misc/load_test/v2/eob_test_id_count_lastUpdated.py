@@ -19,6 +19,7 @@ if not server_public_key:
 
 eob_ids = setup.generateAndLoadIds()
 client_cert = setup.getClientCert()
+setup.set_locust_env(config.load())
 
 '''
 The lastUpdated field defaults to two weeks before when the script is run. The time delta can be modified.
@@ -30,13 +31,13 @@ last_updated = prior_date.strftime('%Y-%m-%d')
 
 class BFDUser(HttpUser):
     @task
-    def coverage(self):
+    def explanation_of_benefit(self):
         if len(eob_ids) == 0:
             print("Ran out of data, stopping test...")
             raise locust_exception.StopUser()
 
         id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/Coverage?beneficiary={id}&_lastUpdated=gt{last_updated}&_count=100',
+        self.client.get(f'/v2/fhir/ExplanationOfBenefit?patient={id}&_count=10&_format=application%2Ffhir%2Bjson&_lastUpdated=gt{last_updated}',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/Coverage')
+                name='/v2/fhir/ExplanationOfBenefit search by id / count=10 / lastUpdated (2 weeks)')

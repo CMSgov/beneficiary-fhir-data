@@ -19,6 +19,7 @@ if not server_public_key:
 
 eob_ids = setup.generateAndLoadIds()
 client_cert = setup.getClientCert()
+setup.set_locust_env(config.load())
 
 class BFDUser(HttpUser):
     @task
@@ -31,4 +32,4 @@ class BFDUser(HttpUser):
         self.client.get(f'/v2/fhir/Patient?_id={id}&_format=application%2Ffhir%2Bjson',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/Patient')
+                name='/v2/fhir/Patient search by id')
