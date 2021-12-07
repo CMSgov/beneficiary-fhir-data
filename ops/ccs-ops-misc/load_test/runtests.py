@@ -49,6 +49,7 @@ def run_tests():
             + "\n10: Patient - ID - IncludeIdentifiers=true"
             + "\n11: Patient - ID - IncludeIdentifiers=mbi - last updated 2 weeks"
             + "\n12: Patient - Coverage Contract - IncludeIdentifiers=mbi - Count 500"
+            + "\n13: Claim - hashed MBI"
             + "\nQ: return to main menu")
             choice = input()
             if choice.upper() == '1':
@@ -86,6 +87,9 @@ def run_tests():
                 main()
             elif choice.upper() == '12':
                 set_locust_env(configFile, "./v2/patient_test_coverageContract_includeMbiIdentifiers_count500.py")
+                main()
+            elif choice.upper() == '13':
+                set_locust_env(configFile, "./v2/claim_test_hashedMbi.py")
                 main()
             choice = ''
         else:

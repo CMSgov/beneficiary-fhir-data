@@ -1,6 +1,7 @@
 import common.config as config
 import common.pull_bene_ids as benes
 import common.pull_hashed_mbis as mbi
+import common.pull_pre_adj_hashed_mbis as pambi
 
 
 def generateAndLoadIds():
@@ -10,6 +11,10 @@ def generateAndLoadIds():
 def generateAndLoadMbis():
     configFile = config.load()
     return mbi.loadData()
+
+def generateAndLoadPreAdjMbis():
+    configFile = config.load()
+    return pambi.loadData()
 
 def getClientCert():
     configFile = config.load()
