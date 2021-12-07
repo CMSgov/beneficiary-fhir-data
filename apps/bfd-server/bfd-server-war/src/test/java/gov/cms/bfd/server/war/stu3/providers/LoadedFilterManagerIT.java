@@ -19,7 +19,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,24 @@ public final class LoadedFilterManagerIT {
 
   private static final String SAMPLE_BENE = "567834";
   private static final String INVALID_BENE = "1";
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
+   */
+  @BeforeClass
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
 
   @Test
   public void emptyFilters() {
