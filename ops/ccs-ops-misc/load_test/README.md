@@ -38,6 +38,15 @@ Offers convenience over python's default http request get().
 Install: _pip3 install requests_
 See: https://pypi.org/project/requests/
 
+**Locust**
+
+Locust may or may not already be installed on your box; if not follow the install instruction here.
+
+What: Library for running the test and reporting the results
+Why: Runs the test execution and reporting
+Install: _pip3 install locust_
+See: http://docs.locust.io/en/stable/installation.html
+
 
 In addition to these libraries, you'll also need to copy a PEM (credentials) file and set the user to your SSH username on the test box. 
 Run the following two commands on the box:
@@ -61,7 +70,7 @@ The tests are run with parameters that specify all the test params and test file
 
 A single-line test will look like this:
 
-_python3 runtests.py --homePath="~/" --clientCertPath="~/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseHost="**<AWS_DB_host>**" --databaseUsername="**<db_username_from_keybase>**" --databasePassword="**<db_password_from_keybase>**" --testHost="https://test.bfd.cms.gov" --testFile="./v1/eob_test.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"_
+_python3 runtests.py --homePath="~/" --clientCertPath="~/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseHost="**<AWS_DB_host>**" --databaseUsername="**<db_username_from_keybase>**" --databasePassword="**<db_password_from_keybase>**" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"_
 
 Essentially, all the items you would set up in the config file are set in a single line. There are some optional, and some required parameters here:
 
@@ -148,8 +157,9 @@ determined by an HTTP response code >200, they will be reported here.
     
 ## Improvements
 This is a list of some improvements that could be made to the tests moving forward:
-- Currently when running with params, the test run time begins counting down when the initial data setup is happening, meaning the test will run slightly shorter than intended. An improvement could be made to fix this to "start" the test time only when locust main runs.
+- Currently, when running with params, the test run time begins counting down when the initial data setup is happening, meaning the test will run slightly shorter than intended. An improvement could be made to fix this to "start" the test time only when locust main runs.
 - Commonize the boilerplate code that each test shares, possibly using Python classes
-- Add te ability for the tests to dynamically add the next page of results (if any) to the pool of ids to use for testing, to better test page 2 and on for various endpoints
+- Add the ability for the tests to dynamically add the next page of results (if any) to the pool of ids to use for testing, to better test page 2 and on for various endpoints
 - Add/Correct any use cases that are missing from the existing tests. The idea was to capture realistic endpoint calls, so these tests should reflect real user calls to most accurately test the system.
 - Once test data is fixed, switch back to using tablesample for randomized results instead of a static query (check the common pull_hashed_mbis and pull_bene_ids files)
+- Look into better utilizing the machine cpu by running distributed: https://docs.locust.io/en/stable/running-without-web-ui.html#running-locust-distributed-without-web-ui
