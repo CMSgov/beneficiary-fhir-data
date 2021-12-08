@@ -125,7 +125,7 @@ ALTER TABLE "pre_adj"."FissClaims" ADD "medicalRecordNo" varchar(17);
 /*
  * FissDiagnosisCodes
  */
-ALTER TABLE "pre_adj"."FissDiagnosisCodes" ALTER COLUMN "diagPoaInd"  varchar(1) NULL;
+ALTER TABLE "pre_adj"."FissDiagnosisCodes" ALTER COLUMN "diagPoaInd" DROP NOT NULL;
 
 /*
  * McsClaims
