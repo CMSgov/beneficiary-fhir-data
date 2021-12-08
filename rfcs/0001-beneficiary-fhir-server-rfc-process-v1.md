@@ -29,7 +29,6 @@
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
-* [Implementation](#implementation)
 
 The Blue Button Data/backend team should have an informal-as-is-reasonable process for managing and evaluating major proposals.
 

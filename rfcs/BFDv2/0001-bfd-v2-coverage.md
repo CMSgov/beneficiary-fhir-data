@@ -36,7 +36,6 @@ This RFC proposes that our team migrate from BFD v1 STU3 Coverage FHIR resource 
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
-* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation

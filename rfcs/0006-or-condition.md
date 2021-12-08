@@ -30,7 +30,6 @@ to improve efficiency on both the client and server.
     * [Proposed Solution: Drawbacks](#proposed-solution-drawbacks)
     * [Proposed Solution: Notable Alternatives](#proposed-solution-notable-alternatives)
 * [Future Possibilities](#future-possibilities)
-* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation

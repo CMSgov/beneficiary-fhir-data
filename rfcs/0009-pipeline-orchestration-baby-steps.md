@@ -47,7 +47,6 @@ This proposal details architectural changes that
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
-* [Implementation](#implementation)
 
 
 ## Motivation

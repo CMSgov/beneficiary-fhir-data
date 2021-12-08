@@ -29,7 +29,6 @@ The addition of a search by Medicare Beneficiary Identifier (MBI) facility to th
     * [Hash Algorithm](#hash-algorithm)
     * [Synthetic Beneficiaries](#synthetic-beneficiaries)
 * [Prior Art](#prior-art)
-* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation

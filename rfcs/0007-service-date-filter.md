@@ -31,7 +31,6 @@ This proposal suggests adding an additional date range query on service completi
   - [Prior Art](#prior-art)
   - [Future Possibilities](#future-possibilities)
   - [Addendums](#addendums)
-  - [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation

@@ -36,7 +36,6 @@ The proposal discusses these new features as well as the logic that BFD's partne
     * [Alternatives Considered](#alternatives-considered)
 * [Future Possibilities](#future-possibilities)
 * [References](#references)
-* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation

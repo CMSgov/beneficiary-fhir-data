@@ -32,7 +32,6 @@ This has a number of benefits: simpler onboarding, better testing of changes, an
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
-* [Implementation](#implementation)
 
 ## Motivation
 [Motivation]: #motivation
