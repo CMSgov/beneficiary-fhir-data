@@ -82,7 +82,7 @@
 		<project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
 
 		<!-- The version of Java that we'll use for everything. -->
-		<javaSourceVersion>1.8</javaSourceVersion>
+		<javaSourceVersion>11</javaSourceVersion>
 
 		<!-- Configure Sonar such that projects evaluated by it against it will 
 			use JaCoCo to compute the code coverage of any unit and integration tests. -->
@@ -221,8 +221,30 @@
 				<version>${hibernate.version}</version>
 			</dependency>
 
+			<!-- JavaEE dependencies that were included in the JRE prior to Java 11 -->
 			<dependency>
-				<!-- JDBC driver for working with PostgreSQL DBs on Java 8 (JDBC 4.2). -->
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>2.3.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.annotation</groupId>
+				<artifactId>jakarta.annotation-api</artifactId>
+				<version>1.3.5</version>
+			</dependency>
+
+			<dependency>
+				<!-- JDBC driver for working with PostgreSQL DBs on Java 8+ (JDBC 4.2). -->
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>42.2.16</version>
@@ -243,13 +265,35 @@
 				<version>3.3.0</version>
 			</dependency>
 
-			 <dependency>
+			<dependency>
+				<!-- Add YAML support to jackson -->
+				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<artifactId>jackson-dataformat-yaml</artifactId>
+				<version>2.9.7</version>
+			</dependency>
+
+			<dependency>
+				<!-- Just useful. -->
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>31.0.1-jre</version>
+			</dependency>
+
+			<dependency>
 				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
 				 <groupId>org.projectlombok</groupId>
 				 <artifactId>lombok</artifactId>
 				 <version>1.18.20</version>
 				 <scope>provided</scope>
 			 </dependency>
+
+
+			<dependency>
+				<!-- Common utility classes -->
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.12.0</version>
+			</dependency>
 
 			<dependency>
 				<!-- The test framework used for unit and integration tests. -->
@@ -301,8 +345,8 @@
 					<configuration>
 						<toolchains>
 							<jdk>
-								<!-- Use a Java 8 JDK, by default. -->
-								<version>1.8</version>
+								<!-- Use a Java 11 JDK, by default. -->
+								<version>11</version>
 							</jdk>
 						</toolchains>
 					</configuration>
@@ -396,7 +440,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.6.1</version>
+					<version>3.8.1</version>
 					<configuration>
 						<!-- Set the Java source version used by the compiler. -->
 						<source>${javaSourceVersion}</source>
@@ -406,7 +450,7 @@ checkJavaFormat
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>3.0.0-M5</version>
 					<configuration>
 						<!-- The intent here is to provide a property that can be set in `settings.xml`,
 							to specify environment-specific JVM arguments for tests. For example, one

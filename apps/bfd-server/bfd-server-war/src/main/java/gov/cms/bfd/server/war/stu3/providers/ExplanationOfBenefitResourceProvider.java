@@ -55,7 +55,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -77,7 +76,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
-  private SamhsaMatcher samhsaMatcher;
+  private Stu3EobSamhsaMatcher samhsaMatcher;
   private LoadedFilterManager loadedFilterManager;
 
   /** @param entityManager a JPA {@link EntityManager} connected to the application's database */
@@ -92,9 +91,9 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     this.metricRegistry = metricRegistry;
   }
 
-  /** @param samhsaMatcher the {@link SamhsaMatcher} to use */
+  /** @param samhsaMatcher the {@link Stu3EobSamhsaMatcher} to use */
   @Inject
-  public void setSamhsaFilterer(SamhsaMatcher samhsaMatcher) {
+  public void setSamhsaFilterer(Stu3EobSamhsaMatcher samhsaMatcher) {
     this.samhsaMatcher = samhsaMatcher;
   }
 
@@ -327,7 +326,7 @@ public final class ExplanationOfBenefitResourceProvider implements IResourceProv
     eobs.sort(ExplanationOfBenefitResourceProvider::compareByClaimIdThenClaimType);
 
     // Add bene_id to MDC logs
-    MDC.put("bene_id", beneficiaryId);
+    TransformerUtils.logBeneIdToMdc(Arrays.asList(beneficiaryId));
 
     return TransformerUtils.createBundle(paging, eobs, loadedFilterManager.getTransactionTime());
   }

@@ -3,10 +3,13 @@ package gov.cms.bfd.server.war.stu3.providers;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ImmutableList;
@@ -50,23 +53,34 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * Integration tests for {@link
- * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider}.
- */
+/** Integration tests for {@link ExplanationOfBenefitResourceProvider}. */
 public final class ExplanationOfBenefitResourceProviderIT {
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(ExplanationOfBenefitResourceProviderIT.class);
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * <<<<<<< HEAD Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once
+   * to make sure that any existing data is deleted from the tables before running the test suite.
+   */
+  @BeforeClass
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does exist in
+   * the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -95,10 +109,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link CarrierClaim}-derived {@link ExplanationOfBenefit} that does not exist
+   * in the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingCarrierClaim() {
@@ -113,10 +126,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist
-   * in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link DMEClaim}-derived {@link ExplanationOfBenefit} that does exist in the
+   * DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -212,10 +224,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does exist
-   * in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does exist in the
+   * DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -244,10 +255,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for an {@link HHAClaim}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingHHAClaim() {
@@ -262,10 +272,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
+   * as expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does exist in
+   * the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -294,10 +303,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link HospiceClaim}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingHospiceClaim() {
@@ -312,10 +320,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in
+   * the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -344,10 +351,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does
-   * not exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link InpatientClaim}-derived {@link ExplanationOfBenefit} that does not exist
+   * in the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingInpatientClaim() {
@@ -362,10 +368,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does exist in
+   * the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -394,10 +399,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does
-   * not exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link OutpatientClaim}-derived {@link ExplanationOfBenefit} that does not
+   * exist in the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingOutpatientClaim() {
@@ -412,10 +416,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does exist
-   * in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does exist in the
+   * DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -444,10 +447,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingPartDEvent() {
@@ -462,10 +464,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB using a negative ID.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB using a negative ID.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingNegativePartDEvent() {
@@ -480,11 +481,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an
-   * invalid {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#IdParam} parameter.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for a {@link PartDEvent}-derived {@link ExplanationOfBenefit} that has an invalid
+   * {@link ExplanationOfBenefitResourceProvider#IdParam} parameter.
    */
   @Test(expected = InvalidRequestException.class)
   public void readEobForInvalidIdParamPartDEvent() {
@@ -499,10 +498,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does exist
-   * in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does exist in the
+   * DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -530,10 +528,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)}
-   * works as expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does not
-   * exist in the DB.
+   * Verifies that {link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works as
+   * expected for an {@link SNFClaim}-derived {@link ExplanationOfBenefit} that does not exist in
+   * the DB.
    */
   @Test(expected = ResourceNotFoundException.class)
   public void readEobForMissingSNFClaim() {
@@ -548,9 +545,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -677,11 +673,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging. This test uses a
-   * count of 2 to verify our code will not run into an IndexOutOfBoundsException on odd bundle
-   * sizes.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging. This test uses a count of 2 to verify
+   * our code will not run into an IndexOutOfBoundsException on odd bundle sizes.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -847,11 +841,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging. This test uses a
-   * count of 3 to verify our code will not run into an IndexOutOfBoundsException on even bundle
-   * sizes.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging. This test uses a count of 3 to verify
+   * our code will not run into an IndexOutOfBoundsException on even bundle sizes.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -893,10 +885,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging, providing the
-   * startIndex but not the pageSize (count).
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging, providing the startIndex but not the
+   * pageSize (count).
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -963,9 +954,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging on a page size of 0.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging on a page size of 0.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1101,10 +1091,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with a page size of 50 with fewer
-   * (8) results.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with a page size of 50 with fewer (8) results.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1234,11 +1222,10 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as expected for a {@link Patient} that does exist in the DB, with paging, using negative values
-   * for page size and start index parameters. This test expects to receive a BadRequestException,
-   * as negative values should result in an HTTP 400.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as expected for
+   * a {@link Patient} that does exist in the DB, with paging, using negative values for page size
+   * and start index parameters. This test expects to receive a BadRequestException, as negative
+   * values should result in an HTTP 400.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1283,9 +1270,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * doesn't return duplicate results.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
+   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} doesn't
+   * return duplicate results.
    *
    * <p>This is a regression test case for TODO.
    *
@@ -1330,9 +1317,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Patient} that does not exist in the DB.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
+   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} works as
+   * expected for a {@link Patient} that does not exist in the DB.
    */
   @Test
   public void searchForEobsByMissingPatient() {
@@ -1352,20 +1339,52 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * with <code>excludeSAMHSA=true</code> properly filters out SAMHSA-related claims.
+   * Load the SAMPLE_A resources and then tweak each of the claim types that support SAMHSA (all
+   * except PDE) to have a SAMHSA diagnosis code.
    *
-   * @throws FHIRException (indicates test failure)
+   * @return the beneficary record loaded by Sample A
    */
-  @Test
-  public void searchForEobsWithSamhsaFiltering() throws FHIRException {
+  private Beneficiary loadSampleAWithSamhsa() {
     // Load the SAMPLE_A resources normally.
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
 
-    // Tweak the SAMPLE_A Carrier claim such that it's SAMHSA-related.
+    EntityManager entityManager = null;
+
+    try {
+      EntityManagerFactory entityManagerFactory =
+          PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
+      entityManager = entityManagerFactory.createEntityManager();
+
+      // Tweak the SAMPLE_A claims such that they are SAMHSA-related.
+      adjustCarrierClaimForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustInpatientRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustOutpatientRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustHhaRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustSnfRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustHospiceRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+      adjustDmeRecordForSamhsaDiagnosis(loadedRecords, entityManager);
+
+    } finally {
+      if (entityManager != null && entityManager.getTransaction().isActive())
+        entityManager.getTransaction().rollback();
+      if (entityManager != null) entityManager.close();
+    }
+
+    // Return beneficiary information
+    return findFirstBeneficary(loadedRecords);
+  }
+
+  /**
+   * Adjusts the carrier claim to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustCarrierClaimForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
     CarrierClaim carrierRifRecord =
         loadedRecords.stream()
             .filter(r -> r instanceof CarrierClaim)
@@ -1373,105 +1392,175 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .findFirst()
             .get();
 
-    EntityManagerFactory entityManagerFactory =
-        PipelineTestUtils.get().getPipelineApplicationState().getEntityManagerFactory();
-    EntityManager entityManager = null;
-    try {
-      entityManager = entityManagerFactory.createEntityManager();
+    entityManager.getTransaction().begin();
+    carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
+    carrierRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(carrierRifRecord);
+    entityManager.getTransaction().commit();
+  }
 
-      entityManager.getTransaction().begin();
-      carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
-      carrierRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(carrierRifRecord);
-      entityManager.getTransaction().commit();
+  /**
+   * Adjusts the first inpatient record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustInpatientRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
 
-      // Tweak the SAMPLE_A Inpatient claim such that it's SAMHSA-related.
-      InpatientClaim inpatientRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof InpatientClaim)
-              .map(r -> (InpatientClaim) r)
-              .findFirst()
-              .get();
+    InpatientClaim inpatientRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof InpatientClaim)
+            .map(r -> (InpatientClaim) r)
+            .findFirst()
+            .get();
 
-      entityManager.getTransaction().begin();
-      inpatientRifRecord =
-          entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
-      inpatientRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(inpatientRifRecord);
-      entityManager.getTransaction().commit();
+    entityManager.getTransaction().begin();
+    inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
+    inpatientRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(inpatientRifRecord);
+    entityManager.getTransaction().commit();
+  }
 
-      // Tweak the SAMPLE_A Outpatient claim such that it's SAMHSA-related.
-      OutpatientClaim outpatientRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof OutpatientClaim)
-              .map(r -> (OutpatientClaim) r)
-              .findFirst()
-              .get();
+  /**
+   * Adjusts the first outpatient record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustOutpatientRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
 
-      entityManager.getTransaction().begin();
-      outpatientRifRecord =
-          entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
-      outpatientRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(outpatientRifRecord);
-      entityManager.getTransaction().commit();
+    OutpatientClaim outpatientRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof OutpatientClaim)
+            .map(r -> (OutpatientClaim) r)
+            .findFirst()
+            .get();
 
-      // Tweak the SAMPLE_A HHA claim such that it's SAMHSA-related.
-      HHAClaim hhaRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof HHAClaim)
-              .map(r -> (HHAClaim) r)
-              .findFirst()
-              .get();
+    entityManager.getTransaction().begin();
+    outpatientRifRecord =
+        entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
+    outpatientRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(outpatientRifRecord);
+    entityManager.getTransaction().commit();
+  }
 
-      entityManager.getTransaction().begin();
-      hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
-      hhaRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(hhaRifRecord);
-      entityManager.getTransaction().commit();
+  /**
+   * Adjusts the first HHA record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustHhaRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
 
-      // Tweak the SAMPLE_A Hospice claim such that it's SAMHSA-related.
-      HospiceClaim hospiceRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof HospiceClaim)
-              .map(r -> (HospiceClaim) r)
-              .findFirst()
-              .get();
+    HHAClaim hhaRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof HHAClaim)
+            .map(r -> (HHAClaim) r)
+            .findFirst()
+            .get();
 
-      entityManager.getTransaction().begin();
-      hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
-      hospiceRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(hospiceRifRecord);
-      entityManager.getTransaction().commit();
+    entityManager.getTransaction().begin();
+    hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
+    hhaRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(hhaRifRecord);
+    entityManager.getTransaction().commit();
+  }
 
-      // Tweak the SAMPLE_A SNF claim such that it's SAMHSA-related.
-      SNFClaim snfRifRecord =
-          loadedRecords.stream()
-              .filter(r -> r instanceof SNFClaim)
-              .map(r -> (SNFClaim) r)
-              .findFirst()
-              .get();
+  /**
+   * Adjusts the first SNF record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustSnfRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
 
-      entityManager.getTransaction().begin();
-      snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
-      snfRifRecord.setDiagnosis2Code(
-          Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
-      snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
-      entityManager.merge(snfRifRecord);
-      entityManager.getTransaction().commit();
-    } finally {
-      if (entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
-      if (entityManager != null) entityManager.close();
-    }
+    SNFClaim snfRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof SNFClaim)
+            .map(r -> (SNFClaim) r)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
+    snfRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(snfRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first Hospice record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustHospiceRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    HospiceClaim hospiceRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof HospiceClaim)
+            .map(r -> (HospiceClaim) r)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
+    hospiceRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(hospiceRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Adjusts the first DME record to support samhsa.
+   *
+   * @param loadedRecords the loaded records
+   * @param entityManager the entity manager
+   */
+  private void adjustDmeRecordForSamhsaDiagnosis(
+      List<Object> loadedRecords, EntityManager entityManager) {
+
+    DMEClaim dmeRifRecord =
+        loadedRecords.stream()
+            .filter(r -> r instanceof DMEClaim)
+            .map(r -> (DMEClaim) r)
+            .findFirst()
+            .get();
+
+    entityManager.getTransaction().begin();
+    dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
+    dmeRifRecord.setDiagnosis2Code(
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+    dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
+    entityManager.merge(dmeRifRecord);
+    entityManager.getTransaction().commit();
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=true</code> properly filters out SAMHSA-related claims.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchForSamhsaEobsWithExcludeSamhsaTrue() throws FHIRException {
+    Beneficiary beneficiary = loadSampleAWithSamhsa();
 
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
 
@@ -1481,40 +1570,123 @@ public final class ExplanationOfBenefitResourceProviderIT {
             .forResource(ExplanationOfBenefit.class)
             .where(
                 ExplanationOfBenefit.PATIENT.hasId(
-                    TransformerUtils.buildPatientId(carrierRifRecord.getBeneficiaryId())))
+                    TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
             .and(new StringClientParam("excludeSAMHSA").matches().value("true"))
             .returnBundle(Bundle.class)
             .execute();
     Assert.assertNotNull(searchResults);
     for (ClaimType claimType : ClaimType.values()) {
       /*
-       * First, verify that the claims that should have been filtered out, were. Then
-       * in the `else` clause, verify that everything was **not** filtered out.
+       * SAMHSA fields are present on all claim types except for PDE so we should not
+       * get any claims back in the results except for PDE.
        */
-      // FIXME remove the `else if`s once filtering fully supports all claim types
-      if (claimType.equals(ClaimType.CARRIER))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimType.HHA))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimType.HOSPICE))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimType.INPATIENT))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimType.OUTPATIENT))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimType.SNF))
-        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
-      else if (claimType.equals(ClaimType.PDE))
-        // PDE Claims do not contain SAMHSA fields and thus won't be filtered.
+      if (claimType == ClaimType.PDE) {
         Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
-      else Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
+      } else {
+        Assert.assertEquals(0, filterToClaimType(searchResults, claimType).size());
+      }
     }
   }
+
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * handles the {@link ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} header
-   * properly.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=false</code> does not filter out SAMHSA-related claims.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchForSamhsaEobsWithExcludeSamhsaFalse() throws FHIRException {
+    Beneficiary beneficiary = loadSampleAWithSamhsa();
+
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(
+                    TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+            .and(new StringClientParam("excludeSAMHSA").matches().value("false"))
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertNotNull(searchResults);
+    for (ClaimType claimType : ClaimType.values()) {
+      // Without filtering we expect one claim for each claim type.
+      Assert.assertEquals(1, filterToClaimType(searchResults, claimType).size());
+    }
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=true</code> properly returns claims that are not SAMHSA-related.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchForNonSamhsaEobsWithExcludeSamhsaTrue() throws FHIRException {
+    // Load the SAMPLE_A resources normally.
+    Beneficiary beneficiary = loadSampleA();
+
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(
+                    TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+            .and(new StringClientParam("excludeSAMHSA").matches().value("true"))
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertNotNull(searchResults);
+    for (ClaimType claimType : ClaimType.values()) {
+      // None of the claims are SAMHSA so we expect one record per claim type in the results.
+      Assert.assertEquals(
+          String.format("Verify claims of type '%s' are present", claimType),
+          1,
+          filterToClaimType(searchResults, claimType).size());
+    }
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} with <code>
+   * excludeSAMHSA=false</code> properly returns claims that are not SAMHSA-related.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchForNonSamhsaEobsWithExcludeSamhsaFalse() throws FHIRException {
+    // Load the SAMPLE_A resources normally.
+    Beneficiary beneficiary = loadSampleA();
+
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClient();
+
+    Bundle searchResults =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(
+                    TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+            .and(new StringClientParam("excludeSAMHSA").matches().value("false"))
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertNotNull(searchResults);
+    for (ClaimType claimType : ClaimType.values()) {
+      // None of the claims are SAMHSA so we expect one record per claim type in the results.
+      Assert.assertEquals(
+          String.format("Verify claims of type '%s' are present", claimType),
+          1,
+          filterToClaimType(searchResults, claimType).size());
+    }
+  }
+
+  /**
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
+   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} handles the
+   * {@link ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS} header properly.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1596,10 +1768,9 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient(ca.uhn.fhir.rest.param.ReferenceParam)}
-   * works as expected for a {@link Patient} that does exist in the DB, with filtering by claim
-   * type.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient(ReferenceParam,
+   * TokenAndListParam, String, String, DateRangeParam, DateRangeParam, RequestDetails)} works as
+   * expected for a {@link Patient} that does exist in the DB, with filtering by claim type.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1649,9 +1820,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as with a lastUpdated parameter after yesterday.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
+   * lastUpdated parameter after yesterday.
    *
    * <p>See https://www.hl7.org/fhir/search.html#lastUpdated for explanation of possible types
    * lastUpdatedQueries
@@ -1682,9 +1852,8 @@ public final class ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
-   * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
-   * as with a lastUpdated parameter after yesterday.
+   * Verifies that {@link ExplanationOfBenefitResourceProvider#findByPatient} works as with a
+   * lastUpdated parameter after yesterday.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -1829,15 +1998,6 @@ public final class ExplanationOfBenefitResourceProviderIT {
           Assert.assertEquals(
               testCase.getLeft(), testCase.getRight().intValue(), bundle.getTotal());
         });
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

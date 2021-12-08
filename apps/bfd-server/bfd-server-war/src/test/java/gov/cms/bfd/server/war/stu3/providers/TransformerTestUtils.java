@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
-
 import ca.uhn.fhir.context.FhirContext;
+
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -26,6 +26,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
+import gov.cms.bfd.server.war.commons.CCWUtils;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -91,7 +92,7 @@ final class TransformerTestUtils {
       CcwCodebookVariable categoryVariable,
       Optional<BigDecimal> expectedAmountValue,
       ExplanationOfBenefit eob) {
-    String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(categoryVariable);
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(categoryVariable);
     Optional<Extension> adjudicationTotalExtension =
         eob.getExtension().stream().filter(e -> expectedExtensionUrl.equals(e.getUrl())).findAny();
     Assert.assertEquals(expectedAmountValue.isPresent(), adjudicationTotalExtension.isPresent());
@@ -320,7 +321,7 @@ final class TransformerTestUtils {
                     isCodeInConcept(
                         f.getType(),
                         TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-                        TransformerUtils.calculateVariableReferenceUrl(expectedFinancialType)))
+                        CCWUtils.calculateVariableReferenceUrl(expectedFinancialType)))
             .findAny();
     Assert.assertTrue(benefitBalanceFinancialEntry.isPresent());
 
@@ -462,7 +463,7 @@ final class TransformerTestUtils {
    */
   static void assertHasCoding(
       CcwCodebookInterface ccwVariable, Optional<?> expectedCode, CodeableConcept actualConcept) {
-    String expectedCodingSystem = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+    String expectedCodingSystem = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Optional<Coding> codingForSystem =
         actualConcept.getCoding().stream()
             .filter(c -> c.getSystem().equals(expectedCodingSystem))
@@ -493,7 +494,7 @@ final class TransformerTestUtils {
       CcwCodebookInterface ccwVariable,
       Optional<String> expectedValue,
       IBaseHasExtensions actualElement) {
-    String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
         actualElement.getExtension().stream()
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
@@ -526,7 +527,7 @@ final class TransformerTestUtils {
       CcwCodebookInterface ccwVariable,
       Optional<? extends Number> expectedValue,
       IBaseHasExtensions actualElement) {
-    String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
         actualElement.getExtension().stream()
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
@@ -550,8 +551,7 @@ final class TransformerTestUtils {
       CcwCodebookInterface ccwVariableForUnit,
       Object expectedUnitCode,
       IBaseHasExtensions actualElement) {
-    String expectedExtensionUrl =
-        TransformerUtils.calculateVariableReferenceUrl(ccwVariableForQuantity);
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariableForQuantity);
     Optional<? extends IBaseExtension<?, ?>> actualExtension =
         actualElement.getExtension().stream()
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
@@ -568,8 +568,7 @@ final class TransformerTestUtils {
 
     Assert.assertEquals(expectedUnitCodeString, actualQuantity.getCode());
     Assert.assertEquals(
-        TransformerUtils.calculateVariableReferenceUrl(ccwVariableForUnit),
-        actualQuantity.getSystem());
+        CCWUtils.calculateVariableReferenceUrl(ccwVariableForUnit), actualQuantity.getSystem());
   }
 
   /**
@@ -585,8 +584,7 @@ final class TransformerTestUtils {
       CcwCodebookInterface ccwVariableForUnit,
       Optional<?> expectedUnitCode,
       IBaseHasExtensions actualElement) {
-    String expectedExtensionUrl =
-        TransformerUtils.calculateVariableReferenceUrl(ccwVariableForQuantity);
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariableForQuantity);
     Optional<? extends IBaseExtension<?, ?>> actualExtension =
         actualElement.getExtension().stream()
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
@@ -623,7 +621,7 @@ final class TransformerTestUtils {
       CcwCodebookInterface ccwVariable,
       Optional<?> expectedCode,
       IBaseHasExtensions actualElement) {
-    String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     String expectedCodingSystem = expectedExtensionUrl;
     Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
         actualElement.getExtension().stream()
@@ -683,7 +681,7 @@ final class TransformerTestUtils {
       CcwCodebookInterface ccwVariable,
       Optional<?> expectedDateYear,
       IBaseHasExtensions actualElement) {
-    String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     String expectedCodingSystem = expectedExtensionUrl;
     Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
         actualElement.getExtension().stream()
@@ -749,8 +747,7 @@ final class TransformerTestUtils {
     if (expectedValue == null) throw new IllegalArgumentException();
 
     Assert.assertNotNull(actual);
-    Assert.assertEquals(
-        TransformerUtils.calculateVariableReferenceUrl(ccwVariable), actual.getSystem());
+    Assert.assertEquals(CCWUtils.calculateVariableReferenceUrl(ccwVariable), actual.getSystem());
     Assert.assertEquals(expectedValue, actual.getValue());
   }
 
@@ -778,7 +775,7 @@ final class TransformerTestUtils {
 
     Assert.assertNotNull(actualIdentifiers);
 
-    String expectedSystem = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+    String expectedSystem = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Optional<Identifier> matchingIdentifier =
         actualIdentifiers.stream()
             .filter(i -> expectedSystem.equals(i.getSystem()))
@@ -853,7 +850,7 @@ final class TransformerTestUtils {
       LocalDate expectedDate,
       List<SupportingInformationComponent> actuals) {
     String expectedCategoryCode =
-        TransformerUtils.calculateVariableReferenceUrl(expectedCategoryCodeVariable);
+        CCWUtils.calculateVariableReferenceUrl(expectedCategoryCodeVariable);
     Optional<SupportingInformationComponent> supportingInformationComponent =
         actuals.stream()
             .filter(
@@ -915,7 +912,7 @@ final class TransformerTestUtils {
       LocalDate expectedThruDate,
       List<SupportingInformationComponent> actuals) {
     String expectedCategoryCode =
-        TransformerUtils.calculateVariableReferenceUrl(expectedCategoryCodeVariable);
+        CCWUtils.calculateVariableReferenceUrl(expectedCategoryCodeVariable);
     Optional<SupportingInformationComponent> supportingInformationComponent =
         actuals.stream()
             .filter(
@@ -981,7 +978,7 @@ final class TransformerTestUtils {
       CcwCodebookInterface ccwVariable, String expectedIdentifierValue, Reference actualReference) {
     Assert.assertTrue("Bad reference: " + actualReference, actualReference.hasIdentifier());
     Assert.assertEquals(
-        TransformerUtils.calculateVariableReferenceUrl(ccwVariable),
+        CCWUtils.calculateVariableReferenceUrl(ccwVariable),
         actualReference.getIdentifier().getSystem());
     Assert.assertEquals(expectedIdentifierValue, actualReference.getIdentifier().getValue());
   }
@@ -1159,8 +1156,8 @@ final class TransformerTestUtils {
     return actualConcept.getCoding().stream()
         .anyMatch(
             c -> {
-              if (!TransformerUtils.calculateVariableReferenceUrl(ccwVariable)
-                  .equals(c.getSystem())) return false;
+              if (!CCWUtils.calculateVariableReferenceUrl(ccwVariable).equals(c.getSystem()))
+                return false;
               if (!expectedCodeString.equals(c.getCode())) return false;
 
               return true;
@@ -1338,7 +1335,7 @@ final class TransformerTestUtils {
                     isCodeInConcept(
                         bc.getType(),
                         TransformerConstants.CODING_BBAPI_BENEFIT_BALANCE_TYPE,
-                        TransformerUtils.calculateVariableReferenceUrl(ccwVariable)))
+                        CCWUtils.calculateVariableReferenceUrl(ccwVariable)))
             .findFirst();
     Assert.assertTrue(benefitOptional.isPresent());
 
@@ -1361,7 +1358,7 @@ final class TransformerTestUtils {
                     isCodeInConcept(
                         i.getCategory(),
                         TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
-                        TransformerUtils.calculateVariableReferenceUrl(categoryVariable)))
+                        CCWUtils.calculateVariableReferenceUrl(categoryVariable)))
             .findFirst();
     Assert.assertTrue(info.isPresent());
 
@@ -1708,8 +1705,7 @@ final class TransformerTestUtils {
 
     List<Extension> hctHgbObservationExtension =
         item.getExtensionsByUrl(
-            TransformerUtils.calculateVariableReferenceUrl(
-                CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM));
+            CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM));
     Assert.assertEquals(1, hctHgbObservationExtension.size());
     Assert.assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
     Reference hctHgbReference = (Reference) hctHgbObservationExtension.get(0).getValue();
