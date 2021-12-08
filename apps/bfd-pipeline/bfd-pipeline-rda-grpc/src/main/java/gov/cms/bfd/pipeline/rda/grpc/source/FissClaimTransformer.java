@@ -1043,7 +1043,7 @@ public class FissClaimTransformer {
         to::setDiagCd2);
     transformer.copyEnumAsString(
         namePrefix + PreAdjFissDiagnosisCode.Fields.diagPoaInd,
-        false,
+        true,
         1,
         1,
         PreAdjFissDiagnosisCode_diagPoaInd_Extractor.getEnumString(from),

@@ -123,6 +123,11 @@ ALTER TABLE "pre_adj"."FissClaims" ADD "adjMbi" varchar(11);
 ALTER TABLE "pre_adj"."FissClaims" ADD "medicalRecordNo" varchar(17);
 
 /*
+ * FissDiagnosisCodes
+ */
+ALTER TABLE "pre_adj"."FissDiagnosisCodes" ALTER COLUMN "diagPoaInd"  varchar(1) NULL;
+
+/*
  * McsClaims
  */
 ALTER TABLE "pre_adj"."McsClaims" ADD "idrAssignment" varchar(1);

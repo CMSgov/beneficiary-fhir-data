@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
+/** JPA class for the FissAuditTrails table */
 @Entity
 @Getter
 @Setter
@@ -25,17 +26,17 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`FissAuditTrails`", schema = "`pre_adj`")
 @IdClass(PreAdjFissAuditTrail.PK.class)
+@Table(name = "`FissAuditTrails`", schema = "`pre_adj`")
 public class PreAdjFissAuditTrail {
   @Id
+  @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
-  @Column(name = "`dcn`", nullable = false, length = 23)
   private String dcn;
 
   @Id
-  @EqualsAndHashCode.Include
   @Column(name = "`priority`", nullable = false)
+  @EqualsAndHashCode.Include
   private short priority;
 
   @Column(name = "`badtStatus`", length = 1)
@@ -60,7 +61,7 @@ public class PreAdjFissAuditTrail {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  public static final class PK implements Serializable {
+  public static class PK implements Serializable {
     private String dcn;
 
     private short priority;

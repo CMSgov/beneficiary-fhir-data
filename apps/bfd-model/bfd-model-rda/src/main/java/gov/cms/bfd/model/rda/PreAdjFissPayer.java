@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
+/** JPA class for the FissPayers table */
 @Entity
 @Getter
 @Setter
@@ -28,17 +29,17 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`FissPayers`", schema = "`pre_adj`")
 @IdClass(PreAdjFissPayer.PK.class)
+@Table(name = "`FissPayers`", schema = "`pre_adj`")
 public class PreAdjFissPayer {
   @Id
+  @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
-  @Column(name = "`dcn`", nullable = false, length = 23)
   private String dcn;
 
   @Id
-  @EqualsAndHashCode.Include
   @Column(name = "`priority`", nullable = false)
+  @EqualsAndHashCode.Include
   private short priority;
 
   @Enumerated(EnumType.STRING)
@@ -134,19 +135,19 @@ public class PreAdjFissPayer {
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
-  public enum PayerType {
-    BeneZ,
-
-    Insured
-  }
-
   /** PK class for the FissPayers table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  public static final class PK implements Serializable {
+  public static class PK implements Serializable {
     private String dcn;
 
     private short priority;
+  }
+
+  public enum PayerType {
+    BeneZ,
+
+    Insured
   }
 }

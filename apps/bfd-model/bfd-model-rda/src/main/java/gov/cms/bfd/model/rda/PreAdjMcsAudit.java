@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
+/** JPA class for the McsAudits table */
 @Entity
 @Getter
 @Setter
@@ -24,17 +25,17 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`McsAudits`", schema = "`pre_adj`")
 @IdClass(PreAdjMcsAudit.PK.class)
+@Table(name = "`McsAudits`", schema = "`pre_adj`")
 public class PreAdjMcsAudit {
   @Id
+  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
   @EqualsAndHashCode.Include
-  @Column(name = "`idrClmHdIcn`", nullable = false, length = 15)
   private String idrClmHdIcn;
 
   @Id
-  @EqualsAndHashCode.Include
   @Column(name = "`priority`", nullable = false)
+  @EqualsAndHashCode.Include
   private short priority;
 
   @Column(name = "`lastUpdated`")
@@ -53,7 +54,7 @@ public class PreAdjMcsAudit {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  public static final class PK implements Serializable {
+  public static class PK implements Serializable {
     private String idrClmHdIcn;
 
     private short priority;

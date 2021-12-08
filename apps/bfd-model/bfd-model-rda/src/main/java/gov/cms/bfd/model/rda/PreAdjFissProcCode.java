@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
+/** JPA class for the FissProcCodes table */
 @Entity
 @Getter
 @Setter
@@ -25,20 +26,20 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`FissProcCodes`", schema = "`pre_adj`")
 @IdClass(PreAdjFissProcCode.PK.class)
+@Table(name = "`FissProcCodes`", schema = "`pre_adj`")
 public class PreAdjFissProcCode {
   @Id
+  @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
-  @Column(name = "`dcn`", nullable = false, length = 23)
   private String dcn;
 
   @Id
-  @EqualsAndHashCode.Include
   @Column(name = "`priority`", nullable = false)
+  @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`procCode`", nullable = false, length = 10)
+  @Column(name = "`procCode`", length = 10, nullable = false)
   private String procCode;
 
   @Column(name = "`procFlag`", length = 4)
@@ -54,7 +55,7 @@ public class PreAdjFissProcCode {
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  public static final class PK implements Serializable {
+  public static class PK implements Serializable {
     private String dcn;
 
     private short priority;
