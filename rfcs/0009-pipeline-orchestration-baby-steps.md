@@ -25,11 +25,18 @@ This proposal details architectural changes that
   can and should be made in order to accomodate these requirements
   (since the BFD Pipeline architecture was originally designed with only one task/job in mind).
 
+## Status
+[Status]: #status
 
+* Implementation Status: Done
+* JIRA Ticket(s):
+    * [BFD-704](https://jira.cms.gov/browse/BFD-704)
+    
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
@@ -565,10 +572,3 @@ The following addendums are required reading before voting on this proposal:
 * (none at this time)
 
 Please note that some of these addendums may be encrypted. If you are unable to decrypt the files, you are not authorized to vote on this proposal.
-
-## Implementation
-[Implementation]: #implementation
-
-* Implementation Status: Done
-* JIRA Ticket(s):
-    * [BFD-704](https://jira.cms.gov/browse/BFD-704)

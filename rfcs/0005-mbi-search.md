@@ -9,10 +9,18 @@
 
 The addition of a search by Medicare Beneficiary Identifier (MBI) facility to the BFD's Patient search end-point.   
 
+## Status
+[Status]: #status
+
+* Implementation Status: Done
+* JIRA Ticket(s):
+    * [BLUEBUTTON-1658](https://jira.cms.gov/browse/BLUEBUTTON-1658)
+
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
@@ -60,12 +68,5 @@ The BFD has a set of 30,000 synthetic beneficiary records for use for developmen
 
 ## Prior Art
 The MBI searches follow the patterns set by the existing HICN search facilities. 
-
-## Implementation
-[Implementation]: #implementation
-
-* Implementation Status: Done
-* JIRA Ticket(s):
-    * [BLUEBUTTON-1658](https://jira.cms.gov/browse/BLUEBUTTON-1658)
 
 

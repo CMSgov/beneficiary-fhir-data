@@ -10,10 +10,18 @@
 This proposal will suggest adding an OR clause to queries that gather the contract to patient mapping in order
 to improve efficiency on both the client and server. 
 
+## Status
+[Status]: #status
+
+* Implementation Status: Done
+* JIRA Ticket(s):
+    * [AB2D-1862](https://jira.cms.gov/browse/AB2D-1862)
+    
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
@@ -99,10 +107,3 @@ can utilize the existing system for using a month parameter, and simply expand i
 [Future Possibilities]: #future-possibilities
 
 There could also be an "or" condition for parameters beyond months, but those would come on a case by case basis.
-
-## Implementation
-[Implementation]: #implementation
-
-* Implementation Status: Done
-* JIRA Ticket(s):
-    * [AB2D-1862](https://jira.cms.gov/browse/AB2D-1862)

@@ -9,10 +9,18 @@
 
 This proposal suggests adding an additional date range query on service completion date to EOB requests. This will allow users to guarantee that claims data falls within an expected date range.
 
+## Status
+[Status]: #status
+
+* Implementation Status: Done
+* JIRA Ticket(s):
+    * [BCDA-3872](https://jira.cms.gov/browse/BCDA-3872)
+    
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 - [RFC Proposal](#rfc-proposal)
+- [Status](#status)
   - [Table of Contents](#table-of-contents)
   - [Motivation](#motivation)
   - [Proposed Solution](#proposed-solution)
@@ -106,10 +114,3 @@ The `service-date` query parameter is based off of the `service-date` [search pa
 The following addendums are required reading before voting on this proposal:
 
 * (none at this time)
-
-## Implementation
-[Implementation]: #implementation
-
-* Implementation Status: Done
-* JIRA Ticket(s):
-    * [BCDA-3872](https://jira.cms.gov/browse/BCDA-3872)
