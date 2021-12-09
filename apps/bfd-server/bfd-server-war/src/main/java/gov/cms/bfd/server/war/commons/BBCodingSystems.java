@@ -13,6 +13,8 @@ public class BBCodingSystems {
   public static final String CLM_SERVICE_CLSFCTN_TYPE_CODE =
       BB_BASE_URL + "/variables/clm_srvc_clsfctn_type_cd";
 
+  public static final String CLM_POA_IND = BB_BASE_URL + "/variables/clm_poa_ind_sw1";
+
   public static final String FI_DOC_CLM_CONTROL_NUM =
       BB_BASE_URL + "/variables/fi_doc_clm_cntrl_num";
 
@@ -33,15 +35,13 @@ public class BBCodingSystems {
 
   public static class MCS {
 
-    public static final String IDR_BILL_PROV_EIN = BB_BASE_URL + "/variables/mcs/idr-bill-prov-ein";
+    public static final String BILL_PROV_EIN = BB_BASE_URL + "/variables/mcs/bill-prov-ein";
 
-    public static final String IDR_BILL_PROV_TYPE =
-        BB_BASE_URL + "/variables/mcs/idr-bill-prov-type";
+    public static final String BILL_PROV_TYPE = BB_BASE_URL + "/variables/mcs/bill-prov-type";
 
-    public static final String IDR_CLM_TYPE = BB_BASE_URL + "/variables/mcs/idr-clm-type";
+    public static final String CLM_TYPE = BB_BASE_URL + "/variables/mcs/clm-type";
 
-    public static final String PROVIDER_SPECIALTY =
-        BB_BASE_URL + "/variables/mcs/idr-bill-prov-spec";
+    public static final String BILL_PROV_SPEC = BB_BASE_URL + "/variables/mcs/bill-prov-spec";
 
     private MCS() {}
   }

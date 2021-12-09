@@ -58,8 +58,6 @@ public class FissClaimTransformerV2 {
           "f", Enumerations.AdministrativeGender.FEMALE,
           "u", Enumerations.AdministrativeGender.UNKNOWN);
 
-  private static final List<String> WHITE_LISTED_POA = List.of("u", "w", "n", "y");
-
   private static final LocalDate ICD_9_CUTOFF_DATE = LocalDate.of(2015, 10, 1);
 
   private static final String MEDICARE = "MEDICARE";
@@ -249,23 +247,37 @@ public class FissClaimTransformerV2 {
   }
 
   private static List<HumanName> getBeneName(PreAdjFissPayer benePayer) {
-    HumanName name = new HumanName().setFamily(benePayer.getBeneLastName());
+    List<HumanName> names;
 
-    if (benePayer.getBeneFirstName() != null || benePayer.getBeneMidInit() != null) {
-      name.setGiven(
-          List.of(
-              new StringType(benePayer.getBeneFirstName()),
-              new StringType(
-                  benePayer.getBeneMidInit() == null ? null : benePayer.getBeneMidInit() + ".")));
+    if (benePayer.getBeneLastName() != null
+        || benePayer.getBeneFirstName() != null
+        || benePayer.getBeneMidInit() != null) {
+      HumanName name = new HumanName();
+
+      if (benePayer.getBeneLastName() != null) {
+        name.setFamily(benePayer.getBeneLastName());
+      }
+
+      if (benePayer.getBeneFirstName() != null || benePayer.getBeneMidInit() != null) {
+        name.setGiven(
+            List.of(
+                new StringType(benePayer.getBeneFirstName()),
+                new StringType(
+                    benePayer.getBeneMidInit() == null ? null : benePayer.getBeneMidInit() + ".")));
+      }
+
+      names = List.of(name);
+    } else {
+      names = null;
     }
 
-    return List.of(name);
+    return names;
   }
 
   private static Resource getContainedProvider(PreAdjFissClaim claimGroup) {
     Organization organization = new Organization();
 
-    if (claimGroup.getMedaProvId() != null) {
+    if (claimGroup.getMedaProv_6() != null) {
       organization
           .getIdentifier()
           .add(
@@ -277,7 +289,7 @@ public class FissClaimTransformerV2 {
                               C4BBOrganizationIdentifierType.PRN.toCode(),
                               C4BBOrganizationIdentifierType.PRN.getDisplay())))
                   .setSystem(BBCodingSystems.PROVIDER_NUM)
-                  .setValue(claimGroup.getMedaProvId()));
+                  .setValue(claimGroup.getMedaProv_6()));
     }
 
     if (claimGroup.getFedTaxNumber() != null) {
@@ -367,13 +379,12 @@ public class FissClaimTransformerV2 {
                                           diagnosisCode.getDiagCd2(),
                                           null))));
 
-              if (diagnosisCode.getDiagPoaInd() != null // Present on Admission
-                  && WHITE_LISTED_POA.contains(diagnosisCode.getDiagPoaInd().toLowerCase())) {
+              if (diagnosisCode.getDiagPoaInd() != null) { // Present on Admission
                 component.setOnAdmission(
                     new CodeableConcept(
                         // If any other value, omit
                         new Coding(
-                            "http://terminology.hl7.org/CodeSystem/ex-diagnosis-on-admission",
+                            BBCodingSystems.CLM_POA_IND,
                             diagnosisCode.getDiagPoaInd().toLowerCase(Locale.ROOT),
                             null)));
               }

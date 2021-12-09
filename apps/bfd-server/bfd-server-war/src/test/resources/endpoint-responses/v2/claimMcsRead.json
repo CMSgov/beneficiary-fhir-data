@@ -2,7 +2,7 @@
   "resourceType": "Claim",
   "id": "m-654321",
   "meta": {
-    "versionId": "f-654321-7640a4213fccee89e2d8a7a3eb80eee64f3bff9c",
+    "versionId": "f-654321-c068f60762c66f83851b6fa8d38eae206cb3ef56",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
@@ -40,16 +40,16 @@
       "id": "provider-org",
       "extension": [
         {
-          "url": "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-type",
+          "url": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-type",
           "valueCoding": {
-            "system": "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-type",
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-type",
             "code": "AB"
           }
         },
         {
-          "url": "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-spec",
+          "url": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-spec",
           "valueCoding": {
-            "system": "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-spec",
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-spec",
             "code": "BA"
           }
         }
@@ -65,7 +65,7 @@
               }
             ]
           },
-          "system": "https://bluebutton.cms.gov/resources/variables/mcs/idr-bill-prov-ein",
+          "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-ein",
           "value": "1231231231"
         },
         {
@@ -86,9 +86,9 @@
   ],
   "extension": [
     {
-      "url": "https://bluebutton.cms.gov/resources/variables/mcs/idr-clm-type",
+      "url": "https://bluebutton.cms.gov/resources/variables/mcs/clm-type",
       "valueCoding": {
-        "system": "https://bluebutton.cms.gov/resources/variables/mcs/idr-clm-type",
+        "system": "https://bluebutton.cms.gov/resources/variables/mcs/clm-type",
         "code": "R"
       }
     }
@@ -126,7 +126,7 @@
     "start": "1970-07-30T00:00:00+00:00",
     "end": "1970-07-30T00:00:00+00:00"
   },
-  "created": "2021-12-06T18:43:01+00:00",
+  "created": "2021-12-09T00:19:24+00:00",
   "provider": {
     "reference": "#provider-org"
   },

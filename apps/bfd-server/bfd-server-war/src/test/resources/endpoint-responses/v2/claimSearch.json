@@ -1,14 +1,14 @@
 {
   "resourceType": "Bundle",
-  "id": "d24acebc-2239-41a7-91ee-4f1e38202453",
+  "id": "d017cb91-6836-4947-9fa4-13474c3bdb6f",
   "meta": {
-    "lastUpdated": "2021-12-06T18:43:02.797+00:00"
+    "lastUpdated": "2021-12-09T00:19:25.209+00:00"
   },
   "type": "searchset",
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:9327/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+      "url": "https://localhost:9970/v2/fhir/Claim?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
     }
   ],
   "entry": [
@@ -17,7 +17,7 @@
         "resourceType": "Claim",
         "id": "f-123456",
         "meta": {
-          "versionId": "f-123456-e31e02683b608ca7291998ad5062f0008bec495d",
+          "versionId": "f-123456-321707905df9bd06b59b6a73723ffab97056c1ed",
           "lastUpdated": "1970-01-01T00:00:00.000+00:00"
         },
         "contained": [
@@ -55,19 +55,6 @@
             "resourceType": "Organization",
             "id": "provider-org",
             "identifier": [
-              {
-                "type": {
-                  "coding": [
-                    {
-                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                      "code": "PRN",
-                      "display": "Provider number"
-                    }
-                  ]
-                },
-                "system": "https://bluebutton.cms.gov/resources/variables/prvdr_num",
-                "value": "meda12345"
-              },
               {
                 "type": {
                   "coding": [
@@ -139,7 +126,7 @@
           "start": "1970-07-20T00:00:00+00:00",
           "end": "1970-07-20T00:00:00+00:00"
         },
-        "created": "2021-12-06T18:43:02+00:00",
+        "created": "2021-12-09T00:19:25+00:00",
         "provider": {
           "reference": "#provider-org"
         },
@@ -219,7 +206,15 @@
                   }
                 ]
               }
-            ]
+            ],
+            "onAdmission": {
+              "coding": [
+                {
+                  "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
+                  "code": "z"
+                }
+              ]
+            }
           },
           {
             "sequence": 2,
@@ -234,7 +229,7 @@
             "onAdmission": {
               "coding": [
                 {
-                  "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosis-on-admission",
+                  "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
                   "code": "u"
                 }
               ]
@@ -253,7 +248,7 @@
             "onAdmission": {
               "coding": [
                 {
-                  "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosis-on-admission",
+                  "system": "https://bluebutton.cms.gov/resources/variables/clm_poa_ind_sw1",
                   "code": "n"
                 }
               ]
