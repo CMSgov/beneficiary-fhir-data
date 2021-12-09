@@ -883,7 +883,8 @@ public class CarrierClaimTransformerV2Test {
                                 "https://bluebutton.cms.gov/resources/codesystem/adjudication",
                                 "https://bluebutton.cms.gov/resources/variables/line_alowd_chrg_amt",
                                 "Line Allowed Charge Amount"))))
-            .setAmount(new Money().setValue(75).setCurrency(TransformerConstants.CODED_MONEY_USD));
+            .setAmount(
+                new Money().setValue(47.84).setCurrency(TransformerConstants.CODED_MONEY_USD));
 
     Assert.assertTrue(compare.equalsDeep(adjudication));
   }
