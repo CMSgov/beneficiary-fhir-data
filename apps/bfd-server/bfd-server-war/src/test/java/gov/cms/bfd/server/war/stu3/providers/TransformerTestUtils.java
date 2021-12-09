@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.war.stu3.providers;
-import ca.uhn.fhir.context.FhirContext;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.codebook.model.CcwCodebookInterface;
@@ -25,8 +25,8 @@ import gov.cms.bfd.model.rif.OutpatientClaimLine;
 import gov.cms.bfd.model.rif.SNFClaim;
 import gov.cms.bfd.model.rif.SNFClaimColumn;
 import gov.cms.bfd.model.rif.SNFClaimLine;
-import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.CCWUtils;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
@@ -642,7 +642,7 @@ final class TransformerTestUtils {
    */
   static void assertExtensionCodingNotEquals(
       CcwCodebookInterface ccwVariable, String expectedCode, IBaseHasExtensions actualElement) {
-    String expectedExtensionUrl = TransformerUtils.calculateVariableReferenceUrl(ccwVariable);
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
         actualElement.getExtension().stream()
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
