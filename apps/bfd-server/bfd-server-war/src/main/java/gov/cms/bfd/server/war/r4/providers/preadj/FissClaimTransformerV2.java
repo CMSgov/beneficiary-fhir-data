@@ -382,7 +382,6 @@ public class FissClaimTransformerV2 {
               if (diagnosisCode.getDiagPoaInd() != null) { // Present on Admission
                 component.setOnAdmission(
                     new CodeableConcept(
-                        // If any other value, omit
                         new Coding(
                             BBCodingSystems.CLM_POA_IND,
                             diagnosisCode.getDiagPoaInd().toLowerCase(Locale.ROOT),
