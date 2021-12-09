@@ -269,7 +269,9 @@ public class HHAClaimTransformerV2Test {
                     "Discharge Status")),
             // Code
             new Coding(
-                "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd", "1", null));
+                "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+                "30",
+                "Still patient."));
 
     Assert.assertTrue(compare.equalsDeep(sic));
   }
