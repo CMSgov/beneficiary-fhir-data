@@ -1,14 +1,14 @@
 {
   "resourceType": "Bundle",
-  "id": "1856fb88-119e-46b6-a775-ab78ae0f61e9",
+  "id": "47923b40-ec3c-4dad-a569-3d13b68c535e",
   "meta": {
-    "lastUpdated": "1970-01-01T00:00:01.000+00:00"
+    "lastUpdated": "2021-12-09T17:34:37.314+00:00"
   },
   "type": "searchset",
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:6500/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+      "url": "https://localhost:9214/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
     }
   ],
   "entry": [
@@ -17,40 +17,63 @@
         "resourceType": "ClaimResponse",
         "id": "f-123456",
         "meta": {
+          "versionId": "f-123456-74f856b6083c300e988f0799da3d52247b1bd919",
           "lastUpdated": "1970-01-01T00:00:00.000+00:00"
         },
+        "contained": [
+          {
+            "resourceType": "Patient",
+            "id": "patient",
+            "identifier": [
+              {
+                "type": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                      "code": "MC",
+                      "display": "Patient's Medicare Number"
+                    }
+                  ]
+                },
+                "system": "http://hl7.org/fhir/sid/us-mbi",
+                "value": "123456MBI"
+              }
+            ],
+            "name": [
+              {
+                "family": "baker",
+                "given": [
+                  "jim",
+                  "k."
+                ]
+              }
+            ],
+            "gender": "male",
+            "birthDate": "1975-03-01"
+          }
+        ],
         "extension": [
           {
-            "url": "https://dcgeo.cms.gov/resources/variables/fiss-status",
+            "url": "https://bluebutton.cms.gov/resources/variables/fiss/curr-status",
             "valueCoding": {
-              "system": "https://dcgeo.cms.gov/resources/variables/fiss-status",
-              "code": "a",
-              "display": "Accepted"
+              "system": "https://bluebutton.cms.gov/resources/variables/fiss/curr-status",
+              "code": "a"
             }
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/fiss/recd-dt-cymd",
+            "valueDate": "1970-01-01"
           }
         ],
         "identifier": [
           {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
-                  "code": "uc",
-                  "display": "Unique Claim ID"
-                }
-              ]
-            },
-            "system": "https://dcgeo.cms.gov/resources/variables/dcn",
+            "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntrl_num",
             "value": "123456"
           }
         ],
         "status": "active",
         "type": {
           "coding": [
-            {
-              "system": "https://dcgeo.cms.gov/resources/codesystem/rda-type",
-              "code": "FISS"
-            },
             {
               "system": "http://terminology.hl7.org/CodeSystem/claim-type",
               "code": "institutional",
@@ -60,21 +83,9 @@
         },
         "use": "claim",
         "patient": {
-          "identifier": {
-            "type": {
-              "coding": [
-                {
-                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                  "code": "MC",
-                  "display": "Patient's Medicare number"
-                }
-              ]
-            },
-            "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "123456MBI"
-          }
+          "reference": "#patient"
         },
-        "created": "1970-01-01T00:00:01+00:00",
+        "created": "2021-12-09T17:34:37+00:00",
         "insurer": {
           "identifier": {
             "value": "CMS"

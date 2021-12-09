@@ -1,9 +1,8 @@
 package gov.cms.bfd.server.war.utils;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
+import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
@@ -16,9 +15,7 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +27,9 @@ import javax.sql.DataSource;
 public class RDATestUtils {
 
   private static final List<Class<?>> TABLE_ENTITIES =
-      ImmutableList.of(
+      List.of(
+          PreAdjFissPayer.class,
+          PreAdjFissDiagnosisCode.class,
           PreAdjFissProcCode.class,
           PreAdjFissClaim.class,
           PreAdjMcsDetail.class,
@@ -45,7 +44,7 @@ public class RDATestUtils {
     final DataSource dataSource = DatabaseTestUtils.get().getUnpooledDataSource();
 
     final Map<String, Object> hibernateProperties =
-        ImmutableMap.of(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
+        Map.of(org.hibernate.cfg.AvailableSettings.DATASOURCE, dataSource);
 
     entityManager =
         Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_NAME, hibernateProperties)
@@ -64,10 +63,9 @@ public class RDATestUtils {
 
   public void truncateTables() {
     doTransaction(
-        em -> {
-          TABLE_ENTITIES.forEach(
-              e -> em.createQuery("delete from " + e.getSimpleName() + " f").executeUpdate());
-        });
+        em ->
+            TABLE_ENTITIES.forEach(
+                e -> em.createQuery("delete from " + e.getSimpleName() + " f").executeUpdate()));
   }
 
   public void doTransaction(Consumer<EntityManager> transaction) {
@@ -98,8 +96,8 @@ public class RDATestUtils {
     return expectedResponse.toString();
   }
 
-  public List<PreAdjFissClaim> fissTestData() {
-    return Arrays.asList(fissTestDataA(), fissTestDataB());
+  public List<?> fissTestData() {
+    return List.of(fissTestDataA(), fissTestDataB());
   }
 
   private PreAdjFissClaim fissTestDataA() {
@@ -112,6 +110,7 @@ public class RDATestUtils {
             .currLoc1('z')
             .currLoc2("Somda")
             .medaProvId("meda12345")
+            .fedTaxNumber("tax12345")
             .totalChargeAmount(new BigDecimal("1234.32"))
             .receivedDate(LocalDate.ofEpochDay(0))
             .currTranDate(LocalDate.ofEpochDay(1))
@@ -121,13 +120,16 @@ public class RDATestUtils {
             .mbi("123456MBI")
             .mbiHash("a7f8e93f09")
             .fedTaxNumber("abc123")
+            .lobCd("r")
             .lastUpdated(Instant.ofEpochMilli(0))
             .stmtCovFromDate(LocalDate.ofEpochDay(200))
             .stmtCovToDate(LocalDate.ofEpochDay(200))
+            .servTypeCd("A")
+            .freqCd("C")
             .build();
 
-    Set<PreAdjFissProcCode> codes =
-        Sets.newHashSet(
+    Set<PreAdjFissProcCode> procCodes =
+        Set.of(
             PreAdjFissProcCode.builder()
                 .dcn("123456")
                 .priority((short) 0)
@@ -144,7 +146,51 @@ public class RDATestUtils {
                 .lastUpdated(Instant.ofEpochMilli(0))
                 .build());
 
-    claim.setProcCodes(codes);
+    Set<PreAdjFissDiagnosisCode> diagnosisCodes =
+        Set.of(
+            PreAdjFissDiagnosisCode.builder()
+                .dcn("123456")
+                .priority((short) 0)
+                .diagCd2("admitcd")
+                .diagPoaInd("Z")
+                .build(),
+            PreAdjFissDiagnosisCode.builder()
+                .dcn("123456")
+                .priority((short) 1)
+                .diagCd2("other")
+                .diagPoaInd("U")
+                .build(),
+            PreAdjFissDiagnosisCode.builder()
+                .dcn("123456")
+                .priority((short) 2)
+                .diagCd2("princcd")
+                .diagPoaInd("n")
+                .build());
+
+    Set<PreAdjFissPayer> payers =
+        Set.of(
+            PreAdjFissPayer.builder()
+                .dcn("123456")
+                .priority((short) 0)
+                .beneFirstName("jim")
+                .beneMidInit("k")
+                .beneLastName("baker")
+                .beneSex("m")
+                .beneDob(LocalDate.of(1975, 3, 1))
+                .payerType(PreAdjFissPayer.PayerType.BeneZ)
+                .payersName("MEDICARE")
+                .build(),
+            PreAdjFissPayer.builder()
+                .dcn("123456")
+                .priority((short) 1)
+                .insuredName("BAKER  JIM  K")
+                .payerType(PreAdjFissPayer.PayerType.Insured)
+                .payersName("BCBS KC")
+                .build());
+
+    claim.setPayers(payers);
+    claim.setProcCodes(procCodes);
+    claim.setDiagCodes(diagnosisCodes);
 
     return claim;
   }
@@ -159,6 +205,7 @@ public class RDATestUtils {
             .currLoc1('r')
             .currLoc2("Somdb")
             .medaProvId("meda12346")
+            .fedTaxNumber("tax12345")
             .totalChargeAmount(new BigDecimal("1235.32"))
             .receivedDate(LocalDate.ofEpochDay(8))
             .currTranDate(LocalDate.ofEpochDay(12))
@@ -168,28 +215,76 @@ public class RDATestUtils {
             .mbi("123456MBI")
             .mbiHash("a7f8e93f09")
             .fedTaxNumber("abc124")
+            .lobCd("k")
             .lastUpdated(Instant.ofEpochMilli(5000))
             .stmtCovFromDate(LocalDate.ofEpochDay(211))
             .stmtCovToDate(LocalDate.ofEpochDay(211))
+            .servTypeCd("A")
+            .freqCd("C")
             .build();
 
-    PreAdjFissProcCode code =
-        PreAdjFissProcCode.builder()
-            .dcn("123457")
-            .priority((short) 0)
-            .procCode("CODEABD")
-            .procFlag("FLAC")
-            .procDate(LocalDate.ofEpochDay(211))
-            .lastUpdated(Instant.ofEpochMilli(5000))
-            .build();
+    Set<PreAdjFissProcCode> procCodes =
+        Set.of(
+            PreAdjFissProcCode.builder()
+                .dcn("123457")
+                .priority((short) 0)
+                .procCode("CODEABD")
+                .procFlag("FLAC")
+                .procDate(LocalDate.ofEpochDay(211))
+                .lastUpdated(Instant.ofEpochMilli(5000))
+                .build());
 
-    claim.setProcCodes(Collections.singleton(code));
+    Set<PreAdjFissDiagnosisCode> diagnosisCodes =
+        Set.of(
+            PreAdjFissDiagnosisCode.builder()
+                .dcn("123457")
+                .priority((short) 0)
+                .diagCd2("princcc")
+                .diagPoaInd("Y")
+                .build(),
+            PreAdjFissDiagnosisCode.builder()
+                .dcn("123457")
+                .priority((short) 1)
+                .diagCd2("other2")
+                .diagPoaInd("w")
+                .build(),
+            PreAdjFissDiagnosisCode.builder()
+                .dcn("123457")
+                .priority((short) 2)
+                .diagCd2("admitcc")
+                .diagPoaInd("1")
+                .build());
+
+    Set<PreAdjFissPayer> payers =
+        Set.of(
+            PreAdjFissPayer.builder()
+                .dcn("123457")
+                .priority((short) 0)
+                .beneFirstName("alice")
+                .beneMidInit("r")
+                .beneLastName("smith")
+                .beneSex("f")
+                .beneDob(LocalDate.of(1981, 8, 13))
+                .payerType(PreAdjFissPayer.PayerType.BeneZ)
+                .payersName("MEDICARE")
+                .build(),
+            PreAdjFissPayer.builder()
+                .dcn("123457")
+                .priority((short) 1)
+                .insuredName("SMITH  ALICE  R")
+                .payerType(PreAdjFissPayer.PayerType.Insured)
+                .payersName("BCBS KC")
+                .build());
+
+    claim.setPayers(payers);
+    claim.setProcCodes(procCodes);
+    claim.setDiagCodes(diagnosisCodes);
 
     return claim;
   }
 
   public List<PreAdjMcsClaim> mcsTestData() {
-    return Collections.singletonList(mcsTestDataA());
+    return List.of(mcsTestDataA());
   }
 
   private PreAdjMcsClaim mcsTestDataA() {
@@ -230,23 +325,25 @@ public class RDATestUtils {
             .build();
 
     Set<PreAdjMcsDetail> procCodes =
-        Sets.newHashSet(
+        Set.of(
             PreAdjMcsDetail.builder()
                 .priority((short) 0)
                 .idrClmHdIcn("654321")
                 .idrDtlToDate(LocalDate.ofEpochDay(208))
                 .idrProcCode("FDSAE")
+                .idrModOne("A")
                 .build(),
             PreAdjMcsDetail.builder()
                 .priority((short) 1)
                 .idrClmHdIcn("654321")
                 .idrProcCode("FDAAA")
+                .idrModTwo("B")
                 .build());
 
     claim.setDetails(procCodes);
 
     claim.setDiagCodes(
-        Sets.newHashSet(
+        Set.of(
             new PreAdjMcsDiagnosisCode(
                 "654321", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new PreAdjMcsDiagnosisCode(

@@ -49,7 +49,7 @@ public class BBCodingSystems {
 
     public static final String CLM_TYPE = BB_BASE_URL + "/variables/mcs/clm-type";
 
-    public static final String STATUS_CODE = "/variables/mcs/status-code";
+    public static final String STATUS_CODE = BB_BASE_URL + "/variables/mcs/status-code";
 
     private MCS() {}
   }
