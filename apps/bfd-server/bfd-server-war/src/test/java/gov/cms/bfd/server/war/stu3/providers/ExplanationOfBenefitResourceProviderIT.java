@@ -53,10 +53,29 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /** Integration tests for {@link ExplanationOfBenefitResourceProvider}. */
 public final class ExplanationOfBenefitResourceProviderIT {
+
+  /**
+   * <<<<<<< HEAD Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once
+   * to make sure that any existing data is deleted from the tables before running the test suite.
+   */
+  @BeforeClass
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
 
   /**
    * Verifies that {@link ExplanationOfBenefitResourceProvider#read(IdType, RequestDetails)} works
@@ -1930,15 +1949,6 @@ public final class ExplanationOfBenefitResourceProviderIT {
           Assert.assertEquals(
               testCase.getLeft(), testCase.getRight().intValue(), bundle.getTotal());
         });
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**
