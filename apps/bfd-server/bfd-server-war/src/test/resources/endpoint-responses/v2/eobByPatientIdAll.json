@@ -1374,7 +1374,7 @@
             } ]
           },
           "amount" : {
-            "value" : 130.45,
+            "value" : 129.45,
             "currency" : "USD"
           }
         }, {
@@ -5097,7 +5097,7 @@
             } ]
           },
           "amount" : {
-            "value" : 75.0,
+            "value" : 47.84,
             "currency" : "USD"
           }
         } ]
