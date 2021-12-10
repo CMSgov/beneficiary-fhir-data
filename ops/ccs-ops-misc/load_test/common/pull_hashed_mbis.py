@@ -12,7 +12,7 @@ def loadData():
     ## Load configuration data, like db creds
     configFile = config.load()
 
-    ## if we failed to load the config, bail out
+    ## if we failed to load the config, bail out (error msg printed in load())
     if configFile is None:
         return []
 

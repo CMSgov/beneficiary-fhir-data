@@ -11,7 +11,7 @@ def loaddata(version):
     ## Load configuration data, like db creds
     config_file = config.load()
 
-    ## if we failed to load the config, bail out
+    ## if we failed to load the config, bail out (error msg printed in load())
     if config_file is None:
         return []
 

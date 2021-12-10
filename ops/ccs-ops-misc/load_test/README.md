@@ -40,8 +40,6 @@ See: https://pypi.org/project/requests/
 
 **Locust**
 
-Locust may or may not already be installed on your box; if not follow the install instruction here.
-
 What: Library for running the test and reporting the results
 Why: Runs the test execution and reporting
 Install: _pip3 install locust_
@@ -58,7 +56,6 @@ sudo chown <SSH-username>:<SSH-username> bluebutton-backend-test-data-server-cli
 ```
 
 Once this is done you'll have a modified PEM to use for the tests in your user directory.
-
 
 ## Running a test
 
