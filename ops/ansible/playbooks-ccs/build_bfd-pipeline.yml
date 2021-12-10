@@ -45,8 +45,8 @@
         data_pipeline_s3_bucket: "{{ vault_data_pipeline_s3_bucket }}"
         # Primary (i.e. write) DB defined in `environments/<env>/group_vars/all/vault.yml`:
         data_pipeline_db_url: "{{ vault_data_db_primary_url }}"
-        data_pipeline_db_username: "{{ vault_data_pipeline_db_username }}"
-        data_pipeline_db_password: "{{ vault_data_pipeline_db_password }}"
+        data_pipeline_db_username: "{{ lookup('aws_ssm', '/bfd/' + env + '/pipeline/db_username') }}"
+        data_pipeline_db_password: "{{ lookup('aws_ssm', '/bfd/' + env + '/pipeline/db_password') }}"
         #data_pipeline_loader_threads: (see group_vars/all/main.yml
         data_pipeline_new_relic_app_name: "BFD Pipeline ({{ env_name_std }})"
         data_pipeline_new_relic_metric_key: "{{ vault_data_pipeline_new_relic_metric_key }}"
