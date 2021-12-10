@@ -370,7 +370,7 @@ public class FissClaimTransformerTest {
                         .setBeneSsnHic("ssn-hic")
                         .setInsuredGroupName("group-name")
                         .setBeneDob("2020-09-10")
-                        .setBeneSexEnum(FissBeneficiarySex.BENEFIXIARY_SEX_FEMALE)
+                        .setBeneSexEnum(FissBeneficiarySex.BENEFICIARY_SEX_FEMALE)
                         .setTreatAuthCd("auth-code")
                         .setInsuredSexEnum(FissBeneficiarySex.BENEFICIARY_SEX_MALE)
                         .setInsuredRelX12Enum(
@@ -1396,7 +1396,7 @@ public class FissClaimTransformerTest {
         .enumField(
             FissBeneZPayer.Builder::setBeneSexEnum,
             PreAdjFissPayer::getBeneSex,
-            FissBeneficiarySex.BENEFIXIARY_SEX_FEMALE,
+            FissBeneficiarySex.BENEFICIARY_SEX_FEMALE,
             "F")
         .stringField(
             FissBeneZPayer.Builder::setBeneSexUnrecognized,
@@ -1421,7 +1421,7 @@ public class FissClaimTransformerTest {
         .enumField(
             FissBeneZPayer.Builder::setInsuredSexEnum,
             PreAdjFissPayer::getInsuredSex,
-            FissBeneficiarySex.BENEFIXIARY_SEX_FEMALE,
+            FissBeneficiarySex.BENEFICIARY_SEX_FEMALE,
             "F")
         .stringField(
             FissBeneZPayer.Builder::setInsuredSexUnrecognized,

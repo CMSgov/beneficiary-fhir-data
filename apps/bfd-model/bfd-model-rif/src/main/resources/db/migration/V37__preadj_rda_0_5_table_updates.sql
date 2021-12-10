@@ -11,6 +11,7 @@
  *   FissClaims
  *   McsClaims
  *   McsDetails
+ *   McsDiagnosisCodes
  */
 
 /************************** CREATES **************************/
@@ -173,3 +174,10 @@ ALTER TABLE "pre_adj"."McsDetails" ADD "idrDtlAmbDropoffAddrL2" varchar(20);
 ALTER TABLE "pre_adj"."McsDetails" ADD "idrDtlAmbDropoffCity" varchar(20);
 ALTER TABLE "pre_adj"."McsDetails" ADD "idrDtlAmbDropoffState" varchar(2);
 ALTER TABLE "pre_adj"."McsDetails" ADD "idrDtlAmbDropoffZipcode" varchar(9);
+
+/*
+ * McsDiagnosisCodes
+ */
+
+UPDATE "pre_adj"."McsDiagnosisCodes" SET "idrDiagCode"='' WHERE "idrDiagCode" IS NULL;
+ALTER TABLE "pre_adj"."McsDiagnosisCodes" ALTER COLUMN "idrDiagCode" SET NOT NULL;
