@@ -9,14 +9,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
-import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.time.Clock;
@@ -24,6 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -182,8 +182,8 @@ public class GrpcRdaSourceIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(5, "pepper-pepper-pepper"));
-  private final FissClaimStreamCaller streamCaller =
-      new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
+  private final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
+  private final FissClaimStreamCaller streamCaller = new FissClaimStreamCaller();
   private MetricRegistry appMetrics;
   private JsonCaptureSink sink;
 
@@ -201,7 +201,7 @@ public class GrpcRdaSourceIT {
             port -> {
               int count;
               GrpcRdaSource.Config config = createSourceConfig(port).build();
-              try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+              try (GrpcRdaSource<FissClaimChange, FissClaimChange> source = createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
               }
               assertEquals(2, count);
@@ -221,7 +221,7 @@ public class GrpcRdaSourceIT {
               int count;
               GrpcRdaSource.Config config =
                   createSourceConfig(port).authenticationToken("secret").build();
-              try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+              try (GrpcRdaSource<FissClaimChange, FissClaimChange> source = createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
               }
               assertEquals(2, count);
@@ -240,7 +240,8 @@ public class GrpcRdaSourceIT {
             port -> {
               GrpcRdaSource.Config config = createSourceConfig(port).build();
               try {
-                try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+                try (GrpcRdaSource<FissClaimChange, FissClaimChange> source =
+                    createSource(config)) {
                   source.retrieveAndProcessObjects(3, sink);
                 }
                 fail("should have thrown an exception due to missing token");
@@ -264,7 +265,8 @@ public class GrpcRdaSourceIT {
               GrpcRdaSource.Config config =
                   createSourceConfig(port).authenticationToken("wrong-secret").build();
               try {
-                try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+                try (GrpcRdaSource<FissClaimChange, FissClaimChange> source =
+                    createSource(config)) {
                   source.retrieveAndProcessObjects(3, sink);
                 }
                 fail("should have thrown an exception due to missing token");
@@ -297,11 +299,12 @@ public class GrpcRdaSourceIT {
   }
 
   @Nonnull
-  private GrpcRdaSource<RdaChange<PreAdjFissClaim>> createSource(GrpcRdaSource.Config config) {
+  private GrpcRdaSource<FissClaimChange, FissClaimChange> createSource(
+      GrpcRdaSource.Config config) {
     return new GrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
   }
 
-  private static class JsonCaptureSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
+  private class JsonCaptureSink implements RdaSink<FissClaimChange, FissClaimChange> {
     private final List<String> values = new ArrayList<>();
     private final ObjectMapper mapper;
 
@@ -316,15 +319,48 @@ public class GrpcRdaSourceIT {
     }
 
     @Override
-    public synchronized int writeObject(RdaChange<PreAdjFissClaim> change)
+    public synchronized int writeMessage(String dataVersion, FissClaimChange message)
         throws ProcessingException {
       try {
-        values.add(mapper.writeValueAsString(change.getClaim()));
+        values.add(mapper.writeValueAsString(transformer.transformClaim(message).getClaim()));
         return 1;
       } catch (Exception ex) {
         throw new ProcessingException(ex, 0);
       }
     }
+
+    @Override
+    public String getDedupKeyForMessage(FissClaimChange object) {
+      return object.getClaim().getDcn();
+    }
+
+    @Override
+    public void updateLastSequenceNumber(long lastSequenceNumber) {}
+
+    @Override
+    public long getSequenceNumberForObject(FissClaimChange object) {
+      return object.getSeq();
+    }
+
+    @Nonnull
+    @Override
+    public FissClaimChange transformMessage(String apiVersion, FissClaimChange fissClaimChange) {
+      return fissClaimChange;
+    }
+
+    @Override
+    public int writeClaims(String dataVersion, Collection<FissClaimChange> objects)
+        throws ProcessingException {
+      return writeMessages(dataVersion, objects);
+    }
+
+    @Override
+    public int getProcessedCount() throws ProcessingException {
+      return 0;
+    }
+
+    @Override
+    public void shutdown(Duration waitTime) throws ProcessingException {}
 
     @Override
     public void close() throws Exception {}

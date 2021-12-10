@@ -1,32 +1,35 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class RdaSinkTest {
-  private final RdaSink<Integer> sink = new TestSink();
+  private final RdaSink<Integer, Integer> sink = new TestSink();
 
   @Test
   public void batchSuccessful() throws Exception {
-    int count = sink.writeBatch(Arrays.asList(1, 2, 3, 4));
+    int count = sink.writeMessages("", Arrays.asList(1, 2, 3, 4));
     Assert.assertEquals(4, count);
   }
 
   @Test
   public void batchFailures() throws Exception {
     try {
-      sink.writeBatch(Arrays.asList(1, 2, 5, 4));
+      sink.writeMessages("", Arrays.asList(1, 2, 5, 4));
       Assert.fail("sink should have thrown");
     } catch (ProcessingException ex) {
       Assert.assertEquals(12, ex.getProcessedCount());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     try {
-      sink.writeBatch(Arrays.asList(1, 2, 6, 5));
+      sink.writeMessages("", Arrays.asList(1, 2, 6, 5));
       Assert.fail("sink should have thrown");
     } catch (ProcessingException ex) {
       Assert.assertEquals(2, ex.getProcessedCount());
@@ -34,9 +37,9 @@ public class RdaSinkTest {
     }
   }
 
-  private static class TestSink implements RdaSink<Integer> {
+  private static class TestSink implements RdaSink<Integer, Integer> {
     @Override
-    public int writeObject(Integer object) throws ProcessingException {
+    public int writeMessage(String dataVersion, Integer object) throws ProcessingException {
       if (object == 5) {
         throw new ProcessingException(new IOException("oops"), 10);
       }
@@ -47,6 +50,39 @@ public class RdaSinkTest {
     }
 
     @Override
+    public String getDedupKeyForMessage(Integer object) {
+      return String.valueOf(object);
+    }
+
+    @Override
+    public void updateLastSequenceNumber(long lastSequenceNumber) {}
+
+    @Override
+    public long getSequenceNumberForObject(Integer object) {
+      return object;
+    }
+
+    @Override
     public void close() throws Exception {}
+
+    @Nonnull
+    @Override
+    public Integer transformMessage(String apiVersion, Integer integer) {
+      return integer;
+    }
+
+    @Override
+    public int writeClaims(String dataVersion, Collection<Integer> objects)
+        throws ProcessingException {
+      return writeMessages(dataVersion, objects);
+    }
+
+    @Override
+    public int getProcessedCount() throws ProcessingException {
+      return 0;
+    }
+
+    @Override
+    public void shutdown(Duration waitTime) throws ProcessingException {}
   }
 }

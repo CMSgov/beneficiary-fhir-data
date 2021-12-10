@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractRdaLoadJobTest {
-  @Mock private Callable<RdaSource<Integer>> sourceFactory;
-  @Mock private Callable<RdaSink<Integer>> sinkFactory;
-  @Mock private RdaSource<Integer> source;
-  @Mock private RdaSink<Integer> sink;
+  @Mock private Callable<RdaSource<Integer, Integer>> sourceFactory;
+  @Mock private Callable<RdaSink<Integer, Integer>> sinkFactory;
+  @Mock private RdaSource<Integer, Integer> source;
+  @Mock private RdaSink<Integer, Integer> sink;
   private TestingLoadJob job;
   private MetricRegistry appMetrics;
   private Config config;
@@ -230,11 +230,11 @@ public class AbstractRdaLoadJobTest {
     assertEquals(original, loaded);
   }
 
-  private static class TestingLoadJob extends AbstractRdaLoadJob<Integer> {
+  private static class TestingLoadJob extends AbstractRdaLoadJob<Integer, Integer> {
     public TestingLoadJob(
         Config config,
-        Callable<RdaSource<Integer>> sourceFactory,
-        Callable<RdaSink<Integer>> sinkFactory,
+        Callable<RdaSource<Integer, Integer>> sourceFactory,
+        Callable<RdaSink<Integer, Integer>> sinkFactory,
         MetricRegistry appMetrics) {
       super(
           config,

@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.*;
-import static gov.cms.bfd.pipeline.rda.grpc.sink.AbstractClaimRdaSink.isDuplicateKeyException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,8 +12,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
-import java.io.IOException;
+import gov.cms.mpsm.rda.v1.FissClaimChange;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -35,11 +35,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FissClaimRdaSinkTest {
+  private static final String VERSION = "version";
+
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
+
   @Mock private HikariDataSource dataSource;
   @Mock private EntityManagerFactory entityManagerFactory;
   @Mock private EntityManager entityManager;
   @Mock private EntityTransaction transaction;
+  @Mock private FissClaimTransformer transformer;
   private MetricRegistry appMetrics;
   private FissClaimRdaSink sink;
   private long nextSeq = 0L;
@@ -52,7 +56,7 @@ public class FissClaimRdaSinkTest {
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
-    sink = new FissClaimRdaSink(appState);
+    sink = new FissClaimRdaSink(appState, transformer, true);
     nextSeq = 0L;
   }
 
@@ -76,7 +80,7 @@ public class FissClaimRdaSinkTest {
     final List<RdaChange<PreAdjFissClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
 
-    final int count = sink.writeBatch(batch);
+    final int count = sink.writeMessages(VERSION, messagesForBatch(batch));
     assertEquals(3, count);
 
     for (RdaChange<PreAdjFissClaim> change : batch) {
@@ -102,7 +106,7 @@ public class FissClaimRdaSinkTest {
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(1).getClaim());
 
-    final int count = sink.writeBatch(batch);
+    final int count = sink.writeMessages(VERSION, messagesForBatch(batch));
     assertEquals(3, count);
 
     verify(entityManager).persist(batch.get(0).getClaim());
@@ -135,7 +139,7 @@ public class FissClaimRdaSinkTest {
     doThrow(new EntityNotFoundException()).when(entityManager).merge(batch.get(1).getClaim());
 
     try {
-      sink.writeBatch(batch);
+      sink.writeMessages(VERSION, messagesForBatch(batch));
       fail("should have thrown");
     } catch (ProcessingException error) {
       assertEquals(0, error.getProcessedCount());
@@ -170,7 +174,7 @@ public class FissClaimRdaSinkTest {
     doThrow(new RuntimeException("oops")).when(entityManager).persist(batch.get(1).getClaim());
 
     try {
-      sink.writeBatch(batch);
+      sink.writeMessages(VERSION, messagesForBatch(batch));
       fail("should have thrown");
     } catch (ProcessingException error) {
       assertEquals(0, error.getProcessedCount());
@@ -201,11 +205,14 @@ public class FissClaimRdaSinkTest {
     verify(entityManager).close();
   }
 
-  @Test
-  public void exceptionMessageDuplicateKeyDetection() {
-    assertEquals(
-        true, isDuplicateKeyException(new RuntimeException(new IOException("key already existS"))));
-    assertEquals(false, isDuplicateKeyException(new IOException("nothing to see here")));
+  private List<FissClaimChange> messagesForBatch(List<RdaChange<PreAdjFissClaim>> batch) {
+    final var messages = ImmutableList.<FissClaimChange>builder();
+    for (RdaChange<PreAdjFissClaim> preAdjFissClaimRdaChange : batch) {
+      var message = mock(FissClaimChange.class);
+      doReturn(preAdjFissClaimRdaChange).when(transformer).transformClaim(message);
+      messages.add(message);
+    }
+    return messages.build();
   }
 
   private RdaChange<PreAdjFissClaim> createClaim(String dcn) {

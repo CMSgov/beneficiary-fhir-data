@@ -18,8 +18,8 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,12 +41,12 @@ import org.slf4j.LoggerFactory;
  * batching received objects and passing them to the RdaSink object for storage. Basic metrics are
  * tracked at this level.
  *
- * @param <TResponse> type of objects returned by the gRPC service
+ * @param <TMessage> type of objects returned by the gRPC service
  */
-public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
+public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TClaim> {
   private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRdaSource.class);
 
-  private final GrpcStreamCaller<TResponse> caller;
+  private final GrpcStreamCaller<TMessage> caller;
   private final String claimType;
   private final Optional<Long> startingSequenceNumber;
   private final Supplier<CallOptions> callOptionsFactory;
@@ -64,7 +64,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    */
   public GrpcRdaSource(
       Config config,
-      GrpcStreamCaller<TResponse> caller,
+      GrpcStreamCaller<TMessage> caller,
       MetricRegistry appMetrics,
       String claimType,
       Optional<Long> startingSequenceNumber) {
@@ -90,7 +90,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
   @VisibleForTesting
   GrpcRdaSource(
       ManagedChannel channel,
-      GrpcStreamCaller<TResponse> caller,
+      GrpcStreamCaller<TMessage> caller,
       Supplier<CallOptions> callOptionsFactory,
       MetricRegistry appMetrics,
       String claimType,
@@ -113,7 +113,7 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @throws ProcessingException wrapper around any Exception thrown by the service or sink
    */
   @Override
-  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TResponse> sink)
+  public int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TMessage, TClaim> sink)
       throws ProcessingException {
     metrics.calls.mark();
     boolean interrupted = false;
@@ -126,21 +126,23 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
           "calling API for {} claims starting at sequence number {}",
           claimType,
           startingSequenceNumber);
-      final GrpcResponseStream<TResponse> responseStream =
+      final String apiVersion = caller.callVersionService(channel, callOptionsFactory.get());
+
+      final GrpcResponseStream<TMessage> responseStream =
           caller.callService(channel, callOptionsFactory.get(), startingSequenceNumber);
-      final List<TResponse> batch = new ArrayList<>();
+      final Map<Object, TMessage> batch = new LinkedHashMap<>();
       try {
         while (responseStream.hasNext()) {
           setUptimeToReceiving();
-          final TResponse result = responseStream.next();
+          final TMessage result = responseStream.next();
           metrics.objectsReceived.mark();
-          batch.add(result);
+          batch.put(sink.getDedupKeyForMessage(result), result);
           if (batch.size() >= maxPerBatch) {
-            processed += submitBatchToSink(sink, batch);
+            processed += submitBatchToSink(apiVersion, sink, batch);
           }
         }
         if (batch.size() > 0) {
-          processed += submitBatchToSink(sink, batch);
+          processed += submitBatchToSink(apiVersion, sink, batch);
         }
       } catch (GrpcResponseStream.StreamInterruptedException ex) {
         // If our thread is interrupted we cancel the stream so the server knows we're done
@@ -148,6 +150,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
         responseStream.cancelStream("shutting down due to InterruptedException");
         interrupted = true;
       }
+      sink.shutdown(Duration.ofMinutes(5));
+      processed += sink.getProcessedCount();
     } catch (ProcessingException ex) {
       processed += ex.getProcessedCount();
       error = ex;
@@ -180,7 +184,8 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
    * @param sink used to obtain the maximum known sequence number
    * @return a valid RDA change sequence number
    */
-  private long getStartingSequenceNumber(RdaSink<TResponse> sink) throws ProcessingException {
+  private long getStartingSequenceNumber(RdaSink<TMessage, TClaim> sink)
+      throws ProcessingException {
     if (startingSequenceNumber.isPresent()) {
       return startingSequenceNumber.get();
     } else {
@@ -231,10 +236,11 @@ public class GrpcRdaSource<TResponse> implements RdaSource<TResponse> {
     metrics.uptimeValue.set(0);
   }
 
-  private int submitBatchToSink(RdaSink<TResponse> sink, List<TResponse> batch)
+  private int submitBatchToSink(
+      String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
     LOGGER.info("submitting batch to sink: type={} size={}", claimType, batch.size());
-    int processed = sink.writeBatch(batch);
+    final int processed = sink.writeMessages(apiVersion, batch.values());
     LOGGER.info(
         "submitted batch to sink: type={} size={} processed={}",
         claimType,

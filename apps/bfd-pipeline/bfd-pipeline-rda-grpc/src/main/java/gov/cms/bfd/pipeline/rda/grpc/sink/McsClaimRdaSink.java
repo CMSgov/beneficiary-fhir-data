@@ -1,23 +1,43 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.model.rda.RdaApiProgress;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
-import java.util.Optional;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
+import javax.annotation.Nonnull;
 
 /**
  * Implementation of AbstractClaimRdaSink that adds the appropriate query to obtain maximum sequence
  * number for MCS claims.
  */
-public class McsClaimRdaSink extends AbstractClaimRdaSink<PreAdjMcsClaim> {
-  public McsClaimRdaSink(PipelineApplicationState appState) {
-    super(appState);
+public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, PreAdjMcsClaim> {
+  private final McsClaimTransformer transformer;
+
+  public McsClaimRdaSink(
+      PipelineApplicationState appState,
+      McsClaimTransformer transformer,
+      boolean autoUpdateLastSeq) {
+    super(appState, RdaApiProgress.ClaimType.MCS, autoUpdateLastSeq);
+    this.transformer = transformer;
   }
 
   @Override
-  public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
-    return readMaxExistingSequenceNumber(
-        String.format(
-            "select max(c.%s) from PreAdjMcsClaim c", PreAdjMcsClaim.Fields.sequenceNumber));
+  public String getDedupKeyForMessage(McsClaimChange object) {
+    return object.getClaim().getIdrClmHdIcn();
+  }
+
+  @Override
+  public long getSequenceNumberForObject(McsClaimChange object) {
+    return object.getSeq();
+  }
+
+  @Nonnull
+  @Override
+  public RdaChange<PreAdjMcsClaim> transformMessage(String apiVersion, McsClaimChange message) {
+    var change = transformer.transformClaim(message);
+    change.getClaim().setApiSource(apiVersion);
+    return change;
   }
 }

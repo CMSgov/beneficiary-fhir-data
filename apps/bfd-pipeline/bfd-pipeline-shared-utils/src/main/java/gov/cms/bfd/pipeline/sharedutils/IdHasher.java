@@ -95,5 +95,9 @@ public class IdHasher {
       // arrays aren't immutable so it's safest to return a copy
       return hashPepper.clone();
     }
+
+    public int getCacheSize() {
+      return 1000;
+    }
   }
 }

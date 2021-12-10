@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import com.google.common.base.Preconditions;
+import gov.cms.bfd.pipeline.rda.grpc.sink.CachingIdHasher;
+import gov.cms.bfd.pipeline.rda.grpc.sink.ConcurrentRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.FissClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.McsClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
@@ -71,12 +73,20 @@ public class RdaLoadOptions implements Serializable {
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
-                new FissClaimStreamCaller(
-                    new FissClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
+                new FissClaimStreamCaller(),
                 appState.getMetrics(),
                 "fiss",
                 jobConfig.getStartingFissSeqNum()),
-        () -> new FissClaimRdaSink(appState),
+        () ->
+            ConcurrentRdaSink.createSink(
+                jobConfig.getWriteThreads(),
+                jobConfig.getBatchSize(),
+                autoUpdateSequenceNumbers ->
+                    new FissClaimRdaSink(
+                        appState,
+                        new FissClaimTransformer(
+                            appState.getClock(), new CachingIdHasher(idHasherConfig)),
+                        autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }
 
@@ -93,12 +103,20 @@ public class RdaLoadOptions implements Serializable {
         () ->
             new GrpcRdaSource<>(
                 grpcConfig,
-                new McsClaimStreamCaller(
-                    new McsClaimTransformer(appState.getClock(), new IdHasher(idHasherConfig))),
+                new McsClaimStreamCaller(),
                 appState.getMetrics(),
                 "mcs",
                 jobConfig.getStartingMcsSeqNum()),
-        () -> new McsClaimRdaSink(appState),
+        () ->
+            ConcurrentRdaSink.createSink(
+                jobConfig.getWriteThreads(),
+                jobConfig.getBatchSize(),
+                autoUpdateSequenceNumbers ->
+                    new McsClaimRdaSink(
+                        appState,
+                        new McsClaimTransformer(
+                            appState.getClock(), new CachingIdHasher(idHasherConfig)),
+                        autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }
 

@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.*;
-import static gov.cms.bfd.pipeline.rda.grpc.sink.AbstractClaimRdaSink.isDuplicateKeyException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,8 +12,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
-import java.io.IOException;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -35,11 +35,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class McsClaimRdaSinkTest {
+  private static final String VERSION = "version";
+
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   @Mock private HikariDataSource dataSource;
   @Mock private EntityManagerFactory entityManagerFactory;
   @Mock private EntityManager entityManager;
   @Mock private EntityTransaction transaction;
+  @Mock private McsClaimTransformer transformer;
   private MetricRegistry appMetrics;
   private McsClaimRdaSink sink;
   private long nextSeq = 0L;
@@ -52,7 +55,7 @@ public class McsClaimRdaSinkTest {
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
-    sink = new McsClaimRdaSink(appState);
+    sink = new McsClaimRdaSink(appState, transformer, true);
     nextSeq = 0L;
   }
 
@@ -76,7 +79,7 @@ public class McsClaimRdaSinkTest {
     final List<RdaChange<PreAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
 
-    final int count = sink.writeBatch(batch);
+    final int count = sink.writeMessages(VERSION, messagesForBatch(batch));
     assertEquals(3, count);
 
     for (RdaChange<PreAdjMcsClaim> change : batch) {
@@ -102,7 +105,7 @@ public class McsClaimRdaSinkTest {
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(1).getClaim());
 
-    final int count = sink.writeBatch(batch);
+    final int count = sink.writeMessages(VERSION, messagesForBatch(batch));
     assertEquals(3, count);
 
     verify(entityManager).persist(batch.get(0).getClaim());
@@ -135,7 +138,7 @@ public class McsClaimRdaSinkTest {
     doThrow(new EntityNotFoundException()).when(entityManager).merge(batch.get(1).getClaim());
 
     try {
-      sink.writeBatch(batch);
+      sink.writeMessages(VERSION, messagesForBatch(batch));
       fail("should have thrown");
     } catch (ProcessingException error) {
       assertEquals(0, error.getProcessedCount());
@@ -170,7 +173,7 @@ public class McsClaimRdaSinkTest {
     doThrow(new RuntimeException("oops")).when(entityManager).persist(batch.get(1).getClaim());
 
     try {
-      sink.writeBatch(batch);
+      sink.writeMessages(VERSION, messagesForBatch(batch));
       fail("should have thrown");
     } catch (ProcessingException error) {
       assertEquals(0, error.getProcessedCount());
@@ -201,11 +204,14 @@ public class McsClaimRdaSinkTest {
     verify(entityManager).close();
   }
 
-  @Test
-  public void exceptionMessageDuplicateKeyDetection() {
-    assertEquals(
-        true, isDuplicateKeyException(new RuntimeException(new IOException("key already existS"))));
-    assertEquals(false, isDuplicateKeyException(new IOException("nothing to see here")));
+  private List<McsClaimChange> messagesForBatch(List<RdaChange<PreAdjMcsClaim>> batch) {
+    final var messages = ImmutableList.<McsClaimChange>builder();
+    for (RdaChange<PreAdjMcsClaim> preAdjMcsClaimRdaChange : batch) {
+      var message = mock(McsClaimChange.class);
+      doReturn(preAdjMcsClaimRdaChange).when(transformer).transformClaim(message);
+      messages.add(message);
+    }
+    return messages.build();
   }
 
   private RdaChange<PreAdjMcsClaim> createClaim(String dcn) {

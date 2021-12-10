@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
@@ -30,10 +31,6 @@ public class FissClaimRdaSinkIT {
         FissClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, entityManager) -> {
-          final FissClaimRdaSink sink = new FissClaimRdaSink(appState);
-
-          assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
-
           final PreAdjFissClaim claim = new PreAdjFissClaim();
           claim.setSequenceNumber(3L);
           claim.setDcn("1");
@@ -59,10 +56,18 @@ public class FissClaimRdaSinkIT {
           diagCode0.setDiagPoaInd("Q");
           claim.getDiagCodes().add(diagCode0);
 
-          int count =
-              sink.writeObject(
-                  new RdaChange<>(
-                      claim.getSequenceNumber(), RdaChange.Type.INSERT, claim, Instant.now()));
+          final RdaChange<PreAdjFissClaim> change =
+              new RdaChange<>(
+                  claim.getSequenceNumber(), RdaChange.Type.INSERT, claim, Instant.now());
+          final FissClaimChange message = mock(FissClaimChange.class);
+          final FissClaimTransformer transformer = mock(FissClaimTransformer.class);
+          doReturn(change).when(transformer).transformClaim(message);
+
+          final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
+
+          assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
+
+          int count = sink.writeMessage("", message);
           assertEquals(1, count);
 
           List<PreAdjFissClaim> claims =
@@ -100,6 +105,7 @@ public class FissClaimRdaSinkIT {
               new FissClaimTransformer(
                   Clock.systemUTC(), new IdHasher(new IdHasher.Config(1, "asdkfjbasdbfd")));
 
+          List<FissClaimChange> messages = new ArrayList<>();
           List<RdaChange<PreAdjFissClaim>> claims = new ArrayList<>();
           for (int i = 0; i < numberOfClaims; ++i) {
             FissClaim rdaClaim = generator.randomClaim();
@@ -120,14 +126,15 @@ public class FissClaimRdaSinkIT {
                     .setClaim(rdaClaim)
                     .build();
             final RdaChange<PreAdjFissClaim> claim = transformer.transformClaim(rdaChange);
+            messages.add(rdaChange);
             claims.add(claim);
           }
 
-          final FissClaimRdaSink sink = new FissClaimRdaSink(appState);
+          final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
-          int count = sink.writeBatch(claims);
+          int count = sink.writeMessages("version", messages);
           assertEquals(numberOfUniqueClaims, count);
 
           List<PreAdjFissClaim> dbClaims =
@@ -139,6 +146,7 @@ public class FissClaimRdaSinkIT {
           for (int i = 0; i < numberOfUniqueClaims; ++i) {
             PreAdjFissClaim dbClaim = dbClaims.get(i);
             PreAdjFissClaim origClaim = claims.get(lastUniqueOffset + i).getClaim();
+            assertEquals("version", dbClaim.getApiSource());
             assertEquals(origClaim.getDcn(), dbClaim.getDcn());
             assertEquals(origClaim.getDiagCodes().size(), dbClaim.getDiagCodes().size());
             assertEquals(origClaim.getPayers().size(), dbClaim.getPayers().size());
