@@ -22,4 +22,6 @@
           - java-11-openjdk-devel
           - git
           - ansible
+          - python2-boto3
+          - python2-botocore
           - amazon-cloudwatch-agent
