@@ -172,7 +172,7 @@ public abstract class ClaimTransformerFieldTester<
   }
 
   /**
-   * Verifies that a date field transformation is working properly. This includes verifying that a
+   * Verifies that a int field transformation is working properly. This includes verifying that a
    * value is properly copied from the message object to the entity object.
    *
    * @param setter method reference or lambda to set a value of the field being tested on a message
@@ -195,7 +195,7 @@ public abstract class ClaimTransformerFieldTester<
   }
 
   /**
-   * Verifies that a date field transformation is working properly. This includes verifying that a
+   * Verifies that an enum field transformation is working properly. This includes verifying that a
    * value is properly copied from the message object to the entity object and that the copied value
    * matches the expected string value associated with the enum.
    *
