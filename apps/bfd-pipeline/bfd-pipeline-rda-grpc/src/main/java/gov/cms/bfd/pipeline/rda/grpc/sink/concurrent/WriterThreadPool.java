@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
+import com.google.common.base.Preconditions;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -10,15 +11,25 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Manages a pool of worker threads write claim and sequence number updates to a database
+ * concurrently. The lifecycle of the pool and all of its resources are tied to the lifecycle of
+ * this object so calling close() method clears up all resources.
+ *
+ * @param <TMessage> RDA API message class
+ * @param <TClaim> JPA claim entity class
+ */
 public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   private static final Logger LOGGER = LoggerFactory.getLogger(WriterThreadPool.class);
   private static final HashFunction Hasher = Hashing.goodFastHash(32);
@@ -26,12 +37,14 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   private final SequenceNumberTracker sequenceNumbers;
   private final RdaSink<TMessage, TClaim> sink;
   private final ExecutorService threadPool;
-  private final BlockingQueue<ClaimWriterThread.ProcessedBatch<TMessage>> outputQueue;
+  private final BlockingQueue<ReportingCallback.ProcessedBatch<TMessage>> outputQueue;
   private final SequenceNumberWriterThread<TMessage, TClaim> sequenceNumberWriter;
   private final List<ClaimWriterThread<TMessage, TClaim>> writers;
 
   public WriterThreadPool(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
+    Preconditions.checkArgument(maxThreads > 0);
+    Preconditions.checkArgument(batchSize > 0);
     sequenceNumbers = new SequenceNumberTracker(0);
     sink = sinkFactory.get();
     threadPool =
@@ -61,7 +74,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    * @throws Exception if adding to queue fails
    */
   public void addToQueue(String apiVersion, TMessage object) throws Exception {
-    sequenceNumbers.addSequenceNumber(sink.getSequenceNumberForObject(object));
+    sequenceNumbers.addActiveSequenceNumber(sink.getSequenceNumberForObject(object));
     final String key = sink.getDedupKeyForMessage(object);
     final int hash = Hasher.hashString(key, StandardCharsets.UTF_8).asInt();
     final int writerIndex = Math.abs(hash) % writers.size();
@@ -80,15 +93,15 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   public int getProcessedCount() throws ProcessingException {
     var count = 0;
     Exception error = null;
-    var results = new ArrayList<ClaimWriterThread.ProcessedBatch<TMessage>>();
+    var results = new ArrayList<ReportingCallback.ProcessedBatch<TMessage>>();
     outputQueue.drainTo(results);
-    for (ClaimWriterThread.ProcessedBatch<TMessage> result : results) {
+    for (ReportingCallback.ProcessedBatch<TMessage> result : results) {
       count += result.getProcessed();
       if (result.getError() == null) {
         // batch was successfully written so mark sequence numbers as processed
         for (TMessage object : result.getBatch()) {
           long sequenceNumber = sink.getSequenceNumberForObject(object);
-          sequenceNumbers.removeSequenceNumber(sequenceNumber);
+          sequenceNumbers.removeWrittenSequenceNumber(sequenceNumber);
         }
       } else if (error != null) {
         error.addSuppressed(result.getError());
@@ -102,8 +115,21 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     return count;
   }
 
-  public RdaSink<TMessage, TClaim> getSink() {
-    return sink;
+  public String getDedupKeyForMessage(TMessage object) {
+    return sink.getDedupKeyForMessage(object);
+  }
+
+  public long getSequenceNumberForObject(TMessage object) {
+    return sink.getSequenceNumberForObject(object);
+  }
+
+  @Nonnull
+  public TClaim transformMessage(String apiVersion, TMessage message) {
+    return sink.transformMessage(apiVersion, message);
+  }
+
+  public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
+    return sink.readMaxExistingSequenceNumber();
   }
 
   /**
@@ -112,7 +138,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    * @throws ProcessingException
    */
   public void updateSequenceNumbers() throws ProcessingException {
-    final long sequenceNumber = sequenceNumbers.getNextSequenceNumber();
+    final long sequenceNumber = sequenceNumbers.getHighestWrittenSequenceNumber();
     if (sequenceNumber > 0) {
       try {
         sequenceNumberWriter.add(sequenceNumber);
@@ -160,7 +186,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   }
 
   private void updateSequenceNumbersDirectly() throws ProcessingException {
-    final long sequenceNumber = sequenceNumbers.getNextSequenceNumber();
+    final long sequenceNumber = sequenceNumbers.getHighestWrittenSequenceNumber();
     if (sequenceNumber > 0) {
       try {
         sink.updateLastSequenceNumber(sequenceNumber);

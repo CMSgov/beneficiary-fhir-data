@@ -1,26 +1,30 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ReportingCallback.ProcessedBatch;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.NotThreadSafe;
 import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoCloseable {
   private static final Logger LOGGER = LoggerFactory.getLogger(ClaimWriterThread.class);
   private static final Duration AddTimeout = Duration.ofMinutes(5);
-  private static final Duration ReadTimeout = Duration.ofMillis(250);
+  private static final Duration ReadTimeout = Duration.ofMillis(500);
   private static final int InputQueuePaddingMultiple = 2;
 
   private final Supplier<RdaSink<TMessage, TClaim>> sinkFactory;
@@ -52,62 +56,78 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
 
   @Override
   public void run() {
-    LOGGER.info("thread started");
-    final var allObjects = new ArrayList<TMessage>();
-    final var uniqueObjects = new LinkedHashMap<String, TClaim>();
+    LOGGER.info("started");
     try (RdaSink<TMessage, TClaim> sink = sinkFactory.get()) {
+      final Buffer<TMessage, TClaim> buffer = new Buffer<>();
       var running = true;
       while (running) {
-        final Entry<TMessage> entry = takeEntryFromInputQueue();
-        boolean sendOk;
-        if (entry == null) {
-          // queue is empty
-          sendOk = uniqueObjects.size() >= 1;
-        } else if (entry == shutdownValue) {
-          running = false;
-          sendOk = uniqueObjects.size() >= 1;
-          LOGGER.info("shutdown requested");
-        } else {
-          // add object to buffer and send if buffer is full
-          final String objectKey = sink.getDedupKeyForMessage(entry.object);
-          allObjects.add(entry.object);
-          uniqueObjects.put(objectKey, sink.transformMessage(entry.apiVersion, entry.object));
-          sendOk = uniqueObjects.size() >= batchSize;
-        }
-        if (sendOk) {
-          writeBatch(sink, allObjects, uniqueObjects);
-          uniqueObjects.clear();
-          allObjects.clear();
-        }
+        running = runOnce(sink, buffer);
       }
+      LOGGER.info("terminating normally");
+    } catch (InterruptedException ex) {
+      LOGGER.info("terminating due to InterruptedException");
     } catch (Exception ex) {
-      LOGGER.error("caught exception: ex={}", ex.getMessage(), ex);
-      try {
-        reportError(ImmutableList.copyOf(allObjects), ex);
-      } catch (InterruptedException ignored) {
-        LOGGER.error(
-            "unable to report terminal exception to pool: message={}", ex.getMessage(), ex);
-      }
+      // this is just a catch all for safety, runOnce() should handle all non-interrupts
+      LOGGER.error("terminating due to uncaught exception: ex={}", ex.getMessage(), ex);
+      reportErrorWhenClosing(ex);
     }
-    LOGGER.info("thread stopped");
+    LOGGER.info("stopped");
   }
 
-  private void writeBatch(
-      RdaSink<TMessage, TClaim> sink,
-      ArrayList<TMessage> allObjects,
-      LinkedHashMap<String, TClaim> uniqueObjects)
+  /**
+   * Reads one entry from the queue and processes it. Adds entries to a list and trackers unique
+   * entries. Once a full batch has been detected it will be written to the database and the list
+   * and map reset. Any exception thrown by the database update is * reported back via our
+   * errorReportingFunction.
+   *
+   * @param sink RdaSink to use for writing to the database
+   * @return true if another iteration is called for, false otherwise
+   */
+  @VisibleForTesting
+  boolean runOnce(RdaSink<TMessage, TClaim> sink, Buffer<TMessage, TClaim> buffer)
       throws InterruptedException {
+    boolean keepRunning = true;
+    try {
+      final Entry<TMessage> entry = takeEntryFromInputQueue();
+      boolean writeNeeded;
+      if (entry == null) {
+        // queue is empty so flush any received claims to reduce latency
+        writeNeeded = buffer.getUniqueCount() >= 1;
+      } else if (entry == shutdownValue) {
+        // shutdown requested so flush any received claims and exit
+        LOGGER.info("shutdown requested");
+        keepRunning = false;
+        writeNeeded = buffer.getUniqueCount() >= 1;
+      } else {
+        // add message and claim to buffer and write if buffer is full
+        buffer.add(sink, entry);
+        writeNeeded = buffer.getUniqueCount() >= batchSize;
+      }
+      if (writeNeeded) {
+        writeBatch(sink, buffer);
+        buffer.clear();
+      }
+    } catch (InterruptedException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      LOGGER.error("caught exception: ex={}", ex.getMessage(), ex);
+      reportError(buffer.getMessages(), ex);
+      keepRunning = false;
+    }
+    return keepRunning;
+  }
+
+  private void writeBatch(RdaSink<TMessage, TClaim> sink, Buffer<TMessage, TClaim> buffer)
+      throws Exception {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
-          "writing batch: allObjects={} uniqueObjects={}", allObjects.size(), uniqueObjects.size());
+          "writing batch: allObjects={} uniqueObjects={}",
+          buffer.getFullCount(),
+          buffer.getUniqueCount());
     }
-    try {
-      final List<TClaim> batch = ImmutableList.copyOf(uniqueObjects.values());
-      final var processed = sink.writeClaims(batch);
-      reportSuccess(allObjects, processed);
-    } catch (Exception ex) {
-      reportError(allObjects, ex);
-    }
+    final List<TClaim> batch = buffer.getClaims();
+    final var processed = sink.writeClaims(batch);
+    reportSuccess(buffer.getMessages(), processed);
   }
 
   @Nullable
@@ -136,20 +156,52 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
     reportingFunction.accept(new ProcessedBatch<>(0, ImmutableList.copyOf(batch), error));
   }
 
+  private void reportErrorWhenClosing(Exception error) {
+    try {
+      reportError(Collections.emptyList(), error);
+    } catch (InterruptedException ex) {
+      LOGGER.error("unable to report final error due to InterruptedException", ex);
+    }
+  }
+
   @AllArgsConstructor
   private static class Entry<T> {
     private final String apiVersion;
     private final T object;
   }
 
-  @Value
-  public static class ProcessedBatch<T> {
-    int processed;
-    List<T> batch;
-    Exception error;
-  }
+  @NotThreadSafe
+  @VisibleForTesting
+  static class Buffer<TMessage, TClaim> {
+    private final List<TMessage> allMessages = new ArrayList<>();
+    private final Map<String, TClaim> uniqueClaims = new LinkedHashMap<>();
 
-  public interface ReportingCallback<TMessage> {
-    void accept(ProcessedBatch<TMessage> result) throws InterruptedException;
+    void add(RdaSink<TMessage, TClaim> sink, Entry<TMessage> entry) {
+      final String claimKey = sink.getDedupKeyForMessage(entry.object);
+      final TClaim claim = sink.transformMessage(entry.apiVersion, entry.object);
+      allMessages.add(entry.object);
+      uniqueClaims.put(claimKey, claim);
+    }
+
+    void clear() {
+      allMessages.clear();
+      uniqueClaims.clear();
+    }
+
+    int getFullCount() {
+      return allMessages.size();
+    }
+
+    int getUniqueCount() {
+      return uniqueClaims.size();
+    }
+
+    List<TMessage> getMessages() {
+      return ImmutableList.copyOf(allMessages);
+    }
+
+    List<TClaim> getClaims() {
+      return ImmutableList.copyOf(uniqueClaims.values());
+    }
   }
 }

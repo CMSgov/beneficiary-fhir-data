@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import com.google.common.base.Preconditions;
+import com.google.common.annotations.VisibleForTesting;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import java.time.Duration;
@@ -29,8 +29,12 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
    */
   public ConcurrentRdaSink(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
-    Preconditions.checkArgument(maxThreads > 0);
-    writerPool = new WriterThreadPool<>(maxThreads, batchSize, sinkFactory);
+    this(new WriterThreadPool<>(maxThreads, batchSize, sinkFactory));
+  }
+
+  @VisibleForTesting
+  ConcurrentRdaSink(WriterThreadPool<TMessage, TClaim> writerPool) {
+    this.writerPool = writerPool;
   }
 
   /**
@@ -56,7 +60,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
 
   @Override
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
-    return writerPool.getSink().readMaxExistingSequenceNumber();
+    return writerPool.readMaxExistingSequenceNumber();
   }
 
   /**
@@ -100,18 +104,18 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
 
   @Override
   public String getDedupKeyForMessage(TMessage object) {
-    return writerPool.getSink().getDedupKeyForMessage(object);
+    return writerPool.getDedupKeyForMessage(object);
   }
 
   @Override
   public long getSequenceNumberForObject(TMessage object) {
-    return writerPool.getSink().getSequenceNumberForObject(object);
+    return writerPool.getSequenceNumberForObject(object);
   }
 
   @Nonnull
   @Override
   public TClaim transformMessage(String apiVersion, TMessage message) {
-    return writerPool.getSink().transformMessage(apiVersion, message);
+    return writerPool.transformMessage(apiVersion, message);
   }
 
   /**
