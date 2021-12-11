@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.RdaApiProgress;
@@ -8,10 +8,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import javax.annotation.Nonnull;
 
-/**
- * Implementation of AbstractClaimRdaSink that adds the appropriate query to obtain maximum sequence
- * number for FISS claims.
- */
+/** Implementation of AbstractClaimRdaSink that adds FISS claim specific methods. */
 public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, PreAdjFissClaim> {
   private final FissClaimTransformer transformer;
 

@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import java.io.IOException;

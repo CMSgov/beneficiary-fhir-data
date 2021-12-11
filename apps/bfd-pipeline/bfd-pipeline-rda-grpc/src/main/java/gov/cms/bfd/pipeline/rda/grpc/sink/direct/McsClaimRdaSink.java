@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.RdaApiProgress;
@@ -8,10 +8,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import javax.annotation.Nonnull;
 
-/**
- * Implementation of AbstractClaimRdaSink that adds the appropriate query to obtain maximum sequence
- * number for MCS claims.
- */
+/** Implementation of AbstractClaimRdaSink that adds MCS claim specific methods. */
 public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, PreAdjMcsClaim> {
   private final McsClaimTransformer transformer;
 

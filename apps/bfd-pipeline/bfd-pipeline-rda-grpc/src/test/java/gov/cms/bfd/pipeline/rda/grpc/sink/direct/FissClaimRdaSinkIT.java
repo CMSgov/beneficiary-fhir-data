@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;

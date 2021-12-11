@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;

@@ -1,14 +1,14 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -21,35 +21,40 @@ import org.slf4j.LoggerFactory;
 
 public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   private static final Logger LOGGER = LoggerFactory.getLogger(WriterThreadPool.class);
-
-  private final HashFunction Hasher = Hashing.goodFastHash(32);
+  private static final HashFunction Hasher = Hashing.goodFastHash(32);
 
   private final SequenceNumberTracker sequenceNumbers;
-  private final ExecutorService threadPool;
   private final RdaSink<TMessage, TClaim> sink;
-  private final List<ClaimWriterThread<TMessage, TClaim>> writers;
-  private final SequenceNumberWriterThread<TMessage, TClaim> sequenceNumberWriter;
+  private final ExecutorService threadPool;
   private final BlockingQueue<ClaimWriterThread.ProcessedBatch<TMessage>> outputQueue;
+  private final SequenceNumberWriterThread<TMessage, TClaim> sequenceNumberWriter;
+  private final List<ClaimWriterThread<TMessage, TClaim>> writers;
 
   public WriterThreadPool(
       int maxThreads, int batchSize, Supplier<RdaSink<TMessage, TClaim>> sinkFactory) {
     sequenceNumbers = new SequenceNumberTracker(0);
-    threadPool = Executors.newCachedThreadPool();
     sink = sinkFactory.get();
-    writers = new ArrayList<>(maxThreads);
+    threadPool =
+        Executors.newCachedThreadPool(
+            new ThreadFactoryBuilder()
+                .setNameFormat(sink.getClass().getSimpleName() + "-thread-%d")
+                .build());
     outputQueue = new LinkedBlockingQueue<>();
+    sequenceNumberWriter = new SequenceNumberWriterThread<>(sinkFactory, outputQueue::put);
+    threadPool.submit(sequenceNumberWriter);
+    writers = new ArrayList<>(maxThreads);
     for (int i = 1; i <= maxThreads; ++i) {
       var writer = new ClaimWriterThread<>(sinkFactory, batchSize, outputQueue::put);
       writers.add(writer);
       threadPool.submit(writer);
     }
-    sequenceNumberWriter = new SequenceNumberWriterThread<>(sinkFactory, outputQueue::put);
-    threadPool.submit(sequenceNumberWriter);
   }
 
   /**
    * Adds a single object to queue for storage. This will not cause the object to be written
-   * immediately nor will it wait for it to be written.
+   * immediately nor will it wait for it to be written. Objects are assigned to workers based on
+   * their claim ids (value returned by {@code RdaSink.getDedupKeyForMessage}) so that all updates
+   * for any given claim are sequential. Updates for unrelated claims can happen in any order.
    *
    * @param apiVersion version string for this batch
    * @param objects object to be enqueued
@@ -61,20 +66,6 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     final int hash = Hasher.hashString(key, StandardCharsets.UTF_8).asInt();
     final int writerIndex = Math.abs(hash) % writers.size();
     writers.get(writerIndex).add(apiVersion, object);
-  }
-
-  /**
-   * Adds all of the objects to queue for storage. This will not cause the objects to be written
-   * immediately nor will it wait for them to be written.
-   *
-   * @param apiVersion version string for this batch
-   * @param objects objects to be enqueued
-   * @throws Exception if adding to queue fails
-   */
-  public void addBatchToQueue(String apiVersion, Collection<TMessage> objects) throws Exception {
-    for (TMessage object : objects) {
-      addToQueue(apiVersion, object);
-    }
   }
 
   /**
@@ -115,6 +106,11 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     return sink;
   }
 
+  /**
+   * Schedules the current sequence number to be written to the database by a worker thread.
+   *
+   * @throws ProcessingException
+   */
   public void updateSequenceNumbers() throws ProcessingException {
     final long sequenceNumber = sequenceNumbers.getNextSequenceNumber();
     if (sequenceNumber > 0) {
@@ -126,6 +122,11 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     }
   }
 
+  /**
+   * Cleanly shuts down our thread pool. Any queued data will be written before this method returns.
+   *
+   * @param waitTime maximum amount of time to wait for the shutdown to complete
+   */
   public void shutdown(Duration waitTime) throws Exception {
     LOGGER.info("shutdown started");
     final MultiCloser closer = new MultiCloser();

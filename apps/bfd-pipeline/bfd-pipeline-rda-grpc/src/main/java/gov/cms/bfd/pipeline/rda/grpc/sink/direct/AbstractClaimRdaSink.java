@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -24,8 +24,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RdaSink implementation that writes TClaim objects to the database in batches.
+ * RdaSink implementation that writes TClaim objects to the database in batches within the calling
+ * thread. This class is abstract and derived classes implement the methods that depend on the
+ * actual class of RDA API message and database entity.
  *
+ * @param <TMessage> type of RDA API messages written to the database
  * @param <TClaim> type of entity objects written to the database
  */
 abstract class AbstractClaimRdaSink<TMessage, TClaim>
@@ -37,6 +40,17 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   protected final RdaApiProgress.ClaimType claimType;
   protected final boolean autoUpdateLastSeq;
 
+  /**
+   * Constructs an instance using the provided appState and claimType. Sequence numbers can either
+   * be written in the same transaction as their associated claims (autoUpdateLastSeq=true) or not
+   * auto updated (autoUpdateLastSeq=false). Generally the former is used for single-threaded
+   * processing and the latter for multi-threaded processing.
+   *
+   * @param appState provides database and metrics configuration
+   * @param claimType used to write claim type when recording sequence number updates
+   * @param autoUpdateLastSeq controls whether sequence numbers are automatically written to the
+   *     database
+   */
   protected AbstractClaimRdaSink(
       PipelineApplicationState appState,
       RdaApiProgress.ClaimType claimType,
@@ -56,6 +70,61 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     }
   }
 
+  /**
+   * Queries the RdaApiProgress table to get the maximum sequence number for our claim type.
+   *
+   * @return max sequence number or empty if there is no record for this claim type
+   * @throws ProcessingException if the operation fails
+   */
+  @Override
+  public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
+    try {
+      logger.info("running query to find max sequence number");
+      String query =
+          String.format(
+              "select p.%s from RdaApiProgress p where p.claimType='%s'",
+              RdaApiProgress.Fields.lastSequenceNumber, claimType.name());
+      final List<Long> sequenceNumber =
+          entityManager.createQuery(query, Long.class).getResultList();
+      final Optional<Long> answer =
+          sequenceNumber.isEmpty() ? Optional.empty() : Optional.of(sequenceNumber.get(0));
+      logger.info(
+          "max sequence number result is {}", answer.map(n -> Long.toString(n)).orElse("none"));
+      return answer;
+    } catch (Exception ex) {
+      throw new ProcessingException(ex, 0);
+    }
+  }
+
+  /**
+   * Writes the sequence number to the database in the calling thread.
+   *
+   * @param lastSequenceNumber value to write to the database
+   */
+  @Override
+  public void updateLastSequenceNumber(long lastSequenceNumber) {
+    boolean commit = false;
+    entityManager.getTransaction().begin();
+    try {
+      updateLastSequenceNumberImpl(lastSequenceNumber);
+      commit = true;
+    } finally {
+      if (commit) {
+        entityManager.getTransaction().commit();
+      } else {
+        entityManager.getTransaction().rollback();
+      }
+    }
+  }
+
+  /**
+   * Writes the claims immediately and returns the number written.
+   *
+   * @param dataVersion value for the apiSource column of the claim record
+   * @param objects zero or more objects to be written to the data store
+   * @return number of objects successfully processed
+   * @throws ProcessingException if the operation fails
+   */
   @Override
   public int writeMessages(String apiVersion, Collection<TMessage> messages)
       throws ProcessingException {
@@ -63,14 +132,14 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     return writeClaims(apiVersion, claims);
   }
 
-  @Override
-  public int getProcessedCount() throws ProcessingException {
-    return 0;
-  }
-
-  @Override
-  public void shutdown(Duration waitTime) throws ProcessingException {}
-
+  /**
+   * Writes the claims to the database in the calling thread.
+   *
+   * @param dataVersion appropriate string for the apiSource column of the claim table
+   * @param claims objects to be written
+   * @return number successfully written
+   * @throws ProcessingException if the operation fails
+   */
   @Override
   public int writeClaims(String dataVersion, Collection<RdaChange<TClaim>> claims)
       throws ProcessingException {
@@ -100,25 +169,29 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     return claims.size();
   }
 
+  /**
+   * Always returns zero since all claims are written synchronously by writeMessages.
+   *
+   * @return zero
+   * @throws ProcessingException if the operation fails
+   */
+  @Override
+  public int getProcessedCount() throws ProcessingException {
+    return 0;
+  }
+
+  /**
+   * Does nothing since there is no thread pool to close.
+   *
+   * @param waitTime maximum amount of time to wait for shutdown to complete
+   * @throws ProcessingException if the operation fails
+   */
+  @Override
+  public void shutdown(Duration waitTime) throws ProcessingException {}
+
   @VisibleForTesting
   Metrics getMetrics() {
     return metrics;
-  }
-
-  @Override
-  public void updateLastSequenceNumber(long lastSequenceNumber) {
-    boolean commit = false;
-    entityManager.getTransaction().begin();
-    try {
-      updateLastSequenceNumberImpl(lastSequenceNumber);
-      commit = true;
-    } finally {
-      if (commit) {
-        entityManager.getTransaction().commit();
-      } else {
-        entityManager.getTransaction().rollback();
-      }
-    }
   }
 
   private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
@@ -170,26 +243,6 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
       logger.warn("processed an empty batch!");
     }
     return value.orElse(0L);
-  }
-
-  @Override
-  public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
-    try {
-      logger.info("running query to find max sequence number");
-      String query =
-          String.format(
-              "select p.%s from RdaApiProgress p where p.claimType='%s'",
-              RdaApiProgress.Fields.lastSequenceNumber, claimType.name());
-      final List<Long> sequenceNumber =
-          entityManager.createQuery(query, Long.class).getResultList();
-      final Optional<Long> answer =
-          sequenceNumber.isEmpty() ? Optional.empty() : Optional.of(sequenceNumber.get(0));
-      logger.info(
-          "max sequence number result is {}", answer.map(n -> Long.toString(n)).orElse("none"));
-      return answer;
-    } catch (Exception ex) {
-      throw new ProcessingException(ex, 0);
-    }
   }
 
   /**

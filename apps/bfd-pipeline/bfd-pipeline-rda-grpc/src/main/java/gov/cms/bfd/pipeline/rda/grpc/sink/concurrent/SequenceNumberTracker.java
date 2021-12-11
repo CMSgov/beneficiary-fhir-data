@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.Set;

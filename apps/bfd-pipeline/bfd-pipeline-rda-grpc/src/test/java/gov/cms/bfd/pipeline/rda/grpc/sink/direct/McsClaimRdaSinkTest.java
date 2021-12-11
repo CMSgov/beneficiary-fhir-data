@@ -1,4 +1,4 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -9,12 +9,12 @@ import static org.mockito.Mockito.*;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
-import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
+import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
-import gov.cms.mpsm.rda.v1.FissClaimChange;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -34,18 +34,17 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FissClaimRdaSinkTest {
+public class McsClaimRdaSinkTest {
   private static final String VERSION = "version";
 
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
-
   @Mock private HikariDataSource dataSource;
   @Mock private EntityManagerFactory entityManagerFactory;
   @Mock private EntityManager entityManager;
   @Mock private EntityTransaction transaction;
-  @Mock private FissClaimTransformer transformer;
+  @Mock private McsClaimTransformer transformer;
   private MetricRegistry appMetrics;
-  private FissClaimRdaSink sink;
+  private McsClaimRdaSink sink;
   private long nextSeq = 0L;
 
   @Before
@@ -56,7 +55,7 @@ public class FissClaimRdaSinkTest {
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
-    sink = new FissClaimRdaSink(appState, transformer, true);
+    sink = new McsClaimRdaSink(appState, transformer, true);
     nextSeq = 0L;
   }
 
@@ -64,26 +63,26 @@ public class FissClaimRdaSinkTest {
   public void metricNames() {
     assertEquals(
         Arrays.asList(
-            "FissClaimRdaSink.calls",
-            "FissClaimRdaSink.change.latency.millis",
-            "FissClaimRdaSink.failures",
-            "FissClaimRdaSink.lastSeq",
-            "FissClaimRdaSink.successes",
-            "FissClaimRdaSink.writes.merged",
-            "FissClaimRdaSink.writes.persisted",
-            "FissClaimRdaSink.writes.total"),
+            "McsClaimRdaSink.calls",
+            "McsClaimRdaSink.change.latency.millis",
+            "McsClaimRdaSink.failures",
+            "McsClaimRdaSink.lastSeq",
+            "McsClaimRdaSink.successes",
+            "McsClaimRdaSink.writes.merged",
+            "McsClaimRdaSink.writes.persisted",
+            "McsClaimRdaSink.writes.total"),
         new ArrayList<>(appMetrics.getNames()));
   }
 
   @Test
   public void persistSuccessful() throws Exception {
-    final List<RdaChange<PreAdjFissClaim>> batch =
+    final List<RdaChange<PreAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
 
     final int count = sink.writeMessages(VERSION, messagesForBatch(batch));
     assertEquals(3, count);
 
-    for (RdaChange<PreAdjFissClaim> change : batch) {
+    for (RdaChange<PreAdjMcsClaim> change : batch) {
       verify(entityManager).persist(change.getClaim());
     }
     verify(entityManager, times(0))
@@ -102,7 +101,7 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void mergeSuccessful() throws Exception {
-    final List<RdaChange<PreAdjFissClaim>> batch =
+    final List<RdaChange<PreAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(1).getClaim());
 
@@ -113,7 +112,7 @@ public class FissClaimRdaSinkTest {
     verify(entityManager).persist(batch.get(1).getClaim());
     verify(entityManager, times(0))
         .persist(batch.get(2).getClaim()); // not called once a persist fails
-    for (RdaChange<PreAdjFissClaim> change : batch) {
+    for (RdaChange<PreAdjMcsClaim> change : batch) {
       verify(entityManager).merge(change.getClaim());
     }
     // the persist transaction will be rolled back
@@ -133,7 +132,7 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void persistAndMergeFail() {
-    final List<RdaChange<PreAdjFissClaim>> batch =
+    final List<RdaChange<PreAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(0).getClaim());
     doThrow(new EntityNotFoundException()).when(entityManager).merge(batch.get(1).getClaim());
@@ -169,7 +168,7 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void persistFatalError() {
-    final List<RdaChange<PreAdjFissClaim>> batch =
+    final List<RdaChange<PreAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new RuntimeException("oops")).when(entityManager).persist(batch.get(1).getClaim());
 
@@ -205,19 +204,19 @@ public class FissClaimRdaSinkTest {
     verify(entityManager).close();
   }
 
-  private List<FissClaimChange> messagesForBatch(List<RdaChange<PreAdjFissClaim>> batch) {
-    final var messages = ImmutableList.<FissClaimChange>builder();
-    for (RdaChange<PreAdjFissClaim> preAdjFissClaimRdaChange : batch) {
-      var message = mock(FissClaimChange.class);
-      doReturn(preAdjFissClaimRdaChange).when(transformer).transformClaim(message);
+  private List<McsClaimChange> messagesForBatch(List<RdaChange<PreAdjMcsClaim>> batch) {
+    final var messages = ImmutableList.<McsClaimChange>builder();
+    for (RdaChange<PreAdjMcsClaim> preAdjMcsClaimRdaChange : batch) {
+      var message = McsClaimChange.newBuilder().build();
+      doReturn(preAdjMcsClaimRdaChange).when(transformer).transformClaim(message);
       messages.add(message);
     }
     return messages.build();
   }
 
-  private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
-    PreAdjFissClaim claim = new PreAdjFissClaim();
-    claim.setDcn(dcn);
+  private RdaChange<PreAdjMcsClaim> createClaim(String dcn) {
+    PreAdjMcsClaim claim = new PreAdjMcsClaim();
+    claim.setIdrClmHdIcn(dcn);
     return new RdaChange<>(
         nextSeq++, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));
   }
