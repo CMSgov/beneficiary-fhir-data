@@ -129,20 +129,18 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   public int writeMessages(String apiVersion, Collection<TMessage> messages)
       throws ProcessingException {
     final List<RdaChange<TClaim>> claims = transformMessages(apiVersion, messages);
-    return writeClaims(apiVersion, claims);
+    return writeClaims(claims);
   }
 
   /**
    * Writes the claims to the database in the calling thread.
    *
-   * @param dataVersion appropriate string for the apiSource column of the claim table
    * @param claims objects to be written
    * @return number successfully written
    * @throws ProcessingException if the operation fails
    */
   @Override
-  public int writeClaims(String dataVersion, Collection<RdaChange<TClaim>> claims)
-      throws ProcessingException {
+  public int writeClaims(Collection<RdaChange<TClaim>> claims) throws ProcessingException {
     final long maxSeq = maxSequenceInBatch(claims);
     try {
       metrics.calls.mark();

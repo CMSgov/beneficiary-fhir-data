@@ -349,9 +349,8 @@ public class GrpcRdaSourceIT {
     }
 
     @Override
-    public int writeClaims(String dataVersion, Collection<FissClaimChange> objects)
-        throws ProcessingException {
-      return writeMessages(dataVersion, objects);
+    public int writeClaims(Collection<FissClaimChange> objects) throws ProcessingException {
+      throw new UnsupportedOperationException();
     }
 
     @Override

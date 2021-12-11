@@ -72,9 +72,8 @@ public class RdaSinkTest {
     }
 
     @Override
-    public int writeClaims(String dataVersion, Collection<Integer> objects)
-        throws ProcessingException {
-      return writeMessages(dataVersion, objects);
+    public int writeClaims(Collection<Integer> objects) throws ProcessingException {
+      throw new UnsupportedOperationException();
     }
 
     @Override

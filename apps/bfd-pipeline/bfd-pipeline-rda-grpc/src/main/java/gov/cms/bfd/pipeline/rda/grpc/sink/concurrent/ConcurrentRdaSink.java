@@ -117,13 +117,11 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
   /**
    * This method is not implemented since that would bypass the queue used to schedule writes.
    *
-   * @param dataVersion appropriate string for the apiSource column of the claim table
    * @param objects collection of entity objects to be written to the database
    * @throws ProcessingException always throws an exception
    */
   @Override
-  public int writeClaims(String dataVersion, Collection<TClaim> objects)
-      throws ProcessingException {
+  public int writeClaims(Collection<TClaim> objects) throws ProcessingException {
     throw new ProcessingException(new UnsupportedOperationException(), 0);
   }
 

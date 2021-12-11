@@ -57,7 +57,6 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
     final var uniqueObjects = new LinkedHashMap<String, TClaim>();
     try (RdaSink<TMessage, TClaim> sink = sinkFactory.get()) {
       var running = true;
-      String apiVersion = "unknown";
       while (running) {
         final Entry<TMessage> entry = takeEntryFromInputQueue();
         boolean sendOk;
@@ -73,11 +72,10 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
           final String objectKey = sink.getDedupKeyForMessage(entry.object);
           allObjects.add(entry.object);
           uniqueObjects.put(objectKey, sink.transformMessage(entry.apiVersion, entry.object));
-          apiVersion = entry.apiVersion;
           sendOk = uniqueObjects.size() >= batchSize;
         }
         if (sendOk) {
-          writeBatch(sink, allObjects, uniqueObjects, apiVersion);
+          writeBatch(sink, allObjects, uniqueObjects);
           uniqueObjects.clear();
           allObjects.clear();
         }
@@ -97,8 +95,7 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
   private void writeBatch(
       RdaSink<TMessage, TClaim> sink,
       ArrayList<TMessage> allObjects,
-      LinkedHashMap<String, TClaim> uniqueObjects,
-      String apiVersion)
+      LinkedHashMap<String, TClaim> uniqueObjects)
       throws InterruptedException {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
@@ -106,7 +103,7 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
     }
     try {
       final List<TClaim> batch = ImmutableList.copyOf(uniqueObjects.values());
-      final var processed = sink.writeClaims(apiVersion, batch);
+      final var processed = sink.writeClaims(batch);
       reportSuccess(allObjects, processed);
     } catch (Exception ex) {
       reportError(allObjects, ex);

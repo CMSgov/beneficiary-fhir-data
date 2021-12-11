@@ -130,13 +130,12 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * Write the specified collection of entity objects to the database. This write could happen in
    * the current thread or in a background thread depending on the sink implementation.
    *
-   * @param dataVersion appropriate string for the apiSource column of the claim table
    * @param objects collection of entity objects to be written to the database
    * @return number of claims processed since last call to writeClaims or getProcessedCount
    * @throws ProcessingException if any exceptions are thrown they are wrapped in a
    *     ProcessingException
    */
-  int writeClaims(String dataVersion, Collection<TClaim> objects) throws ProcessingException;
+  int writeClaims(Collection<TClaim> objects) throws ProcessingException;
 
   /**
    * Return count of records processed since the most recent call to a write method or this method.
