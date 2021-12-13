@@ -69,6 +69,10 @@ public class FissClaimStreamCallerIT {
         .runWithChannelParam(
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller();
+              assertEquals(
+                  RdaService.RDA_PROTO_VERSION,
+                  caller.callVersionService(channel, CallOptions.DEFAULT));
+
               final GrpcResponseStream<FissClaimChange> results =
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
               assertEquals(true, results.hasNext());
@@ -76,13 +80,11 @@ public class FissClaimStreamCallerIT {
               PreAdjFissClaim claim = transform(results.next());
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-              assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
               assertEquals(true, results.hasNext());
 
               claim = transform(results.next());
               assertEquals("2643602", claim.getDcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-              assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
               assertEquals(false, results.hasNext());
             });
   }

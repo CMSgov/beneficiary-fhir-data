@@ -63,7 +63,7 @@ public class RdaServerJobIT {
           fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2);
       assertEquals(true, fissStream.hasNext());
       RdaChange<PreAdjFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
-      assertMatches(fissChange.getClaim().getApiSource(), "Random:1:.*");
+      assertMatches(fissCaller.callVersionService(fissChannel, CallOptions.DEFAULT), "Random:1:.*");
       assertEquals(2L, fissChange.getSequenceNumber());
       assertEquals(true, fissStream.hasNext());
       fissChange = fissTransformer.transformClaim(fissStream.next());
@@ -76,7 +76,7 @@ public class RdaServerJobIT {
           mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 3);
       assertEquals(true, mcsStream.hasNext());
       RdaChange<PreAdjMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
-      assertMatches(mcsChange.getClaim().getApiSource(), "Random:1:.*");
+      assertMatches(mcsCaller.callVersionService(mcsChannel, CallOptions.DEFAULT), "Random:1:.*");
       assertEquals(3L, mcsChange.getSequenceNumber());
       assertEquals(false, mcsStream.hasNext());
     } finally {
@@ -114,7 +114,8 @@ public class RdaServerJobIT {
         final var fissStream = fissCaller.callService(fissChannel, CallOptions.DEFAULT, 1098);
         assertEquals(true, fissStream.hasNext());
         RdaChange<PreAdjFissClaim> fissChange = fissTransformer.transformClaim(fissStream.next());
-        assertMatches(fissChange.getClaim().getApiSource(), "S3:\\d+:.*");
+        assertMatches(
+            fissCaller.callVersionService(fissChannel, CallOptions.DEFAULT), "S3:\\d+:.*");
         assertEquals(1098L, fissChange.getSequenceNumber());
         assertEquals(true, fissStream.hasNext());
         fissChange = fissTransformer.transformClaim(fissStream.next());
@@ -128,7 +129,7 @@ public class RdaServerJobIT {
         final var mcsStream = mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 1099);
         assertEquals(true, mcsStream.hasNext());
         RdaChange<PreAdjMcsClaim> mcsChange = mcsTransformer.transformClaim(mcsStream.next());
-        assertMatches(mcsChange.getClaim().getApiSource(), "S3:\\d+:.*");
+        assertMatches(mcsCaller.callVersionService(mcsChannel, CallOptions.DEFAULT), "S3:\\d+:.*");
         assertEquals(1099L, mcsChange.getSequenceNumber());
         assertEquals(true, mcsStream.hasNext());
         mcsChange = mcsTransformer.transformClaim(mcsStream.next());

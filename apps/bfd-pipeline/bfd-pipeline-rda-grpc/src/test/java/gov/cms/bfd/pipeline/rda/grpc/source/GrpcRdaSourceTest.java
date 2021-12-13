@@ -22,7 +22,7 @@ import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
@@ -56,6 +56,7 @@ public class GrpcRdaSourceTest {
             new GrpcRdaSource<>(
                 channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
     doReturn(VERSION).when(caller).callVersionService(channel, CallOptions.DEFAULT);
+    doAnswer(i -> i.getArgument(0).toString()).when(sink).getDedupKeyForMessage(any());
     metrics = source.getMetrics();
   }
 
@@ -79,8 +80,8 @@ public class GrpcRdaSourceTest {
     doReturn(createResponse(CLAIM_1, CLAIM_2, CLAIM_3))
         .when(caller)
         .callService(channel, CallOptions.DEFAULT, 42L);
-    doReturn(2).when(sink).writeMessages(VERSION, Arrays.asList(CLAIM_1, CLAIM_2));
-    doReturn(1).when(sink).writeMessages(VERSION, Collections.singletonList(CLAIM_3));
+    doReturn(2).when(sink).writeMessages(VERSION, List.of(CLAIM_1, CLAIM_2));
+    doReturn(1).when(sink).writeMessages(VERSION, List.of(CLAIM_3));
 
     final int result = source.retrieveAndProcessObjects(2, sink);
     assertEquals(3, result);

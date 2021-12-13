@@ -9,7 +9,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -201,7 +203,8 @@ public class GrpcRdaSourceIT {
             port -> {
               int count;
               GrpcRdaSource.Config config = createSourceConfig(port).build();
-              try (GrpcRdaSource<FissClaimChange, FissClaimChange> source = createSource(config)) {
+              try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
+                  createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
               }
               assertEquals(2, count);
@@ -221,7 +224,8 @@ public class GrpcRdaSourceIT {
               int count;
               GrpcRdaSource.Config config =
                   createSourceConfig(port).authenticationToken("secret").build();
-              try (GrpcRdaSource<FissClaimChange, FissClaimChange> source = createSource(config)) {
+              try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
+                  createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
               }
               assertEquals(2, count);
@@ -240,7 +244,7 @@ public class GrpcRdaSourceIT {
             port -> {
               GrpcRdaSource.Config config = createSourceConfig(port).build();
               try {
-                try (GrpcRdaSource<FissClaimChange, FissClaimChange> source =
+                try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
                     createSource(config)) {
                   source.retrieveAndProcessObjects(3, sink);
                 }
@@ -265,7 +269,7 @@ public class GrpcRdaSourceIT {
               GrpcRdaSource.Config config =
                   createSourceConfig(port).authenticationToken("wrong-secret").build();
               try {
-                try (GrpcRdaSource<FissClaimChange, FissClaimChange> source =
+                try (GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> source =
                     createSource(config)) {
                   source.retrieveAndProcessObjects(3, sink);
                 }
@@ -299,12 +303,12 @@ public class GrpcRdaSourceIT {
   }
 
   @Nonnull
-  private GrpcRdaSource<FissClaimChange, FissClaimChange> createSource(
+  private GrpcRdaSource<FissClaimChange, RdaChange<PreAdjFissClaim>> createSource(
       GrpcRdaSource.Config config) {
     return new GrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
   }
 
-  private class JsonCaptureSink implements RdaSink<FissClaimChange, FissClaimChange> {
+  private class JsonCaptureSink implements RdaSink<FissClaimChange, RdaChange<PreAdjFissClaim>> {
     private final List<String> values = new ArrayList<>();
     private final ObjectMapper mapper;
 
@@ -322,7 +326,8 @@ public class GrpcRdaSourceIT {
     public synchronized int writeMessage(String dataVersion, FissClaimChange message)
         throws ProcessingException {
       try {
-        values.add(mapper.writeValueAsString(transformer.transformClaim(message).getClaim()));
+        var change = transformMessage(dataVersion, message);
+        values.add(mapper.writeValueAsString(change.getClaim()));
         return 1;
       } catch (Exception ex) {
         throw new ProcessingException(ex, 0);
@@ -344,12 +349,15 @@ public class GrpcRdaSourceIT {
 
     @Nonnull
     @Override
-    public FissClaimChange transformMessage(String apiVersion, FissClaimChange fissClaimChange) {
-      return fissClaimChange;
+    public RdaChange<PreAdjFissClaim> transformMessage(String apiVersion, FissClaimChange message) {
+      var change = transformer.transformClaim(message);
+      change.getClaim().setApiSource(apiVersion);
+      return change;
     }
 
     @Override
-    public int writeClaims(Collection<FissClaimChange> objects) throws ProcessingException {
+    public int writeClaims(Collection<RdaChange<PreAdjFissClaim>> objects)
+        throws ProcessingException {
       throw new UnsupportedOperationException();
     }
 

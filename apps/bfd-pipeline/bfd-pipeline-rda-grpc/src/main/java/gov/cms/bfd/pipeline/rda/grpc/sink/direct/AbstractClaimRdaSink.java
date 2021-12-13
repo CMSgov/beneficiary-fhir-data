@@ -120,14 +120,13 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
   /**
    * Writes the claims immediately and returns the number written.
    *
-   * @param dataVersion value for the apiSource column of the claim record
-   * @param objects zero or more objects to be written to the data store
+   * @param apiVersion value for the apiSource column of the claim record
+   * @param messages zero or more objects to be written to the data store
    * @return number of objects successfully processed
    * @throws ProcessingException if the operation fails
    */
   @Override
-  public int writeMessages(String apiVersion, Collection<TMessage> messages)
-      throws ProcessingException {
+  public int writeMessages(String apiVersion, List<TMessage> messages) throws ProcessingException {
     final List<RdaChange<TClaim>> claims = transformMessages(apiVersion, messages);
     return writeClaims(claims);
   }
@@ -145,13 +144,10 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
     try {
       metrics.calls.mark();
       updateLatencyMetric(claims);
-      mergeBatch(claims);
-      metrics.objectsPersisted.mark(claims.size());
+      mergeBatch(maxSeq, claims);
+      metrics.objectsMerged.mark(claims.size());
       metrics.setLatestSequenceNumber(maxSeq);
       logger.info("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
-      if (autoUpdateLastSeq) {
-        updateLastSequenceNumberImpl(maxSeq);
-      }
     } catch (Exception error) {
       logger.error(
           "writeBatch failed: size={} maxSeq={} error={}",
@@ -210,7 +206,7 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
         .collect(Collectors.toList());
   }
 
-  private void mergeBatch(Iterable<RdaChange<TClaim>> changes) {
+  private void mergeBatch(long maxSeq, Iterable<RdaChange<TClaim>> changes) {
     boolean commit = false;
     try {
       entityManager.getTransaction().begin();
@@ -221,6 +217,9 @@ abstract class AbstractClaimRdaSink<TMessage, TClaim>
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
           throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
         }
+      }
+      if (autoUpdateLastSeq) {
+        updateLastSequenceNumberImpl(maxSeq);
       }
       commit = true;
     } finally {

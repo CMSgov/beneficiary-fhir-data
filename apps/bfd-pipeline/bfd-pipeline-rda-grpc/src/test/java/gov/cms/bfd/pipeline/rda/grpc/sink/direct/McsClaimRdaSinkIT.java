@@ -1,6 +1,5 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -44,8 +43,13 @@ public class McsClaimRdaSinkIT {
           claim.getDiagCodes().add(diagCode);
 
           final RdaChange<PreAdjMcsClaim> change =
-              new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now());
-          final McsClaimChange message = mock(McsClaimChange.class);
+              new RdaChange<>(
+                  claim.getSequenceNumber(), RdaChange.Type.INSERT, claim, Instant.now());
+          final McsClaimChange message =
+              McsClaimChange.newBuilder()
+                  .setIcn(claim.getIdrClmHdIcn())
+                  .setSeq(claim.getSequenceNumber())
+                  .build();
           final McsClaimTransformer transformer = mock(McsClaimTransformer.class);
           doReturn(change).when(transformer).transformClaim(message);
 
@@ -53,7 +57,7 @@ public class McsClaimRdaSinkIT {
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
-          int count = sink.writeMessage("", message);
+          int count = sink.writeMessage("version", message);
           assertEquals(1, count);
 
           List<PreAdjMcsClaim> resultClaims =

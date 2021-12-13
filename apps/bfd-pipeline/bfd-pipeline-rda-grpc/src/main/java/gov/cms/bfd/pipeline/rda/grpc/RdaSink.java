@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
@@ -57,7 +57,7 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * @throws ProcessingException if the operation fails
    */
   default int writeMessage(String dataVersion, TMessage object) throws ProcessingException {
-    return writeMessages(dataVersion, Collections.singleton(object));
+    return writeMessages(dataVersion, List.of(object));
   }
 
   /**
@@ -78,8 +78,7 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * @return number of objects successfully processed
    * @throws ProcessingException if the operation fails
    */
-  default int writeMessages(String dataVersion, Collection<TMessage> objects)
-      throws ProcessingException {
+  default int writeMessages(String dataVersion, List<TMessage> objects) throws ProcessingException {
     int processedCount = 0;
     for (TMessage object : objects) {
       try {

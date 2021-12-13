@@ -19,6 +19,7 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -240,7 +241,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
       String apiVersion, RdaSink<TMessage, TClaim> sink, Map<Object, TMessage> batch)
       throws ProcessingException {
     LOGGER.info("submitting batch to sink: type={} size={}", claimType, batch.size());
-    final int processed = sink.writeMessages(apiVersion, batch.values());
+    final int processed = sink.writeMessages(apiVersion, List.copyOf(batch.values()));
     LOGGER.info(
         "submitted batch to sink: type={} size={} processed={}",
         claimType,

@@ -5,6 +5,7 @@ import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -85,8 +86,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
    * @throws ProcessingException if something goes wrong
    */
   @Override
-  public int writeMessages(String apiVersion, Collection<TMessage> objects)
-      throws ProcessingException {
+  public int writeMessages(String apiVersion, List<TMessage> objects) throws ProcessingException {
     int count = 0;
     try {
       for (TMessage object : objects) {
