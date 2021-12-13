@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * The claim transformers {@link FissClaimTransformer and }{@link McsClaimTransformer} combined
+ * The claim transformers {@link FissClaimTransformer} and {@link McsClaimTransformer} combined
  * populate 11 different JPA entity classes with data from corresponding gRPC API message objects.
  * The tests for these transformations need to apply specific checks for every field based on the
  * type of field being converted. These tests have a lot of commonality but work on different
