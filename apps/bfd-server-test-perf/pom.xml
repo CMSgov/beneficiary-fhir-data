@@ -64,6 +64,11 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-nop</artifactId>
 				</exclusion>
+				<!-- Exclude this old version of log4j since it has a vulnerability CVE-2021-44228-->
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -100,6 +105,10 @@
 			<artifactId>opencsv</artifactId>
 			<version>5.0</version>
 		</dependency>
+        	<dependency>
+            		<groupId>org.slf4j</groupId>
+            		<artifactId>log4j-over-slf4j</artifactId>
+        	</dependency>
 	</dependencies>
 
 	<build>
