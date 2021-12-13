@@ -289,7 +289,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrClmHdIcn() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrClmHdIcn,
             PreAdjMcsClaim::getIdrClmHdIcn,
             PreAdjMcsClaim.Fields.idrClmHdIcn,
@@ -299,7 +299,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrContrId() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrContrId,
             PreAdjMcsClaim::getIdrContrId,
             PreAdjMcsClaim.Fields.idrContrId,
@@ -309,7 +309,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrHic() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrHic,
             PreAdjMcsClaim::getIdrHic,
             PreAdjMcsClaim.Fields.idrHic,
@@ -319,12 +319,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrClaimType() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrClaimTypeEnum,
             PreAdjMcsClaim::getIdrClaimType,
             McsClaimType.CLAIM_TYPE_MEDICAL,
             "3")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrClaimTypeUnrecognized,
             PreAdjMcsClaim::getIdrClaimType,
             PreAdjMcsClaim.Fields.idrClaimType,
@@ -334,7 +334,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBeneLast16() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBeneLast16,
             PreAdjMcsClaim::getIdrBeneLast_1_6,
             PreAdjMcsClaim.Fields.idrBeneLast_1_6,
@@ -344,7 +344,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBeneFirstInit() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBeneFirstInit,
             PreAdjMcsClaim::getIdrBeneFirstInit,
             PreAdjMcsClaim.Fields.idrBeneFirstInit,
@@ -354,7 +354,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBeneMidInit() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBeneMidInit,
             PreAdjMcsClaim::getIdrBeneMidInit,
             PreAdjMcsClaim.Fields.idrBeneMidInit,
@@ -364,12 +364,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBeneSex() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrBeneSexEnum,
             PreAdjMcsClaim::getIdrBeneSex,
             McsBeneficiarySex.BENEFICIARY_SEX_MALE,
             "M")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBeneSexUnrecognized,
             PreAdjMcsClaim::getIdrBeneSex,
             PreAdjMcsClaim.Fields.idrBeneSex,
@@ -379,16 +379,16 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrStatusCode() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrStatusCodeEnum,
             PreAdjMcsClaim::getIdrStatusCode,
             McsStatusCode.STATUS_CODE_DENIED_E,
             "E")
-        .enumFieldRejectsUnrecognizedValue(
+        .verifyEnumFieldTransformationRejectsUnrecognizedValue(
             McsClaim.Builder::setIdrStatusCodeUnrecognized,
             PreAdjMcsClaim.Fields.idrStatusCode,
             "ZZZ")
-        .enumFieldRejectsSpecificValues(
+        .verifyEnumFieldTransformationRejectsSpecificValues(
             McsClaim.Builder::setIdrStatusCodeEnum,
             PreAdjMcsClaim.Fields.idrStatusCode,
             McsStatusCode.STATUS_CODE_NOT_USED);
@@ -397,7 +397,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrStatusDate() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsClaim.Builder::setIdrStatusDate,
             PreAdjMcsClaim::getIdrStatusDate,
             PreAdjMcsClaim.Fields.idrStatusDate);
@@ -406,7 +406,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvNpi,
             PreAdjMcsClaim::getIdrBillProvNpi,
             PreAdjMcsClaim.Fields.idrBillProvNpi,
@@ -416,7 +416,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvNum() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvNum,
             PreAdjMcsClaim::getIdrBillProvNum,
             PreAdjMcsClaim.Fields.idrBillProvNum,
@@ -426,7 +426,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvEin() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvEin,
             PreAdjMcsClaim::getIdrBillProvEin,
             PreAdjMcsClaim.Fields.idrBillProvEin,
@@ -436,7 +436,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvType() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvType,
             PreAdjMcsClaim::getIdrBillProvType,
             PreAdjMcsClaim.Fields.idrBillProvType,
@@ -446,7 +446,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvSpec() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvSpec,
             PreAdjMcsClaim::getIdrBillProvSpec,
             PreAdjMcsClaim.Fields.idrBillProvSpec,
@@ -456,12 +456,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvGroupInd() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrBillProvGroupIndEnum,
             PreAdjMcsClaim::getIdrBillProvGroupInd,
             McsBillingProviderIndicator.BILLING_PROVIDER_INDICATOR_GROUP,
             "G")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvGroupIndUnrecognized,
             PreAdjMcsClaim::getIdrBillProvGroupInd,
             PreAdjMcsClaim.Fields.idrBillProvGroupInd,
@@ -471,7 +471,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvPriceSpec() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvPriceSpec,
             PreAdjMcsClaim::getIdrBillProvPriceSpec,
             PreAdjMcsClaim.Fields.idrBillProvPriceSpec,
@@ -481,7 +481,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvCounty() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvCounty,
             PreAdjMcsClaim::getIdrBillProvCounty,
             PreAdjMcsClaim.Fields.idrBillProvCounty,
@@ -491,7 +491,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvLoc() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvLoc,
             PreAdjMcsClaim::getIdrBillProvLoc,
             PreAdjMcsClaim.Fields.idrBillProvLoc,
@@ -501,7 +501,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrTotAllowed() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             McsClaim.Builder::setIdrTotAllowed,
             PreAdjMcsClaim::getIdrTotAllowed,
             PreAdjMcsClaim.Fields.idrTotAllowed);
@@ -510,7 +510,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrCoinsurance() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             McsClaim.Builder::setIdrCoinsurance,
             PreAdjMcsClaim::getIdrCoinsurance,
             PreAdjMcsClaim.Fields.idrCoinsurance);
@@ -519,7 +519,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrDeductible() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             McsClaim.Builder::setIdrDeductible,
             PreAdjMcsClaim::getIdrDeductible,
             PreAdjMcsClaim.Fields.idrDeductible);
@@ -528,12 +528,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBillProvStatusCd() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrBillProvStatusCdEnum,
             PreAdjMcsClaim::getIdrBillProvStatusCd,
             McsBillingProviderStatusCode.BILLING_PROVIDER_STATUS_CODE_NON_PARTICIPATING,
             "N")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrBillProvStatusCdUnrecognized,
             PreAdjMcsClaim::getIdrBillProvStatusCd,
             PreAdjMcsClaim.Fields.idrBillProvStatusCd,
@@ -543,7 +543,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrBilledAmt() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             McsClaim.Builder::setIdrTotBilledAmt,
             PreAdjMcsClaim::getIdrTotBilledAmt,
             PreAdjMcsClaim.Fields.idrTotBilledAmt);
@@ -552,7 +552,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrClaimReceiptDate() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsClaim.Builder::setIdrClaimReceiptDate,
             PreAdjMcsClaim::getIdrClaimReceiptDate,
             PreAdjMcsClaim.Fields.idrClaimReceiptDate);
@@ -561,19 +561,19 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrClaimMbi() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrClaimMbi,
             PreAdjMcsClaim::getIdrClaimMbi,
             PreAdjMcsClaim.Fields.idrClaimMbi,
             13)
-        .hashField(
+        .verifyIdHashFieldPopulatedCorrectly(
             McsClaim.Builder::setIdrClaimMbi, PreAdjMcsClaim::getIdrClaimMbiHash, 13, idHasher);
   }
 
   @Test
   public void testClaimIdrHdrFromDos() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsClaim.Builder::setIdrHdrFromDos,
             PreAdjMcsClaim::getIdrHdrFromDateOfSvc,
             PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc);
@@ -582,7 +582,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrHdrToDos() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsClaim.Builder::setIdrHdrToDos,
             PreAdjMcsClaim::getIdrHdrToDateOfSvc,
             PreAdjMcsClaim.Fields.idrHdrToDateOfSvc);
@@ -591,12 +591,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAssignment() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrAssignmentEnum,
             PreAdjMcsClaim::getIdrAssignment,
             McsClaimAssignmentCode.CLAIM_ASSIGNMENT_CODE,
             "A")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAssignmentUnrecognized,
             PreAdjMcsClaim::getIdrAssignment,
             PreAdjMcsClaim.Fields.idrAssignment,
@@ -606,12 +606,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrClmLevelInd() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrClmLevelIndEnum,
             PreAdjMcsClaim::getIdrClmLevelInd,
             McsClaimLevelIndicator.CLAIM_LEVEL_INDICATOR_ORIGINAL,
             "O")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrClmLevelIndUnrecognized,
             PreAdjMcsClaim::getIdrClmLevelInd,
             PreAdjMcsClaim.Fields.idrClmLevelInd,
@@ -621,18 +621,19 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrHdrAudit() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .intField(McsClaim.Builder::setIdrHdrAudit, PreAdjMcsClaim::getIdrHdrAudit);
+        .verifyIntFieldCopiedCorrectly(
+            McsClaim.Builder::setIdrHdrAudit, PreAdjMcsClaim::getIdrHdrAudit);
   }
 
   @Test
   public void testClaimIdrHdrAuditInd() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrHdrAuditIndEnum,
             PreAdjMcsClaim::getIdrHdrAuditInd,
             McsAuditIndicator.AUDIT_INDICATOR_AUDIT_NUMBER,
             "A")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrHdrAuditIndUnrecognized,
             PreAdjMcsClaim::getIdrHdrAuditInd,
             PreAdjMcsClaim.Fields.idrHdrAuditInd,
@@ -642,12 +643,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrUSplitReason() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsClaim.Builder::setIdrUSplitReasonEnum,
             PreAdjMcsClaim::getIdrUSplitReason,
             McsSplitReasonCode.SPLIT_REASON_CODE_GHI_SPLIT,
             "4")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrUSplitReasonUnrecognized,
             PreAdjMcsClaim::getIdrUSplitReason,
             PreAdjMcsClaim.Fields.idrUSplitReason,
@@ -657,7 +658,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrJReferringProvNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrJReferringProvNpi,
             PreAdjMcsClaim::getIdrJReferringProvNpi,
             PreAdjMcsClaim.Fields.idrJReferringProvNpi,
@@ -667,7 +668,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrJFacProvNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrJFacProvNpi,
             PreAdjMcsClaim::getIdrJFacProvNpi,
             PreAdjMcsClaim.Fields.idrJFacProvNpi,
@@ -677,7 +678,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrUDemoProvNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrUDemoProvNpi,
             PreAdjMcsClaim::getIdrUDemoProvNpi,
             PreAdjMcsClaim.Fields.idrUDemoProvNpi,
@@ -687,7 +688,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrUSuperNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrUSuperNpi,
             PreAdjMcsClaim::getIdrUSuperNpi,
             PreAdjMcsClaim.Fields.idrUSuperNpi,
@@ -697,7 +698,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrUFcadjBilNpi() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrUFcadjBilNpi,
             PreAdjMcsClaim::getIdrUFcadjBilNpi,
             PreAdjMcsClaim.Fields.idrUFcadjBilNpi,
@@ -707,7 +708,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbPickupAddresLine1() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbPickupAddresLine1,
             PreAdjMcsClaim::getIdrAmbPickupAddresLine1,
             PreAdjMcsClaim.Fields.idrAmbPickupAddresLine1,
@@ -717,7 +718,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbPickupAddresLine2() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbPickupAddresLine2,
             PreAdjMcsClaim::getIdrAmbPickupAddresLine2,
             PreAdjMcsClaim.Fields.idrAmbPickupAddresLine2,
@@ -727,7 +728,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbPickupCity() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbPickupCity,
             PreAdjMcsClaim::getIdrAmbPickupCity,
             PreAdjMcsClaim.Fields.idrAmbPickupCity,
@@ -737,7 +738,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbPickupState() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbPickupState,
             PreAdjMcsClaim::getIdrAmbPickupState,
             PreAdjMcsClaim.Fields.idrAmbPickupState,
@@ -747,7 +748,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbPickupZipcode() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbPickupZipcode,
             PreAdjMcsClaim::getIdrAmbPickupZipcode,
             PreAdjMcsClaim.Fields.idrAmbPickupZipcode,
@@ -757,7 +758,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbDropoffName() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbDropoffName,
             PreAdjMcsClaim::getIdrAmbDropoffName,
             PreAdjMcsClaim.Fields.idrAmbDropoffName,
@@ -767,7 +768,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbDropoffAddrLine1() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbDropoffAddrLine1,
             PreAdjMcsClaim::getIdrAmbDropoffAddrLine1,
             PreAdjMcsClaim.Fields.idrAmbDropoffAddrLine1,
@@ -777,7 +778,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbDropoffAddrLine2() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbDropoffAddrLine2,
             PreAdjMcsClaim::getIdrAmbDropoffAddrLine2,
             PreAdjMcsClaim.Fields.idrAmbDropoffAddrLine2,
@@ -787,7 +788,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbDropoffCity() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbDropoffCity,
             PreAdjMcsClaim::getIdrAmbDropoffCity,
             PreAdjMcsClaim.Fields.idrAmbDropoffCity,
@@ -797,7 +798,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbDropoffState() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbDropoffState,
             PreAdjMcsClaim::getIdrAmbDropoffState,
             PreAdjMcsClaim.Fields.idrAmbDropoffState,
@@ -807,7 +808,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testClaimIdrAmbDropoffZipcode() {
     new McsClaimTransformerTest.ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsClaim.Builder::setIdrAmbDropoffZipcode,
             PreAdjMcsClaim::getIdrAmbDropoffZipcode,
             PreAdjMcsClaim.Fields.idrAmbDropoffZipcode,
@@ -821,7 +822,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testAdjustmentIdrAdjDate() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsAdjustment.Builder::setIdrAdjDate,
             PreAdjMcsAdjustment::getIdrAdjDate,
             PreAdjMcsAdjustment.Fields.idrAdjDate);
@@ -830,7 +831,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testAdjustmentIdrXrefIcn() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsAdjustment.Builder::setIdrXrefIcn,
             PreAdjMcsAdjustment::getIdrXrefIcn,
             PreAdjMcsAdjustment.Fields.idrXrefIcn,
@@ -840,7 +841,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testAdjustmentIdrAdjClerk() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsAdjustment.Builder::setIdrAdjClerk,
             PreAdjMcsAdjustment::getIdrAdjClerk,
             PreAdjMcsAdjustment.Fields.idrAdjClerk,
@@ -850,7 +851,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testAdjustmentIdrInitCcn() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsAdjustment.Builder::setIdrInitCcn,
             PreAdjMcsAdjustment::getIdrInitCcn,
             PreAdjMcsAdjustment.Fields.idrInitCcn,
@@ -860,7 +861,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testAdjustmentIdrAdjChkWrtDt() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsAdjustment.Builder::setIdrAdjChkWrtDt,
             PreAdjMcsAdjustment::getIdrAdjChkWrtDt,
             PreAdjMcsAdjustment.Fields.idrAdjChkWrtDt);
@@ -869,7 +870,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testAdjustmentIdrAdjBEombAmt() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             McsAdjustment.Builder::setIdrAdjBEombAmt,
             PreAdjMcsAdjustment::getIdrAdjBEombAmt,
             PreAdjMcsAdjustment.Fields.idrAdjBEombAmt);
@@ -878,7 +879,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testAdjustmentIdrAdjPEombAmt() {
     new McsClaimTransformerTest.AdjustmentFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             McsAdjustment.Builder::setIdrAdjPEombAmt,
             PreAdjMcsAdjustment::getIdrAdjPEombAmt,
             PreAdjMcsAdjustment.Fields.idrAdjPEombAmt);
@@ -891,18 +892,19 @@ public class McsClaimTransformerTest {
   @Test
   public void testAuditIdrJAuditNum() {
     new McsClaimTransformerTest.AuditFieldTester()
-        .intField(McsAudit.Builder::setIdrJAuditNum, PreAdjMcsAudit::getIdrJAuditNum);
+        .verifyIntFieldCopiedCorrectly(
+            McsAudit.Builder::setIdrJAuditNum, PreAdjMcsAudit::getIdrJAuditNum);
   }
 
   @Test
   public void testAuditIdrJAuditInd() {
     new McsClaimTransformerTest.AuditFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsAudit.Builder::setIdrJAuditIndEnum,
             PreAdjMcsAudit::getIdrJAuditInd,
             McsCutbackAuditIndicator.CUTBACK_AUDIT_INDICATOR_AUDIT_NUMBER,
             "A")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsAudit.Builder::setIdrJAuditIndUnrecognized,
             PreAdjMcsAudit::getIdrJAuditInd,
             PreAdjMcsAudit.Fields.idrJAuditInd,
@@ -912,12 +914,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testAuditIdrJAuditDisp() {
     new McsClaimTransformerTest.AuditFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsAudit.Builder::setIdrJAuditDispEnum,
             PreAdjMcsAudit::getIdrJAuditDisp,
             McsCutbackAuditDisposition.CUTBACK_AUDIT_DISPOSITION_ADS_LETTER,
             "S")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsAudit.Builder::setIdrJAuditDispUnrecognized,
             PreAdjMcsAudit::getIdrJAuditDisp,
             PreAdjMcsAudit.Fields.idrJAuditDisp,
@@ -931,7 +933,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDiagnosisCodeIdrDiagCode() {
     new McsClaimTransformerTest.DiagCodeFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDiagnosisCode.Builder::setIdrDiagCode,
             PreAdjMcsDiagnosisCode::getIdrDiagCode,
             PreAdjMcsDiagnosisCode.Fields.idrDiagCode,
@@ -941,12 +943,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testDiagnosisCodeIdrDiagIcdType() {
     new McsClaimTransformerTest.DiagCodeFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsDiagnosisCode.Builder::setIdrDiagIcdTypeEnum,
             PreAdjMcsDiagnosisCode::getIdrDiagIcdType,
             McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD9,
             "9")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDiagnosisCode.Builder::setIdrDiagIcdTypeUnrecognized,
             PreAdjMcsDiagnosisCode::getIdrDiagIcdType,
             PreAdjMcsDiagnosisCode.Fields.idrDiagIcdType,
@@ -959,12 +961,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlStatus() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsDetail.Builder::setIdrDtlStatusEnum,
             PreAdjMcsDetail::getIdrDtlStatus,
             McsDetailStatus.DETAIL_STATUS_FINAL,
             "F")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlStatusUnrecognized,
             PreAdjMcsDetail::getIdrDtlStatus,
             PreAdjMcsDetail.Fields.idrDtlStatus,
@@ -974,7 +976,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlFromDate() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsDetail.Builder::setIdrDtlFromDate,
             PreAdjMcsDetail::getIdrDtlFromDate,
             PreAdjMcsDetail.Fields.idrDtlFromDate);
@@ -983,7 +985,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlToDate() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsDetail.Builder::setIdrDtlToDate,
             PreAdjMcsDetail::getIdrDtlToDate,
             PreAdjMcsDetail.Fields.idrDtlToDate);
@@ -992,7 +994,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrProcCode() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrProcCode,
             PreAdjMcsDetail::getIdrProcCode,
             PreAdjMcsDetail.Fields.idrProcCode,
@@ -1002,7 +1004,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrModOne() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrModOne,
             PreAdjMcsDetail::getIdrModOne,
             PreAdjMcsDetail.Fields.idrModOne,
@@ -1012,7 +1014,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrModTwo() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrModTwo,
             PreAdjMcsDetail::getIdrModTwo,
             PreAdjMcsDetail.Fields.idrModTwo,
@@ -1022,7 +1024,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrModThree() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrModThree,
             PreAdjMcsDetail::getIdrModThree,
             PreAdjMcsDetail.Fields.idrModThree,
@@ -1032,7 +1034,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrModFour() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrModFour,
             PreAdjMcsDetail::getIdrModFour,
             PreAdjMcsDetail.Fields.idrModFour,
@@ -1042,12 +1044,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlDiagIcdType() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsDetail.Builder::setIdrDtlDiagIcdTypeEnum,
             PreAdjMcsDetail::getIdrDtlDiagIcdType,
             McsDiagnosisIcdType.DIAGNOSIS_ICD_TYPE_ICD10,
             "0")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlDiagIcdTypeUnrecognized,
             PreAdjMcsDetail::getIdrDtlDiagIcdType,
             PreAdjMcsDetail.Fields.idrDtlDiagIcdType,
@@ -1057,7 +1059,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlPrimaryDiagCode() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlPrimaryDiagCode,
             PreAdjMcsDetail::getIdrDtlPrimaryDiagCode,
             PreAdjMcsDetail.Fields.idrDtlPrimaryDiagCode,
@@ -1067,7 +1069,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosLnameOrg() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosLnameOrg,
             PreAdjMcsDetail::getIdrKPosLnameOrg,
             PreAdjMcsDetail.Fields.idrKPosLnameOrg,
@@ -1077,7 +1079,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosFname() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosFname,
             PreAdjMcsDetail::getIdrKPosFname,
             PreAdjMcsDetail.Fields.idrKPosFname,
@@ -1087,7 +1089,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosMname() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosMname,
             PreAdjMcsDetail::getIdrKPosMname,
             PreAdjMcsDetail.Fields.idrKPosMname,
@@ -1097,7 +1099,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosAddr1() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosAddr1,
             PreAdjMcsDetail::getIdrKPosAddr1,
             PreAdjMcsDetail.Fields.idrKPosAddr1,
@@ -1107,7 +1109,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosAddr21St() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosAddr21St,
             PreAdjMcsDetail::getIdrKPosAddr2_1st,
             PreAdjMcsDetail.Fields.idrKPosAddr2_1st,
@@ -1117,7 +1119,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosAddr22Nd() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosAddr22Nd,
             PreAdjMcsDetail::getIdrKPosAddr2_2nd,
             PreAdjMcsDetail.Fields.idrKPosAddr2_2nd,
@@ -1127,7 +1129,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosCity() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosCity,
             PreAdjMcsDetail::getIdrKPosCity,
             PreAdjMcsDetail.Fields.idrKPosCity,
@@ -1137,7 +1139,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosState() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosState,
             PreAdjMcsDetail::getIdrKPosState,
             PreAdjMcsDetail.Fields.idrKPosState,
@@ -1147,7 +1149,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKPosZip() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKPosZip,
             PreAdjMcsDetail::getIdrKPosZip,
             PreAdjMcsDetail.Fields.idrKPosZip,
@@ -1157,12 +1159,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrTos() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsDetail.Builder::setIdrTosEnum,
             PreAdjMcsDetail::getIdrTos,
             McsTypeOfService.TYPE_OF_SERVICE_ANESTHESIA,
             "7")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrTosUnrecognized,
             PreAdjMcsDetail::getIdrTos,
             PreAdjMcsDetail.Fields.idrTos,
@@ -1172,12 +1174,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrTwoDigitPos() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsDetail.Builder::setIdrTwoDigitPosEnum,
             PreAdjMcsDetail::getIdrTwoDigitPos,
             McsTwoDigitPlanOfService.TWO_DIGIT_PLAN_OF_SERVICE_AMBULANCE_LAND,
             "41")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrTwoDigitPosUnrecognized,
             PreAdjMcsDetail::getIdrTwoDigitPos,
             PreAdjMcsDetail.Fields.idrTwoDigitPos,
@@ -1187,7 +1189,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlRendType() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlRendType,
             PreAdjMcsDetail::getIdrDtlRendType,
             PreAdjMcsDetail.Fields.idrDtlRendType,
@@ -1197,7 +1199,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlRendSpec() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlRendSpec,
             PreAdjMcsDetail::getIdrDtlRendSpec,
             PreAdjMcsDetail.Fields.idrDtlRendSpec,
@@ -1207,7 +1209,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlRendNpi() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlRendNpi,
             PreAdjMcsDetail::getIdrDtlRendNpi,
             PreAdjMcsDetail.Fields.idrDtlRendNpi,
@@ -1217,7 +1219,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlRendProv() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlRendProv,
             PreAdjMcsDetail::getIdrDtlRendProv,
             PreAdjMcsDetail.Fields.idrDtlRendProv,
@@ -1227,7 +1229,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrKDtlFacProvNpi() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrKDtlFacProvNpi,
             PreAdjMcsDetail::getIdrKDtlFacProvNpi,
             PreAdjMcsDetail.Fields.idrKDtlFacProvNpi,
@@ -1237,7 +1239,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbPickupAddres1() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbPickupAddres1,
             PreAdjMcsDetail::getIdrDtlAmbPickupAddres1,
             PreAdjMcsDetail.Fields.idrDtlAmbPickupAddres1,
@@ -1247,7 +1249,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbPickupAddres2() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbPickupAddres2,
             PreAdjMcsDetail::getIdrDtlAmbPickupAddres2,
             PreAdjMcsDetail.Fields.idrDtlAmbPickupAddres2,
@@ -1257,7 +1259,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbPickupCity() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbPickupCity,
             PreAdjMcsDetail::getIdrDtlAmbPickupCity,
             PreAdjMcsDetail.Fields.idrDtlAmbPickupCity,
@@ -1267,7 +1269,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbPickupState() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbPickupState,
             PreAdjMcsDetail::getIdrDtlAmbPickupState,
             PreAdjMcsDetail.Fields.idrDtlAmbPickupState,
@@ -1277,7 +1279,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbPickupZipcode() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbPickupZipcode,
             PreAdjMcsDetail::getIdrDtlAmbPickupZipcode,
             PreAdjMcsDetail.Fields.idrDtlAmbPickupZipcode,
@@ -1287,7 +1289,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbDropoffName() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbDropoffName,
             PreAdjMcsDetail::getIdrDtlAmbDropoffName,
             PreAdjMcsDetail.Fields.idrDtlAmbDropoffName,
@@ -1297,7 +1299,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbDropoffAddrL1() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbDropoffAddrL1,
             PreAdjMcsDetail::getIdrDtlAmbDropoffAddrL1,
             PreAdjMcsDetail.Fields.idrDtlAmbDropoffAddrL1,
@@ -1307,7 +1309,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbDropoffAddrL2() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbDropoffAddrL2,
             PreAdjMcsDetail::getIdrDtlAmbDropoffAddrL2,
             PreAdjMcsDetail.Fields.idrDtlAmbDropoffAddrL2,
@@ -1317,7 +1319,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbDropoffCity() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbDropoffCity,
             PreAdjMcsDetail::getIdrDtlAmbDropoffCity,
             PreAdjMcsDetail.Fields.idrDtlAmbDropoffCity,
@@ -1327,7 +1329,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbDropoffState() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbDropoffState,
             PreAdjMcsDetail::getIdrDtlAmbDropoffState,
             PreAdjMcsDetail.Fields.idrDtlAmbDropoffState,
@@ -1337,7 +1339,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testDetailIdrDtlAmbDropoffZipcode() {
     new McsClaimTransformerTest.DetailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsDetail.Builder::setIdrDtlAmbDropoffZipcode,
             PreAdjMcsDetail::getIdrDtlAmbDropoffZipcode,
             PreAdjMcsDetail.Fields.idrDtlAmbDropoffZipcode,
@@ -1351,7 +1353,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testLocationIdrLocClerk() {
     new McsClaimTransformerTest.LocationFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsLocation.Builder::setIdrLocClerk,
             PreAdjMcsLocation::getIdrLocClerk,
             PreAdjMcsLocation.Fields.idrLocClerk,
@@ -1361,7 +1363,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testLocationIdrLocCode() {
     new McsClaimTransformerTest.LocationFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsLocation.Builder::setIdrLocCode,
             PreAdjMcsLocation::getIdrLocCode,
             PreAdjMcsLocation.Fields.idrLocCode,
@@ -1371,7 +1373,7 @@ public class McsClaimTransformerTest {
   @Test
   public void testLocationIdrLocDate() {
     new McsClaimTransformerTest.LocationFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             McsLocation.Builder::setIdrLocDate,
             PreAdjMcsLocation::getIdrLocDate,
             PreAdjMcsLocation.Fields.idrLocDate);
@@ -1380,12 +1382,12 @@ public class McsClaimTransformerTest {
   @Test
   public void testLocationIdrLocActvCode() {
     new McsClaimTransformerTest.LocationFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             McsLocation.Builder::setIdrLocActvCodeEnum,
             PreAdjMcsLocation::getIdrLocActvCode,
             McsLocationActivityCode.LOCATION_ACTIVITY_CODE_CAS_ACTIVITY,
             "Q")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             McsLocation.Builder::setIdrLocActvCodeUnrecognized,
             PreAdjMcsLocation::getIdrLocActvCode,
             PreAdjMcsLocation.Fields.idrLocActvCode,

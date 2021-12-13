@@ -486,36 +486,38 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimDcn() {
     new ClaimFieldTester()
-        .stringField(FissClaim.Builder::setDcn, PreAdjFissClaim::getDcn, "dcn", 23);
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setDcn, PreAdjFissClaim::getDcn, "dcn", 23);
   }
 
   @Test
   public void testClaimHicNo() {
     new ClaimFieldTester()
-        .stringField(FissClaim.Builder::setHicNo, PreAdjFissClaim::getHicNo, "hicNo", 12);
+        .verifyStringFieldCopiedCorrectly(
+            FissClaim.Builder::setHicNo, PreAdjFissClaim::getHicNo, "hicNo", 12);
   }
 
   @Test
   public void testClaimCurrStatus() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setCurrStatusEnum,
             claim -> String.valueOf(claim.getCurrStatus()),
             FissClaimStatus.CLAIM_STATUS_MOVE,
             "M")
-        .enumFieldRejectsUnrecognizedValue(
+        .verifyEnumFieldTransformationRejectsUnrecognizedValue(
             FissClaim.Builder::setCurrStatusUnrecognized, PreAdjFissClaim.Fields.currStatus, "ZZZ");
   }
 
   @Test
   public void testClaimCurrLoc1() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setCurrLoc1Enum,
             claim -> String.valueOf(claim.getCurrLoc1()),
             FissProcessingType.PROCESSING_TYPE_BATCH,
             "B")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setCurrLoc1Unrecognized,
             claim -> String.valueOf(claim.getCurrLoc1()),
             PreAdjFissClaim.Fields.currLoc1,
@@ -525,12 +527,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimCurrLoc2() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setCurrLoc2Enum,
             PreAdjFissClaim::getCurrLoc2,
             FissCurrentLocation2.CURRENT_LOCATION_2_CABLE,
             "9000")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setCurrLoc2Unrecognized,
             PreAdjFissClaim::getCurrLoc2,
             PreAdjFissClaim.Fields.currLoc2,
@@ -540,7 +542,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimMedaProvId() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setMedaProvId,
             PreAdjFissClaim::getMedaProvId,
             PreAdjFissClaim.Fields.medaProvId,
@@ -550,7 +552,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimMedaProv6() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setMedaProv6,
             PreAdjFissClaim::getMedaProv_6,
             PreAdjFissClaim.Fields.medaProv_6,
@@ -560,7 +562,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimTotalChargeAmount() {
     new ClaimFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             FissClaim.Builder::setTotalChargeAmount,
             PreAdjFissClaim::getTotalChargeAmount,
             PreAdjFissClaim.Fields.totalChargeAmount);
@@ -569,7 +571,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimRecdDtCymd() {
     new ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissClaim.Builder::setRecdDtCymd,
             PreAdjFissClaim::getReceivedDate,
             PreAdjFissClaim.Fields.receivedDate);
@@ -578,7 +580,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimCurrTranDtCymd() {
     new ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissClaim.Builder::setCurrTranDtCymd,
             PreAdjFissClaim::getCurrTranDate,
             PreAdjFissClaim.Fields.currTranDate);
@@ -587,7 +589,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAdmDiagCode() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAdmDiagCode,
             PreAdjFissClaim::getAdmitDiagCode,
             PreAdjFissClaim.Fields.admitDiagCode,
@@ -597,7 +599,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimPrincipleDiag() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setPrincipleDiag,
             PreAdjFissClaim::getPrincipleDiag,
             PreAdjFissClaim.Fields.principleDiag,
@@ -607,7 +609,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimNpiNumber() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setNpiNumber,
             PreAdjFissClaim::getNpiNumber,
             PreAdjFissClaim.Fields.npiNumber,
@@ -617,15 +619,16 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimMbi() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setMbi, PreAdjFissClaim::getMbi, PreAdjFissClaim.Fields.mbi, 13)
-        .hashField(FissClaim.Builder::setMbi, PreAdjFissClaim::getMbiHash, 13, idHasher);
+        .verifyIdHashFieldPopulatedCorrectly(
+            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbiHash, 13, idHasher);
   }
 
   @Test
   public void testClaimFedTaxNb() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setFedTaxNb,
             PreAdjFissClaim::getFedTaxNumber,
             PreAdjFissClaim.Fields.fedTaxNumber,
@@ -635,7 +638,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimPracLocAddr1() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setPracLocAddr1,
             PreAdjFissClaim::getPracLocAddr1,
             PreAdjFissClaim.Fields.pracLocAddr1,
@@ -645,7 +648,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimPracLocAddr2() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setPracLocAddr2,
             PreAdjFissClaim::getPracLocAddr2,
             PreAdjFissClaim.Fields.pracLocAddr2,
@@ -655,7 +658,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimPracLocCity() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setPracLocCity,
             PreAdjFissClaim::getPracLocCity,
             PreAdjFissClaim.Fields.pracLocCity,
@@ -665,7 +668,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimPracLocState() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setPracLocState,
             PreAdjFissClaim::getPracLocState,
             PreAdjFissClaim.Fields.pracLocState,
@@ -675,7 +678,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimPracLocZip() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setPracLocZip,
             PreAdjFissClaim::getPracLocZip,
             PreAdjFissClaim.Fields.pracLocZip,
@@ -685,7 +688,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimStmtCovFromCymd() {
     new ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissClaim.Builder::setStmtCovFromCymd,
             PreAdjFissClaim::getStmtCovFromDate,
             PreAdjFissClaim.Fields.stmtCovFromDate);
@@ -694,7 +697,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimStmtCovToCymd() {
     new ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissClaim.Builder::setStmtCovToCymd,
             PreAdjFissClaim::getStmtCovToDate,
             PreAdjFissClaim.Fields.stmtCovToDate);
@@ -703,12 +706,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimLobCd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setLobCdEnum,
             claim -> String.valueOf(claim.getLobCd()),
             FissBillFacilityType.BILL_FACILITY_TYPE_HOME_HEALTH,
             "3")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setLobCdUnrecognized,
             claim -> String.valueOf(claim.getLobCd()),
             PreAdjFissClaim.Fields.lobCd,
@@ -718,12 +721,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimServTypCd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setServTypeCdEnum,
             claim -> String.valueOf(claim.getServTypeCd()),
             FissBillClassification.BILL_CLASSIFICATION_INPATIENT_PART_A,
             "1")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setServTypCdUnrecognized,
             claim -> String.valueOf(claim.getServTypeCd()),
             PreAdjFissClaim.Fields.servTypeCd,
@@ -733,12 +736,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimFreqCd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setFreqCdEnum,
             PreAdjFissClaim::getFreqCd,
             FissBillFrequency.BILL_FREQUENCY_ADJUSTMENT_CLAIM_F,
             "F")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setFreqCdUnrecognized,
             PreAdjFissClaim::getFreqCd,
             PreAdjFissClaim.Fields.freqCd,
@@ -748,7 +751,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimBillTypCd() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setBillTypCd,
             PreAdjFissClaim::getBillTypCd,
             PreAdjFissClaim.Fields.billTypCd,
@@ -758,7 +761,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimRejectCd() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setRejectCd,
             PreAdjFissClaim::getRejectCd,
             PreAdjFissClaim.Fields.rejectCd,
@@ -768,7 +771,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimFullPartDenInd() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setFullPartDenInd,
             PreAdjFissClaim::getFullPartDenInd,
             PreAdjFissClaim.Fields.fullPartDenInd,
@@ -778,7 +781,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimNonPayInd() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setNonPayInd,
             PreAdjFissClaim::getNonPayInd,
             PreAdjFissClaim.Fields.nonPayInd,
@@ -788,7 +791,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimXrefDcnNbr() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setXrefDcnNbr,
             PreAdjFissClaim::getXrefDcnNbr,
             PreAdjFissClaim.Fields.xrefDcnNbr,
@@ -798,12 +801,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAdjReqCd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setAdjReqCdEnum,
             PreAdjFissClaim::getAdjReqCd,
             FissAdjustmentRequestorCode.ADJUSTMENT_REQUESTOR_CODE_FISCAL_INTERMEDIARY,
             "F")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAdjReqCdUnrecognized,
             PreAdjFissClaim::getAdjReqCd,
             PreAdjFissClaim.Fields.adjReqCd,
@@ -813,7 +816,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAdjReasCd() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAdjReasCd,
             PreAdjFissClaim::getAdjReasCd,
             PreAdjFissClaim.Fields.adjReasCd,
@@ -823,7 +826,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimCancelXrefDcn() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setCancelXrefDcn,
             PreAdjFissClaim::getCancelXrefDcn,
             PreAdjFissClaim.Fields.cancelXrefDcn,
@@ -833,7 +836,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimCancelDate() {
     new ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissClaim.Builder::setCancelDateCymd,
             PreAdjFissClaim::getCancelDate,
             PreAdjFissClaim.Fields.cancelDate);
@@ -842,12 +845,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimCancAdjCd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setCancAdjCdEnum,
             PreAdjFissClaim::getCancAdjCd,
             FissCancelAdjustmentCode.CANCEL_ADJUSTMENT_CODE_COVERAGE,
             "C")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setCancAdjCdUnrecognized,
             PreAdjFissClaim::getCancAdjCd,
             PreAdjFissClaim.Fields.cancAdjCd,
@@ -857,7 +860,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOriginalXrefDcn() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOriginalXrefDcn,
             PreAdjFissClaim::getOriginalXrefDcn,
             PreAdjFissClaim.Fields.originalXrefDcn,
@@ -867,7 +870,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimPaidDt() {
     new ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissClaim.Builder::setPaidDtCymd,
             PreAdjFissClaim::getPaidDt,
             PreAdjFissClaim.Fields.paidDt);
@@ -876,7 +879,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAdmDate() {
     new ClaimFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissClaim.Builder::setAdmDateCymd,
             PreAdjFissClaim::getAdmDate,
             PreAdjFissClaim.Fields.admDate);
@@ -885,12 +888,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAdmSource() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setAdmSourceEnum,
             PreAdjFissClaim::getAdmSource,
             FissSourceOfAdmission.SOURCE_OF_ADMISSION_CLINIC_REFERRAL,
             "2")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAdmSourceUnrecognized,
             PreAdjFissClaim::getAdmSource,
             PreAdjFissClaim.Fields.admSource,
@@ -900,12 +903,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimPrimaryPayerCode() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setPrimaryPayerCodeEnum,
             PreAdjFissClaim::getPrimaryPayerCode,
             FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
             "D")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setPrimaryPayerCodeUnrecognized,
             PreAdjFissClaim::getPrimaryPayerCode,
             PreAdjFissClaim.Fields.primaryPayerCode,
@@ -915,7 +918,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAttendPhysId() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAttendPhysId,
             PreAdjFissClaim::getAttendPhysId,
             PreAdjFissClaim.Fields.attendPhysId,
@@ -925,7 +928,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAttendPhysLname() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAttendPhysLname,
             PreAdjFissClaim::getAttendPhysLname,
             PreAdjFissClaim.Fields.attendPhysLname,
@@ -935,7 +938,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAttendPhysFname() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAttendPhysFname,
             PreAdjFissClaim::getAttendPhysFname,
             PreAdjFissClaim.Fields.attendPhysFname,
@@ -945,7 +948,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAttendPhysMint() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAttendPhysMint,
             PreAdjFissClaim::getAttendPhysMint,
             PreAdjFissClaim.Fields.attendPhysMint,
@@ -955,12 +958,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAttendPhysFlag() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setAttendPhysFlagEnum,
             PreAdjFissClaim::getAttendPhysFlag,
             FissPhysicianFlag.PHYSICIAN_FLAG_NO,
             "N")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAttendPhysFlagUnrecognized,
             PreAdjFissClaim::getAttendPhysFlag,
             PreAdjFissClaim.Fields.attendPhysFlag,
@@ -970,7 +973,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOperatingPhysId() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOperatingPhysId,
             PreAdjFissClaim::getOperatingPhysId,
             PreAdjFissClaim.Fields.operatingPhysId,
@@ -980,7 +983,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOperPhysLname() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOperPhysLname,
             PreAdjFissClaim::getOperPhysLname,
             PreAdjFissClaim.Fields.operPhysLname,
@@ -990,7 +993,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOperPhysFname() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOperPhysFname,
             PreAdjFissClaim::getOperPhysFname,
             PreAdjFissClaim.Fields.operPhysFname,
@@ -1000,7 +1003,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOperPhysMint() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOperPhysMint,
             PreAdjFissClaim::getOperPhysMint,
             PreAdjFissClaim.Fields.operPhysMint,
@@ -1010,12 +1013,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOperPhysFlag() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setOperPhysFlagEnum,
             PreAdjFissClaim::getOperPhysFlag,
             FissPhysicianFlag.PHYSICIAN_FLAG_NO,
             "N")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOperPhysFlagUnrecognized,
             PreAdjFissClaim::getOperPhysFlag,
             PreAdjFissClaim.Fields.operPhysFlag,
@@ -1025,7 +1028,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOthPhysId() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOthPhysId,
             PreAdjFissClaim::getOthPhysId,
             PreAdjFissClaim.Fields.othPhysId,
@@ -1035,7 +1038,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOthPhysLname() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOthPhysLname,
             PreAdjFissClaim::getOthPhysLname,
             PreAdjFissClaim.Fields.othPhysLname,
@@ -1045,7 +1048,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOthPhysFname() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOthPhysFname,
             PreAdjFissClaim::getOthPhysFname,
             PreAdjFissClaim.Fields.othPhysFname,
@@ -1055,7 +1058,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOthPhysMint() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOthPhysMint,
             PreAdjFissClaim::getOthPhysMint,
             PreAdjFissClaim.Fields.othPhysMint,
@@ -1065,12 +1068,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimOthPhysFlag() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setOthPhysFlagEnum,
             PreAdjFissClaim::getOthPhysFlag,
             FissPhysicianFlag.PHYSICIAN_FLAG_NO,
             "N")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setOthPhysFlagUnrecognized,
             PreAdjFissClaim::getOthPhysFlag,
             PreAdjFissClaim.Fields.othPhysFlag,
@@ -1080,7 +1083,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimXrefHicNbr() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setXrefHicNbr,
             PreAdjFissClaim::getXrefHicNbr,
             PreAdjFissClaim.Fields.xrefHicNbr,
@@ -1090,12 +1093,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimProcNewHicInd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setProcNewHicIndEnum,
             PreAdjFissClaim::getProcNewHicInd,
             FissProcessNewHealthInsuranceClaimNumberIndicator.PROCESS_NEW_HIC_INDICATOR_Y,
             "Y")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setProcNewHicIndUnrecognized,
             PreAdjFissClaim::getProcNewHicInd,
             PreAdjFissClaim.Fields.procNewHicInd,
@@ -1105,7 +1108,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimNewHic() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setNewHic,
             PreAdjFissClaim::getNewHic,
             PreAdjFissClaim.Fields.newHic,
@@ -1115,12 +1118,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimReposInd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setReposIndEnum,
             PreAdjFissClaim::getReposInd,
             FissRepositoryIndicator.REPOSITORY_INDICATOR_HIC_HAS_BEEN_MOVED,
             "Y")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setReposIndUnrecognized,
             PreAdjFissClaim::getReposInd,
             PreAdjFissClaim.Fields.reposInd,
@@ -1130,7 +1133,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimReposHic() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setReposHic,
             PreAdjFissClaim::getReposHic,
             PreAdjFissClaim.Fields.reposHic,
@@ -1140,12 +1143,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimMbiSubmBeneInd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setMbiSubmBeneIndEnum,
             PreAdjFissClaim::getMbiSubmBeneInd,
             FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.FISS_HIC_OR_MBI_IS_HIC,
             "H")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setMbiSubmBeneIndUnrecognized,
             PreAdjFissClaim::getMbiSubmBeneInd,
             PreAdjFissClaim.Fields.mbiSubmBeneInd,
@@ -1155,13 +1158,13 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAdjMbiInd() {
     new ClaimFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissClaim.Builder::setAdjMbiIndEnum,
             PreAdjFissClaim::getAdjMbiInd,
             FissAdjustmentMedicareBeneficiaryIdentifierIndicator
                 .ADJUSTMENT_MBI_INDICATOR_HIC_SUBMITTED_ON_ADJUSTMENT_OR_CANCEL_CLAIM,
             "H")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAdjMbiIndUnrecognized,
             PreAdjFissClaim::getAdjMbiInd,
             PreAdjFissClaim.Fields.adjMbiInd,
@@ -1171,7 +1174,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimAdjMbi() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setAdjMbi,
             PreAdjFissClaim::getAdjMbi,
             PreAdjFissClaim.Fields.adjMbi,
@@ -1181,7 +1184,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testClaimMedicalRecordNo() {
     new ClaimFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissClaim.Builder::setMedicalRecordNo,
             PreAdjFissClaim::getMedicalRecordNo,
             PreAdjFissClaim.Fields.medicalRecordNo,
@@ -1194,7 +1197,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testProcCodeProcCd() {
     new ProcCodeFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissProcedureCode.Builder::setProcCd,
             PreAdjFissProcCode::getProcCode,
             PreAdjFissProcCode.Fields.procCode,
@@ -1204,7 +1207,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testProcCodeProcFlag() {
     new ProcCodeFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissProcedureCode.Builder::setProcFlag,
             PreAdjFissProcCode::getProcFlag,
             PreAdjFissProcCode.Fields.procFlag,
@@ -1214,7 +1217,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testProcCodeProcDt() {
     new ProcCodeFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissProcedureCode.Builder::setProcDt,
             PreAdjFissProcCode::getProcDate,
             PreAdjFissProcCode.Fields.procDate);
@@ -1226,12 +1229,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerPayersId() {
     new BeneZPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissBeneZPayer.Builder::setPayersIdEnum,
             PreAdjFissPayer::getPayersId,
             FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
             "D")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setPayersIdUnrecognized,
             PreAdjFissPayer::getPayersId,
             PreAdjFissPayer.Fields.payersId,
@@ -1241,7 +1244,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerPayersName() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setPayersName,
             PreAdjFissPayer::getPayersName,
             PreAdjFissPayer.Fields.payersName,
@@ -1251,12 +1254,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerRelInd() {
     new BeneZPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissBeneZPayer.Builder::setRelIndEnum,
             PreAdjFissPayer::getRelInd,
             FissReleaseOfInformation.RELEASE_OF_INFORMATION_NO_RELEASE_ON_FILE,
             "N")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setRelIndUnrecognized,
             PreAdjFissPayer::getRelInd,
             PreAdjFissPayer.Fields.relInd,
@@ -1266,12 +1269,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerAssignInd() {
     new BeneZPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissBeneZPayer.Builder::setAssignIndEnum,
             PreAdjFissPayer::getAssignInd,
             FissAssignmentOfBenefitsIndicator.ASSIGNMENT_OF_BENEFITS_INDICATOR_BENEFITS_ASSIGNED,
             "Y")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setAssignIndUnrecognized,
             PreAdjFissPayer::getAssignInd,
             PreAdjFissPayer.Fields.assignInd,
@@ -1281,7 +1284,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerProviderNumber() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setProviderNumber,
             PreAdjFissPayer::getProviderNumber,
             PreAdjFissPayer.Fields.providerNumber,
@@ -1291,7 +1294,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerAdjDcnIcn() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setAdjDcnIcn,
             PreAdjFissPayer::getAdjDcnIcn,
             PreAdjFissPayer.Fields.adjDcnIcn,
@@ -1301,7 +1304,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerPriorPmt() {
     new BeneZPayerFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             FissBeneZPayer.Builder::setPriorPmt,
             PreAdjFissPayer::getPriorPmt,
             PreAdjFissPayer.Fields.priorPmt);
@@ -1310,7 +1313,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerEstAmtDue() {
     new BeneZPayerFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             FissBeneZPayer.Builder::setEstAmtDue,
             PreAdjFissPayer::getEstAmtDue,
             PreAdjFissPayer.Fields.estAmtDue);
@@ -1319,12 +1322,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneRel() {
     new BeneZPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissBeneZPayer.Builder::setBeneRelEnum,
             PreAdjFissPayer::getBeneRel,
             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_DEFAULT,
             "00")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setBeneRelUnrecognized,
             PreAdjFissPayer::getBeneRel,
             PreAdjFissPayer.Fields.beneRel,
@@ -1334,7 +1337,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneLastName() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setBeneLastName,
             PreAdjFissPayer::getBeneLastName,
             PreAdjFissPayer.Fields.beneLastName,
@@ -1344,7 +1347,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneFirstName() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setBeneFirstName,
             PreAdjFissPayer::getBeneFirstName,
             PreAdjFissPayer.Fields.beneFirstName,
@@ -1354,7 +1357,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneMidInit() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setBeneMidInit,
             PreAdjFissPayer::getBeneMidInit,
             PreAdjFissPayer.Fields.beneMidInit,
@@ -1364,7 +1367,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneSsnHic() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setBeneSsnHic,
             PreAdjFissPayer::getBeneSsnHic,
             PreAdjFissPayer.Fields.beneSsnHic,
@@ -1374,7 +1377,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerInsuredGroupName() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setInsuredGroupName,
             PreAdjFissPayer::getInsuredGroupName,
             PreAdjFissPayer.Fields.insuredGroupName,
@@ -1384,7 +1387,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneDob() {
     new BeneZPayerFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissBeneZPayer.Builder::setBeneDob,
             PreAdjFissPayer::getBeneDob,
             PreAdjFissPayer.Fields.beneDob);
@@ -1393,12 +1396,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerBeneSex() {
     new BeneZPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissBeneZPayer.Builder::setBeneSexEnum,
             PreAdjFissPayer::getBeneSex,
             FissBeneficiarySex.BENEFICIARY_SEX_FEMALE,
             "F")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setBeneSexUnrecognized,
             PreAdjFissPayer::getBeneSex,
             PreAdjFissPayer.Fields.beneSex,
@@ -1408,7 +1411,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerTreatAuthCd() {
     new BeneZPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setTreatAuthCd,
             PreAdjFissPayer::getTreatAuthCd,
             PreAdjFissPayer.Fields.treatAuthCd,
@@ -1418,12 +1421,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerInsuredSex() {
     new BeneZPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissBeneZPayer.Builder::setInsuredSexEnum,
             PreAdjFissPayer::getInsuredSex,
             FissBeneficiarySex.BENEFICIARY_SEX_FEMALE,
             "F")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setInsuredSexUnrecognized,
             PreAdjFissPayer::getInsuredSex,
             PreAdjFissPayer.Fields.insuredSex,
@@ -1433,12 +1436,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testBeneZPayerInsuredRelX12() {
     new BeneZPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissBeneZPayer.Builder::setInsuredRelX12Enum,
             PreAdjFissPayer::getInsuredRelX12,
             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_DEFAULT,
             "00")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissBeneZPayer.Builder::setInsuredRelX12Unrecognized,
             PreAdjFissPayer::getInsuredRelX12,
             PreAdjFissPayer.Fields.insuredRelX12,
@@ -1451,12 +1454,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerPayersId() {
     new InsuredPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissInsuredPayer.Builder::setPayersIdEnum,
             PreAdjFissPayer::getPayersId,
             FissPayersCode.PAYERS_CODE_AUTO_NO_FAULT,
             "D")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setPayersIdUnrecognized,
             PreAdjFissPayer::getPayersId,
             PreAdjFissPayer.Fields.payersId,
@@ -1466,7 +1469,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerPayersName() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setPayersName,
             PreAdjFissPayer::getPayersName,
             PreAdjFissPayer.Fields.payersName,
@@ -1476,12 +1479,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerRelInd() {
     new InsuredPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissInsuredPayer.Builder::setRelIndEnum,
             PreAdjFissPayer::getRelInd,
             FissReleaseOfInformation.RELEASE_OF_INFORMATION_NO_RELEASE_ON_FILE,
             "N")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setRelIndUnrecognized,
             PreAdjFissPayer::getRelInd,
             PreAdjFissPayer.Fields.relInd,
@@ -1491,12 +1494,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerAssignInd() {
     new InsuredPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissInsuredPayer.Builder::setAssignIndEnum,
             PreAdjFissPayer::getAssignInd,
             FissAssignmentOfBenefitsIndicator.ASSIGNMENT_OF_BENEFITS_INDICATOR_BENEFITS_ASSIGNED,
             "Y")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setAssignIndUnrecognized,
             PreAdjFissPayer::getAssignInd,
             PreAdjFissPayer.Fields.assignInd,
@@ -1506,7 +1509,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerProviderNumber() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setProviderNumber,
             PreAdjFissPayer::getProviderNumber,
             PreAdjFissPayer.Fields.providerNumber,
@@ -1516,7 +1519,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerAdjDcnIcn() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setAdjDcnIcn,
             PreAdjFissPayer::getAdjDcnIcn,
             PreAdjFissPayer.Fields.adjDcnIcn,
@@ -1526,7 +1529,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerPriorPmt() {
     new InsuredPayerFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             FissInsuredPayer.Builder::setPriorPmt,
             PreAdjFissPayer::getPriorPmt,
             PreAdjFissPayer.Fields.priorPmt);
@@ -1535,7 +1538,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerEstAmtDue() {
     new InsuredPayerFieldTester()
-        .amountField(
+        .verifyAmountStringFieldTransformedCorrectly(
             FissInsuredPayer.Builder::setEstAmtDue,
             PreAdjFissPayer::getEstAmtDue,
             PreAdjFissPayer.Fields.estAmtDue);
@@ -1544,12 +1547,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredRel() {
     new InsuredPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissInsuredPayer.Builder::setInsuredRelEnum,
             PreAdjFissPayer::getInsuredRel,
             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_EMPLOYEE,
             "08")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setInsuredRelUnrecognized,
             PreAdjFissPayer::getInsuredRel,
             PreAdjFissPayer.Fields.insuredRel,
@@ -1559,7 +1562,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredName() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setInsuredName,
             PreAdjFissPayer::getInsuredName,
             PreAdjFissPayer.Fields.insuredName,
@@ -1569,7 +1572,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredSsnHic() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setInsuredSsnHic,
             PreAdjFissPayer::getInsuredSsnHic,
             PreAdjFissPayer.Fields.insuredSsnHic,
@@ -1579,7 +1582,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredGroupName() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setInsuredGroupName,
             PreAdjFissPayer::getInsuredGroupName,
             PreAdjFissPayer.Fields.insuredGroupName,
@@ -1589,7 +1592,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredGroupNbr() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setInsuredGroupNbr,
             PreAdjFissPayer::getInsuredGroupNbr,
             PreAdjFissPayer.Fields.insuredGroupNbr,
@@ -1599,7 +1602,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerTreatAuthCd() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setTreatAuthCd,
             PreAdjFissPayer::getTreatAuthCd,
             PreAdjFissPayer.Fields.treatAuthCd,
@@ -1609,12 +1612,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredSex() {
     new InsuredPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissInsuredPayer.Builder::setInsuredSexEnum,
             PreAdjFissPayer::getInsuredSex,
             FissBeneficiarySex.BENEFICIARY_SEX_UNKNOWN,
             "U")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setInsuredSexUnrecognized,
             PreAdjFissPayer::getInsuredSex,
             PreAdjFissPayer.Fields.insuredSex,
@@ -1624,12 +1627,12 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredRelX12() {
     new InsuredPayerFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissInsuredPayer.Builder::setInsuredRelX12Enum,
             PreAdjFissPayer::getInsuredRelX12,
             FissPatientRelationshipCode.PATIENT_RELATIONSHIP_CODE_DEFAULT,
             "00")
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setInsuredRelX12Unrecognized,
             PreAdjFissPayer::getInsuredRelX12,
             PreAdjFissPayer.Fields.insuredRelX12,
@@ -1639,7 +1642,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredDob() {
     new InsuredPayerFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissInsuredPayer.Builder::setInsuredDob,
             PreAdjFissPayer::getInsuredDob,
             PreAdjFissPayer.Fields.insuredDob);
@@ -1648,7 +1651,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testInsuredPayerInsuredDobText() {
     new InsuredPayerFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissInsuredPayer.Builder::setInsuredDobText,
             PreAdjFissPayer::getInsuredDobText,
             PreAdjFissPayer.Fields.insuredDobText,
@@ -1661,7 +1664,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testAuditTrailBadtStatus() {
     new AuditTrailFieldTester()
-        .enumField(
+        .verifyEnumFieldStringValueExtractedCorrectly(
             FissAuditTrail.Builder::setBadtStatusEnum,
             PreAdjFissAuditTrail::getBadtStatus,
             FissClaimStatus.CLAIM_STATUS_BLANK,
@@ -1671,7 +1674,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testAudiTrailBadtLoc() {
     new AuditTrailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissAuditTrail.Builder::setBadtLoc,
             PreAdjFissAuditTrail::getBadtLoc,
             PreAdjFissAuditTrail.Fields.badtLoc,
@@ -1681,7 +1684,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testAudiTrailBadtOperId() {
     new AuditTrailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissAuditTrail.Builder::setBadtOperId,
             PreAdjFissAuditTrail::getBadtOperId,
             PreAdjFissAuditTrail.Fields.badtOperId,
@@ -1691,7 +1694,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testAudiTrailBadtReas() {
     new AuditTrailFieldTester()
-        .stringField(
+        .verifyStringFieldCopiedCorrectly(
             FissAuditTrail.Builder::setBadtReas,
             PreAdjFissAuditTrail::getBadtReas,
             PreAdjFissAuditTrail.Fields.badtReas,
@@ -1701,7 +1704,7 @@ public class FissClaimTransformerTest {
   @Test
   public void testAudiTrailBadtCurrDate() {
     new AuditTrailFieldTester()
-        .dateField(
+        .verifyDateStringFieldTransformedCorrectly(
             FissAuditTrail.Builder::setBadtCurrDateCymd,
             PreAdjFissAuditTrail::getBadtCurrDate,
             PreAdjFissAuditTrail.Fields.badtCurrDate);

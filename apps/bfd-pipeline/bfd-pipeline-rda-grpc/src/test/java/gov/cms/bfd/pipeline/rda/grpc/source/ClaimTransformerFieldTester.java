@@ -49,7 +49,7 @@ public abstract class ClaimTransformerFieldTester<
    */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-      stringField(
+      verifyStringFieldCopiedCorrectly(
           BiConsumer<TTestEntityBuilder, String> setter,
           Function<TTestEntity, String> getter,
           String fieldLabel,
@@ -85,7 +85,7 @@ public abstract class ClaimTransformerFieldTester<
    */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-      hashField(
+      verifyIdHashFieldPopulatedCorrectly(
           BiConsumer<TTestEntityBuilder, String> setter,
           Function<TTestEntity, String> getter,
           int maxLength,
@@ -117,7 +117,7 @@ public abstract class ClaimTransformerFieldTester<
    */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-      dateField(
+      verifyDateStringFieldTransformedCorrectly(
           BiConsumer<TTestEntityBuilder, String> setter,
           Function<TTestEntity, LocalDate> getter,
           String fieldLabel) {
@@ -152,7 +152,7 @@ public abstract class ClaimTransformerFieldTester<
    */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-      amountField(
+      verifyAmountStringFieldTransformedCorrectly(
           BiConsumer<TTestEntityBuilder, String> setter,
           Function<TTestEntity, BigDecimal> getter,
           String fieldLabel) {
@@ -183,7 +183,7 @@ public abstract class ClaimTransformerFieldTester<
    */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-      intField(
+      verifyIntFieldCopiedCorrectly(
           BiConsumer<TTestEntityBuilder, Integer> setter, Function<TTestEntity, Integer> getter) {
     final BiConsumer<TClaimBuilder, Integer> wrappedSetter =
         (claimBuilder, value) -> setter.accept(getTestEntityBuilder(claimBuilder), value);
@@ -211,7 +211,7 @@ public abstract class ClaimTransformerFieldTester<
   <TEnum extends Enum<?>>
       ClaimTransformerFieldTester<
               TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-          enumField(
+          verifyEnumFieldStringValueExtractedCorrectly(
               BiConsumer<TTestEntityBuilder, TEnum> setter,
               Function<TTestEntity, String> getter,
               TEnum enumValue,
@@ -237,7 +237,7 @@ public abstract class ClaimTransformerFieldTester<
    */
   @CanIgnoreReturnValue
   ClaimTransformerFieldTester<TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-      enumFieldRejectsUnrecognizedValue(
+      verifyEnumFieldTransformationRejectsUnrecognizedValue(
           BiConsumer<TTestEntityBuilder, String> setter, String fieldLabel, String badStringValue) {
     verifyFieldTransformationFails(
         claimBuilder -> setter.accept(getTestEntityBuilder(claimBuilder), badStringValue),
@@ -263,7 +263,7 @@ public abstract class ClaimTransformerFieldTester<
   <TEnum extends Enum<?>>
       ClaimTransformerFieldTester<
               TClaimBuilder, TClaim, TClaimEntity, TTestEntityBuilder, TTestEntity>
-          enumFieldRejectsSpecificValues(
+          verifyEnumFieldTransformationRejectsSpecificValues(
               BiConsumer<TTestEntityBuilder, TEnum> setter, String fieldLabel, TEnum... badValues) {
     for (TEnum badValue : badValues) {
       verifyFieldTransformationFails(
