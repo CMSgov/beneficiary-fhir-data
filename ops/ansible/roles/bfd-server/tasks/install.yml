@@ -58,9 +58,10 @@
   become: true
 
 # FIXME: Switch to the maven_artifact module after we move to the CCS.
+# see ../defaults/main.yml for version
 - name: Download New Relic Java Agent Bundle
   get_url:
-    url: 'https://search.maven.org/remotecontent?filepath=com/newrelic/agent/java/newrelic-java/5.6.0/newrelic-java-5.6.0.zip'
+    url: 'https://search.maven.org/remotecontent?filepath=com/newrelic/agent/java/newrelic-java/{{new_relic_agent_version}}/newrelic-java-{{new_relic_agent_version}}.zip'
     dest: /tmp/newrelic-java.zip
 
 - name: Unzip New Relic Java Agent Bundle
