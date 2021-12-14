@@ -13,8 +13,8 @@ This RFC proposes that our team migrate from BFD v1 STU3 Patient FHIR resource t
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BFD-293](https://jira.cms.gov/browse/BFD-293)
     
 ## Table of Contents

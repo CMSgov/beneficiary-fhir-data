@@ -14,8 +14,8 @@ This RFC proposes that our team migrate from BFD v1 platform currently on FHIR S
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BFD-907](https://jira.cms.gov/browse/BFD-907)
 
 ## Table of Contents

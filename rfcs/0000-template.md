@@ -16,8 +16,8 @@ For any such not-needed section, simply write in "N/A".
 ## Status
 [Status]: #status
 
-* Implementation Status: (Done/Not yet/Not viable)
-* JIRA Ticket(s):
+* Status: (Proposed/Approved/Rejected/Implemented)
+* Implementation JIRA Ticket(s):
     * [BLUEBUTTON-0001](https://jira.cms.gov/browse/BLUEBUTTON-0001)
 
 ## Table of Contents

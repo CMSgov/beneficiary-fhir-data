@@ -12,8 +12,8 @@ This proposal suggests adding an additional date range query on service completi
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BCDA-3872](https://jira.cms.gov/browse/BCDA-3872)
     
 ## Table of Contents

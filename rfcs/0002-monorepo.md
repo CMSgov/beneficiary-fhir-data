@@ -13,8 +13,8 @@ This has a number of benefits: simpler onboarding, better testing of changes, an
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BLUEBUTTON-1086](https://jira.cms.gov/browse/BLUEBUTTON-1086)
 
 ## Table of Contents

@@ -15,8 +15,8 @@ The proposal discusses these new features as well as the logic that BFD's partne
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BLUEBUTTON-1506](https://jira.cms.gov/browse/BLUEBUTTON-1506)
 
 ## Table of Contents

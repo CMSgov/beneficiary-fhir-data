@@ -28,8 +28,8 @@ This proposal details architectural changes that
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BFD-704](https://jira.cms.gov/browse/BFD-704)
     
 ## Table of Contents

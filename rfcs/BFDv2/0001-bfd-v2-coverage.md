@@ -14,8 +14,8 @@ This RFC proposes that our team migrate from BFD v1 STU3 Coverage FHIR resource 
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BFD-344](https://jira.cms.gov/browse/BFD-344)
 
 ## Table of Contents

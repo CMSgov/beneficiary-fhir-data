@@ -15,8 +15,8 @@ Jetty is an open source, well-supported, and widely-used alternative.
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BLUEBUTTON-1112](https://jira.cms.gov/browse/BLUEBUTTON-1112)
 
 ## Table of Contents

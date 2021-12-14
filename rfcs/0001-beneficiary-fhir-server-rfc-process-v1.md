@@ -10,8 +10,8 @@
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
+* Status: Implemented
+* Implementation JIRA Ticket(s):
     * [BLUEBUTTON-949](https://jira.cms.gov/browse/BLUEBUTTON-949)
     
 ## Table of Contents

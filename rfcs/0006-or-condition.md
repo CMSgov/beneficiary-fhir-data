@@ -13,9 +13,9 @@ to improve efficiency on both the client and server.
 ## Status
 [Status]: #status
 
-* Implementation Status: Done
-* JIRA Ticket(s):
-    * [AB2D-1862](https://jira.cms.gov/browse/AB2D-1862)
+* Status: Rejected
+* Implementation JIRA Ticket(s):
+    * N/A
     
 ## Table of Contents
 [Table of Contents]: #table-of-contents
