@@ -48,8 +48,8 @@
         # Note: the `data_server_ssl_client_certificates` variable is defined for each env/group in `group_vars/*/main.yml`.
         # Secondary (i.e. read-only) DBs defined in `group_vars/env_<name>_az_<x>/vault.yml`:
         data_server_db_url: "{{ vault_data_db_secondary_url }}"
-        data_server_db_username: "{{ lookup('aws_ssm', '/bfd/' + env + '/server/db_username') }}"
-        data_server_db_password: "{{ lookup('aws_ssm', '/bfd/' + env + '/server/db_password') }}"
+        data_server_db_username: "{{ lookup('aws_ssm', '/bfd/' + env + '/server/db_username', region='us-east-1') }}"
+        data_server_db_password: "{{ lookup('aws_ssm', '/bfd/' + env + '/server/db_password', region='us-east-1') }}"
         data_server_db_connections_max: "{{ data_server_num_cores * 10 }}" # Oracle recommends 1-10 connections per CPU core
         data_server_new_relic_license_key: "{{ vault_data_server_new_relic_license_key }}"
         data_server_new_relic_app_name: "BFD Server ({{ env_name_std }})"
