@@ -646,6 +646,99 @@ public class CarrierClaimTransformerV2Test {
   }
 
   @Test
+  public void shouldHaveLineItemExtension() {
+    Assert.assertNotNull(eob.getItemFirstRep().getExtension());
+    Assert.assertEquals(6, eob.getItemFirstRep().getExtension().size());
+
+    Extension ex1 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare1 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cnt",
+            new Quantity().setValue(1));
+
+    Assert.assertTrue(compare1.equalsDeep(ex1));
+
+    Extension ex2 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare2 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+            new Coding()
+                .setSystem("https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd")
+                .setCode("3")
+                .setDisplay("Services"));
+
+    Assert.assertTrue(compare2.equalsDeep(ex2));
+
+    Extension ex3 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/betos_cd",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare3 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/betos_cd",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/betos_cd",
+                "T2D",
+                "Other tests - other"));
+
+    Assert.assertTrue(compare3.equalsDeep(ex3));
+
+    Extension ex4 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare4 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+                "E",
+                "Workers' compensation"));
+
+    Assert.assertTrue(compare4.equalsDeep(ex4));
+
+    Extension ex5 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare5 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/line_prcsg_ind_cd",
+                "A",
+                "Allowed"));
+
+    Assert.assertTrue(compare5.equalsDeep(ex5));
+
+    Extension ex6 =
+        TransformerTestUtilsV2.findExtensionByUrl(
+            "https://bluebutton.cms.gov/resources/variables/line_service_deductible",
+            eob.getItemFirstRep().getExtension());
+
+    Extension compare6 =
+        new Extension(
+            "https://bluebutton.cms.gov/resources/variables/line_service_deductible",
+            new Coding(
+                "https://bluebutton.cms.gov/resources/variables/line_service_deductible",
+                "0",
+                "Service Subject to Deductible"));
+
+    Assert.assertTrue(compare6.equalsDeep(ex6));
+  }
+
+  @Test
   public void shouldHaveLineItemAdjudications() {
     Assert.assertEquals(9, eob.getItemFirstRep().getAdjudication().size());
   }

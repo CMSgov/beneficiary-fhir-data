@@ -272,7 +272,7 @@ public class CarrierClaimTransformerV2 {
               code ->
                   item.addExtension(
                       TransformerUtilsV2.createExtensionCoding(
-                          eob, CcwCodebookVariable.CARR_LINE_MTUS_CNT, code)));
+                          eob, CcwCodebookVariable.CARR_LINE_MTUS_CD, code)));
 
       // Common item level fields between Carrier and DME
       // LINE_SRVC_CNT            => ExplanationOfBenefit.item.quantity
