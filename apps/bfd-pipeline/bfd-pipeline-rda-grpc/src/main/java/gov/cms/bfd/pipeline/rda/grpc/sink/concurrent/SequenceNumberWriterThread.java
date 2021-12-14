@@ -84,7 +84,7 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
   }
 
   /**
-   * Adds a sentinel value to our queue to cause the thread ot terminate cleanly. Any values added
+   * Adds a sentinel value to our queue to cause the thread to terminate cleanly. Any values added
    * after this will be ignored but any values added before this should be written prior to the
    * thread terminating.
    *

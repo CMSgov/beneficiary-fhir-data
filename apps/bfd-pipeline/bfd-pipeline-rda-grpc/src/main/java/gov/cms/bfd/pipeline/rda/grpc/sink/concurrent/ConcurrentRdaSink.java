@@ -134,9 +134,7 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
     return writerPool.getProcessedCount();
   }
 
-  /**
-   * Shuts down the thread pool and closes all sinks. Any unwritten data is flushed to the database.
-   */
+  /** Shuts down the thread pool. Any unwritten data is flushed to the database. */
   @Override
   public void shutdown(Duration waitTime) throws ProcessingException {
     try {

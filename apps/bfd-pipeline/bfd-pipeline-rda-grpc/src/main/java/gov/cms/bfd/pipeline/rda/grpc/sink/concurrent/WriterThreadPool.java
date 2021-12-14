@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -55,12 +56,13 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     outputQueue = new LinkedBlockingQueue<>();
     sequenceNumberWriter = new SequenceNumberWriterThread<>(sinkFactory, outputQueue::put);
     threadPool.submit(sequenceNumberWriter);
-    writers = new ArrayList<>(maxThreads);
+    var writers = ImmutableList.<ClaimWriterThread<TMessage, TClaim>>builder();
     for (int i = 1; i <= maxThreads; ++i) {
       var writer = new ClaimWriterThread<>(sinkFactory, batchSize, outputQueue::put);
       writers.add(writer);
       threadPool.submit(writer);
     }
+    this.writers = writers.build();
   }
 
   /**
