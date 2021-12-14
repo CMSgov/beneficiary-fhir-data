@@ -129,9 +129,10 @@ def buildAppAmis(String gitBranchName, String gitCommitId, AmiIds amiIds, AppBui
 }"""
 
 			// build AMIs in parallel
+			// Hardcoding platinum here for testing, revert before merge!
 			sh "packer build -color=false \
 				-var vault_password_file=${vaultPasswordFile} \
-				-var 'source_ami=${amiIds.platinumAmiId}' \
+				-var 'source_ami=ami-0ed644299d39063cc' \
 				-var 'subnet_id=subnet-092c2a68bd18b34d1' \
 				-var 'git_branch=${gitBranchName}' \
 				-var 'git_commit=${gitCommitId}' \
