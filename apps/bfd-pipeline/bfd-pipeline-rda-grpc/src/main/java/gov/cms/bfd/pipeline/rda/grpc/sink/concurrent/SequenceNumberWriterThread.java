@@ -71,6 +71,13 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
     inputQueue = new LinkedBlockingQueue<>(MaxQueueSize);
   }
 
+  /**
+   * Adds a sequence number to our queue so that it can be written to the database. Does not wait
+   * for the number to be written.
+   *
+   * @param sequenceNumber to be written to the database
+   * @throws Exception if adding to the queue fails
+   */
   public void add(Long sequenceNumber) throws Exception {
     final Entry entry = new Entry(sequenceNumber);
     addEntryToInputQueue(entry);
@@ -115,9 +122,9 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
   }
 
   /**
-   * Reads one entry from the queue and processes it. If there is no entry nothing is done. If the
+   * Reads an entry from the queue and processes it. If there is no entry nothing is done. If the
    * entry is the shutdown trigger nothing is written and false is returned. Any exception thrown by
-   * the database update is * reported back via our errorReportingFunction.
+   * the database update is reported back via our errorReportingFunction.
    *
    * @param sink RdaSink to use for writing to the database
    * @return true if another iteration is called for, false otherwise
@@ -158,7 +165,8 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
 
   /**
    * Waits for at least one entry to appear in the queue and returns it. If multiple entries are in
-   * the queue they are removed and only the last one is returned.
+   * the queue they are all removed and only the last one is returned. This is safe because the last
+   * one written would overwrite any others anyway.
    *
    * @return the Entry to be written or null if the queue is empty
    */

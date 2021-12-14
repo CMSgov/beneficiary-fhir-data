@@ -6,7 +6,8 @@ package gov.cms.bfd.pipeline.rda.grpc;
  * database connection. Implementations of this class MUST provide orderly shutdown when their
  * thread receives an InterruptedException.
  *
- * @param <TMessage> the type of objects processed
+ * @param <TMessage> RDA API message class
+ * @param <TClaim> JPA entity class
  */
 public interface RdaSource<TMessage, TClaim> extends AutoCloseable {
   /**
