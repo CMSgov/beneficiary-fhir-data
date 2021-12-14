@@ -108,7 +108,8 @@ public class DirectRdaLoadApp {
     final AbstractRdaLoadJob.Config.ConfigBuilder jobConfig =
         AbstractRdaLoadJob.Config.builder()
             .runInterval(Duration.ofDays(1))
-            .batchSize(options.intValue("job.batchSize", 1));
+            .batchSize(options.intValue("job.batchSize", 1))
+            .writeThreads(options.intValue("job.writeThreads", 1));
     options.longOption("job.startingFissSeqNum").ifPresent(jobConfig::startingFissSeqNum);
     options.longOption("job.startingMcsSeqNum").ifPresent(jobConfig::startingMcsSeqNum);
     final GrpcRdaSource.Config grpcConfig =
