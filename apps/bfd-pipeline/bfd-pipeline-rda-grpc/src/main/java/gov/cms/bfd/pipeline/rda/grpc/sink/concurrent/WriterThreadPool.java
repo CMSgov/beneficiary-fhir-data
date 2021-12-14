@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages a pool of worker threads write claim and sequence number updates to a database
+ * Manages a pool of worker threads to write claim and sequence number updates to a database
  * concurrently. The lifecycle of the pool and all of its resources are tied to the lifecycle of
  * this object so calling close() method clears up all resources.
  *
@@ -169,7 +169,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
             throw new IOException("threadPool did not shut down");
           }
         });
-    closer.close(this::updateSequenceNumbersDirectly);
+    closer.close(this::updateSequenceNumberDirectly);
     LOGGER.info("shutdown complete");
     closer.finish();
   }
@@ -180,12 +180,12 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     if (!threadPool.isShutdown()) {
       closer.close(() -> shutdown(Duration.ofMinutes(5)));
     }
-    closer.close(this::updateSequenceNumbersForClose);
+    closer.close(this::updateSequenceNumberForClose);
     closer.close(sink::close);
     closer.finish();
   }
 
-  private void updateSequenceNumbersDirectly() throws ProcessingException {
+  private void updateSequenceNumberDirectly() throws ProcessingException {
     final long sequenceNumber = sequenceNumbers.getHighestWrittenSequenceNumber();
     if (sequenceNumber > 0) {
       try {
@@ -196,11 +196,19 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     }
   }
 
-  private void updateSequenceNumbersForClose() throws Exception {
+  /**
+   * Flushes the outputQueue to determine the final sequence number and processed count. Then is
+   * writes the final sequence number to the database.
+   *
+   * <p>If the processed count is non-zero this method logs a warning. If that happens it's not a
+   * serious issue since in the worst case it just means the pipeline job will reprocess a few
+   * records the next time it starts but it is worth noting in the log.
+   */
+  private void updateSequenceNumberForClose() throws Exception {
     int count = getProcessedCount();
     if (count != 0) {
       LOGGER.warn("uncollected final processedCount: {}", count);
     }
-    updateSequenceNumbersDirectly();
+    updateSequenceNumberDirectly();
   }
 }

@@ -156,6 +156,12 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
      */
     @Getter private final Duration runInterval;
 
+    /**
+     * writeThreads specifies the number of threads to be used for writing claims to the database.
+     * Setting this to one perform all writes synchronously. Higher numbers use {@link
+     * gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ConcurrentRdaSink} to perform writes
+     * asynchronously.
+     */
     @Getter private final int writeThreads;
 
     /**
@@ -192,7 +198,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       Preconditions.checkArgument(
           runInterval.toMillis() >= 1_000, "runInterval less than 1s: %s", runInterval);
       Preconditions.checkArgument(
-          this.writeThreads >= 1, "writeThreads less than 1: %s", this.writeThreads);
+          this.writeThreads >= 1, "writeThreads less than 1: %s", writeThreads);
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s", batchSize);
     }
 

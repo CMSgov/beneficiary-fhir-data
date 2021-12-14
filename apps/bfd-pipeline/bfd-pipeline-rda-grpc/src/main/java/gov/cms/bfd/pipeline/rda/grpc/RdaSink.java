@@ -10,13 +10,13 @@ import javax.annotation.Nonnull;
  * Interface for objects that process incoming RDA API messages and write them to the database in
  * some manner. Implementations may be either single threaded or multi-threaded.
  *
- * <p>At least one of the write methods (writeMessage or writeMessages) must be implemented. All
- * implementations are AutoCloseable since they will generally hold a database connection and/or
- * thread pool.
+ * <p>At least one of the write methods (writeMessage or writeMessages) must be implemented.
  *
- * <p>All implementations MUST be idempotent. If the same object is written multiple times the sink
- * must ensure that it does not create duplicates or overwrite newer information with older
- * information.
+ * <p>All implementations are AutoCloseable since they will generally hold a database connection
+ * and/or thread pool.
+ *
+ * <p>All implementations MUST be idempotent. If the same messages/claims are written multiple times
+ * the sink must ensure that it does not create duplicates.
  *
  * @param <TMessage> type of RDA API messages written to the database
  * @param <TClaim> type of entity objects written to the database

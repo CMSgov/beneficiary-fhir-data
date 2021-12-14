@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -21,16 +22,50 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoCloseable {
+/**
+ * A Callable object submitted to an ExecutorService to process RDA API messages and write them to
+ * the database using an RdaSink object. Each thread has its own BlockingQueue to receive inbound
+ * messages for processing and uses a callback function to report its successes and failures.
+ *
+ * <p>The thread is stopped by calling its close() method. This adds a special token to the work
+ * queue that tells the thread to flush its buffer and exit its run loop.
+ *
+ * @param <TMessage> RDA API message class
+ * @param <TClaim> JPA entity class
+ */
+public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, AutoCloseable {
   private static final Logger LOGGER = LoggerFactory.getLogger(ClaimWriterThread.class);
-  private static final Duration AddTimeout = Duration.ofMinutes(5);
-  private static final Duration ReadTimeout = Duration.ofMillis(500);
-  private static final int InputQueuePaddingMultiple = 2;
 
+  /**
+   * Max time the main thread can be blocked if our queue is full. This would only happen if our
+   * thread has become stuck and is not draining the queue.
+   */
+  private static final Duration AddTimeout = Duration.ofMinutes(5);
+
+  /**
+   * Poll interval for reading from our queue. Not strictly necessary but allows us to log that
+   * we're still alive when debugging.
+   */
+  private static final Duration ReadTimeout = Duration.ofMillis(500);
+
+  /**
+   * Extra padding added to the queue's maximum size. This padding allows the main thread to
+   * continue adding messages to the queue while the thread is busy writing a batch to the database.
+   */
+  private static final int InputQueuePaddingMultiple = 4;
+
+  /** Used to create a sink when the thread starts. */
   private final Supplier<RdaSink<TMessage, TClaim>> sinkFactory;
-  private final Entry<TMessage> shutdownValue;
+  /**
+   * Used as a marker to cause the thread to shutdown. Comparison uses == (identity) so the actual
+   * value is irrelevant. This isn't static since the entry depends on the TMessage type.
+   */
+  private final Entry<TMessage> shutdownToken;
+  /** Number of claims to write to the database in a single transaction. */
   private final int batchSize;
+  /** Used to receive messages from the main thread. */
   private final BlockingQueue<Entry<TMessage>> inputQueue;
+  /** Used to report results to the main thread. */
   private final ReportingCallback<TMessage> reportingFunction;
 
   public ClaimWriterThread(
@@ -41,21 +76,41 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
     this.batchSize = batchSize;
     this.reportingFunction = reportingFunction;
     inputQueue = new ArrayBlockingQueue<>(InputQueuePaddingMultiple * batchSize);
-    shutdownValue = new Entry<>("", null);
+    shutdownToken = new Entry<>("", null);
   }
 
+  /**
+   * Adds an entry for this specified object to the work queue. Transformation of the message into a
+   * claim will be done by the worker thread when it processes the entry.
+   *
+   * @param apiVersion value for the claim's apiSource column
+   * @param object an RDA API message object
+   * @throws Exception thrown if the entry could not be added to the queue
+   */
   public void add(String apiVersion, TMessage object) throws Exception {
     final Entry<TMessage> entry = new Entry<>(apiVersion, object);
     addEntryToInputQueue(entry);
   }
 
+  /**
+   * Adds a shutdown token to the work queue to trigger a shutdown. Does not actually wait for the
+   * shutdown to happen since the caller needs to trigger all threads to shutdown before waiting for
+   * them to complete.
+   *
+   * @throws Exception thrown if the token could not be added to the queue
+   */
   @Override
   public void close() throws Exception {
-    addEntryToInputQueue(shutdownValue);
+    addEntryToInputQueue(shutdownToken);
   }
 
+  /**
+   * Processes entries from its work queue until a shutdown is requested or an exception is caught.
+   * Exceptions other than InterruptedException are passed back to the main thread using the
+   * reportingFunction.
+   */
   @Override
-  public void run() {
+  public Integer call() throws InterruptedException {
     LOGGER.info("started");
     try (RdaSink<TMessage, TClaim> sink = sinkFactory.get()) {
       final Buffer<TMessage, TClaim> buffer = new Buffer<>();
@@ -66,19 +121,20 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
       LOGGER.info("terminating normally");
     } catch (InterruptedException ex) {
       LOGGER.info("terminating due to InterruptedException");
+      throw ex;
     } catch (Exception ex) {
       // this is just a catch all for safety, runOnce() should handle all non-interrupts
       LOGGER.error("terminating due to uncaught exception: ex={}", ex.getMessage(), ex);
-      reportErrorWhenClosing(ex);
+      reportError(ex);
     }
     LOGGER.info("stopped");
+    return 0;
   }
 
   /**
-   * Reads one entry from the queue and processes it. Adds entries to a list and trackers unique
-   * entries. Once a full batch has been detected it will be written to the database and the list
-   * and map reset. Any exception thrown by the database update is * reported back via our
-   * errorReportingFunction.
+   * Reads one entry from the queue and processes it. Adds entries to a buffer. Once a full batch
+   * has been detected it will be written to the database and the list and map reset. Any exception
+   * thrown by the database update is * reported back via our errorReportingFunction.
    *
    * @param sink RdaSink to use for writing to the database
    * @return true if another iteration is called for, false otherwise
@@ -93,7 +149,7 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
       if (entry == null) {
         // queue is empty so flush any received claims to reduce latency
         writeNeeded = buffer.getUniqueCount() >= 1;
-      } else if (entry == shutdownValue) {
+      } else if (entry == shutdownToken) {
         // shutdown requested so flush any received claims and exit
         LOGGER.info("shutdown requested");
         keepRunning = false;
@@ -117,6 +173,11 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
     return keepRunning;
   }
 
+  /**
+   * Writes all unique objects from the buffer to the database and reports the results using the
+   * reporting function. Any exceptions will be caught by our caller and reported as errors using
+   * the reporting function.
+   */
   private void writeBatch(RdaSink<TMessage, TClaim> sink, Buffer<TMessage, TClaim> buffer)
       throws Exception {
     if (LOGGER.isDebugEnabled()) {
@@ -156,20 +217,27 @@ public class ClaimWriterThread<TMessage, TClaim> implements Runnable, AutoClosea
     reportingFunction.accept(new ProcessedBatch<>(0, ImmutableList.copyOf(batch), error));
   }
 
-  private void reportErrorWhenClosing(Exception error) {
-    try {
-      reportError(Collections.emptyList(), error);
-    } catch (InterruptedException ex) {
-      LOGGER.error("unable to report final error due to InterruptedException", ex);
-    }
+  private void reportError(Exception error) throws InterruptedException {
+    reportError(Collections.emptyList(), error);
   }
 
+  /**
+   * Unit of work added to the input queue. Contains all of the information required by the thread
+   * to transform an RDA API message into a JPA entity for writing to the database.
+   *
+   * @param <TMessage> the RDA API message class
+   */
   @AllArgsConstructor
-  private static class Entry<T> {
+  private static class Entry<TMessage> {
     private final String apiVersion;
-    private final T object;
+    private final TMessage object;
   }
 
+  /**
+   * A buffer used to accumulate messages and their associated claims until we have a complete
+   * batch. For any given claim ID only the last version of that claim will be written as part of a
+   * batch. This class is only used by the worker thread so it does not need to be thread safe.
+   */
   @NotThreadSafe
   @VisibleForTesting
   static class Buffer<TMessage, TClaim> {

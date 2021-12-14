@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -15,8 +16,22 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SequenceNumberWriterThread<TMessage, TClaim> implements Runnable, AutoCloseable {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ClaimWriterThread.class);
+/**
+ * A Callable object submitted to an ExecutorService to process RDA API sequence numbers and write
+ * them to the database using an RdaSink object. Each thread has its own BlockingQueue to receive
+ * inbound sequence numbers for processing and uses a callback function to report its successes and
+ * failures.
+ *
+ * <p>The thread is stopped by calling its close() method. This adds a special token to the work
+ * queue that tells the thread to flush its buffer and exit its run loop.
+ *
+ * @param <TMessage> RDA API message class
+ * @param <TClaim> JPA entity class
+ */
+public class SequenceNumberWriterThread<TMessage, TClaim>
+    implements Callable<Integer>, AutoCloseable {
+  private static final Logger LOGGER = LoggerFactory.getLogger(SequenceNumberWriterThread.class);
+
   /**
    * Max time the main thread can be blocked if our queue is full. This would only happen if our
    * thread has become stuck and is not draining the queue.
@@ -28,6 +43,7 @@ public class SequenceNumberWriterThread<TMessage, TClaim> implements Runnable, A
    * we're still alive when debugging.
    */
   private static final Duration ReadTimeout = Duration.ofMillis(500);
+
   /**
    * Used as a marker to cause the thread to shutdown. Comparison uses == (identity) so the actual
    * value is irrelevant.
@@ -72,21 +88,30 @@ public class SequenceNumberWriterThread<TMessage, TClaim> implements Runnable, A
     addEntryToInputQueue(ShutdownToken);
   }
 
-  /** Main thread look that runs */
+  /**
+   * Processes sequence numbers from its work queue until a shutdown is requested or an exception is
+   * caught. Exceptions other than InterruptedException are passed back to the main thread using the
+   * reportingFunction.
+   */
   @Override
-  public void run() {
-    LOGGER.info("thread started");
+  public Integer call() throws InterruptedException {
+    LOGGER.info("started");
     try (RdaSink<TMessage, TClaim> sink = sinkFactory.get()) {
       var running = true;
       while (running) {
         running = runOnce(sink);
       }
+      LOGGER.info("terminating normally");
     } catch (InterruptedException ex) {
       LOGGER.info("terminating due to InterruptedException");
+      throw ex;
     } catch (Exception ex) {
-      LOGGER.error("caught exception: ex={}", ex.getMessage(), ex);
+      // this is just a catch all for safety, runOnce() should handle all non-interrupts
+      LOGGER.error("terminating due to uncaught exception: ex={}", ex.getMessage(), ex);
+      reportError(ex);
     }
-    LOGGER.info("thread stopped");
+    LOGGER.info("stopped");
+    return 0;
   }
 
   /**
@@ -110,7 +135,7 @@ public class SequenceNumberWriterThread<TMessage, TClaim> implements Runnable, A
       } catch (InterruptedException ex) {
         throw ex;
       } catch (Exception ex) {
-        errorReportingFunction.accept(new ProcessedBatch<>(0, Collections.emptyList(), ex));
+        reportError(ex);
         keepRunning = false;
       }
     }
@@ -166,6 +191,10 @@ public class SequenceNumberWriterThread<TMessage, TClaim> implements Runnable, A
       LOGGER.error("unable to add an object to queue within timeout period");
       throw new IOException("timeout exceeded while adding object to input queue");
     }
+  }
+
+  private void reportError(Exception error) throws InterruptedException {
+    errorReportingFunction.accept(new ProcessedBatch<>(0, Collections.emptyList(), error));
   }
 
   @AllArgsConstructor
