@@ -7,28 +7,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
-/** JPA class for the LoadedBatches table */
+/** JPA class for the loaded_batches table */
 @Entity
-@Table(name = "`LoadedBatches`")
+@Table(name = "loaded_batches")
 public class LoadedBatch {
   public static final String SEPARATOR = ",";
 
   @Id
-  @Column(name = "`loadedBatchId`", nullable = false)
+  @Column(name = "loaded_batchid", nullable = false)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedBatches_loadedBatchId_seq")
   @SequenceGenerator(
       name = "loadedBatches_loadedBatchId_seq",
       sequenceName = "loadedBatches_loadedBatchId_seq",
       allocationSize = 20)
-  private long loadedBatchId;
+  private long loaded_batchid;
 
-  @Column(name = "`loadedFileId`", nullable = false)
-  private long loadedFileId;
+  @Column(name = "loaded_fileid", nullable = false)
+  private long loaded_fileid;
 
-  @Column(name = "`beneficiaries`", columnDefinition = "varchar", nullable = false)
+  @Column(name = "beneficiaries", columnDefinition = "varchar", nullable = false)
   private String beneficiaries;
 
-  @Column(name = "`created`", nullable = false)
+  @Column(name = "created", nullable = false)
   private Instant created;
 
   /** default constructor */
@@ -37,15 +37,15 @@ public class LoadedBatch {
   /**
    * Create with known values
    *
-   * @param loadedBatchId unique sequence id
-   * @param loadedFileId associated file
+   * @param loaded_batchid unique sequence id
+   * @param loaded_fileid associated file
    * @param beneficiaries to associate
    * @param created batch creation date
    */
   public LoadedBatch(long loadedBatchId, long loadedFileId, String beneficiaries, Instant created) {
     this();
-    this.loadedBatchId = loadedBatchId;
-    this.loadedFileId = loadedFileId;
+    this.loaded_batchid = loadedBatchId;
+    this.loaded_fileid = loadedFileId;
     this.beneficiaries = beneficiaries;
     this.created = created;
   }
@@ -53,38 +53,38 @@ public class LoadedBatch {
   /**
    * Create with known values
    *
-   * @param loadedBatchId unique sequence id
-   * @param loadedFileId associated file
+   * @param loaded_batchid unique sequence id
+   * @param loaded_fileid associated file
    * @param beneficiaries to associate
    * @param created batch creation date
    */
   public LoadedBatch(
       long loadedBatchId, long loadedFileId, List<String> beneficiaries, Instant created) {
     this();
-    this.loadedBatchId = loadedBatchId;
-    this.loadedFileId = loadedFileId;
+    this.loaded_batchid = loadedBatchId;
+    this.loaded_fileid = loadedFileId;
     this.beneficiaries = convertToString(beneficiaries);
     this.created = created;
   }
 
   /** @return the loadedBatchId */
   public long getLoadedBatchId() {
-    return loadedFileId;
+    return loaded_fileid;
   }
 
   /** @param loadedBatchId the identifier to set */
   public void setLoadedBatchId(long loadedBatchId) {
-    this.loadedBatchId = loadedBatchId;
+    this.loaded_batchid = loadedBatchId;
   }
 
   /** @return the loadedFileId */
   public long getLoadedFileId() {
-    return loadedFileId;
+    return loaded_fileid;
   }
 
   /** @param loadedFileId the identifier to set */
   public void setLoadedFileId(long loadedFileId) {
-    this.loadedFileId = loadedFileId;
+    this.loaded_fileid = loadedFileId;
   }
 
   /** @return the beneficiaries */
@@ -136,8 +136,8 @@ public class LoadedBatch {
     if (a == null) return b;
     if (b == null) return a;
     LoadedBatch sum = new LoadedBatch();
-    sum.loadedBatchId = a.loadedBatchId;
-    sum.loadedFileId = a.loadedFileId;
+    sum.loaded_batchid = a.loaded_batchid;
+    sum.loaded_fileid = a.loaded_fileid;
     sum.beneficiaries =
         a.beneficiaries.isEmpty()
             ? b.beneficiaries
@@ -153,16 +153,14 @@ public class LoadedBatch {
    * slightly simpler and, since conversion is done once, just as efficient.
    */
   private static String convertToString(List<String> list) {
-    if (list == null || list.isEmpty()) {
-      return "";
-    }
-    return list.stream().collect(Collectors.joining(SEPARATOR));
+    return (list == null || list.isEmpty())
+        ? ""
+        : list.stream().collect(Collectors.joining(SEPARATOR));
   }
 
   private static List<String> convertToList(String commaSeparated) {
-    if (commaSeparated == null || commaSeparated.isEmpty()) {
-      return new ArrayList<>();
-    }
-    return Arrays.asList(commaSeparated.split(SEPARATOR, -1));
+    return (commaSeparated == null || commaSeparated.isEmpty())
+        ? new ArrayList<>()
+        : Arrays.asList(commaSeparated.split(SEPARATOR, -1));
   }
 }

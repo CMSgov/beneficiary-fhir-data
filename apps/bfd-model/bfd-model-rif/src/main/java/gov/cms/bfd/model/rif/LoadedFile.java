@@ -6,25 +6,25 @@ import java.util.Set;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "`LoadedFiles`")
+@Table(name = "loaded_files")
 public class LoadedFile {
   @Id
-  @Column(name = "`loadedFileId`", nullable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedFiles_loadedFileId_seq")
+  @Column(name = "loaded_fileid", nullable = false)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedfiles_loadedfileid_seq")
   @SequenceGenerator(
       name = "loadedFiles_loadedFileId_seq",
-      sequenceName = "loadedFiles_loadedFileId_seq",
+      sequenceName = "loadedfiles_loadedfileid_seq",
       allocationSize = 1)
-  private long loadedFileId;
+  private long loaded_fileid;
 
-  @Column(name = "`rifType`", nullable = false)
-  private String rifType;
+  @Column(name = "rif_type", nullable = false)
+  private String rif_type;
 
-  @Column(name = "`created`", nullable = false)
+  @Column(name = "created", nullable = false)
   private Instant created;
 
   @OneToMany(
-      mappedBy = "loadedFileId",
+      mappedBy = "loaded_fileid",
       orphanRemoval = false,
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL)
@@ -41,8 +41,8 @@ public class LoadedFile {
    */
   public LoadedFile(long loadedFileId, String rifType, Instant created) {
     this();
-    this.loadedFileId = loadedFileId;
-    this.rifType = rifType;
+    this.loaded_fileid = loadedFileId;
+    this.rif_type = rifType;
     this.created = created;
   }
 
@@ -53,27 +53,27 @@ public class LoadedFile {
    */
   public LoadedFile(String rifType) {
     this();
-    this.rifType = rifType;
+    this.rif_type = rifType;
   }
 
   /** @return the identifier */
   public long getLoadedFileId() {
-    return loadedFileId;
+    return loaded_fileid;
   }
 
   /** @param loadedFileId the identifier to set */
   public void setLoadedFileId(long loadedFileId) {
-    this.loadedFileId = loadedFileId;
+    this.loaded_fileid = loadedFileId;
   }
 
   /** @return the rifType */
   public String getRifType() {
-    return rifType;
+    return rif_type;
   }
 
   /** @param rifType the rifType to set */
   public void setRifType(String rifType) {
-    this.rifType = rifType;
+    this.rif_type = rifType;
   }
 
   /** @return the creation time stamp */

@@ -35,6 +35,7 @@ public final class MappingSpec {
   private boolean hasLines = false;
   private boolean hasBeneficiaryMonthly = false;
   private String lineTable;
+  private String lineEntityLineNumberField;
   private List<String> headerEntityTransientFields;
   private List<RifField> headerEntityAdditionalDatabaseFields;
   private List<InnerJoinRelationship> innerJoinRelationship;
@@ -196,7 +197,9 @@ public final class MappingSpec {
 
     for (int fieldIndex = 0; fieldIndex < rifLayout.getRifFields().size(); fieldIndex++) {
       RifField field = rifLayout.getRifFields().get(fieldIndex);
-      if (field.getJavaFieldName().equals(getLineEntityLineNumberField())) return fieldIndex;
+      if (field.getRifColumnName().equalsIgnoreCase(getLineEntityLineNumberField())) {
+        return fieldIndex;
+      }
     }
 
     throw new IllegalStateException();
@@ -265,12 +268,23 @@ public final class MappingSpec {
   }
 
   /**
+   * @param the name of the field in the {@link #getLineEntity()} {@link Entity} that should be used
+   *     for the identifying line number
+   */
+  public MappingSpec setLineEntityLineNumberField(String lineEntityLineNumberField) {
+    if (!hasLines) throw new IllegalStateException();
+    this.lineEntityLineNumberField = lineEntityLineNumberField;
+    return this;
+  }
+
+  /**
    * @return the name of the field in the {@link #getLineEntity()} {@link Entity} that should be
    *     used for the identifying line number, if any
    */
   public String getLineEntityLineNumberField() {
+    // use Java field name since there is no uniformity among column names for line #
     if (!hasLines) throw new IllegalStateException();
-    return "lineNumber";
+    return lineEntityLineNumberField;
   }
 
   /**
@@ -279,7 +293,7 @@ public final class MappingSpec {
    */
   public String getEntityBeneficiaryMonthlyField() {
     if (!hasBeneficiaryMonthly) throw new IllegalStateException();
-    return "yearMonth";
+    return "YEAR_MONTH";
   }
 
   /** @return the fields in {@link #getHeaderEntity()} that should be marked as {@link Transient} */
@@ -348,6 +362,10 @@ public final class MappingSpec {
     builder.append(hasLines);
     builder.append(", lineTable=");
     builder.append(lineTable);
+    if (hasLines) {
+      builder.append(", lineEntityLineNumber=");
+      builder.append(lineEntityLineNumberField);
+    }
     builder.append("]");
     return builder.toString();
   }
