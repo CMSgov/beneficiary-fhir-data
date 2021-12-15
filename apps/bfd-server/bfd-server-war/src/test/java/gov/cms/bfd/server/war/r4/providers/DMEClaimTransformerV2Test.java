@@ -309,7 +309,7 @@ public final class DMEClaimTransformerV2Test {
   @Test
   public void shouldHaveLineItemExtension() {
     Assert.assertNotNull(eob.getItemFirstRep().getExtension());
-    Assert.assertEquals(10, eob.getItemFirstRep().getExtension().size());
+    Assert.assertEquals(9, eob.getItemFirstRep().getExtension().size());
 
     Extension ex1 =
         TransformerTestUtilsV2.findExtensionByUrl(
@@ -443,21 +443,6 @@ public final class DMEClaimTransformerV2Test {
                 "Service Subject to Deductible"));
 
     Assert.assertTrue(compare9.equalsDeep(ex9));
-
-    Extension ex10 =
-        TransformerTestUtilsV2.findExtensionByUrl(
-            "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-            eob.getItemFirstRep().getExtension());
-
-    Extension compare10 =
-        new Extension(
-            "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-            new Coding(
-                "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
-                "E",
-                "Workers' compensation"));
-
-    Assert.assertTrue(compare10.equalsDeep(ex10));
   }
 
   @Test

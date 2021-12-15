@@ -377,17 +377,6 @@ final class DMEClaimTransformerV2 {
                     eob, CcwCodebookVariable.PRVDR_STATE_CD, line.getProviderStateCode()));
       }
 
-      // LINE_BENE_PRMRY_PYR_CD
-      // claimLine.getPrimaryPayerCode()) => ExplanationOfBenefit.item.extension
-      line.getPrimaryPayerCode()
-          .ifPresent(
-              c ->
-                  item.addExtension(
-                      TransformerUtilsV2.createExtensionCoding(
-                          eob,
-                          CcwCodebookVariable.LINE_BENE_PRMRY_PYR_CD,
-                          line.getPrimaryPayerCode())));
-
       // LINE_BENE_PMT_AMT
       // claimLine.getBeneficiaryPaymentAmount() => ExplanationOfBenefit.item.adjudication.value
       TransformerUtilsV2.addAdjudication(
