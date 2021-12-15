@@ -17,6 +17,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
+import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
@@ -39,6 +41,7 @@ import javax.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
@@ -60,6 +63,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
   private EntityManager entityManager;
   private MetricRegistry metricRegistry;
+  private R4ClaimSamhsaMatcher samhsaMatcher;
 
   private ClaimDao claimDao;
 
@@ -75,6 +79,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   @Inject
   public void setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
+  }
+
+  /** @param samhsaMatcher the {@link R4ClaimSamhsaMatcher} to use */
+  @Inject
+  public void setSamhsaFilterer(R4ClaimSamhsaMatcher samhsaMatcher) {
+    this.samhsaMatcher = samhsaMatcher;
   }
 
   @PostConstruct
@@ -137,7 +147,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
     String claimIdTypeText = claimIdMatcher.group(1);
     Optional<ResourceTypeV2<T>> optional = parseClaimType(claimIdTypeText);
-    if (!optional.isPresent()) throw new ResourceNotFoundException(claimId);
+    if (optional.isEmpty()) throw new ResourceNotFoundException(claimId);
     ResourceTypeV2<T> claimIdType = optional.get();
     String claimIdString = claimIdMatcher.group(2);
 
@@ -206,6 +216,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       @OptionalParam(name = "isHashed")
           @Description(shortDefinition = "A boolean indicating whether or not the MBI is hashed")
           String hashed,
+      @OptionalParam(name = "excludeSAMHSA")
+          @Description(shortDefinition = "If true, exclude all SAMHSA-related resources")
+          String samhsa,
       @OptionalParam(name = "_lastUpdated")
           @Description(shortDefinition = "Include resources last updated in the given range")
           DateRangeParam lastUpdated,
@@ -219,13 +232,21 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Bundle bundleResource;
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
+      boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
 
       if (types != null) {
         bundleResource =
-            createBundleFor(parseClaimTypes(types), mbiString, isHashed, lastUpdated, serviceDate);
+            createBundleFor(
+                parseClaimTypes(types),
+                mbiString,
+                isHashed,
+                excludeSamhsa,
+                lastUpdated,
+                serviceDate);
       } else {
         bundleResource =
-            createBundleFor(getResourceTypes(), mbiString, isHashed, lastUpdated, serviceDate);
+            createBundleFor(
+                getResourceTypes(), mbiString, isHashed, excludeSamhsa, lastUpdated, serviceDate);
       }
 
       return bundleResource;
@@ -249,6 +270,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       Set<ResourceTypeV2<T>> resourceTypes,
       String mbi,
       boolean isHashed,
+      boolean excludeSamhsa,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate) {
     List<T> resources = new ArrayList<>();
@@ -270,6 +292,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       resources.addAll(
           entities.stream()
+              .filter(e -> !excludeSamhsa || hasNoSamhsaData(metricRegistry, e))
               .map(e -> type.getTransformer().transform(metricRegistry, e))
               .collect(Collectors.toList()));
     }
@@ -283,5 +306,21 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
         });
 
     return bundle;
+  }
+
+  @VisibleForTesting
+  boolean hasNoSamhsaData(MetricRegistry metricRegistry, Object entity) {
+    Claim claim;
+
+    if (entity instanceof PreAdjFissClaim) {
+      claim = FissClaimTransformerV2.transform(metricRegistry, entity);
+    } else if (entity instanceof PreAdjMcsClaim) {
+      claim = McsClaimTransformerV2.transform(metricRegistry, entity);
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");
+    }
+
+    return !samhsaMatcher.test(claim);
   }
 }

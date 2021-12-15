@@ -161,17 +161,12 @@ public class GrpcRdaSourceTest {
   public void testHandlesExceptionFromCaller() throws Exception {
     doReturn(Optional.empty()).when(sink).readMaxExistingSequenceNumber();
     final Exception error = new IOException("oops");
+    final GrpcStreamCaller<Integer> caller = mock(GrpcStreamCaller.class);
+    doThrow(error).when(caller).callService(any(), any(), anyLong());
     source =
         spy(
             new GrpcRdaSource<>(
-                channel,
-                (channel, callOptions, sequenceNumber) -> {
-                  throw error;
-                },
-                () -> CallOptions.DEFAULT,
-                appMetrics,
-                "ints",
-                Optional.empty()));
+                channel, caller, () -> CallOptions.DEFAULT, appMetrics, "ints", Optional.empty()));
 
     try {
       source.retrieveAndProcessObjects(2, sink);

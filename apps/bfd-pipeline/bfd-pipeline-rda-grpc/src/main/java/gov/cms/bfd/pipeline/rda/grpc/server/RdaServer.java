@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.common.base.Strings;
 import gov.cms.bfd.pipeline.rda.grpc.ThrowableAction;
 import gov.cms.bfd.pipeline.rda.grpc.ThrowableConsumer;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -13,9 +14,9 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.Singular;
-import lombok.Value;
 
 public class RdaServer {
   /**
@@ -26,7 +27,7 @@ public class RdaServer {
    */
   public static Server startLocal(LocalConfig config) throws IOException {
     return ServerBuilder.forPort(config.getPort())
-        .addService(new RdaService(config.getFissSourceFactory(), config.getMcsSourceFactory()))
+        .addService(config.createService())
         .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
         .start();
@@ -40,7 +41,7 @@ public class RdaServer {
    */
   public static Server startInProcess(InProcessConfig config) throws IOException {
     return InProcessServerBuilder.forName(config.getServerName())
-        .addService(new RdaService(config.getFissSourceFactory(), config.getMcsSourceFactory()))
+        .addService(config.createService())
         .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
         .start();
@@ -115,28 +116,65 @@ public class RdaServer {
     }
   }
 
-  /** Configuration data for running a server on a local port. */
-  @Value
-  @Builder
-  public static class LocalConfig {
-    /**
-     * The port for the server to listen on. A value of zero causes the server to allocate any open
-     * port. Default for the builder is zero.
-     */
-    @Builder.Default int port = 0;
+  @Getter
+  private abstract static class BaseConfig {
+    /** Version for the RdaService to report when getVersion is called. */
+    private final RdaService.Version version;
 
     /** Factory used to create {@link MessageSource<FissClaimChange>} objects on demand. */
-    @NonNull @Builder.Default
-    MessageSource.Factory<FissClaimChange> fissSourceFactory = EmptyMessageSource.factory();
+    private final MessageSource.Factory<FissClaimChange> fissSourceFactory;
 
     /** Factory used to create {@link MessageSource<McsClaimChange>} objects on demand. */
-    @NonNull @Builder.Default
-    MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
+    private final MessageSource.Factory<McsClaimChange> mcsSourceFactory;
 
     /**
      * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
      */
-    @NonNull @Singular Set<String> authorizedTokens;
+    private final Set<String> authorizedTokens;
+
+    BaseConfig(
+        RdaService.Version version,
+        MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        Set<String> authorizedTokens) {
+      this.version = version != null ? version : RdaService.Version.builder().build();
+      this.fissSourceFactory =
+          fissSourceFactory != null ? fissSourceFactory : EmptyMessageSource.factory();
+      this.mcsSourceFactory =
+          mcsSourceFactory != null ? mcsSourceFactory : EmptyMessageSource.factory();
+      this.authorizedTokens = authorizedTokens;
+    }
+
+    /** @return properly configured RdaService instance */
+    public RdaService createService() {
+      return RdaService.Config.builder()
+          .version(version)
+          .fissSourceFactory(fissSourceFactory)
+          .mcsSourceFactory(mcsSourceFactory)
+          .build()
+          .createService();
+    }
+  }
+
+  /** Configuration data for running a server on a local port. */
+  @Getter
+  public static class LocalConfig extends BaseConfig {
+    /**
+     * The port for the server to listen on. A value of zero causes the server to allocate any open
+     * port. Default for the builder is zero.
+     */
+    private final int port;
+
+    @Builder
+    private LocalConfig(
+        RdaService.Version version,
+        MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @NonNull @Singular Set<String> authorizedTokens,
+        int port) {
+      super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
+      this.port = port;
+    }
 
     /**
      * Shorthand for calling {@link RdaServer#runWithLocalServer(LocalConfig, ThrowableConsumer)}
@@ -148,27 +186,24 @@ public class RdaServer {
   }
 
   /** Configuration data for running an in-process server. */
-  @Value
-  @Builder
-  public static class InProcessConfig {
+  @Getter
+  public static class InProcessConfig extends BaseConfig {
     /**
      * Server name to use when starting the in-process server. Defaults to {@code
      * RdaServer.class.getName()}.
      */
-    @NonNull @Builder.Default String serverName = RdaServer.class.getName();
+    private final String serverName;
 
-    /** Factory used to create {@link MessageSource<FissClaimChange>} objects on demand. */
-    @NonNull @Builder.Default
-    MessageSource.Factory<FissClaimChange> fissSourceFactory = EmptyMessageSource.factory();
-
-    /** Factory used to create {@link MessageSource<McsClaimChange>} objects on demand. */
-    @NonNull @Builder.Default
-    MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
-
-    /**
-     * Set of authorized tokens to authenticate clients. If empty no authentication is performed.
-     */
-    @NonNull @Singular Set<String> authorizedTokens;
+    @Builder
+    private InProcessConfig(
+        RdaService.Version version,
+        MessageSource.Factory<FissClaimChange> fissSourceFactory,
+        MessageSource.Factory<McsClaimChange> mcsSourceFactory,
+        @NonNull @Singular Set<String> authorizedTokens,
+        String serverName) {
+      super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
+      this.serverName = Strings.isNullOrEmpty(serverName) ? RdaServer.class.getName() : serverName;
+    }
 
     /**
      * Shorthand for calling {@link RdaServer#runWithInProcessServer(InProcessConfig,

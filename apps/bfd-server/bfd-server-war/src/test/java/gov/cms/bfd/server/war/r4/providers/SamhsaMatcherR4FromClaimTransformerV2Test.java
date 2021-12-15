@@ -37,14 +37,14 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class SamhsaMatcherR4FromClaimTransformerV2Test {
 
-  private R4SamhsaMatcher samhsaMatcherV2;
+  private R4EobSamhsaMatcher samhsaMatcherV2;
   private static final String CODING_SYSTEM_HCPCS_CD =
       TransformerConstants.BASE_URL_CCW_VARIABLES
           + "/"
           + CcwCodebookVariable.HCPCS_CD.getVariable().getId().toLowerCase();
   private static final String DRG_SYSTEM =
       CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.CLM_DRG_CD);
-  private static final String BLACKLISTED_HCPCS_CODE = "M1034";
+  private static final String BLACKLISTED_HCPCS_CODE = "G2215";
   private static final String NON_SAMHSA_HCPCS_CODE = "11111";
   private static final String BLACKLISTED_IC9_DIAGNOSIS_CODE = "291.0";
   private static final String BLACKLISTED_IC10_DIAGNOSIS_CODE = "F10.10";
@@ -66,7 +66,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
   /** Sets up the test. */
   @Before
   public void setup() {
-    samhsaMatcherV2 = new R4SamhsaMatcher();
+    samhsaMatcherV2 = new R4EobSamhsaMatcher();
   }
 
   /**
