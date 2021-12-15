@@ -60,6 +60,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -177,6 +178,24 @@ public final class EndpointJsonResponseComparatorIT {
   public EndpointJsonResponseComparatorIT(String endpointId, Supplier<String> endpointOperation) {
     this.endpointId = endpointId;
     this.endpointOperation = endpointOperation;
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
+   */
+  @BeforeClass
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**
@@ -1201,14 +1220,5 @@ public final class EndpointJsonResponseComparatorIT {
         node.removeAll();
       }
     }
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 }

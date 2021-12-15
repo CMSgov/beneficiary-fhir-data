@@ -6,16 +6,17 @@ import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
 import gov.cms.bfd.pipeline.rda.grpc.AbstractRdaLoadJob;
 import gov.cms.bfd.pipeline.rda.grpc.RdaLoadOptions;
+import gov.cms.bfd.pipeline.rda.grpc.RdaServerJob;
 import gov.cms.bfd.pipeline.rda.grpc.server.EmptyMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
-import gov.cms.bfd.pipeline.rda.grpc.shared.ConfigLoader;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
+import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.io.File;
@@ -64,31 +65,33 @@ public class LoadRdaJsonApp {
     reporter.start(5, TimeUnit.SECONDS);
     try {
       logger.info("starting RDA API local server");
-      RdaServer.runWithLocalServer(
-          config::createFissClaimsSource,
-          config::createMcsClaimsSource,
-          port -> {
-            final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
-            final DatabaseOptions databaseConfig = config.createDatabaseOptions();
-            final HikariDataSource pooledDataSource =
-                PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
-            if (config.runSchemaMigration) {
-              logger.info("running database migration");
-              DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
-            }
-            try (PipelineApplicationState appState =
-                new PipelineApplicationState(
-                    metrics,
-                    pooledDataSource,
-                    PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
-                    Clock.systemUTC())) {
-              final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
-              for (PipelineJob<?> job : jobs) {
-                logger.info("starting job {}", job.getClass().getSimpleName());
-                job.call();
-              }
-            }
-          });
+      RdaServer.LocalConfig.builder()
+          .fissSourceFactory(config::createFissClaimsSource)
+          .mcsSourceFactory(config::createMcsClaimsSource)
+          .build()
+          .runWithPortParam(
+              port -> {
+                final RdaLoadOptions jobConfig = config.createRdaLoadOptions(port);
+                final DatabaseOptions databaseConfig = config.createDatabaseOptions();
+                final HikariDataSource pooledDataSource =
+                    PipelineApplicationState.createPooledDataSource(databaseConfig, metrics);
+                if (config.runSchemaMigration) {
+                  logger.info("running database migration");
+                  DatabaseSchemaManager.createOrUpdateSchema(pooledDataSource);
+                }
+                try (PipelineApplicationState appState =
+                    new PipelineApplicationState(
+                        metrics,
+                        pooledDataSource,
+                        PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME,
+                        Clock.systemUTC())) {
+                  final List<PipelineJob<?>> jobs = config.createPipelineJobs(jobConfig, appState);
+                  for (PipelineJob<?> job : jobs) {
+                    logger.info("starting job {}", job.getClass().getSimpleName());
+                    job.call();
+                  }
+                }
+              });
     } finally {
       reporter.report();
       reporter.close();
@@ -126,11 +129,18 @@ public class LoadRdaJsonApp {
     private RdaLoadOptions createRdaLoadOptions(int port) {
       final IdHasher.Config idHasherConfig = new IdHasher.Config(hashIterations, hashPepper);
       final AbstractRdaLoadJob.Config jobConfig =
-          new AbstractRdaLoadJob.Config(
-              Duration.ofDays(1), batchSize, Optional.empty(), Optional.empty());
+          AbstractRdaLoadJob.Config.builder()
+              .runInterval(Duration.ofDays(1))
+              .batchSize(batchSize)
+              .build();
       final GrpcRdaSource.Config grpcConfig =
-          new GrpcRdaSource.Config("localhost", port, Duration.ofDays(1));
-      return new RdaLoadOptions(jobConfig, grpcConfig, idHasherConfig);
+          GrpcRdaSource.Config.builder()
+              .serverType(GrpcRdaSource.Config.ServerType.Remote)
+              .host("localhost")
+              .port(port)
+              .maxIdle(Duration.ofDays(1))
+              .build();
+      return new RdaLoadOptions(jobConfig, grpcConfig, new RdaServerJob.Config(), idHasherConfig);
     }
 
     private MessageSource<FissClaimChange> createFissClaimsSource(long sequenceNumber) {

@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
+import com.google.protobuf.Empty;
+import gov.cms.mpsm.rda.v1.ApiVersion;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
@@ -7,6 +9,8 @@ import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.Builder;
+import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,14 +20,23 @@ import org.slf4j.LoggerFactory;
  */
 public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(RdaService.class);
-  private final MessageSource.Factory<FissClaimChange> fissSourceFactory;
-  private final MessageSource.Factory<McsClaimChange> mcsSourceFactory;
+  public static final String RDA_PROTO_VERSION = "0.4";
 
-  public RdaService(
-      MessageSource.Factory<FissClaimChange> fissSourceFactory,
-      MessageSource.Factory<McsClaimChange> mcsSourceFactory) {
-    this.fissSourceFactory = fissSourceFactory;
-    this.mcsSourceFactory = mcsSourceFactory;
+  private final Config config;
+
+  public RdaService(Config config) {
+    this.config = config;
+  }
+
+  @Override
+  public void getVersion(Empty request, StreamObserver<ApiVersion> responseObserver) {
+    try {
+      LOGGER.info("getVersion called: response={}", config.getVersion());
+      responseObserver.onNext(config.getVersion().toApiVersion());
+      responseObserver.onCompleted();
+    } catch (Exception ex) {
+      responseObserver.onError(ex);
+    }
   }
 
   @Override
@@ -31,7 +44,8 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
       ClaimRequest request, StreamObserver<FissClaimChange> responseObserver) {
     LOGGER.info("start getFissClaims call with since={}", request.getSince());
     try {
-      MessageSource<FissClaimChange> generator = fissSourceFactory.apply(request.getSince());
+      MessageSource<FissClaimChange> generator =
+          config.getFissSourceFactory().apply(request.getSince());
       Responder<FissClaimChange> responder = new Responder<>(responseObserver, generator);
       responder.sendResponses();
     } catch (Exception ex) {
@@ -44,7 +58,8 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
   public void getMcsClaims(ClaimRequest request, StreamObserver<McsClaimChange> responseObserver) {
     LOGGER.info("start getMcsClaims call with since={}", request.getSince());
     try {
-      MessageSource<McsClaimChange> generator = mcsSourceFactory.apply(request.getSince());
+      MessageSource<McsClaimChange> generator =
+          config.getMcsSourceFactory().apply(request.getSince());
       Responder<McsClaimChange> responder = new Responder<>(responseObserver, generator);
       responder.sendResponses();
     } catch (Exception ex) {
@@ -94,6 +109,38 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
           responseObserver.onError(ex);
         }
       }
+    }
+  }
+
+  @Value
+  @Builder
+  public static class Version {
+    @Builder.Default String version = RDA_PROTO_VERSION;
+    @Builder.Default String commitId = "";
+    @Builder.Default String buildTime = "";
+
+    public ApiVersion toApiVersion() {
+      return ApiVersion.newBuilder()
+          .setVersion(version)
+          .setCommitId(commitId)
+          .setBuildTime(buildTime)
+          .build();
+    }
+  }
+
+  @Value
+  @Builder
+  public static class Config {
+    @Builder.Default
+    MessageSource.Factory<FissClaimChange> fissSourceFactory = EmptyMessageSource.factory();
+
+    @Builder.Default
+    MessageSource.Factory<McsClaimChange> mcsSourceFactory = EmptyMessageSource.factory();
+
+    @Builder.Default Version version = Version.builder().build();
+
+    public RdaService createService() {
+      return new RdaService(this);
     }
   }
 }

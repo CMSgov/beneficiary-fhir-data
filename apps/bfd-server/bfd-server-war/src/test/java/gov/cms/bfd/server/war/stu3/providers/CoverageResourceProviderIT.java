@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,24 @@ import org.slf4j.LoggerFactory;
 public final class CoverageResourceProviderIT {
   @SuppressWarnings("unused")
   private static final Logger LOGGER = LoggerFactory.getLogger(CoverageResourceProviderIT.class);
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
+   */
+  @BeforeClass
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
 
   /**
    * Verifies that {@link
@@ -385,14 +404,5 @@ public final class CoverageResourceProviderIT {
             .execute();
     Assert.assertNotNull(searchOutOfBoundsResult);
     Assert.assertEquals(0, searchOutOfBoundsResult.getTotal());
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 }

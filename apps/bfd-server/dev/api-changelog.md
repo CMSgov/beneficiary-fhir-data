@@ -1,5 +1,16 @@
 # API Changelog
 
+## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
+
+Added three new codes to `codes-cpt.csv`:
+```
+G1028
+G2215
+G2216
+```
+
+These new codes allow for enhanced SAMHSA filtering for the v1 and v2 endpoints to remain compliant with SAMHSA data sharing policy.
+
 ## BLUEBUTTON-865: Adding Carrier & DME Tax Numbers to ExplanationOfBenefit resource
 
 A new optional flag has been added that will cause tax numbers from a claim to be included in response `ExplanationOfBenefit` resources.

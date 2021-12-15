@@ -221,6 +221,7 @@
 				<version>${hibernate.version}</version>
 			</dependency>
 
+			<!-- JavaEE dependencies that were included in the JRE prior to Java 11 -->
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>activation</artifactId>
@@ -264,13 +265,35 @@
 				<version>3.3.0</version>
 			</dependency>
 
-			 <dependency>
+			<dependency>
+				<!-- Add YAML support to jackson -->
+				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<artifactId>jackson-dataformat-yaml</artifactId>
+				<version>2.9.7</version>
+			</dependency>
+
+			<dependency>
+				<!-- Just useful. -->
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>31.0.1-jre</version>
+			</dependency>
+
+			<dependency>
 				 <!-- Compile Time only dependency to simplify creation of simple POJOs -->
 				 <groupId>org.projectlombok</groupId>
 				 <artifactId>lombok</artifactId>
 				 <version>1.18.20</version>
 				 <scope>provided</scope>
 			 </dependency>
+
+
+			<dependency>
+				<!-- Common utility classes -->
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.12.0</version>
+			</dependency>
 
 			<dependency>
 				<!-- The test framework used for unit and integration tests. -->
