@@ -80,8 +80,12 @@ public class McsClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
+  /**
+   * Basic smoke test for transformation of claim objects prior to all of the individual field
+   * tests.
+   */
   @Test
-  public void allFields() {
+  public void basicFieldsTestForClaimObjectTransformation() {
     claim.setSequenceNumber(42L);
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
@@ -152,8 +156,12 @@ public class McsClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
+  /**
+   * Basic smoke test for transformation of detail objects prior to all of the individual field
+   * tests.
+   */
   @Test
-  public void details() {
+  public void basicFieldsTestForDetailObjectTransformation() {
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
     claim.setIdrClaimType("3");
@@ -215,8 +223,12 @@ public class McsClaimTransformerTest {
         claim.getDetails(), transformed.getDetails(), PreAdjMcsDetail::getPriority);
   }
 
+  /**
+   * Basic smoke test for transformation of diagnosis code objects prior to all of the individual
+   * field tests.
+   */
   @Test
-  public void diagnosisCodes() {
+  public void basicFieldsTestForDiagCodeObjectTransformation() {
     claim.setIdrClmHdIcn("123456789012345");
     claim.setIdrContrId("12345");
     claim.setIdrClaimType("3");
@@ -259,7 +271,7 @@ public class McsClaimTransformerTest {
   }
 
   @Test
-  public void requiredFieldsMissing() {
+  public void testMissingRequiredFieldsGenerateErrors() {
     try {
       changeBuilder
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)

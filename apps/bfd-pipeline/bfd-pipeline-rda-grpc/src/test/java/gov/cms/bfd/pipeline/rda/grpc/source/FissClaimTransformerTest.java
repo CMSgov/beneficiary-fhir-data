@@ -92,8 +92,12 @@ public class FissClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.INSERT);
   }
 
+  /**
+   * Basic smoke test for transformation of claim objects prior to all of the individual field
+   * tests.
+   */
   @Test
-  public void allFields() {
+  public void basicFieldsTestForClaimObjectTransformation() {
     claim.setDcn("dcn");
     claim.setSequenceNumber(42L);
     claim.setHicNo("hicn");
@@ -160,8 +164,12 @@ public class FissClaimTransformerTest {
     assertChangeMatches(RdaChange.Type.UPDATE);
   }
 
+  /**
+   * Basic smoke test for transformation of procedure code objects prior to all of the individual
+   * field tests.
+   */
   @Test
-  public void procCodes() {
+  public void basicFieldsTestForProcCodeObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
@@ -206,8 +214,12 @@ public class FissClaimTransformerTest {
         claim.getProcCodes(), transformed.getProcCodes(), PreAdjFissProcCode::getPriority);
   }
 
+  /**
+   * Basic smoke test for transformation of diagnosis code objects prior to all of the individual
+   * field tests.
+   */
   @Test
-  public void diagCodes() {
+  public void basicFieldsTestForDiagCodeObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
@@ -262,8 +274,12 @@ public class FissClaimTransformerTest {
         claim.getDiagCodes(), transformed.getDiagCodes(), PreAdjFissDiagnosisCode::getPriority);
   }
 
+  /**
+   * Basic smoke test for transformation of insured payer objects prior to all of the individual
+   * field tests.
+   */
   @Test
-  public void insuredPayer() {
+  public void basicFieldsTestForInsuredPayerObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
@@ -339,8 +355,12 @@ public class FissClaimTransformerTest {
         claim.getPayers(), transformed.getPayers(), PreAdjFissPayer::getPriority);
   }
 
+  /**
+   * Basic smoke test for transformation of BeneZ payer objects prior to all of the individual field
+   * tests.
+   */
   @Test
-  public void benezPayer() {
+  public void basicFieldsTestForBeneZPayerObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
@@ -418,8 +438,12 @@ public class FissClaimTransformerTest {
         claim.getPayers(), transformed.getPayers(), PreAdjFissPayer::getPriority);
   }
 
+  /**
+   * Basic smoke test for transformation of audit trail objects prior to all of the individual field
+   * tests.
+   */
   @Test
-  public void auditTrail() {
+  public void basicFieldsTestForAuditTrailObjectTransformation() {
     claimBuilder
         .setDcn("dcn")
         .setHicNo("hicn")
@@ -461,7 +485,7 @@ public class FissClaimTransformerTest {
   }
 
   @Test
-  public void requiredFieldsMissing() {
+  public void testMissingRequiredFieldsGenerateErrors() {
     try {
       changeBuilder
           .setSeq(MIN_SEQUENCE_NUM)
