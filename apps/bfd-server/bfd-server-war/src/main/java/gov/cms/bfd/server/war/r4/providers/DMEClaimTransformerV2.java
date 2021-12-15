@@ -325,7 +325,6 @@ final class DMEClaimTransformerV2 {
       // LINE_COINSRNC_AMT        => ExplanationOfBenefit.item.adjudication
       // LINE_SBMTD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
       // LINE_ALOWD_CHRG_AMT      => ExplanationOfBenefit.item.adjudication
-      // LINE_BENE_PRMRY_PYR_CD   => ExplanationOfBenefit.item.extension
       // LINE_SERVICE_DEDUCTIBLE  => ExplanationOfBenefit.item.extension
       // LINE_HCT_HGB_TYPE_CD     => Observation.code
       // LINE_HCT_HGB_RSLT_NUM    => Observation.value
