@@ -367,13 +367,6 @@ final class PartDEventTransformerV2 {
           claimGroup.getDispensingStatusCode());
     }
 
-    // DRUG_CVRG_STUS_CD => ExplanationOfBenefit.supportingInfo.code
-    TransformerUtilsV2.addInformationWithCode(
-        eob,
-        CcwCodebookVariable.DRUG_CVRG_STUS_CD,
-        CcwCodebookVariable.DRUG_CVRG_STUS_CD,
-        claimGroup.getDrugCoverageStatusCode());
-
     // ADJSTMT_DLTN_CD => => ExplanationOfBenefit.supportingInfo.code
     if (claimGroup.getAdjustmentDeletionCode().isPresent()) {
       TransformerUtilsV2.addInformationWithCode(
