@@ -24,8 +24,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
+/** Supplies test data for the RDA based unit tests. */
 public class RDATestUtils {
 
+  /** Tracking entities (tables) so they can be cleaned after. */
   private static final List<Class<?>> TABLE_ENTITIES =
       List.of(
           PreAdjFissPayer.class,
@@ -57,10 +59,16 @@ public class RDATestUtils {
     }
   }
 
+  /**
+   * Seed data into the database for testing.
+   *
+   * @param entities The entities to seed into the db.
+   */
   public void seedData(Collection<?> entities) {
     doTransaction(em -> entities.forEach(em::persist));
   }
 
+  /** Delete all the test data from the db. */
   public void truncateTables() {
     doTransaction(
         em ->
@@ -68,12 +76,25 @@ public class RDATestUtils {
                 e -> em.createQuery("delete from " + e.getSimpleName() + " f").executeUpdate()));
   }
 
-  public void doTransaction(Consumer<EntityManager> transaction) {
+  /**
+   * Helper method to perform transactions with the db.
+   *
+   * @param transaction Lambda containing the queries to commit to this transaction.
+   */
+  private void doTransaction(Consumer<EntityManager> transaction) {
     entityManager.getTransaction().begin();
     transaction.accept(entityManager);
     entityManager.getTransaction().commit();
   }
 
+  /**
+   * Fetches the expected response for a given requestId.
+   *
+   * <p>Each expected response is a dedicated json file in the test resources folder.
+   *
+   * @param requestId The ID associated with the request made.
+   * @return The expected json string response associated to the given requestId.
+   */
   public String expectedResponseFor(String requestId) {
     StringBuilder expectedResponse = new StringBuilder();
     InputStream fileStream =
@@ -96,10 +117,20 @@ public class RDATestUtils {
     return expectedResponse.toString();
   }
 
+  /**
+   * Provides a set of FISS related test data.
+   *
+   * @return The FISS related test data.
+   */
   public List<?> fissTestData() {
     return List.of(fissTestDataA(), fissTestDataB());
   }
 
+  /**
+   * One FISS claim for testing
+   *
+   * @return The FISS test claim A
+   */
   private PreAdjFissClaim fissTestDataA() {
     PreAdjFissClaim claim =
         PreAdjFissClaim.builder()
@@ -195,6 +226,11 @@ public class RDATestUtils {
     return claim;
   }
 
+  /**
+   * One FISS claim for testing
+   *
+   * @return The FISS test claim B
+   */
   private PreAdjFissClaim fissTestDataB() {
     PreAdjFissClaim claim =
         PreAdjFissClaim.builder()
@@ -283,10 +319,20 @@ public class RDATestUtils {
     return claim;
   }
 
+  /**
+   * Provides a set of MCS related test data.
+   *
+   * @return The MCS related test data.
+   */
   public List<PreAdjMcsClaim> mcsTestData() {
     return List.of(mcsTestDataA());
   }
 
+  /**
+   * One MCS claim for testing
+   *
+   * @return The MCS test claim A
+   */
   private PreAdjMcsClaim mcsTestDataA() {
     PreAdjMcsClaim claim =
         PreAdjMcsClaim.builder()

@@ -1,14 +1,14 @@
 {
   "resourceType": "Bundle",
-  "id": "47923b40-ec3c-4dad-a569-3d13b68c535e",
+  "id": "0561fc36-9def-493f-9be0-9354e139b81b",
   "meta": {
-    "lastUpdated": "2021-12-09T17:34:37.314+00:00"
+    "lastUpdated": "2021-12-16T18:44:32.354+00:00"
   },
   "type": "searchset",
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:9214/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+      "url": "https://localhost:8785/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
     }
   ],
   "entry": [
@@ -17,7 +17,7 @@
         "resourceType": "ClaimResponse",
         "id": "f-123456",
         "meta": {
-          "versionId": "f-123456-74f856b6083c300e988f0799da3d52247b1bd919",
+          "versionId": "f-123456-224d1b5be6023302c5c5c103d0d6d532e9e1f84c",
           "lastUpdated": "1970-01-01T00:00:00.000+00:00"
         },
         "contained": [
@@ -67,6 +67,15 @@
         ],
         "identifier": [
           {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+                  "code": "uc",
+                  "display": "Unique Claim ID"
+                }
+              ]
+            },
             "system": "https://bluebutton.cms.gov/resources/variables/fi_doc_clm_cntrl_num",
             "value": "123456"
           }
@@ -85,7 +94,7 @@
         "patient": {
           "reference": "#patient"
         },
-        "created": "2021-12-09T17:34:37+00:00",
+        "created": "2021-12-16T18:44:32+00:00",
         "insurer": {
           "identifier": {
             "value": "CMS"
