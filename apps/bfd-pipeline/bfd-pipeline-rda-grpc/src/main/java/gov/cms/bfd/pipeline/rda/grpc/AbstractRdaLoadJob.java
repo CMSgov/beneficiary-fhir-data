@@ -102,7 +102,7 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       metrics.calls.mark();
       try (RdaSource<TResponse, TClaim> source = sourceFactory.call();
           RdaSink<TResponse, TClaim> sink = sinkFactory.call()) {
-        processedCount = source.retrieveAndProcessObjects(config.getBufferSize(), sink);
+        processedCount = source.retrieveAndProcessObjects(config.getBatchSize(), sink);
       }
     } catch (ProcessingException ex) {
       processedCount += ex.getProcessedCount();
@@ -200,10 +200,6 @@ public abstract class AbstractRdaLoadJob<TResponse, TClaim>
       Preconditions.checkArgument(
           this.writeThreads >= 1, "writeThreads less than 1: %s", writeThreads);
       Preconditions.checkArgument(batchSize >= 1, "batchSize less than 1: %s", batchSize);
-    }
-
-    public int getBufferSize() {
-      return batchSize;
     }
 
     public Optional<Long> getStartingFissSeqNum() {
