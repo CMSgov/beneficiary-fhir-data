@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.CommonCodings;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
+import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -204,13 +205,14 @@ public class McsClaimResponseTransformerV2 {
 
     if (claimGroup.getIdrClaimReceiptDate() != null) {
       extensions.add(
-          new Extension()
+          new Extension(BBCodingSystems.MCS.CLAIM_RECEIPT_DATE)
               .setValue(new DateType(localDateToDate(claimGroup.getIdrClaimReceiptDate()))));
     }
 
     if (claimGroup.getIdrStatusDate() != null) {
       extensions.add(
-          new Extension().setValue(new DateType(localDateToDate(claimGroup.getIdrStatusDate()))));
+          new Extension(BBCodingSystems.MCS.STATUS_DATE)
+              .setValue(new DateType(localDateToDate(claimGroup.getIdrStatusDate()))));
     }
 
     return List.copyOf(extensions);
@@ -219,6 +221,12 @@ public class McsClaimResponseTransformerV2 {
   private static List<Identifier> getIdentifier(PreAdjMcsClaim claimGroup) {
     return List.of(
         new Identifier()
+            .setType(
+                new CodeableConcept(
+                    new Coding(
+                        C4BBIdentifierType.UC.getSystem(),
+                        C4BBIdentifierType.UC.toCode(),
+                        C4BBIdentifierType.UC.getDisplay())))
             .setSystem(BBCodingSystems.CARR_CLM_CONTROL_NUM)
             .setValue(claimGroup.getIdrClmHdIcn()));
   }

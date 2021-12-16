@@ -26,30 +26,38 @@ public class BBCodingSystems {
 
   public static class FISS {
 
-    public static final String CURR_STATUS = BB_BASE_URL + "/variables/fiss/curr-status";
+    private static final String FISS_BASE = BB_BASE_URL + "/variables/fiss";
 
-    public static final String CURR_TRAN_DT_CYMD = "/variables/fiss/curr-tran-dt-cymd";
+    public static final String CURR_STATUS = FISS_BASE + "/curr-status";
 
-    public static final String PAYERS_NAME = BB_BASE_URL + "/variables/fiss/payers-name";
+    public static final String CURR_TRAN_DT_CYMD = FISS_BASE + "/curr-tran-dt-cymd";
 
-    public static final String RECD_DT_CYMD = BB_BASE_URL + "/variables/fiss/recd-dt-cymd";
+    public static final String PAYERS_NAME = FISS_BASE + "/payers-name";
 
-    public static final String TAX_NUM = BB_BASE_URL + "/variables/fiss/fed-tax-nb";
+    public static final String RECD_DT_CYMD = FISS_BASE + "/recd-dt-cymd";
+
+    public static final String TAX_NUM = FISS_BASE + "/fed-tax-nb";
 
     private FISS() {}
   }
 
   public static class MCS {
 
-    public static final String BILL_PROV_EIN = BB_BASE_URL + "/variables/mcs/bill-prov-ein";
+    private static final String MCS_BASE = BB_BASE_URL + "/variables/mcs";
 
-    public static final String BILL_PROV_SPEC = BB_BASE_URL + "/variables/mcs/bill-prov-spec";
+    public static final String BILL_PROV_EIN = MCS_BASE + "/bill-prov-ein";
 
-    public static final String BILL_PROV_TYPE = BB_BASE_URL + "/variables/mcs/bill-prov-type";
+    public static final String BILL_PROV_SPEC = MCS_BASE + "/bill-prov-spec";
 
-    public static final String CLM_TYPE = BB_BASE_URL + "/variables/mcs/clm-type";
+    public static final String BILL_PROV_TYPE = MCS_BASE + "/bill-prov-type";
 
-    public static final String STATUS_CODE = BB_BASE_URL + "/variables/mcs/status-code";
+    public static final String CLAIM_RECEIPT_DATE = MCS_BASE + "/claim-receipt-date";
+
+    public static final String CLM_TYPE = MCS_BASE + "/clm-type";
+
+    public static final String STATUS_CODE = MCS_BASE + "/status-code";
+
+    public static final String STATUS_DATE = MCS_BASE + "/status-date";
 
     private MCS() {}
   }
