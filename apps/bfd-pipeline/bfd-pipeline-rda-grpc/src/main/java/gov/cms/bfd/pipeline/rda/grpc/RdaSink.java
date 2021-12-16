@@ -52,6 +52,7 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * writeBatch() or both. The default implementations call one another so implementing only one of
    * the two provides a usable implementation for the other.
    *
+   * @param dataVersion value for the apiSource column of the claim record
    * @param object single object to be written to the data store
    * @return number of objects successfully processed
    * @throws ProcessingException if the operation fails
@@ -107,7 +108,7 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
   /**
    * Extract the sequence number from the message object and return it.
    *
-   * @param object RDA API message object
+   * @param object object to get the sequence number from
    * @return the sequence number within the message object
    */
   long getSequenceNumberForObject(TMessage object);
@@ -140,6 +141,8 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * Return count of records processed since the most recent call to a write method or this method.
    * Calls to this method collect the current value and resets the counter. The sum of this method's
    * results plus all writeClaims returns should equal the total number of objects processed.
+   * Synchronous sinks will return 0 from this method but asynchronous sinks will return non-zero
+   * values sometimes as they track completion of background writes.
    *
    * @return unreported number of processed records
    * @throws ProcessingException if the operation fails
@@ -152,7 +155,6 @@ public interface RdaSink<TMessage, TClaim> extends AutoCloseable {
    * @param waitTime maximum amount of time to wait for shutdown to complete
    * @throws ProcessingException if any exceptions are thrown they are wrapped in a
    *     ProcessingException
-   * @throws ProcessingException if the operation fails
    */
   void shutdown(Duration waitTime) throws ProcessingException;
 }

@@ -72,7 +72,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    * for any given claim are sequential. Updates for unrelated claims can happen in any order.
    *
    * @param apiVersion version string for this batch
-   * @param objects object to be enqueued
+   * @param object object to be enqueued
    * @throws Exception if adding to queue fails
    */
   public void addToQueue(String apiVersion, TMessage object) throws Exception {
@@ -137,7 +137,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   /**
    * Schedules the current sequence number to be written to the database by a worker thread.
    *
-   * @throws ProcessingException
+   * @throws ProcessingException if scheduled the write fails
    */
   public void updateSequenceNumbers() throws ProcessingException {
     final long sequenceNumber = sequenceNumbers.getHighestWrittenSequenceNumber();
