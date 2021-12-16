@@ -9,17 +9,17 @@ import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
-import gov.cms.bfd.server.war.commons.CommonCodings;
+import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -28,7 +28,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -45,13 +44,7 @@ import org.hl7.fhir.r4.model.codesystems.ClaimType;
 import org.hl7.fhir.r4.model.codesystems.ProcessPriority;
 
 /** Transforms FISS/MCS instances into FHIR {@link Claim} resources. */
-public class McsClaimTransformerV2 {
-
-  private static final Map<String, Enumerations.AdministrativeGender> GENDER_MAP =
-      Map.of(
-          "m", Enumerations.AdministrativeGender.MALE,
-          "f", Enumerations.AdministrativeGender.FEMALE,
-          "u", Enumerations.AdministrativeGender.UNKNOWN);
+public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimTransformerV2.class.getSimpleName(), "transform");
@@ -127,16 +120,16 @@ public class McsClaimTransformerV2 {
                     .setType(
                         new CodeableConcept(
                             new Coding(
-                                CommonCodings.MC.getSystem(),
-                                CommonCodings.MC.getCode(),
-                                CommonCodings.MC.getDisplay())))
+                                IdentifierType.MC.getSystem(),
+                                IdentifierType.MC.getCode(),
+                                IdentifierType.MC.getDisplay())))
                     .setSystem(TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
                     .setValue(claimGroup.getIdrClaimMbi())))
         .setName(getBeneName(claimGroup))
         .setGender(
             claimGroup.getIdrBeneSex() == null
                 ? null
-                : GENDER_MAP.get(claimGroup.getIdrBeneSex().toLowerCase()))
+                : genderMap().get(claimGroup.getIdrBeneSex().toLowerCase()))
         .setId("patient");
   }
 
