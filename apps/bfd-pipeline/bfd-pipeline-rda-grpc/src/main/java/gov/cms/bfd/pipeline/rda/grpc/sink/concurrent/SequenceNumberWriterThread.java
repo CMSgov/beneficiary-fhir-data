@@ -138,29 +138,14 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
       keepRunning = false;
     } else if (entry != null) {
       try {
-        writeSequenceNumber(sink, entry.sequenceNumber);
-      } catch (InterruptedException ex) {
-        throw ex;
+        LOGGER.debug("writing sequenceNumber {}", entry.sequenceNumber);
+        sink.updateLastSequenceNumber(entry.sequenceNumber);
       } catch (Exception ex) {
         reportError(ex);
         keepRunning = false;
       }
     }
     return keepRunning;
-  }
-
-  /**
-   * Writes the sequence number to our database.
-   *
-   * @param sink RdaSink used to write the sequence number
-   * @param sequenceNumber value to write
-   */
-  private void writeSequenceNumber(RdaSink<TMessage, TClaim> sink, long sequenceNumber)
-      throws InterruptedException {
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("writing sequenceNumber {}", sequenceNumber);
-    }
-    sink.updateLastSequenceNumber(sequenceNumber);
   }
 
   /**
