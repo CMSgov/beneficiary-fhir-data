@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.war.commons;
 
+/** BlueButton based coding systems */
 public class BBCodingSystems {
 
   public static final String BB_BASE_URL = "https://bluebutton.cms.gov/resources";
