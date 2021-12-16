@@ -14,8 +14,8 @@ import javax.annotation.Nonnull;
 /**
  * A sink implementation that uses a thread pool to perform all writes asynchronously.
  *
- * @param <TMessage>
- * @param <TClaim>
+ * @param <TMessage> RDA API message class
+ * @param <TClaim> JPA entity class
  */
 public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TClaim> {
   private final WriterThreadPool<TMessage, TClaim> writerPool;
@@ -43,11 +43,14 @@ public class ConcurrentRdaSink<TMessage, TClaim> implements RdaSink<TMessage, TC
    * sink is created using sinkFactory. Otherwise a ConcurrentRdaSink is created using the specified
    * number of threads. The sinkFactory function takes a boolean indicating whether the created sink
    * should manage sequence number updates itself (true) or not update sequence numbers (false).
+   * This is needed because asynchronous sinks need to manage sequence numbers in a special way
+   * while synchronous ones can just update the sequence numbers at same time they update claims.
    *
-   * @param maxThreads number of threads to use when writing
-   * @param keyExtractor function to get a key to dedup records
-   * @param sinkFactory function to create a sink
-   * @param <T> type of objects being written
+   * @param maxThreads number of writer threads used to write claims
+   * @param batchSize number of messages per batch for database writes
+   * @param sinkFactory factory method to produce appropriate single threaded sinks
+   * @param <TMessage> RDA API message class
+   * @param <TClaim> JPA entity class
    * @return either a simple sink or a ConcurrentRdaSink
    */
   public static <TMessage, TClaim> RdaSink<TMessage, TClaim> createSink(
