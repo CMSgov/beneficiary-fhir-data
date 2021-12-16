@@ -1,5 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
+import javax.annotation.concurrent.ThreadSafe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Several classes contain multiple resources that require cleanup in a close method. An exception
  * thrown while cleaning up one of these resources should not abort the entire process. This class
@@ -7,7 +11,10 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
  * consolidated into a single exception that can be thrown after all of the calls have been
  * completed.
  */
+@ThreadSafe
 public class MultiCloser {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MultiCloser.class);
+
   private Exception error = null;
 
   /**
@@ -15,10 +22,11 @@ public class MultiCloser {
    *
    * @param closer method to perform some cleanup that might throw
    */
-  public void close(Closer closer) {
+  public synchronized void close(Closer closer) {
     try {
       closer.close();
     } catch (Exception ex) {
+      LOGGER.error("captured exception: message={}", ex.getMessage(), ex);
       if (error == null) {
         error = ex;
       } else {
@@ -32,7 +40,7 @@ public class MultiCloser {
    *
    * @throws Exception consolidated exception including any exceptions thrown by close methods
    */
-  public void finish() throws Exception {
+  public synchronized void finish() throws Exception {
     if (error != null) {
       throw error;
     }

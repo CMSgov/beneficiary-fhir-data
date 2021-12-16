@@ -101,7 +101,15 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
    */
   @Override
   public void close() throws Exception {
-    addEntryToInputQueue(shutdownToken);
+    try {
+      addEntryToInputQueue(shutdownToken);
+    } catch (InterruptedException ignored) {
+      // During shutdown we might encounter an InterruptedException.
+      // We can retry immediately.  The exception being thrown would have cleared the interrupted
+      // status so that this can succeed on the second call.
+      LOGGER.info("retrying add shutdownToken after an InterruptedException");
+      addEntryToInputQueue(shutdownToken);
+    }
   }
 
   /**

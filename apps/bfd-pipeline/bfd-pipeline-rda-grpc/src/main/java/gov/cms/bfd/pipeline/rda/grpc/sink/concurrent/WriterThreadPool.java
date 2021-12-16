@@ -61,6 +61,8 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
       var writer = new ClaimWriterThread<>(sinkFactory, batchSize, outputQueue::put);
       writers.add(writer);
       threadPool.submit(writer);
+      LOGGER.info(
+          "added writer writer: sink={} writer={}", sink.getClass().getSimpleName(), writer);
     }
     this.writers = writers.build();
   }
@@ -158,19 +160,25 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   public void shutdown(Duration waitTime) throws Exception {
     LOGGER.info("shutdown started");
     final MultiCloser closer = new MultiCloser();
-    for (ClaimWriterThread<TMessage, TClaim> writer : writers) {
-      closer.close(writer::close);
-    }
+    writers.forEach(
+        writer -> {
+          LOGGER.info("calling claimWriterThread.close: writer={}", writer);
+          closer.close(() -> writer.close());
+        });
+    LOGGER.info("calling sequenceNumberWriterThread.close");
     closer.close(sequenceNumberWriter::close);
+    LOGGER.info("calling threadPool.shutdown");
     closer.close(threadPool::shutdown);
     closer.close(
         () -> {
+          LOGGER.info("calling threadPool.awaitTermination");
           boolean successful =
               threadPool.awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
           if (!successful) {
             throw new IOException("threadPool did not shut down");
           }
         });
+    LOGGER.info("calling updateSequenceNumberDirectly");
     closer.close(this::updateSequenceNumberDirectly);
     LOGGER.info("shutdown complete");
     closer.finish();
@@ -182,8 +190,11 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     if (!threadPool.isShutdown()) {
       closer.close(() -> shutdown(Duration.ofMinutes(5)));
     }
+    LOGGER.info("calling this.updateSequenceNumberForClose");
     closer.close(this::updateSequenceNumberForClose);
+    LOGGER.info("calling sink.close");
     closer.close(sink::close);
+    LOGGER.info("close complete");
     closer.finish();
   }
 

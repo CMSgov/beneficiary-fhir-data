@@ -92,7 +92,15 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
    */
   @Override
   public void close() throws Exception {
-    addEntryToInputQueue(ShutdownToken);
+    try {
+      addEntryToInputQueue(ShutdownToken);
+    } catch (InterruptedException ignored) {
+      // During shutdown we might encounter an InterruptedException.
+      // We can retry immediately.  The exception being thrown would have cleared the interrupted
+      // status so that this can succeed on the second call.
+      LOGGER.info("retrying add ShutdownToken after an InterruptedException");
+      addEntryToInputQueue(ShutdownToken);
+    }
   }
 
   /**
