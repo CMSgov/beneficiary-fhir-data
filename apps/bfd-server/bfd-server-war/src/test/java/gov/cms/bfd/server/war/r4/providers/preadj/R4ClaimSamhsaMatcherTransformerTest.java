@@ -9,7 +9,6 @@ import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -163,13 +162,8 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       String principalDxCode = diagCodes.get(0);
       String admittingDxCode = diagCodes.get(1);
 
-      entity.setDcn("abc123");
       entity.setLastUpdated(Instant.ofEpochMilli(1));
-      entity.setTotalChargeAmount(new BigDecimal("1.00"));
       entity.setStmtCovToDate(toDate);
-      entity.setMedaProvId("abc123");
-      entity.setNpiNumber("npinpinpin");
-      entity.setMbi("mbimbimbimbi");
       entity.setPrincipleDiag(principalDxCode);
       entity.setAdmitDiagCode(admittingDxCode);
 
@@ -178,7 +172,6 @@ public class R4ClaimSamhsaMatcherTransformerTest {
               .mapToObj(
                   i -> {
                     PreAdjFissDiagnosisCode diagCode = new PreAdjFissDiagnosisCode();
-                    diagCode.setDiagPoaInd("u");
                     diagCode.setPriority((short) i);
                     diagCode.setDiagCd2(diagCodes.get(i));
 
@@ -276,12 +269,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
     public void test() {
       PreAdjMcsClaim entity = new PreAdjMcsClaim();
 
-      entity.setIdrClmHdIcn("abc123");
       entity.setLastUpdated(Instant.ofEpochMilli(1));
-      entity.setIdrTotAllowed(new BigDecimal("1.00"));
-      entity.setIdrBillProvNum("abc123");
-      entity.setIdrBillProvNpi("npinpinpin");
-      entity.setIdrClaimMbi("mbimbimbimbi");
 
       Set<PreAdjMcsDiagnosisCode> diagnoses =
           IntStream.range(0, diagCodes.size())
