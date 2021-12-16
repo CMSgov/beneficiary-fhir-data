@@ -13,7 +13,7 @@ to improve efficiency on both the client and server.
 ## Status
 [Status]: #status
 
-* Status: Rejected
+* Status: Rejected (This RFC was previously approved but after further discussion within the BFD team it has been retroactively rejected because the parameter passing is inappropriate. If this functionality is still required a new approach should be discussed and the RFC updated and re-reviewed.)
 * Implementation JIRA Ticket(s):
     * N/A
     
