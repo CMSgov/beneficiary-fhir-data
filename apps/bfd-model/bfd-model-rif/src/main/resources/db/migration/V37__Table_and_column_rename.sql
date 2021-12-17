@@ -1737,7 +1737,7 @@ ${logic.hsql-only-alter} table public.loaded_files ${logic.alter-rename-column} 
 alter table public."LoadedBatches" rename to loaded_batches;
 alter table public.loaded_batches ${logic.alter-rename-column} "loadedBatchId" ${logic.rename-to} loaded_batchid;
 alter table public.loaded_batches ${logic.alter-rename-column} "loadedFileId" ${logic.rename-to} loaded_fileid;
-alter table public.loaded_batches ${logic.alter-rename-column} "beneficiaries" ${logic.rename-to} beneficiaries;
+${logic.hsql-only-alter} table public.loaded_batches ${logic.alter-rename-column} "beneficiaries" ${logic.rename-to} beneficiaries;
 ${logic.hsql-only-alter} table public.loaded_batches ${logic.alter-rename-column} "created" ${logic.rename-to} created;
 --
 -- MedicareBeneficiaryIdHistory to medicare_beneficiaryid_history
