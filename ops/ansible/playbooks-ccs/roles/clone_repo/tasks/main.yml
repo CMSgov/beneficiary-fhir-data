@@ -1,0 +1,7 @@
+---
+- name: Clone BFD repository
+  git:
+    repo: "https://github.com/CMSgov/beneficiary-fhir-data.git"
+    dest: "/beneficiary-fhir-data"
+    version: "{{ git_branch }}"
+    depth: 1

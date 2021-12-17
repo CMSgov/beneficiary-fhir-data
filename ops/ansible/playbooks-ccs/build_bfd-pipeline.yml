@@ -57,5 +57,11 @@
       tags:
         - pre-ami
 
+    - name: Clone BFD repo
+      import_role:
+        name: clone_repo
+      tags:
+        - pre-ami
+
   handlers:
     - import_tasks: handlers/main.yml

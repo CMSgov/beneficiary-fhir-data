@@ -8,7 +8,7 @@ exec > >(
 	done
 )
 
-git clone https://github.com/CMSgov/beneficiary-fhir-data.git --branch ${gitBranchName} --single-branch
+# Clone clone operation removed, handled during AMI build
 
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
