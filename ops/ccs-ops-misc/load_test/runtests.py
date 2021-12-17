@@ -92,7 +92,6 @@ def run_with_params(argv):
         ## Spawn worker threads to connect to the main thread
         for i in range(int(workerThreads)):
             print(f"Creating worker #{i}")
-            ## Do something with threading library to spawn subprocesses
             p = Process(target=setup.run_worker_test, args=(i,workerThreads,))
             p.start()
 

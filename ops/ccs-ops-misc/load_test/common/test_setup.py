@@ -62,15 +62,30 @@ def run_worker_test(workerNum, workers):
     os.environ['LOCUST_WORKER_NUM'] = str(workerNum)
     main()
 
+'''
+Checks if the currently running test thread is a worker thread.
+Returns false if the test is not running in distributed mode.
+'''
 def is_worker_thread():
     return 'LOCUST_MODE_WORKER' in os.environ and os.environ['LOCUST_MODE_WORKER'] == "True"
 
+'''
+Checks if the currently running test thread is the singular master test thread.
+Returns false if the test is not running in distributed mode.
+'''
 def is_master_thread():
     return 'LOCUST_MODE_MASTER' in os.environ and os.environ['LOCUST_MODE_MASTER'] == "True"
 
+'''
+Checks if the currently running test is running in distributed mode.
+'''
 def is_distributed():
     return 'LOCUST_MODE_MASTER' in os.environ or 'LOCUST_MODE_WORKER' in os.environ
 
+'''
+Resets the distributed mode environment variables, to allow
+for non-distributed test runs.
+'''
 def reset_distributed_values():
     if "LOCUST_MODE_WORKER" in os.environ:
         os.environ.pop("LOCUST_MODE_WORKER")

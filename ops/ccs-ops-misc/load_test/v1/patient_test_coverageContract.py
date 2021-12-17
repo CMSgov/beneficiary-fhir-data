@@ -3,8 +3,6 @@ import common.test_setup as setup
 import common.config as config
 import common.data as data
 import common.errors as errors
-import common.read_contract_cursors as cursors
-import locust.exception as locust_exception
 from locust import HttpUser, task
 
 server_public_key = setup.loadServerPublicKey()

@@ -8,9 +8,10 @@ import common.read_contract_cursors as cursors
 import common.test_setup as setup
 
 '''
-Gets the cursor data and either returns it whole if not a distributed test,
-or takes a percentage portion of the data to distribute to the current worker thread
-calling this method based on the worker number and total number of workers.
+Gets the cursor data and either returns all the data in a list if not a distributed test,
+or takes a percentage of the data to distribute to the current worker thread. The percentage
+of the data in distributed mode depends on the total number of workers and the index of the
+data is dependant on which worker index calls this method.
 '''
 def load_cursors(version):
     if setup.is_master_thread():
@@ -30,9 +31,10 @@ def load_cursors(version):
         return cursors.load_data(version)
 
 '''
-Gets the bene id data and either returns it whole if not a distributed test,
-or takes a percentage portion of the data to distribute to the current worker thread
-calling this method based on the worker number and total number of workers.
+Gets the bene id data and either returns all the data in a list if not a distributed test,
+or takes a percentage of the data to distribute to the current worker thread. The percentage
+of the data in distributed mode depends on the total number of workers and the index of the
+data is dependant on which worker index calls this method.
 '''
 def load_bene_ids():
     if setup.is_master_thread():
@@ -53,6 +55,12 @@ def load_bene_ids():
         configFile = config.load()
         return benes.loadData()
 
+'''
+Gets the hashed mbi data and either returns all the data in a list if not a distributed test,
+or takes a percentage of the data to distribute to the current worker thread. The percentage
+of the data in distributed mode depends on the total number of workers and the index of the
+data is dependant on which worker index calls this method.
+'''
 def load_mbis():
     if setup.is_master_thread():
         ## Don't bother loading data for the master thread, it doenst run a test

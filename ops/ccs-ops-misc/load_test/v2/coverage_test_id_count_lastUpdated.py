@@ -1,12 +1,8 @@
-import csv
-import os
-import sys
 import urllib3
 import common.config as config
 import common.test_setup as setup
 import common.data as data
 import common.errors as errors
-import locust.exception as locust_exception
 from locust import HttpUser, task
 
 server_public_key = setup.loadServerPublicKey()
