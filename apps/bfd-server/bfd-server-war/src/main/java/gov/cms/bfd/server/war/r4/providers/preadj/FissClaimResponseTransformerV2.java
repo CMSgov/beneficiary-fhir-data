@@ -171,20 +171,4 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
                     ClaimType.INSTITUTIONAL.toCode(),
                     ClaimType.INSTITUTIONAL.getDisplay())));
   }
-
-  private static Reference getPatient(PreAdjFissClaim claimGroup) {
-    return new Reference()
-        .setIdentifier(
-            new Identifier()
-                .setType(
-                    new CodeableConcept()
-                        .setCoding(
-                            List.of(
-                                new Coding(
-                                    "http://terminology.hl7.org/CodeSystem/v2-0203",
-                                    "MC",
-                                    "Patient's Medicare number"))))
-                .setSystem("http://hl7.org/fhir/sid/us-mbi")
-                .setValue(claimGroup.getMbi()));
-  }
 }
