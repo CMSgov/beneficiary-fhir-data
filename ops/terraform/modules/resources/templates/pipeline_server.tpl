@@ -39,7 +39,7 @@ aws s3 cp s3://bfd-mgmt-admin-${accountId}/ansible/vault.password .
 
 # The extra_vars.json file from the previous build step contains a few incorrect values
 # and needs to get trimmed down to the following
-cat <<EOF >> extra_vars.json
+cat <<EOF > extra_vars.json
 {
     "env":"${env}",
     "data_pipeline_zip":"/bluebutton-data-pipeline/bfd-pipeline-app-1.0.0-SNAPSHOT.zip"
