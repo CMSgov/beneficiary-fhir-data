@@ -5,8 +5,9 @@
 --   2. don't try to rename a column that already has the name (i.e., "hicn" ${logic.rename-to} hicn)
 --   3. optionally rename contraint and/or index names (i.e., remove camelCase)
 --
--- for debugging hsql
--- SCRIPT './foobar_schema.txt';
+-- uncomment the following SCRIPT directive to dump the hsql database schema
+-- to a file prior to performing table or column rename.
+-- SCRIPT './bfd_schema_pre.txt';
 --
 -- Drop foreign key constraints
 --
@@ -1709,12 +1710,27 @@ alter table public.beneficiary_monthly ${logic.alter-rename-column} "partDRetire
 alter table public.beneficiary_monthly ${logic.alter-rename-column} "partDLowIncomeCostShareGroupCode" ${logic.rename-to} partd_low_income_cost_share_group_code;
 alter table public.beneficiary_monthly ${logic.alter-rename-column} "medicaidDualEligibilityCode" ${logic.rename-to} medicaid_dual_eligibility_code;
 --
--- LoadedFiles ${logic.rename-to} loaded_files
+-- LoadedFiles to loaded_files
+--
+-- We have a bit of a funky condition between psql and hsql; for both loaded_files and loaded_batches
+-- there is a column called "created". For psql there is no need to do a rename; in fact if we tried
+-- to do something like:
+--
+--      psql: alter table public.loaded_files rename column "created" to created
+--
+-- we'd get an error. So in theory, maybe we don't even need to do a rename for that type of condition.
+-- However, in hsql, if we don't do a rename, we end up with a column called "created" (ltierally,
+-- meaning the double-quotes are an integral part of the column name). So for hsql we do need to
+-- perform the rename so we can rid the column name of the double-quotes.
+--
+--      ${logic.hsql-only-alter}
+--          psql: "--"
+--          hsql: "alter"
 --
 alter table public."LoadedFiles" rename to loaded_files;
 alter table public.loaded_files ${logic.alter-rename-column} "loadedFileId" ${logic.rename-to} loaded_fileid;
 alter table public.loaded_files ${logic.alter-rename-column} "rifType" ${logic.rename-to} rif_type;
-alter table public.loaded_files ${logic.alter-rename-column} "created" ${logic.rename-to} created;
+${logic.hsql-only-alter} table public.loaded_files ${logic.alter-rename-column} "created" ${logic.rename-to} created;
 --
 -- LoadedBatches to loaded_batches
 --
@@ -1722,7 +1738,7 @@ alter table public."LoadedBatches" rename to loaded_batches;
 alter table public.loaded_batches ${logic.alter-rename-column} "loadedBatchId" ${logic.rename-to} loaded_batchid;
 alter table public.loaded_batches ${logic.alter-rename-column} "loadedFileId" ${logic.rename-to} loaded_fileid;
 alter table public.loaded_batches ${logic.alter-rename-column} "beneficiaries" ${logic.rename-to} beneficiaries;
-alter table public.loaded_batches ${logic.alter-rename-column} "created" ${logic.rename-to} created;
+${logic.hsql-only-alter} table public.loaded_batches ${logic.alter-rename-column} "created" ${logic.rename-to} created;
 --
 -- MedicareBeneficiaryIdHistory to medicare_beneficiaryid_history
 --
@@ -1929,4 +1945,6 @@ ALTER TABLE public.snf_claims
 ALTER TABLE public.loaded_batches
     ADD CONSTRAINT loaded_batches_loaded_fileid FOREIGN KEY (loaded_fileid) REFERENCES public.loaded_files (loaded_fileid);
 
---SCRIPT './foobar_schema_end.txt';
+-- uncomment the following SCRIPT directive to dump the hsql database schema
+-- to a file; helpful in tracking down misnamed table or columns in an hsql db.
+-- SCRIPT './bfd_schema_post.txt';
