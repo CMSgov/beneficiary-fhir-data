@@ -8,7 +8,7 @@ exec > >(
 	done
 )
 
-# Clone clone operation removed, handled during AMI build
+# Git clone operation removed, handled during AMI build
 
 cd beneficiary-fhir-data/ops/ansible/playbooks-ccs/
 
