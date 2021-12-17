@@ -38,7 +38,7 @@ public final class CoverageTransformerTest {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
-    beneficiary.setLastUpdated(Instant.now());
+    beneficiary.setLastUpdated(Optional.of(Instant.now()));
 
     Coverage partACoverage =
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
@@ -57,7 +57,7 @@ public final class CoverageTransformerTest {
     assertPartDMatches(beneficiary, partDCoverage);
 
     // Test with null lastUpdated
-    beneficiary.setLastUpdated(null);
+    beneficiary.setLastUpdated(Optional.empty());
     Coverage partACoverageNullLastUpdated =
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
     assertPartAMatches(beneficiary, partACoverageNullLastUpdated);

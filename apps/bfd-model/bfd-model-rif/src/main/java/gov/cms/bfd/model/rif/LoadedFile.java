@@ -12,19 +12,19 @@ public class LoadedFile {
   @Column(name = "loaded_fileid", nullable = false)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedfiles_loadedfileid_seq")
   @SequenceGenerator(
-      name = "loadedFiles_loadedFileId_seq",
+      name = "loadedfiles_loadedfileid_seq",
       sequenceName = "loadedfiles_loadedfileid_seq",
       allocationSize = 1)
-  private long loaded_fileid;
+  private long loadedFileId;
 
   @Column(name = "rif_type", nullable = false)
-  private String rif_type;
+  private String rifType;
 
   @Column(name = "created", nullable = false)
   private Instant created;
 
   @OneToMany(
-      mappedBy = "loaded_fileid",
+      mappedBy = "loadedFileId",
       orphanRemoval = false,
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL)
@@ -41,8 +41,8 @@ public class LoadedFile {
    */
   public LoadedFile(long loadedFileId, String rifType, Instant created) {
     this();
-    this.loaded_fileid = loadedFileId;
-    this.rif_type = rifType;
+    this.loadedFileId = loadedFileId;
+    this.rifType = rifType;
     this.created = created;
   }
 
@@ -53,27 +53,27 @@ public class LoadedFile {
    */
   public LoadedFile(String rifType) {
     this();
-    this.rif_type = rifType;
+    this.rifType = rifType;
   }
 
   /** @return the identifier */
   public long getLoadedFileId() {
-    return loaded_fileid;
+    return loadedFileId;
   }
 
   /** @param loadedFileId the identifier to set */
   public void setLoadedFileId(long loadedFileId) {
-    this.loaded_fileid = loadedFileId;
+    this.loadedFileId = loadedFileId;
   }
 
   /** @return the rifType */
   public String getRifType() {
-    return rif_type;
+    return rifType;
   }
 
   /** @param rifType the rifType to set */
   public void setRifType(String rifType) {
-    this.rif_type = rifType;
+    this.rifType = rifType;
   }
 
   /** @return the creation time stamp */

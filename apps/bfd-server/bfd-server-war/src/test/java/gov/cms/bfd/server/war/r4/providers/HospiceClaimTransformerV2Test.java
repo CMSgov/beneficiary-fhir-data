@@ -67,7 +67,7 @@ public final class HospiceClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
+    claim.setLastUpdated(Optional.of(Instant.now()));
     createEOB(Optional.of(false));
   }
 

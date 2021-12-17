@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -49,7 +50,7 @@ public final class CoverageTransformerV2Test {
 
     Calendar calen = Calendar.getInstance();
     calen.set(2021, 3, 17);
-    beneficiary.setLastUpdated(calen.getTime().toInstant());
+    beneficiary.setLastUpdated(Optional.of(calen.getTime().toInstant()));
   }
 
   /** Standalone wrapper to output PART_A */

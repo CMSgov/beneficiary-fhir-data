@@ -2,7 +2,7 @@
 -- NOTES:
 --   1. when you rename a table, indexes/constraints will trickle down to contraint & index directives,
 --      BUT not contraint or index names themselves
---   2. don't try to rename} a column that already has the name (i.e., "hicn" ${logic.rename-to} hicn)
+--   2. don't try to rename a column that already has the name (i.e., "hicn" ${logic.rename-to} hicn)
 --   3. optionally rename contraint and/or index names (i.e., remove camelCase)
 --
 -- for debugging hsql
@@ -1714,12 +1714,15 @@ alter table public.beneficiary_monthly ${logic.alter-rename-column} "medicaidDua
 alter table public."LoadedFiles" rename to loaded_files;
 alter table public.loaded_files ${logic.alter-rename-column} "loadedFileId" ${logic.rename-to} loaded_fileid;
 alter table public.loaded_files ${logic.alter-rename-column} "rifType" ${logic.rename-to} rif_type;
+alter table public.loaded_files ${logic.alter-rename-column} "created" ${logic.rename-to} created;
 --
 -- LoadedBatches to loaded_batches
 --
 alter table public."LoadedBatches" rename to loaded_batches;
 alter table public.loaded_batches ${logic.alter-rename-column} "loadedBatchId" ${logic.rename-to} loaded_batchid;
 alter table public.loaded_batches ${logic.alter-rename-column} "loadedFileId" ${logic.rename-to} loaded_fileid;
+alter table public.loaded_batches ${logic.alter-rename-column} "beneficiaries" ${logic.rename-to} beneficiaries;
+alter table public.loaded_batches ${logic.alter-rename-column} "created" ${logic.rename-to} created;
 --
 -- MedicareBeneficiaryIdHistory to medicare_beneficiaryid_history
 --

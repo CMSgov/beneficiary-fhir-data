@@ -219,12 +219,12 @@ public final class BeneficiaryTransformerTest {
     Beneficiary beneficiary = loadSampleABeneficiary();
 
     RequestHeaders requestHeader = getRHwithIncldIdntityHdr("");
-    beneficiary.setLastUpdated(Instant.now());
+    beneficiary.setLastUpdated(Optional.of(Instant.now()));
     Patient patientWithLastUpdated =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patientWithLastUpdated, requestHeader);
 
-    beneficiary.setLastUpdated(null);
+    beneficiary.setLastUpdated(Optional.empty());
     Patient patientWithoutLastUpdated =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patientWithoutLastUpdated, requestHeader);
@@ -239,7 +239,7 @@ public final class BeneficiaryTransformerTest {
   @Test
   public void transformSampleARecordWithoutLastUpdated() {
     Beneficiary beneficiary = loadSampleABeneficiary();
-    beneficiary.setLastUpdated(null);
+    beneficiary.setLastUpdated(Optional.empty());
     RequestHeaders requestHeader = getRHwithIncldIdntityHdr("");
     Patient patient =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);

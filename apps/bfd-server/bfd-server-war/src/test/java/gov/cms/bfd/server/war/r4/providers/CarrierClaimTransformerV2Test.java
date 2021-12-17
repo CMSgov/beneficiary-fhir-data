@@ -59,7 +59,7 @@ public class CarrierClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
+    claim.setLastUpdated(Optional.of(Instant.now()));
 
     return claim;
   }

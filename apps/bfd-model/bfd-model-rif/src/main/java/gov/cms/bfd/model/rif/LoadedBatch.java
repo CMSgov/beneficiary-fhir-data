@@ -15,15 +15,15 @@ public class LoadedBatch {
 
   @Id
   @Column(name = "loaded_batchid", nullable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedBatches_loadedBatchId_seq")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedbatches_loadedbatchid_seq")
   @SequenceGenerator(
-      name = "loadedBatches_loadedBatchId_seq",
-      sequenceName = "loadedBatches_loadedBatchId_seq",
+      name = "loadedbatches_loadedbatchid_seq",
+      sequenceName = "loadedbatches_loadedbatchid_seq",
       allocationSize = 20)
-  private long loaded_batchid;
+  private long loadedBatchId;
 
   @Column(name = "loaded_fileid", nullable = false)
-  private long loaded_fileid;
+  private long loadedFileId;
 
   @Column(name = "beneficiaries", columnDefinition = "varchar", nullable = false)
   private String beneficiaries;
@@ -37,15 +37,15 @@ public class LoadedBatch {
   /**
    * Create with known values
    *
-   * @param loaded_batchid unique sequence id
-   * @param loaded_fileid associated file
+   * @param loadedBatchId unique sequence id
+   * @param loadedFileId associated file
    * @param beneficiaries to associate
    * @param created batch creation date
    */
   public LoadedBatch(long loadedBatchId, long loadedFileId, String beneficiaries, Instant created) {
     this();
-    this.loaded_batchid = loadedBatchId;
-    this.loaded_fileid = loadedFileId;
+    this.loadedBatchId = loadedBatchId;
+    this.loadedFileId = loadedFileId;
     this.beneficiaries = beneficiaries;
     this.created = created;
   }
@@ -61,30 +61,30 @@ public class LoadedBatch {
   public LoadedBatch(
       long loadedBatchId, long loadedFileId, List<String> beneficiaries, Instant created) {
     this();
-    this.loaded_batchid = loadedBatchId;
-    this.loaded_fileid = loadedFileId;
+    this.loadedBatchId = loadedBatchId;
+    this.loadedFileId = loadedFileId;
     this.beneficiaries = convertToString(beneficiaries);
     this.created = created;
   }
 
   /** @return the loadedBatchId */
   public long getLoadedBatchId() {
-    return loaded_fileid;
+    return loadedBatchId;
   }
 
   /** @param loadedBatchId the identifier to set */
   public void setLoadedBatchId(long loadedBatchId) {
-    this.loaded_batchid = loadedBatchId;
+    this.loadedBatchId = loadedBatchId;
   }
 
   /** @return the loadedFileId */
   public long getLoadedFileId() {
-    return loaded_fileid;
+    return loadedFileId;
   }
 
   /** @param loadedFileId the identifier to set */
   public void setLoadedFileId(long loadedFileId) {
-    this.loaded_fileid = loadedFileId;
+    this.loadedFileId = loadedFileId;
   }
 
   /** @return the beneficiaries */
@@ -136,8 +136,8 @@ public class LoadedBatch {
     if (a == null) return b;
     if (b == null) return a;
     LoadedBatch sum = new LoadedBatch();
-    sum.loaded_batchid = a.loaded_batchid;
-    sum.loaded_fileid = a.loaded_fileid;
+    sum.loadedBatchId = a.loadedBatchId;
+    sum.loadedFileId = a.loadedFileId;
     sum.beneficiaries =
         a.beneficiaries.isEmpty()
             ? b.beneficiaries

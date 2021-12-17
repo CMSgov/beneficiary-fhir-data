@@ -64,7 +64,7 @@ public final class InpatientClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
+    claim.setLastUpdated(Optional.of(Instant.now()));
 
     return claim;
   }

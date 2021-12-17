@@ -42,12 +42,12 @@ public final class CarrierClaimTransformerTest {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Instant.now());
+    claim.setLastUpdated(Optional.of(Instant.now()));
     ExplanationOfBenefit eobWithLastUpdated =
         CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
     assertMatches(claim, eobWithLastUpdated, Optional.of(true));
 
-    claim.setLastUpdated(null);
+    claim.setLastUpdated(Optional.empty());
     ExplanationOfBenefit eobWithoutLastUpdated =
         CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
     assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));

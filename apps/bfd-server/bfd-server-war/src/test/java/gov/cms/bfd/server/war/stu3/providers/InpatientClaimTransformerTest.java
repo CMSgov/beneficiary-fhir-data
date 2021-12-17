@@ -41,7 +41,7 @@ public final class InpatientClaimTransformerTest {
             .map(r -> (InpatientClaim) r)
             .findFirst()
             .get();
-    claim.setLastUpdated(Instant.now());
+    claim.setLastUpdated(Optional.of(Instant.now()));
 
     ExplanationOfBenefit eob =
         InpatientClaimTransformer.transform(new MetricRegistry(), claim, Optional.empty());

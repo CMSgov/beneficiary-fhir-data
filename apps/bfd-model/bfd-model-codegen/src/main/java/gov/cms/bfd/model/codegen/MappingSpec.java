@@ -36,6 +36,7 @@ public final class MappingSpec {
   private boolean hasBeneficiaryMonthly = false;
   private String lineTable;
   private String lineEntityLineNumberField;
+  private String sequenceNumberGeneratorName;
   private List<String> headerEntityTransientFields;
   private List<RifField> headerEntityAdditionalDatabaseFields;
   private List<InnerJoinRelationship> innerJoinRelationship;
@@ -326,6 +327,25 @@ public final class MappingSpec {
     Objects.requireNonNull(headerEntityAdditionalDatabaseFields);
     this.headerEntityAdditionalDatabaseFields = headerEntityAdditionalDatabaseFields;
     return this;
+  }
+
+  /**
+   * @param sequenceNumberGeneratorName the db sequence number generator name {@link
+   *     #getsequenceNumberGeneratorName()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
+  public MappingSpec setSequenceNumberGeneratorName(String sequenceNumberGeneratorName) {
+    this.sequenceNumberGeneratorName = sequenceNumberGeneratorName;
+    return this;
+  }
+
+  /**
+   * @param sequenceNumberGeneratorName the db sequence number generator name {@link
+   *     #getsequenceNumberGeneratorName()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
+  public String getSequenceNumberGeneratorName() {
+    return sequenceNumberGeneratorName;
   }
 
   /**
