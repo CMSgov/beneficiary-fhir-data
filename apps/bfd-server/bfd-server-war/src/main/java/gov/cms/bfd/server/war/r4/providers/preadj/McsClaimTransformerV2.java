@@ -6,6 +6,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBOrganizationIdentifierType;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
@@ -228,6 +229,8 @@ public class McsClaimTransformerV2 {
                 .setCoding(
                     Collections.singletonList(
                         new Coding(
-                            "http://www.ama-assn.org/go/cpt", procCode.getIdrProcCode(), null))));
+                            TransformerConstants.CODING_SYSTEM_CPT,
+                            procCode.getIdrProcCode(),
+                            null))));
   }
 }

@@ -11,10 +11,18 @@
 
 This RFC proposes that our team migrate from BFD v1 platform currently on FHIR STU3 to BFD v2 platform supporting the first normative FHIR release, R4 and implement CARIN BB profiles.
 
+## Status
+[Status]: #status
+
+* Status: Implemented
+* Implementation JIRA Ticket(s):
+    * [BFD-907](https://jira.cms.gov/browse/BFD-907)
+
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
@@ -34,7 +42,6 @@ This RFC proposes that our team migrate from BFD v1 platform currently on FHIR S
 * [Prior Art](#prior-art)
 * [Future Possibilities](#future-possibilities)
 * [Addendums](#addendums)
-
 
 ## Motivation
 [Motivation]: #motivation
