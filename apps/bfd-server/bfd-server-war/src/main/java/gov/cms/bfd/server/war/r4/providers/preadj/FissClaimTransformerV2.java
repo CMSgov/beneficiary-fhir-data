@@ -91,9 +91,8 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setId("f-" + claimGroup.getDcn());
     claim.setContained(List.of(getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
     claim.setIdentifier(getIdentifier(claimGroup));
-    claim.setExtension(getExtension(claimGroup));
     claim.setStatus(Claim.ClaimStatus.ACTIVE);
-    claim.setType(getType());
+    claim.setType(getType(claimGroup));
     claim.setSupportingInfo(getSupportingInfo(claimGroup));
     claim.setBillablePeriod(getBillablePeriod(claimGroup));
     claim.setUse(Claim.Use.CLAIM);
@@ -135,26 +134,18 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             .setValue(claimGroup.getDcn()));
   }
 
-  private static List<Extension> getExtension(PreAdjFissClaim claimGroup) {
-    return claimGroup.getServTypeCd() == null
-        ? null
-        : List.of(
-            new Extension(BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE)
-                .setValue(
-                    new Coding(
-                        BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE,
-                        claimGroup.getServTypeCd(),
-                        null)));
-  }
-
-  private static CodeableConcept getType() {
+  private static CodeableConcept getType(PreAdjFissClaim claimGroup) {
     return new CodeableConcept()
         .setCoding(
             List.of(
                 new Coding(
                     ClaimType.INSTITUTIONAL.getSystem(),
                     ClaimType.INSTITUTIONAL.toCode(),
-                    ClaimType.INSTITUTIONAL.getDisplay())));
+                    ClaimType.INSTITUTIONAL.getDisplay()),
+                new Coding(
+                    BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE,
+                    claimGroup.getServTypeCd(),
+                    null)));
   }
 
   private static List<Claim.SupportingInformationComponent> getSupportingInfo(
