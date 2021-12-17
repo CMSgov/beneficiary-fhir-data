@@ -127,9 +127,6 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
         running = runOnce(sink, buffer);
       }
       LOGGER.info("terminating normally");
-    } catch (InterruptedException ex) {
-      LOGGER.info("terminating due to InterruptedException");
-      throw ex;
     } catch (Exception ex) {
       // this is just a catch all for safety, runOnce() should handle all non-interrupts
       LOGGER.error("terminating due to uncaught exception: ex={}", ex.getMessage(), ex);
