@@ -2029,6 +2029,7 @@
         }
       } ],
       "diagnosis" : [ {
+        "sequence" : 1,
         "packageCode" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
@@ -2804,6 +2805,7 @@
         }
       } ],
       "diagnosis" : [ {
+        "sequence" : 1,
         "packageCode" : {
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/clm_drg_cd",
@@ -3048,10 +3050,10 @@
       "patient" : {
         "reference" : "Patient/567834"
       },
-      "billablePeriod": {
-        "start": "2015-05-12",
-        "end": "2015-05-12"
-      },    
+      "billablePeriod" : {
+        "start" : "2015-05-12",
+        "end" : "2015-05-12"
+      },
       "organization" : {
         "identifier" : {
           "type" : {

@@ -1549,7 +1549,8 @@ public final class TransformerUtils {
        */
       eob.addDiagnosis()
           .setPackageCode(
-              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd));
+              createCodeableConcept(eob, CcwCodebookVariable.CLM_DRG_CD, diagnosisRelatedGroupCd))
+          .setSequence(eob.getDiagnosis().size());
     }
   }
 
