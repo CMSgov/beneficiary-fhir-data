@@ -211,8 +211,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   RifLayout.parse(spreadsheetWorkbook, annotation.beneficiaryHistorySheet()))
               .setHeaderEntity("BeneficiaryHistory")
               .setHeaderTable("beneficiaries_history")
-              .setHeaderEntityGeneratedIdField("BENE_HISTORY_ID")
-              .setSequenceNumberGeneratorName("BENEFICIARYHISTORY_BENEFICIARYHISTORYID_SEQ")
+              .setHeaderEntityGeneratedIdField("bene_history_id")
+              .setSequenceNumberGeneratorName("beneficiaryhistory_beneficiaryhistoryid_seq")
               .setHeaderEntityTransientFields(
                   "STATE_CODE",
                   "BENE_COUNTY_CD",
@@ -238,7 +238,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                   RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
               .setHeaderEntity("MedicareBeneficiaryIdHistory")
               .setHeaderTable("medicare_beneficiaryid_history")
-              .setHeaderEntityIdField("BENE_MBI_ID")
+              .setHeaderEntityIdField("bene_mbi_id")
               .setHeaderEntityAdditionalDatabaseFields(
                   createDetailsForAdditionalDatabaseFields(Arrays.asList("LAST_UPDATED"))));
 
@@ -437,7 +437,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
     AnnotationSpec tableAnnotation =
         AnnotationSpec.builder(Table.class)
-            .addMember("name", "$S", mappingSpec.getLineTable())
+            .addMember("name", "$S", mappingSpec.getLineTable().toLowerCase())
             .build();
     TypeSpec.Builder lineEntity =
         TypeSpec.classBuilder(mappingSpec.getLineEntity())
@@ -464,7 +464,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     RifField parentClaimRifField =
         rifLayout.getRifFields().stream()
             .filter(
-                f -> f.getRifColumnName().equalsIgnoreCase(mappingSpec.getHeaderEntityIdField()))
+                f ->
+                    f.getRifColumnName()
+                        .equalsIgnoreCase(mappingSpec.getHeaderEntityIdField().toLowerCase()))
             .findAny()
             .get();
     RifField lineNumberRifField =
@@ -472,7 +474,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .filter(
                 f ->
                     f.getRifColumnName()
-                        .equalsIgnoreCase(mappingSpec.getLineEntityLineNumberField()))
+                        .equalsIgnoreCase(mappingSpec.getLineEntityLineNumberField().toLowerCase()))
             .findFirst()
             .get();
 
@@ -529,7 +531,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
             .addAnnotation(
                 AnnotationSpec.builder(JoinColumn.class)
-                    .addMember("name", "$S", mappingSpec.getHeaderEntityIdField())
+                    .addMember("name", "$S", mappingSpec.getHeaderEntityIdField().toLowerCase())
                     .addMember(
                         "foreignKey",
                         "@$T(name = $S)",
@@ -694,7 +696,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
             .addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
             .addAnnotation(
                 AnnotationSpec.builder(JoinColumn.class)
-                    .addMember("name", "$S", "BENE_ID")
+                    .addMember("name", "$S", "bene_id")
                     .addMember(
                         "foreignKey",
                         "@$T(name = $S)",
@@ -924,7 +926,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     AnnotationSpec entityAnnotation = AnnotationSpec.builder(Entity.class).build();
     AnnotationSpec tableAnnotation =
         AnnotationSpec.builder(Table.class)
-            .addMember("name", "$S", mappingSpec.getHeaderTable())
+            .addMember("name", "$S", mappingSpec.getHeaderTable().toLowerCase())
             .build();
     TypeSpec.Builder headerEntityClass =
         TypeSpec.classBuilder(mappingSpec.getHeaderEntity())
@@ -941,8 +943,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       idFieldBuilder.addAnnotation(Id.class);
       idFieldBuilder.addAnnotation(
           AnnotationSpec.builder(Column.class)
-              .addMember(
-                  "name", "$S", String.format("%s", mappingSpec.getHeaderEntityGeneratedIdField()))
+              .addMember("name", "$S", mappingSpec.getHeaderEntityGeneratedIdField().toLowerCase())
               .addMember("nullable", "$L", false)
               .addMember("updatable", "$L", false)
               .build());
@@ -1722,7 +1723,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     if (!isTransient) {
       AnnotationSpec.Builder columnAnnotation =
           AnnotationSpec.builder(Column.class)
-              .addMember("name", "$S", rifField.getRifColumnName())
+              .addMember("name", "$S", rifField.getRifColumnName().toLowerCase())
               .addMember("nullable", "$L", rifField.isRifColumnOptional());
       if (rifField.getRifColumnType() == RifColumnType.CHAR
           && rifField.getRifColumnLength().isPresent()) {
@@ -2081,7 +2082,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     // Add an @Column annotation to every column.
     AnnotationSpec.Builder columnAnnotation =
         AnnotationSpec.builder(Column.class)
-            .addMember("name", "$S", rifField.getRifColumnName())
+            .addMember("name", "$S", rifField.getRifColumnName().toLowerCase())
             .addMember("nullable", "$L", rifField.isRifColumnOptional());
 
     if (rifField.getRifColumnType() == RifColumnType.CHAR
