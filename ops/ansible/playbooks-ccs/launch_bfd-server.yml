@@ -6,6 +6,7 @@
 - name: Launch BFD Data Server
   hosts: localhost
   gather_facts: yes
+  gather_subset: '!all,!min,facter'
   vars:
     bfd_server_dir: '/usr/local/bfd-server'
 
