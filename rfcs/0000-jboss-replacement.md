@@ -12,10 +12,18 @@ Why? Primarily the licensing costs of JBoss,
   though the number of issues we've had with JBoss being unreliable over the years is also a consideration.
 Jetty is an open source, well-supported, and widely-used alternative.
 
+## Status
+[Status]: #status
+
+* Status: Implemented
+* Implementation JIRA Ticket(s):
+    * [BLUEBUTTON-1112](https://jira.cms.gov/browse/BLUEBUTTON-1112)
+
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
