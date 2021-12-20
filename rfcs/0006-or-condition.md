@@ -10,10 +10,18 @@
 This proposal will suggest adding an OR clause to queries that gather the contract to patient mapping in order
 to improve efficiency on both the client and server. 
 
+## Status
+[Status]: #status
+
+* Status: Rejected (This RFC was previously approved but after further discussion within the BFD team it has been retroactively rejected because the parameter passing is inappropriate. If this functionality is still required a new approach should be discussed and the RFC updated and re-reviewed.)
+* Implementation JIRA Ticket(s):
+    * N/A
+    
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
@@ -98,4 +106,3 @@ can utilize the existing system for using a month parameter, and simply expand i
 [Future Possibilities]: #future-possibilities
 
 There could also be an "or" condition for parameters beyond months, but those would come on a case by case basis.
-
