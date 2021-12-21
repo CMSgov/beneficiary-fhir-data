@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+enum McsSplitReasonCode {
+  SPLIT_REASON_CODE_GRAMM_RUDMAN = 0            [(string_value) = "G"];
+
+  SPLIT_REASON_CODE_OCCUPATIONAL_THERAPY = 1    [(string_value) = "O"];
+
+  SPLIT_REASON_CODE_REJECTED_SERVICES = 2       [(string_value) = "R"];
+
+  SPLIT_REASON_CODE_CARE_PLAN_OVERSIGHT = 3     [(string_value) = "P"];
+
+  SPLIT_REASON_CODE_PAR_OR_NON_PAR = 4          [(string_value) = "N"];
+
+  SPLIT_REASON_CODE_KIDNEY_DONOR = 5            [(string_value) = "8"];
+
+  SPLIT_REASON_CODE_USED_DME = 6                [(string_value) = "7"];
+
+  SPLIT_REASON_CODE_ALTERNATE_METHOD_CRD = 7    [(string_value) = "6"];
+
+  SPLIT_REASON_CODE_2ND_OPINION = 8             [(string_value) = "5"];
+
+  SPLIT_REASON_CODE_GHI_SPLIT = 9               [(string_value) = "4"];
+
+  SPLIT_REASON_CODE_PHYSICAL_THERAPY = 10       [(string_value) = "3"];
+
+  SPLIT_REASON_CODE_DIFFERENT_YEARS = 11        [(string_value) = "2"];
+}

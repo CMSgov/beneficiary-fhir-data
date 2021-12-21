@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/mcs/mcs_location_activity_code.proto";
+
+message McsLocation {
+  optional string idr_loc_clerk = 1;
+  optional string idr_loc_code = 2;
+  optional string idr_loc_date = 3;
+  oneof idr_loc_actv_code {
+    McsLocationActivityCode idr_loc_actv_code_enum = 4;
+    string idr_loc_actv_code_unrecognized = 5;
+  }
+}
