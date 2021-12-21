@@ -13,10 +13,18 @@ Please note: many of the other sections below will not be needed for some propos
   don't waste time writing responses that don't deliver real value.
 For any such not-needed section, simply write in "N/A".
 
+## Status
+[Status]: #status
+
+* Status: (Proposed/Approved/Rejected/Implemented)
+* Implementation JIRA Ticket(s):
+    * [BLUEBUTTON-0001](https://jira.cms.gov/browse/BLUEBUTTON-0001)
+
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
 * [RFC Proposal](#rfc-proposal)
+* [Status](#status)
 * [Table of Contents](#table-of-contents)
 * [Motivation](#motivation)
 * [Proposed Solution](#proposed-solution)
