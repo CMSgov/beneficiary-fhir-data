@@ -93,7 +93,7 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--clientsPerSecond** : (Optional) : The number of clients to spawn per second, until maxClients is reached. If not provided, defaults to 5.
 
-**--workerThreads** : (Optional) : Controls running in distributed mode; If this is set to >1, will spawn that many worker threads to run the tests across multiple cores. If not provided, defaults to 1m. See section on running in distributed mode for more info.
+**--workerThreads** : (Optional) : Controls running in distributed mode; If this is set to >1, will spawn that many worker threads to run the tests across multiple cores. If not provided, defaults to 1. See section on running in distributed mode for more info.
 
 ### Data setup for contract tests
 
