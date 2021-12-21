@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+enum McsTypeOfService {
+  TYPE_OF_SERVICE_WHOLE_BLOOD_AND_PACKED_RED_BLOOD_CELLS = 0        [(string_value) = "0"];
+
+  TYPE_OF_SERVICE_MEDICAL_CARE = 1                                  [(string_value) = "1"];
+
+  TYPE_OF_SERVICE_SURGERY = 2                                       [(string_value) = "2"];
+
+  TYPE_OF_SERVICE_CONSULTATION = 3                                  [(string_value) = "3"];
+
+  TYPE_OF_SERVICE_DIAGNOSTIC_X_RAY = 4                              [(string_value) = "4"];
+
+  TYPE_OF_SERVICE_DIAGNOSTIC_LAB = 5                                [(string_value) = "5"];
+
+  TYPE_OF_SERVICE_RADIATION_THERAPY = 6                             [(string_value) = "6"];
+
+  TYPE_OF_SERVICE_ANESTHESIA = 7                                    [(string_value) = "7"];
+
+  TYPE_OF_SERVICE_ASSISTANCE_AT_SURGERY = 8                         [(string_value) = "8"];
+
+  TYPE_OF_SERVICE_OTHER_MEDICAL_SERVICE = 9                         [(string_value) = "9"];
+
+  TYPE_OF_SERVICE_USED_DME = 10                                     [(string_value) = "A"];
+
+  TYPE_OF_SERVICE_AMBULATORY_SURGICAL_CENTER = 11                   [(string_value) = "F"];
+
+  TYPE_OF_SERVICE_HOSPICE = 12                                      [(string_value) = "H"];
+
+  TYPE_OF_SERVICE_RENAL_SUPPLIES_IN_THE_HOME = 13                   [(string_value) = "L"];
+
+  TYPE_OF_SERVICE_ALTERNATE_PAYMENT_FOR_MAINTENANCE_DIALYSIS = 14   [(string_value) = "M"];
+
+  TYPE_OF_SERVICE_KIDNEY_DONOR = 15                                 [(string_value) = "N"];
+
+  TYPE_OF_SERVICE_DME_PRESCRIPTION = 16                             [(string_value) = "P"];
+
+  TYPE_OF_SERVICE_PNEUMOCOCCAL_OR_FLU_VACCINE = 17                  [(string_value) = "V"];
+
+  TYPE_OF_SERVICE_SECOND_OPINION_ON_ELECTIVE_SURGERY = 18           [(string_value) = "Y"];
+
+  TYPE_OF_SERVICE_THIRD_OPINION_ON_ELECTIVE_SURGERY = 19            [(string_value) = "Z"];
+}

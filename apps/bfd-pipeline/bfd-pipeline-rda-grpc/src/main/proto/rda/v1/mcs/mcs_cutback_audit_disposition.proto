@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+enum McsCutbackAuditDisposition {
+  CUTBACK_AUDIT_DISPOSITION_AUTO_DENY_WITHOUT_TRANSMIT_TO_CWF = 0   [(string_value) = "A"];
+  CUTBACK_AUDIT_DISPOSITION_TRANSFER = 1                            [(string_value) = "B"];
+  CUTBACK_AUDIT_DISPOSITION_DENY = 2                                [(string_value) = "C"];
+  CUTBACK_AUDIT_DISPOSITION_DENY_AGAINST_PAID_HISTORY = 3           [(string_value) = "D"];
+  CUTBACK_AUDIT_DISPOSITION_SUSPEND = 4                             [(string_value) = "E"];
+  CUTBACK_AUDIT_DISPOSITION_SUSPEND_WITH_HISTORY = 5                [(string_value) = "F"];
+  CUTBACK_AUDIT_DISPOSITION_MODIFIER_51 = 6                         [(string_value) = "G"];
+  CUTBACK_AUDIT_DISPOSITION_SUBSEQUENT_PROCEDURE = 7                [(string_value) = "H"];
+  CUTBACK_AUDIT_DISPOSITION_SPLIT_THE_DETAIL = 8                    [(string_value) = "I"];
+  CUTBACK_AUDIT_DISPOSITION_CUTBACK_TO_LIMIT = 9                    [(string_value) = "J"];
+  CUTBACK_AUDIT_DISPOSITION_CUTBACK_TO_PAY_PERCENT = 10             [(string_value) = "K"];
+  CUTBACK_AUDIT_DISPOSITION_OMNIBUS_PRICING = 11                    [(string_value) = "L"];
+  CUTBACK_AUDIT_DISPOSITION_REDUCE_BY_SUM_OF_PRIOR_PAYMENTS = 12    [(string_value) = "M"];
+  CUTBACK_AUDIT_DISPOSITION_REDUCE_BY_SUM_OF_MATCHING_DATES = 13    [(string_value) = "N"];
+  CUTBACK_AUDIT_DISPOSITION_QUERY = 14                              [(string_value) = "P"];
+  CUTBACK_AUDIT_DISPOSITION_ADS_LETTER = 15                         [(string_value) = "S"];
+  CUTBACK_AUDIT_DISPOSITION_EOMB_MESSAGE_ONLY = 16                  [(string_value) = "T"];
+  CUTBACK_AUDIT_DISPOSITION_CLAIM_FIELD_UPDATE = 17                 [(string_value) = "U"];
+  CUTBACK_AUDIT_DISPOSITION_NULL = 18                               [(string_value) = "Y"];
+  CUTBACK_AUDIT_DISPOSITION_AUDIT_OVERRIDDEN = 19                   [(string_value) = "Z"];
+}

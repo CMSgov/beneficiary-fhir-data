@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS Process New Health Insurance Claim Number Indicator
+enum FissProcessNewHealthInsuranceClaimNumberIndicator {
+  // The new HIC entered is cross-referenced on the Beneficiary file and this cross-reverenced HIC is also
+  // cross-referenced. The chain continues for 25 HICs, or the NEW HIC number is in a cross-reference loop.
+  PROCESS_NEW_HIC_INDICATOR_E = 0 [(string_value) = "E"];
+
+  // Incorrect HIC number, process new HIC number.
+  PROCESS_NEW_HIC_INDICATOR_Y = 1 [(string_value) = "Y"];
+
+  // The cross-referenced HIC number on the beneficiary file is the same as the original HIC number on the claim.
+  PROCESS_NEW_HIC_INDICATOR_S = 2 [(string_value) = "S"];
+}
