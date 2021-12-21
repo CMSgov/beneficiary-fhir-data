@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/fiss/fiss_claim_status.proto";
+
+message FissAuditTrail {
+  oneof badt_status {
+    FissClaimStatus badt_status_enum = 1;
+    string badt_status_unrecognized = 2;
+  }
+  optional string badt_loc = 3;
+  optional string badt_oper_id = 4;
+  optional string badt_reas = 5;
+  optional string badt_curr_date_cymd = 6;
+}

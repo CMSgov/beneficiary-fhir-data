@@ -4,12 +4,19 @@ package gov.cms.mpsm.rda.v1.mcs;
 
 option java_multiple_files = true;
 
+import "rda/v1/mcs/mcs_adjustment.proto";
+import "rda/v1/mcs/mcs_audit.proto";
+import "rda/v1/mcs/mcs_audit_indicator.proto";
 import "rda/v1/mcs/mcs_beneficiary_sex.proto";
 import "rda/v1/mcs/mcs_billing_provider_indicator.proto";
 import "rda/v1/mcs/mcs_billing_provider_status_code.proto";
+import "rda/v1/mcs/mcs_claim_assignment_code.proto";
+import "rda/v1/mcs/mcs_claim_level_indicator.proto";
 import "rda/v1/mcs/mcs_claim_type.proto";
 import "rda/v1/mcs/mcs_detail.proto";
 import "rda/v1/mcs/mcs_diagnosis_code.proto";
+import "rda/v1/mcs/mcs_location.proto";
+import "rda/v1/mcs/mcs_split_reason_code.proto";
 import "rda/v1/mcs/mcs_status_code.proto";
 
 message McsClaim {
@@ -59,6 +66,43 @@ message McsClaim {
   optional string idr_hdr_from_dos = 47;
   optional string idr_hdr_to_dos = 48;
 
+  oneof idr_assignment {
+    McsClaimAssignmentCode idr_assignment_enum = 49;
+    string idr_assignment_unrecognized = 50;
+  };
+  oneof idr_clm_level_ind {
+    McsClaimLevelIndicator idr_clm_level_ind_enum = 51;
+    string idr_clm_level_ind_unrecognized = 52;
+  };
+  optional int32 idr_hdr_audit = 53;
+  oneof idr_hdr_audit_ind {
+    McsAuditIndicator idr_hdr_audit_ind_enum = 54;
+    string idr_hdr_audit_ind_unrecognized = 55;
+  };
+  oneof idr_u_split_reason {
+    McsSplitReasonCode idr_u_split_reason_enum = 56;
+    string idr_u_split_reason_unrecognized = 57;
+  };
+  optional string idr_j_referring_prov_npi = 58;
+  optional string idr_j_fac_prov_npi = 59;
+  optional string idr_u_demo_prov_npi = 60;
+  optional string idr_u_super_npi = 61;
+  optional string idr_u_fcadj_bil_npi = 62;
+  optional string idr_amb_pickup_addres_line1 = 63;
+  optional string idr_amb_pickup_addres_line2 = 64;
+  optional string idr_amb_pickup_city = 65;
+  optional string idr_amb_pickup_state = 66;
+  optional string idr_amb_pickup_zipcode = 67;
+  optional string idr_amb_dropoff_name = 68;
+  optional string idr_amb_dropoff_addr_line1 = 69;
+  optional string idr_amb_dropoff_addr_line2 = 70;
+  optional string idr_amb_dropoff_city = 71;
+  optional string idr_amb_dropoff_state = 72;
+  optional string idr_amb_dropoff_zipcode = 73;
+
   repeated McsDiagnosisCode mcs_diagnosis_codes = 40;
   repeated McsDetail mcs_details = 41;
+  repeated McsAudit mcs_audits = 74;
+  repeated McsLocation mcs_locations = 75;
+  repeated McsAdjustment mcs_adjustments = 76;
 }
