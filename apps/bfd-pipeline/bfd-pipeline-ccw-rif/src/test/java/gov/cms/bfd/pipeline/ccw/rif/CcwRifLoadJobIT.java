@@ -59,8 +59,6 @@ public final class CcwRifLoadJobIT {
       Assert.assertEquals(1, listener.getNoDataAvailableEvents());
       Assert.assertEquals(0, listener.getDataEvents().size());
       Assert.assertEquals(0, listener.getErrorEvents().size());
-    } catch (Exception e) {
-      LOGGER.error("EXCEPTION: %s", e.getMessage());
     } finally {
       if (bucket != null) s3Client.deleteBucket(bucket.getName());
     }
