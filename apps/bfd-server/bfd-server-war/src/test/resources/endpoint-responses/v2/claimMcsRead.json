@@ -2,7 +2,7 @@
   "resourceType": "Claim",
   "id": "m-654321",
   "meta": {
-    "versionId": "f-654321-c068f60762c66f83851b6fa8d38eae206cb3ef56",
+    "versionId": "m-654321-c068f60762c66f83851b6fa8d38eae206cb3ef56",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
