@@ -107,7 +107,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setMeta(
         new Meta()
             .setLastUpdated(Date.from(claimGroup.getLastUpdated()))
-            .setVersionId("m-" + claimGroup.getIdrClmHdIcn() + "-" + resourceHash));
+            .setVersionId("f-" + claimGroup.getIdrClmHdIcn() + "-" + resourceHash));
 
     return claim;
   }

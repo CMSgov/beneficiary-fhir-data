@@ -2,7 +2,7 @@
   "resourceType": "Claim",
   "id": "f-123456",
   "meta": {
-    "versionId": "f-123456-b79049ea2eab420e8f4748091c10c2b4b8d7d5d7",
+    "versionId": "f-123456-321707905df9bd06b59b6a73723ffab97056c1ed",
     "lastUpdated": "1970-01-01T00:00:00.000+00:00"
   },
   "contained": [
@@ -69,6 +69,15 @@
       ]
     }
   ],
+  "extension": [
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+      "valueCoding": {
+        "system": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+        "code": "A"
+      }
+    }
+  ],
   "identifier": [
     {
       "type": {
@@ -91,10 +100,6 @@
         "system": "http://terminology.hl7.org/CodeSystem/claim-type",
         "code": "institutional",
         "display": "Institutional"
-      },
-      {
-        "system": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
-        "code": "A"
       }
     ]
   },
