@@ -1864,11 +1864,11 @@ ALTER INDEX "BeneficiaryMonthly_partDContractNumberId_yearmonth_idx" RENAME TO b
 ALTER INDEX "CarrierClaims_beneficiaryId_idx" RENAME TO carrier_claims_beneid_idx;
 ALTER INDEX "DMEClaims_beneficiaryId_idx" RENAME TO dme_claims_beneid_idx;
 ALTER INDEX "HHAClaims_beneficiaryId_idx" RENAME TO hha_claims_beneid_idx;
-ALTER INDEX "HospiceClaims_beneficiaryId_idx" RENAME TO hospice_claims_beneid_idx
-ALTER INDEX "InpatientClaims_beneficiaryId_idx" RENAME TO inpatient_claims_beneid_idx
+ALTER INDEX "HospiceClaims_beneficiaryId_idx" RENAME TO hospice_claims_beneid_idx;
+ALTER INDEX "InpatientClaims_beneficiaryId_idx" RENAME TO inpatient_claims_beneid_idx;
 ALTER INDEX "LoadedBatches_created_index" RENAME TO loaded_batches_created_idx;
 ALTER INDEX "MedicareBeneficiaryIdHistory_beneficiaryId_idx" RENAME TO medicare_beneficiaryid_history_beneid_idx;
-ALTER INDEX "OutpatientClaims_beneficiaryId_idx" RENAME TO outpatient_claims_beneid_idx
+ALTER INDEX "OutpatientClaims_beneficiaryId_idx" RENAME TO outpatient_claims_beneid_idx;
 ALTER INDEX "PartDEvents_beneficiaryId_idx" RENAME TO partd_events_beneid_idx;
 ALTER INDEX "SNFClaims_beneficiaryId_idx" RENAME TO snf_claims_beneid_idx;
 
