@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+enum McsTwoDigitPlanOfService {
+  TWO_DIGIT_PLAN_OF_SERVICE_PHARMACY = 0                                                                          [(string_value) = "01"];
+  TWO_DIGIT_PLAN_OF_SERVICE_TELEHEALTH = 1                                                                        [(string_value) = "02"];
+  TWO_DIGIT_PLAN_OF_SERVICE_SCHOOL = 2                                                                            [(string_value) = "03"];
+  TWO_DIGIT_PLAN_OF_SERVICE_HOMELESS_SHELTER = 3                                                                  [(string_value) = "04"];
+  TWO_DIGIT_PLAN_OF_SERVICE_INDIAN_HEALTH_SERVICE_FREE_STANDING_FACILITY = 4                                      [(string_value) = "05"];
+  TWO_DIGIT_PLAN_OF_SERVICE_INDIAN_HEALTH_SERVICE_PROVIDER_BASED_FACILITY = 5                                     [(string_value) = "06"];
+  TWO_DIGIT_PLAN_OF_SERVICE_TRIBAL_638_FREE_STANDING_FACILITY = 6                                                 [(string_value) = "07"];
+  TWO_DIGIT_PLAN_OF_SERVICE_TRIBAL_638_PROVIDER_BASE_FACILITY = 7                                                 [(string_value) = "08"];
+  TWO_DIGIT_PLAN_OF_SERVICE_PRISON_OR_CORRECTIONAL_FACILITY = 8                                                   [(string_value) = "09"];
+  TWO_DIGIT_PLAN_OF_SERVICE_OFFICE = 9                                                                            [(string_value) = "11"];
+  TWO_DIGIT_PLAN_OF_SERVICE_HOME = 10                                                                             [(string_value) = "12"];
+  TWO_DIGIT_PLAN_OF_SERVICE_ASSISTED_LIVING_FACILITY = 11                                                         [(string_value) = "13"];
+  TWO_DIGIT_PLAN_OF_SERVICE_GROUP_HOME = 12                                                                       [(string_value) = "14"];
+  TWO_DIGIT_PLAN_OF_SERVICE_MOBIL_UNIT = 13                                                                       [(string_value) = "15"];
+  TWO_DIGIT_PLAN_OF_SERVICE_TEMPORARY_LODGING = 14                                                                [(string_value) = "16"];
+  TWO_DIGIT_PLAN_OF_SERVICE_WALK_IN_RETAIL_HEALTH_CLINIC = 15                                                     [(string_value) = "17"];
+  TWO_DIGIT_PLAN_OF_SERVICE_PLACE_OF_EMPLOYMENT_OR_WORKSITE = 16                                                  [(string_value) = "18"];
+  TWO_DIGIT_PLAN_OF_SERVICE_OFF_CAMPUS_OUTPATIENT_HOSPITAL = 17                                                   [(string_value) = "19"];
+  TWO_DIGIT_PLAN_OF_SERVICE_URGENT_CARE_FACILITY = 18                                                             [(string_value) = "20"];
+  TWO_DIGIT_PLAN_OF_SERVICE_INPATIENT_HOSPITAL = 19                                                               [(string_value) = "21"];
+  TWO_DIGIT_PLAN_OF_SERVICE_ON_CAMPUS_OUTPATIENT_HOSPITAL = 20                                                    [(string_value) = "22"];
+  TWO_DIGIT_PLAN_OF_SERVICE_EMERGENCY_ROOM_HOSPITAL = 21                                                          [(string_value) = "23"];
+  TWO_DIGIT_PLAN_OF_SERVICE_AMBULATORY_SURGICAL_CENTER = 22                                                       [(string_value) = "24"];
+  TWO_DIGIT_PLAN_OF_SERVICE_BIRTHING_CENTER = 23                                                                  [(string_value) = "25"];
+  TWO_DIGIT_PLAN_OF_SERVICE_MILITARY_TREATMENT_FACILITY = 24                                                      [(string_value) = "26"];
+  TWO_DIGIT_PLAN_OF_SERVICE_SKILLED_NURSING_FACILITY = 25                                                         [(string_value) = "31"];
+  TWO_DIGIT_PLAN_OF_SERVICE_NURSING_FACILITY = 26                                                                 [(string_value) = "32"];
+  TWO_DIGIT_PLAN_OF_SERVICE_CUSTODIAL_CARE_FACILITY = 27                                                          [(string_value) = "33"];
+  TWO_DIGIT_PLAN_OF_SERVICE_HOSPICE = 28                                                                          [(string_value) = "34"];
+  TWO_DIGIT_PLAN_OF_SERVICE_AMBULANCE_LAND = 29                                                                   [(string_value) = "41"];
+  TWO_DIGIT_PLAN_OF_SERVICE_AMBULANCE_AIR_OR_WATER = 30                                                           [(string_value) = "42"];
+  TWO_DIGIT_PLAN_OF_SERVICE_INDEPENDENT_CLINIC = 31                                                               [(string_value) = "49"];
+  TWO_DIGIT_PLAN_OF_SERVICE_FEDERALLY_QUALIFIED_HEALTH_CENTER = 32                                                [(string_value) = "50"];
+  TWO_DIGIT_PLAN_OF_SERVICE_INPATIENT_PSYCHIATRIC_FACILITY = 33                                                   [(string_value) = "51"];
+  TWO_DIGIT_PLAN_OF_SERVICE_PSYCHIATRIC_FACILITY_PARTIAL_HOSPITALIZATION = 34                                     [(string_value) = "52"];
+  TWO_DIGIT_PLAN_OF_SERVICE_COMMUNITY_MENTAL_HEALTH_CENTER = 35                                                   [(string_value) = "53"];
+  TWO_DIGIT_PLAN_OF_SERVICE_INTERMEDIATE_HEALTH_CARE_FACILITY_OR_INDIVIDUALS_WITH_INTELLECTUAL_DISABILITIES = 36  [(string_value) = "54"];
+  TWO_DIGIT_PLAN_OF_SERVICE_RESIDENTIAL_SUBSTANCE_ABUSE_TREATMENT_FACILITY = 37                                   [(string_value) = "55"];
+  TWO_DIGIT_PLAN_OF_SERVICE_PSYCHIATRIC_RESIDENTIAL_TREATMENT_CENTER = 38                                         [(string_value) = "56"];
+  TWO_DIGIT_PLAN_OF_SERVICE_NON_RESIDENTIAL_SUBSTANCE_ABUSE_TREATMENT_FACILITY = 39                               [(string_value) = "57"];
+  TWO_DIGIT_PLAN_OF_SERVICE_OPIOID_TREATMENT_FACILITY = 40                                                        [(string_value) = "58"];
+  TWO_DIGIT_PLAN_OF_SERVICE_MASS_IMMUNIZATION_CENTER = 41                                                         [(string_value) = "60"];
+  TWO_DIGIT_PLAN_OF_SERVICE_COMPREHENSIVE_INPATIENT_REHABILITATION_FACILITY = 42                                  [(string_value) = "61"];
+  TWO_DIGIT_PLAN_OF_SERVICE_COMPREHENSIVE_OUTPATIENT_REHABILITATION_FACILITY = 43                                 [(string_value) = "62"];
+  TWO_DIGIT_PLAN_OF_SERVICE_END_STAGE_RENAL_DISEASE_TREATMENT_FACILITY = 44                                       [(string_value) = "65"];
+  TWO_DIGIT_PLAN_OF_SERVICE_STATE_OR_LOCAL_PUBLIC_HEALTH_CLINIC = 45                                              [(string_value) = "71"];
+  TWO_DIGIT_PLAN_OF_SERVICE_RURAL_HEALTH_CLINIC = 46                                                              [(string_value) = "72"];
+  TWO_DIGIT_PLAN_OF_SERVICE_INDEPENDENT_LABORATORY = 47                                                           [(string_value) = "81"];
+  TWO_DIGIT_PLAN_OF_SERVICE_OTHER_UNLISTED_FACILITY = 48                                                          [(string_value) = "99"];
+}

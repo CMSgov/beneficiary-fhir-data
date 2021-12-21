@@ -86,7 +86,8 @@ public class RdaService extends RDAServiceGrpc.RDAServiceImplBase {
     private void sendResponses() {
       if (running.get()) {
         try {
-          while (responseObserver.isReady()
+          while (running.get()
+              && responseObserver.isReady()
               && !responseObserver.isCancelled()
               && !cancelled.get()
               && generator.hasNext()) {
