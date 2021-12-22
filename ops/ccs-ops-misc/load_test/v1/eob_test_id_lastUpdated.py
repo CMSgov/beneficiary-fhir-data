@@ -20,7 +20,9 @@ class BFDUser(HttpUser):
             errors.no_data_stop_test(self)
 
         id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/ExplanationOfBenefit?patient={id}&_count=10&_format=application%2Ffhir%2Bjson&_lastUpdated=gt{last_updated}',
+        response = self.client.get(f'/v1/fhir/ExplanationOfBenefit?_lastUpdated=gt{last_updated}&patient={id}&_format=json',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/ExplanationOfBenefit search by id / count=10 / lastUpdated (2 weeks)')
+                name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated')
+    
+

@@ -8,18 +8,18 @@ from locust import HttpUser, task
 server_public_key = setup.loadServerPublicKey()
 setup.disable_no_cert_warnings(server_public_key, urllib3)
 
-mbis = data.load_mbis()
+eob_ids = data.load_bene_ids()
 client_cert = setup.getClientCert()
 setup.set_locust_env(config.load())
 
 class BFDUser(HttpUser):
     @task
-    def patient(self):
-        if len(mbis) == 0:
+    def explanation_of_benefit(self):
+        if len(eob_ids) == 0:
             errors.no_data_stop_test(self)
 
-        hashed_mbi = mbis.pop()
-        self.client.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C%0A{hashed_mbi}&_IncludeIdentifiers=mbi',
+        id = eob_ids.pop()
+        self.client.get(f'/v2/fhir/ExplanationOfBenefit?patient={id}&_format=application%2Ffhir%2Bjson',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/Patient search by hashed mbi / _IncludeIdentifiers=mbi')
+                name='/v2/fhir/ExplanationOfBenefit search by id')

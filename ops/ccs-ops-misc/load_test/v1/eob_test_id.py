@@ -11,15 +11,18 @@ setup.disable_no_cert_warnings(server_public_key, urllib3)
 eob_ids = data.load_bene_ids()
 client_cert = setup.getClientCert()
 setup.set_locust_env(config.load())
+last_updated = data.get_last_updated()
 
 class BFDUser(HttpUser):
     @task
-    def patient(self):
+    def explanation_of_benefit(self):
         if len(eob_ids) == 0:
             errors.no_data_stop_test(self)
 
         id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/Patient?_id={id}&_format=application%2Ffhir%2Bjson&_IncludeIdentifiers=true',
+        response = self.client.get(f'/v1/fhir/ExplanationOfBenefit?patient={id}&_format=json',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/Patient search by id / _IncludeIdentifiers=true')
+                name='/v1/fhir/ExplanationOfBenefit search by id')
+    
+

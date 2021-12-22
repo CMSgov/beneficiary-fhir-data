@@ -11,6 +11,7 @@ setup.disable_no_cert_warnings(server_public_key, urllib3)
 eob_ids = data.load_bene_ids()
 client_cert = setup.getClientCert()
 setup.set_locust_env(config.load())
+last_updated = data.get_last_updated()
 
 class BFDUser(HttpUser):
     @task
@@ -19,7 +20,9 @@ class BFDUser(HttpUser):
             errors.no_data_stop_test(self)
 
         id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/ExplanationOfBenefit?_IncludeTaxNumbers=false&_lastUpdated=false&service-date=false&patient={id}&_format=application%2Ffhir%2Bjson',
+        response = self.client.get(f'/v1/fhir/ExplanationOfBenefit?patient={id}&_types=PDE&_count=50&_format=json',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/ExplanationOfBenefit search by id / _IncludeTaxNumbers=false / _lastUpdated=false / service-date=false')
+                name='/v1/fhir/ExplanationOfBenefit search by id / type = PDE / count = 50')
+    
+

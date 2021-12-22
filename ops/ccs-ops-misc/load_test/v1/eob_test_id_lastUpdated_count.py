@@ -1,8 +1,8 @@
 import urllib3
 import common.config as config
-import common.test_setup as setup
 import common.data as data
 import common.errors as errors
+import common.test_setup as setup
 from locust import HttpUser, task
 
 server_public_key = setup.loadServerPublicKey()
@@ -15,12 +15,14 @@ last_updated = data.get_last_updated()
 
 class BFDUser(HttpUser):
     @task
-    def coverage(self):
+    def explanation_of_benefit(self):
         if len(eob_ids) == 0:
             errors.no_data_stop_test(self)
 
         id = eob_ids.pop()
-        self.client.get(f'/v2/fhir/Coverage?beneficiary={id}&_lastUpdated=gt{last_updated}&_count=100',
+        response = self.client.get(f'/v1/fhir/ExplanationOfBenefit?_lastUpdated=gt{last_updated}&patient={id}&_count=100&_format=json',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/Coverage search by id / lastUpdated (2 weeks) / count=100')
+                name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / count = 100')
+    
+

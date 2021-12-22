@@ -20,9 +20,9 @@ class BFDUser(HttpUser):
             errors.no_data_stop_test(self)
 
         id = eob_ids.pop()
-        response = self.client.get(f'/v1/fhir/ExplanationOfBenefit?_lastUpdated=gt{last_updated}&excludeSAMHSA=true&patient={id}&_format=json',
+        response = self.client.get(f'/v1/fhir/ExplanationOfBenefit?_lastUpdated=gt{last_updated}&patient={id}&_IncludeTaxNumbers=true&_format=json',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v1/fhir/ExplanationOfBenefit search by lastUpdated excludeSAMHSA=true patient={id}')
+                name='/v1/fhir/ExplanationOfBenefit search by id / lastUpdated / includeTaxNumbers = true')
     
 
