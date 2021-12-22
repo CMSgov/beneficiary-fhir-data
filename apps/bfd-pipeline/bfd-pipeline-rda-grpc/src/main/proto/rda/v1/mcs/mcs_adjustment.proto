@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+message McsAdjustment {
+  optional string idr_adj_date = 1;
+  optional string idr_xref_icn = 2;
+  optional string idr_adj_clerk = 3;
+  optional string idr_init_ccn = 4;
+  optional string idr_adj_chk_wrt_dt = 5;
+  optional string idr_adj_b_eomb_amt = 6;
+  optional string idr_adj_p_eomb_amt = 7;
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS Adjustment Medicare Beneficiary Identifier (MBI) Indicator
+enum FissAdjustmentMedicareBeneficiaryIdentifierIndicator {
+  ADJUSTMENT_MBI_INDICATOR_HIC_SUBMITTED_ON_ADJUSTMENT_OR_CANCEL_CLAIM = 0  [(string_value) = "H"];
+
+  ADJUSTMENT_MBI_INDICATOR_MBI_SUBMITTED_ON_ADJUSTMENT_OR_CANCEL_CLAIM = 1  [(string_value) = "M"];
+}

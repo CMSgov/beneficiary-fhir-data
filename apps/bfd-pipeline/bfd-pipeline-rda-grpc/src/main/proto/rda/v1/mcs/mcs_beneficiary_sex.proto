@@ -7,9 +7,7 @@ option java_multiple_files = true;
 import "rda/v1/enum_options.proto";
 
 enum McsBeneficiarySex {
-  // ASCII M
   BENEFICIARY_SEX_MALE = 0   [(string_value) = "M"];
 
-  // ASCII F
   BENEFICIARY_SEX_FEMALE = 1 [(string_value) = "F"];
 }
