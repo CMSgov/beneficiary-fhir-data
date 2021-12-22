@@ -33,7 +33,7 @@ rm vault.password
 
 # Set login environment for all users:
 # 1. make BFD_ENV_NAME available to all logins
-# 2. change prompt color based on environment (red for prod, yellow for prod-sbx, purple for test)
+# 2. change prompt color based on environment (red for prod and yellow for prod-sbx)
 cat <<EOF > /etc/profile.d/set-bfd-login-env.sh
 # make BFD_ENV_NAME available to all logins
 export BFD_ENV_NAME="${env}"
@@ -43,7 +43,6 @@ if [[ \$- == *i* ]]; then
 	case "\$BFD_ENV_NAME" in
 		"prod") export PS1="[\[\033[1;31m\]\u@\h\[\033[00m\]:\[\033[1;31m\]\w\[\033[00m\]] " ;;
 		"prod-sbx") export PS1="[\[\033[0;33m\]\u@\h\[\033[00m\]:\[\033[0;33m\]\w\[\033[00m\]] " ;;
-		"test") export PS1="[\[\033[0;35m\]\u@\h\[\033[00m\]:\[\033[0;35m\]\w\[\033[00m\]] " ;;
 	esac
 fi
 EOF
