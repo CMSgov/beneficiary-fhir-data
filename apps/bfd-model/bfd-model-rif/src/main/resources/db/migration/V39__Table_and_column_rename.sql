@@ -12,134 +12,93 @@
 -- Drop foreign key constraints
 --
 ALTER TABLE public."BeneficiariesHistory"
-    DROP CONSTRAINT "BeneficiariesHistory_beneficiaryId_to_Beneficiary";
+    drop constraint "BeneficiariesHistory_beneficiaryId_to_Beneficiary";
 
 ALTER TABLE public."BeneficiaryMonthly"
-    DROP CONSTRAINT "BeneficiaryMonthly_parentBeneficiary_to_Beneficiary";
+    drop constraint "BeneficiaryMonthly_parentBeneficiary_to_Beneficiary";
 
 ALTER TABLE public."CarrierClaimLines"
-    DROP CONSTRAINT "CarrierClaimLines_parentClaim_to_CarrierClaims";
+    drop constraint "CarrierClaimLines_parentClaim_to_CarrierClaims";
 
 ALTER TABLE public."CarrierClaims"
-    DROP CONSTRAINT "CarrierClaims_beneficiaryId_to_Beneficiaries";
+    drop constraint "CarrierClaims_beneficiaryId_to_Beneficiaries";
 
 ALTER TABLE public."DMEClaimLines"
-    DROP CONSTRAINT "DMEClaimLines_parentClaim_to_DMEClaims";
+    drop constraint "DMEClaimLines_parentClaim_to_DMEClaims";
 
 ALTER TABLE public."DMEClaims"
-    DROP CONSTRAINT "DMEClaims_beneficiaryId_to_Beneficiaries";
+    drop constraint "DMEClaims_beneficiaryId_to_Beneficiaries";
 
 ALTER TABLE public."HHAClaimLines"
-    DROP CONSTRAINT "HHAClaimLines_parentClaim_to_HHAClaims";
+    drop constraint "HHAClaimLines_parentClaim_to_HHAClaims";
 
 ALTER TABLE public."HHAClaims"
-    DROP CONSTRAINT "HHAClaims_beneficiaryId_to_Beneficiaries";
+    drop constraint "HHAClaims_beneficiaryId_to_Beneficiaries";
 
 ALTER TABLE public."HospiceClaimLines"
-    DROP CONSTRAINT "HospiceClaimLines_parentClaim_to_HospiceClaims";
+    drop constraint "HospiceClaimLines_parentClaim_to_HospiceClaims";
 
 ALTER TABLE public."HospiceClaims"
-    DROP CONSTRAINT "HospiceClaims_beneficiaryId_to_Beneficiaries";
+    drop constraint "HospiceClaims_beneficiaryId_to_Beneficiaries";
 
 ALTER TABLE public."InpatientClaimLines"
-    DROP CONSTRAINT "InpatientClaimLines_parentClaim_to_InpatientClaims";
+    drop constraint "InpatientClaimLines_parentClaim_to_InpatientClaims";
 
 ALTER TABLE public."InpatientClaims"
-    DROP CONSTRAINT "InpatientClaims_beneficiaryId_to_Beneficiaries";
+    drop constraint "InpatientClaims_beneficiaryId_to_Beneficiaries";
 
 ALTER TABLE public."MedicareBeneficiaryIdHistory"
-    DROP CONSTRAINT "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary";
+    drop constraint "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary";
 
 ALTER TABLE public."OutpatientClaimLines"
-    DROP CONSTRAINT "OutpatientClaimLines_parentClaim_to_OutpatientClaims";
+    drop constraint "OutpatientClaimLines_parentClaim_to_OutpatientClaims";
 
 ALTER TABLE public."OutpatientClaims"
-    DROP CONSTRAINT "OutpatientClaims_beneficiaryId_to_Beneficiaries";
+    drop constraint "OutpatientClaims_beneficiaryId_to_Beneficiaries";
 
 ALTER TABLE public."PartDEvents"
-    DROP CONSTRAINT "PartDEvents_beneficiaryId_to_Beneficiaries";
+    drop constraint "PartDEvents_beneficiaryId_to_Beneficiaries";
 
 ALTER TABLE public."SNFClaimLines"
-    DROP CONSTRAINT "SNFClaimLines_parentClaim_to_SNFClaims";
+    drop constraint "SNFClaimLines_parentClaim_to_SNFClaims";
 
 ALTER TABLE public."SNFClaims"
-    DROP CONSTRAINT "SNFClaims_beneficiaryId_to_Beneficiaries";
+    drop constraint "SNFClaims_beneficiaryId_to_Beneficiaries";
 
 ALTER TABLE public."LoadedBatches"
-    DROP CONSTRAINT "loadedBatches_loadedFileId";
+    drop constraint "loadedBatches_loadedFileId";
 --
 -- Drop primary key constraints; hsql does not support rename constraint
 --
-ALTER TABLE public."BeneficiariesHistoryInvalidBeneficiaries"
-    DROP CONSTRAINT "BeneficiariesHistoryInvalidBeneficiaries_pkey";
-
-ALTER TABLE public."BeneficiariesHistory"
-    DROP CONSTRAINT "BeneficiariesHistory_pkey";
-
-ALTER TABLE public."Beneficiaries"
-    DROP CONSTRAINT "Beneficiaries_pkey";
-
-ALTER TABLE public."BeneficiaryMonthly"
-    DROP CONSTRAINT "BeneficiaryMonthly_pkey";
-
-ALTER TABLE public."CarrierClaimLines"
-    DROP CONSTRAINT "CarrierClaimLines_pkey";
-
-ALTER TABLE public."CarrierClaims"
-    DROP CONSTRAINT "CarrierClaims_pkey";
-
-ALTER TABLE public."DMEClaimLines"
-    DROP CONSTRAINT "DMEClaimLines_pkey";
-
-ALTER TABLE public."DMEClaims"
-    DROP CONSTRAINT "DMEClaims_pkey";
-
-ALTER TABLE public."HHAClaimLines"
-    DROP CONSTRAINT "HHAClaimLines_pkey";
-
-ALTER TABLE public."HHAClaims"
-    DROP CONSTRAINT "HHAClaims_pkey";
-
-ALTER TABLE public."HospiceClaimLines"
-    DROP CONSTRAINT "HospiceClaimLines_pkey";
-
-ALTER TABLE public."HospiceClaims"
-    DROP CONSTRAINT "HospiceClaims_pkey";
-
-ALTER TABLE public."InpatientClaimLines"
-    DROP CONSTRAINT "InpatientClaimLines_pkey";
-
-ALTER TABLE public."InpatientClaims"
-    DROP CONSTRAINT "InpatientClaims_pkey";
-
--- FIX THIS
-/*
-ALTER TABLE public."LoadedBatches"
-    DROP CONSTRAINT "LoadedBatches_pkey";
-
-ALTER TABLE public."LoadedFiles"
-    DROP CONSTRAINT "LoadedFiles_pkey";
-*/
-ALTER TABLE public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries"
-    DROP CONSTRAINT "MedicareBeneficiaryIdHistoryInvalidBeneficiaries_pkey";
-
-ALTER TABLE public."MedicareBeneficiaryIdHistory"
-    DROP CONSTRAINT "MedicareBeneficiaryIdHistory_pkey";
-
-ALTER TABLE public."OutpatientClaimLines"
-    DROP CONSTRAINT "OutpatientClaimLines_pkey";
-
-ALTER TABLE public."OutpatientClaims"
-    DROP CONSTRAINT "OutpatientClaims_pkey";
-
-ALTER TABLE public."PartDEvents"
-    DROP CONSTRAINT "PartDEvents_pkey";
-
-ALTER TABLE public."SNFClaimLines"
-    DROP CONSTRAINT "SNFClaimLines_pkey";
-
-ALTER TABLE public."SNFClaims"
-    DROP CONSTRAINT "SNFClaims_pkey";
+--      hsql: alter table public."BeneficiariesHistoryInvalidBeneficiaries" drop constraint "BeneficiariesHistoryInvalidBeneficiaries_pkey";
+--
+--      ${logic.hsql-only-alter}
+--          psql: "--"
+--          hsql: "alter"
+--
+${logic.hsql-only-alter} table public."BeneficiariesHistoryInvalidBeneficiaries" drop constraint "BeneficiariesHistoryInvalidBeneficiaries_pkey";
+${logic.hsql-only-alter} table public."BeneficiariesHistory" drop constraint "BeneficiariesHistory_pkey";
+${logic.hsql-only-alter} table public."Beneficiaries" drop constraint "Beneficiaries_pkey";
+${logic.hsql-only-alter} table public."BeneficiaryMonthly" drop constraint "BeneficiaryMonthly_pkey";
+${logic.hsql-only-alter} table public."CarrierClaimLines" drop constraint "CarrierClaimLines_pkey";
+${logic.hsql-only-alter} table public."CarrierClaims" drop constraint "CarrierClaims_pkey";
+${logic.hsql-only-alter} table public."DMEClaimLines" drop constraint "DMEClaimLines_pkey";
+${logic.hsql-only-alter} table public."DMEClaims" drop constraint "DMEClaims_pkey";
+${logic.hsql-only-alter} table public."HHAClaimLines" drop constraint "HHAClaimLines_pkey";
+${logic.hsql-only-alter} table public."HHAClaims" drop constraint "HHAClaims_pkey";
+${logic.hsql-only-alter} table public."HospiceClaimLines" drop constraint "HospiceClaimLines_pkey";
+${logic.hsql-only-alter} table public."HospiceClaims" drop constraint "HospiceClaims_pkey";
+${logic.hsql-only-alter} table public."InpatientClaimLines" drop constraint "InpatientClaimLines_pkey";
+${logic.hsql-only-alter} table public."InpatientClaims" drop constraint "InpatientClaims_pkey";
+${logic.hsql-only-alter} table public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries" drop constraint "MedicareBeneficiaryIdHistoryInvalidBeneficiaries_pkey";
+${logic.hsql-only-alter} table public."MedicareBeneficiaryIdHistory" drop constraint "MedicareBeneficiaryIdHistory_pkey";
+${logic.hsql-only-alter} table public."OutpatientClaimLines" drop constraint "OutpatientClaimLines_pkey";
+${logic.hsql-only-alter} table public."OutpatientClaims" drop constraint "OutpatientClaims_pkey";
+${logic.hsql-only-alter} table public."PartDEvents" drop constraint "PartDEvents_pkey";
+${logic.hsql-only-alter} table public."SNFClaimLines" drop constraint "SNFClaimLines_pkey";
+${logic.hsql-only-alter} table public."SNFClaims" drop constraint "SNFClaims_pkey";
+--${logic.hsql-only-alter} table public."LoadedBatches" drop constraint "LoadedBatches_pkey";
+--${logic.hsql-only-alter} table public."LoadedFiles" drop constraint "LoadedFiles_pkey";
 --
 -- Rename tables and table columns
 --
@@ -1781,76 +1740,66 @@ alter table public.medicare_beneficiaryid_history_invalid_beneficiaries ${logic.
 alter table public.medicare_beneficiaryid_history_invalid_beneficiaries ${logic.alter-rename-column} "mbiUpdateUser" ${logic.rename-to} updt_user_id;
 alter table public.medicare_beneficiaryid_history_invalid_beneficiaries ${logic.alter-rename-column} "mbiUpdateDate" ${logic.rename-to} updt_ts;
 --
--- take care of primary jeys
+-- take care of primary keys
 --
-ALTER TABLE public.beneficiaries
-    ADD CONSTRAINT beneficiaries_pkey PRIMARY KEY (bene_id);
-  
-ALTER TABLE public.beneficiaries_history
-    ADD CONSTRAINT beneficiaries_history_pkey PRIMARY KEY (bene_history_id);
-    
-ALTER TABLE public.beneficiaries_history_invalid_beneficiaries
-    ADD CONSTRAINT beneficiaries_history_invalid_beneficiaries_pkey PRIMARY KEY (bene_history_id);
-    
-ALTER TABLE public.beneficiary_monthly
-    ADD CONSTRAINT beneficiary_monthly_pkey PRIMARY KEY (bene_id, year_month);
-    
-ALTER TABLE public.carrier_claim_lines
-    ADD CONSTRAINT carrier_claim_lines_pkey PRIMARY KEY (clm_id, line_num);
-    
-ALTER TABLE public.carrier_claims
-    ADD CONSTRAINT carrier_claims_pkey PRIMARY KEY (clm_id);
-    
-ALTER TABLE public.dme_claim_lines
-    ADD CONSTRAINT dme_claim_lines_pkey PRIMARY KEY (clm_id, line_num);
-    
-ALTER TABLE public.dme_claims
-    ADD CONSTRAINT dme_claims_pkey PRIMARY KEY (clm_id);
-    
-ALTER TABLE public.hha_claim_lines
-    ADD CONSTRAINT hha_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-    
-ALTER TABLE public.hha_claims
-    ADD CONSTRAINT hha_claims_pkey PRIMARY KEY (clm_id);
-    
-ALTER TABLE public.hospice_claim_lines
-    ADD CONSTRAINT hospice_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-    
-ALTER TABLE public.hospice_claims
-    ADD CONSTRAINT hospice_claims_pkey PRIMARY KEY (clm_id);
-    
-ALTER TABLE public.inpatient_claim_lines
-    ADD CONSTRAINT inpatient_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-    
-ALTER TABLE public.inpatient_claims
-    ADD CONSTRAINT npatient_claims_pkey PRIMARY KEY (clm_id);
-/* 
-ALTER TABLE public.loaded_batches
-    ADD CONSTRAINT loaded_batches_pkey PRIMARY KEY (loaded_batchid);
-    
-ALTER TABLE public.loaded_files
-    ADD CONSTRAINT loaded_files_pkey PRIMARY KEY (loaded_fileid);
-*/   
-ALTER TABLE public.medicare_beneficiaryid_history_invalid_beneficiaries
-    ADD CONSTRAINT medicare_beneficiaryid_history_invalid_beneficiaries_pkey PRIMARY KEY (bene_mbi_id);
-    
-ALTER TABLE public.medicare_beneficiaryid_history
-    ADD CONSTRAINT medicare_beneficiaryid_history_pkey PRIMARY KEY (bene_mbi_id);
-    
-ALTER TABLE public.outpatient_claim_lines
-    ADD CONSTRAINT outpatient_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-    
-ALTER TABLE public.outpatient_claims
-    ADD CONSTRAINT outpatient_claims_pkey PRIMARY KEY (clm_id);
-    
-ALTER TABLE public.partd_events
-    ADD CONSTRAINT ppartd_events_pkey PRIMARY KEY (pde_id);
-    
-ALTER TABLE public.snf_claim_lines
-    ADD CONSTRAINT snf_claim_lines_pkey PRIMARY KEY (clm_id, clm_line_num);
-    
-ALTER TABLE public.snf_claims
-    ADD CONSTRAINT snf_claims_pkey PRIMARY KEY (clm_id);
+-- For hsql we need to (re-) create the primary key constraint since we deleted them at
+-- beginning of script. For psql, we can just do a rename.
+--
+--      {alter-rename-index}
+--          psql: "alter index if exists"
+--          hsql: "--"
+--
+${logic.alter-rename-index} public."BeneficiariesHistoryInvalidBeneficiaries_pkey" rename to beneficiaries_history_invalid_beneficiaries_pkey;
+${logic.alter-rename-index} public."BeneficiariesHistory_pkey" rename to beneficiaries_history_pkey;
+${logic.alter-rename-index} public."Beneficiaries_pkey" rename to beneficiaries_pkey;
+${logic.alter-rename-index} public."BeneficiaryMonthly_pkey" rename to beneficiary_monthly_pkey;
+${logic.alter-rename-index} public."CarrierClaimLines_pkey"rename to carrier_claim_lines_pkey;
+${logic.alter-rename-index} public."CarrierClaims_pkey" rename to carrier_claims_pkey;
+${logic.alter-rename-index} public."DMEClaimLines_pkey" rename to dme_claim_lines_pkey;
+${logic.alter-rename-index} public."DMEClaims_pkey" rename to dme_claims_pkey;
+${logic.alter-rename-index} public."HHAClaimLines_pkey" rename to hha_claim_lines_pkey;
+${logic.alter-rename-index} public."HHAClaims_pkey" rename to hha_claims_pkey;
+${logic.alter-rename-index} public."HospiceClaimLines_pkey" rename to hospice_claim_lines_pkey;
+${logic.alter-rename-index} public."HospiceClaims_pkey" rename to hospice_claims_pkey;
+${logic.alter-rename-index} public."InpatientClaimLines_pkey" rename to inpatient_claim_lines_pkey;
+${logic.alter-rename-index} public."InpatientClaims_pkey" rename to inpatient_claims_pkey;
+${logic.alter-rename-index} public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries_pkey" rename to medicare_beneficiaryid_history_invalid_beneficiaries_pkey;
+${logic.alter-rename-index} public."MedicareBeneficiaryIdHistory_pkey" rename to medicare_beneficiaryid_history_pkey;
+${logic.alter-rename-index} public."OutpatientClaimLines_pkey" rename to outpatient_claim_lines_pkey;
+${logic.alter-rename-index} public."OutpatientClaims_pkey" rename to outpatient_claims_pkey;
+${logic.alter-rename-index} public."PartDEvents_pkey" rename to partd_events_pkey;
+${logic.alter-rename-index} public."SNFClaimLines_pkey" rename to snf_claim_lines_pkey;
+${logic.alter-rename-index} public."SNFClaims_pkey" rename to snf_claims_pkey;
+${logic.alter-rename-index} public."LoadedBatches_pkey" rename to loaded_batches_pkey;
+${logic.alter-rename-index} public."LoadedFiles_pkey" rename to loaded_files_pkey;
+--
+--      ${logic.hsql-only-alter}
+--          psql: "--"
+--          hsql: "alter"
+--
+${logic.hsql-only-alter} table public.beneficiaries add constraint beneficiaries_pkey primary key (bene_id);
+${logic.hsql-only-alter} table public.beneficiaries_history add constraint beneficiaries_history_pkey primary key (bene_history_id);  
+${logic.hsql-only-alter} table public.beneficiaries_history_invalid_beneficiaries add constraint beneficiaries_history_invalid_beneficiaries_pkey primary key (bene_history_id); 
+${logic.hsql-only-alter} table public.beneficiary_monthly add constraint beneficiary_monthly_pkey primary key (bene_id, year_month);
+${logic.hsql-only-alter} table public.carrier_claim_lines add constraint carrier_claim_lines_pkey primary key (clm_id, line_num);
+${logic.hsql-only-alter} table public.carrier_claims add constraint carrier_claims_pkey primary key (clm_id);
+${logic.hsql-only-alter} table public.dme_claim_lines add constraint dme_claim_lines_pkey primary key (clm_id, line_num);
+${logic.hsql-only-alter} table public.dme_claims add constraint dme_claims_pkey primary key (clm_id);
+${logic.hsql-only-alter} table public.hha_claim_lines add constraint hha_claim_lines_pkey primary key (clm_id, clm_line_num); 
+${logic.hsql-only-alter} table public.hha_claims add constraint hha_claims_pkey primary key (clm_id);  
+${logic.hsql-only-alter} table public.hospice_claim_lines add constraint hospice_claim_lines_pkey primary key (clm_id, clm_line_num); 
+${logic.hsql-only-alter} table public.hospice_claims add constraint hospice_claims_pkey primary key (clm_id); 
+${logic.hsql-only-alter} table public.inpatient_claim_lines add constraint inpatient_claim_lines_pkey primary key (clm_id, clm_line_num); 
+${logic.hsql-only-alter} table public.inpatient_claims add constraint npatient_claims_pkey primary key (clm_id); 
+${logic.hsql-only-alter} table public.medicare_beneficiaryid_history_invalid_beneficiaries add constraint medicare_beneficiaryid_history_invalid_beneficiaries_pkey primary key (bene_mbi_id); 
+${logic.hsql-only-alter} table public.medicare_beneficiaryid_history add constraint medicare_beneficiaryid_history_pkey primary key (bene_mbi_id);   
+${logic.hsql-only-alter} table public.outpatient_claim_lines add constraint outpatient_claim_lines_pkey primary key (clm_id, clm_line_num); 
+${logic.hsql-only-alter} table public.outpatient_claims add constraint outpatient_claims_pkey primary key (clm_id); 
+${logic.hsql-only-alter} table public.partd_events add constraint partd_events_pkey primary key (pde_id); 
+${logic.hsql-only-alter} table public.snf_claim_lines add constraint snf_claim_lines_pkey primary key (clm_id, clm_line_num); 
+${logic.hsql-only-alter} table public.snf_claims add constraint snf_claims_pkey primary key (clm_id);
+--${logic.hsql-only-alter} table public.loaded_batches add constraint loaded_batches_pkey primary key (loaded_batchid);
+--${logic.hsql-only-alter} table public.loaded_files add constraint loaded_files_pkey primary key (loaded_fileid);
 --
 -- rename indexes (index names are limited to 64 chars)
 --
