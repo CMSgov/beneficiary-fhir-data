@@ -6,6 +6,8 @@ option java_multiple_files = true;
 
 import "rda/v1/mcs/mcs_detail_status.proto";
 import "rda/v1/mcs/mcs_diagnosis_icd_type.proto";
+import "rda/v1/mcs/mcs_two_digit_plan_of_service.proto";
+import "rda/v1/mcs/mcs_type_of_service.proto";
 
 message McsDetail {
   oneof idr_dtl_status {
@@ -33,4 +35,28 @@ message McsDetail {
   optional string idr_k_pos_city = 32;
   optional string idr_k_pos_state = 33;
   optional string idr_k_pos_zip = 34;
+  oneof idr_tos {
+    McsTypeOfService idr_tos_enum = 37;
+    string idr_tos_unrecognized = 38;
+  };
+  oneof idr_two_digit_pos {
+    McsTwoDigitPlanOfService idr_two_digit_pos_enum = 39;
+    string idr_two_digit_pos_unrecognized = 40;
+  };
+  optional string idr_dtl_rend_type = 41;
+  optional string idr_dtl_rend_spec = 42;
+  optional string idr_dtl_rend_npi = 43;
+  optional string idr_dtl_rend_prov = 44;
+  optional string idr_k_dtl_fac_prov_npi = 45;
+  optional string idr_dtl_amb_pickup_addres_1 = 51;
+  optional string idr_dtl_amb_pickup_addres_2 = 52;
+  optional string idr_dtl_amb_pickup_city = 53;
+  optional string idr_dtl_amb_pickup_state = 54;
+  optional string idr_dtl_amb_pickup_zipcode = 55;
+  optional string idr_dtl_amb_dropoff_name = 56;
+  optional string idr_dtl_amb_dropoff_addr_l1 = 57;
+  optional string idr_dtl_amb_dropoff_addr_l2 = 58;
+  optional string idr_dtl_amb_dropoff_city = 59;
+  optional string idr_dtl_amb_dropoff_state = 60;
+  optional string idr_dtl_amb_dropoff_zipcode = 61;
 }

@@ -198,7 +198,7 @@ public class SchemaMigrationIT {
     assertEquals(1, resultClaims.size());
     PreAdjMcsClaim resultClaim = resultClaims.get(0);
     assertEquals("0:P,1:Q,2:R", summarizeMcsDetails(resultClaim));
-    assertEquals("0:T,1:U,2:V", summarizeMcsDiagCodes(resultClaim));
+    assertEquals("0:T:0,1:U:1,2:V:2", summarizeMcsDiagCodes(resultClaim));
 
     // Remove a detail and diagCode and modify the remaining ones, update, and read back to verify
     // all records updated correctly.
@@ -219,7 +219,7 @@ public class SchemaMigrationIT {
     resultClaim = resultClaims.get(0);
     assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
     assertEquals("0:P,2:S", summarizeMcsDetails(resultClaim));
-    assertEquals("0:W,1:U", summarizeMcsDiagCodes(resultClaim));
+    assertEquals("0:W:0,1:U:1", summarizeMcsDiagCodes(resultClaim));
   }
 
   private PreAdjMcsDetail quickMcsDetail(PreAdjMcsClaim claim, int priority, String dtlStatus) {
@@ -236,6 +236,7 @@ public class SchemaMigrationIT {
         .idrClmHdIcn(claim.getIdrClmHdIcn())
         .priority((short) priority)
         .idrDiagIcdType(icdType)
+        .idrDiagCode(String.valueOf(priority))
         .build();
   }
 
@@ -266,7 +267,7 @@ public class SchemaMigrationIT {
   private String summarizeMcsDiagCodes(PreAdjMcsClaim resultClaim) {
     return summarizeObjects(
         resultClaim.getDiagCodes().stream(),
-        d -> format("%d:%s", d.getPriority(), d.getIdrDiagIcdType()));
+        d -> format("%d:%s:%s", d.getPriority(), d.getIdrDiagIcdType(), d.getIdrDiagCode()));
   }
 
   private <T> String summarizeObjects(Stream<T> objects, Function<T, String> mapping) {
