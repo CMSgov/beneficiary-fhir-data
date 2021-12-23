@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
+/** JPA class for the McsDiagnosisCodes table */
 @Entity
 @Getter
 @Setter
@@ -40,18 +41,19 @@ public class PreAdjMcsDiagnosisCode {
   @Column(name = "`idrDiagIcdType`", length = 1)
   private String idrDiagIcdType;
 
-  @Column(name = "`idrDiagCode`", length = 7)
+  @Column(name = "`idrDiagCode`", length = 7, nullable = false)
   private String idrDiagCode;
 
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
+  /** PK class for the McsDiagnosisCodes table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the McsDiagnosisCodes table */
   public static class PK implements Serializable {
     private String idrClmHdIcn;
+
     private short priority;
   }
 }

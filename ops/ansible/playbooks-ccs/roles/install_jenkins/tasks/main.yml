@@ -1,7 +1,0 @@
----
-###
-# Attach and Mount EBS Volume then install all OS packages (including Jenkins itself) and then run plugin task to check for installs and updates. 
-###
-- include_tasks: "jenkins.yml"
-- include_tasks: "tools.yml"
-- include_tasks: "plugins.yml"

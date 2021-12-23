@@ -42,6 +42,7 @@ public class McsClaimRdaSinkIT {
           diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
           diagCode.setPriority((short) 0);
           diagCode.setIdrDiagIcdType("T");
+          diagCode.setIdrDiagCode("D");
           claim.getDiagCodes().add(diagCode);
 
           int count =

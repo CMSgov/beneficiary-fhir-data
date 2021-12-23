@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS Physician Flag
+enum FissPhysicianFlag {
+  PHYSICIAN_FLAG_NO = 0   [(string_value) = "N"];
+}

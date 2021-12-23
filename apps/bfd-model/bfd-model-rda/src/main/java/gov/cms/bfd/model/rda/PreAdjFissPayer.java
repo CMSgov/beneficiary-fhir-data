@@ -42,11 +42,6 @@ public class PreAdjFissPayer {
   @EqualsAndHashCode.Include
   private short priority;
 
-  public enum PayerType {
-    BeneZ,
-    Insured
-  }
-
   @Enumerated(EnumType.STRING)
   @Column(name = "`payerType`", length = 20)
   private PayerType payerType;
@@ -75,50 +70,50 @@ public class PreAdjFissPayer {
   @Column(name = "`estAmtDue`", columnDefinition = "decimal(11,2)")
   private BigDecimal estAmtDue;
 
-  // BeneZ only
+  /** BeneZ only */
   @Column(name = "`beneRel`", length = 2)
   private String beneRel;
 
-  // BeneZ only
+  /** BeneZ only */
   @Column(name = "`beneLastName`", length = 15)
   private String beneLastName;
 
-  // BeneZ only
+  /** BeneZ only */
   @Column(name = "`beneFirstName`", length = 10)
   private String beneFirstName;
 
-  // BeneZ only
+  /** BeneZ only */
   @Column(name = "`beneMidInit`", length = 1)
   private String beneMidInit;
 
-  // BeneZ only
+  /** BeneZ only */
   @Column(name = "`beneSsnHic`", length = 19)
   private String beneSsnHic;
 
-  // Insured only
+  /** Insured only */
   @Column(name = "`insuredRel`", length = 2)
   private String insuredRel;
 
-  // Insured only
+  /** Insured only */
   @Column(name = "`insuredName`", length = 25)
   private String insuredName;
 
-  // Insured only
+  /** Insured only */
   @Column(name = "`insuredSsnHic`", length = 19)
   private String insuredSsnHic;
 
   @Column(name = "`insuredGroupName`", length = 17)
   private String insuredGroupName;
 
-  // Insured only
+  /** Insured only */
   @Column(name = "`insuredGroupNbr`", length = 20)
   private String insuredGroupNbr;
 
-  // BeneZ only
+  /** BeneZ only */
   @Column(name = "`beneDob`")
   private LocalDate beneDob;
 
-  // BeneZ only
+  /** BeneZ only */
   @Column(name = "`beneSex`", length = 1)
   private String beneSex;
 
@@ -131,23 +126,28 @@ public class PreAdjFissPayer {
   @Column(name = "`insuredRelX12`", length = 2)
   private String insuredRelX12;
 
-  // Insured only
   @Column(name = "`insuredDob`")
   private LocalDate insuredDob;
 
-  // Insured only
   @Column(name = "`insuredDobText`", length = 9)
   private String insuredDobText;
 
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
+  /** PK class for the FissPayers table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the FissDiagnosisCodes table */
   public static class PK implements Serializable {
     private String dcn;
+
     private short priority;
+  }
+
+  public enum PayerType {
+    BeneZ,
+
+    Insured
   }
 }
