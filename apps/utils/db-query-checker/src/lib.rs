@@ -48,6 +48,12 @@ pub async fn run_db_query_checker() -> Result<()> {
         .unwrap_or_else(|_| "5".into())
         .parse()
         .expect("Unable to parse environment variable: DB_QUERIES_CONNECTIONS");
+    // added to support synthetic data, which has year like '0003'
+    let start_year: u32 = std::env::var("DB_QUERIES_START_YEAR")
+        .unwrap_or_else(|_| "2020".into())
+        .parse()
+        .expect("Unable to parse environment variable: DB_QUERIES_START_YEAR");
+    let end_year = start_year + 1;
 
     let fmt_layer = fmt::layer()
         .with_writer(std::io::stderr)
@@ -119,11 +125,14 @@ pub async fn run_db_query_checker() -> Result<()> {
 
     let year_months = {
         let mut year_months = vec![];
-        for year in 2020..=2021 {
+        for year in start_year..=end_year {
             for month in &[
                 "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12",
             ] {
-                year_months.push(format!("{}-{}-01", year, month));
+                // need a psql complaint year....i.e., 3 becomes '0003'
+                let yr_str: String = format!("{:04}", year);
+                let date_str: String = format!("{}-{}-01", yr_str, month);
+                year_months.push(date_str);
             }
         }
         year_months

@@ -26,7 +26,20 @@ Then, run these commands to build and run the application:
 $ cd beneficiary-fhir-data.git/apps/utils/db-query-checker/
 $ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
     DB_QUERIES_CONNECTIONS=10 \
-    DB_QUERIES_OUTPUT=results/db_query_checker_2021-07-07-T14-31.csv \
+    DB_QUERIES_OUTPUT=results/db_query_checker_$(date +"%Y-%m-%d-%H-%M").csv \
+    cargo run --release
+```
+* [NOTE] lib.rs dynamically builds a year-month date to be passed into beneficiary_monthly
+  queries. If you are running the checker vs. a db that contains synthetic data, you will
+  need to pass in start year since the default start year of 2020 will not result is any 
+  meaningful tests since no records will be found. To run vs. synthetic data (or to not use
+  the default start date of 2020) pass in the DB_QUERIES_START_YEAR; for example:
+```shell
+$ cd beneficiary-fhir-data.git/apps/utils/db-query-checker/
+$ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
+    DB_QUERIES_CONNECTIONS=10 \
+    DB_QUERIES_START_YEAR=0003 \
+    DB_QUERIES_OUTPUT=results/db_query_checker_$(date +"%Y-%m-%d-%H-%M").csv \
     cargo run --release
 ```
 
