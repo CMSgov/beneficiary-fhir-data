@@ -93,7 +93,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "");
         placeholders.put("logic.alter-column-type", "type");
-        placeholders.put("logic.hsql-only-alter", "--");
+        placeholders.put("logic.hsql-only-alter", "--alter");
         placeholders.put("logic.alter-rename-column", "rename column");
         placeholders.put("logic.alter-rename-constraint", "rename constraint");
         placeholders.put("logic.rename-to", "to");
