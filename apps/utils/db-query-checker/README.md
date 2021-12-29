@@ -32,7 +32,7 @@ $ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
 
 The default behavior for the query checker is to use a year starting at 2020 and continue
 on thru 2021; lib.rs dynamically builds a year-month date within its loop processing which
-is then added to an array of psql formatted date(s), i.e., '20200101'. If you are running
+is then added to an array of psql formatted date(s), i.e., '2020-01-01'. If you are running
 the checker vs. a db that contains synthetic data, you will need to pass in the start year
 since the default start year of 2020 will not result in any meaningful tests since no records
 will be found. To run vs. synthetic data (or to not use the default start date of 2020) pass
