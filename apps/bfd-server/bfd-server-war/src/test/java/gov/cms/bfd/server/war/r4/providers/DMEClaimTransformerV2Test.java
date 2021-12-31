@@ -513,10 +513,9 @@ public final class DMEClaimTransformerV2Test {
     Extension compare =
         new Extension(
             "http://hl7.org/fhir/sid/ndc",
-            new Coding(
-                "http://hl7.org/fhir/sid/ndc",
-                "495800192",
-                "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"));
+            new Coding("http://hl7.org/fhir/sid/ndc", "495800192", null));
+    // "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN
+    // HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"));
 
     Assert.assertTrue(compare.equalsDeep(ex));
   }

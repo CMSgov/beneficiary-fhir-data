@@ -579,12 +579,9 @@ public final class PartDEventTransformerV2Test {
 
     CodeableConcept compare =
         new CodeableConcept()
-            .setCoding(
-                Arrays.asList(
-                    new Coding(
-                        "http://hl7.org/fhir/sid/ndc",
-                        "495800192",
-                        "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE")));
+            .setCoding(Arrays.asList(new Coding("http://hl7.org/fhir/sid/ndc", "495800192", null)));
+    // "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN
+    // HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE")));
 
     Assert.assertTrue(compare.equalsDeep(pos));
   }

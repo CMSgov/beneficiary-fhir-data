@@ -284,9 +284,9 @@ public final class PartDEventTransformerTest {
           eob);
     TransformerTestUtils.assertLastUpdatedEquals(claim.getLastUpdated(), eob);
     try {
-      TransformerTestUtils.assertFDADrugCodeDisplayEquals(
-          claim.getNationalDrugCode(),
-          "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE");
+      TransformerTestUtils.assertFDADrugCodeDisplayEquals(claim.getNationalDrugCode(), null);
+      // "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN
+      // HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE");
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
