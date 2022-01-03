@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
@@ -39,16 +40,10 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
   private static final Duration AddTimeout = Duration.ofMinutes(5);
 
   /**
-   * Poll interval for reading from our queue. Not strictly necessary but allows us to log that
-   * we're still alive when debugging.
+   * Poll interval for reading from our queue. Gives us a chance to log idleness when debugging as
+   * well as to check the stopped flag periodically.
    */
   private static final Duration ReadTimeout = Duration.ofMillis(500);
-
-  /**
-   * Used as a marker to cause the thread to shutdown. Comparison uses == (identity) so the actual
-   * value is irrelevant.
-   */
-  private static final Entry ShutdownToken = new Entry(0);
 
   /**
    * A fairly arbitrary but high limit. Should never be reached in real life unless our thread has
@@ -62,6 +57,8 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
   private final BlockingQueue<Entry> inputQueue;
   /** Used to report exceptions to the main thread. */
   private final ReportingCallback<TMessage> errorReportingFunction;
+  /** Used to tell the thread to stop running. */
+  private final AtomicBoolean stopped;
 
   public SequenceNumberWriterThread(
       Supplier<RdaSink<TMessage, TClaim>> sinkFactory,
@@ -69,6 +66,7 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
     this.sinkFactory = sinkFactory;
     this.errorReportingFunction = errorReportingFunction;
     inputQueue = new LinkedBlockingQueue<>(MaxQueueSize);
+    stopped = new AtomicBoolean(false);
   }
 
   /**
@@ -83,24 +81,11 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
     addEntryToInputQueue(entry);
   }
 
-  /**
-   * Adds a sentinel value to our queue to cause the thread to terminate cleanly. Any values added
-   * after this will be ignored but any values added before this should be written prior to the
-   * thread terminating.
-   *
-   * @throws Exception if adding to the queue fails
-   */
+  /** Sets the stopped flag to cause the thread to stop once it has reached an idle moment. */
   @Override
-  public void close() throws Exception {
-    try {
-      addEntryToInputQueue(ShutdownToken);
-    } catch (InterruptedException ignored) {
-      // During shutdown we might encounter an InterruptedException.
-      // We can retry immediately.  The exception being thrown would have cleared the interrupted
-      // status so that this can succeed on the second call.
-      LOGGER.info("retrying add ShutdownToken after an InterruptedException");
-      addEntryToInputQueue(ShutdownToken);
-    }
+  public void close() {
+    stopped.set(true);
+    LOGGER.info("shutdown requested");
   }
 
   /**
@@ -127,9 +112,10 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
   }
 
   /**
-   * Reads an entry from the queue and processes it. If there is no entry nothing is done. If the
-   * entry is the shutdown trigger nothing is written and false is returned. Any exception thrown by
-   * the database update is reported back via our errorReportingFunction.
+   * If the stopped flag has been set all available entries in the queue are processed and then
+   * false is returned. Otherwise reads an entry from the queue and processes it. If no entries are
+   * available within the allowed wait period nothing is done. Any exception thrown by the database
+   * update is reported back via our errorReportingFunction.
    *
    * @param sink RdaSink to use for writing to the database
    * @return true if another iteration is called for, false otherwise
@@ -137,11 +123,15 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
   @VisibleForTesting
   boolean runOnce(RdaSink<TMessage, TClaim> sink) throws InterruptedException {
     boolean keepRunning = true;
-    final Entry entry = waitForEntryFromInputQueue();
-    if (entry == ShutdownToken) {
+    final Entry entry;
+    if (stopped.get()) {
       LOGGER.info("shutdown requested");
       keepRunning = false;
-    } else if (entry != null) {
+      entry = readEntryFromInputQueueWithoutWaiting();
+    } else {
+      entry = waitForEntryFromInputQueue();
+    }
+    if (entry != null) {
       try {
         LOGGER.debug("writing sequenceNumber {}", entry.sequenceNumber);
         sink.updateLastSequenceNumber(entry.sequenceNumber);
@@ -166,12 +156,27 @@ public class SequenceNumberWriterThread<TMessage, TClaim>
     if (entry == null) {
       LOGGER.debug("no objects on input queue within timeout period");
     } else {
-      // Consume all available non-shutdown values so we only write the most recent one
-      for (var next = inputQueue.peek();
-          next != null && next != ShutdownToken;
-          next = inputQueue.peek()) {
+      // Consume all available values so we only write the most recent one
+      for (var next = inputQueue.peek(); next != null; next = inputQueue.peek()) {
         entry = inputQueue.take();
       }
+    }
+    return entry;
+  }
+
+  /**
+   * Reads as many entries from the input queue as possible without waiting. If multiple entries are
+   * in the queue they are all removed and only the last one is returned. This is safe because the
+   * last one written would overwrite any others anyway.
+   *
+   * @return the Entry to be written or null if the queue is empty
+   */
+  @Nullable
+  private Entry readEntryFromInputQueueWithoutWaiting() throws InterruptedException {
+    Entry entry = null;
+    // Consume all available values so we only write the most recent one
+    for (var next = inputQueue.peek(); next != null; next = inputQueue.peek()) {
+      entry = inputQueue.take();
     }
     return entry;
   }

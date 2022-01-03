@@ -15,6 +15,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -43,8 +44,8 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
   private static final Duration AddTimeout = Duration.ofMinutes(5);
 
   /**
-   * Poll interval for reading from our queue. Not strictly necessary but allows us to log that
-   * we're still alive when debugging.
+   * Poll interval for reading from our queue. Gives us a chance to log idleness when debugging as
+   * well as to check the stopped flag periodically.
    */
   private static final Duration ReadTimeout = Duration.ofMillis(500);
 
@@ -56,17 +57,14 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
 
   /** Used to create a sink when the thread starts. */
   private final Supplier<RdaSink<TMessage, TClaim>> sinkFactory;
-  /**
-   * Used as a marker to cause the thread to shutdown. Comparison uses == (identity) so the actual
-   * value is irrelevant. This isn't static since the entry depends on the TMessage type.
-   */
-  private final Entry<TMessage> shutdownToken;
   /** Number of claims to write to the database in a single transaction. */
   private final int batchSize;
   /** Used to receive messages from the main thread. */
   private final BlockingQueue<Entry<TMessage>> inputQueue;
   /** Used to report results to the main thread. */
   private final ReportingCallback<TMessage> reportingFunction;
+  /** Used to tell the thread to stop running. */
+  private final AtomicBoolean stopped;
 
   public ClaimWriterThread(
       Supplier<RdaSink<TMessage, TClaim>> sinkFactory,
@@ -76,7 +74,7 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     this.batchSize = batchSize;
     this.reportingFunction = reportingFunction;
     inputQueue = new ArrayBlockingQueue<>(InputQueuePaddingMultiple * batchSize);
-    shutdownToken = new Entry<>("", null);
+    stopped = new AtomicBoolean(false);
   }
 
   /**
@@ -92,24 +90,10 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     addEntryToInputQueue(entry);
   }
 
-  /**
-   * Adds a shutdown token to the work queue to trigger a shutdown. Does not actually wait for the
-   * shutdown to happen since the caller needs to trigger all threads to shutdown before waiting for
-   * them to complete.
-   *
-   * @throws Exception thrown if the token could not be added to the queue
-   */
+  /** Sets the stopped flag to cause the thread to stop once it has reached an idle moment. */
   @Override
-  public void close() throws Exception {
-    try {
-      addEntryToInputQueue(shutdownToken);
-    } catch (InterruptedException ignored) {
-      // During shutdown we might encounter an InterruptedException.
-      // We can retry immediately.  The exception being thrown would have cleared the interrupted
-      // status so that this can succeed on the second call.
-      LOGGER.info("retrying add shutdownToken after an InterruptedException");
-      addEntryToInputQueue(shutdownToken);
-    }
+  public void close() {
+    stopped.set(true);
   }
 
   /**
@@ -139,7 +123,8 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
   /**
    * Reads one entry from the queue and processes it. Adds entries to a buffer. Once a full batch
    * has been detected it will be written to the database and the list and map reset. Any exception
-   * thrown by the database update is * reported back via our errorReportingFunction.
+   * thrown by the database update is * reported back via our errorReportingFunction. If shutdown
+   * has been requested the buffer is flushed and false is returned to stop the thread.
    *
    * @param sink RdaSink to use for writing to the database
    * @return true if another iteration is called for, false otherwise
@@ -151,13 +136,13 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     try {
       final Entry<TMessage> entry = takeEntryFromInputQueue();
       boolean writeNeeded;
-      if (entry == null) {
-        // queue is empty so flush any received claims to reduce latency
-        writeNeeded = buffer.getUniqueCount() >= 1;
-      } else if (entry == shutdownToken) {
-        // shutdown requested so flush any received claims and exit
+      if (stopped.get()) {
+        // shutdown requested so flush any received claims and return false
         LOGGER.info("shutdown requested");
+        writeNeeded = buffer.getUniqueCount() >= 1;
         keepRunning = false;
+      } else if (entry == null) {
+        // queue is empty so flush any received claims to reduce latency
         writeNeeded = buffer.getUniqueCount() >= 1;
       } else {
         // add message and claim to buffer and write if buffer is full

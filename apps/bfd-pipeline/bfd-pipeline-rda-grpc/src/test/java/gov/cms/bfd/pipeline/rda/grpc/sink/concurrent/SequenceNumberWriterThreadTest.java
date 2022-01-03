@@ -65,11 +65,11 @@ public class SequenceNumberWriterThreadTest {
     thread.add(1000L);
     thread.add(1001L);
     thread.add(1002L);
-    thread.close();
     var running = thread.runOnce(sink);
     assertEquals(true, running);
     verify(sink).updateLastSequenceNumber(1002);
 
+    thread.close();
     running = thread.runOnce(sink);
     assertEquals(false, running);
     verifyNoMoreInteractions(sink);

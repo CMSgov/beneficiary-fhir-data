@@ -138,7 +138,6 @@ public class ClaimWriterThreadTest {
     final var claimB1 = new TestDatabase.Claim("b", "b1", 2, VERSION);
     thread.add(VERSION, claimA1.toMessage());
     thread.add(VERSION, claimB1.toMessage());
-    thread.close();
 
     // first loop finds claimA1
     var running = thread.runOnce(sink, buffer);
@@ -156,7 +155,8 @@ public class ClaimWriterThreadTest {
     assertEquals(ImmutableList.of(), database.getClaims());
     assertEquals(Collections.emptyList(), callbacks);
 
-    // third loop finds shutdown token so flushes buffer and returns false to end loop
+    // third loop finds shutdown requested so flushes buffer and returns false to end loop
+    thread.close();
     running = thread.runOnce(sink, buffer);
     assertEquals(false, running);
     assertEquals(ImmutableList.of(), buffer.getMessages());
