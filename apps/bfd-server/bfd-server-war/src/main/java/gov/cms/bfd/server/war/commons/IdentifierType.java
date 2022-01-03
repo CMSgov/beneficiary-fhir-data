@@ -24,7 +24,11 @@ public enum IdentifierType {
   TAX(
       TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
       TransformerConstants.CODED_IDENTIFIER_TYPE_TAX,
-      TransformerConstants.CODED_IDENTIFIER_TYPE_TAX_DISPLAY);
+      TransformerConstants.CODED_IDENTIFIER_TYPE_TAX_DISPLAY),
+  MC(
+      TransformerConstants.CODING_SYSTEM_HL7_IDENTIFIER_TYPE,
+      TransformerConstants.CODED_IDENTIFIER_TYPE_MC,
+      TransformerConstants.CODED_IDENTIFIER_TYPE_MC_DISPLAY);
 
   public final String system;
   public final String code;

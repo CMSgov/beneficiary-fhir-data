@@ -1487,6 +1487,52 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
+   * as with a lastUpdated parameter after yesterday.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchEobWithLastUpdatedAndPaginationAndType() throws FHIRException {
+    Beneficiary beneficiary = loadSampleA();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    // Search with lastUpdated range between yesterday and now
+    int expectedCount = 3;
+    Date yesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+    Date now = new Date();
+    DateRangeParam afterYesterday = new DateRangeParam(yesterday, now);
+    Bundle searchResultsAfter =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
+            .lastUpdated(afterYesterday)
+            .count(expectedCount)
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertEquals(
+        "Expected number resources return to be equal to count",
+        expectedCount,
+        searchResultsAfter.getEntry().size());
+
+    // Check self url
+    String selfLink = searchResultsAfter.getLink(IBaseBundle.LINK_SELF).getUrl();
+    Assert.assertTrue(selfLink.contains("lastUpdated"));
+
+    // Check next bundle
+    String nextLink = searchResultsAfter.getLink(IBaseBundle.LINK_NEXT).getUrl();
+    Assert.assertTrue(nextLink.contains("lastUpdated"));
+    Bundle nextResults = fhirClient.search().byUrl(nextLink).returnBundle(Bundle.class).execute();
+    Assert.assertEquals(
+        "Expected number resources return to be equal to count",
+        expectedCount,
+        nextResults.getEntry().size());
+  }
+
+  /**
    * Verifies that {@link gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider}
    * works as with a null lastUpdated parameter after yesterday.
    *
