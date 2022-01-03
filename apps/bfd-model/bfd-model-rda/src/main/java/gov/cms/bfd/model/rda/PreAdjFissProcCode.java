@@ -51,12 +51,13 @@ public class PreAdjFissProcCode {
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
+  /** PK class for the FissProcCodes table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  /* PK class for the FissProcCodes table */
   public static class PK implements Serializable {
     private String dcn;
+
     private short priority;
   }
 }

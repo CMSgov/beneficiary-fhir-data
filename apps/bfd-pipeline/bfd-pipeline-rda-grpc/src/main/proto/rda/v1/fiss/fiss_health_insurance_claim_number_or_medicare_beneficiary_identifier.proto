@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.fiss;
+
+option java_multiple_files = true;
+
+import "rda/v1/enum_options.proto";
+
+// FISS Health Insurance Claim (HIC) Number or Medicare Beneficiary Identifier (MBI)
+enum FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier {
+  FISS_HIC_OR_MBI_IS_HIC = 0 [(string_value) = "H"];
+
+  FISS_HIC_OR_MBI_IS_MBI = 1 [(string_value) = "M"];
+}

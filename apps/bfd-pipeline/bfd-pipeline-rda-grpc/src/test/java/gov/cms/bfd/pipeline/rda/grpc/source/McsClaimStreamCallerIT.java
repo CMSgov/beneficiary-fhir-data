@@ -41,7 +41,7 @@ public class McsClaimStreamCallerIT {
               assertEquals(true, results.hasNext());
 
               claim = transform(results.next());
-              assertEquals("43644459", claim.getIdrClmHdIcn());
+              assertEquals("972078", claim.getIdrClmHdIcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertEquals(false, results.hasNext());

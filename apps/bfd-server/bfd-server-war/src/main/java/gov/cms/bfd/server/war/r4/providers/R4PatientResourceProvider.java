@@ -26,7 +26,6 @@ import gov.cms.bfd.model.rif.BeneficiaryMonthly_;
 import gov.cms.bfd.model.rif.Beneficiary_;
 import gov.cms.bfd.server.war.Operation;
 import gov.cms.bfd.server.war.commons.CommonHeaders;
-import gov.cms.bfd.server.war.commons.LinkBuilder;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
 import gov.cms.bfd.server.war.commons.OffsetLinkBuilder;
 import gov.cms.bfd.server.war.commons.PatientLinkBuilder;
@@ -308,7 +307,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     checkCoverageId(coverageId);
     RequestHeaders requestHeader = RequestHeaders.getHeaderWrapper(requestDetails);
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
-    checkPageSize(paging);
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
     operation.setOption("by", "coverageContract");
@@ -399,11 +397,12 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     // So, in cases where there are joins and paging, we query in two steps: first fetch bene-ids
     // with paging and then fetch full benes with joins.
     boolean useTwoSteps = (requestHeader.isMBIinIncludeIdentifiers() && paging.isPagingRequested());
+
     if (useTwoSteps) {
       // Fetch ids
       List<String> ids =
           queryBeneficiaryIds(contractMonthField, contractCode, paging)
-              .setMaxResults(paging.getPageSize() + 1)
+              .setMaxResults(paging.getQueryMaxSize())
               .getResultList();
 
       // Fetch the benes using the ids
@@ -411,7 +410,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     } else {
       // Fetch benes and their histories in one query
       return queryBeneficiariesBy(contractMonthField, contractCode, paging, requestHeader)
-          .setMaxResults(paging.getPageSize() + 1)
+          .setMaxResults(paging.getQueryMaxSize())
           .getResultList();
     }
   }
@@ -997,7 +996,6 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
     }
 
     PatientLinkBuilder paging = new PatientLinkBuilder(requestDetails.getCompleteUrl());
-    checkPageSize(paging);
 
     Operation operation = new Operation(Operation.Endpoint.V2_PATIENT);
     operation.setOption("by", "coverageContractForYearMonth");
@@ -1162,7 +1160,7 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
       matchingBeneIds =
           entityManager
               .createQuery(beneIdCriteria)
-              .setMaxResults(paging.getPageSize() + 1)
+              .setMaxResults(paging.getQueryMaxSize())
               .getResultList();
       return matchingBeneIds;
     } finally {
@@ -1172,15 +1170,5 @@ public final class R4PatientResourceProvider implements IResourceProvider, Commo
           beneHistoryMatchesTimerQueryNanoSeconds,
           matchingBeneIds == null ? 0 : matchingBeneIds.size());
     }
-  }
-
-  /**
-   * Check that the page size is valid
-   *
-   * @param paging to check
-   */
-  public static void checkPageSize(LinkBuilder paging) {
-    if (paging.getPageSize() <= 0)
-      throw new InvalidRequestException("A zero or negative count is unsupported");
   }
 }

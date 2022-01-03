@@ -138,7 +138,8 @@ public class GrpcRdaSourceIT {
           + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
           + "  } ],\n"
           + "  \"diagCodes\" : [ ],\n"
-          + "  \"payers\" : [ ]\n"
+          + "  \"payers\" : [ ],\n"
+          + "  \"auditTrail\" : [ ]\n"
           + "}";
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
@@ -178,7 +179,8 @@ public class GrpcRdaSourceIT {
           + "    \"lastUpdated\" : \"2021-06-03T18:02:37Z\"\n"
           + "  } ],\n"
           + "  \"diagCodes\" : [ ],\n"
-          + "  \"payers\" : [ ]\n"
+          + "  \"payers\" : [ ],\n"
+          + "  \"auditTrail\" : [ ]\n"
           + "}";
 
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)

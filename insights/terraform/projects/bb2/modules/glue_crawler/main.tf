@@ -23,8 +23,8 @@ resource "aws_glue_crawler" "glue_crawler" {
 
   configuration = jsonencode({
     CrawlerOutput = {
-      Tables = {
-        AddOrUpdateBehavior = "MergeNewColumns"
+      Partitions = {
+        AddOrUpdateBehavior = "InheritFromTable"
       }
     }
     Grouping = {
@@ -35,7 +35,7 @@ resource "aws_glue_crawler" "glue_crawler" {
   })
 
   schema_change_policy {
-    delete_behavior = "LOG"
-    update_behavior = "LOG"
+    delete_behavior = "DEPRECATE_IN_DATABASE"
+    update_behavior = "UPDATE_IN_DATABASE"
   }
 }

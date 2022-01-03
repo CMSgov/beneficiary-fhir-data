@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package gov.cms.mpsm.rda.v1.mcs;
+
+option java_multiple_files = true;
+
+import "rda/v1/mcs/mcs_cutback_audit_disposition.proto";
+import "rda/v1/mcs/mcs_cutback_audit_indicator.proto";
+
+message McsAudit {
+  optional int32 idr_j_audit_num = 1;
+  oneof idr_j_audit_ind {
+    McsCutbackAuditIndicator idr_j_audit_ind_enum = 2;
+    string idr_j_audit_ind_unrecognized = 3;
+  };
+  oneof idr_j_audit_disp {
+    McsCutbackAuditDisposition idr_j_audit_disp_enum = 4;
+    string idr_j_audit_disp_unrecognized = 5;
+  }
+}
