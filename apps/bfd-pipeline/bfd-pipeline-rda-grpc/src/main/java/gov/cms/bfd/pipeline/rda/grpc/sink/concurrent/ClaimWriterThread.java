@@ -136,14 +136,13 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
     try {
       final Entry<TMessage> entry = takeEntryFromInputQueue();
       boolean writeNeeded;
-      if (stopped.get()) {
-        // shutdown requested so flush any received claims and return false
-        LOGGER.info("shutdown requested");
-        writeNeeded = buffer.getUniqueCount() >= 1;
-        keepRunning = false;
-      } else if (entry == null) {
+      if (entry == null) {
         // queue is empty so flush any received claims to reduce latency
         writeNeeded = buffer.getUniqueCount() >= 1;
+        if (stopped.get()) {
+          LOGGER.info("shutdown requested");
+          keepRunning = false;
+        }
       } else {
         // add message and claim to buffer and write if buffer is full
         buffer.add(sink, entry);
@@ -183,7 +182,14 @@ public class ClaimWriterThread<TMessage, TClaim> implements Callable<Integer>, A
 
   @Nullable
   private Entry<TMessage> takeEntryFromInputQueue() throws InterruptedException {
-    final Entry<TMessage> entry = inputQueue.poll(ReadTimeout.toMillis(), TimeUnit.MILLISECONDS);
+    final Entry<TMessage> entry;
+    if (stopped.get()) {
+      // Once close has been called we just process objects already in the queue until
+      // we've drained the queue but never wait for any new ones to arrive before stopping.
+      entry = inputQueue.poll();
+    } else {
+      entry = inputQueue.poll(ReadTimeout.toMillis(), TimeUnit.MILLISECONDS);
+    }
     if (entry == null) {
       LOGGER.debug("no objects on input queue within timeout period");
     }

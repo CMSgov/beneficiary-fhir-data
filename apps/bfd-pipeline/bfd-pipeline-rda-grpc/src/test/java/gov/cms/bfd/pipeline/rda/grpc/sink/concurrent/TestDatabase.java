@@ -24,7 +24,7 @@ import lombok.With;
 @ThreadSafe
 public class TestDatabase {
   private final List<Sink> sinks = new ArrayList<>();
-  private final Map<String, Claim> claims = Collections.synchronizedMap(new TreeMap<>());
+  private final Map<String, Claim> claims = new TreeMap<>();
   private long lastSequenceNumber;
 
   public synchronized RdaSink<Message, Claim> createSink() {
@@ -37,10 +37,8 @@ public class TestDatabase {
     return lastSequenceNumber;
   }
 
-  public List<Claim> getClaims() {
-    synchronized (claims) {
-      return ImmutableList.copyOf(claims.values());
-    }
+  public synchronized List<Claim> getClaims() {
+    return ImmutableList.copyOf(claims.values());
   }
 
   public synchronized boolean allClosed() {
@@ -52,8 +50,7 @@ public class TestDatabase {
     lastSequenceNumber = value;
   }
 
-  private void addClaim(Claim claim) {
-    // claims map is self-synchronized
+  private synchronized void addClaim(Claim claim) {
     claims.put(claim.getClaimId(), claim);
   }
 
