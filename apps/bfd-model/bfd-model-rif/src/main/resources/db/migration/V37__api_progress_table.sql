@@ -9,3 +9,7 @@ create table "pre_adj"."RdaApiProgress" (
     "lastSequenceNumber" BIGINT      NOT NULL,
     "lastUpdated"        timestamp with time zone
 )
+
+/* These are no longer required since we are tracking the replay sequence number in RdaApiProgress. */
+drop index "FissClaims_sequenceNumber_idx" on "pre_adj"."FissClaims"("sequenceNumber");
+drop index "McsClaims_sequenceNumber_idx" on "pre_adj"."McsClaims"("sequenceNumber");
