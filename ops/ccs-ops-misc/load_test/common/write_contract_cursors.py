@@ -83,8 +83,6 @@ def loadDataFromArgs(argv):
         # keep writing cursors to the file as long as the response has "next" cursor entries
         while url:
 
-            print(f"Getting: {url}")
-
             contents = requests.get(url, cert=certFile, verify="", headers={"IncludeIdentifiers": "mbi"})
             # Reset the next url to hit, so if no "next" page we exit loop
             url = ""
