@@ -88,6 +88,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setId("f-" + claimGroup.getDcn());
     claim.setContained(List.of(getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
     claim.setIdentifier(getIdentifier(claimGroup));
+    claim.setExtension(getExtension(claimGroup));
     claim.setStatus(Claim.ClaimStatus.ACTIVE);
     claim.setType(getType(claimGroup));
     claim.setSupportingInfo(getSupportingInfo(claimGroup));
@@ -129,6 +130,18 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                         C4BBClaimIdentifierType.UC.getDisplay())))
             .setSystem(BBCodingSystems.FI_DOC_CLM_CONTROL_NUM)
             .setValue(claimGroup.getDcn()));
+  }
+
+  private static List<Extension> getExtension(PreAdjFissClaim claimGroup) {
+    return claimGroup.getServTypeCd() == null
+        ? null
+        : List.of(
+            new Extension(BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE)
+                .setValue(
+                    new Coding(
+                        BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE,
+                        claimGroup.getServTypeCd(),
+                        null)));
   }
 
   private static CodeableConcept getType(PreAdjFissClaim claimGroup) {

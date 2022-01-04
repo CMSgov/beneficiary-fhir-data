@@ -26,7 +26,9 @@ public class AbstractTransformerV2 {
       Map.of(
           "m", Enumerations.AdministrativeGender.MALE,
           "f", Enumerations.AdministrativeGender.FEMALE,
-          "u", Enumerations.AdministrativeGender.UNKNOWN);
+          // Fiss uses 'u', MCS uses 'o', we're mapping both to UNKNOWN
+          "u", Enumerations.AdministrativeGender.UNKNOWN,
+          "o", Enumerations.AdministrativeGender.UNKNOWN);
 
   protected static Map<String, Enumerations.AdministrativeGender> genderMap() {
     return GENDER_MAP;

@@ -2,7 +2,7 @@
   "resourceType": "Claim",
   "id": "f-123456",
   "meta": {
-    "versionId": "f-123456-b79049ea2eab420e8f4748091c10c2b4b8d7d5d7",
+    "versionId": "f-123456-8e50a587ef3ec5f80a2cbabc534c0205f0ab6f54",
     "lastUpdated": "1970-01-01T00:00:00.000+00:00"
   },
   "contained": [
@@ -69,6 +69,15 @@
       ]
     }
   ],
+  "extension": [
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+      "valueCoding": {
+        "system": "https://bluebutton.cms.gov/resources/variables/clm_srvc_clsfctn_type_cd",
+        "code": "A"
+      }
+    }
+  ],
   "identifier": [
     {
       "type": {
@@ -106,7 +115,7 @@
     "start": "1970-07-20T00:00:00+00:00",
     "end": "1970-07-20T00:00:00+00:00"
   },
-  "created": "2021-12-09T00:19:23+00:00",
+  "created": "2022-01-04T18:01:06+00:00",
   "provider": {
     "reference": "#provider-org"
   },
