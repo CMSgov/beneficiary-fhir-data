@@ -172,16 +172,26 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
     closer.close(
         () -> {
           LOGGER.info("calling threadPool.awaitTermination");
-          boolean successful =
-              threadPool.awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
-          if (!successful) {
-            throw new IOException("threadPool did not shut down");
-          }
+          awaitThreadPoolTermination(waitTime);
         });
     LOGGER.info("calling updateSequenceNumberDirectly");
     closer.close(this::updateSequenceNumberDirectly);
     LOGGER.info("shutdown complete");
     closer.finish();
+  }
+
+  private void awaitThreadPoolTermination(Duration waitTime)
+      throws InterruptedException, IOException {
+    boolean successful;
+    try {
+      successful = threadPool.awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
+    } catch (InterruptedException ex) {
+      LOGGER.info("interrupted while waiting for thread pool termination, retrying once...");
+      successful = threadPool.awaitTermination(waitTime.toMillis(), TimeUnit.MILLISECONDS);
+    }
+    if (!successful) {
+      throw new IOException("threadPool did not shut down");
+    }
   }
 
   @Override
