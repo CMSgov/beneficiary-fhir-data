@@ -235,6 +235,10 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
       boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
 
+      if (isHashed) {
+        TransformerUtils.logMbiHashToMdc(mbiString);
+      }
+
       if (types != null) {
         bundleResource =
             createBundleFor(
@@ -250,9 +254,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                 getResourceTypes(), mbiString, isHashed, excludeSamhsa, lastUpdated, serviceDate);
       }
 
-      if (isHashed) {
-        TransformerUtils.logMbiHashToMdc(mbiString);
-      }
       return bundleResource;
     } else {
       throw new IllegalArgumentException("mbi can't be null/blank");
