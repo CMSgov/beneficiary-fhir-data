@@ -3264,6 +3264,12 @@ public final class TransformerUtils {
     }
   }
 
+  public static void logMbiHashToMdc(String mbiHash) {
+    if (!Strings.isNullOrEmpty(mbiHash)) {
+      MDC.put("mbi_hash", mbiHash);
+    }
+  }
+
   /**
    * @param currencyIdentifier the {@link CurrencyIdentifier} indicating the currency of an {@link
    *     Identifier}.
