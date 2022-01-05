@@ -1,5 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import gov.cms.bfd.model.rda.PreAdjMbi;
@@ -33,7 +34,8 @@ public class DatabaseMbiHasher extends IdHasher implements AutoCloseable {
     entityManager.close();
   }
 
-  private String lookup(String mbi) {
+  @VisibleForTesting
+  String lookup(String mbi) {
     entityManager.getTransaction().begin();
     PreAdjMbi record = entityManager.find(PreAdjMbi.class, mbi);
     if (record == null) {
