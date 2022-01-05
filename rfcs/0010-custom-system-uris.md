@@ -3,7 +3,7 @@
 
 * RFC Proposal ID: `0010-custom-system-uris`
 * Start Date: 2021-11-30
-* RFC PR: [rust-lang/rfcs#0000](https://github.com/rust-lang/rfcs/pull/0000)
+* RFC PR: [beneficiary-fhir-data/rfcs#0010](https://github.com/CMSgov/beneficiary-fhir-data/pull/888)
 * JIRA Ticket(s):
     * [BFD-1459](https://jira.cms.gov/browse/BFD-1459)
 
