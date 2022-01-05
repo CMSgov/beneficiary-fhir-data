@@ -1,5 +1,19 @@
 # API Changelog
 
+## BFD-1422 Remove Duplicate Primary Payer Codes
+
+Removed duplicate primary payer code from API output for DME claims:
+```
+{
+          "url" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+          "valueCoding" : {
+            "system" : "https://bluebutton.cms.gov/resources/variables/line_bene_prmry_pyr_cd",
+            "code" : "E",
+            "display" : "Workers' compensation"
+          }
+}
+```
+
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
