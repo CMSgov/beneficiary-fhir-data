@@ -455,14 +455,6 @@
 					</execution>
 				</executions>
 			</plugin>
-		<!--	<plugin>
-
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<executions>
-
-				</executions>
-			</plugin> -->
 		</plugins>
 	</build>
 
