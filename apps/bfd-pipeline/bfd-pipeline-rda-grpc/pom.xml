@@ -75,13 +75,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Used to serialize and deserialize objects to JSON during testing. -->
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <!-- Adds java-8 types to jackson. -->
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
