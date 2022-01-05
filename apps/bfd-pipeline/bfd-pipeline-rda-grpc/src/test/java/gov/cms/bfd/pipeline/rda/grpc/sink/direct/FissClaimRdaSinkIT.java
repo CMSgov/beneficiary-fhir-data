@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import java.time.Clock;
 import java.time.Instant;
@@ -57,7 +58,10 @@ public class FissClaimRdaSinkIT {
                   .setDcn(claim.getDcn())
                   .setSeq(claim.getSequenceNumber())
                   .build();
+          final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final FissClaimTransformer transformer = mock(FissClaimTransformer.class);
+          doReturn(defaultIdHasher).when(transformer).getIdHasher();
+          doReturn(transformer).when(transformer).withIdHasher(any());
           doReturn(change).when(transformer).transformClaim(message);
 
           final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);

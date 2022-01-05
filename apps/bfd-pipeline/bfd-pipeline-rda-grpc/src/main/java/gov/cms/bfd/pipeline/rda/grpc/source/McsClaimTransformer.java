@@ -35,6 +35,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsTypeOfService;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import lombok.Getter;
 
 public class McsClaimTransformer {
   private final EnumStringExtractor<McsClaim, McsClaimType> PreAdjMcsClaim_idrClaimType_Extractor;
@@ -86,7 +87,7 @@ public class McsClaimTransformer {
       PreAdjMcsLocation_idrLocActvCode_Extractor;
 
   private final Clock clock;
-  private final IdHasher idHasher;
+  @Getter private final IdHasher idHasher;
 
   public McsClaimTransformer(Clock clock, IdHasher idHasher) {
     this.clock = clock;
@@ -244,6 +245,17 @@ public class McsClaimTransformer {
             McsLocationActivityCode.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
+  }
+
+  /**
+   * Hook to allow the McsClaimRdaSink to install an alternative IdHasher implementation that
+   * supports caching MBI values.
+   *
+   * @param idHasher alternative IdHasher to use for hashing MBI values
+   * @return a new transformer with the same clock but alternative IdHasher
+   */
+  public McsClaimTransformer withIdHasher(IdHasher idHasher) {
+    return new McsClaimTransformer(clock, idHasher);
   }
 
   public RdaChange<PreAdjMcsClaim> transformClaim(McsClaimChange change) {

@@ -39,6 +39,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import lombok.Getter;
 
 /**
  * Transforms a gRPC FissClaim object into a Hibernate PreAdjFissClaim object. Note that the gRPC
@@ -152,7 +153,7 @@ public class FissClaimTransformer {
       PreAdjFissAuditTrail_badtStatus_Extractor;
 
   private final Clock clock;
-  private final IdHasher idHasher;
+  @Getter private final IdHasher idHasher;
 
   public FissClaimTransformer(Clock clock, IdHasher idHasher) {
     this.clock = clock;
@@ -474,6 +475,17 @@ public class FissClaimTransformer {
             FissClaimStatus.UNRECOGNIZED,
             ImmutableSet.of(),
             ImmutableSet.of());
+  }
+
+  /**
+   * Hook to allow the FissClaimRdaSink to install an alternative IdHasher implementation that
+   * supports caching MBI values.
+   *
+   * @param idHasher alternative IdHasher to use for hashing MBI values
+   * @return a new transformer with the same clock but alternative IdHasher
+   */
+  public FissClaimTransformer withIdHasher(IdHasher idHasher) {
+    return new FissClaimTransformer(clock, idHasher);
   }
 
   public RdaChange<PreAdjFissClaim> transformClaim(FissClaimChange change) {

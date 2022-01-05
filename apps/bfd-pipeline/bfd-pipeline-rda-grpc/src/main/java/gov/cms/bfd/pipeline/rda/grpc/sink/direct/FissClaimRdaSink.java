@@ -17,7 +17,9 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<FissClaimChange, PreA
       FissClaimTransformer transformer,
       boolean autoUpdateLastSeq) {
     super(appState, RdaApiProgress.ClaimType.FISS, autoUpdateLastSeq);
-    this.transformer = transformer;
+    this.transformer =
+        transformer.withIdHasher(
+            new DatabaseMbiHasher(transformer.getIdHasher().getConfig(), super.entityManager));
   }
 
   @Override

@@ -9,6 +9,7 @@ import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
+import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.time.Clock;
 import java.time.Instant;
@@ -51,7 +52,10 @@ public class McsClaimRdaSinkIT {
                   .setIcn(claim.getIdrClmHdIcn())
                   .setSeq(claim.getSequenceNumber())
                   .build();
+          final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final McsClaimTransformer transformer = mock(McsClaimTransformer.class);
+          doReturn(defaultIdHasher).when(transformer).getIdHasher();
+          doReturn(transformer).when(transformer).withIdHasher(any());
           doReturn(change).when(transformer).transformClaim(message);
 
           final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);

@@ -13,10 +13,10 @@ public class DatabaseMbiHasher extends IdHasher implements AutoCloseable {
   private final EntityManager entityManager;
   private final Cache<String, String> cache;
 
-  public DatabaseMbiHasher(Config config, EntityManager entityManager, int cacheSize) {
+  public DatabaseMbiHasher(Config config, EntityManager entityManager) {
     super(config);
     this.entityManager = entityManager;
-    cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
+    cache = CacheBuilder.newBuilder().maximumSize(config.getCacheSize()).build();
   }
 
   @Override

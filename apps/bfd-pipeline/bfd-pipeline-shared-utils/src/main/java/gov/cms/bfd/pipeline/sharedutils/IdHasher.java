@@ -71,6 +71,10 @@ public class IdHasher {
     }
   }
 
+  public Config getConfig() {
+    return config;
+  }
+
   /** Configuration options that encapsulates the settings for computing a hash. */
   public static class Config implements Serializable {
     private static final long serialVersionUID = 4911655334835485L;
@@ -94,6 +98,11 @@ public class IdHasher {
     public byte[] getHashPepper() {
       // arrays aren't immutable so it's safest to return a copy
       return hashPepper.clone();
+    }
+
+    public int getCacheSize() {
+      // TODO make this a real property
+      return 1000;
     }
   }
 }
