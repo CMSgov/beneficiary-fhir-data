@@ -2,29 +2,71 @@
   "resourceType": "Claim",
   "id": "m-654321",
   "meta": {
+    "versionId": "m-654321-c068f60762c66f83851b6fa8d38eae206cb3ef56",
     "lastUpdated": "1970-01-01T00:00:04.000+00:00"
   },
   "contained": [
     {
-      "resourceType": "Organization",
-      "id": "provider-org",
-      "meta": {
-        "profile": [
-          "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
-        ]
-      },
+      "resourceType": "Patient",
+      "id": "patient",
       "identifier": [
         {
           "type": {
             "coding": [
               {
                 "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                "code": "PRN",
-                "display": "Provider number"
+                "code": "MC",
+                "display": "Patient's Medicare Number"
               }
             ]
           },
-          "value": "4444422222"
+          "system": "http://hl7.org/fhir/sid/us-mbi",
+          "value": "123456MBI"
+        }
+      ],
+      "name": [
+        {
+          "family": "S.",
+          "given": [
+            "J.",
+            "D."
+          ]
+        }
+      ],
+      "gender": "male"
+    },
+    {
+      "resourceType": "Organization",
+      "id": "provider-org",
+      "extension": [
+        {
+          "url": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-type",
+          "valueCoding": {
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-type",
+            "code": "AB"
+          }
+        },
+        {
+          "url": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-spec",
+          "valueCoding": {
+            "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-spec",
+            "code": "BA"
+          }
+        }
+      ],
+      "identifier": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                "code": "TAX",
+                "display": "Tax ID number"
+              }
+            ]
+          },
+          "system": "https://bluebutton.cms.gov/resources/variables/mcs/bill-prov-ein",
+          "value": "1231231231"
         },
         {
           "type": {
@@ -42,6 +84,15 @@
       ]
     }
   ],
+  "extension": [
+    {
+      "url": "https://bluebutton.cms.gov/resources/variables/mcs/clm-type",
+      "valueCoding": {
+        "system": "https://bluebutton.cms.gov/resources/variables/mcs/clm-type",
+        "code": "R"
+      }
+    }
+  ],
   "identifier": [
     {
       "type": {
@@ -53,17 +104,13 @@
           }
         ]
       },
-      "system": "https://dcgeo.cms.gov/resources/variables/icn",
+      "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
       "value": "654321"
     }
   ],
   "status": "active",
   "type": {
     "coding": [
-      {
-        "system": "https://dcgeo.cms.gov/resources/codesystem/rda-type",
-        "code": "MCS"
-      },
       {
         "system": "http://terminology.hl7.org/CodeSystem/claim-type",
         "code": "professional",
@@ -73,21 +120,13 @@
   },
   "use": "claim",
   "patient": {
-    "identifier": {
-      "type": {
-        "coding": [
-          {
-            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-            "code": "MC",
-            "display": "Patient's Medicare number"
-          }
-        ]
-      },
-      "system": "http://hl7.org/fhir/sid/us-mbi",
-      "value": "123456MBI"
-    }
+    "reference": "#patient"
   },
-  "created": "1970-01-01T00:00:01+00:00",
+  "billablePeriod": {
+    "start": "1970-07-30T00:00:00+00:00",
+    "end": "1970-07-30T00:00:00+00:00"
+  },
+  "created": "2021-12-09T00:19:24+00:00",
   "provider": {
     "reference": "#provider-org"
   },
@@ -117,40 +156,64 @@
       "diagnosisCodeableConcept": {
         "coding": [
           {
-            "system": "http://hl7.org/fhir/sid/icd-9",
+            "system": "http://hl7.org/fhir/sid/icd-9-cm",
             "code": "HF3IJIG"
           }
         ]
       }
     }
   ],
-  "procedure": [
+  "item": [
     {
       "sequence": 1,
-      "date": "1970-07-28T00:00:00+00:00",
-      "procedureCodeableConcept": {
+      "productOrService": {
         "coding": [
           {
-            "system": "http://www.ama-assn.org/go/cpt",
+            "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
             "code": "FDSAE"
           }
         ]
+      },
+      "modifier": [
+        {
+          "coding": [
+            {
+              "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+              "version": "1",
+              "code": "A"
+            }
+          ]
+        }
+      ],
+      "servicedPeriod": {
+        "end": "1970-07-28T00:00:00+00:00"
       }
     },
     {
       "sequence": 2,
-      "procedureCodeableConcept": {
+      "productOrService": {
         "coding": [
           {
-            "system": "http://www.ama-assn.org/go/cpt",
+            "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
             "code": "FDAAA"
           }
         ]
-      }
+      },
+      "modifier": [
+        {
+          "coding": [
+            {
+              "system": "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+              "version": "2",
+              "code": "B"
+            }
+          ]
+        }
+      ]
     }
   ],
   "total": {
-    "value": 23.00,
+    "value": 23.0,
     "currency": "USD"
   }
 }

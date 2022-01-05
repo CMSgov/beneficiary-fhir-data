@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
+/** JPA class for the McsClaims table */
 @Entity
 @Getter
 @Setter
@@ -136,6 +137,69 @@ public class PreAdjMcsClaim {
   @Column(name = "`apiSource`", length = 24)
   private String apiSource;
 
+  @Column(name = "`idrAssignment`", length = 1)
+  private String idrAssignment;
+
+  @Column(name = "`idrClmLevelInd`", length = 1)
+  private String idrClmLevelInd;
+
+  @Column(name = "`idrHdrAudit`")
+  private Integer idrHdrAudit;
+
+  @Column(name = "`idrHdrAuditInd`", length = 1)
+  private String idrHdrAuditInd;
+
+  @Column(name = "`idrUSplitReason`", length = 1)
+  private String idrUSplitReason;
+
+  @Column(name = "`idrJReferringProvNpi`", length = 10)
+  private String idrJReferringProvNpi;
+
+  @Column(name = "`idrJFacProvNpi`", length = 10)
+  private String idrJFacProvNpi;
+
+  @Column(name = "`idrUDemoProvNpi`", length = 10)
+  private String idrUDemoProvNpi;
+
+  @Column(name = "`idrUSuperNpi`", length = 10)
+  private String idrUSuperNpi;
+
+  @Column(name = "`idrUFcadjBilNpi`", length = 10)
+  private String idrUFcadjBilNpi;
+
+  @Column(name = "`idrAmbPickupAddresLine1`", length = 25)
+  private String idrAmbPickupAddresLine1;
+
+  @Column(name = "`idrAmbPickupAddresLine2`", length = 20)
+  private String idrAmbPickupAddresLine2;
+
+  @Column(name = "`idrAmbPickupCity`", length = 20)
+  private String idrAmbPickupCity;
+
+  @Column(name = "`idrAmbPickupState`", length = 2)
+  private String idrAmbPickupState;
+
+  @Column(name = "`idrAmbPickupZipcode`", length = 9)
+  private String idrAmbPickupZipcode;
+
+  @Column(name = "`idrAmbDropoffName`", length = 24)
+  private String idrAmbDropoffName;
+
+  @Column(name = "`idrAmbDropoffAddrLine1`", length = 25)
+  private String idrAmbDropoffAddrLine1;
+
+  @Column(name = "`idrAmbDropoffAddrLine2`", length = 20)
+  private String idrAmbDropoffAddrLine2;
+
+  @Column(name = "`idrAmbDropoffCity`", length = 20)
+  private String idrAmbDropoffCity;
+
+  @Column(name = "`idrAmbDropoffState`", length = 2)
+  private String idrAmbDropoffState;
+
+  @Column(name = "`idrAmbDropoffZipcode`", length = 9)
+  private String idrAmbDropoffZipcode;
+
   @OneToMany(
       mappedBy = "idrClmHdIcn",
       fetch = FetchType.EAGER,
@@ -151,4 +215,28 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @Builder.Default
   private Set<PreAdjMcsDiagnosisCode> diagCodes = new HashSet<>();
+
+  @OneToMany(
+      mappedBy = "idrClmHdIcn",
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @Builder.Default
+  private Set<PreAdjMcsAdjustment> adjustments = new HashSet<>();
+
+  @OneToMany(
+      mappedBy = "idrClmHdIcn",
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @Builder.Default
+  private Set<PreAdjMcsAudit> audits = new HashSet<>();
+
+  @OneToMany(
+      mappedBy = "idrClmHdIcn",
+      fetch = FetchType.EAGER,
+      orphanRemoval = true,
+      cascade = CascadeType.ALL)
+  @Builder.Default
+  private Set<PreAdjMcsLocation> locations = new HashSet<>();
 }

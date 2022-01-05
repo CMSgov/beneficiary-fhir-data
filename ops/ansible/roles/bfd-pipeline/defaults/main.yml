@@ -1,4 +1,6 @@
 ---
+env_name_std: 'unknown-environment'
+
 data_pipeline_dir: /usr/local/bluebutton-data-pipeline
 data_pipeline_user: bb-etl
 data_pipeline_loader_threads: 200

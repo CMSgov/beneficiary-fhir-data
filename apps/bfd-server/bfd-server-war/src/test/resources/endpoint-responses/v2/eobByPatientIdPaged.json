@@ -1162,8 +1162,8 @@
             "url" : "http://hl7.org/fhir/sid/ndc",
             "valueCoding" : {
               "system" : "http://hl7.org/fhir/sid/ndc",
-              "code" : "495800192",
-              "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
+              "code" : "500904610",
+              "display" : "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"
             }
           } ],
           "coding" : [ {
@@ -2740,8 +2740,7 @@
           "coding" : [ {
             "system" : "https://bluebutton.cms.gov/resources/variables/hcpcs_cd",
             "code" : "M55"
-          },
-          {
+          }, {
             "system" : "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
             "code" : "M55"
           } ]
@@ -4333,8 +4332,8 @@
         "productOrService" : {
           "coding" : [ {
             "system" : "http://hl7.org/fhir/sid/ndc",
-            "code" : "495800192",
-            "display" : "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"
+            "code" : "500904610",
+            "display" : "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"
           } ]
         },
         "servicedDate" : "2015-05-12",
