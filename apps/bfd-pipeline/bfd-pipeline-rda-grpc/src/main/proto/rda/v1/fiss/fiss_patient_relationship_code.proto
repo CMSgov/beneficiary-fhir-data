@@ -8,303 +8,203 @@ import "rda/v1/enum_options.proto";
 
 // FISS Patient Relationship Code
 enum FissPatientRelationshipCode {
-  // ASCII 00
   PATIENT_RELATIONSHIP_CODE_DEFAULT = 0                                                       [(string_value) = "00"];
 
-  // ASCII 01
   PATIENT_RELATIONSHIP_CODE_PATIENT_IS_INSURED = 1                                            [(string_value) = "01"];
 
-  // ASCII 02
   PATIENT_RELATIONSHIP_CODE_SPOUSE = 2                                                        [(string_value) = "02"];
 
-  // ASCII 03
   PATIENT_RELATIONSHIP_CODE_NATURAL_CHILD_INSURED_HAS_FINANCIAL_RESPONSIBILITY = 3            [(string_value) = "03"];
 
-  // ASCII 04
   PATIENT_RELATIONSHIP_CODE_NATURAL_CHILD_INSURED_DOES_NOT_HAVE_FINANCIAL_RESPONSIBILITY = 4  [(string_value) = "04"];
 
-  // ASCII 05
   PATIENT_RELATIONSHIP_CODE_STEP_CHILD = 5                                                    [(string_value) = "05"];
 
-  // ASCII 06
   PATIENT_RELATIONSHIP_CODE_FOSTER_CHILD = 6                                                  [(string_value) = "06"];
 
-  // ASCII 07
   PATIENT_RELATIONSHIP_CODE_WARD_OF_THE_COURT = 7                                             [(string_value) = "07"];
 
-  // ASCII 08
   PATIENT_RELATIONSHIP_CODE_EMPLOYEE = 8                                                      [(string_value) = "08"];
 
-  // ASCII 09
   PATIENT_RELATIONSHIP_CODE_UNKNOWN = 9                                                       [(string_value) = "09"];
 
-  // ASCII 10
   PATIENT_RELATIONSHIP_CODE_HANDICAPPED_DEPENDENT = 10                                        [(string_value) = "10"];
 
-  // ASCII 11
   PATIENT_RELATIONSHIP_CODE_ORGAN_DONOR = 11                                                  [(string_value) = "11"];
 
-  // ASCII 12
   PATIENT_RELATIONSHIP_CODE_CADAVER_DONOR = 12                                                [(string_value) = "12"];
 
-  // ASCII 13
   PATIENT_RELATIONSHIP_CODE_GRANDCHILD = 13                                                   [(string_value) = "13"];
 
-  // ASCII 14
   PATIENT_RELATIONSHIP_CODE_NIECE_OR_NEPHEW = 14                                              [(string_value) = "14"];
 
-  // ASCII 15
   PATIENT_RELATIONSHIP_CODE_INJURED_PLAINTIFF = 15                                            [(string_value) = "15"];
 
-  // ASCII 16
   PATIENT_RELATIONSHIP_CODE_SPONSORED_DEPENDENT = 16                                          [(string_value) = "16"];
 
-  // ASCII 17
   PATIENT_RELATIONSHIP_CODE_MINOR_DEPENDENT_OF_A_MINOR_DEPENDENT = 17                         [(string_value) = "17"];
 
-  // ASCII 18
   PATIENT_RELATIONSHIP_CODE_PARENT = 18                                                       [(string_value) = "18"];
 
-  // ASCII 19
   PATIENT_RELATIONSHIP_CODE_GRANDPARENT = 19                                                  [(string_value) = "19"];
 
-  // ASCII 20
   PATIENT_RELATIONSHIP_CODE_LIFE_PARTNER = 20                                                 [(string_value) = "20"];
 
-  // ASCII 21
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_21 = 21                          [(string_value) = "21"];
 
-  // ASCII 22
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_22 = 22                          [(string_value) = "22"];
 
-  // ASCII 23
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_23 = 23                          [(string_value) = "23"];
 
-  // ASCII 24
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_24 = 24                          [(string_value) = "24"];
 
-  // ASCII 25
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_25 = 25                          [(string_value) = "25"];
 
-  // ASCII 26
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_26 = 26                          [(string_value) = "26"];
 
-  // ASCII 27
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_27 = 27                          [(string_value) = "27"];
 
-  // ASCII 28
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_28 = 28                          [(string_value) = "28"];
 
-  // ASCII 29
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_29 = 29                          [(string_value) = "29"];
 
-  // ASCII 30
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_30 = 30                          [(string_value) = "30"];
 
-  // ASCII 31
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_31 = 31                          [(string_value) = "31"];
 
-  // ASCII 32
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_32 = 32                          [(string_value) = "32"];
 
-  // ASCII 33
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_33 = 33                          [(string_value) = "33"];
 
-  // ASCII 34
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_34 = 34                          [(string_value) = "34"];
 
-  // ASCII 35
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_35 = 35                          [(string_value) = "35"];
 
-  // ASCII 36
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_36 = 36                          [(string_value) = "36"];
 
-  // ASCII 37
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_37 = 37                          [(string_value) = "37"];
 
-  // ASCII 38
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_38 = 38                          [(string_value) = "38"];
 
-  // ASCII 39
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_39 = 39                          [(string_value) = "39"];
 
-  // ASCII 40
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_40 = 40                          [(string_value) = "40"];
 
-  // ASCII 41
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_41 = 41                          [(string_value) = "41"];
 
-  // ASCII 42
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_42 = 42                          [(string_value) = "42"];
 
-  // ASCII 43
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_43 = 43                          [(string_value) = "43"];
 
-  // ASCII 44
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_44 = 44                          [(string_value) = "44"];
 
-  // ASCII 45
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_45 = 45                          [(string_value) = "45"];
 
-  // ASCII 46
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_46 = 46                          [(string_value) = "46"];
 
-  // ASCII 47
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_47 = 47                          [(string_value) = "47"];
 
-  // ASCII 48
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_48 = 48                          [(string_value) = "48"];
 
-  // ASCII 49
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_49 = 49                          [(string_value) = "49"];
 
-  // ASCII 50
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_50 = 50                          [(string_value) = "50"];
 
-  // ASCII 51
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_51 = 51                          [(string_value) = "51"];
 
-  // ASCII 52
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_52 = 52                          [(string_value) = "52"];
 
-  // ASCII 53
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_53 = 53                          [(string_value) = "53"];
 
-  // ASCII 54
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_54 = 54                          [(string_value) = "54"];
 
-  // ASCII 55
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_55 = 55                          [(string_value) = "55"];
 
-  // ASCII 56
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_56 = 56                          [(string_value) = "56"];
 
-  // ASCII 57
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_57 = 57                          [(string_value) = "57"];
 
-  // ASCII 58
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_58 = 58                          [(string_value) = "58"];
 
-  // ASCII 59
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_59 = 59                          [(string_value) = "59"];
 
-  // ASCII 60
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_60 = 60                          [(string_value) = "60"];
 
-  // ASCII 61
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_61 = 61                          [(string_value) = "61"];
 
-  // ASCII 62
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_62 = 62                          [(string_value) = "62"];
 
-  // ASCII 63
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_63 = 63                          [(string_value) = "63"];
 
-  // ASCII 64
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_64 = 64                          [(string_value) = "64"];
 
-  // ASCII 65
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_65 = 65                          [(string_value) = "65"];
 
-  // ASCII 66
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_66 = 66                          [(string_value) = "66"];
 
-  // ASCII 67
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_67 = 67                          [(string_value) = "67"];
 
-  // ASCII 68
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_68 = 68                          [(string_value) = "68"];
 
-  // ASCII 69
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_69 = 69                          [(string_value) = "69"];
 
-  // ASCII 70
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_70 = 70                          [(string_value) = "70"];
 
-  // ASCII 71
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_71 = 71                          [(string_value) = "71"];
 
-  // ASCII 72
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_72 = 72                          [(string_value) = "72"];
 
-  // ASCII 73
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_73 = 73                          [(string_value) = "73"];
 
-  // ASCII 74
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_74 = 74                          [(string_value) = "74"];
 
-  // ASCII 75
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_75 = 75                          [(string_value) = "75"];
 
-  // ASCII 76
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_76 = 76                          [(string_value) = "76"];
 
-  // ASCII 77
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_77 = 77                          [(string_value) = "77"];
 
-  // ASCII 78
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_78 = 78                          [(string_value) = "78"];
 
-  // ASCII 79
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_79 = 79                          [(string_value) = "79"];
 
-  // ASCII 80
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_80 = 80                          [(string_value) = "80"];
 
-  // ASCII 81
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_81 = 81                          [(string_value) = "81"];
 
-  // ASCII 82
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_82 = 82                          [(string_value) = "82"];
 
-  // ASCII 83
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_83 = 83                          [(string_value) = "83"];
 
-  // ASCII 84
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_84 = 84                          [(string_value) = "84"];
 
-  // ASCII 85
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_85 = 85                          [(string_value) = "85"];
 
-  // ASCII 86
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_86 = 86                          [(string_value) = "86"];
 
-  // ASCII 87
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_87 = 87                          [(string_value) = "87"];
 
-  // ASCII 88
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_88 = 88                          [(string_value) = "88"];
 
-  // ASCII 89
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_89 = 89                          [(string_value) = "89"];
 
-  // ASCII 90
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_90 = 90                          [(string_value) = "90"];
 
-  // ASCII 91
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_91 = 91                          [(string_value) = "91"];
 
-  // ASCII 92
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_92 = 92                          [(string_value) = "92"];
 
-  // ASCII 93
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_93 = 93                          [(string_value) = "93"];
 
-  // ASCII 94
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_94 = 94                          [(string_value) = "94"];
 
-  // ASCII 95
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_95 = 95                          [(string_value) = "95"];
 
-  // ASCII 96
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_96 = 96                          [(string_value) = "96"];
 
-  // ASCII 97
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_97 = 97                          [(string_value) = "97"];
 
-  // ASCII 98
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_98 = 98                          [(string_value) = "98"];
 
-  // ASCII 99
   PATIENT_RELATIONSHIP_CODE_RESERVED_FOR_NATIONAL_ASSIGNMENT_99 = 99                          [(string_value) = "99"];
 }
