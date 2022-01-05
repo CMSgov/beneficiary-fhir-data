@@ -4,15 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import gov.cms.bfd.server.war.ServerTestUtils;
 import gov.cms.bfd.server.war.utils.AssertUtils;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
@@ -25,7 +23,7 @@ public class R4ClaimResourceProviderIT {
   private static final RDATestUtils testUtils = new RDATestUtils();
 
   private static final Set<String> IGNORE_PATTERNS =
-      ImmutableSet.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
+      Set.of("\"/link/[0-9]+/url\"", "\"/created\"", "\"/meta/lastUpdated\"");
 
   @BeforeClass
   public static void init() {
@@ -74,11 +72,10 @@ public class R4ClaimResourceProviderIT {
             .search()
             .forResource(Claim.class)
             .where(
-                ImmutableMap.of(
-                    "mbi", Collections.singletonList(new ReferenceParam("a7f8e93f09")),
+                Map.of(
+                    "mbi", List.of(new ReferenceParam("a7f8e93f09")),
                     "service-date",
-                        Arrays.asList(
-                            new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))
+                        List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))
             .returnBundle(Bundle.class)
             .execute();
 

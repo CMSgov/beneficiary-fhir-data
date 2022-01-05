@@ -6,6 +6,7 @@ option java_multiple_files = true;
 
 import "google/protobuf/empty.proto";
 import "rda/v1/api_version.proto";
+import "rda/v1/change_sequence_range.proto";
 import "rda/v1/fiss/fiss_claim_change.proto";
 import "rda/v1/mcs/mcs_claim_change.proto";
 
@@ -26,6 +27,12 @@ service RDAService {
 
   // Gets all MCS claims data from the database, and closes the stream.
   rpc GetMcsClaims(ClaimRequest) returns (stream McsClaimChange);
+
+  // Gets the upper and lower bounds (inclusive) for sequence numbers of FISS claims.
+  rpc GetFissClaimsSequenceNumberRange(google.protobuf.Empty) returns (ClaimSequenceNumberRange);
+
+  // Gets the upper and lowers bounds (inclusive) for sequence numbers for MCS claims.
+  rpc GetMcsClaimsSequenceNumberRange(google.protobuf.Empty) returns (ClaimSequenceNumberRange);
 
   // Gets the version of RDA API service.
   rpc GetVersion(google.protobuf.Empty) returns (ApiVersion);

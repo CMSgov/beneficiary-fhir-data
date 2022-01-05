@@ -4,15 +4,25 @@ package gov.cms.mpsm.rda.v1.fiss;
 
 option java_multiple_files = true;
 
+import "rda/v1/fiss/fiss_adjustment_medicare_beneficiary_identifier_indicator.proto";
+import "rda/v1/fiss/fiss_adjustment_requestor_code.proto";
+import "rda/v1/fiss/fiss_audit_trail.proto";
 import "rda/v1/fiss/fiss_bill_classification.proto";
 import "rda/v1/fiss/fiss_bill_facility_type.proto";
 import "rda/v1/fiss/fiss_bill_frequency.proto";
+import "rda/v1/fiss/fiss_cancel_adjustment_code.proto";
 import "rda/v1/fiss/fiss_claim_status.proto";
 import "rda/v1/fiss/fiss_current_location_2.proto";
 import "rda/v1/fiss/fiss_diagnosis_code.proto";
+import "rda/v1/fiss/fiss_health_insurance_claim_number_or_medicare_beneficiary_identifier.proto";
 import "rda/v1/fiss/fiss_payer.proto";
+import "rda/v1/fiss/fiss_payers_code.proto";
+import "rda/v1/fiss/fiss_physician_flag.proto";
 import "rda/v1/fiss/fiss_procedure_code.proto";
+import "rda/v1/fiss/fiss_process_new_health_insurance_claim_number_indicator.proto";
 import "rda/v1/fiss/fiss_processing_type.proto";
+import "rda/v1/fiss/fiss_repository_indicator.proto";
+import "rda/v1/fiss/fiss_source_of_admission.proto";
 
 // FISS (Fiscal Intermediary Shared Systems) Claim
 message FissClaim {
@@ -179,6 +189,153 @@ message FissClaim {
   // 3-digit Bill Type Code (concatenation of location of bill, bill classification, and bill frequency).
   optional string bill_typ_cd = 50;
 
+  // Reject Code
+  optional string reject_cd = 53;
+
+  // Fully or Partially Denied Indicator
+  optional string full_part_den_ind = 54;
+
+  // Non-Pay Code Indicator
+  optional string non_pay_ind = 55;
+
+  // Cross-reference Document Control Number
+  optional string xref_dcn_nbr = 56;
+
+  // Adjustment Requestor Identification
+  oneof adj_req_cd {
+    FissAdjustmentRequestorCode adj_req_cd_enum = 57;
+    string adj_req_cd_unrecognized = 58;
+  };
+
+  // Adjustment Reason Code
+  optional string adj_reas_cd = 59;
+
+  // Cancel Cross-reference Document Control Number
+  optional string cancel_xref_dcn = 60;
+
+  // Cancel Date
+  optional string cancel_date_cymd = 61;
+
+  // Cancel Adjustment Code
+  oneof canc_adj_cd {
+    FissCancelAdjustmentCode canc_adj_cd_enum = 62;
+    string canc_adj_cd_unrecognized = 63;
+  };
+
+  // Original Cross-Reference Document Control Number
+  optional string original_xref_dcn = 64;
+
+  // Paid Date
+  optional string paid_dt_cymd = 65;
+
+  // Admission Date
+  optional string adm_date_cymd = 66;
+
+  // Source of Admission
+  oneof adm_source {
+    FissSourceOfAdmission adm_source_enum = 67;
+    string adm_source_unrecognized = 68;
+  };
+
+  // Primary Payer Code
+  oneof primary_payer_code {
+    FissPayersCode primary_payer_code_enum = 69;
+    string primary_payer_code_unrecognized = 70;
+  };
+
+  // Attending Physician NPI
+  optional string attend_phys_id = 71;
+
+  // Attending Physician Last Name
+  optional string attend_phys_lname = 72;
+
+  // Attending Physician First Name
+  optional string attend_phys_fname = 73;
+
+  // Attending Physician Middle Initial
+  optional string attend_phys_mint = 74;
+
+  // Attending Physician Flag
+  oneof attend_phys_flag {
+    FissPhysicianFlag attend_phys_flag_enum = 75;
+    string attend_phys_flag_unrecognized = 76;
+  };
+
+  // Operating Physician NPI
+  optional string operating_phys_id = 77;
+
+  // Operating Physician Last Name
+  optional string oper_phys_lname = 78;
+
+  // Operating Physician First Name
+  optional string oper_phys_fname = 79;
+
+  // Operating Physician Middle Initial
+  optional string oper_phys_mint = 80;
+
+  // Operating Physician Flag
+  oneof oper_phys_flag {
+    FissPhysicianFlag oper_phys_flag_enum = 81;
+    string oper_phys_flag_unrecognized = 82;
+  };
+
+  // Other Physician NPI
+  optional string oth_phys_id = 83;
+
+  // Other Physician Last Name
+  optional string oth_phys_lname = 84;
+
+  // Other Physician First Name
+  optional string oth_phys_fname = 85;
+
+  // Other Physician Middle Initial
+  optional string oth_phys_mint = 86;
+
+  // Other Physician Flag
+  oneof oth_phys_flag {
+    FissPhysicianFlag oth_phys_flag_enum = 87;
+    string oth_phys_flag_unrecognized = 88;
+  };
+
+  // Cross-Reference Health Insurance Claim Number
+  optional string xref_hic_nbr = 89;
+
+  // Process new Health Insurance Claim Number
+  oneof proc_new_hic_ind {
+    FissProcessNewHealthInsuranceClaimNumberIndicator proc_new_hic_ind_enum = 90;
+    string proc_new_hic_ind_unrecognized = 91;
+  };
+
+  // New Health Insurance Claim Number
+  optional string new_hic = 92;
+
+  // Repository Indicator
+  oneof repos_ind {
+    FissRepositoryIndicator repos_ind_enum = 93;
+    string repos_ind_unrecognized = 94;
+  };
+
+  // Repository HIC
+  optional string repos_hic = 95;
+
+  // Health Insurance Claim (HIC) Number or Medicare Beneficiary Identify (MBI)
+  oneof mbi_subm_bene_ind {
+    FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier mbi_subm_bene_ind_enum = 96;
+    string mbi_subm_bene_ind_unrecognized = 97;
+  };
+
+  // Adjustment Medicare Beneficiary Identifier (MBI) Indicator
+  oneof adj_mbi_ind {
+    FissAdjustmentMedicareBeneficiaryIdentifierIndicator adj_mbi_ind_enum = 98;
+    string adj_mbi_ind_unrecognized = 99;
+  };
+
+  // Adjustment Medicare Beneficiary Identifier
+  optional string adj_mbi = 100;
+
+  // Medical Record Number
+  optional string medical_record_no = 101;
+
   // FISS Procedure Codes
   repeated FissProcedureCode fiss_proc_codes = 28;
 
@@ -187,4 +344,7 @@ message FissClaim {
 
   // FISS Payers
   repeated FissPayer fiss_payers = 51;
+
+  // FISS Audit Trail
+  repeated FissAuditTrail fiss_audit_trail = 52;
 }

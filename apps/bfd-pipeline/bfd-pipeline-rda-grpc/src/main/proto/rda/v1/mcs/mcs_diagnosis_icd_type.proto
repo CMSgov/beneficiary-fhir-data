@@ -7,9 +7,7 @@ option java_multiple_files = true;
 import "rda/v1/enum_options.proto";
 
 enum McsDiagnosisIcdType {
-  // ASCII 9
   DIAGNOSIS_ICD_TYPE_ICD9 = 0  [(string_value) = "9"];
 
-  // ASCII 0
   DIAGNOSIS_ICD_TYPE_ICD10 = 1 [(string_value) = "0"];
 }
