@@ -1,5 +1,44 @@
 # API Changelog
 
+## BFD-1403 Update patient discharge status code mapping
+
+Update mapping for patient discharge status coding for HHA, Inpatient and Hospice:
+For Inpatient:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "51",
+        "display" : "Discharged/transferred to a Hospice – medical facility."
+      } ]
+    }
+```
+
+For Hospice:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+```
+
+For HHA:
+
+```
+"code" : {
+      "coding" : [ {
+        "system" : "https://bluebutton.cms.gov/resources/variables/ptnt_dschrg_stus_cd",
+        "code" : "30",
+        "display" : "Still patient."
+      } ]
+    }
+```
+
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
