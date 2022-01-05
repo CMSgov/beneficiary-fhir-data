@@ -1,5 +1,24 @@
 # API Changelog
 
+## BFD-1383 Update V2 line item allowed charge amount mapping
+
+The charge amount for Carrier and DME have been updated from submitted to allowed.
+For DME the new allowed charge amount looks like:
+
+````
+"amount" : {
+    "value" : 129.45,
+    "currency" : "USD"
+}
+````
+
+For Carrier:
+````
+"amount" : {
+    "value" : 47.84,
+    "currency" : "USD"
+}
+````
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
