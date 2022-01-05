@@ -28,7 +28,7 @@ import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.RequestHeaders;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
-import gov.cms.bfd.server.war.stu3.providers.SamhsaMatcherTest;
+import gov.cms.bfd.server.war.stu3.providers.Stu3EobSamhsaMatcherTest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -57,12 +57,31 @@ import org.hl7.fhir.r4.model.Money;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /** R4ExplanationOfBenefitResourceProviderIT. */
 public final class R4ExplanationOfBenefitResourceProviderIT {
 
   public static final String EXCLUDE_SAMHSA_PARAM = "excludeSAMHSA";
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
+   * that any existing data is deleted from the tables before running the test suite.
+   */
+  @BeforeClass
+  public static void cleanupDatabaseBeforeTestSuite() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
+
+  /**
+   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
+   * case.
+   */
+  @After
+  public void cleanDatabaseServerAfterEachTestCase() {
+    PipelineTestUtils.get().truncateTablesInDataSource();
+  }
 
   /**
    * Verifies that {@link
@@ -960,7 +979,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     carrierRifRecord = entityManager.find(CarrierClaim.class, carrierRifRecord.getClaimId());
     carrierRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     carrierRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(carrierRifRecord);
     entityManager.getTransaction().commit();
@@ -985,7 +1004,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     inpatientRifRecord = entityManager.find(InpatientClaim.class, inpatientRifRecord.getClaimId());
     inpatientRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     inpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(inpatientRifRecord);
     entityManager.getTransaction().commit();
@@ -1011,7 +1030,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     outpatientRifRecord =
         entityManager.find(OutpatientClaim.class, outpatientRifRecord.getClaimId());
     outpatientRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     outpatientRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(outpatientRifRecord);
     entityManager.getTransaction().commit();
@@ -1036,7 +1055,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     hhaRifRecord = entityManager.find(HHAClaim.class, hhaRifRecord.getClaimId());
     hhaRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hhaRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(hhaRifRecord);
     entityManager.getTransaction().commit();
@@ -1061,7 +1080,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     snfRifRecord = entityManager.find(SNFClaim.class, snfRifRecord.getClaimId());
     snfRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     snfRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(snfRifRecord);
     entityManager.getTransaction().commit();
@@ -1086,7 +1105,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     hospiceRifRecord = entityManager.find(HospiceClaim.class, hospiceRifRecord.getClaimId());
     hospiceRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     hospiceRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(hospiceRifRecord);
     entityManager.getTransaction().commit();
@@ -1111,7 +1130,7 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
     entityManager.getTransaction().begin();
     dmeRifRecord = entityManager.find(DMEClaim.class, dmeRifRecord.getClaimId());
     dmeRifRecord.setDiagnosis2Code(
-        Optional.of(SamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
+        Optional.of(Stu3EobSamhsaMatcherTest.SAMPLE_SAMHSA_ICD_9_DIAGNOSIS_CODE));
     dmeRifRecord.setDiagnosis2CodeVersion(Optional.of('9'));
     entityManager.merge(dmeRifRecord);
     entityManager.getTransaction().commit();
@@ -1468,6 +1487,52 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
   }
 
   /**
+   * Verifies that {@link
+   * gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider#findByPatient} works
+   * as with a lastUpdated parameter after yesterday.
+   *
+   * @throws FHIRException (indicates test failure)
+   */
+  @Test
+  public void searchEobWithLastUpdatedAndPaginationAndType() throws FHIRException {
+    Beneficiary beneficiary = loadSampleA();
+    IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
+
+    // Search with lastUpdated range between yesterday and now
+    int expectedCount = 3;
+    Date yesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
+    Date now = new Date();
+    DateRangeParam afterYesterday = new DateRangeParam(yesterday, now);
+    Bundle searchResultsAfter =
+        fhirClient
+            .search()
+            .forResource(ExplanationOfBenefit.class)
+            .where(
+                ExplanationOfBenefit.PATIENT.hasId(TransformerUtilsV2.buildPatientId(beneficiary)))
+            .lastUpdated(afterYesterday)
+            .count(expectedCount)
+            .returnBundle(Bundle.class)
+            .execute();
+    Assert.assertEquals(
+        "Expected number resources return to be equal to count",
+        expectedCount,
+        searchResultsAfter.getEntry().size());
+
+    // Check self url
+    String selfLink = searchResultsAfter.getLink(IBaseBundle.LINK_SELF).getUrl();
+    Assert.assertTrue(selfLink.contains("lastUpdated"));
+
+    // Check next bundle
+    String nextLink = searchResultsAfter.getLink(IBaseBundle.LINK_NEXT).getUrl();
+    Assert.assertTrue(nextLink.contains("lastUpdated"));
+    Bundle nextResults = fhirClient.search().byUrl(nextLink).returnBundle(Bundle.class).execute();
+    Assert.assertEquals(
+        "Expected number resources return to be equal to count",
+        expectedCount,
+        nextResults.getEntry().size());
+  }
+
+  /**
    * Verifies that {@link gov.cms.bfd.server.war.r4.providers.ExplanationOfBenefitResourceProvider}
    * works as with a null lastUpdated parameter after yesterday.
    *
@@ -1606,15 +1671,6 @@ public final class R4ExplanationOfBenefitResourceProviderIT {
           Assert.assertEquals(
               testCase.getLeft(), testCase.getRight().intValue(), bundle.getTotal());
         });
-  }
-
-  /**
-   * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called after each test
-   * case.
-   */
-  @After
-  public void cleanDatabaseServerAfterEachTestCase() {
-    PipelineTestUtils.get().truncateTablesInDataSource();
   }
 
   /**

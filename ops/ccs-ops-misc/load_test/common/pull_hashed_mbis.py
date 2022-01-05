@@ -3,13 +3,18 @@ import psycopg2 as p
 import yaml
 from common import config
 
+'''
+Calls out to the database located in the config file, and returns the list of hashed mbis from the query.
+
+Returns a list of hashed mbis, or an empty array if nothing was found.
+'''
 def loadData():
     ## Load configuration data, like db creds
     configFile = config.load()
 
-    ## if we failed to load the config, bail out
+    ## if we failed to load the config, bail out (error msg printed in load())
     if configFile is None:
-        return -1
+        return []
 
     beneQuery = "SELECT \"mbiHash\" FROM \"Beneficiaries\" WHERE \"mbiHash\" IS NOT NULL LIMIT 100000;"
 

@@ -138,6 +138,8 @@ public final class TransformerConstants {
    */
   public static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
+  public static final String CODING_SYSTEM_CPT = "http://www.ama-assn.org/go/cpt";
+
   /**
    * Used as the {@link Coding#getSystem()} for determining the currency of an {@link Identifier}.
    */
@@ -241,6 +243,18 @@ public final class TransformerConstants {
    * identifier is a TAX.
    */
   public static final String CODED_IDENTIFIER_TYPE_TAX_DISPLAY = "Tax ID number";
+
+  /**
+   * The standard {@link Coding#gCode()} for {@link Identifier#getType()} entries where the
+   * identifier is an MC.
+   */
+  public static final String CODED_IDENTIFIER_TYPE_MC = "MC";
+
+  /**
+   * The standard {@link Coding#getDisplay()} for {@link Identifier#getType()} entries where the
+   * identifier is an MC.
+   */
+  public static final String CODED_IDENTIFIER_TYPE_MC_DISPLAY = "Patient's Medicare Number";
 
   /**
    * The {@link Coding#getSystem()} for "The Unified Code for Units of Measure (UCUM)", a

@@ -1,103 +1,14 @@
 import os
 import sys
 import getopt
-import common.pull_bene_ids
 import common.config as config
+import common.test_setup as setup
 from locust.main import main
+from multiprocessing import Process
 
-def set_locust_env(configFile, testFileName):
-    os.environ['LOCUST_HOST'] = configFile["testHost"]
-    os.environ['LOCUST_RUN_TIME'] = configFile["testRunTime"]
-    os.environ['LOCUST_HEADLESS'] = "True"
-    os.environ['LOCUST_LOCUSTFILE'] = testFileName
-    os.environ['LOCUST_USERS'] = configFile["testNumTotalClients"]
-    os.environ['LOCUST_SPAWN_RATE'] = configFile["testCreatedClientsPerSecond"]
-    os.environ['LOCUST_LOGLEVEL'] = "INFO"
-
-def run_tests():
-    print(" --- BFD Load Tests ---")
-    choice = ''
-    configFile = {}
-
-    while choice.upper() != 'Q':
-        if choice.upper() == '1':
-            configFile = config.create()
-            choice = ''
-        elif choice.upper() == '2':
-            configFile = config.load()
-            while choice.upper() != 'Q':
-                print(" -- Individual Test List (v1) --")
-                print("1: Explanation of Benefit (EOB) by ID \n2: Patient by ID \nQ: return to main menu")
-                choice = input()
-                if choice.upper() == '1':
-                    set_locust_env(configFile, "./v1/eob_test.py")
-                    main()
-                elif choice.upper() == '2':
-                    set_locust_env(configFile, "./v1/patient_test.py")
-                    main()
-            choice = ''
-        elif choice.upper() == '3':
-            configFile = config.load()
-            print(" -- Individual Test List (v2) --")
-            print("1: Coverage by ID - Count 10 \n2: Coverage by ID - Count 100 - last Updated 2 weeks"
-            + "\n3: Coverage by ID - last Updated 2 weeks \n4: Explanation of Benefit (EOB) by ID - Count 10"
-            + "\n5: Explanation of Benefit (EOB) by ID - Count 10 - last Updated 2 weeks"
-            + "\n6: Explanation of Benefit (EOB) by ID - Include tax numbers - last Updated 2 weeks"
-            + "\n7: Explanation of Benefit (EOB) by ID - minimal response"
-            + "\n8: Patient - hashed MBI"
-            + "\n9: Patient - ID"
-            + "\n10: Patient - ID - IncludeIdentifiers=true"
-            + "\n11: Patient - ID - IncludeIdentifiers=mbi - last updated 2 weeks"
-            + "\n12: Patient - Coverage Contract - IncludeIdentifiers=mbi - Count 500"
-            + "\n13: Claim - hashed MBI"
-            + "\nQ: return to main menu")
-            choice = input()
-            if choice.upper() == '1':
-                set_locust_env(configFile, "./v2/coverage_test_id_count10.py")
-                main()
-            elif choice.upper() == '2':
-                set_locust_env(configFile, "./v2/coverage_test_id_count100_lastUpdated.py")
-                main()
-            elif choice.upper() == '3':
-                set_locust_env(configFile, "./v2/coverage_test_id_lastUpdated.py")
-                main()
-            elif choice.upper() == '4':
-                set_locust_env(configFile, "./v2/eob_test_id_count10.py")
-                main()
-            elif choice.upper() == '5':
-                set_locust_env(configFile, "./v2/eob_test_id_count10_lastUpdated.py")
-                main()
-            elif choice.upper() == '6':
-                set_locust_env(configFile, "./v2/eob_test_id_includeTaxNumbers_lastUpdated.py")
-                main()
-            elif choice.upper() == '7':
-                set_locust_env(configFile, "./v2/eob_test_id_params_false.py")
-                main()
-            elif choice.upper() == '8':
-                set_locust_env(configFile, "./v2/patient_test_hashedMbi.py")
-                main()
-            elif choice.upper() == '9':
-                set_locust_env(configFile, "./v2/patient_test_id.py")
-                main()
-            elif choice.upper() == '10':
-                set_locust_env(configFile, "./v2/patient_test_id_includeIdentifiers.py")
-                main()
-            elif choice.upper() == '11':
-                set_locust_env(configFile, "./v2/patient_test_id_includeMbiIdentifiers_lastUpdated.py")
-                main()
-            elif choice.upper() == '12':
-                set_locust_env(configFile, "./v2/patient_test_coverageContract_includeMbiIdentifiers_count500.py")
-                main()
-            elif choice.upper() == '13':
-                set_locust_env(configFile, "./v2/claim_test_hashedMbi.py")
-                main()
-            choice = ''
-        else:
-            print("Please select an option: ")
-            print("1: Setup config file (change target environment) \n2: Run single v1 test \n3: Run single v2 test \nQ: quit")
-            choice = input()
-
-
+'''
+Runs a specified test via the input args.
+'''
 def run_with_params(argv):
 
     testFile = ''
@@ -110,6 +21,7 @@ def run_with_params(argv):
     configData.testRunTime = "1m"
     configData.testNumTotalClients = "100"
     configData.testCreatedClientsPerSecond = "5"
+    workerThreads = "1"
 
     helpString = ('runtests.py \n--homePath="<path/to/home/directory>" (Required) '
      '\n--clientCertPath="<path/to/client/pem/file>" (Required)'
@@ -121,12 +33,13 @@ def run_with_params(argv):
      '\n--serverPublicKey="<server public key>" (Optional, Default: "")'
      '\n--testRunTime="<Test run time, ex. 30s, 1m, 2d 1h>" (Optional, Default 1m)'
      '\n--maxClients="<Max number of clients to create at once, int>" (Optional, Default 100)'
-     '\n--clientsPerSecond="<Clients to create per second until maxClients is reached, int>" (Optional, Default 5)')
+     '\n--clientsPerSecond="<Clients to create per second until maxClients is reached, int>" (Optional, Default 5)'
+     '\n--workerThreads="<If >1 the test is run as distributed, and expects this many worker processes to start, int>" (Optional, Default 1 - non distributed mode)')
 
     try:
         opts, args = getopt.getopt(argv,"h",["homePath=", "clientCertPath=", "databaseHost=", "databaseUsername=",
         "databasePassword=", "testHost=", "serverPublicKey=", "testRunTime=", "maxClients=", "clientsPerSecond=",
-        "testFile="])
+        "testFile=","workerThreads="])
     except getopt.GetoptError:
         print(helpString)
         sys.exit(2)
@@ -157,6 +70,8 @@ def run_with_params(argv):
             configData.testCreatedClientsPerSecond = arg
         elif opt == "--testFile":
             testFile = arg
+        elif opt == "--workerThreads":
+            workerThreads = arg
         else:
             print(helpString)
             sys.exit()
@@ -168,18 +83,27 @@ def run_with_params(argv):
 
     ## write out config file
     config.save(configData)
+    setup.set_locust_test_name(testFile)
 
-    ## set up locust params
-    set_locust_env(config.load(), testFile)
     # strip off extra command line params for locust, or else it tries to parse them
     sys.argv = sys.argv[:1]
-    # call locust to run test
-    main()
 
+    if(int(workerThreads) > 1):
+        ## Spawn worker threads to connect to the main thread
+        for i in range(int(workerThreads)):
+            print(f"Creating worker #{i}")
+            p = Process(target=setup.run_worker_test, args=(i,workerThreads,))
+            p.start()
 
-## Run either single-line mode, or interactive command-line mode based on if args were passed
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        run_with_params(sys.argv[1:])
+        ## Run the master test
+        setup.set_locust_env(config.load())
+        setup.run_master_test(workerThreads)
     else:
-        run_tests()
+        # Reset the distributed values
+        setup.reset_distributed_values()
+        # call locust to run the master test
+        main()
+
+## Runs the test via run args when this file is run
+if __name__ == "__main__":
+    run_with_params(sys.argv[1:])

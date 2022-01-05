@@ -1,9 +1,7 @@
-import csv
-import datetime
-import os
-import sys
 import urllib3
 import common.config as config
+import common.data as data
+import common.errors as errors
 import common.test_setup as setup
 from locust import HttpUser, task
 
@@ -16,12 +14,16 @@ to see anything else.
 if not server_public_key:
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-mbis = setup.generateAndLoadPreAdjMbis()
+mbis = data.load_pa_mbis()
 client_cert = setup.getClientCert()
+setup.set_locust_env(config.load())
 
 class BFDUser(HttpUser):
     @task
     def patient(self):
+        if len(mbis) == 0:
+            errors.no_data_stop_test(self)
+
         hashed_mbi = mbis.pop()
         self.client.get(f'/v2/fhir/Claim?mbi={hashed_mbi}',
                 cert=client_cert,
