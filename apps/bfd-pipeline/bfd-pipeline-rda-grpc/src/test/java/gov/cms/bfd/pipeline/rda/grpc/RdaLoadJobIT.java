@@ -12,7 +12,10 @@ import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
+import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -51,6 +54,26 @@ public class RdaLoadJobIT {
     }
     if (mcsClaimJson == null) {
       mcsClaimJson = mcsClaimsSource.readLines();
+    }
+  }
+
+  /**
+   * All of our test claims should be valid for our IT tests to succeed. This test ensures this is
+   * the case and catches any incompatibility issues when a new RDA API version contains breaking
+   * changes.
+   */
+  @Test
+  public void fissClaimsAreValid() throws Exception {
+    final ImmutableList<FissClaimChange> expectedClaims =
+        JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
+    final FissClaimTransformer transformer =
+        new FissClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+    for (FissClaimChange claim : expectedClaims) {
+      try {
+        transformer.transformClaim(claim);
+      } catch (DataTransformer.TransformationException ex) {
+        fail(String.format("bad sample claim: seq=%d error=%s", claim.getSeq(), ex.getErrors()));
+      }
     }
   }
 
@@ -123,6 +146,26 @@ public class RdaLoadJobIT {
           List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
+  }
+
+  /**
+   * All of our test claims should be valid for our IT tests to succeed. This test ensures this is
+   * the case and catches any incompatibility issues when a new RDA API version contains breaking
+   * changes.
+   */
+  @Test
+  public void mcsClaimsAreValid() throws Exception {
+    final ImmutableList<McsClaimChange> expectedClaims =
+        JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
+    final McsClaimTransformer transformer =
+        new McsClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+    for (McsClaimChange claim : expectedClaims) {
+      try {
+        transformer.transformClaim(claim);
+      } catch (DataTransformer.TransformationException ex) {
+        fail(String.format("bad sample claim: seq=%d error=%s", claim.getSeq(), ex.getErrors()));
+      }
+    }
   }
 
   @Test
