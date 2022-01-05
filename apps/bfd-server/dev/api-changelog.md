@@ -1,5 +1,20 @@
 # API Changelog
 
+## BFD-1424 Fix mtus code
+
+Update Carrier claim mapping for mtus code instead of mtus count:
+The new coding:
+```
+{
+      "url" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+      "valueCoding" : {
+        "system" : "https://bluebutton.cms.gov/resources/variables/carr_line_mtus_cd",
+        "code" : "3",
+        "display":"Services"
+      }
+}
+```
+
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
