@@ -179,6 +179,7 @@ EOF
 
 # Also add a temporary policy for the datalag bucket
 resource "aws_iam_policy" "bfd_datalag_pipeline_rif" {
+  count       = var.env_config.env == "prod" ? 1 : 0
   name        = "bfd-${var.env_config.env}-datalag-pipeline-rw-s3-rif"
   description = "Allow the BFD Pipeline application to read-write the datalag S3 bucket"
 
@@ -236,6 +237,7 @@ resource "aws_iam_role_policy_attachment" "bfd_pipeline_rif" {
 
 # attach the datalag policy to the etl instance profile
 resource "aws_iam_role_policy_attachment" "bfd_datalag_pipeline_rif" {
+  count      = var.env_config.env == "prod" ? 1 : 0
   role       = module.iam_profile_bfd_pipeline.role
   policy_arn = aws_iam_policy.bfd_pipeline_rif.arn
 }
