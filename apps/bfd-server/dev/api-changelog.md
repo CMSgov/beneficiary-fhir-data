@@ -1,5 +1,31 @@
 # API Changelog
 
+## BFD-1423 Remove Duplicate Drug Status Code
+
+Removed duplicate drug status coding from API output for PDE claims:
+There will only be one of these:
+```
+ "category" : {
+          "coding" : [ {
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code" : "info",
+            "display" : "Information"
+          }, {
+            "system" : "https://bluebutton.cms.gov/resources/codesystem/information",
+            "code" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
+            "display" : "Drug Coverage Status Code"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "system" : "https://bluebutton.cms.gov/resources/variables/drug_cvrg_stus_cd",
+            "code" : "C",
+            "display" : "Covered"
+          } ]
+        }
+}
+```
+
 ## BFD-1338 Add 2021 CPT Codes for SAMHSA Filtering
 
 Added three new codes to `codes-cpt.csv`:
