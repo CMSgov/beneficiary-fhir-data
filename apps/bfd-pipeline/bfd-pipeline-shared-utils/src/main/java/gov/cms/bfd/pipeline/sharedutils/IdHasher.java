@@ -98,13 +98,12 @@ public class IdHasher {
       return hashPepper.clone();
     }
 
+    /**
+     * This partial builder implementation will be filled out by lombok to produce the entire
+     * builder. We just need to add extra method for setting the hashPepper as either a string.
+     */
     public static class ConfigBuilder {
       private byte[] hashPepper;
-
-      public ConfigBuilder hashPepperBytes(byte[] hashPepper) {
-        this.hashPepper = hashPepper;
-        return this;
-      }
 
       public ConfigBuilder hashPepperString(String hashPepper) {
         this.hashPepper = hashPepper.getBytes(StandardCharsets.UTF_8);

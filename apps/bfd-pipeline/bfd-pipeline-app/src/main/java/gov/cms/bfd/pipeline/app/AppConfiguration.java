@@ -66,6 +66,16 @@ public final class AppConfiguration implements Serializable {
   public static final String ENV_VAR_KEY_HICN_HASH_PEPPER = "HICN_HASH_PEPPER";
 
   /**
+   * The name of the environment variable that should be used to provide an integer size for the
+   * in-memory cache of computed hicn/mbi hash values. Used to set the {@link
+   * IdHasher.Config#getCachSize()}.
+   */
+  private static final String ENV_VAR_KEY_HICN_HASH_CACHE_SIZE = "HICN_HASH_CACHE_SIZE";
+
+  /** Default value for {@link IdHasher.Config#getCachSize()}. */
+  private static final int DEFAULT_HICN_HASH_CACHE_SIZE = 100;
+
+  /**
    * The name of the environment variable that should be used to provide the {@link
    * #getDatabaseOptions()} {@link DatabaseOptions#getDatabaseUrl()} value.
    */
@@ -376,6 +386,8 @@ public final class AppConfiguration implements Serializable {
   static AppConfiguration readConfigFromEnvironmentVariables() {
     int hicnHashIterations = readEnvIntPositiveRequired(ENV_VAR_KEY_HICN_HASH_ITERATIONS);
     byte[] hicnHashPepper = readEnvBytesRequired(ENV_VAR_KEY_HICN_HASH_PEPPER);
+    int hicnHashCacheSize =
+        readEnvIntOptional(ENV_VAR_KEY_HICN_HASH_CACHE_SIZE).orElse(DEFAULT_HICN_HASH_CACHE_SIZE);
     String databaseUrl = readEnvStringRequired(ENV_VAR_KEY_DATABASE_URL);
     String databaseUsername = readEnvStringRequired(ENV_VAR_KEY_DATABASE_USERNAME);
     String databasePassword = readEnvStringRequired(ENV_VAR_KEY_DATABASE_PASSWORD);
