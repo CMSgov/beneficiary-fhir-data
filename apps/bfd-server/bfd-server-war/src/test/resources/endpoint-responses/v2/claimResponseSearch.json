@@ -1,14 +1,14 @@
 {
   "resourceType": "Bundle",
-  "id": "0561fc36-9def-493f-9be0-9354e139b81b",
+  "id": "1856fb88-119e-46b6-a775-ab78ae0f61e9",
   "meta": {
-    "lastUpdated": "2021-12-16T18:44:32.354+00:00"
+    "lastUpdated": "1970-01-01T00:00:01.000+00:00"
   },
   "type": "searchset",
   "link": [
     {
       "relation": "self",
-      "url": "https://localhost:8785/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
+      "url": "https://localhost:6500/v2/fhir/ClaimResponse?mbi=a7f8e93f09&service-date=gt1970-07-18&service-date=lt1970-07-30"
     }
   ],
   "entry": [
@@ -94,7 +94,7 @@
         "patient": {
           "reference": "#patient"
         },
-        "created": "2021-12-16T18:44:32+00:00",
+        "created": "1970-01-01T00:00:01+00:00",
         "insurer": {
           "identifier": {
             "value": "CMS"
