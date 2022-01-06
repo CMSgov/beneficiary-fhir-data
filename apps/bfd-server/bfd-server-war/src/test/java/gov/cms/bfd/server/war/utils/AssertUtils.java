@@ -103,6 +103,8 @@ public class AssertUtils {
 
     List<JsonNode> actualDiffs = new ArrayList<>();
 
+    // Looping through the diffs, checking what actually contains a non-empty object, and adding
+    // them to actualDiffs, which will be printed out as the real list of differences.
     if (diff.size() > 0) {
       for (int i = 0; i < diff.size(); i++) {
         if (!diff.get(i).toString().equals("{}")) {
