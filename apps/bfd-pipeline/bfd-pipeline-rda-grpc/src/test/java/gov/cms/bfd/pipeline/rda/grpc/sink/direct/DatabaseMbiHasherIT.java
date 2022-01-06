@@ -1,13 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.time.Clock;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DatabaseMbiHasherIT {
   private final IdHasher.Config hashConfig =
