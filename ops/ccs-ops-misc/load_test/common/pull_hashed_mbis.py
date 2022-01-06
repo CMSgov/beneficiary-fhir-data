@@ -23,8 +23,8 @@ def loadData():
             user = configFile["dbUsername"],
             password = configFile["dbPassword"],
             host = configFile["dbHost"],
-            port = '5435',
-            database = 'bfd'
+            port = '5432',
+            database = 'fhirdb'
     )
 
     cursor = conn.cursor()
