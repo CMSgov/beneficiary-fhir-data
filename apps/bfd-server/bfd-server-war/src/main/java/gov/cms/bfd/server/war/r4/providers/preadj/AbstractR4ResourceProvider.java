@@ -19,9 +19,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
-import gov.cms.bfd.server.war.stu3.providers.TransformerUtils;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -236,7 +236,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       boolean excludeSamhsa = Boolean.TRUE.toString().equalsIgnoreCase(samhsa);
 
       if (isHashed) {
-        TransformerUtils.logMbiHashToMdc(mbiString);
+        TransformerUtilsV2.logMbiHashToMdc(mbiString);
       }
 
       if (types != null) {
