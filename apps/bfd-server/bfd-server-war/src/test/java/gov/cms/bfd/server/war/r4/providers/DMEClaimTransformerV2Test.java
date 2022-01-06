@@ -515,8 +515,8 @@ public final class DMEClaimTransformerV2Test {
             "http://hl7.org/fhir/sid/ndc",
             new Coding(
                 "http://hl7.org/fhir/sid/ndc",
-                "495800192",
-                "Day Time Cold Multi-Symptom Cool Blast - ACETAMINOPHEN; GUAIFENESIN; DEXTROMETHORPHAN HYDROBROMIDE; PHENYLEPHRINE HYDROCHLORIDE"));
+                "500904610",
+                "ACETAMINOPHEN AND CODEINE PHOSPHATE - ACETAMINOPHEN; CODEINE PHOSPHATE"));
 
     Assert.assertTrue(compare.equalsDeep(ex));
   }

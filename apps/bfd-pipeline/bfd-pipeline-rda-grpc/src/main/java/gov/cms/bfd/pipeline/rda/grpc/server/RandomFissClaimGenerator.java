@@ -1,7 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentRequestorCode;
 import gov.cms.mpsm.rda.v1.fiss.FissAssignmentOfBenefitsIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissAuditTrail;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneficiarySex;
 import gov.cms.mpsm.rda.v1.fiss.FissBillClassification;
@@ -9,18 +12,24 @@ import gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForClinics;
 import gov.cms.mpsm.rda.v1.fiss.FissBillClassificationForSpecialFacilities;
 import gov.cms.mpsm.rda.v1.fiss.FissBillFacilityType;
 import gov.cms.mpsm.rda.v1.fiss.FissBillFrequency;
+import gov.cms.mpsm.rda.v1.fiss.FissCancelAdjustmentCode;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissCurrentLocation2;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisPresentOnAdmissionIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier;
 import gov.cms.mpsm.rda.v1.fiss.FissInsuredPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPatientRelationshipCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissPayersCode;
+import gov.cms.mpsm.rda.v1.fiss.FissPhysicianFlag;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import gov.cms.mpsm.rda.v1.fiss.FissProcessNewHealthInsuranceClaimNumberIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissProcessingType;
 import gov.cms.mpsm.rda.v1.fiss.FissReleaseOfInformation;
+import gov.cms.mpsm.rda.v1.fiss.FissRepositoryIndicator;
+import gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission;
 import java.time.Clock;
 import java.util.List;
 
@@ -36,33 +45,57 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
   private static final int MAX_PROC_CODES = 7;
   private static final int MAX_DIAG_CODES = 7;
   private static final int MAX_PAYERS = 5;
-  private static final List<FissClaimStatus> CLAIM_STATUSES = enumValues(FissClaimStatus.values());
-  private static final List<FissProcessingType> PROCESSING_TYPES =
+  private static final int MAX_AUDITS = 20;
+  private static final List<FissClaimStatus> FissClaimStatusEnums =
+      enumValues(FissClaimStatus.values());
+  private static final List<FissProcessingType> FissProcessingTypeEnums =
       enumValues(FissProcessingType.values());
-  private static final List<FissCurrentLocation2> CURR_LOC2S =
+  private static final List<FissCurrentLocation2> FissCurrentLocation2Enums =
       enumValues(FissCurrentLocation2.values());
-  private static final List<FissDiagnosisPresentOnAdmissionIndicator> INDICATORS =
-      enumValues(FissDiagnosisPresentOnAdmissionIndicator.values());
-  private static final List<FissBillFacilityType> FACILITY_TYPES =
+  private static final List<FissDiagnosisPresentOnAdmissionIndicator>
+      FissDiagnosisPresentOnAdmissionIndicatorEnums =
+          enumValues(FissDiagnosisPresentOnAdmissionIndicator.values());
+  private static final List<FissBillFacilityType> FissBillFacilityTypeEnums =
       enumValues(FissBillFacilityType.values());
-  private static final List<FissBillClassification> BILL_CLASSIFICATIONS =
+  private static final List<FissBillClassification> FissBillClassificationEnums =
       enumValues(FissBillClassification.values());
-  private static final List<FissBillClassificationForClinics> CLINIC_BILL_CLASSIFICATIONS =
-      enumValues(FissBillClassificationForClinics.values());
+  private static final List<FissBillClassificationForClinics>
+      FissBillClassificationForClinicsEnums = enumValues(FissBillClassificationForClinics.values());
   private static final List<FissBillClassificationForSpecialFacilities>
-      SPECIAL_BILL_CLASSIFICATIONS =
+      FissBillClassificationForSpecialFacilitiesEnums =
           enumValues(FissBillClassificationForSpecialFacilities.values());
-  private static final List<FissBillFrequency> BILL_FREQUENCIES =
+  private static final List<FissBillFrequency> FissBillFrequencyEnums =
       enumValues(FissBillFrequency.values());
-  private static final List<FissPayersCode> PAYER_CODES = enumValues(FissPayersCode.values());
-  private static final List<FissReleaseOfInformation> RELEASE_OF_INFOS =
+  private static final List<FissPayersCode> FissPayersCodeEnums =
+      enumValues(FissPayersCode.values());
+  private static final List<FissReleaseOfInformation> FissReleaseOfInformationEnums =
       enumValues(FissReleaseOfInformation.values());
-  private static final List<FissAssignmentOfBenefitsIndicator> ASSIGNMENT_OF_BENE_INDICATORS =
-      enumValues(FissAssignmentOfBenefitsIndicator.values());
-  private static final List<FissPatientRelationshipCode> PATIENT_REL_CODES =
+  private static final List<FissAssignmentOfBenefitsIndicator>
+      FissAssignmentOfBenefitsIndicatorEnums =
+          enumValues(FissAssignmentOfBenefitsIndicator.values());
+  private static final List<FissPatientRelationshipCode> FissPatientRelationshipCodeEnums =
       enumValues(FissPatientRelationshipCode.values());
-  private static final List<FissBeneficiarySex> BENE_SEXES =
+  private static final List<FissBeneficiarySex> FissBeneficiarySexEnums =
       enumValues(FissBeneficiarySex.values());
+  private static final List<FissAdjustmentRequestorCode> FissAdjustmentRequestorCodeEnums =
+      enumValues(FissAdjustmentRequestorCode.values());
+  private static final List<FissCancelAdjustmentCode> FissCancelAdjustmentCodeEnums =
+      enumValues(FissCancelAdjustmentCode.values());
+  private static final List<FissSourceOfAdmission> FissSourceOfAdmissionEnums =
+      enumValues(FissSourceOfAdmission.values());
+  private static final List<FissPhysicianFlag> FissPhysicianFlagEnums =
+      enumValues(FissPhysicianFlag.values());
+  private static final List<FissProcessNewHealthInsuranceClaimNumberIndicator>
+      FissProcessNewHealthInsuranceClaimNumberIndicatorEnums =
+          enumValues(FissProcessNewHealthInsuranceClaimNumberIndicator.values());
+  private static final List<FissRepositoryIndicator> FissRepositoryIndicatorEnums =
+      enumValues(FissRepositoryIndicator.values());
+  private static final List<FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier>
+      FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifierEnums =
+          enumValues(FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifier.values());
+  private static final List<FissAdjustmentMedicareBeneficiaryIdentifierIndicator>
+      FissAdjustmentMedicareBeneficiaryIdentifierIndicatorEnums =
+          enumValues(FissAdjustmentMedicareBeneficiaryIdentifierIndicator.values());
 
   /**
    * Creates an instance with the specified seed.
@@ -91,17 +124,18 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     addRandomProcCodes(claim);
     addRandomDiagnosisCodes(claim);
     addRandomPayers(claim);
+    addRandomAudits(claim);
     return claim.build();
   }
 
   private void addRandomFieldValues(FissClaim.Builder claim) {
     claim.setDcn(randomDigit(5, 8)).setHicNo(randomDigit(12, 12));
-    claim.setCurrStatusEnum(randomEnum(CLAIM_STATUSES));
+    claim.setCurrStatusEnum(randomEnum(FissClaimStatusEnums));
     oneOf(
-        () -> claim.setCurrLoc1Enum(randomEnum(PROCESSING_TYPES)),
+        () -> claim.setCurrLoc1Enum(randomEnum(FissProcessingTypeEnums)),
         () -> claim.setCurrLoc1Unrecognized(randomLetter(1, 1)));
     oneOf(
-        () -> claim.setCurrLoc2Enum(randomEnum(CURR_LOC2S)),
+        () -> claim.setCurrLoc2Enum(randomEnum(FissCurrentLocation2Enums)),
         () -> claim.setCurrLoc2Unrecognized(randomLetter(1, 5)));
     optional(() -> claim.setMedaProvId(randomAlphaNumeric(13, 13)));
     optional(() -> claim.setTotalChargeAmount(randomAmount()));
@@ -119,17 +153,85 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> claim.setStmtCovFromCymd(randomDate()));
     optional(() -> claim.setStmtCovToCymd(randomDate()));
     oneOf(
-        () -> claim.setLobCdEnum(randomEnum(FACILITY_TYPES)),
+        () -> claim.setLobCdEnum(randomEnum(FissBillFacilityTypeEnums)),
         () -> claim.setLobCdUnrecognized(randomAlphaNumeric(1, 1)));
     oneOf(
-        () -> claim.setServTypeCdEnum(randomEnum(BILL_CLASSIFICATIONS)),
-        () -> claim.setServTypeCdForClinicsEnum(randomEnum(CLINIC_BILL_CLASSIFICATIONS)),
-        () -> claim.setServTypeCdForSpecialFacilitiesEnum(randomEnum(SPECIAL_BILL_CLASSIFICATIONS)),
+        () -> claim.setServTypeCdEnum(randomEnum(FissBillClassificationEnums)),
+        () -> claim.setServTypeCdForClinicsEnum(randomEnum(FissBillClassificationForClinicsEnums)),
+        () ->
+            claim.setServTypeCdForSpecialFacilitiesEnum(
+                randomEnum(FissBillClassificationForSpecialFacilitiesEnums)),
         () -> claim.setServTypCdUnrecognized(randomLetter(1, 1)));
     oneOf(
-        () -> claim.setFreqCdEnum(randomEnum(BILL_FREQUENCIES)),
+        () -> claim.setFreqCdEnum(randomEnum(FissBillFrequencyEnums)),
         () -> claim.setFreqCdUnrecognized(randomLetter(1, 1)));
     optional(() -> claim.setBillTypCd(randomAlphaNumeric(3, 3)));
+    optional(() -> claim.setRejectCd(randomAlphaNumeric(1, 5)));
+    optional(() -> claim.setFullPartDenInd(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setNonPayInd(randomAlphaNumeric(1, 2)));
+    optional(() -> claim.setXrefDcnNbr(randomAlphaNumeric(1, 23)));
+    oneOf(
+        () -> claim.setAdjReqCdEnum(randomEnum(FissAdjustmentRequestorCodeEnums)),
+        () -> claim.setAdjReqCdUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setAdjReasCd(randomAlphaNumeric(1, 2)));
+    optional(() -> claim.setCancelXrefDcn(randomAlphaNumeric(1, 23)));
+    optional(() -> claim.setCancelDateCymd(randomDate()));
+    oneOf(
+        () -> claim.setCancAdjCdEnum(randomEnum(FissCancelAdjustmentCodeEnums)),
+        () -> claim.setCancAdjCdUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setOriginalXrefDcn(randomAlphaNumeric(1, 23)));
+    optional(() -> claim.setPaidDtCymd(randomDate()));
+    optional(() -> claim.setAdmDateCymd(randomDate()));
+    oneOf(
+        () -> claim.setAdmSourceEnum(randomEnum(FissSourceOfAdmissionEnums)),
+        () -> claim.setAdmSourceUnrecognized(randomAlphaNumeric(1, 1)));
+    oneOf(
+        () -> claim.setPrimaryPayerCodeEnum(randomEnum(FissPayersCodeEnums)),
+        () -> claim.setPrimaryPayerCodeUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setAttendPhysId(randomAlphaNumeric(1, 16)));
+    optional(() -> claim.setAttendPhysLname(randomAlphaNumeric(1, 17)));
+    optional(() -> claim.setAttendPhysFname(randomAlphaNumeric(1, 18)));
+    optional(() -> claim.setAttendPhysMint(randomAlphaNumeric(1, 1)));
+    oneOf(
+        () -> claim.setAttendPhysFlagEnum(randomEnum(FissPhysicianFlagEnums)),
+        () -> claim.setAttendPhysFlagUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setOperatingPhysId(randomAlphaNumeric(1, 16)));
+    optional(() -> claim.setOperPhysLname(randomAlphaNumeric(1, 17)));
+    optional(() -> claim.setOperPhysFname(randomAlphaNumeric(1, 18)));
+    optional(() -> claim.setOperPhysMint(randomAlphaNumeric(1, 1)));
+    oneOf(
+        () -> claim.setOperPhysFlagEnum(randomEnum(FissPhysicianFlagEnums)),
+        () -> claim.setOperPhysFlagUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setOthPhysId(randomAlphaNumeric(1, 16)));
+    optional(() -> claim.setOthPhysLname(randomAlphaNumeric(1, 17)));
+    optional(() -> claim.setOthPhysFname(randomAlphaNumeric(1, 18)));
+    optional(() -> claim.setOthPhysMint(randomAlphaNumeric(1, 1)));
+    oneOf(
+        () -> claim.setOthPhysFlagEnum(randomEnum(FissPhysicianFlagEnums)),
+        () -> claim.setOthPhysFlagUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setXrefHicNbr(randomAlphaNumeric(1, 12)));
+    oneOf(
+        () ->
+            claim.setProcNewHicIndEnum(
+                randomEnum(FissProcessNewHealthInsuranceClaimNumberIndicatorEnums)),
+        () -> claim.setProcNewHicIndUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setNewHic(randomAlphaNumeric(1, 12)));
+    oneOf(
+        () -> claim.setReposIndEnum(randomEnum(FissRepositoryIndicatorEnums)),
+        () -> claim.setReposIndUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setReposHic(randomAlphaNumeric(1, 12)));
+    oneOf(
+        () ->
+            claim.setMbiSubmBeneIndEnum(
+                randomEnum(FissHealthInsuranceClaimNumberOrMedicareBeneficiaryIdentifierEnums)),
+        () -> claim.setMbiSubmBeneIndUnrecognized(randomAlphaNumeric(1, 1)));
+    oneOf(
+        () ->
+            claim.setAdjMbiIndEnum(
+                randomEnum(FissAdjustmentMedicareBeneficiaryIdentifierIndicatorEnums)),
+        () -> claim.setAdjMbiIndUnrecognized(randomAlphaNumeric(1, 1)));
+    optional(() -> claim.setAdjMbi(randomAlphaNumeric(1, 11)));
+    optional(() -> claim.setMedicalRecordNo(randomAlphaNumeric(1, 17)));
   }
 
   private void addRandomProcCodes(FissClaim.Builder claim) {
@@ -153,7 +255,8 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
       FissDiagnosisCode.Builder diagCode =
           FissDiagnosisCode.newBuilder().setDiagCd2(randomLetter(1, 7));
       oneOf(
-          () -> diagCode.setDiagPoaIndEnum(randomEnum(INDICATORS)),
+          () ->
+              diagCode.setDiagPoaIndEnum(randomEnum(FissDiagnosisPresentOnAdmissionIndicatorEnums)),
           () -> diagCode.setDiagPoaIndUnrecognized(randomLetter(1, 1)));
       optional(() -> diagCode.setBitFlags(randomLetter(1, 4)));
       claim.addFissDiagCodes(diagCode);
@@ -173,21 +276,21 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     final FissBeneZPayer.Builder payer = FissBeneZPayer.newBuilder();
 
     oneOf(
-        () -> payer.setPayersIdEnum(randomEnum(PAYER_CODES)),
+        () -> payer.setPayersIdEnum(randomEnum(FissPayersCodeEnums)),
         () -> payer.setPayersIdUnrecognized(randomAlphaNumeric(1, 1)));
     optional(() -> payer.setPayersName(randomAlphaNumeric(1, 32)));
     oneOf(
-        () -> payer.setRelIndEnum(randomEnum(RELEASE_OF_INFOS)),
+        () -> payer.setRelIndEnum(randomEnum(FissReleaseOfInformationEnums)),
         () -> payer.setRelIndUnrecognized(randomLetter(1, 1)));
     oneOf(
-        () -> payer.setAssignIndEnum(randomEnum(ASSIGNMENT_OF_BENE_INDICATORS)),
+        () -> payer.setAssignIndEnum(randomEnum(FissAssignmentOfBenefitsIndicatorEnums)),
         () -> payer.setAssignIndUnrecognized(randomLetter(1, 1)));
     optional(() -> payer.setProviderNumber(randomAlphaNumeric(1, 13)));
     optional(() -> payer.setAdjDcnIcn(randomAlphaNumeric(1, 23)));
     optional(() -> payer.setPriorPmt(randomAmount()));
     optional(() -> payer.setEstAmtDue(randomAmount()));
     oneOf(
-        () -> payer.setBeneRelEnum(randomEnum(PATIENT_REL_CODES)),
+        () -> payer.setBeneRelEnum(randomEnum(FissPatientRelationshipCodeEnums)),
         () -> payer.setBeneRelUnrecognized(randomDigit(2, 2)));
     optional(() -> payer.setBeneLastName(randomLetter(1, 15)));
     optional(() -> payer.setBeneFirstName(randomLetter(1, 10)));
@@ -196,14 +299,14 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> payer.setInsuredGroupName(randomLetter(1, 17)));
     optional(() -> payer.setBeneDob(randomDate()));
     oneOf(
-        () -> payer.setBeneSexEnum(randomEnum(BENE_SEXES)),
+        () -> payer.setBeneSexEnum(randomEnum(FissBeneficiarySexEnums)),
         () -> payer.setBeneSexUnrecognized(randomLetter(1, 1)));
     optional(() -> payer.setTreatAuthCd(randomLetter(1, 1)));
     oneOf(
-        () -> payer.setInsuredSexEnum(randomEnum(BENE_SEXES)),
+        () -> payer.setInsuredSexEnum(randomEnum(FissBeneficiarySexEnums)),
         () -> payer.setInsuredSexUnrecognized(randomLetter(1, 1)));
     oneOf(
-        () -> payer.setInsuredRelX12Enum(randomEnum(PATIENT_REL_CODES)),
+        () -> payer.setInsuredRelX12Enum(randomEnum(FissPatientRelationshipCodeEnums)),
         () -> payer.setInsuredRelX12Unrecognized(randomDigit(2, 2)));
 
     parent.setBeneZPayer(payer.build());
@@ -213,21 +316,21 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     final FissInsuredPayer.Builder payer = FissInsuredPayer.newBuilder();
 
     oneOf(
-        () -> payer.setPayersIdEnum(randomEnum(PAYER_CODES)),
+        () -> payer.setPayersIdEnum(randomEnum(FissPayersCodeEnums)),
         () -> payer.setPayersIdUnrecognized(randomAlphaNumeric(1, 1)));
     optional(() -> payer.setPayersName(randomLetter(1, 32)));
     oneOf(
-        () -> payer.setRelIndEnum(randomEnum(RELEASE_OF_INFOS)),
+        () -> payer.setRelIndEnum(randomEnum(FissReleaseOfInformationEnums)),
         () -> payer.setRelIndUnrecognized(randomLetter(1, 1)));
     oneOf(
-        () -> payer.setAssignIndEnum(randomEnum(ASSIGNMENT_OF_BENE_INDICATORS)),
+        () -> payer.setAssignIndEnum(randomEnum(FissAssignmentOfBenefitsIndicatorEnums)),
         () -> payer.setAssignIndUnrecognized(randomLetter(1, 1)));
     optional(() -> payer.setProviderNumber(randomLetter(8, 13)));
     optional(() -> payer.setAdjDcnIcn(randomLetter(23, 23)));
     optional(() -> payer.setPriorPmt(randomAmount()));
     optional(() -> payer.setEstAmtDue(randomAmount()));
     oneOf(
-        () -> payer.setInsuredRelEnum(randomEnum(PATIENT_REL_CODES)),
+        () -> payer.setInsuredRelEnum(randomEnum(FissPatientRelationshipCodeEnums)),
         () -> payer.setInsuredRelUnrecognized(randomDigit(2, 2)));
     optional(() -> payer.setInsuredName(randomLetter(1, 25)));
     optional(() -> payer.setInsuredSsnHic(randomLetter(1, 19)));
@@ -235,10 +338,10 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
     optional(() -> payer.setInsuredGroupNbr(randomLetter(1, 20)));
     optional(() -> payer.setTreatAuthCd(randomAlphaNumeric(1, 18)));
     oneOf(
-        () -> payer.setInsuredSexEnum(randomEnum(BENE_SEXES)),
+        () -> payer.setInsuredSexEnum(randomEnum(FissBeneficiarySexEnums)),
         () -> payer.setInsuredSexUnrecognized(randomLetter(1, 1)));
     oneOf(
-        () -> payer.setInsuredRelX12Enum(randomEnum(PATIENT_REL_CODES)),
+        () -> payer.setInsuredRelX12Enum(randomEnum(FissPatientRelationshipCodeEnums)),
         () -> payer.setInsuredRelX12Unrecognized(randomDigit(2, 2)));
     optional(
         () -> {
@@ -248,5 +351,22 @@ public class RandomFissClaimGenerator extends AbstractRandomClaimGenerator {
         });
 
     parent.setInsuredPayer(payer.build());
+  }
+
+  private void addRandomAudits(FissClaim.Builder claim) {
+    final int count = 1 + randomInt(MAX_AUDITS);
+    for (int i = 1; i <= count; ++i) {
+      FissAuditTrail.Builder payer = FissAuditTrail.newBuilder();
+
+      oneOf(
+          () -> payer.setBadtStatusEnum(randomEnum(FissClaimStatusEnums)),
+          () -> payer.setBadtStatusUnrecognized(randomAlphaNumeric(1, 1)));
+      optional(() -> payer.setBadtLoc(randomAlphaNumeric(1, 5)));
+      optional(() -> payer.setBadtOperId(randomAlphaNumeric(1, 9)));
+      optional(() -> payer.setBadtReas(randomAlphaNumeric(1, 5)));
+      optional(() -> payer.setBadtCurrDateCymd(randomDate()));
+
+      claim.addFissAuditTrail(payer.build());
+    }
   }
 }
