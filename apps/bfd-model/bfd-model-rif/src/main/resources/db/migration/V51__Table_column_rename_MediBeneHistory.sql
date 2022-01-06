@@ -46,13 +46,17 @@ alter table public.medicare_beneficiaryid_history_invalid_beneficiaries ${logic.
 alter table public.medicare_beneficiaryid_history_invalid_beneficiaries ${logic.alter-rename-column} "mbiUpdateUser" ${logic.rename-to} updt_user_id;
 alter table public.medicare_beneficiaryid_history_invalid_beneficiaries ${logic.alter-rename-column} "mbiUpdateDate" ${logic.rename-to} updt_ts;
 
-${logic.alter-rename-index} public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries_pkey" rename to medicare_beneficiaryid_history_invalid_beneficiaries_pkey;
-${logic.alter-rename-index} public."MedicareBeneficiaryIdHistory_pkey" rename to medicare_beneficiaryid_history_pkey;
+-- psql only
+${logic.psql-only-alter} index if exists public."MedicareBeneficiaryIdHistoryInvalidBeneficiaries_pkey" rename to medicare_beneficiaryid_history_invalid_beneficiaries_pkey;
+${logic.psql-only-alter} index if exists public."MedicareBeneficiaryIdHistory_pkey" rename to medicare_beneficiaryid_history_pkey;
 
+${logic.psql-only-alter} table public.medicare_beneficiaryid_history rename constraint "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary" to medicare_beneficiaryid_history_bene_id_to_beneficiaries;
+
+-- hsql only
 ${logic.hsql-only-alter} table public.medicare_beneficiaryid_history_invalid_beneficiaries add constraint medicare_beneficiaryid_history_invalid_beneficiaries_pkey primary key (bene_mbi_id); 
 ${logic.hsql-only-alter} table public.medicare_beneficiaryid_history add constraint medicare_beneficiaryid_history_pkey primary key (bene_mbi_id);   
 
-ALTER INDEX "MedicareBeneficiaryIdHistory_beneficiaryId_idx" RENAME TO medicare_beneficiaryid_history_beneid_idx;
+${logic.hsql-only-alter} table public.medicare_beneficiaryid_history ADD CONSTRAINT medicare_beneficiaryid_history_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
 
-ALTER TABLE public.medicare_beneficiaryid_history
-    ADD CONSTRAINT medicare_beneficiaryid_history_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
+-- both psql and hsql
+ALTER INDEX "MedicareBeneficiaryIdHistory_beneficiaryId_idx" RENAME TO medicare_beneficiaryid_history_beneid_idx;

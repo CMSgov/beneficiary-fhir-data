@@ -79,6 +79,7 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.drop-tablespaces-escape", "--");
         placeholders.put("logic.alter-column-type", "");
         placeholders.put("logic.hsql-only-alter", "alter");
+        placeholders.put("logic.psql-only-alter", "-- alter");
         placeholders.put("logic.alter-rename-column", "alter column");
         placeholders.put("logic.alter-rename-constraint", "alter constraint");
         placeholders.put("logic.rename-to", "rename to");
@@ -86,14 +87,14 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.sequence-start", "start with");
         placeholders.put("logic.sequence-increment", "increment by");
         placeholders.put("logic.perms", "--");
-        placeholders.put("logic.alter-rename-index", "--");
       } else if (DatabaseUtils.isPostgresConnection(connection)) {
         placeholders.put("type.int4", "int4");
         placeholders.put("type.text", "text");
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "");
         placeholders.put("logic.alter-column-type", "type");
-        placeholders.put("logic.hsql-only-alter", "--alter");
+        placeholders.put("logic.hsql-only-alter", "-- alter");
+        placeholders.put("logic.psql-only-alter", "alter");
         placeholders.put("logic.alter-rename-column", "rename column");
         placeholders.put("logic.alter-rename-constraint", "rename constraint");
         placeholders.put("logic.rename-to", "to");
@@ -101,7 +102,6 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.sequence-start", "start");
         placeholders.put("logic.sequence-increment", "increment");
         placeholders.put("logic.perms", "");
-        placeholders.put("logic.alter-rename-index", "alter index if exists");
       } else {
         throw new BadCodeMonkeyException(
             String.format(

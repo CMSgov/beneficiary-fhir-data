@@ -248,16 +248,19 @@ alter table public.outpatient_claim_lines ${logic.alter-rename-column} "totalCha
 alter table public.outpatient_claim_lines ${logic.alter-rename-column} "unitCount" ${logic.rename-to} rev_cntr_unit_cnt;
 alter table public.outpatient_claim_lines ${logic.alter-rename-column} "wageAdjustedCoinsuranceAmount" ${logic.rename-to} rev_cntr_coinsrnc_wge_adjstd_c;
 
-${logic.alter-rename-index} public."OutpatientClaimLines_pkey" rename to outpatient_claim_lines_pkey;
-${logic.alter-rename-index} public."OutpatientClaims_pkey" rename to outpatient_claims_pkey;
+-- psql only
+${logic.psql-only-alter} index if exists public."OutpatientClaimLines_pkey" rename to outpatient_claim_lines_pkey;
+${logic.psql-only-alter} index if exists public."OutpatientClaims_pkey" rename to outpatient_claims_pkey;
 
+${logic.psql-only-alter} table public.outpatient_claim_lines rename constraint "OutpatientClaimLines_parentClaim_to_OutpatientClaims" to outpatient_claim_lines_clmid_to_outpatient_claims;
+${logic.psql-only-alter} table public.outpatient_claims rename constraint "OutpatientClaims_beneficiaryId_to_Beneficiaries" to outpatient_claims_bene_id_to_beneficiaries;
+
+-- hsql only
 ${logic.hsql-only-alter} table public.outpatient_claim_lines add constraint outpatient_claim_lines_pkey primary key (clm_id, clm_line_num);
 ${logic.hsql-only-alter} table public.outpatient_claims add constraint outpatient_claims_pkey primary key (clm_id);
 
+${logic.hsql-only-alter} table public.outpatient_claim_lines ADD CONSTRAINT outpatient_claim_lines_parent_claim_to_outpatient_claims FOREIGN KEY (clm_id) REFERENCES public.outpatient_claims (clm_id);
+${logic.hsql-only-alter} table public.outpatient_claims ADD CONSTRAINT outpatient_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
+
+-- both psql and hsql
 ALTER INDEX "OutpatientClaims_beneficiaryId_idx" RENAME TO outpatient_claims_beneid_idx;
-
-ALTER TABLE public.outpatient_claim_lines
-    ADD CONSTRAINT outpatient_claim_lines_parent_claim_to_outpatient_claims FOREIGN KEY (clm_id) REFERENCES public.outpatient_claims (clm_id);
-
-ALTER TABLE public.outpatient_claims
-    ADD CONSTRAINT outpatient_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);

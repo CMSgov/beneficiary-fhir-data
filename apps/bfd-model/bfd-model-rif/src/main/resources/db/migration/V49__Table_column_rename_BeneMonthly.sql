@@ -24,12 +24,16 @@ alter table public.beneficiary_monthly ${logic.alter-rename-column} "partDRetire
 alter table public.beneficiary_monthly ${logic.alter-rename-column} "partDLowIncomeCostShareGroupCode" ${logic.rename-to} partd_low_income_cost_share_group_code;
 alter table public.beneficiary_monthly ${logic.alter-rename-column} "medicaidDualEligibilityCode" ${logic.rename-to} medicaid_dual_eligibility_code;
 
-${logic.alter-rename-index} public."BeneficiaryMonthly_pkey" rename to beneficiary_monthly_pkey;
+-- psql only
+${logic.psql-only-alter} index if exists public."BeneficiaryMonthly_pkey" rename to beneficiary_monthly_pkey;
 
+${logic.psql-only-alter} table public.beneficiary_monthly rename constraint "BeneficiaryMonthly_parentBeneficiary_to_Beneficiary" to beneficiary_monthly_bene_id_to_beneficiary;
+
+-- hsql only
 ${logic.hsql-only-alter} table public.beneficiary_monthly add constraint beneficiary_monthly_pkey primary key (bene_id, year_month);
- 
+    
+${logic.hsql-only-alter} table public.beneficiary_monthly ADD CONSTRAINT beneficiary_monthly_bene_id_to_beneficiary FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
+
+-- both psql and hsql
 ALTER INDEX "BeneficiaryMonthly_partDContractNumId_yearMonth_parentBene_idx" RENAME TO beneficiary_monthly_year_month_partd_contract_beneid_idx;
 ALTER INDEX "BeneficiaryMonthly_partDContractNumberId_yearmonth_idx" RENAME TO beneficiary_monthly_partd_contract_number_year_month_idx;
-
-ALTER TABLE public.beneficiary_monthly
-    ADD CONSTRAINT beneficiary_monthly_beneid_to_beneficiary FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);

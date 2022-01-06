@@ -44,8 +44,11 @@ alter table public.partd_events ${logic.alter-rename-column} "serviceProviderIdQ
 alter table public.partd_events ${logic.alter-rename-column} "submissionClarificationCode" ${logic.rename-to} submsn_clr_cd;
 alter table public.partd_events ${logic.alter-rename-column} "totalPrescriptionCost" ${logic.rename-to} tot_rx_cst_amt;
 
-${logic.alter-rename-index} public."PartDEvents_pkey" rename to partd_events_pkey;
+-- psql only
+${logic.psql-only-alter} index if exists public."PartDEvents_pkey" rename to partd_events_pkey;
 
+-- hsql only
 ${logic.hsql-only-alter} table public.partd_events add constraint partd_events_pkey primary key (pde_id); 
 
+-- both psql and hsql
 ALTER INDEX "PartDEvents_beneficiaryId_idx" RENAME TO partd_events_beneid_idx;

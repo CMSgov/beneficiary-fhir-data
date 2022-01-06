@@ -130,14 +130,19 @@ alter table public.carrier_claim_lines ${logic.alter-rename-column} "providerZip
 alter table public.carrier_claim_lines ${logic.alter-rename-column} "providerTaxNumber" ${logic.rename-to} tax_num;
 alter table public.carrier_claim_lines ${logic.alter-rename-column} "providerPaymentAmount" ${logic.rename-to} line_prvdr_pmt_amt;
 
-${logic.alter-rename-index} public."CarrierClaimLines_pkey"rename to carrier_claim_lines_pkey;
-${logic.alter-rename-index} public."CarrierClaims_pkey" rename to carrier_claims_pkey;
+-- psql only
+${logic.psql-only-alter} index if exists public."CarrierClaimLines_pkey" rename to carrier_claim_lines_pkey;
+${logic.psql-only-alter} index if exists public."CarrierClaims_pkey" rename to carrier_claims_pkey;
 
+${logic.psql-only-alter} table public.carrier_claim_lines rename constraint "CarrierClaimLines_parentClaim_to_CarrierClaims" to carrier_claim_lines_clmid_to_carrier_claims;
+${logic.psql-only-alter} table public.carrier_claims rename constraint "CarrierClaims_beneficiaryId_to_Beneficiaries" to carrier_claims_bene_id_to_beneficiaries;
+
+-- hsql only      
 ${logic.hsql-only-alter} table public.carrier_claim_lines add constraint carrier_claim_lines_pkey primary key (clm_id, line_num);
 ${logic.hsql-only-alter} table public.carrier_claims add constraint carrier_claims_pkey primary key (clm_id);
 
-ALTER TABLE public.carrier_claim_lines
-    ADD CONSTRAINT carrier_claim_lines_clmid_to_carrier_claims FOREIGN KEY (clm_id) REFERENCES public.carrier_claims (clm_id);
+${logic.hsql-only-alter} table public.carrier_claim_lines ADD CONSTRAINT carrier_claim_lines_clmid_to_carrier_claims FOREIGN KEY (clm_id) REFERENCES public.carrier_claims (clm_id);
+${logic.hsql-only-alter} table public.carrier_claims ADD CONSTRAINT carrier_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
 
-ALTER TABLE public.carrier_claims
-    ADD CONSTRAINT carrier_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
+-- both psql and hsql
+ALTER INDEX "CarrierClaims_beneficiaryId_idx" RENAME TO carrier_claims_beneid_idx;

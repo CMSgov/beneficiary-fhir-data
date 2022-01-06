@@ -244,16 +244,19 @@ alter table public.snf_claim_lines ${logic.alter-rename-column} "unitCount" ${lo
 alter table public.snf_claim_lines ${logic.alter-rename-column} "revenueCenterRenderingPhysicianNPI" ${logic.rename-to} rndrng_physn_npi;
 alter table public.snf_claim_lines ${logic.alter-rename-column} "revenueCenterRenderingPhysicianUPIN" ${logic.rename-to} rndrng_physn_upin;
 
-${logic.alter-rename-index} public."SNFClaimLines_pkey" rename to snf_claim_lines_pkey;
-${logic.alter-rename-index} public."SNFClaims_pkey" rename to snf_claims_pkey;
+-- psql only
+${logic.psql-only-alter} index if exists public."SNFClaimLines_pkey" rename to snf_claim_lines_pkey;
+${logic.psql-only-alter} index if exists public."SNFClaims_pkey" rename to snf_claims_pkey;
 
+${logic.psql-only-alter} table public.snf_claim_lines rename constraint "SNFClaimLines_parentClaim_to_SNFClaims" to snf_claim_lines_clmid_to_snf_claims;
+${logic.psql-only-alter} table public.snf_claims rename constraint "SNFClaims_beneficiaryId_to_Beneficiaries" to snf_claims_bene_id_to_beneficiaries;
+
+-- hsql only
 ${logic.hsql-only-alter} table public.snf_claim_lines add constraint snf_claim_lines_pkey primary key (clm_id, clm_line_num);
 ${logic.hsql-only-alter} table public.snf_claims add constraint snf_claims_pkey primary key (clm_id);
 
+${logic.hsql-only-alter} table public.snf_claim_lines ADD CONSTRAINT snf_claim_lines_clmid_to_snf_claims FOREIGN KEY (clm_id) REFERENCES public.snf_claims (clm_id);
+${logic.hsql-only-alter} table public.snf_claims ADD CONSTRAINT snf_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries(bene_id);
+
+-- both psql and hsql
 ALTER INDEX "SNFClaims_beneficiaryId_idx" RENAME TO snf_claims_beneid_idx;
-
-ALTER TABLE public.snf_claim_lines
-    ADD CONSTRAINT snf_claim_lines_parent_claim_to_snf_claims FOREIGN KEY (clm_id) REFERENCES public.snf_claims (clm_id);
-
-ALTER TABLE public.snf_claims
-    ADD CONSTRAINT snf_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);

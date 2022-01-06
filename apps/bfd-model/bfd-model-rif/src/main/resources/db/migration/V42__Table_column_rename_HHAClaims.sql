@@ -149,16 +149,19 @@ alter table public.hha_claim_lines ${logic.alter-rename-column} "statusCode" ${l
 alter table public.hha_claim_lines ${logic.alter-rename-column} "totalChargeAmount" ${logic.rename-to} rev_cntr_tot_chrg_amt;
 alter table public.hha_claim_lines ${logic.alter-rename-column} "unitCount" ${logic.rename-to} rev_cntr_unit_cnt;
 
-${logic.alter-rename-index} public."HHAClaimLines_pkey" rename to hha_claim_lines_pkey;
-${logic.alter-rename-index} public."HHAClaims_pkey" rename to hha_claims_pkey;
+-- psql only
+${logic.psql-only-alter} index if exists public."HHAClaimLines_pkey" rename to hha_claim_lines_pkey;
+${logic.psql-only-alter} index if exists public."HHAClaims_pkey" rename to hha_claims_pkey;
 
+${logic.psql-only-alter} table public.hha_claim_lines rename constraint "HHAClaimLines_parentClaim_to_HHAClaims" to hha_claim_lines_clmid_to_hha_claims;
+${logic.psql-only-alter} table public.hha_claims rename constraint "HHAClaims_beneficiaryId_to_Beneficiaries" to hha_claims_bene_id_to_beneficiaries;
+
+-- hsql only
 ${logic.hsql-only-alter} table public.hha_claim_lines add constraint hha_claim_lines_pkey primary key (clm_id, clm_line_num);
 ${logic.hsql-only-alter} table public.hha_claims add constraint hha_claims_pkey primary key (clm_id);
 
+${logic.hsql-only-alter} table public.hha_claim_lines ADD CONSTRAINT hha_claim_lines_clmid_to_hha_claims FOREIGN KEY (clm_id) REFERENCES public.hha_claims (clm_id);
+${logic.hsql-only-alter} table public.hha_claims ADD CONSTRAINT hha_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries(bene_id);
+
+-- both psql and hsql
 ALTER INDEX "HHAClaims_beneficiaryId_idx" RENAME TO hha_claims_beneid_idx;
-
-ALTER TABLE public.hha_claim_lines
-    ADD CONSTRAINT hha_claim_lines_parent_claim_to_hha_claims FOREIGN KEY (clm_id) REFERENCES public.hha_claims (clm_id);
-
-ALTER TABLE public.hha_claims
-    ADD CONSTRAINT hha_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
