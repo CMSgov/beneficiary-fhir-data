@@ -26,7 +26,7 @@ class BFDUser(HttpUser):
             errors.no_data_stop_test(self)
 
         hashed_mbi = mbis.pop()
-        self.client.get(f'/v2/fhir/Claim?mbi={hashed_mbi}',
+        self.client.get(f'/v2/fhir/ClaimResponse?mbi={hashed_mbi}',
                         cert=client_cert,
                         verify=server_public_key,
                         name='/v2/fhir/Claim')

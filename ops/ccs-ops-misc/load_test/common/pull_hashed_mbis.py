@@ -1,6 +1,4 @@
-import os
 import psycopg2 as p
-import yaml
 from common import config
 
 '''
@@ -25,17 +23,17 @@ def loadData():
             user = configFile["dbUsername"],
             password = configFile["dbPassword"],
             host = configFile["dbHost"],
-            port = '5432',
-            database = 'fhirdb'
+            port = '5435',
+            database = 'bfd'
     )
 
     cursor = conn.cursor()
     cursor.execute(beneQuery)
     results = cursor.fetchall()
 
-    eob_ids = []
+    hashed_mbis = []
     for row in results:
-        eob_ids.append(str(row[0]))
+        hashed_mbis.append(str(row[0]))
 
     print("Returned " + str(len(results)) + " results from the database for the test.")
-    return eob_ids
+    return hashed_mbis
