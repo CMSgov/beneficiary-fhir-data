@@ -21,7 +21,7 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`PreAdjMbis`", schema = "`pre_adj`")
+@Table(name = "`MbiCache`", schema = "`pre_adj`")
 public class PreAdjMbi {
   @Id
   @Column(name = "`mbi`", length = 13, nullable = false)
