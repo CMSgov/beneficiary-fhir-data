@@ -147,7 +147,7 @@ alter table public.hospice_claim_lines ${logic.alter-rename-column} "revenueCent
 ${logic.psql-only-alter} index if exists  public."HospiceClaimLines_pkey" rename to hospice_claim_lines_pkey;
 ${logic.psql-only-alter} index if exists  public."HospiceClaims_pkey" rename to hospice_claims_pkey;
 
-${logic.psql-only-alter} table public.hospice_claim_lines rename constraint "HospiceClaimLines_parentClaim_to_HospiceClaims" to hospice_claim_lines_clmid_to_hospice_claims;
+${logic.psql-only-alter} table public.hospice_claim_lines rename constraint "HospiceClaimLines_parentClaim_to_HospiceClaims" to hospice_claim_lines_clm_id_to_hospice_claims;
 ${logic.psql-only-alter} table public.hospice_claims rename constraint "HospiceClaims_beneficiaryId_to_Beneficiaries" to hospice_claims_bene_id_to_beneficiaries;
 
 -- hsql onl

@@ -292,7 +292,7 @@ alter table public.inpatient_claim_lines ${logic.alter-rename-column} "revenueCe
 ${logic.psql-only-alter} index if exists public."InpatientClaimLines_pkey" rename to inpatient_claim_lines_pkey;
 ${logic.psql-only-alter} index if exists public."InpatientClaims_pkey" rename to inpatient_claims_pkey;
 
-${logic.psql-only-alter} table public.inpatient_claim_lines rename constraint "InpatientClaimLines_parentClaim_to_InpatientClaims" to inpatient_claim_lines_clmid_to_inpatient_claims;
+${logic.psql-only-alter} table public.inpatient_claim_lines rename constraint "InpatientClaimLines_parentClaim_to_InpatientClaims" to inpatient_claim_lines_clm_id_to_inpatient_claims;
 ${logic.psql-only-alter} table public.inpatient_claims rename constraint "InpatientClaims_beneficiaryId_to_Beneficiaries" to inpatient_claims_bene_id_to_beneficiaries;
 
 ${logic.hsql-only-alter} table public.inpatient_claim_lines add constraint inpatient_claim_lines_pkey primary key (clm_id, clm_line_num);

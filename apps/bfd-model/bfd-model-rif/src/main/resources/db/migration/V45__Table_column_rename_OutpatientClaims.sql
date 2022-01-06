@@ -252,7 +252,7 @@ alter table public.outpatient_claim_lines ${logic.alter-rename-column} "wageAdju
 ${logic.psql-only-alter} index if exists public."OutpatientClaimLines_pkey" rename to outpatient_claim_lines_pkey;
 ${logic.psql-only-alter} index if exists public."OutpatientClaims_pkey" rename to outpatient_claims_pkey;
 
-${logic.psql-only-alter} table public.outpatient_claim_lines rename constraint "OutpatientClaimLines_parentClaim_to_OutpatientClaims" to outpatient_claim_lines_clmid_to_outpatient_claims;
+${logic.psql-only-alter} table public.outpatient_claim_lines rename constraint "OutpatientClaimLines_parentClaim_to_OutpatientClaims" to outpatient_claim_lines_clm_id_to_outpatient_claims;
 ${logic.psql-only-alter} table public.outpatient_claims rename constraint "OutpatientClaims_beneficiaryId_to_Beneficiaries" to outpatient_claims_bene_id_to_beneficiaries;
 
 -- hsql only

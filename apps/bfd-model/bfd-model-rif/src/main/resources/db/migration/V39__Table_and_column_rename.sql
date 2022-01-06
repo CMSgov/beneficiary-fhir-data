@@ -11,62 +11,25 @@
 --
 -- Drop foreign key constraints (hsql only)
 --
-${logic.hsql-only-alter} table public."BeneficiariesHistory"
-    drop constraint "BeneficiariesHistory_beneficiaryId_to_Beneficiary";
-
-${logic.hsql-only-alter} table public."BeneficiaryMonthly"
-    drop constraint "BeneficiaryMonthly_parentBeneficiary_to_Beneficiary";
-
-${logic.hsql-only-alter} table public."CarrierClaimLines"
-    drop constraint "CarrierClaimLines_parentClaim_to_CarrierClaims";
-
-${logic.hsql-only-alter} table public."CarrierClaims"
-    drop constraint "CarrierClaims_beneficiaryId_to_Beneficiaries";
-
-${logic.hsql-only-alter} table public."DMEClaimLines"
-    drop constraint "DMEClaimLines_parentClaim_to_DMEClaims";
-
-${logic.hsql-only-alter} table public."DMEClaims"
-    drop constraint "DMEClaims_beneficiaryId_to_Beneficiaries";
-
-${logic.hsql-only-alter} table public."HHAClaimLines"
-    drop constraint "HHAClaimLines_parentClaim_to_HHAClaims";
-
-${logic.hsql-only-alter} table public."HHAClaims"
-    drop constraint "HHAClaims_beneficiaryId_to_Beneficiaries";
-
-${logic.hsql-only-alter} table public."HospiceClaimLines"
-    drop constraint "HospiceClaimLines_parentClaim_to_HospiceClaims";
-
-${logic.hsql-only-alter} table public."HospiceClaims"
-    drop constraint "HospiceClaims_beneficiaryId_to_Beneficiaries";
-
-${logic.hsql-only-alter} table public."InpatientClaimLines"
-    drop constraint "InpatientClaimLines_parentClaim_to_InpatientClaims";
-
-${logic.hsql-only-alter} table public."InpatientClaims"
-    drop constraint "InpatientClaims_beneficiaryId_to_Beneficiaries";
-
-${logic.hsql-only-alter} table public."MedicareBeneficiaryIdHistory"
-    drop constraint "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary";
-
-${logic.hsql-only-alter} table public."OutpatientClaimLines"
-    drop constraint "OutpatientClaimLines_parentClaim_to_OutpatientClaims";
-
-${logic.hsql-only-alter} table public."OutpatientClaims"
-    drop constraint "OutpatientClaims_beneficiaryId_to_Beneficiaries";
-
-${logic.hsql-only-alter} table public."PartDEvents"
-    drop constraint "PartDEvents_beneficiaryId_to_Beneficiaries";
-
-${logic.hsql-only-alter} table public."SNFClaimLines"
-    drop constraint "SNFClaimLines_parentClaim_to_SNFClaims";
-
-${logic.hsql-only-alter} table public."SNFClaims"
-    drop constraint "SNFClaims_beneficiaryId_to_Beneficiaries";
-
-${logic.hsql-only-alter} table public."LoadedBatches"
-    drop constraint "loadedBatches_loadedFileId";
+${logic.hsql-only-alter} table public."BeneficiariesHistory" drop constraint "BeneficiariesHistory_beneficiaryId_to_Beneficiary";
+${logic.hsql-only-alter} table public."BeneficiaryMonthly" drop constraint "BeneficiaryMonthly_parentBeneficiary_to_Beneficiary";
+${logic.hsql-only-alter} table public."CarrierClaimLines" drop constraint "CarrierClaimLines_parentClaim_to_CarrierClaims";
+${logic.hsql-only-alter} table public."CarrierClaims" drop constraint "CarrierClaims_beneficiaryId_to_Beneficiaries";
+${logic.hsql-only-alter} table public."DMEClaimLines" drop constraint "DMEClaimLines_parentClaim_to_DMEClaims";
+${logic.hsql-only-alter} table public."DMEClaims" drop constraint "DMEClaims_beneficiaryId_to_Beneficiaries";
+${logic.hsql-only-alter} table public."HHAClaimLines" drop constraint "HHAClaimLines_parentClaim_to_HHAClaims";
+${logic.hsql-only-alter} table public."HHAClaims" drop constraint "HHAClaims_beneficiaryId_to_Beneficiaries";
+${logic.hsql-only-alter} table public."HospiceClaimLines" drop constraint "HospiceClaimLines_parentClaim_to_HospiceClaims";
+${logic.hsql-only-alter} table public."HospiceClaims" drop constraint "HospiceClaims_beneficiaryId_to_Beneficiaries";
+${logic.hsql-only-alter} table public."InpatientClaimLines" drop constraint "InpatientClaimLines_parentClaim_to_InpatientClaims";
+${logic.hsql-only-alter} table public."InpatientClaims" drop constraint "InpatientClaims_beneficiaryId_to_Beneficiaries";
+${logic.hsql-only-alter} table public."MedicareBeneficiaryIdHistory" drop constraint "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary";
+${logic.hsql-only-alter} table public."OutpatientClaimLines" drop constraint "OutpatientClaimLines_parentClaim_to_OutpatientClaims";
+${logic.hsql-only-alter} table public."OutpatientClaims" drop constraint "OutpatientClaims_beneficiaryId_to_Beneficiaries";
+${logic.hsql-only-alter} table public."PartDEvents" drop constraint "PartDEvents_beneficiaryId_to_Beneficiaries";
+${logic.hsql-only-alter} table public."SNFClaimLines" drop constraint "SNFClaimLines_parentClaim_to_SNFClaims";
+${logic.hsql-only-alter} table public."SNFClaims" drop constraint "SNFClaims_beneficiaryId_to_Beneficiaries";
+${logic.hsql-only-alter} table public."LoadedBatches" drop constraint "loadedBatches_loadedFileId";
 --
 -- Drop primary key constraints fo hsql; hsql does not support rename constraint
 --

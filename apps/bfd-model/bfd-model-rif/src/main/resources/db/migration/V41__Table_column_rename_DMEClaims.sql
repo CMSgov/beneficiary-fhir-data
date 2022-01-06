@@ -106,11 +106,11 @@ alter table public.dme_claim_lines ${logic.alter-rename-column} "providerPayment
 ${logic.psql-only-alter} index if exists public."DMEClaimLines_pkey" rename to dme_claim_lines_pkey;
 ${logic.psql-only-alter} index if exists public."DMEClaims_pkey" rename to dme_claims_pkey;
 
-${logic.psql-only-alter} table public.dme_claim_lines rename constraint "DMEClaimLines_parentClaim_to_DMEClaims" to dme_claim_lines_clmid_to_dme_claims;
+${logic.psql-only-alter} table public.dme_claim_lines rename constraint "DMEClaimLines_parentClaim_to_DMEClaims" to dme_claim_lines_clm_id_to_dme_claims;
 ${logic.psql-only-alter} table public.dme_claims rename constraint "DMEClaims_beneficiaryId_to_Beneficiaries" to dme_claims_bene_id_to_beneficiaries;
 
 ${logic.hsql-only-alter} table public.dme_claim_lines add constraint dme_claim_lines_pkey primary key (clm_id, line_num);
 ${logic.hsql-only-alter} table public.dme_claims add constraint dme_claims_pkey primary key (clm_id);
 
-${logic.hsql-only-alter} table public.dme_claim_lines ADD CONSTRAINT dme_claim_lines_clmid_to_dme_claims FOREIGN KEY (clm_id) REFERENCES public.dme_claims (clm_id);
+${logic.hsql-only-alter} table public.dme_claim_lines ADD CONSTRAINT dme_claim_lines_clm_id_to_dme_claims FOREIGN KEY (clm_id) REFERENCES public.dme_claims (clm_id);
 ${logic.hsql-only-alter} table public.dme_claims ADD CONSTRAINT dme_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries(bene_id);
