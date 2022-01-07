@@ -33,3 +33,10 @@ ALTER TABLE "pre_adj"."FissClaims"
 ALTER TABLE "pre_adj"."McsClaims" DROP "idrClaimMbiHash";
 ALTER TABLE "pre_adj"."McsClaims"
     ADD CONSTRAINT "FK_McsClaims_mbi" FOREIGN KEY ("idrClaimMbi") REFERENCES "pre_adj"."MbiCache"("mbi");
+
+/*
+ * We need these indexes to support queries by mbi and mbiHash.
+ */
+CREATE UNIQUE INDEX "MbiCache_mbi_hash_idx" on "pre_adj"."MbiCache"("mbiHash");
+CREATE INDEX "FissClaims_mbi_idx" on "pre_adj"."FissClaims"("mbi");
+CREATE INDEX "McsClaims_mbi_idx" on "pre_adj"."McsClaims"("idrClaimMbi");
