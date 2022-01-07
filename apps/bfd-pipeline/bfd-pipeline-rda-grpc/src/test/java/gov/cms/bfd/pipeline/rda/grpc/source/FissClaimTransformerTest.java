@@ -11,6 +11,7 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
@@ -113,8 +114,9 @@ public class FissClaimTransformerTest {
     claim.setAdmitDiagCode("1234567");
     claim.setPrincipleDiag("7654321");
     claim.setNpiNumber("npi-123456");
-    claim.setMbi("1234567890123");
-    claim.setMbiHash("50ad6d78d3b8bb1a8195896c7479f04f4af76e8b42011a24146a943ede9321a0");
+    claim.setMbiRecord(
+        new PreAdjMbi(
+            "1234567890123", "50ad6d78d3b8bb1a8195896c7479f04f4af76e8b42011a24146a943ede9321a0"));
     claim.setFedTaxNumber("1234567890");
     claim.setPracLocAddr1("loc-address-1");
     claim.setPracLocAddr2("loc-address-2");

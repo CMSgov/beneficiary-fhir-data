@@ -38,7 +38,7 @@ public class McsClaimRdaSinkIT {
           claim.setIdrContrId("c1");
           claim.setIdrHic("hc");
           claim.setIdrClaimType("c");
-          claim.setIdrClaimMbi("1234567890123");
+          claim.setMbiRecord(new PreAdjMbi("1234567890123", "hash-of-1234567890123"));
 
           final PreAdjMcsDetail detail = new PreAdjMcsDetail();
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());

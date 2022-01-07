@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -114,11 +116,11 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrClaimReceiptDate`")
   private LocalDate idrClaimReceiptDate;
 
-  @Column(name = "`idrClaimMbi`", length = 13)
-  private String idrClaimMbi;
-
-  @Column(name = "`idrClaimMbiHash`", length = 64)
-  private String idrClaimMbiHash;
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+  @JoinColumn(name = "`idrClaimMbi`")
+  private PreAdjMbi mbiRecord;
 
   @Column(name = "`idrHdrFromDateOfSvc`")
   private LocalDate idrHdrFromDateOfSvc;
@@ -239,4 +241,17 @@ public class PreAdjMcsClaim {
       cascade = CascadeType.ALL)
   @Builder.Default
   private Set<PreAdjMcsLocation> locations = new HashSet<>();
+
+  public String getIdrClaimMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getIdrClaimMbiHash() {
+    return mbiRecord != null ? mbiRecord.getMbiHash() : null;
+  }
+
+  public static class Fields {
+    public static final String idrClaimMbi = "idrClaimMbi";
+    public static final String idrClaimMbiHash = "idrClaimMbiHash";
+  }
 }

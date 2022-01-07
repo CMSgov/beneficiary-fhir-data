@@ -52,7 +52,6 @@ public class DatabaseMbiHasher extends IdHasher implements AutoCloseable {
       entityManager.merge(record);
     }
     entityManager.getTransaction().commit();
-    entityManager.clear();
     return record.getMbiHash();
   }
 }

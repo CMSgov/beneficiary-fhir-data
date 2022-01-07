@@ -6,6 +6,7 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -587,15 +588,25 @@ public class FissClaimTransformer {
         from::hasNpiNumber,
         from::getNpiNumber,
         to::setNpiNumber);
-    transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.mbi, 1, 13, from::hasMbi, from::getMbi, to::setMbi);
-    transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.mbiHash,
-        1,
-        64,
-        from::hasMbi,
-        () -> idHasher.computeIdentifierHash(from.getMbi()),
-        to::setMbiHash);
+    if (from.hasMbi()) {
+      final var mbi = from.getMbi();
+      final var hash = idHasher.computeIdentifierHash(mbi);
+      to.setMbiRecord(new PreAdjMbi());
+      transformer.copyString(
+          namePrefix + PreAdjFissClaim.Fields.mbi,
+          false,
+          1,
+          13,
+          mbi,
+          x -> to.getMbiRecord().setMbi(x));
+      transformer.copyString(
+          namePrefix + PreAdjFissClaim.Fields.mbiHash,
+          false,
+          1,
+          64,
+          hash,
+          x -> to.getMbiRecord().setMbiHash(x));
+    }
     transformer.copyOptionalString(
         namePrefix + PreAdjFissClaim.Fields.fedTaxNumber,
         1,

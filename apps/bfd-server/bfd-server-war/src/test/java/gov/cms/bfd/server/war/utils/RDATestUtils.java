@@ -4,6 +4,7 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
@@ -34,6 +35,7 @@ public class RDATestUtils {
           PreAdjFissDiagnosisCode.class,
           PreAdjFissProcCode.class,
           PreAdjFissClaim.class,
+          PreAdjMbi.class,
           PreAdjMcsDetail.class,
           PreAdjMcsDiagnosisCode.class,
           PreAdjMcsClaim.class);
@@ -148,8 +150,7 @@ public class RDATestUtils {
             .admitDiagCode("admitcd")
             .principleDiag("princcd")
             .npiNumber("8876543211")
-            .mbi("123456MBI")
-            .mbiHash("a7f8e93f09")
+            .mbiRecord(new PreAdjMbi("123456MBI", "a7f8e93f09"))
             .fedTaxNumber("abc123")
             .lobCd("r")
             .lastUpdated(Instant.ofEpochMilli(0))
@@ -248,8 +249,7 @@ public class RDATestUtils {
             .admitDiagCode("admitcc")
             .principleDiag("princcc")
             .npiNumber("8876543212")
-            .mbi("123456MBI")
-            .mbiHash("a7f8e93f09")
+            .mbiRecord(new PreAdjMbi("123456MBI", "a7f8e93f09"))
             .fedTaxNumber("abc124")
             .lobCd("k")
             .lastUpdated(Instant.ofEpochMilli(5000))
@@ -363,8 +363,7 @@ public class RDATestUtils {
             .idrBillProvStatusCd("Z")
             .idrTotBilledAmt(new BigDecimal("23.00"))
             .idrClaimReceiptDate(LocalDate.ofEpochDay(54))
-            .idrClaimMbi("123456MBI")
-            .idrClaimMbiHash("a7f8e93f09")
+            .mbiRecord(new PreAdjMbi("123456MBI", "a7f8e93f09"))
             .idrHdrFromDateOfSvc(LocalDate.ofEpochDay(210))
             .idrHdrToDateOfSvc(LocalDate.ofEpochDay(210))
             .lastUpdated(Instant.ofEpochMilli(4000))

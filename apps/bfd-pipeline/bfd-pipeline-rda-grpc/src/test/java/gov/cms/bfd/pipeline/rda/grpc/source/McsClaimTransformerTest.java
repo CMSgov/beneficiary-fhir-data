@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
 import gov.cms.bfd.model.rda.PreAdjMcsAudit;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
@@ -114,8 +115,9 @@ public class McsClaimTransformerTest {
     claim.setIdrBillProvStatusCd("P");
     claim.setIdrTotBilledAmt(new BigDecimal("67591.96"));
     claim.setIdrClaimReceiptDate(LocalDate.of(2020, 2, 1));
-    claim.setIdrClaimMbi("5467891245678");
-    claim.setIdrClaimMbiHash("c0755c7a103d9d8556778f64cc45766686d6c02151ebfcc4639dcaeedbf00ca1");
+    claim.setMbiRecord(
+        new PreAdjMbi(
+            "5467891245678", "c0755c7a103d9d8556778f64cc45766686d6c02151ebfcc4639dcaeedbf00ca1"));
     claim.setIdrHdrFromDateOfSvc(LocalDate.of(2020, 1, 7));
     claim.setIdrHdrToDateOfSvc(LocalDate.of(2020, 1, 14));
     claim.setLastUpdated(clock.instant());

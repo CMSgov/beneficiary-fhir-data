@@ -109,8 +109,10 @@ public class GrpcRdaSourceIT {
           + "  \"totalChargeAmount\" : 3.75,\n"
           + "  \"currTranDate\" : \"2021-03-20\",\n"
           + "  \"principleDiag\" : \"uec\",\n"
-          + "  \"mbi\" : \"c1ihk7q0g3i57\",\n"
-          + "  \"mbiHash\" : \"56dd7e48bfbfcfe851d4cda2dbd863775b450aea207614a9cc118ed2765713e7\",\n"
+          + "  \"mbiRecord\" : {\n"
+          + "    \"mbi\" : \"c1ihk7q0g3i57\",\n"
+          + "    \"mbiHash\" : \"56dd7e48bfbfcfe851d4cda2dbd863775b450aea207614a9cc118ed2765713e7\"\n"
+          + "  },\n"
           + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "  \"apiSource\" : \"0.4\",\n"
           + "  \"procCodes\" : [ {\n"
@@ -141,7 +143,9 @@ public class GrpcRdaSourceIT {
           + "  } ],\n"
           + "  \"diagCodes\" : [ ],\n"
           + "  \"payers\" : [ ],\n"
-          + "  \"auditTrail\" : [ ]\n"
+          + "  \"auditTrail\" : [ ],\n"
+          + "  \"mbi\" : \"c1ihk7q0g3i57\",\n"
+          + "  \"mbiHash\" : \"56dd7e48bfbfcfe851d4cda2dbd863775b450aea207614a9cc118ed2765713e7\"\n"
           + "}";
   public static final String EXPECTED_CLAIM_2 =
       "{\n"
@@ -156,8 +160,10 @@ public class GrpcRdaSourceIT {
           + "  \"currTranDate\" : \"2020-12-21\",\n"
           + "  \"principleDiag\" : \"egnj\",\n"
           + "  \"npiNumber\" : \"5764657700\",\n"
-          + "  \"mbi\" : \"0vtc7u321x0se\",\n"
-          + "  \"mbiHash\" : \"9c0e61338935c978c25f73442c5593cdc20e35164ad8d8e426955b626de24e2c\",\n"
+          + "  \"mbiRecord\" : {\n"
+          + "    \"mbi\" : \"0vtc7u321x0se\",\n"
+          + "    \"mbiHash\" : \"9c0e61338935c978c25f73442c5593cdc20e35164ad8d8e426955b626de24e2c\"\n"
+          + "  },\n"
           + "  \"fedTaxNumber\" : \"2845244764\",\n"
           + "  \"lastUpdated\" : \"2021-06-03T18:02:37Z\",\n"
           + "  \"apiSource\" : \"0.4\",\n"
@@ -182,7 +188,9 @@ public class GrpcRdaSourceIT {
           + "  } ],\n"
           + "  \"diagCodes\" : [ ],\n"
           + "  \"payers\" : [ ],\n"
-          + "  \"auditTrail\" : [ ]\n"
+          + "  \"auditTrail\" : [ ],\n"
+          + "  \"mbi\" : \"0vtc7u321x0se\",\n"
+          + "  \"mbiHash\" : \"9c0e61338935c978c25f73442c5593cdc20e35164ad8d8e426955b626de24e2c\"\n"
           + "}";
 
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)

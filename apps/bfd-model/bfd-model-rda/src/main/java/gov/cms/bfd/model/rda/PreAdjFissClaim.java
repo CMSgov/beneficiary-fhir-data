@@ -12,6 +12,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -77,11 +79,11 @@ public class PreAdjFissClaim {
   @Column(name = "`npiNumber`", length = 10)
   private String npiNumber;
 
-  @Column(name = "`mbi`", length = 13)
-  private String mbi;
-
-  @Column(name = "`mbiHash`", length = 64)
-  private String mbiHash;
+  @ManyToOne(
+      fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+  @JoinColumn(name = "`mbi`")
+  private PreAdjMbi mbiRecord;
 
   @Column(name = "`fedTaxNumber`", length = 10)
   private String fedTaxNumber;
@@ -318,13 +320,23 @@ public class PreAdjFissClaim {
   @Builder.Default
   private Set<PreAdjFissAuditTrail> auditTrail = new HashSet<>();
 
+  public String getMbi() {
+    return mbiRecord != null ? mbiRecord.getMbi() : null;
+  }
+
+  public String getMbiHash() {
+    return mbiRecord != null ? mbiRecord.getMbiHash() : null;
+  }
+
   public enum ServTypeCdMapping {
     Normal,
-
     Clinic,
-
     SpecialFacility,
-
     Unrecognized
+  }
+
+  public static class Fields {
+    public static final String mbi = "mbi";
+    public static final String mbiHash = "mbiHash";
   }
 }

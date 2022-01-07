@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.collect.ImmutableSet;
+import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
 import gov.cms.bfd.model.rda.PreAdjMcsAudit;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
@@ -453,20 +454,25 @@ public class McsClaimTransformer {
         from::hasIdrClaimReceiptDate,
         from::getIdrClaimReceiptDate,
         to::setIdrClaimReceiptDate);
-    transformer.copyOptionalString(
-        namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi,
-        1,
-        13,
-        from::hasIdrClaimMbi,
-        from::getIdrClaimMbi,
-        to::setIdrClaimMbi);
-    transformer.copyOptionalString(
-        namePrefix + PreAdjMcsClaim.Fields.idrClaimMbiHash,
-        1,
-        64,
-        from::hasIdrClaimMbi,
-        () -> idHasher.computeIdentifierHash(from.getIdrClaimMbi()),
-        to::setIdrClaimMbiHash);
+    if (from.hasIdrClaimMbi()) {
+      final var mbi = from.getIdrClaimMbi();
+      final var hash = idHasher.computeIdentifierHash(mbi);
+      to.setMbiRecord(new PreAdjMbi());
+      transformer.copyString(
+          namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi,
+          false,
+          1,
+          13,
+          mbi,
+          x -> to.getMbiRecord().setMbi(x));
+      transformer.copyString(
+          namePrefix + PreAdjMcsClaim.Fields.idrClaimMbiHash,
+          false,
+          1,
+          64,
+          hash,
+          x -> to.getMbiRecord().setMbiHash(x));
+    }
     transformer.copyOptionalDate(
         namePrefix + PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc,
         from::hasIdrHdrFromDos,
