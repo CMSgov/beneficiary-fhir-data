@@ -17,23 +17,20 @@ import org.hl7.fhir.r4.model.ClaimResponse;
 public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
   F(
       PreAdjFissClaim.class,
-      PreAdjFissClaim.Fields.mbi,
-      PreAdjFissClaim.Fields.mbiHash,
+      PreAdjFissClaim.Fields.mbiRecord,
       PreAdjFissClaim.Fields.dcn,
       PreAdjFissClaim.Fields.stmtCovToDate,
       FissClaimTransformerV2::transform),
 
   M(
       PreAdjMcsClaim.class,
-      PreAdjMcsClaim.Fields.idrClaimMbi,
-      PreAdjMcsClaim.Fields.idrClaimMbiHash,
+      PreAdjMcsClaim.Fields.mbiRecord,
       PreAdjMcsClaim.Fields.idrClmHdIcn,
       PreAdjMcsClaim.Fields.idrHdrToDateOfSvc,
       McsClaimTransformerV2::transform);
 
   private final Class<?> entityClass;
-  private final String entityMbiAttribute;
-  private final String entityMbiHashAttribute;
+  private final String entityMbiRecordAttribute;
   private final String entityIdAttribute;
   private final String entityEndDateAttribute;
   private final ResourceTransformer<Claim> transformer;
@@ -51,14 +48,12 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
    */
   ClaimTypeV2(
       Class<?> entityClass,
-      String entityMbiAttribute,
-      String entityMbiHashAttribute,
+      String entityMbiRecordAttribute,
       String entityIdAttribute,
       String entityEndDateAttribute,
       ResourceTransformer<Claim> transformer) {
     this.entityClass = entityClass;
-    this.entityMbiAttribute = entityMbiAttribute;
-    this.entityMbiHashAttribute = entityMbiHashAttribute;
+    this.entityMbiRecordAttribute = entityMbiRecordAttribute;
     this.entityIdAttribute = entityIdAttribute;
     this.entityEndDateAttribute = entityEndDateAttribute;
     this.transformer = transformer;
@@ -78,13 +73,8 @@ public enum ClaimTypeV2 implements ResourceTypeV2<Claim> {
   }
 
   /** @return The attribute name for the entity's mbi attribute. */
-  public String getEntityMbiAttribute() {
-    return entityMbiAttribute;
-  }
-
-  /** @return The attribute name for the entity's mbi hash attribute. */
-  public String getEntityMbiHashAttribute() {
-    return entityMbiHashAttribute;
+  public String getEntityMbiRecordAttribute() {
+    return entityMbiRecordAttribute;
   }
 
   public String getEntityEndDateAttribute() {

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
+import gov.cms.bfd.model.rda.PreAdjMbi;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -105,10 +106,12 @@ public class ClaimDaoTest {
 
   @Test
   public void shouldFindEntitiesByAttribute() {
-    Class<Object> entityClass = Object.class;
-    String attributeName = "attr";
-    String attributeValue = "value";
-    String endAttribute = "endAttribute";
+    final Class<Object> entityClass = Object.class;
+    final String mbiRecordAttributeName = "attr";
+    final String mbiSearchValue = "value";
+    final boolean isMbiSearchValueHashed = false;
+    final String mbiValueAttributeName = PreAdjMbi.Fields.mbi;
+    final String endAttribute = "endAttribute";
 
     EntityManager mockEntityManager = mock(EntityManager.class);
     MetricRegistry metricRegistry = new MetricRegistry();
@@ -127,9 +130,10 @@ public class ClaimDaoTest {
     Predicate mockAndPredicate = mock(Predicate.class);
     Predicate mockEqualsPredicate = mock(Predicate.class);
 
-    Path<?> mockPath = mock(Path.class);
+    Path<?> mockPathToMbiRecord = mock(Path.class);
+    Path<?> mockPathToMbiField = mock(Path.class);
 
-    doReturn(mockEqualsPredicate).when(mockBuilder).equal(mockPath, attributeValue);
+    doReturn(mockEqualsPredicate).when(mockBuilder).equal(mockPathToMbiField, mbiSearchValue);
 
     doReturn(null).when(mockBuilder).and(mockEqualsPredicate, null);
 
@@ -144,7 +148,8 @@ public class ClaimDaoTest {
         .serviceDateRangePredicate(
             any(Root.class), any(DateRangeParam.class), any(CriteriaBuilder.class), anyString());
 
-    doReturn(mockPath).when(mockRoot).get(attributeName);
+    doReturn(mockPathToMbiRecord).when(mockRoot).get(mbiRecordAttributeName);
+    doReturn(mockPathToMbiField).when(mockPathToMbiRecord).get(mbiValueAttributeName);
 
     doReturn(mockRoot).when(mockQuery).from(entityClass);
 
@@ -161,8 +166,14 @@ public class ClaimDaoTest {
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
 
     List<Object> actual =
-        daoSpy.findAllByAttribute(
-            entityClass, attributeName, attributeValue, null, null, endAttribute);
+        daoSpy.findAllByMbiAttribute(
+            entityClass,
+            mbiRecordAttributeName,
+            mbiSearchValue,
+            isMbiSearchValueHashed,
+            null,
+            null,
+            endAttribute);
 
     verify(mockQuery, times(1)).select(mockRoot);
     verify(mockQuery, times(1)).where(mockAndPredicate);
@@ -171,12 +182,14 @@ public class ClaimDaoTest {
 
   @Test
   public void shouldFindEntitiesByAttributeAndLastUpdated() {
-    Class<Object> entityClass = Object.class;
-    String attributeName = "attr";
-    String attributeValue = "value";
-    String endAttribute = "endAttribute";
-    DateRangeParam mockLastUpdatedParam = mock(DateRangeParam.class);
-    DateRangeParam mockServiceDateParam = mock(DateRangeParam.class);
+    final Class<Object> entityClass = Object.class;
+    final String mbiRecordAttributeName = "attr";
+    final String mbiSearchValue = "value";
+    final boolean isMbiSearchValueHashed = true;
+    final String mbiValueAttributeName = PreAdjMbi.Fields.mbiHash;
+    final String endAttribute = "endAttribute";
+    final DateRangeParam mockLastUpdatedParam = mock(DateRangeParam.class);
+    final DateRangeParam mockServiceDateParam = mock(DateRangeParam.class);
 
     EntityManager mockEntityManager = mock(EntityManager.class);
     MetricRegistry metricRegistry = new MetricRegistry();
@@ -195,9 +208,10 @@ public class ClaimDaoTest {
     Predicate mockAndPredicate = mock(Predicate.class);
     Predicate mockEqualsPredicate = mock(Predicate.class);
 
-    Path<?> mockPath = mock(Path.class);
+    Path<?> mockPathToMbiRecord = mock(Path.class);
+    Path<?> mockPathToMbiField = mock(Path.class);
 
-    doReturn(mockEqualsPredicate).when(mockBuilder).equal(mockPath, attributeValue);
+    doReturn(mockEqualsPredicate).when(mockBuilder).equal(mockPathToMbiField, mbiSearchValue);
 
     Predicate mockLastUpdatedPredicate = mock(Predicate.class);
 
@@ -235,7 +249,8 @@ public class ClaimDaoTest {
 
     doReturn(mockEmptyAndPredicate).when(mockBuilder).and();
 
-    doReturn(mockPath).when(mockRoot).get(attributeName);
+    doReturn(mockPathToMbiRecord).when(mockRoot).get(mbiRecordAttributeName);
+    doReturn(mockPathToMbiField).when(mockPathToMbiRecord).get(mbiValueAttributeName);
 
     doReturn(mockRoot).when(mockQuery).from(entityClass);
 
@@ -252,10 +267,11 @@ public class ClaimDaoTest {
     doReturn(mockTypedQuery).when(mockEntityManager).createQuery(mockQuery);
 
     List<Object> actual =
-        daoSpy.findAllByAttribute(
+        daoSpy.findAllByMbiAttribute(
             entityClass,
-            attributeName,
-            attributeValue,
+            mbiRecordAttributeName,
+            mbiSearchValue,
+            isMbiSearchValueHashed,
             mockLastUpdatedParam,
             mockServiceDateParam,
             endAttribute);
@@ -278,13 +294,8 @@ public class ClaimDaoTest {
     }
 
     @Override
-    public String getEntityMbiAttribute() {
+    public String getEntityMbiRecordAttribute() {
       return "mbiAttribute";
-    }
-
-    @Override
-    public String getEntityMbiHashAttribute() {
-      return "mbiHashAttribute";
     }
 
     @Override

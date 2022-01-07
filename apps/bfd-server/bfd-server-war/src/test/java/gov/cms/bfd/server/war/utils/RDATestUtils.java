@@ -35,10 +35,10 @@ public class RDATestUtils {
           PreAdjFissDiagnosisCode.class,
           PreAdjFissProcCode.class,
           PreAdjFissClaim.class,
-          PreAdjMbi.class,
           PreAdjMcsDetail.class,
           PreAdjMcsDiagnosisCode.class,
-          PreAdjMcsClaim.class);
+          PreAdjMcsClaim.class,
+          PreAdjMbi.class);
 
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
@@ -67,7 +67,7 @@ public class RDATestUtils {
    * @param entities The entities to seed into the db.
    */
   public void seedData(Collection<?> entities) {
-    doTransaction(em -> entities.forEach(em::persist));
+    doTransaction(em -> entities.forEach(em::merge));
   }
 
   /** Delete all the test data from the db. */

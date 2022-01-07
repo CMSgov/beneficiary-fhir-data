@@ -283,14 +283,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     for (ResourceTypeV2<T> type : resourceTypes) {
       List<?> entities;
 
-      String attributeName =
-          isHashed ? type.getEntityMbiHashAttribute() : type.getEntityMbiAttribute();
-
       entities =
-          claimDao.findAllByAttribute(
+          claimDao.findAllByMbiAttribute(
               type.getEntityClass(),
-              attributeName,
+              type.getEntityMbiRecordAttribute(),
               mbi,
+              isHashed,
               lastUpdated,
               serviceDate,
               type.getEntityEndDateAttribute());
