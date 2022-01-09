@@ -87,7 +87,7 @@ data "aws_security_group" "aurora_cluster" {
   }
 }
 
-# vpc security group
+# vpn security group
 data "aws_security_group" "vpn" {
   filter {
     name   = "tag:Name"
