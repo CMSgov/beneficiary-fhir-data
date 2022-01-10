@@ -1,0 +1,171 @@
+{
+  "resourceType" : "Bundle",
+  "id" : "IGNORED_FIELD",
+  "meta" : {
+    "lastUpdated" : "IGNORED_FIELD"
+  },
+  "type" : "searchset",
+  "total" : 4,
+  "link" : [ {
+    "relation" : "self",
+    "url" : "https://localhost:IGNORED_FIELD/v1/fhir/Coverage?_format=json&beneficiary=Patient%2F567834"
+  } ],
+  "entry" : [ {
+    "resource" : {
+      "resourceType" : "Coverage",
+      "id" : "part-a-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
+          "code" : "20",
+          "display" : "Disabled without ESRD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/orec",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/orec",
+          "code" : "1",
+          "display" : "Disability insurance benefits (DIB)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/crec",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/crec",
+          "code" : "1",
+          "display" : "Disability insurance benefits (DIB)"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/esrd_ind",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/esrd_ind",
+          "code" : "N"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/a_trm_cd",
+          "code" : "0",
+          "display" : "Not Terminated"
+        }
+      } ],
+      "status" : "active",
+      "type" : {
+        "coding" : [ {
+          "system" : "Medicare",
+          "code" : "Part A"
+        } ]
+      },
+      "beneficiary" : {
+        "reference" : "Patient/567834"
+      },
+      "period" : {
+        "start" : "1963-10-03"
+      },
+      "grouping" : {
+        "subGroup" : "Medicare",
+        "subPlan" : "Part A"
+      },
+      "contract" : [ {
+        "id" : "ptc-contract1"
+      }, {
+        "reference" : "Coverage/part-a-contract1 reference"
+      } ]
+    }
+  }, {
+    "resource" : {
+      "resourceType" : "Coverage",
+      "id" : "part-b-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
+          "code" : "20",
+          "display" : "Disabled without ESRD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/resources/variables/b_trm_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/b_trm_cd",
+          "code" : "0",
+          "display" : "Not Terminated"
+        }
+      } ],
+      "status" : "active",
+      "type" : {
+        "coding" : [ {
+          "system" : "Medicare",
+          "code" : "Part B"
+        } ]
+      },
+      "beneficiary" : {
+        "reference" : "Patient/567834"
+      },
+      "period" : {
+        "start" : "1963-10-03"
+      },
+      "grouping" : {
+        "subGroup" : "Medicare",
+        "subPlan" : "Part B"
+      }
+    }
+  }, {
+    "resource" : {
+      "resourceType" : "Coverage",
+      "id" : "part-c-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
+      "status" : "active",
+      "type" : {
+        "coding" : [ {
+          "system" : "Medicare",
+          "code" : "Part C"
+        } ]
+      },
+      "beneficiary" : {
+        "reference" : "Patient/567834"
+      },
+      "grouping" : {
+        "subGroup" : "Medicare",
+        "subPlan" : "Part C"
+      }
+    }
+  }, {
+    "resource" : {
+      "resourceType" : "Coverage",
+      "id" : "part-d-567834",
+      "meta" : {
+        "lastUpdated" : "IGNORED_FIELD"
+      },
+      "extension" : [ {
+        "url" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
+        "valueCoding" : {
+          "system" : "https://bluebutton.cms.gov/resources/variables/ms_cd",
+          "code" : "20",
+          "display" : "Disabled without ESRD"
+        }
+      } ],
+      "status" : "active",
+      "type" : {
+        "coding" : [ {
+          "system" : "Medicare",
+          "code" : "Part D"
+        } ]
+      },
+      "beneficiary" : {
+        "reference" : "Patient/567834"
+      },
+      "grouping" : {
+        "subGroup" : "Medicare",
+        "subPlan" : "Part D"
+      }
+    }
+  } ]
+}

@@ -28,6 +28,11 @@ public enum StaticRifResource {
   SAMPLE_A_BENES(
       resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
+  SAMPLE_A_BENES_WITH_NULL_REFERENCE_YEAR(
+      resourceUrl("rif-static-samples/sample-a-beneficiaries-with-null-reference-year.txt"),
+      RifFileType.BENEFICIARY,
+      1),
+
   SAMPLE_A_BENES_WITH_BACKSLASH(
       resourceUrl("rif-static-samples/sample-a-beneficiaries-with-backslash.txt"),
       RifFileType.BENEFICIARY,

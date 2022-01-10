@@ -61,7 +61,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -119,8 +118,17 @@ public final class EndpointJsonResponseComparatorIT {
       },
       {"coverageRead", (Supplier<String>) EndpointJsonResponseComparatorIT::coverageRead},
       {
+        "coverageReadWithNullReferenceYear",
+        (Supplier<String>) EndpointJsonResponseComparatorIT::coverageReadWithNullReferenceYear
+      },
+      {
         "coverageSearchByPatientId",
         (Supplier<String>) EndpointJsonResponseComparatorIT::coverageSearchByPatientId
+      },
+      {
+        "coverageSearchByPatientIdWithNullReferenceYear",
+        (Supplier<String>)
+            EndpointJsonResponseComparatorIT::coverageSearchByPatientIdWithNullReferenceYear
       },
       {"eobByPatientIdAll", (Supplier<String>) EndpointJsonResponseComparatorIT::eobByPatientIdAll},
       {
@@ -218,7 +226,7 @@ public final class EndpointJsonResponseComparatorIT {
    * Generates the "golden" files, i.e. the approved responses to compare to. Run by commenting out
    * the <code>@Ignore</code> annotation and running this method as JUnit.
    */
-  @Ignore
+  // @Ignore
   @Test
   public void generateApprovedResponseFiles() {
     Path approvedResponseDir = getApprovedResponseDir();
@@ -716,6 +724,33 @@ public final class EndpointJsonResponseComparatorIT {
 
   /**
    * @return the results of the {@link
+   *     CoverageResourceProvider#read(org.hl7.fhir.dstu3.model.IdType)} operation
+   */
+  public static String coverageReadWithNullReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITH_NULL_REFERENCE_YEAR.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .read()
+        .resource(Coverage.class)
+        .withId(TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary))
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
    *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
    *     operation
    */
@@ -723,6 +758,38 @@ public final class EndpointJsonResponseComparatorIT {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .search()
+        .forResource(Coverage.class)
+        .where(
+            Coverage.BENEFICIARY.hasId(
+                TransformerUtils.buildPatientId(beneficiary.getBeneficiaryId())))
+        .returnBundle(Bundle.class)
+        .execute();
+    return jsonInterceptor.getResponse();
+  }
+
+  /**
+   * @return the results of the {@link
+   *     CoverageResourceProvider#searchByBeneficiary(ca.uhn.fhir.rest.param.ReferenceParam)}
+   *     operation
+   */
+  public static String coverageSearchByPatientIdWithNullReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITH_NULL_REFERENCE_YEAR.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)

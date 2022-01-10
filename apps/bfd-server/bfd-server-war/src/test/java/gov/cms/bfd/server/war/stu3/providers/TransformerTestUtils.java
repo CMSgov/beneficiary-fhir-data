@@ -746,6 +746,27 @@ final class TransformerTestUtils {
   }
 
   /**
+   * FIXME change name of this and related methods to assertHasExtensionCoding(...)
+   *
+   * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
+   *     Coding} are for
+   * @param expectedCode the expected {@link Coding#getCode()}
+   * @param actualElement the FHIR element to find and verify the {@link Extension} of
+   */
+  static void assertExtensionCodingDoesNotExist(
+      CcwCodebookInterface ccwVariable,
+      Optional<?> expectedCode,
+      IBaseHasExtensions actualElement) {
+    String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
+    Optional<? extends IBaseExtension<?, ?>> extensionForUrl =
+        actualElement.getExtension().stream()
+            .filter(e -> e.getUrl().equals(expectedExtensionUrl))
+            .findFirst();
+
+    Assert.assertFalse(extensionForUrl.isPresent());
+  }
+
+  /**
    * @param ccwVariable the {@link CcwCodebookVariable} that was mapped
    * @param expectedValue the expected {@link Identifier#getValue()} value
    * @param actualIdentifiers the actual {@link Identifier}s to verify a match can be found within
