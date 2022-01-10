@@ -97,7 +97,10 @@ data "aws_security_group" "vpn" {
 
 # vpn cidr blocks
 data "aws_prefix_list" "vpn" {
-  name = "cmscloud-vpn"
+  filter {
+    name = "prefix-list-name"
+    values = "cmscloud-vpn"
+  }
 }
 
 # tools security group
