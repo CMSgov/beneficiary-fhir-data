@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.time.Clock;
+import javax.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 
 public class DatabaseMbiHasherIT {
@@ -94,10 +95,29 @@ public class DatabaseMbiHasherIT {
           assertEquals(hash1, hasher.computeIdentifierHash(mbi1));
 
           // every mbi except mbi1 should have been looked up in the database exactly once
-          verify(hasher, times(2)).lookup(mbi1);
-          verify(hasher, times(1)).lookup(mbi2);
-          verify(hasher, times(1)).lookup(mbi3);
-          verify(hasher, times(1)).lookup(mbi4);
+          verify(hasher, times(2)).lookupWithRetries(mbi1);
+          verify(hasher, times(1)).lookupWithRetries(mbi2);
+          verify(hasher, times(1)).lookupWithRetries(mbi3);
+          verify(hasher, times(1)).lookupWithRetries(mbi4);
+        });
+  }
+
+  @Test
+  public void retryFiveTimes() throws Exception {
+    RdaPipelineTestUtils.runTestWithTemporaryDb(
+        FissClaimRdaSinkIT.class,
+        Clock.systemUTC(),
+        (appState, entityManager) -> {
+          final PersistenceException error = new PersistenceException("oops");
+          final DatabaseMbiHasher hasher = spy(new DatabaseMbiHasher(hashConfig, entityManager));
+          doThrow(error, error, error, error, error)
+              .doReturn(hash1)
+              .when(hasher)
+              .readOrInsertIfMissing(mbi1);
+
+          assertEquals(hash1, hasher.computeIdentifierHash(mbi1));
+          verify(hasher, times(1)).lookupWithRetries(mbi1);
+          verify(hasher, times(6)).readOrInsertIfMissing(mbi1);
         });
   }
 }
