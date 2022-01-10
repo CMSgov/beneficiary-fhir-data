@@ -158,6 +158,7 @@ module "fhir_lb" {
     description = "Public Internet access"
     port        = 443
     cidr_blocks = ["0.0.0.0/0"]
+    prefix_list_ids = []
     } : {
     description     = "From VPN, VPC peerings, the MGMT VPC, and self"
     port            = 443
