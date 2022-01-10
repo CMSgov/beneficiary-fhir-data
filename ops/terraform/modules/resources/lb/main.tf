@@ -44,7 +44,7 @@ resource "aws_elb" "main" {
 
   internal        = ! var.is_public
   subnets         = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
-  security_groups = [aws_security_group.lb.id, aws_security_group.lb_vpn.id]
+  security_groups = [aws_security_group.lb.id, aws_security_group.lb_vpn[0].id]
 
   cross_zone_load_balancing   = false # Match HealthApt
   idle_timeout                = 60    # (seconds) Match HealthApt
