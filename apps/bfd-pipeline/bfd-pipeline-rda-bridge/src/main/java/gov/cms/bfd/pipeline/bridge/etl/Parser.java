@@ -41,7 +41,7 @@ public interface Parser<T> extends Closeable {
    *
    * <p>{@link Data} objects are created by an implemented {@link Parser} that parses a source file.
    *
-   * @param <T>
+   * @param <T> The type of data returned by the {@link Data} object.
    */
   // S1610 - Abstract classes for predefined methods
   @SuppressWarnings("squid:S1610")
