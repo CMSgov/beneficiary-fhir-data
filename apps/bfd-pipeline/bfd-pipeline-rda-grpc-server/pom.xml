@@ -111,12 +111,6 @@
         <dependency>
             <!-- contains the JPA entities for writing to the database -->
             <groupId>gov.cms.bfd</groupId>
-            <artifactId>bfd-model-rda</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <!-- contains the JPA entities for writing to the database -->
-            <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-pipeline-rda-grpc</artifactId>
             <version>${project.version}</version>
         </dependency>
