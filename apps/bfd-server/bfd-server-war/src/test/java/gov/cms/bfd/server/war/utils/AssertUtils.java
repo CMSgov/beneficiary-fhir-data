@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.JsonDiff;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -97,11 +100,20 @@ public class AssertUtils {
         new NodeFilteringConsumer(node -> pattern.matcher(node.get("path").toString()).matches());
 
     diff.forEach(consumer);
+
+    List<JsonNode> actualDiffs = new ArrayList<>();
+
+    // Looping through the diffs, checking what actually contains a non-empty object, and adding
+    // them to actualDiffs, which will be printed out as the real list of differences.
     if (diff.size() > 0) {
       for (int i = 0; i < diff.size(); i++) {
-        Assert.assertEquals("{}", diff.get(i).toString());
+        if (!diff.get(i).toString().equals("{}")) {
+          actualDiffs.add(diff.get(i));
+        }
       }
     }
+
+    Assert.assertEquals(Collections.emptyList(), actualDiffs);
   }
 
   /**
