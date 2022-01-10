@@ -155,10 +155,10 @@ module "fhir_lb" {
   is_public  = var.is_public
 
   ingress = var.is_public ? {
-    description = "Public Internet access"
-    port        = 443
-    cidr_blocks = ["0.0.0.0/0"]
-    prefix_list_ids = []
+    description     = "Public Internet access"
+    port            = 443
+    cidr_blocks     = ["0.0.0.0/0"]
+    prefix_list_ids = [""]
     } : {
     description     = "From VPN, VPC peerings, the MGMT VPC, and self"
     port            = 443

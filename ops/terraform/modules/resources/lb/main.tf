@@ -74,12 +74,19 @@ resource "aws_security_group" "lb" {
   tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-lb" }, local.tags)
 
   ingress {
+    from_port   = var.ingress.port
+    to_port     = var.ingress.port
+    protocol    = "tcp"
+    cidr_blocks = var.ingress.cidr_blocks
+    description = var.ingress.description
+  }
+
+  ingress {
     from_port       = var.ingress.port
-    to_port         = var.ingress.port
     protocol        = "tcp"
-    cidr_blocks     = var.ingress.cidr_blocks
+    to_port         = var.ingress.port
+    prefix_list_ids = var.ingress.prefix_list_ids
     description     = var.ingress.description
-    prefix_list_ids = [var.ingress.prefix_list_ids]
   }
 
   egress {
