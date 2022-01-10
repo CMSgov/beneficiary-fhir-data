@@ -26,14 +26,6 @@ data "aws_s3_bucket" "logs" {
   bucket = var.log_bucket
 }
 
-# vpn security group
-data "aws_security_group" "vpn" {
-  filter {
-    name   = "tag:Name"
-    values = ["bfd-${var.env_config.env}-vpn-private"]
-  }
-}
-
 ## RESOURCES
 #
 
@@ -44,7 +36,7 @@ resource "aws_elb" "main" {
 
   internal        = ! var.is_public
   subnets         = data.aws_subnet.app_subnets[*].id # Gives AZs and VPC association
-  security_groups = [aws_security_group.lb.id, aws_security_group.lb_vpn[0].id]
+  security_groups = [aws_security_group.lb.id]
 
   cross_zone_load_balancing   = false # Match HealthApt
   idle_timeout                = 60    # (seconds) Match HealthApt
@@ -95,22 +87,6 @@ resource "aws_security_group" "lb" {
     protocol    = "tcp"
     cidr_blocks = var.egress.cidr_blocks
     description = var.egress.description
-  }
-}
-
-# allow https to prod and test load balancers from vpn
-resource "aws_security_group" "lb_vpn" {
-  count       = var.is_public ? 0 : 1
-  name        = "bfd-${var.env_config.env}-${var.role}-lb-from-vpn"
-  description = "Allow HTTPS from VPN to ${var.role} load-balancer}"
-  vpc_id      = var.env_config.vpc_id
-  tags        = merge({ Name = "bfd-${var.env_config.env}-${var.role}-lb" }, local.tags)
-
-  ingress {
-    protocol = "tcp"
-    from_port = 443
-    to_port = 443
-    security_groups = [data.aws_security_group.vpn.id]
   }
 }
 

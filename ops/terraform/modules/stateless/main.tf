@@ -95,6 +95,11 @@ data "aws_security_group" "vpn" {
   }
 }
 
+# vpn cidr blocks
+data "aws_prefix_list" "vpn" {
+  name = "cmscloud-vpn"
+}
+
 # tools security group
 data "aws_security_group" "tools" {
   filter {
@@ -151,9 +156,9 @@ module "fhir_lb" {
     port        = 443
     cidr_blocks = ["0.0.0.0/0"]
     } : {
-    description = "From VPC peerings, the MGMT VPC, and self"
+    description = "From VPN, VPC peerings, the MGMT VPC, and self"
     port        = 443
-    cidr_blocks = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    cidr_blocks = concat(data.aws_prefix_list.vpn.cidr_blocks, data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
   }
 
   egress = {
