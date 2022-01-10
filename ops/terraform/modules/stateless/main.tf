@@ -95,11 +95,11 @@ data "aws_security_group" "vpn" {
   }
 }
 
-# vpn cidr blocks
-data "aws_prefix_list" "vpn" {
+# get vpn cidr blocks from shared CMS prefix list
+data "aws_ec2_managed_prefix_list" "vpn" {
   filter {
-    name = "prefix-list-name"
-    values = "cmscloud-vpn"
+    name   = "prefix-list-name"
+    values = ["cmscloud-vpn"]
   }
 }
 
@@ -159,9 +159,10 @@ module "fhir_lb" {
     port        = 443
     cidr_blocks = ["0.0.0.0/0"]
     } : {
-    description = "From VPN, VPC peerings, the MGMT VPC, and self"
-    port        = 443
-    cidr_blocks = concat(data.aws_prefix_list.vpn.cidr_blocks, data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    description     = "From VPN, VPC peerings, the MGMT VPC, and self"
+    port            = 443
+    cidr_blocks     = concat(data.aws_vpc_peering_connection.peers[*].peer_cidr_block, [data.aws_vpc.mgmt.cidr_block, data.aws_vpc.main.cidr_block])
+    prefix_list_ids = [data.aws_ec2_managed_prefix_list.vpn.id]
   }
 
   egress = {
