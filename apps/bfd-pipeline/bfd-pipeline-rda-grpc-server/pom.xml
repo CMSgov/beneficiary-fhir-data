@@ -25,7 +25,6 @@
         <jpa.version>1.0.2.Final</jpa.version>
         <postgresql.version>42.2.20</postgresql.version>
         <hsqldb.version>2.6.0</hsqldb.version>
-        <junit.version>4.13.2</junit.version>
         <slf4j.version>1.7.7</slf4j.version>
         <hikari.version>4.0.3</hikari.version>
     </properties>
@@ -144,8 +143,14 @@
 
         <dependency>
             <!-- Used to run our unit and integration tests. -->
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Allows junit compatibility with old junit4 tests -->
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

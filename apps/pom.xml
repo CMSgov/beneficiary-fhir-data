@@ -93,8 +93,10 @@
 
 		<metrics.version>4.1.29</metrics.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
+		<junit.version>5.8.2</junit.version>
+		<junit.vintage.version>5.8.2</junit.vintage.version>
 		<jackson.version>2.13.1</jackson.version>
-		
+
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
 			on the default 'jdbc:bfd-test:' URL here. -->
@@ -298,9 +300,17 @@
 
 			<dependency>
 				<!-- The test framework used for unit and integration tests. -->
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.13.1</version>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<!-- Allows junit compatibility with old junit4 tests -->
+				<groupId>org.junit.vintage</groupId>
+				<artifactId>junit-vintage-engine</artifactId>
+				<version>${junit.vintage.version}</version>
 				<scope>test</scope>
 			</dependency>
 
