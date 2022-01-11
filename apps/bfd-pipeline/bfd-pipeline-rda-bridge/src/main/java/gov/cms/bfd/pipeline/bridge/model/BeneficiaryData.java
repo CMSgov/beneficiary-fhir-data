@@ -44,7 +44,7 @@ public class BeneficiaryData {
     String firstName = data.get(BENE_GVN_NAME).orElse(null);
     String lastName = data.get(BENE_SRNM_NAME).orElse(null);
     String midName = data.get(BENE_MDL_NAME).orElse(null);
-    String dob = data.get(BENE_BIRTH_DT).orElse(null);
+    String dob = data.getFromType(BENE_BIRTH_DT, Parser.Data.Type.DATE).orElse(null);
     String gender = data.get(BENE_SEX_IDENT_CD).orElse(null);
 
     return new BeneficiaryData(beneId, mbi, hicNo, firstName, lastName, midName, dob, gender);
