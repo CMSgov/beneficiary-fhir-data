@@ -211,7 +211,7 @@ public final class EndpointJsonResponseComparatorIT {
     String endpointResponse = endpointOperation.get();
     writeFile(endpointResponse, generateFileName(targetResponseDir, endpointId));
 
-    // assertJsonDiffIsEmpty(endpointId);
+    assertJsonDiffIsEmpty(endpointId);
   }
 
   /**
