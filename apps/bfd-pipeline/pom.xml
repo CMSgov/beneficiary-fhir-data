@@ -15,10 +15,6 @@
 		A parent POM for the bfd-pipeline-* projects, which migrate data from the CCW data warehouse to the Beneficiary FHIR Data systems.
 	</description>
 
-	<properties>
-		<jackson.version>2.13.1</jackson.version>
-	</properties>
-
 	<modules>
 		<module>bfd-pipeline-ccw-rif</module>
 		<module>bfd-pipeline-rda-grpc</module>
