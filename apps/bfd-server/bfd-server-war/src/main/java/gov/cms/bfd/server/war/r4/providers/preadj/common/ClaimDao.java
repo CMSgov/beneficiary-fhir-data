@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
-import gov.cms.bfd.model.rda.PreAdjMbi;
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import gov.cms.bfd.server.war.r4.providers.TransformerUtilsV2;
 import java.time.LocalDate;
@@ -105,7 +105,7 @@ public class ClaimDao {
       DateRangeParam serviceDate,
       String endDateAttributeName) {
     final String mbiValueAttributeName =
-        isMbiSearchValueHashed ? PreAdjMbi.Fields.mbiHash : PreAdjMbi.Fields.mbi;
+        isMbiSearchValueHashed ? Mbi.Fields.mbiHash : Mbi.Fields.mbi;
 
     List<T> claimEntities = null;
 

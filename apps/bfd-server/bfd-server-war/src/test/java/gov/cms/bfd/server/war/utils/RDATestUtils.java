@@ -1,10 +1,10 @@
 package gov.cms.bfd.server.war.utils;
 
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
-import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
@@ -16,7 +16,6 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +37,7 @@ public class RDATestUtils {
           PreAdjMcsDetail.class,
           PreAdjMcsDiagnosisCode.class,
           PreAdjMcsClaim.class,
-          PreAdjMbi.class);
+          Mbi.class);
 
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
@@ -61,13 +60,15 @@ public class RDATestUtils {
     }
   }
 
-  /**
-   * Seed data into the database for testing.
-   *
-   * @param entities The entities to seed into the db.
-   */
-  public void seedData(Collection<?> entities) {
-    doTransaction(em -> entities.forEach(em::merge));
+  /** Seed data into the database for testing. */
+  public void seedData() {
+    doTransaction(
+        em -> {
+          Mbi mbi = em.merge(new Mbi(null, "123456MBI", "a7f8e93f09"));
+          em.merge(fissTestDataA(mbi));
+          em.merge(fissTestDataB(mbi));
+          em.merge(mcsTestDataA(mbi));
+        });
   }
 
   /** Delete all the test data from the db. */
@@ -120,20 +121,11 @@ public class RDATestUtils {
   }
 
   /**
-   * Provides a set of FISS related test data.
-   *
-   * @return The FISS related test data.
-   */
-  public List<?> fissTestData() {
-    return List.of(fissTestDataA(), fissTestDataB());
-  }
-
-  /**
    * One FISS claim for testing
    *
    * @return The FISS test claim A
    */
-  private PreAdjFissClaim fissTestDataA() {
+  private PreAdjFissClaim fissTestDataA(Mbi mbi) {
     PreAdjFissClaim claim =
         PreAdjFissClaim.builder()
             .sequenceNumber(1L)
@@ -150,7 +142,7 @@ public class RDATestUtils {
             .admitDiagCode("admitcd")
             .principleDiag("princcd")
             .npiNumber("8876543211")
-            .mbiRecord(new PreAdjMbi("123456MBI", "a7f8e93f09"))
+            .mbiRecord(mbi)
             .fedTaxNumber("abc123")
             .lobCd("r")
             .lastUpdated(Instant.ofEpochMilli(0))
@@ -232,7 +224,7 @@ public class RDATestUtils {
    *
    * @return The FISS test claim B
    */
-  private PreAdjFissClaim fissTestDataB() {
+  private PreAdjFissClaim fissTestDataB(Mbi mbi) {
     PreAdjFissClaim claim =
         PreAdjFissClaim.builder()
             .sequenceNumber(2L)
@@ -249,7 +241,7 @@ public class RDATestUtils {
             .admitDiagCode("admitcc")
             .principleDiag("princcc")
             .npiNumber("8876543212")
-            .mbiRecord(new PreAdjMbi("123456MBI", "a7f8e93f09"))
+            .mbiRecord(mbi)
             .fedTaxNumber("abc124")
             .lobCd("k")
             .lastUpdated(Instant.ofEpochMilli(5000))
@@ -320,20 +312,11 @@ public class RDATestUtils {
   }
 
   /**
-   * Provides a set of MCS related test data.
-   *
-   * @return The MCS related test data.
-   */
-  public List<PreAdjMcsClaim> mcsTestData() {
-    return List.of(mcsTestDataA());
-  }
-
-  /**
    * One MCS claim for testing
    *
    * @return The MCS test claim A
    */
-  private PreAdjMcsClaim mcsTestDataA() {
+  private PreAdjMcsClaim mcsTestDataA(Mbi mbi) {
     PreAdjMcsClaim claim =
         PreAdjMcsClaim.builder()
             .sequenceNumber(1L)
@@ -363,7 +346,7 @@ public class RDATestUtils {
             .idrBillProvStatusCd("Z")
             .idrTotBilledAmt(new BigDecimal("23.00"))
             .idrClaimReceiptDate(LocalDate.ofEpochDay(54))
-            .mbiRecord(new PreAdjMbi("123456MBI", "a7f8e93f09"))
+            .mbiRecord(mbi)
             .idrHdrFromDateOfSvc(LocalDate.ofEpochDay(210))
             .idrHdrToDateOfSvc(LocalDate.ofEpochDay(210))
             .lastUpdated(Instant.ofEpochMilli(4000))

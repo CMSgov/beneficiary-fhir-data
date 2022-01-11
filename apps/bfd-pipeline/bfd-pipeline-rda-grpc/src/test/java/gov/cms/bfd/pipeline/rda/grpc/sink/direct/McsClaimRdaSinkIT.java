@@ -3,7 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import gov.cms.bfd.model.rda.PreAdjMbi;
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
@@ -38,7 +38,7 @@ public class McsClaimRdaSinkIT {
           claim.setIdrContrId("c1");
           claim.setIdrHic("hc");
           claim.setIdrClaimType("c");
-          claim.setMbiRecord(new PreAdjMbi("1234567890123", "hash-of-1234567890123"));
+          claim.setMbiRecord(new Mbi(1L, "1234567890123", "hash-of-1234567890123"));
 
           final PreAdjMcsDetail detail = new PreAdjMcsDetail();
           detail.setIdrClmHdIcn(claim.getIdrClmHdIcn());
@@ -80,11 +80,11 @@ public class McsClaimRdaSinkIT {
                   .setClaim(claimMessage)
                   .build();
 
-          final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
-          final McsClaimTransformer transformer = new McsClaimTransformer(clock, defaultIdHasher);
+          final IdHasher hasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
+          final McsClaimTransformer transformer =
+              new McsClaimTransformer(clock, hasher.getConfig());
           final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
-          final String expectedMbiHash =
-              defaultIdHasher.computeIdentifierHash(claim.getIdrClaimMbi());
+          final String expectedMbiHash = hasher.computeIdentifierHash(claim.getIdrClaimMbi());
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
@@ -107,8 +107,8 @@ public class McsClaimRdaSinkIT {
           assertEquals(
               Optional.of(claim.getSequenceNumber()), sink.readMaxExistingSequenceNumber());
 
-          PreAdjMbi databaseMbiEntity =
-              entityManager.find(PreAdjMbi.class, claimMessage.getIdrClaimMbi());
+          Mbi databaseMbiEntity =
+              RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getIdrClaimMbi());
           assertNotNull(databaseMbiEntity);
           assertEquals(claim.getIdrClaimMbi(), databaseMbiEntity.getMbi());
           assertEquals(expectedMbiHash, databaseMbiEntity.getMbiHash());

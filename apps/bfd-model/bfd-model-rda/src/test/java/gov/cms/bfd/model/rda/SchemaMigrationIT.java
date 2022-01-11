@@ -253,6 +253,7 @@ public class SchemaMigrationIT {
       final String mbi = format("%05d", mbiNumber);
       mbis.add(mbi);
       entityManager.getTransaction().begin();
+      Mbi mbiRecord = entityManager.merge(new Mbi(null, mbi, mbi + hashSuffix));
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
         final PreAdjFissClaim claim =
             PreAdjFissClaim.builder()
@@ -262,7 +263,7 @@ public class SchemaMigrationIT {
                 .currLoc1('A')
                 .currLoc2("1A")
                 .sequenceNumber(seqNo++)
-                .mbiRecord(new PreAdjMbi(mbi, mbi + hashSuffix))
+                .mbiRecord(mbiRecord)
                 .build();
         entityManager.merge(claim);
       }
@@ -273,7 +274,13 @@ public class SchemaMigrationIT {
     // verify the mbis were written to the MbiCache table
     entityManager.getTransaction().begin();
     for (String mbi : mbis) {
-      assertNotNull(entityManager.find(PreAdjMbi.class, mbi));
+      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+      Root<Mbi> root = criteria.from(Mbi.class);
+      criteria.select(root);
+      criteria.where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+      var record = entityManager.createQuery(criteria).getSingleResult();
+      assertNotNull(record);
     }
     entityManager.getTransaction().commit();
 
@@ -286,7 +293,7 @@ public class SchemaMigrationIT {
       criteria.select(root);
       criteria.where(
           builder.equal(
-              root.get(PreAdjFissClaim.Fields.mbiRecord).get(PreAdjMbi.Fields.mbiHash),
+              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.mbiHash),
               mbi + hashSuffix));
       var claims = entityManager.createQuery(criteria).getResultList();
       assertEquals(3, claims.size());
@@ -307,6 +314,7 @@ public class SchemaMigrationIT {
       final String mbi = format("%05d", mbiNumber);
       mbis.add(mbi);
       entityManager.getTransaction().begin();
+      Mbi mbiRecord = entityManager.merge(new Mbi(null, mbi, mbi + hashSuffix));
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
         final PreAdjMcsClaim claim =
             PreAdjMcsClaim.builder()
@@ -316,7 +324,7 @@ public class SchemaMigrationIT {
                 .idrHic("hc")
                 .idrClaimType("c")
                 .sequenceNumber(seqNo++)
-                .mbiRecord(new PreAdjMbi(mbi, mbi + hashSuffix))
+                .mbiRecord(mbiRecord)
                 .build();
         entityManager.merge(claim);
       }
@@ -327,7 +335,13 @@ public class SchemaMigrationIT {
     // verify the mbis were written to the MbiCache table
     entityManager.getTransaction().begin();
     for (String mbi : mbis) {
-      assertNotNull(entityManager.find(PreAdjMbi.class, mbi));
+      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+      CriteriaQuery<Mbi> criteria = builder.createQuery(Mbi.class);
+      Root<Mbi> root = criteria.from(Mbi.class);
+      criteria.select(root);
+      criteria.where(builder.equal(root.get(Mbi.Fields.mbi), mbi));
+      var record = entityManager.createQuery(criteria).getSingleResult();
+      assertNotNull(record);
     }
     entityManager.getTransaction().commit();
 
@@ -340,7 +354,7 @@ public class SchemaMigrationIT {
       criteria.select(root);
       criteria.where(
           builder.equal(
-              root.get(PreAdjFissClaim.Fields.mbiRecord).get(PreAdjMbi.Fields.mbiHash),
+              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.mbiHash),
               mbi + hashSuffix));
       var claims = entityManager.createQuery(criteria).getResultList();
       assertEquals(3, claims.size());

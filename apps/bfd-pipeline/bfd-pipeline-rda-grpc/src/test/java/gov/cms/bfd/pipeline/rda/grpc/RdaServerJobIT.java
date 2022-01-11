@@ -42,9 +42,10 @@ public class RdaServerJobIT {
       Resources.asByteSource(Resources.getResource("MCS.ndjson"));
 
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
-  private final IdHasher hasher = new IdHasher(new IdHasher.Config(100, "whatever"));
-  private final FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
-  private final McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
+  private final IdHasher.Config hasherConfig = new IdHasher.Config(100, "whatever");
+  private final FissClaimTransformer fissTransformer =
+      new FissClaimTransformer(clock, hasherConfig);
+  private final McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasherConfig);
 
   @Test
   public void testRandom() throws Exception {

@@ -1,7 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.collect.ImmutableSet;
-import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
 import gov.cms.bfd.model.rda.PreAdjMcsAudit;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
@@ -9,6 +8,7 @@ import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
@@ -88,11 +88,15 @@ public class McsClaimTransformer {
       PreAdjMcsLocation_idrLocActvCode_Extractor;
 
   private final Clock clock;
-  @Getter private final IdHasher idHasher;
+  @Getter private final MbiCache mbiCache;
 
-  public McsClaimTransformer(Clock clock, IdHasher idHasher) {
+  public McsClaimTransformer(Clock clock, IdHasher.Config hasherConfig) {
+    this(clock, MbiCache.computedCache(hasherConfig));
+  }
+
+  private McsClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
-    this.idHasher = idHasher;
+    this.mbiCache = mbiCache;
     PreAdjMcsClaim_idrClaimType_Extractor =
         new EnumStringExtractor<>(
             McsClaim::hasIdrClaimTypeEnum,
@@ -255,8 +259,8 @@ public class McsClaimTransformer {
    * @param idHasher alternative IdHasher to use for hashing MBI values
    * @return a new transformer with the same clock but alternative IdHasher
    */
-  public McsClaimTransformer withIdHasher(IdHasher idHasher) {
-    return new McsClaimTransformer(clock, idHasher);
+  public McsClaimTransformer withMbiCache(MbiCache mbiCache) {
+    return new McsClaimTransformer(clock, mbiCache);
   }
 
   public RdaChange<PreAdjMcsClaim> transformClaim(McsClaimChange change) {
@@ -456,22 +460,10 @@ public class McsClaimTransformer {
         to::setIdrClaimReceiptDate);
     if (from.hasIdrClaimMbi()) {
       final var mbi = from.getIdrClaimMbi();
-      final var hash = idHasher.computeIdentifierHash(mbi);
-      to.setMbiRecord(new PreAdjMbi());
-      transformer.copyString(
-          namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi,
-          false,
-          1,
-          13,
-          mbi,
-          x -> to.getMbiRecord().setMbi(x));
-      transformer.copyString(
-          namePrefix + PreAdjMcsClaim.Fields.idrClaimMbiHash,
-          false,
-          1,
-          64,
-          hash,
-          x -> to.getMbiRecord().setMbiHash(x));
+      if (transformer.validateString(
+          namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi, false, 1, 13, mbi)) {
+        to.setMbiRecord(mbiCache.lookupMbi(mbi));
+      }
     }
     transformer.copyOptionalDate(
         namePrefix + PreAdjMcsClaim.Fields.idrHdrFromDateOfSvc,

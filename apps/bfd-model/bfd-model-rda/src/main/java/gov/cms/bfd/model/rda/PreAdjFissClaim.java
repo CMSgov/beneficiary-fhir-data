@@ -82,8 +82,8 @@ public class PreAdjFissClaim {
   @ManyToOne(
       fetch = FetchType.EAGER,
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
-  @JoinColumn(name = "`mbi`")
-  private PreAdjMbi mbiRecord;
+  @JoinColumn(name = "`mbiId`")
+  private Mbi mbiRecord;
 
   @Column(name = "`fedTaxNumber`", length = 10)
   private String fedTaxNumber;

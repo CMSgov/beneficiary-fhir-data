@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.rda.PreAdjMbi;
+import gov.cms.bfd.model.rda.Mbi;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -110,7 +110,7 @@ public class ClaimDaoTest {
     final String mbiRecordAttributeName = "attr";
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = false;
-    final String mbiValueAttributeName = PreAdjMbi.Fields.mbi;
+    final String mbiValueAttributeName = Mbi.Fields.mbi;
     final String endAttribute = "endAttribute";
 
     EntityManager mockEntityManager = mock(EntityManager.class);
@@ -186,7 +186,7 @@ public class ClaimDaoTest {
     final String mbiRecordAttributeName = "attr";
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = true;
-    final String mbiValueAttributeName = PreAdjMbi.Fields.mbiHash;
+    final String mbiValueAttributeName = Mbi.Fields.mbiHash;
     final String endAttribute = "endAttribute";
     final DateRangeParam mockLastUpdatedParam = mock(DateRangeParam.class);
     final DateRangeParam mockServiceDateParam = mock(DateRangeParam.class);

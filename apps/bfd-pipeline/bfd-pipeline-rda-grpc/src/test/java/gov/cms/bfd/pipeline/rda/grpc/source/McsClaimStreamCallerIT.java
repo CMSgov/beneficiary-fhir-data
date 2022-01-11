@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 public class McsClaimStreamCallerIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-  private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-  private final McsClaimTransformer transformer = new McsClaimTransformer(clock, hasher);
+  private final McsClaimTransformer transformer =
+      new McsClaimTransformer(clock, new IdHasher.Config(10, "justsomestring"));
 
   @Test
   public void basicCall() throws Exception {

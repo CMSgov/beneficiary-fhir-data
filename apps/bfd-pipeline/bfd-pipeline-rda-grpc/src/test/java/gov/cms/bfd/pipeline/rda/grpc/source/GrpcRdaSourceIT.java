@@ -196,7 +196,8 @@ public class GrpcRdaSourceIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(5, "pepper-pepper-pepper"));
-  private final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
+  private final FissClaimTransformer transformer =
+      new FissClaimTransformer(clock, hasher.getConfig());
   private final FissClaimStreamCaller streamCaller = new FissClaimStreamCaller();
   private MetricRegistry appMetrics;
   private JsonCaptureSink sink;

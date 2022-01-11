@@ -18,8 +18,7 @@ public class McsClaimRdaSink extends AbstractClaimRdaSink<McsClaimChange, PreAdj
       boolean autoUpdateLastSeq) {
     super(appState, RdaApiProgress.ClaimType.MCS, autoUpdateLastSeq);
     this.transformer =
-        transformer.withIdHasher(
-            new DatabaseMbiHasher(transformer.getIdHasher().getConfig(), super.entityManager));
+        transformer.withMbiCache(transformer.getMbiCache().withDatabaseLookup(super.entityManager));
   }
 
   @Override

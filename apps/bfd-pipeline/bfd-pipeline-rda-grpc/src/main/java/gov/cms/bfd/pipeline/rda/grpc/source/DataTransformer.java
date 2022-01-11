@@ -56,6 +56,21 @@ public class DataTransformer {
   }
 
   /**
+   * Checks the nullability and length of a string.
+   *
+   * @param fieldName name of the field from which the value originates
+   * @param nullable true if null is a valid value
+   * @param minLength minimum allowed length for non-null value
+   * @param maxLength maximum allowed length for non-null value
+   * @param value value to validate
+   * @return true if the string value is valid
+   */
+  public boolean validateString(
+      String fieldName, boolean nullable, int minLength, int maxLength, String value) {
+    return nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength);
+  }
+
+  /**
    * Checks the nullability and length of a string and then delivers it to the Consumer if the
    * checks are successful. Valid null values are silently accepted without calling the Consumer.
    *
@@ -74,7 +89,7 @@ public class DataTransformer {
       int maxLength,
       String value,
       Consumer<String> copier) {
-    if (nonNull(fieldName, value, nullable) && lengthOk(fieldName, value, minLength, maxLength)) {
+    if (validateString(fieldName, nullable, minLength, maxLength, value)) {
       copier.accept(value);
     }
     return this;

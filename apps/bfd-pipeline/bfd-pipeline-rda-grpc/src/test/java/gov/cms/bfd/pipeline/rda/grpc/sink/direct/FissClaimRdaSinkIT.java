@@ -3,10 +3,10 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
-import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -41,7 +41,7 @@ public class FissClaimRdaSinkIT {
           claim.setCurrLoc1('A');
           claim.setCurrLoc2("1A");
           claim.setPracLocCity("city name can be very long indeed");
-          claim.setMbiRecord(new PreAdjMbi("1234567890123", "hash-of-1234567890123"));
+          claim.setMbiRecord(new Mbi(1L, "1234567890123", "hash-of-1234567890123"));
 
           final PreAdjFissProcCode procCode0 = new PreAdjFissProcCode();
           procCode0.setDcn(claim.getDcn());
@@ -92,7 +92,8 @@ public class FissClaimRdaSinkIT {
                   .build();
 
           final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
-          final FissClaimTransformer transformer = new FissClaimTransformer(clock, defaultIdHasher);
+          final FissClaimTransformer transformer =
+              new FissClaimTransformer(clock, defaultIdHasher.getConfig());
           final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
           final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
 
@@ -118,7 +119,8 @@ public class FissClaimRdaSinkIT {
           assertEquals(
               Optional.of(claim.getSequenceNumber()), sink.readMaxExistingSequenceNumber());
 
-          PreAdjMbi databaseMbiEntity = entityManager.find(PreAdjMbi.class, claimMessage.getMbi());
+          Mbi databaseMbiEntity =
+              RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getMbi());
           assertNotNull(databaseMbiEntity);
           assertEquals(claim.getMbi(), databaseMbiEntity.getMbi());
           assertEquals(expectedMbiHash, databaseMbiEntity.getMbiHash());

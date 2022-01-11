@@ -6,12 +6,12 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.PreAdjFissAuditTrail;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
-import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
@@ -60,7 +60,8 @@ public class FissClaimTransformerTest {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1621609413832L), ZoneOffset.UTC);
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
-  private final FissClaimTransformer transformer = new FissClaimTransformer(clock, idHasher);
+  private final FissClaimTransformer transformer =
+      new FissClaimTransformer(clock, idHasher.getConfig());
   private FissClaimChange.Builder changeBuilder;
   private FissClaim.Builder claimBuilder;
   private PreAdjFissClaim claim;
@@ -115,8 +116,10 @@ public class FissClaimTransformerTest {
     claim.setPrincipleDiag("7654321");
     claim.setNpiNumber("npi-123456");
     claim.setMbiRecord(
-        new PreAdjMbi(
-            "1234567890123", "50ad6d78d3b8bb1a8195896c7479f04f4af76e8b42011a24146a943ede9321a0"));
+        new Mbi(
+            1L,
+            "1234567890123",
+            "50ad6d78d3b8bb1a8195896c7479f04f4af76e8b42011a24146a943ede9321a0"));
     claim.setFedTaxNumber("1234567890");
     claim.setPracLocAddr1("loc-address-1");
     claim.setPracLocAddr2("loc-address-2");

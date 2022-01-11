@@ -6,8 +6,8 @@ import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
-import gov.cms.bfd.model.rda.PreAdjMbi;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
@@ -154,11 +154,15 @@ public class FissClaimTransformer {
       PreAdjFissAuditTrail_badtStatus_Extractor;
 
   private final Clock clock;
-  @Getter private final IdHasher idHasher;
+  @Getter private final MbiCache mbiCache;
 
-  public FissClaimTransformer(Clock clock, IdHasher idHasher) {
+  public FissClaimTransformer(Clock clock, IdHasher.Config hasherConfig) {
+    this(clock, MbiCache.computedCache(hasherConfig));
+  }
+
+  private FissClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
-    this.idHasher = idHasher;
+    this.mbiCache = mbiCache;
     PreAdjFissClaim_currStatus_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCurrStatusEnum,
@@ -485,8 +489,8 @@ public class FissClaimTransformer {
    * @param idHasher alternative IdHasher to use for hashing MBI values
    * @return a new transformer with the same clock but alternative IdHasher
    */
-  public FissClaimTransformer withIdHasher(IdHasher idHasher) {
-    return new FissClaimTransformer(clock, idHasher);
+  public FissClaimTransformer withMbiCache(MbiCache mbiCache) {
+    return new FissClaimTransformer(clock, mbiCache);
   }
 
   public RdaChange<PreAdjFissClaim> transformClaim(FissClaimChange change) {
@@ -590,22 +594,9 @@ public class FissClaimTransformer {
         to::setNpiNumber);
     if (from.hasMbi()) {
       final var mbi = from.getMbi();
-      final var hash = idHasher.computeIdentifierHash(mbi);
-      to.setMbiRecord(new PreAdjMbi());
-      transformer.copyString(
-          namePrefix + PreAdjFissClaim.Fields.mbi,
-          false,
-          1,
-          13,
-          mbi,
-          x -> to.getMbiRecord().setMbi(x));
-      transformer.copyString(
-          namePrefix + PreAdjFissClaim.Fields.mbiHash,
-          false,
-          1,
-          64,
-          hash,
-          x -> to.getMbiRecord().setMbiHash(x));
+      if (transformer.validateString(namePrefix + PreAdjFissClaim.Fields.mbi, false, 1, 13, mbi)) {
+        to.setMbiRecord(mbiCache.lookupMbi(mbi));
+      }
     }
     transformer.copyOptionalString(
         namePrefix + PreAdjFissClaim.Fields.fedTaxNumber,

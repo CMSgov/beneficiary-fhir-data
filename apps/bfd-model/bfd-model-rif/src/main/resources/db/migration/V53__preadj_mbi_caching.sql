@@ -1,42 +1,50 @@
 /*
+ * NOTE: This migration will fail if there are any claims in the FissClaims or McsClaims tables.
+ */
+
+/*
  * Table to hold known MBI and their hashed equivalents.
  */
 CREATE TABLE "pre_adj"."MbiCache" (
-    "mbi"     VARCHAR(13) NOT NULL PRIMARY KEY,
+    "mbiId"   bigint      NOT NULL PRIMARY KEY,
+    "mbi"     VARCHAR(13) NOT NULL,
     "mbiHash" VARCHAR(64) NOT NULL
 );
 
 /*
- * Preload all known MBI into the new table.
+ * We need these indexes to support queries by mbi and mbiHash.
  */
-INSERT INTO "pre_adj"."MbiCache"("mbi", "mbiHash")
-SELECT DISTINCT "mbi", "mbiHash"
-FROM (
-    SELECT DISTINCT "mbi", "mbiHash"
-    FROM "pre_adj"."FissClaims"
-    UNION
-    SELECT DISTINCT "idrClaimMbi" AS "mbi", "idrClaimMbiHash" AS "mbiHash"
-    FROM "pre_adj"."McsClaims"
-) x
-WHERE "mbi" IS NOT NULL AND "mbiHash" IS NOT NULL;
+CREATE UNIQUE INDEX "MbiCache_mbi_idx" on "pre_adj"."MbiCache"("mbi");
+CREATE UNIQUE INDEX "MbiCache_mbi_hash_idx" on "pre_adj"."MbiCache"("mbiHash");
+
+/*
+ * FIXME For consistency, sequence names should be mixed-case, but can't be, due
+ * to https://hibernate.atlassian.net/browse/HHH-9431.
+ */
+create sequence mbi_cache_mbi_id_seq ${logic.sequence-start} 1 ${logic.sequence-increment} 50;
 
 /*
  * Replace the mbiHash column and add a constraint to enforce that mbi is known to exist in MbiCache.
  */
+ALTER TABLE "pre_adj"."FissClaims" DROP "mbi";
 ALTER TABLE "pre_adj"."FissClaims" DROP "mbiHash";
 ALTER TABLE "pre_adj"."FissClaims"
-    ADD CONSTRAINT "FK_FissClaims_mbi" FOREIGN KEY ("mbi") REFERENCES "pre_adj"."MbiCache"("mbi");
+    ADD "mbiId" bigint;
+ALTER TABLE "pre_adj"."FissClaims"
+    ADD CONSTRAINT "FK_FissClaims_mbiId" FOREIGN KEY ("mbiId") REFERENCES "pre_adj"."MbiCache"("mbiId");
 
 /*
  * Replace the idrClaimMbiHash column and add a constraint to enforce that mbi is known to exist in MbiCache.
  */
+ALTER TABLE "pre_adj"."McsClaims" DROP "idrClaimMbi";
 ALTER TABLE "pre_adj"."McsClaims" DROP "idrClaimMbiHash";
 ALTER TABLE "pre_adj"."McsClaims"
-    ADD CONSTRAINT "FK_McsClaims_mbi" FOREIGN KEY ("idrClaimMbi") REFERENCES "pre_adj"."MbiCache"("mbi");
+    ADD "mbiId" bigint;
+ALTER TABLE "pre_adj"."McsClaims"
+    ADD CONSTRAINT "FK_McsClaims_mbiId" FOREIGN KEY ("mbiId") REFERENCES "pre_adj"."MbiCache"("mbiId");
 
 /*
- * We need these indexes to support queries by mbi and mbiHash.
+ * We need these indexes to efficiently find claims using join from MbiCache.
  */
-CREATE UNIQUE INDEX "MbiCache_mbi_hash_idx" on "pre_adj"."MbiCache"("mbiHash");
-CREATE INDEX "FissClaims_mbi_idx" on "pre_adj"."FissClaims"("mbi");
-CREATE INDEX "McsClaims_mbi_idx" on "pre_adj"."McsClaims"("idrClaimMbi");
+CREATE INDEX "FissClaims_mbiId_idx" on "pre_adj"."FissClaims"("mbiId");
+CREATE INDEX "McsClaims_mbiId_idx" on "pre_adj"."McsClaims"("mbiId");

@@ -119,8 +119,8 @@ public class PreAdjMcsClaim {
   @ManyToOne(
       fetch = FetchType.EAGER,
       cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
-  @JoinColumn(name = "`idrClaimMbi`")
-  private PreAdjMbi mbiRecord;
+  @JoinColumn(name = "`mbiId`")
+  private Mbi mbiRecord;
 
   @Column(name = "`idrHdrFromDateOfSvc`")
   private LocalDate idrHdrFromDateOfSvc;

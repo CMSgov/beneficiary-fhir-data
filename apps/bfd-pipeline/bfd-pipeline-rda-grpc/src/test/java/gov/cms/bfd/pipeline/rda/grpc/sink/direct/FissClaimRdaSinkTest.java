@@ -35,7 +35,7 @@ public class FissClaimRdaSinkTest {
   private static final String VERSION = "version";
 
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
-  private final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
+  private final IdHasher.Config hasherConfig = new IdHasher.Config(1, "notarealpepper");
 
   @Mock private HikariDataSource dataSource;
   @Mock private EntityManagerFactory entityManagerFactory;
@@ -52,8 +52,8 @@ public class FissClaimRdaSinkTest {
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
-    doReturn(defaultIdHasher).when(transformer).getIdHasher();
-    doReturn(transformer).when(transformer).withIdHasher(any());
+    doReturn(MbiCache.computedCache(hasherConfig)).when(transformer).getMbiCache();
+    doReturn(transformer).when(transformer).withMbiCache(any());
     doReturn(true).when(entityManager).isOpen();
     PipelineApplicationState appState =
         new PipelineApplicationState(appMetrics, dataSource, entityManagerFactory, clock);
