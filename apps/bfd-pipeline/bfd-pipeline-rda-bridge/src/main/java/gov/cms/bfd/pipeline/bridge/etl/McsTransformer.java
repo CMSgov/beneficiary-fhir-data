@@ -12,7 +12,6 @@ import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -56,13 +55,18 @@ public class McsTransformer extends AbstractTransformer {
               .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A)
               .setIdrStatusDate("1970-01-01");
 
-      data.get(mbiMap.get(beneId).getFirstName()).ifPresent(claimBuilder::setIdrBeneFirstInit);
-      data.get(mbiMap.get(beneId).getLastName()).ifPresent(claimBuilder::setIdrBeneLast16);
-      data.get(mbiMap.get(beneId).getMidName()).ifPresent(claimBuilder::setIdrBeneMidInit);
+      consumeIfNotNull(
+          mbiMap.get(beneId).getFirstName(),
+          value -> claimBuilder.setIdrBeneFirstInit(value.substring(0, 1)));
+      consumeIfNotNull(
+          mbiMap.get(beneId).getLastName(),
+          value -> claimBuilder.setIdrBeneLast16(String.format("%.6s", value)));
+      consumeIfNotNull(
+          mbiMap.get(beneId).getMidName(),
+          value -> claimBuilder.setIdrBeneMidInit(value.substring(0, 1)));
       // TODO: What is the RIF -> RDA conversion for this value?
-      consumeIf(
+      consumeIfNotNull(
           mbiMap.get(beneId).getGender(),
-          Objects::nonNull,
           value -> claimBuilder.setIdrBeneSexEnumValue(Integer.parseInt(value)));
       data.getFromType(Mcs.CLM_FRM_DT, Parser.Data.Type.DATE)
           .ifPresent(claimBuilder::setIdrHdrFromDos);

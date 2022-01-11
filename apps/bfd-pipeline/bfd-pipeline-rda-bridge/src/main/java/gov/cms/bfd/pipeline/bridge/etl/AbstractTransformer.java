@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.bridge.etl;
 
 import com.google.protobuf.MessageOrBuilder;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -52,9 +53,30 @@ public abstract class AbstractTransformer {
     return value != null ? action.apply(value) : fallback.get();
   }
 
+  /**
+   * Runs the given value through the given {@link Consumer} if the value meets the condition of the
+   * given {@link Predicate}, otherwise nothing happens.
+   *
+   * @param value The value to check against.
+   * @param condition The condition to check against.
+   * @param consumer The {@link Consumer} to run the given value through if the condition was true.
+   * @param <T> The type of value being processed.
+   */
   public <T> void consumeIf(T value, Predicate<T> condition, Consumer<T> consumer) {
     if (condition.test(value)) {
       consumer.accept(value);
     }
+  }
+
+  /**
+   * Runs the given value through the given {@link Consumer} if the value is not null, otherwise
+   * nothing happens.
+   *
+   * @param value The value to check against.
+   * @param consumer The {@link Consumer} to run the given value through if the condition was true.
+   * @param <T> The type of value being processed.
+   */
+  public <T> void consumeIfNotNull(T value, Consumer<T> consumer) {
+    consumeIf(value, Objects::nonNull, consumer);
   }
 }

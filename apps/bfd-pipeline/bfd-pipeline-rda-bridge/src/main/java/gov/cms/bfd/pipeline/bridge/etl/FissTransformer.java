@@ -58,15 +58,14 @@ public class FissTransformer extends AbstractTransformer {
 
       // Build beneZ payer object
       FissBeneZPayer.Builder payerBuilder = FissBeneZPayer.newBuilder();
-      consumeIf(
-          mbiMap.get(beneId).getFirstName(), Objects::nonNull, payerBuilder::setBeneFirstName);
-      consumeIf(mbiMap.get(beneId).getLastName(), Objects::nonNull, payerBuilder::setBeneLastName);
-      consumeIf(
-          ifNotNull(
-              mbiMap.get(beneId).getMidName(),
-              s -> s.isEmpty() ? null : String.valueOf(s.charAt(0))),
-          Objects::nonNull,
-          payerBuilder::setBeneFirstName);
+      consumeIfNotNull(
+          mbiMap.get(beneId).getFirstName(),
+          value -> payerBuilder.setBeneFirstName(String.format("%.10s", value)));
+      consumeIfNotNull(
+          mbiMap.get(beneId).getLastName(),
+          value -> payerBuilder.setBeneLastName(String.format("%.15s", value)));
+      consumeIfNotNull(
+          mbiMap.get(beneId).getMidName(), s -> payerBuilder.setBeneMidInit(s.substring(0, 1)));
       consumeIf(
           data.get(mbiMap.get(beneId).getGender()).orElse(null),
           NumberUtils::isDigits,
