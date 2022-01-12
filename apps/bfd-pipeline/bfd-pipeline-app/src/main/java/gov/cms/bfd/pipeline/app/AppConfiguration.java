@@ -431,7 +431,11 @@ public final class AppConfiguration implements Serializable {
             databaseUrl, databaseUsername, databasePassword, databaseMaxPoolSize.get());
     LoadAppOptions loadOptions =
         new LoadAppOptions(
-            new IdHasher.Config(hicnHashIterations, hicnHashPepper),
+            IdHasher.Config.builder()
+                .hashIterations(hicnHashIterations)
+                .hashPepper(hicnHashPepper)
+                .cacheSize(hicnHashCacheSize)
+                .build(),
             loaderThreads,
             idempotencyRequired);
 
