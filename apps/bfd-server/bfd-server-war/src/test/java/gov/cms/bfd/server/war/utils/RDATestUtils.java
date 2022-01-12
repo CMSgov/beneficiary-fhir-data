@@ -40,6 +40,9 @@ public class RDATestUtils {
           Mbi.class);
 
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
+  public static final String MBI = "123456MBI";
+  public static final String MBI_HASH = "a7f8e93f09";
+  public static final String MBI_OLD_HASH = "3816a4c752";
 
   private EntityManager entityManager;
 
@@ -64,7 +67,7 @@ public class RDATestUtils {
   public void seedData() {
     doTransaction(
         em -> {
-          Mbi mbi = em.merge(new Mbi("123456MBI", "a7f8e93f09"));
+          Mbi mbi = em.merge(Mbi.builder().mbi(MBI).hash(MBI_HASH).oldHash(MBI_OLD_HASH).build());
           em.merge(fissTestDataA(mbi));
           em.merge(fissTestDataB(mbi));
           em.merge(mcsTestDataA(mbi));

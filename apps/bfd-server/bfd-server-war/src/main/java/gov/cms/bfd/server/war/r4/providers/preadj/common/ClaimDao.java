@@ -101,11 +101,10 @@ public class ClaimDao {
       String mbiRecordAttributeName,
       String mbiSearchValue,
       boolean isMbiSearchValueHashed,
+      boolean isOldMbiHashEnabled,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
       String endDateAttributeName) {
-    final String mbiValueAttributeName = isMbiSearchValueHashed ? Mbi.Fields.hash : Mbi.Fields.mbi;
-
     List<T> claimEntities = null;
 
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -115,8 +114,12 @@ public class ClaimDao {
     criteria.select(root);
     criteria.where(
         builder.and(
-            builder.equal(
-                root.get(mbiRecordAttributeName).get(mbiValueAttributeName), mbiSearchValue),
+            createMbiPredicate(
+                root.get(mbiRecordAttributeName),
+                mbiSearchValue,
+                isMbiSearchValueHashed,
+                isOldMbiHashEnabled,
+                builder),
             lastUpdated == null
                 ? builder.and()
                 : createDateRangePredicate(root, lastUpdated, builder),
@@ -136,6 +139,22 @@ public class ClaimDao {
     }
 
     return claimEntities;
+  }
+
+  @VisibleForTesting
+  Predicate createMbiPredicate(
+      Path<?> root,
+      String mbiSearchValue,
+      boolean isMbiSearchValueHashed,
+      boolean isOldMbiHashEnabled,
+      CriteriaBuilder builder) {
+    final String mbiValueAttributeName = isMbiSearchValueHashed ? Mbi.Fields.hash : Mbi.Fields.mbi;
+    var answer = builder.equal(root.get(mbiValueAttributeName), mbiSearchValue);
+    if (isMbiSearchValueHashed && isOldMbiHashEnabled) {
+      var oldHashPredicate = builder.equal(root.get(Mbi.Fields.oldHash), mbiSearchValue);
+      answer = builder.or(answer, oldHashPredicate);
+    }
+    return answer;
   }
 
   @VisibleForTesting

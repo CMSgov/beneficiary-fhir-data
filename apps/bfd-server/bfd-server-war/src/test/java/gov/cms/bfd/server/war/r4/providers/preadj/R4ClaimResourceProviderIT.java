@@ -71,7 +71,7 @@ public class R4ClaimResourceProviderIT {
             .forResource(Claim.class)
             .where(
                 Map.of(
-                    "mbi", List.of(new ReferenceParam("a7f8e93f09")),
+                    "mbi", List.of(new ReferenceParam(RDATestUtils.MBI_HASH)),
                     "service-date",
                         List.of(new DateParam("gt1970-07-18"), new DateParam("lt1970-07-30"))))
             .returnBundle(Bundle.class)

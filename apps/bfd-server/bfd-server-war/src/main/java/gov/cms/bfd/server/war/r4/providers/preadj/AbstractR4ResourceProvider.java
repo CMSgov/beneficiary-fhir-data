@@ -289,6 +289,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               type.getEntityMbiRecordAttribute(),
               mbi,
               isHashed,
+              true,
               lastUpdated,
               serviceDate,
               type.getEntityEndDateAttribute());
