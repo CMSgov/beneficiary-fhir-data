@@ -250,8 +250,11 @@ public class PreAdjMcsClaim {
     return mbiRecord != null ? mbiRecord.getHash() : null;
   }
 
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
   public static class Fields {
     public static final String idrClaimMbi = "idrClaimMbi";
-    public static final String idrClaimMbiHash = "idrClaimMbiHash";
   }
 }

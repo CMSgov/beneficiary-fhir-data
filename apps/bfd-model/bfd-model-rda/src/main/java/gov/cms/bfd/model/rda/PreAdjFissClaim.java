@@ -335,8 +335,11 @@ public class PreAdjFissClaim {
     Unrecognized
   }
 
+  /**
+   * Defines extra field names. Lombok will append all of the other fields to this class
+   * automatically.
+   */
   public static class Fields {
     public static final String mbi = "mbi";
-    public static final String mbiHash = "mbiHash";
   }
 }
