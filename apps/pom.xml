@@ -93,6 +93,7 @@
 
 		<metrics.version>4.1.2</metrics.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
+		<jackson.version>2.13.1</jackson.version>
 		
 		<!-- The default DB that will be used in integration tests. -->
 		<!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
