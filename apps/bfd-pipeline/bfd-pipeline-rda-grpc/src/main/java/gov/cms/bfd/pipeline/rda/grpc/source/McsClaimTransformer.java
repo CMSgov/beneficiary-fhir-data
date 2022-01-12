@@ -253,11 +253,11 @@ public class McsClaimTransformer {
   }
 
   /**
-   * Hook to allow the McsClaimRdaSink to install an alternative IdHasher implementation that
-   * supports caching MBI values.
+   * Hook to allow the McsClaimRdaSink to install an alternative MbiCache implementation that
+   * supports caching MBI values in a database table.
    *
-   * @param idHasher alternative IdHasher to use for hashing MBI values
-   * @return a new transformer with the same clock but alternative IdHasher
+   * @param mbiCache alternative MbiCache to use for obtaining Mbi instances
+   * @return a new transformer with the same clock but alternative MbiCache
    */
   public McsClaimTransformer withMbiCache(MbiCache mbiCache) {
     return new McsClaimTransformer(clock, mbiCache);

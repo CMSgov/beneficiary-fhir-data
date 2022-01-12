@@ -483,11 +483,11 @@ public class FissClaimTransformer {
   }
 
   /**
-   * Hook to allow the FissClaimRdaSink to install an alternative IdHasher implementation that
-   * supports caching MBI values.
+   * Hook to allow the FissClaimRdaSink to install an alternative MbiCache implementation that
+   * supports caching MBI values in a database table.
    *
-   * @param idHasher alternative IdHasher to use for hashing MBI values
-   * @return a new transformer with the same clock but alternative IdHasher
+   * @param mbiCache alternative MbiCache to use for obtaining Mbi instances
+   * @return a new transformer with the same clock but alternative MbiCache
    */
   public FissClaimTransformer withMbiCache(MbiCache mbiCache) {
     return new FissClaimTransformer(clock, mbiCache);
