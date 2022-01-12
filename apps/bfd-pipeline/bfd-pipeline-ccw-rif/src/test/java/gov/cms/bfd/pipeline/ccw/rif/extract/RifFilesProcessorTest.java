@@ -38,6 +38,7 @@ import org.junit.rules.ExpectedException;
 
 /** Unit tests for {@link RifFilesProcessor}. */
 public final class RifFilesProcessorTest {
+  // TODO: Replace with junit5 extension and upgrade class to junit5
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
   /**

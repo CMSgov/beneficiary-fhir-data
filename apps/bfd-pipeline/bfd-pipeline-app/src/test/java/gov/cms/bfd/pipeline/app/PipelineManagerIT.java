@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 public final class PipelineManagerIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManagerIT.class);
 
+  // TODO: Replace with Junit5 extension
   @Rule
   public TestWatcher testCaseEntryExitLogger =
       new TestWatcher() {

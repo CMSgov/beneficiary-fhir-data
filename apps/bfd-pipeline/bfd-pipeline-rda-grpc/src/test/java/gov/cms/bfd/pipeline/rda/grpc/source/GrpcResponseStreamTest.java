@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
@@ -9,16 +10,15 @@ import io.grpc.ClientCall;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.util.Iterator;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class GrpcResponseStreamTest {
   private Iterator<Integer> iterator;
   private ClientCall<Integer, Integer> clientCall;
   private GrpcResponseStream<Integer> stream;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     iterator = mock(Iterator.class);
     clientCall = mock(ClientCall.class);
@@ -31,9 +31,9 @@ public class GrpcResponseStreamTest {
     doThrow(status).when(iterator).hasNext();
     try {
       stream.hasNext();
-      Assert.fail("exception should have been thrown");
+      fail("exception should have been thrown");
     } catch (Throwable ex) {
-      Assert.assertSame(status, ex);
+      assertSame(status, ex);
     }
   }
 
@@ -43,9 +43,9 @@ public class GrpcResponseStreamTest {
     doThrow(status).when(iterator).next();
     try {
       stream.next();
-      Assert.fail("exception should have been thrown");
+      fail("exception should have been thrown");
     } catch (Throwable ex) {
-      Assert.assertSame(status, ex);
+      assertSame(status, ex);
     }
   }
 
@@ -56,9 +56,9 @@ public class GrpcResponseStreamTest {
     doThrow(status).when(iterator).hasNext();
     try {
       stream.hasNext();
-      Assert.fail("exception should have been thrown");
+      fail("exception should have been thrown");
     } catch (StreamInterruptedException ex) {
-      Assert.assertSame(status, ex.getCause());
+      assertSame(status, ex.getCause());
     }
   }
 
@@ -71,7 +71,7 @@ public class GrpcResponseStreamTest {
       stream.next();
       fail("exception should have been thrown");
     } catch (StreamInterruptedException ex) {
-      Assert.assertSame(status, ex.getCause());
+      assertSame(status, ex.getCause());
     }
   }
 }

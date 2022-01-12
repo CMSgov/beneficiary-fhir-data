@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.app;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.model.rif.RifFileType;
@@ -42,10 +45,8 @@ import org.apache.commons.codec.binary.Hex;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.awaitility.core.ConditionTimeoutException;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.AssumptionViolatedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.TestAbortedException;
 
 /**
  * Integration tests for {@link PipelineApplication}.
@@ -85,7 +86,7 @@ public final class PipelineApplicationIT {
     appProcess.waitFor(1, TimeUnit.MINUTES);
     appRunConsumerThread.join();
     // Verify that the application exited as expected.
-    Assert.assertEquals(PipelineApplication.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
+    assertEquals(PipelineApplication.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
   }
 
   /**
@@ -357,8 +358,8 @@ public final class PipelineApplicationIT {
   }
 
   /**
-   * Throws an {@link AssumptionViolatedException} if the OS doesn't support
-   * <strong>graceful</strong> shutdowns via {@link Process#destroy()}.
+   * Throws an {@link TestAbortedException} if the OS doesn't support <strong>graceful</strong>
+   * shutdowns via {@link Process#destroy()}.
    */
   private static void skipOnUnsupportedOs() {
     /*
@@ -373,9 +374,9 @@ public final class PipelineApplicationIT {
      * requests, and handles them gracefully.
      */
 
-    Assume.assumeTrue(
-        "Unsupported OS for this test case.",
-        Arrays.asList("Linux", "Mac OS X").contains(System.getProperty("os.name")));
+    assumeTrue(
+        Arrays.asList("Linux", "Mac OS X").contains(System.getProperty("os.name")),
+        "Unsupported OS for this test case.");
   }
 
   /**
@@ -522,7 +523,7 @@ public final class PipelineApplicationIT {
      * applications that exit due to a signal should return an exit code
      * that is 128 + the signal number.
      */
-    Assert.assertEquals(128 + signalNumber, process.exitValue());
+    assertEquals(128 + signalNumber, process.exitValue());
   }
 
   /**
@@ -650,7 +651,7 @@ public final class PipelineApplicationIT {
     /**
      * Constructs a new {@link ProcessOutputConsumer} instance.
      *
-     * @param the {@link ProcessOutputConsumer} whose output should be consumed
+     * @param process the {@link ProcessOutputConsumer} whose output should be consumed
      */
     public ProcessOutputConsumer(Process process) {
       /*

@@ -72,12 +72,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Allows junit compatibility with old junit4 tests -->
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <!-- Needed for comparing JSON files to obtain the diff. See
                  https://github.com/flipkart-incubator/zjsonpatch for details. -->
             <groupId>com.flipkart.zjsonpatch</groupId>

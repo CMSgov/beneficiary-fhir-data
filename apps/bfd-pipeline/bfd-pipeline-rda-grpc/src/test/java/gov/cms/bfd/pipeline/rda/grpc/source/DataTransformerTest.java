@@ -1,20 +1,21 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class DataTransformerTest {
   private DataTransformer transformer;
   private List<Object> copied;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     transformer = new DataTransformer();
     copied = new ArrayList<>();

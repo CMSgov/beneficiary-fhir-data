@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 import com.amazonaws.services.s3.model.S3Object;
@@ -16,8 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class S3JsonMessageSourceTest {
   private static final String MCS_CLAIMS_JSON =
@@ -28,7 +30,7 @@ public class S3JsonMessageSourceTest {
   private S3ObjectInputStream inputStream;
   private S3JsonMessageSource<McsClaimChange> source;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     inputStream = createInputStream();
     s3Object = createObject();
@@ -46,7 +48,7 @@ public class S3JsonMessageSourceTest {
 
   @Test
   public void abortCalledIfMessagesRemain() throws Exception {
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     source.close();
     verify(inputStream).abort();
     verify(inputStream).close();

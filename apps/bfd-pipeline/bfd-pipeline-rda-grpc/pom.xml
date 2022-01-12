@@ -119,12 +119,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Allows junit compatibility with old junit4 tests -->
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <!-- provides DatabaseSchemaManager to apply flyway migrations -->
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-model-rif</artifactId>

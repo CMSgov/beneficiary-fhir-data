@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -14,7 +16,7 @@ import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FissClaimStreamCallerIT {
   private static final String CLAIM_1 =
@@ -71,19 +73,19 @@ public class FissClaimStreamCallerIT {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
               final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
               PreAdjFissClaim claim = results.next().getClaim();
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
               assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
               claim = results.next().getClaim();
               assertEquals("2643602", claim.getDcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
-              assertEquals(false, results.hasNext());
+              assertFalse(results.hasNext());
             });
   }
 
@@ -105,7 +107,7 @@ public class FissClaimStreamCallerIT {
               assertEquals(12L, results.next().getSequenceNumber());
               assertEquals(13L, results.next().getSequenceNumber());
               assertEquals(14L, results.next().getSequenceNumber());
-              assertEquals(false, results.hasNext());
+              assertFalse(results.hasNext());
             });
   }
 }

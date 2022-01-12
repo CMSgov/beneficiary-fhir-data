@@ -148,12 +148,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Allows junit compatibility with old junit4 tests -->
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <!-- Used in tests to help with managing asynchronous behavior. Reference:
                    https://github.com/awaitility/awaitility -->
             <groupId>org.awaitility</groupId>
