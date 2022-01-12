@@ -62,7 +62,7 @@ public class MbiCache {
           "caught exception while saving generated hash: hash={} message={}",
           hash,
           ex.getCause().getMessage());
-      return new Mbi(null, mbi, hasher.computeIdentifierHash(mbi));
+      return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
     }
   }
 
@@ -83,7 +83,7 @@ public class MbiCache {
 
     @Override
     public Mbi lookupMbi(String mbi) {
-      return new Mbi(null, mbi, hasher.computeIdentifierHash(mbi));
+      return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
     }
   }
 
@@ -132,7 +132,7 @@ public class MbiCache {
         }
       }
       LOGGER.warn("unable to cache MBI after multiple tries, returning computed value");
-      return new Mbi(null, mbi, hasher.computeIdentifierHash(mbi));
+      return new Mbi(mbi, hasher.computeIdentifierHash(mbi));
     }
 
     /**
@@ -154,7 +154,7 @@ public class MbiCache {
         final var records = entityManager.createQuery(criteria).getResultList();
         var record = records.isEmpty() ? null : records.get(0);
         if (record == null) {
-          record = entityManager.merge(new Mbi(null, mbi, hasher.computeIdentifierHash(mbi)));
+          record = entityManager.merge(new Mbi(mbi, hasher.computeIdentifierHash(mbi)));
         }
         successful = true;
         return record;

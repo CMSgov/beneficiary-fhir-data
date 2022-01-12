@@ -253,7 +253,7 @@ public class SchemaMigrationIT {
       final String mbi = format("%05d", mbiNumber);
       mbis.add(mbi);
       entityManager.getTransaction().begin();
-      Mbi mbiRecord = entityManager.merge(new Mbi(null, mbi, mbi + hashSuffix));
+      Mbi mbiRecord = entityManager.merge(new Mbi(mbi, mbi + hashSuffix));
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
         final PreAdjFissClaim claim =
             PreAdjFissClaim.builder()
@@ -293,8 +293,7 @@ public class SchemaMigrationIT {
       criteria.select(root);
       criteria.where(
           builder.equal(
-              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.mbiHash),
-              mbi + hashSuffix));
+              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
       var claims = entityManager.createQuery(criteria).getResultList();
       assertEquals(3, claims.size());
       for (PreAdjFissClaim claim : claims) {
@@ -314,7 +313,7 @@ public class SchemaMigrationIT {
       final String mbi = format("%05d", mbiNumber);
       mbis.add(mbi);
       entityManager.getTransaction().begin();
-      Mbi mbiRecord = entityManager.merge(new Mbi(null, mbi, mbi + hashSuffix));
+      Mbi mbiRecord = entityManager.merge(new Mbi(mbi, mbi + hashSuffix));
       for (int claimNumber = 1; claimNumber <= 3; ++claimNumber) {
         final PreAdjMcsClaim claim =
             PreAdjMcsClaim.builder()
@@ -354,8 +353,7 @@ public class SchemaMigrationIT {
       criteria.select(root);
       criteria.where(
           builder.equal(
-              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.mbiHash),
-              mbi + hashSuffix));
+              root.get(PreAdjFissClaim.Fields.mbiRecord).get(Mbi.Fields.hash), mbi + hashSuffix));
       var claims = entityManager.createQuery(criteria).getResultList();
       assertEquals(3, claims.size());
       for (PreAdjMcsClaim claim : claims) {

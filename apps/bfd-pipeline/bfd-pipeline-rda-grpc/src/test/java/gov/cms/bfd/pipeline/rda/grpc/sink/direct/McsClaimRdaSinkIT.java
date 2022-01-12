@@ -111,7 +111,7 @@ public class McsClaimRdaSinkIT {
               RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getIdrClaimMbi());
           assertNotNull(databaseMbiEntity);
           assertEquals(claim.getIdrClaimMbi(), databaseMbiEntity.getMbi());
-          assertEquals(expectedMbiHash, databaseMbiEntity.getMbiHash());
+          assertEquals(expectedMbiHash, databaseMbiEntity.getHash());
         });
   }
 }

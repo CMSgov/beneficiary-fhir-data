@@ -35,10 +35,41 @@ public class Mbi {
       allocationSize = 50)
   private Long mbiId;
 
+  /** Actual MBI value from RDA API. */
   @Column(name = "`mbi`", length = 13, nullable = false, unique = true)
   @EqualsAndHashCode.Include
   private String mbi;
 
-  @Column(name = "`mbiHash`", length = 64, nullable = false, unique = true)
-  private String mbiHash;
+  /** Currently active hash value used to represent the MBI in client applications. */
+  @Column(name = "`hash`", length = 64, nullable = false, unique = true)
+  private String hash;
+
+  /**
+   * Old hash value that can be used to maintain backwards compatibility when rotating between a
+   * current hash to a new one. For example if the algorithm, number of iterations, or salt have
+   * been changed. This column is nullable.
+   */
+  @Column(name = "`oldHash`", length = 64)
+  private String oldHash;
+
+  /**
+   * Convenience constructor to create a record with a non-null ID and no oldHash value.
+   *
+   * @param mbiId primary key value
+   * @param mbi mbi value
+   * @param hash hash value
+   */
+  public Mbi(long mbiId, String mbi, String hash) {
+    this(mbiId, mbi, hash, null);
+  }
+
+  /**
+   * Convenience constructor to create a record with null ID and no oldHash value.
+   *
+   * @param mbi mbi value
+   * @param hash hash value
+   */
+  public Mbi(String mbi, String hash) {
+    this(null, mbi, hash, null);
+  }
 }

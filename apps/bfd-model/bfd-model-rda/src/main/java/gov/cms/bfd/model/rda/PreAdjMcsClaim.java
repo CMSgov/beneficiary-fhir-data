@@ -247,7 +247,7 @@ public class PreAdjMcsClaim {
   }
 
   public String getIdrClaimMbiHash() {
-    return mbiRecord != null ? mbiRecord.getMbiHash() : null;
+    return mbiRecord != null ? mbiRecord.getHash() : null;
   }
 
   public static class Fields {

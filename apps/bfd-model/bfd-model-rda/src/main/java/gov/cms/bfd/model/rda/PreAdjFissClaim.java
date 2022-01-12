@@ -325,7 +325,7 @@ public class PreAdjFissClaim {
   }
 
   public String getMbiHash() {
-    return mbiRecord != null ? mbiRecord.getMbiHash() : null;
+    return mbiRecord != null ? mbiRecord.getHash() : null;
   }
 
   public enum ServTypeCdMapping {

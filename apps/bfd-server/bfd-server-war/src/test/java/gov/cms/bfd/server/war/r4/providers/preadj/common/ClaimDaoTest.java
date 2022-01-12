@@ -186,7 +186,7 @@ public class ClaimDaoTest {
     final String mbiRecordAttributeName = "attr";
     final String mbiSearchValue = "value";
     final boolean isMbiSearchValueHashed = true;
-    final String mbiValueAttributeName = Mbi.Fields.mbiHash;
+    final String mbiValueAttributeName = Mbi.Fields.hash;
     final String endAttribute = "endAttribute";
     final DateRangeParam mockLastUpdatedParam = mock(DateRangeParam.class);
     final DateRangeParam mockServiceDateParam = mock(DateRangeParam.class);

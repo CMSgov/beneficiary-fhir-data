@@ -64,7 +64,7 @@ public class RDATestUtils {
   public void seedData() {
     doTransaction(
         em -> {
-          Mbi mbi = em.merge(new Mbi(null, "123456MBI", "a7f8e93f09"));
+          Mbi mbi = em.merge(new Mbi("123456MBI", "a7f8e93f09"));
           em.merge(fissTestDataA(mbi));
           em.merge(fissTestDataB(mbi));
           em.merge(mcsTestDataA(mbi));

@@ -8,14 +8,17 @@
 CREATE TABLE "pre_adj"."MbiCache" (
     "mbiId"   bigint      NOT NULL PRIMARY KEY,
     "mbi"     VARCHAR(13) NOT NULL,
-    "mbiHash" VARCHAR(64) NOT NULL
+    "hash"    VARCHAR(64) NOT NULL,
+    "oldHash" VARCHAR(64)
 );
 
 /*
- * We need these indexes to support queries by mbi and mbiHash.
+ * We need these indexes to support queries by mbi, hash, and oldHash.  Note that oldHash
+ * is usually null (only set to a value during hash rotation) so the index cannot be unique.
  */
 CREATE UNIQUE INDEX "MbiCache_mbi_idx" on "pre_adj"."MbiCache"("mbi");
-CREATE UNIQUE INDEX "MbiCache_mbi_hash_idx" on "pre_adj"."MbiCache"("mbiHash");
+CREATE UNIQUE INDEX "MbiCache_hash_idx" on "pre_adj"."MbiCache"("hash");
+CREATE INDEX "MbiCache_alt_hash_idx" on "pre_adj"."MbiCache"("oldHash");
 
 /*
  * FIXME For consistency, sequence names should be mixed-case, but can't be, due

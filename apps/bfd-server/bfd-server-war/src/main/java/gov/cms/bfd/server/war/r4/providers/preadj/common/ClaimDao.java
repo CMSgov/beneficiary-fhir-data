@@ -104,8 +104,7 @@ public class ClaimDao {
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
       String endDateAttributeName) {
-    final String mbiValueAttributeName =
-        isMbiSearchValueHashed ? Mbi.Fields.mbiHash : Mbi.Fields.mbi;
+    final String mbiValueAttributeName = isMbiSearchValueHashed ? Mbi.Fields.hash : Mbi.Fields.mbi;
 
     List<T> claimEntities = null;
 

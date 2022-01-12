@@ -123,7 +123,7 @@ public class FissClaimRdaSinkIT {
               RdaPipelineTestUtils.lookupCachedMbi(entityManager, claimMessage.getMbi());
           assertNotNull(databaseMbiEntity);
           assertEquals(claim.getMbi(), databaseMbiEntity.getMbi());
-          assertEquals(expectedMbiHash, databaseMbiEntity.getMbiHash());
+          assertEquals(expectedMbiHash, databaseMbiEntity.getHash());
         });
   }
 }
