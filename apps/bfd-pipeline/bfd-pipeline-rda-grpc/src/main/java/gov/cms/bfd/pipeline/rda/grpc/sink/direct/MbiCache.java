@@ -8,7 +8,6 @@ import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.concurrent.NotThreadSafe;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -18,16 +17,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Maintains a cache of MBI/hash values in a separate table within the database. Requests to compute
- * an MBI hash first check the database for an existing record and return the value from the record
- * if one is found. Otherwise computes the value and writes it to the database. Multiple threads
- * could encounter conflicts if they attempt to write a record at the same time so retry logic is
- * used in case of an error while writing.
+ * Provides a mechanism for reliably producing Mbi objects from an MBI string. Two implementations
+ * are provided. One simply computes hash value and returns an object with no connection to a
+ * database. This is suitable for use in testing. The other looks up values in a database table and
+ * inserts a new record when none is found. This is used in production to ensure that all of the
+ * claim objects contain a valid foreign key value referencing the proper MBI record.
  *
- * <p>Values that have been looked up previously are kept in an in-memory cache to avoid excessive
- * lookups in case we encounter the same MBI frequently during a session.
+ * <p>Values that have been looked up previously are kept in an in-memory LRU cache to avoid
+ * excessive lookups in case we encounter the same MBI frequently during a session.
  */
-@NotThreadSafe
 public class MbiCache {
   private static final Logger LOGGER = LoggerFactory.getLogger(MbiCache.class);
 
@@ -42,17 +40,43 @@ public class MbiCache {
     cache = CacheBuilder.newBuilder().maximumSize(hasher.getConfig().getCacheSize()).build();
   }
 
+  /**
+   * Produces a simple instance that computes the hash value when needed and is not connected to any
+   * database. The Mbi objects returned from this must be manually merged into the database before
+   * they can be used with a persistent claim object.
+   *
+   * @param config provides the information needed to configure the hash algorithm and cache
+   * @return an MbiCache instance with no database connection
+   */
   public static MbiCache computedCache(IdHasher.Config config) {
     var hasher = new IdHasher(config);
     var lookupFunction = new ComputedLookupFunction(hasher);
     return new MbiCache(lookupFunction, hasher);
   }
 
+  /**
+   * Produces an instance that ensures that all returned Mbi instances refer to a table that exists
+   * in the database. The Mbi objects returned from this have their primary key (mbiId) already set
+   * and can be used with a persistent claim object. Without requiring a merge.
+   *
+   * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
+   * entityManager.
+   *
+   * @param config provides the information needed to configure the hash algorithm and cache
+   * @param entityManager used to query and create records
+   * @return an MbiCache instance with a corresponding record in the database
+   */
   public static MbiCache databaseCache(EntityManager entityManager, IdHasher hasher) {
     var lookupFunction = new DatabaseLookupFunction(entityManager, hasher);
     return new MbiCache(lookupFunction, hasher);
   }
 
+  /**
+   * Returns an Mbi object containing an appropriate hash value for the given MBI string.
+   *
+   * @param mbi the MBI to be hashed
+   * @return an Mbi object with correct hash value
+   */
   public Mbi lookupMbi(String mbi) {
     try {
       return cache.get(mbi, () -> lookupFunction.lookupMbi(mbi));
@@ -66,10 +90,24 @@ public class MbiCache {
     }
   }
 
+  /**
+   * Creates a new instance connected to the specified database. Equivalent to calling {@code
+   * databaseCache()} with appropriate parameters.
+   *
+   * <p>Lifespan of the entityManager is controlled by the caller. This object never closes the
+   * entityManager.
+   *
+   * @param entityManager used to query and create records
+   * @return an MbiCache instance with a corresponding record in the database
+   */
   public MbiCache withDatabaseLookup(EntityManager entityManager) {
     return databaseCache(entityManager, hasher);
   }
 
+  /**
+   * Implementations of this interface perform the computation and/or I/O necessary to produce an
+   * Mbi object from an MBI string.
+   */
   public interface LookupFunction {
     Mbi lookupMbi(String mbi);
   }
@@ -87,6 +125,16 @@ public class MbiCache {
     }
   }
 
+  /**
+   * Maintains a cache of MBI/hash values in a separate table within the database. Requests to
+   * compute an MBI hash first check the database for an existing record and return the value from
+   * the record if one is found. Otherwise computes the value and writes it to the database.
+   * Multiple threads could encounter conflicts if they attempt to write a record at the same time
+   * so retry logic is used in case of an error while writing.
+   *
+   * <p>Values that have been looked up previously are kept in an in-memory cache to avoid excessive
+   * lookups in case we encounter the same MBI frequently during a session.
+   */
   @VisibleForTesting
   static class DatabaseLookupFunction implements LookupFunction {
     private final EntityManager entityManager;
