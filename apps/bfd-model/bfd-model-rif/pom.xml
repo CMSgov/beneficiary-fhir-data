@@ -152,12 +152,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<!-- Allows junit compatibility with old junit4 tests -->
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<!-- Logback is used as the logging target/backend for SLF4J during tests: 
 				all logging events will be sent to it. -->
 			<groupId>ch.qos.logback</groupId>

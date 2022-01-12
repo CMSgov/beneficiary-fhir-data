@@ -47,20 +47,6 @@
 				<artifactId>javax.servlet-api</artifactId>
 				<version>4.0.1</version>
 				<scope>provided</scope>
-			</dependency>	
-			<dependency>
-				<!-- The test framework used for unit and integration tests. -->
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<!-- Allows junit compatibility with old junit4 tests -->
-				<groupId>org.junit.vintage</groupId>
-				<artifactId>junit-vintage-engine</artifactId>
-				<version>${junit.vintage.version}</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<!-- Provides sample data used in tests. -->
