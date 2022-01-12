@@ -26,7 +26,6 @@ data "aws_s3_bucket" "logs" {
   bucket = var.log_bucket
 }
 
-
 ## RESOURCES
 #
 
@@ -80,6 +79,14 @@ resource "aws_security_group" "lb" {
     protocol    = "tcp"
     cidr_blocks = var.ingress.cidr_blocks
     description = var.ingress.description
+  }
+
+  ingress {
+    from_port       = var.ingress.port
+    protocol        = "tcp"
+    to_port         = var.ingress.port
+    prefix_list_ids = var.ingress.prefix_list_ids
+    description     = var.ingress.description
   }
 
   egress {
