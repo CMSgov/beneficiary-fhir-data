@@ -37,12 +37,10 @@ public class McsClaimStreamCallerIT {
               PreAdjMcsClaim claim = transform(results.next());
               assertTrue(claim.getIdrClmHdIcn().length() > 0);
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-              assertEquals(Long.valueOf(0), claim.getSequenceNumber());
               assertTrue(results.hasNext());
 
               claim = transform(results.next());
               assertTrue(claim.getIdrClmHdIcn().length() > 0);
-              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertFalse(results.hasNext());
             });
