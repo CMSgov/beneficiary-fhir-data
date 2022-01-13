@@ -86,6 +86,7 @@
 			<!-- Allows junit compatibility with old junit4 tests -->
 			<groupId>org.junit.vintage</groupId>
 			<artifactId>junit-vintage-engine</artifactId>
+			<version>${junit.vintage.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
