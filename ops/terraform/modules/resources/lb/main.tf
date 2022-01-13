@@ -81,12 +81,16 @@ resource "aws_security_group" "lb" {
     description = var.ingress.description
   }
 
-  ingress {
-    from_port       = var.ingress.port
-    protocol        = "tcp"
-    to_port         = var.ingress.port
-    prefix_list_ids = var.ingress.prefix_list_ids
-    description     = var.ingress.description
+  # add ingress rules for each prefix list id
+  dynamic "ingress" {
+    for_each = var.ingress.prefix_list_ids
+    content {
+      from_port       = var.ingress.port
+      protocol        = "tcp"
+      to_port         = var.ingress.port
+      prefix_list_ids = [ingress.value]
+      description     = var.ingress.description
+    }
   }
 
   egress {

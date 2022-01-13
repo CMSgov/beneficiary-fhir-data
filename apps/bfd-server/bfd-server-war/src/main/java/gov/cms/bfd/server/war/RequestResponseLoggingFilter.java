@@ -43,12 +43,17 @@ public final class RequestResponseLoggingFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
-    handleRequest(request);
     try {
-      chain.doFilter(request, response);
+      handleRequest(request);
+      try {
+        chain.doFilter(request, response);
+      } finally {
+        handleResponse(request, response);
+        addToHttpAccessLog();
+      }
     } finally {
-      handleResponse(request, response);
-      addToHttpAccessLog();
+      // Using a separate finally to clear the MDC ensures a thrown exception during
+      // request/response processing can't leak values into another request.
       clearMdc();
     }
   }
