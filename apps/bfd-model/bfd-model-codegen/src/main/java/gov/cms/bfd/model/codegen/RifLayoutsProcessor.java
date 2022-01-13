@@ -702,8 +702,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                         "@$T(name = $S)",
                         ForeignKey.class,
                         String.format(
-                                "%s_%s_to_%s",
-                                "beneficiary_monthly", PARENT_BENEFICIARY, "beneficiary")
+                                "%s_%s_to_%s", "beneficiary_monthly", "bene_id", "beneficiary")
                             .toLowerCase())
                     .build())
             .build();
