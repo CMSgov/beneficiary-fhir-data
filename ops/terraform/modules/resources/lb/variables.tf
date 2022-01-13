@@ -25,7 +25,7 @@ variable "is_public" {
 
 variable "ingress" {
   description = "Ingress port and cidr blocks"
-  type        = object({ description = string, port = number, cidr_blocks = list(string) })
+  type        = object({ description = string, port = number, cidr_blocks = list(string), prefix_list_ids = list(string) })
 }
 
 variable "egress" {
