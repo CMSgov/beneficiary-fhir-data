@@ -61,7 +61,7 @@ public final class OutpatientClaimTransformerV2Test {
             .findFirst()
             .get();
 
-    claim.setLastUpdated(Optional.of(Instant.now()));
+    claim.setLastUpdated(Instant.now());
 
     return claim;
   }

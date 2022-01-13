@@ -38,7 +38,7 @@ public final class CoverageTransformerTest {
             .map(r -> (Beneficiary) r)
             .findFirst()
             .get();
-    beneficiary.setLastUpdated(Optional.of(Instant.now()));
+    beneficiary.setLastUpdated(Instant.now());
 
     Coverage partACoverage =
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);

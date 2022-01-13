@@ -742,7 +742,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
         parsedRecords.stream().filter(type::isInstance).map(type::cast).findFirst().orElse(null);
 
     if (claim != null) {
-      claim.setLastUpdated(Optional.of(Instant.now()));
+      claim.setLastUpdated(Instant.now());
     } else {
       throw new IllegalStateException(
           "Test setup issue, did not find expected InpatientClaim in sample record.");

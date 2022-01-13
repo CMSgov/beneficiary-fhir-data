@@ -67,7 +67,7 @@ public final class BeneficiaryTransformerV2Test {
             .findFirst()
             .get();
 
-    beneficiary.setLastUpdated(Optional.of(Instant.now()));
+    beneficiary.setLastUpdated(Instant.now());
     beneficiary.setMbiHash(Optional.of("someMBIhash"));
 
     // Add the history records to the Beneficiary, but nill out the HICN fields.
