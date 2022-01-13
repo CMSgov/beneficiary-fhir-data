@@ -1,9 +1,7 @@
 package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the McsAdjustments table */
+/** JPA class for the McsDiagnosisCodes table */
 @Entity
 @Getter
 @Setter
@@ -27,9 +25,9 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsAdjustment.PK.class)
-@Table(name = "`McsAdjustments`", schema = "`pre_adj`")
-public class PreAdjMcsAdjustment {
+@IdClass(PartAdjMcsDiagnosisCode.PK.class)
+@Table(name = "`McsDiagnosisCodes`", schema = "`part_adj`")
+public class PartAdjMcsDiagnosisCode {
   @Id
   @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
   @EqualsAndHashCode.Include
@@ -40,31 +38,16 @@ public class PreAdjMcsAdjustment {
   @EqualsAndHashCode.Include
   private short priority;
 
+  @Column(name = "`idrDiagIcdType`", length = 1)
+  private String idrDiagIcdType;
+
+  @Column(name = "`idrDiagCode`", length = 7, nullable = false)
+  private String idrDiagCode;
+
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
-  @Column(name = "`idrAdjDate`")
-  private LocalDate idrAdjDate;
-
-  @Column(name = "`idrXrefIcn`", length = 15)
-  private String idrXrefIcn;
-
-  @Column(name = "`idrAdjClerk`", length = 4)
-  private String idrAdjClerk;
-
-  @Column(name = "`idrInitCcn`", length = 15)
-  private String idrInitCcn;
-
-  @Column(name = "`idrAdjChkWrtDt`")
-  private LocalDate idrAdjChkWrtDt;
-
-  @Column(name = "`idrAdjBEombAmt`", columnDefinition = "decimal(7,2)")
-  private BigDecimal idrAdjBEombAmt;
-
-  @Column(name = "`idrAdjPEombAmt`", columnDefinition = "decimal(7,2)")
-  private BigDecimal idrAdjPEombAmt;
-
-  /** PK class for the McsAdjustments table */
+  /** PK class for the McsDiagnosisCodes table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor

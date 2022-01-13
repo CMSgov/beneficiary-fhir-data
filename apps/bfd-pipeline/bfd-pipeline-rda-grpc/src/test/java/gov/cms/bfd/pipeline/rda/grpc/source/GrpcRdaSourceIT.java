@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
@@ -203,7 +203,7 @@ public class GrpcRdaSourceIT {
             port -> {
               int count;
               GrpcRdaSource.Config config = createSourceConfig(port).build();
-              try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+              try (GrpcRdaSource<RdaChange<PartAdjFissClaim>> source = createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
               }
               assertEquals(2, count);
@@ -223,7 +223,7 @@ public class GrpcRdaSourceIT {
               int count;
               GrpcRdaSource.Config config =
                   createSourceConfig(port).authenticationToken("secret").build();
-              try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+              try (GrpcRdaSource<RdaChange<PartAdjFissClaim>> source = createSource(config)) {
                 count = source.retrieveAndProcessObjects(3, sink);
               }
               assertEquals(2, count);
@@ -242,7 +242,7 @@ public class GrpcRdaSourceIT {
             port -> {
               GrpcRdaSource.Config config = createSourceConfig(port).build();
               try {
-                try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+                try (GrpcRdaSource<RdaChange<PartAdjFissClaim>> source = createSource(config)) {
                   source.retrieveAndProcessObjects(3, sink);
                 }
                 fail("should have thrown an exception due to missing token");
@@ -266,7 +266,7 @@ public class GrpcRdaSourceIT {
               GrpcRdaSource.Config config =
                   createSourceConfig(port).authenticationToken("wrong-secret").build();
               try {
-                try (GrpcRdaSource<RdaChange<PreAdjFissClaim>> source = createSource(config)) {
+                try (GrpcRdaSource<RdaChange<PartAdjFissClaim>> source = createSource(config)) {
                   source.retrieveAndProcessObjects(3, sink);
                 }
                 fail("should have thrown an exception due to missing token");
@@ -299,11 +299,11 @@ public class GrpcRdaSourceIT {
   }
 
   @Nonnull
-  private GrpcRdaSource<RdaChange<PreAdjFissClaim>> createSource(GrpcRdaSource.Config config) {
+  private GrpcRdaSource<RdaChange<PartAdjFissClaim>> createSource(GrpcRdaSource.Config config) {
     return new GrpcRdaSource<>(config, streamCaller, appMetrics, "fiss", Optional.empty());
   }
 
-  private static class JsonCaptureSink implements RdaSink<RdaChange<PreAdjFissClaim>> {
+  private static class JsonCaptureSink implements RdaSink<RdaChange<PartAdjFissClaim>> {
     private final List<String> values = new ArrayList<>();
     private final ObjectMapper mapper;
 
@@ -318,7 +318,7 @@ public class GrpcRdaSourceIT {
     }
 
     @Override
-    public synchronized int writeObject(RdaChange<PreAdjFissClaim> change)
+    public synchronized int writeObject(RdaChange<PartAdjFissClaim> change)
         throws ProcessingException {
       try {
         values.add(mapper.writeValueAsString(change.getClaim()));

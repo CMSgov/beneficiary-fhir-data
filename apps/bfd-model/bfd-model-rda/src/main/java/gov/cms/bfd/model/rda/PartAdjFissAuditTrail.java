@@ -2,6 +2,7 @@ package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the McsAudits table */
+/** JPA class for the FissAuditTrails table */
 @Entity
 @Getter
 @Setter
@@ -25,37 +26,43 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsAudit.PK.class)
-@Table(name = "`McsAudits`", schema = "`pre_adj`")
-public class PreAdjMcsAudit {
+@IdClass(PartAdjFissAuditTrail.PK.class)
+@Table(name = "`FissAuditTrails`", schema = "`part_adj`")
+public class PartAdjFissAuditTrail {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
+  @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
-  private String idrClmHdIcn;
+  private String dcn;
 
   @Id
   @Column(name = "`priority`", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
+  @Column(name = "`badtStatus`", length = 1)
+  private String badtStatus;
+
+  @Column(name = "`badtLoc`", length = 5)
+  private String badtLoc;
+
+  @Column(name = "`badtOperId`", length = 9)
+  private String badtOperId;
+
+  @Column(name = "`badtReas`", length = 5)
+  private String badtReas;
+
+  @Column(name = "`badtCurrDate`")
+  private LocalDate badtCurrDate;
+
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
-  @Column(name = "`idrJAuditNum`")
-  private Integer idrJAuditNum;
-
-  @Column(name = "`idrJAuditInd`", length = 1)
-  private String idrJAuditInd;
-
-  @Column(name = "`idrJAuditDisp`", length = 1)
-  private String idrJAuditDisp;
-
-  /** PK class for the McsAudits table */
+  /** PK class for the FissAuditTrails table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
   public static class PK implements Serializable {
-    private String idrClmHdIcn;
+    private String dcn;
 
     private short priority;
   }

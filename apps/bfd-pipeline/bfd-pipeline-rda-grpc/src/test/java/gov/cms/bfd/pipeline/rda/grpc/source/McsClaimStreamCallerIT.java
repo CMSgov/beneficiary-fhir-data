@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.Assert.assertEquals;
 
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
@@ -30,11 +30,11 @@ public class McsClaimStreamCallerIT {
         .runWithChannelParam(
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
-              final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
+              final GrpcResponseStream<RdaChange<PartAdjMcsClaim>> results =
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
               assertEquals(true, results.hasNext());
 
-              PreAdjMcsClaim claim = results.next().getClaim();
+              PartAdjMcsClaim claim = results.next().getClaim();
               assertEquals("75302", claim.getIdrClmHdIcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
@@ -59,7 +59,7 @@ public class McsClaimStreamCallerIT {
         .runWithChannelParam(
             channel -> {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller(transformer);
-              final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> results =
+              final GrpcResponseStream<RdaChange<PartAdjMcsClaim>> results =
                   caller.callService(channel, CallOptions.DEFAULT, 10L);
               assertEquals(10L, results.next().getSequenceNumber());
               assertEquals(11L, results.next().getSequenceNumber());

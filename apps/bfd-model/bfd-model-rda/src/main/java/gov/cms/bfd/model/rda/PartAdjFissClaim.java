@@ -31,8 +31,8 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`FissClaims`", schema = "`pre_adj`")
-public class PreAdjFissClaim {
+@Table(name = "`FissClaims`", schema = "`part_adj`")
+public class PartAdjFissClaim {
   @Id
   @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
@@ -292,7 +292,7 @@ public class PreAdjFissClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjFissProcCode> procCodes = new HashSet<>();
+  private Set<PartAdjFissProcCode> procCodes = new HashSet<>();
 
   @OneToMany(
       mappedBy = "dcn",
@@ -300,7 +300,7 @@ public class PreAdjFissClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjFissDiagnosisCode> diagCodes = new HashSet<>();
+  private Set<PartAdjFissDiagnosisCode> diagCodes = new HashSet<>();
 
   @OneToMany(
       mappedBy = "dcn",
@@ -308,7 +308,7 @@ public class PreAdjFissClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjFissPayer> payers = new HashSet<>();
+  private Set<PartAdjFissPayer> payers = new HashSet<>();
 
   @OneToMany(
       mappedBy = "dcn",
@@ -316,7 +316,7 @@ public class PreAdjFissClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjFissAuditTrail> auditTrail = new HashSet<>();
+  private Set<PartAdjFissAuditTrail> auditTrail = new HashSet<>();
 
   public enum ServTypeCdMapping {
     Normal,

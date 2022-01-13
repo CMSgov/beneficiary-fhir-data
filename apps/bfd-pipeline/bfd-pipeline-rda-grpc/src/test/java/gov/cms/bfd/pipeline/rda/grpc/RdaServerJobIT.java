@@ -8,8 +8,8 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
@@ -56,10 +56,10 @@ public class RdaServerJobIT {
       final ManagedChannel fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
       final FissClaimStreamCaller fissCaller =
           new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
-      final GrpcResponseStream<RdaChange<PreAdjFissClaim>> fissStream =
+      final GrpcResponseStream<RdaChange<PartAdjFissClaim>> fissStream =
           fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2);
       assertEquals(true, fissStream.hasNext());
-      RdaChange<PreAdjFissClaim> fissChange = fissStream.next();
+      RdaChange<PartAdjFissClaim> fissChange = fissStream.next();
       assertMatches(fissChange.getClaim().getApiSource(), "Random:1:.*");
       assertEquals(2L, fissChange.getSequenceNumber());
       assertEquals(true, fissStream.hasNext());
@@ -70,10 +70,10 @@ public class RdaServerJobIT {
       final ManagedChannel mcsChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
       final McsClaimStreamCaller mcsCaller =
           new McsClaimStreamCaller(new McsClaimTransformer(clock, hasher));
-      final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> mcsStream =
+      final GrpcResponseStream<RdaChange<PartAdjMcsClaim>> mcsStream =
           mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 3);
       assertEquals(true, mcsStream.hasNext());
-      RdaChange<PreAdjMcsClaim> mcsChange = mcsStream.next();
+      RdaChange<PartAdjMcsClaim> mcsChange = mcsStream.next();
       assertMatches(mcsChange.getClaim().getApiSource(), "Random:1:.*");
       assertEquals(3L, mcsChange.getSequenceNumber());
       assertEquals(false, mcsStream.hasNext());
@@ -110,10 +110,10 @@ public class RdaServerJobIT {
         final ManagedChannel fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
         final FissClaimStreamCaller fissCaller =
             new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
-        final GrpcResponseStream<RdaChange<PreAdjFissClaim>> fissStream =
+        final GrpcResponseStream<RdaChange<PartAdjFissClaim>> fissStream =
             fissCaller.callService(fissChannel, CallOptions.DEFAULT, 1098);
         assertEquals(true, fissStream.hasNext());
-        RdaChange<PreAdjFissClaim> fissChange = fissStream.next();
+        RdaChange<PartAdjFissClaim> fissChange = fissStream.next();
         assertMatches(fissChange.getClaim().getApiSource(), "S3:\\d+:.*");
         assertEquals(1098L, fissChange.getSequenceNumber());
         assertEquals(true, fissStream.hasNext());
@@ -126,10 +126,10 @@ public class RdaServerJobIT {
         final ManagedChannel mcsChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
         final McsClaimStreamCaller mcsCaller =
             new McsClaimStreamCaller(new McsClaimTransformer(clock, hasher));
-        final GrpcResponseStream<RdaChange<PreAdjMcsClaim>> mcsStream =
+        final GrpcResponseStream<RdaChange<PartAdjMcsClaim>> mcsStream =
             mcsCaller.callService(mcsChannel, CallOptions.DEFAULT, 1099);
         assertEquals(true, mcsStream.hasNext());
-        RdaChange<PreAdjMcsClaim> mcsChange = mcsStream.next();
+        RdaChange<PartAdjMcsClaim> mcsChange = mcsStream.next();
         assertMatches(mcsChange.getClaim().getApiSource(), "S3:\\d+:.*");
         assertEquals(1099L, mcsChange.getSequenceNumber());
         assertEquals(true, mcsStream.hasNext());
@@ -164,7 +164,7 @@ public class RdaServerJobIT {
       ManagedChannel fissChannel = InProcessChannelBuilder.forName(SERVER_NAME).build();
       FissClaimStreamCaller fissCaller =
           new FissClaimStreamCaller(new FissClaimTransformer(clock, hasher));
-      GrpcResponseStream<RdaChange<PreAdjFissClaim>> fissStream =
+      GrpcResponseStream<RdaChange<PartAdjFissClaim>> fissStream =
           fissCaller.callService(fissChannel, CallOptions.DEFAULT, 2);
       assertEquals(true, fissStream.hasNext());
       assertEquals(2L, fissStream.next().getSequenceNumber());

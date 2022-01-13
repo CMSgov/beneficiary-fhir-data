@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.util.Optional;
@@ -9,7 +9,7 @@ import java.util.Optional;
  * Implementation of AbstractClaimRdaSink that adds the appropriate query to obtain maximum sequence
  * number for FISS claims.
  */
-public class FissClaimRdaSink extends AbstractClaimRdaSink<PreAdjFissClaim> {
+public class FissClaimRdaSink extends AbstractClaimRdaSink<PartAdjFissClaim> {
   public FissClaimRdaSink(PipelineApplicationState appState) {
     super(appState);
   }
@@ -18,6 +18,6 @@ public class FissClaimRdaSink extends AbstractClaimRdaSink<PreAdjFissClaim> {
   public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
     return readMaxExistingSequenceNumber(
         String.format(
-            "select max(c.%s) from PreAdjFissClaim c", PreAdjFissClaim.Fields.sequenceNumber));
+            "select max(c.%s) from PartAdjFissClaim c", PartAdjFissClaim.Fields.sequenceNumber));
   }
 }

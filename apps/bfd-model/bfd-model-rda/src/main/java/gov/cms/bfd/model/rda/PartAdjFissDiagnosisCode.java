@@ -2,7 +2,6 @@ package gov.cms.bfd.model.rda;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -17,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the FissAuditTrails table */
+/** JPA class for the FissDiagnosisCodes table */
 @Entity
 @Getter
 @Setter
@@ -26,9 +25,9 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjFissAuditTrail.PK.class)
-@Table(name = "`FissAuditTrails`", schema = "`pre_adj`")
-public class PreAdjFissAuditTrail {
+@IdClass(PartAdjFissDiagnosisCode.PK.class)
+@Table(name = "`FissDiagnosisCodes`", schema = "`part_adj`")
+public class PartAdjFissDiagnosisCode {
   @Id
   @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
@@ -39,25 +38,19 @@ public class PreAdjFissAuditTrail {
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`badtStatus`", length = 1)
-  private String badtStatus;
+  @Column(name = "`diagCd2`", length = 7, nullable = false)
+  private String diagCd2;
 
-  @Column(name = "`badtLoc`", length = 5)
-  private String badtLoc;
+  @Column(name = "`diagPoaInd`", length = 1)
+  private String diagPoaInd;
 
-  @Column(name = "`badtOperId`", length = 9)
-  private String badtOperId;
-
-  @Column(name = "`badtReas`", length = 5)
-  private String badtReas;
-
-  @Column(name = "`badtCurrDate`")
-  private LocalDate badtCurrDate;
+  @Column(name = "`bitFlags`", length = 4)
+  private String bitFlags;
 
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
-  /** PK class for the FissAuditTrails table */
+  /** PK class for the FissDiagnosisCodes table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor

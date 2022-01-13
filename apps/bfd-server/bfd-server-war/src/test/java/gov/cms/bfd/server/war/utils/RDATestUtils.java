@@ -1,12 +1,12 @@
 package gov.cms.bfd.server.war.utils;
 
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
-import gov.cms.bfd.model.rda.PreAdjFissPayer;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsDetail;
-import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjFissDiagnosisCode;
+import gov.cms.bfd.model.rda.PartAdjFissPayer;
+import gov.cms.bfd.model.rda.PartAdjFissProcCode;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsDetail;
+import gov.cms.bfd.model.rda.PartAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rif.schema.DatabaseTestUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,13 +30,13 @@ public class RDATestUtils {
   /** Tracking entities (tables) so they can be cleaned after. */
   private static final List<Class<?>> TABLE_ENTITIES =
       List.of(
-          PreAdjFissPayer.class,
-          PreAdjFissDiagnosisCode.class,
-          PreAdjFissProcCode.class,
-          PreAdjFissClaim.class,
-          PreAdjMcsDetail.class,
-          PreAdjMcsDiagnosisCode.class,
-          PreAdjMcsClaim.class);
+          PartAdjFissPayer.class,
+          PartAdjFissDiagnosisCode.class,
+          PartAdjFissProcCode.class,
+          PartAdjFissClaim.class,
+          PartAdjMcsDetail.class,
+          PartAdjMcsDiagnosisCode.class,
+          PartAdjMcsClaim.class);
 
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
@@ -131,9 +131,9 @@ public class RDATestUtils {
    *
    * @return The FISS test claim A
    */
-  private PreAdjFissClaim fissTestDataA() {
-    PreAdjFissClaim claim =
-        PreAdjFissClaim.builder()
+  private PartAdjFissClaim fissTestDataA() {
+    PartAdjFissClaim claim =
+        PartAdjFissClaim.builder()
             .sequenceNumber(1L)
             .dcn("123456")
             .hicNo("hicnumber")
@@ -159,9 +159,9 @@ public class RDATestUtils {
             .freqCd("C")
             .build();
 
-    Set<PreAdjFissProcCode> procCodes =
+    Set<PartAdjFissProcCode> procCodes =
         Set.of(
-            PreAdjFissProcCode.builder()
+            PartAdjFissProcCode.builder()
                 .dcn("123456")
                 .priority((short) 0)
                 .procCode("CODEABC")
@@ -169,7 +169,7 @@ public class RDATestUtils {
                 .procDate(LocalDate.ofEpochDay(200))
                 .lastUpdated(Instant.ofEpochMilli(0))
                 .build(),
-            PreAdjFissProcCode.builder()
+            PartAdjFissProcCode.builder()
                 .dcn("123456")
                 .priority((short) 1)
                 .procCode("CODECBA")
@@ -177,30 +177,30 @@ public class RDATestUtils {
                 .lastUpdated(Instant.ofEpochMilli(0))
                 .build());
 
-    Set<PreAdjFissDiagnosisCode> diagnosisCodes =
+    Set<PartAdjFissDiagnosisCode> diagnosisCodes =
         Set.of(
-            PreAdjFissDiagnosisCode.builder()
+            PartAdjFissDiagnosisCode.builder()
                 .dcn("123456")
                 .priority((short) 0)
                 .diagCd2("admitcd")
                 .diagPoaInd("Z")
                 .build(),
-            PreAdjFissDiagnosisCode.builder()
+            PartAdjFissDiagnosisCode.builder()
                 .dcn("123456")
                 .priority((short) 1)
                 .diagCd2("other")
                 .diagPoaInd("U")
                 .build(),
-            PreAdjFissDiagnosisCode.builder()
+            PartAdjFissDiagnosisCode.builder()
                 .dcn("123456")
                 .priority((short) 2)
                 .diagCd2("princcd")
                 .diagPoaInd("n")
                 .build());
 
-    Set<PreAdjFissPayer> payers =
+    Set<PartAdjFissPayer> payers =
         Set.of(
-            PreAdjFissPayer.builder()
+            PartAdjFissPayer.builder()
                 .dcn("123456")
                 .priority((short) 0)
                 .beneFirstName("jim")
@@ -208,14 +208,14 @@ public class RDATestUtils {
                 .beneLastName("baker")
                 .beneSex("m")
                 .beneDob(LocalDate.of(1975, 3, 1))
-                .payerType(PreAdjFissPayer.PayerType.BeneZ)
+                .payerType(PartAdjFissPayer.PayerType.BeneZ)
                 .payersName("MEDICARE")
                 .build(),
-            PreAdjFissPayer.builder()
+            PartAdjFissPayer.builder()
                 .dcn("123456")
                 .priority((short) 1)
                 .insuredName("BAKER  JIM  K")
-                .payerType(PreAdjFissPayer.PayerType.Insured)
+                .payerType(PartAdjFissPayer.PayerType.Insured)
                 .payersName("BCBS KC")
                 .build());
 
@@ -231,9 +231,9 @@ public class RDATestUtils {
    *
    * @return The FISS test claim B
    */
-  private PreAdjFissClaim fissTestDataB() {
-    PreAdjFissClaim claim =
-        PreAdjFissClaim.builder()
+  private PartAdjFissClaim fissTestDataB() {
+    PartAdjFissClaim claim =
+        PartAdjFissClaim.builder()
             .sequenceNumber(2L)
             .dcn("123457")
             .hicNo("hicnumbe2")
@@ -259,9 +259,9 @@ public class RDATestUtils {
             .freqCd("C")
             .build();
 
-    Set<PreAdjFissProcCode> procCodes =
+    Set<PartAdjFissProcCode> procCodes =
         Set.of(
-            PreAdjFissProcCode.builder()
+            PartAdjFissProcCode.builder()
                 .dcn("123457")
                 .priority((short) 0)
                 .procCode("CODEABD")
@@ -270,30 +270,30 @@ public class RDATestUtils {
                 .lastUpdated(Instant.ofEpochMilli(5000))
                 .build());
 
-    Set<PreAdjFissDiagnosisCode> diagnosisCodes =
+    Set<PartAdjFissDiagnosisCode> diagnosisCodes =
         Set.of(
-            PreAdjFissDiagnosisCode.builder()
+            PartAdjFissDiagnosisCode.builder()
                 .dcn("123457")
                 .priority((short) 0)
                 .diagCd2("princcc")
                 .diagPoaInd("Y")
                 .build(),
-            PreAdjFissDiagnosisCode.builder()
+            PartAdjFissDiagnosisCode.builder()
                 .dcn("123457")
                 .priority((short) 1)
                 .diagCd2("other2")
                 .diagPoaInd("w")
                 .build(),
-            PreAdjFissDiagnosisCode.builder()
+            PartAdjFissDiagnosisCode.builder()
                 .dcn("123457")
                 .priority((short) 2)
                 .diagCd2("admitcc")
                 .diagPoaInd("1")
                 .build());
 
-    Set<PreAdjFissPayer> payers =
+    Set<PartAdjFissPayer> payers =
         Set.of(
-            PreAdjFissPayer.builder()
+            PartAdjFissPayer.builder()
                 .dcn("123457")
                 .priority((short) 0)
                 .beneFirstName("alice")
@@ -301,14 +301,14 @@ public class RDATestUtils {
                 .beneLastName("smith")
                 .beneSex("f")
                 .beneDob(LocalDate.of(1981, 8, 13))
-                .payerType(PreAdjFissPayer.PayerType.BeneZ)
+                .payerType(PartAdjFissPayer.PayerType.BeneZ)
                 .payersName("MEDICARE")
                 .build(),
-            PreAdjFissPayer.builder()
+            PartAdjFissPayer.builder()
                 .dcn("123457")
                 .priority((short) 1)
                 .insuredName("SMITH  ALICE  R")
-                .payerType(PreAdjFissPayer.PayerType.Insured)
+                .payerType(PartAdjFissPayer.PayerType.Insured)
                 .payersName("BCBS KC")
                 .build());
 
@@ -324,7 +324,7 @@ public class RDATestUtils {
    *
    * @return The MCS related test data.
    */
-  public List<PreAdjMcsClaim> mcsTestData() {
+  public List<PartAdjMcsClaim> mcsTestData() {
     return List.of(mcsTestDataA());
   }
 
@@ -333,9 +333,9 @@ public class RDATestUtils {
    *
    * @return The MCS test claim A
    */
-  private PreAdjMcsClaim mcsTestDataA() {
-    PreAdjMcsClaim claim =
-        PreAdjMcsClaim.builder()
+  private PartAdjMcsClaim mcsTestDataA() {
+    PartAdjMcsClaim claim =
+        PartAdjMcsClaim.builder()
             .sequenceNumber(1L)
             .idrClmHdIcn("654321")
             .idrContrId("contr")
@@ -370,16 +370,16 @@ public class RDATestUtils {
             .lastUpdated(Instant.ofEpochMilli(4000))
             .build();
 
-    Set<PreAdjMcsDetail> procCodes =
+    Set<PartAdjMcsDetail> procCodes =
         Set.of(
-            PreAdjMcsDetail.builder()
+            PartAdjMcsDetail.builder()
                 .priority((short) 0)
                 .idrClmHdIcn("654321")
                 .idrDtlToDate(LocalDate.ofEpochDay(208))
                 .idrProcCode("FDSAE")
                 .idrModOne("A")
                 .build(),
-            PreAdjMcsDetail.builder()
+            PartAdjMcsDetail.builder()
                 .priority((short) 1)
                 .idrClmHdIcn("654321")
                 .idrProcCode("FDAAA")
@@ -390,9 +390,9 @@ public class RDATestUtils {
 
     claim.setDiagCodes(
         Set.of(
-            new PreAdjMcsDiagnosisCode(
+            new PartAdjMcsDiagnosisCode(
                 "654321", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
-            new PreAdjMcsDiagnosisCode(
+            new PartAdjMcsDiagnosisCode(
                 "654321", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;

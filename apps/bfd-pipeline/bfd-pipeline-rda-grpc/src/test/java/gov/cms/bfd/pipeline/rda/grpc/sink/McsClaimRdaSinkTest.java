@@ -10,7 +10,7 @@ import static org.mockito.Mockito.*;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.zaxxer.hikari.HikariDataSource;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
@@ -73,13 +73,13 @@ public class McsClaimRdaSinkTest {
 
   @Test
   public void persistSuccessful() throws Exception {
-    final List<RdaChange<PreAdjMcsClaim>> batch =
+    final List<RdaChange<PartAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
 
     final int count = sink.writeBatch(batch);
     assertEquals(3, count);
 
-    for (RdaChange<PreAdjMcsClaim> change : batch) {
+    for (RdaChange<PartAdjMcsClaim> change : batch) {
       verify(entityManager).persist(change.getClaim());
     }
     verify(entityManager, times(0))
@@ -98,7 +98,7 @@ public class McsClaimRdaSinkTest {
 
   @Test
   public void mergeSuccessful() throws Exception {
-    final List<RdaChange<PreAdjMcsClaim>> batch =
+    final List<RdaChange<PartAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(1).getClaim());
 
@@ -109,7 +109,7 @@ public class McsClaimRdaSinkTest {
     verify(entityManager).persist(batch.get(1).getClaim());
     verify(entityManager, times(0))
         .persist(batch.get(2).getClaim()); // not called once a persist fails
-    for (RdaChange<PreAdjMcsClaim> change : batch) {
+    for (RdaChange<PartAdjMcsClaim> change : batch) {
       verify(entityManager).merge(change.getClaim());
     }
     // the persist transaction will be rolled back
@@ -129,7 +129,7 @@ public class McsClaimRdaSinkTest {
 
   @Test
   public void persistAndMergeFail() {
-    final List<RdaChange<PreAdjMcsClaim>> batch =
+    final List<RdaChange<PartAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new EntityExistsException()).when(entityManager).persist(batch.get(0).getClaim());
     doThrow(new EntityNotFoundException()).when(entityManager).merge(batch.get(1).getClaim());
@@ -165,7 +165,7 @@ public class McsClaimRdaSinkTest {
 
   @Test
   public void persistFatalError() {
-    final List<RdaChange<PreAdjMcsClaim>> batch =
+    final List<RdaChange<PartAdjMcsClaim>> batch =
         ImmutableList.of(createClaim("1"), createClaim("2"), createClaim("3"));
     doThrow(new RuntimeException("oops")).when(entityManager).persist(batch.get(1).getClaim());
 
@@ -208,8 +208,8 @@ public class McsClaimRdaSinkTest {
     assertEquals(false, isDuplicateKeyException(new IOException("nothing to see here")));
   }
 
-  private RdaChange<PreAdjMcsClaim> createClaim(String dcn) {
-    PreAdjMcsClaim claim = new PreAdjMcsClaim();
+  private RdaChange<PartAdjMcsClaim> createClaim(String dcn) {
+    PartAdjMcsClaim claim = new PartAdjMcsClaim();
     claim.setIdrClmHdIcn(dcn);
     return new RdaChange<>(
         nextSeq++, RdaChange.Type.INSERT, claim, clock.instant().minusMillis(12));

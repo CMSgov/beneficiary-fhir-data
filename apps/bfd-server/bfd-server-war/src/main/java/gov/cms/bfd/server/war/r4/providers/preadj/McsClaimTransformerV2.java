@@ -5,9 +5,9 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsDetail;
-import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsDetail;
+import gov.cms.bfd.model.rda.PartAdjMcsDiagnosisCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
@@ -49,25 +49,25 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claimEntity the MCS {@link PreAdjMcsClaim} to transform
+   * @param claimEntity the MCS {@link PartAdjMcsClaim} to transform
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
   @Trace
   static Claim transform(MetricRegistry metricRegistry, Object claimEntity) {
-    if (!(claimEntity instanceof PreAdjMcsClaim)) {
+    if (!(claimEntity instanceof PartAdjMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((PreAdjMcsClaim) claimEntity);
+      return transformClaim((PartAdjMcsClaim) claimEntity);
     }
   }
 
   /**
-   * @param claimGroup the {@link PreAdjMcsClaim} to transform
-   * @return a FHIR {@link Claim} resource that represents the specified {@link PreAdjMcsClaim}
+   * @param claimGroup the {@link PartAdjMcsClaim} to transform
+   * @return a FHIR {@link Claim} resource that represents the specified {@link PartAdjMcsClaim}
    */
-  private static Claim transformClaim(PreAdjMcsClaim claimGroup) {
+  private static Claim transformClaim(PartAdjMcsClaim claimGroup) {
     Claim claim = new Claim();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -106,7 +106,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     return claim;
   }
 
-  private static Resource getContainedPatient(PreAdjMcsClaim claimGroup) {
+  private static Resource getContainedPatient(PartAdjMcsClaim claimGroup) {
     PatientInfo patientInfo =
         new PatientInfo(
             ifNotNull(claimGroup.getIdrBeneFirstInit(), s -> s + "."),
@@ -118,7 +118,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
 
-  private static Resource getContainedProvider(PreAdjMcsClaim claimGroup) {
+  private static Resource getContainedProvider(PartAdjMcsClaim claimGroup) {
     Organization organization = new Organization();
 
     if (claimGroup.getIdrBillProvType() != null) {
@@ -180,7 +180,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     return organization;
   }
 
-  private static List<Extension> getExtension(PreAdjMcsClaim claimGroup) {
+  private static List<Extension> getExtension(PartAdjMcsClaim claimGroup) {
     return claimGroup.getIdrClaimType() == null
         ? null
         : List.of(
@@ -189,7 +189,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                     new Coding(BBCodingSystems.MCS.CLM_TYPE, claimGroup.getIdrClaimType(), null)));
   }
 
-  private static List<Identifier> getIdentifier(PreAdjMcsClaim claimGroup) {
+  private static List<Identifier> getIdentifier(PartAdjMcsClaim claimGroup) {
     return claimGroup.getIdrClmHdIcn() == null
         ? null
         : List.of(
@@ -214,7 +214,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
                     ClaimType.PROFESSIONAL.getDisplay())));
   }
 
-  private static Period getBillablePeriod(PreAdjMcsClaim claimGroup) {
+  private static Period getBillablePeriod(PartAdjMcsClaim claimGroup) {
     return new Period()
         .setStart(localDateToDate(claimGroup.getIdrHdrFromDateOfSvc()))
         .setEnd(localDateToDate(claimGroup.getIdrHdrToDateOfSvc()));
@@ -228,7 +228,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
             ProcessPriority.NORMAL.getDisplay()));
   }
 
-  private static Money getTotal(PreAdjMcsClaim claimGroup) {
+  private static Money getTotal(PartAdjMcsClaim claimGroup) {
     Money total;
 
     if (claimGroup.getIdrTotBilledAmt() != null) {
@@ -243,8 +243,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
     return total;
   }
 
-  private static List<Claim.DiagnosisComponent> getDiagnosis(PreAdjMcsClaim claimGroup) {
-    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<PreAdjMcsDiagnosisCode>of())
+  private static List<Claim.DiagnosisComponent> getDiagnosis(PartAdjMcsClaim claimGroup) {
+    return ObjectUtils.defaultIfNull(claimGroup.getDiagCodes(), List.<PartAdjMcsDiagnosisCode>of())
         .stream()
         .map(
             diagCode -> {
@@ -265,8 +265,8 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
         .collect(Collectors.toList());
   }
 
-  private static List<Claim.ItemComponent> getItems(PreAdjMcsClaim claimGroup) {
-    return ObjectUtils.defaultIfNull(claimGroup.getDetails(), List.<PreAdjMcsDetail>of()).stream()
+  private static List<Claim.ItemComponent> getItems(PartAdjMcsClaim claimGroup) {
+    return ObjectUtils.defaultIfNull(claimGroup.getDetails(), List.<PartAdjMcsDetail>of()).stream()
         .map(
             detail -> {
               Claim.ItemComponent item =
@@ -286,7 +286,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
               Optional.ofNullable(detail.getIdrDtlPrimaryDiagCode())
                   .ifPresent(
                       detailDiagnosisCode -> {
-                        Optional<PreAdjMcsDiagnosisCode> matchingCode =
+                        Optional<PartAdjMcsDiagnosisCode> matchingCode =
                             claimGroup.getDiagCodes().stream()
                                 .filter(
                                     diagnosisCode ->
@@ -306,7 +306,7 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2 {
         .collect(Collectors.toList());
   }
 
-  private static List<CodeableConcept> getModifiers(PreAdjMcsDetail detail) {
+  private static List<CodeableConcept> getModifiers(PartAdjMcsDetail detail) {
     List<Optional<String>> mods =
         List.of(
             Optional.ofNullable(detail.getIdrModOne()),

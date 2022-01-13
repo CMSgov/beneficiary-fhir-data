@@ -3,12 +3,12 @@ package gov.cms.bfd.server.war.r4.providers.preadj;
 import static org.junit.Assert.assertEquals;
 
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsDetail;
-import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjFissDiagnosisCode;
+import gov.cms.bfd.model.rda.PartAdjFissProcCode;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsDetail;
+import gov.cms.bfd.model.rda.PartAdjMcsDiagnosisCode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -157,7 +157,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     @Test
     public void test() {
-      PreAdjFissClaim entity = new PreAdjFissClaim();
+      PartAdjFissClaim entity = new PartAdjFissClaim();
 
       String principalDxCode = diagCodes.get(0);
       String admittingDxCode = diagCodes.get(1);
@@ -167,11 +167,11 @@ public class R4ClaimSamhsaMatcherTransformerTest {
       entity.setPrincipleDiag(principalDxCode);
       entity.setAdmitDiagCode(admittingDxCode);
 
-      Set<PreAdjFissDiagnosisCode> diagnoses =
+      Set<PartAdjFissDiagnosisCode> diagnoses =
           IntStream.range(0, diagCodes.size())
               .mapToObj(
                   i -> {
-                    PreAdjFissDiagnosisCode diagCode = new PreAdjFissDiagnosisCode();
+                    PartAdjFissDiagnosisCode diagCode = new PartAdjFissDiagnosisCode();
                     diagCode.setPriority((short) i);
                     diagCode.setDiagCd2(diagCodes.get(i));
 
@@ -181,11 +181,11 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
       entity.setDiagCodes(diagnoses);
 
-      Set<PreAdjFissProcCode> procedures =
+      Set<PartAdjFissProcCode> procedures =
           IntStream.range(0, procCodes.size())
               .mapToObj(
                   i -> {
-                    PreAdjFissProcCode procCode = new PreAdjFissProcCode();
+                    PartAdjFissProcCode procCode = new PartAdjFissProcCode();
                     procCode.setProcDate(LocalDate.EPOCH);
                     procCode.setPriority((short) i);
                     procCode.setProcCode(procCodes.get(i));
@@ -267,17 +267,17 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
     @Test
     public void test() {
-      PreAdjMcsClaim entity = new PreAdjMcsClaim();
+      PartAdjMcsClaim entity = new PartAdjMcsClaim();
 
       entity.setLastUpdated(Instant.ofEpochMilli(1));
 
-      Set<PreAdjMcsDiagnosisCode> diagnoses =
+      Set<PartAdjMcsDiagnosisCode> diagnoses =
           IntStream.range(0, diagCodes.size())
               .mapToObj(
                   i -> {
                     String[] dx = diagCodes.get(i).split(":");
 
-                    PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
+                    PartAdjMcsDiagnosisCode diagCode = new PartAdjMcsDiagnosisCode();
                     diagCode.setPriority((short) i);
                     diagCode.setIdrDiagIcdType(dx[0]);
                     diagCode.setIdrDiagCode(dx[1]);
@@ -288,11 +288,11 @@ public class R4ClaimSamhsaMatcherTransformerTest {
 
       entity.setDiagCodes(diagnoses);
 
-      Set<PreAdjMcsDetail> procedures =
+      Set<PartAdjMcsDetail> procedures =
           IntStream.range(0, procCodes.size())
               .mapToObj(
                   i -> {
-                    PreAdjMcsDetail procCode = new PreAdjMcsDetail();
+                    PartAdjMcsDetail procCode = new PartAdjMcsDetail();
                     procCode.setIdrDtlToDate(LocalDate.EPOCH);
                     procCode.setPriority((short) i);
                     procCode.setIdrProcCode(procCodes.get(i));

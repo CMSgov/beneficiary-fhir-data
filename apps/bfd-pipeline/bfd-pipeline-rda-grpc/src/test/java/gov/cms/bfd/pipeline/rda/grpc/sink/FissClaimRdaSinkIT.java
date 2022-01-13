@@ -2,9 +2,9 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import static org.junit.Assert.assertEquals;
 
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
-import gov.cms.bfd.model.rda.PreAdjFissProcCode;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjFissDiagnosisCode;
+import gov.cms.bfd.model.rda.PartAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimGenerator;
@@ -34,7 +34,7 @@ public class FissClaimRdaSinkIT {
 
           assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
 
-          final PreAdjFissClaim claim = new PreAdjFissClaim();
+          final PartAdjFissClaim claim = new PartAdjFissClaim();
           claim.setSequenceNumber(3L);
           claim.setDcn("1");
           claim.setHicNo("h1");
@@ -43,7 +43,7 @@ public class FissClaimRdaSinkIT {
           claim.setCurrLoc2("1A");
           claim.setPracLocCity("city name can be very long indeed");
 
-          final PreAdjFissProcCode procCode0 = new PreAdjFissProcCode();
+          final PartAdjFissProcCode procCode0 = new PartAdjFissProcCode();
           procCode0.setDcn(claim.getDcn());
           procCode0.setPriority((short) 0);
           procCode0.setProcCode("P");
@@ -52,7 +52,7 @@ public class FissClaimRdaSinkIT {
           procCode0.setLastUpdated(Instant.now());
           claim.getProcCodes().add(procCode0);
 
-          final PreAdjFissDiagnosisCode diagCode0 = new PreAdjFissDiagnosisCode();
+          final PartAdjFissDiagnosisCode diagCode0 = new PartAdjFissDiagnosisCode();
           diagCode0.setDcn(claim.getDcn());
           diagCode0.setPriority((short) 0);
           diagCode0.setDiagCd2("cd2");
@@ -65,12 +65,12 @@ public class FissClaimRdaSinkIT {
                       claim.getSequenceNumber(), RdaChange.Type.INSERT, claim, Instant.now()));
           assertEquals(1, count);
 
-          List<PreAdjFissClaim> claims =
+          List<PartAdjFissClaim> claims =
               entityManager
-                  .createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+                  .createQuery("select c from PartAdjFissClaim c", PartAdjFissClaim.class)
                   .getResultList();
           assertEquals(1, claims.size());
-          PreAdjFissClaim resultClaim = claims.get(0);
+          PartAdjFissClaim resultClaim = claims.get(0);
           assertEquals(Long.valueOf(3), resultClaim.getSequenceNumber());
           assertEquals("h1", resultClaim.getHicNo());
           assertEquals("city name can be very long indeed", resultClaim.getPracLocCity());
@@ -100,7 +100,7 @@ public class FissClaimRdaSinkIT {
               new FissClaimTransformer(
                   Clock.systemUTC(), new IdHasher(new IdHasher.Config(1, "asdkfjbasdbfd")));
 
-          List<RdaChange<PreAdjFissClaim>> claims = new ArrayList<>();
+          List<RdaChange<PartAdjFissClaim>> claims = new ArrayList<>();
           for (int i = 0; i < numberOfClaims; ++i) {
             FissClaim rdaClaim = generator.randomClaim();
             if (i >= numberOfUniqueClaims) {
@@ -119,7 +119,7 @@ public class FissClaimRdaSinkIT {
                     .setSeq(i)
                     .setClaim(rdaClaim)
                     .build();
-            final RdaChange<PreAdjFissClaim> claim = transformer.transformClaim(rdaChange);
+            final RdaChange<PartAdjFissClaim> claim = transformer.transformClaim(rdaChange);
             claims.add(claim);
           }
 
@@ -130,15 +130,15 @@ public class FissClaimRdaSinkIT {
           int count = sink.writeBatch(claims);
           assertEquals(numberOfUniqueClaims, count);
 
-          List<PreAdjFissClaim> dbClaims =
-              entityManager.createQuery("select c from PreAdjFissClaim c", PreAdjFissClaim.class)
+          List<PartAdjFissClaim> dbClaims =
+              entityManager.createQuery("select c from PartAdjFissClaim c", PartAdjFissClaim.class)
                   .getResultList().stream()
-                  .sorted(Comparator.comparingLong(PreAdjFissClaim::getSequenceNumber))
+                  .sorted(Comparator.comparingLong(PartAdjFissClaim::getSequenceNumber))
                   .collect(Collectors.toList());
           assertEquals(numberOfUniqueClaims, dbClaims.size());
           for (int i = 0; i < numberOfUniqueClaims; ++i) {
-            PreAdjFissClaim dbClaim = dbClaims.get(i);
-            PreAdjFissClaim origClaim = claims.get(lastUniqueOffset + i).getClaim();
+            PartAdjFissClaim dbClaim = dbClaims.get(i);
+            PartAdjFissClaim origClaim = claims.get(lastUniqueOffset + i).getClaim();
             assertEquals(origClaim.getDcn(), dbClaim.getDcn());
             assertEquals(origClaim.getDiagCodes().size(), dbClaim.getDiagCodes().size());
             assertEquals(origClaim.getPayers().size(), dbClaim.getPayers().size());

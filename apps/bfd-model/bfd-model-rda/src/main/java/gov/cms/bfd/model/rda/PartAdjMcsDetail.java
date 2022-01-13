@@ -26,9 +26,9 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsDetail.PK.class)
-@Table(name = "`McsDetails`", schema = "`pre_adj`")
-public class PreAdjMcsDetail {
+@IdClass(PartAdjMcsDetail.PK.class)
+@Table(name = "`McsDetails`", schema = "`part_adj`")
+public class PartAdjMcsDetail {
   @Id
   @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
   @EqualsAndHashCode.Include

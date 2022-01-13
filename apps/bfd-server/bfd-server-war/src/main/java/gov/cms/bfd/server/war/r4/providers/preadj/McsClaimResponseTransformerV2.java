@@ -5,7 +5,7 @@ import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
@@ -70,26 +70,26 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
   /**
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param claimEntity the MCS {@link PreAdjMcsClaim} to transform
+   * @param claimEntity the MCS {@link PartAdjMcsClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
   @Trace
   static ClaimResponse transform(MetricRegistry metricRegistry, Object claimEntity) {
-    if (!(claimEntity instanceof PreAdjMcsClaim)) {
+    if (!(claimEntity instanceof PartAdjMcsClaim)) {
       throw new BadCodeMonkeyException();
     }
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
-      return transformClaim((PreAdjMcsClaim) claimEntity);
+      return transformClaim((PartAdjMcsClaim) claimEntity);
     }
   }
 
   /**
-   * @param claimGroup the {@link PreAdjMcsClaim} to transform
+   * @param claimGroup the {@link PartAdjMcsClaim} to transform
    * @return a FHIR {@link ClaimResponse} resource that represents the specified {@link
-   *     PreAdjMcsClaim}
+   *     PartAdjMcsClaim}
    */
-  private static ClaimResponse transformClaim(PreAdjMcsClaim claimGroup) {
+  private static ClaimResponse transformClaim(PartAdjMcsClaim claimGroup) {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("m-" + claimGroup.getIdrClmHdIcn());
@@ -123,7 +123,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return claim;
   }
 
-  private static Resource getContainedPatient(PreAdjMcsClaim claimGroup) {
+  private static Resource getContainedPatient(PartAdjMcsClaim claimGroup) {
     PatientInfo patientInfo =
         new PatientInfo(
             ifNotNull(claimGroup.getIdrBeneFirstInit(), s -> s + "."),
@@ -135,7 +135,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return getContainedPatient(claimGroup.getIdrClaimMbi(), patientInfo);
   }
 
-  private static List<Extension> getExtension(PreAdjMcsClaim claimGroup) {
+  private static List<Extension> getExtension(PartAdjMcsClaim claimGroup) {
     List<Extension> extensions = new ArrayList<>();
 
     if (claimGroup.getIdrStatusCode() != null) {
@@ -161,7 +161,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     return List.copyOf(extensions);
   }
 
-  private static List<Identifier> getIdentifier(PreAdjMcsClaim claimGroup) {
+  private static List<Identifier> getIdentifier(PartAdjMcsClaim claimGroup) {
     return List.of(
         new Identifier()
             .setType(

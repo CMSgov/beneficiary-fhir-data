@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterators;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * development there is no way to resume a stream from a given point in time so every time the
  * service is called it sends all of its values.
  */
-public class McsClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjMcsClaim>> {
+public class McsClaimStreamCaller extends GrpcStreamCaller<RdaChange<PartAdjMcsClaim>> {
   private final McsClaimTransformer transformer;
 
   public McsClaimStreamCaller(McsClaimTransformer transformer) {
@@ -30,15 +30,15 @@ public class McsClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjMcsCl
 
   /**
    * Calls the getMcsClaims RPC. The Iterator from the RPC call is wrapped with a transforming
-   * Iterator that converts the API McsClaim objects into database PreAdjMcsClaim entity objects.
+   * Iterator that converts the API McsClaim objects into database PartAdjMcsClaim entity objects.
    *
    * @param channel an already open channel to the service being called
    * @param startingSequenceNumber specifies the sequence number to send to the RDA API server
-   * @return a blocking GrpcResponseStream of PreAdjMcsClaim entity objects
+   * @return a blocking GrpcResponseStream of PartAdjMcsClaim entity objects
    * @throws Exception passes through any gRPC framework exceptions
    */
   @Override
-  public GrpcResponseStream<RdaChange<PreAdjMcsClaim>> callService(
+  public GrpcResponseStream<RdaChange<PartAdjMcsClaim>> callService(
       ManagedChannel channel, CallOptions callOptions, long startingSequenceNumber)
       throws Exception {
     final String apiSource = callVersionService(channel, callOptions);
@@ -50,11 +50,11 @@ public class McsClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjMcsCl
     final ClientCall<ClaimRequest, McsClaimChange> call = channel.newCall(method, callOptions);
     final Iterator<McsClaimChange> apiResults =
         ClientCalls.blockingServerStreamingCall(call, request);
-    final Iterator<RdaChange<PreAdjMcsClaim>> transformedResults =
+    final Iterator<RdaChange<PartAdjMcsClaim>> transformedResults =
         Iterators.transform(
             apiResults,
             apiClaim -> {
-              RdaChange<PreAdjMcsClaim> mcsChange = transformer.transformClaim(apiClaim);
+              RdaChange<PartAdjMcsClaim> mcsChange = transformer.transformClaim(apiClaim);
               mcsChange.getClaim().setApiSource(apiSource);
               return mcsChange;
             });

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the McsLocations table */
+/** JPA class for the FissProcCodes table */
 @Entity
 @Getter
 @Setter
@@ -26,40 +26,37 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjMcsLocation.PK.class)
-@Table(name = "`McsLocations`", schema = "`pre_adj`")
-public class PreAdjMcsLocation {
+@IdClass(PartAdjFissProcCode.PK.class)
+@Table(name = "`FissProcCodes`", schema = "`part_adj`")
+public class PartAdjFissProcCode {
   @Id
-  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
+  @Column(name = "`dcn`", length = 23, nullable = false)
   @EqualsAndHashCode.Include
-  private String idrClmHdIcn;
+  private String dcn;
 
   @Id
   @Column(name = "`priority`", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
+  @Column(name = "`procCode`", length = 10, nullable = false)
+  private String procCode;
+
+  @Column(name = "`procFlag`", length = 4)
+  private String procFlag;
+
+  @Column(name = "`procDate`")
+  private LocalDate procDate;
+
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
-  @Column(name = "`idrLocClerk`", length = 4)
-  private String idrLocClerk;
-
-  @Column(name = "`idrLocCode`", length = 3)
-  private String idrLocCode;
-
-  @Column(name = "`idrLocDate`")
-  private LocalDate idrLocDate;
-
-  @Column(name = "`idrLocActvCode`", length = 1)
-  private String idrLocActvCode;
-
-  /** PK class for the McsLocations table */
+  /** PK class for the FissProcCodes table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
   public static class PK implements Serializable {
-    private String idrClmHdIcn;
+    private String dcn;
 
     private short priority;
   }

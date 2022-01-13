@@ -29,8 +29,8 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@Table(name = "`McsClaims`", schema = "`pre_adj`")
-public class PreAdjMcsClaim {
+@Table(name = "`McsClaims`", schema = "`part_adj`")
+public class PartAdjMcsClaim {
   @Id
   @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
   @EqualsAndHashCode.Include
@@ -206,7 +206,7 @@ public class PreAdjMcsClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjMcsDetail> details = new HashSet<>();
+  private Set<PartAdjMcsDetail> details = new HashSet<>();
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
@@ -214,7 +214,7 @@ public class PreAdjMcsClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjMcsDiagnosisCode> diagCodes = new HashSet<>();
+  private Set<PartAdjMcsDiagnosisCode> diagCodes = new HashSet<>();
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
@@ -222,7 +222,7 @@ public class PreAdjMcsClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjMcsAdjustment> adjustments = new HashSet<>();
+  private Set<PartAdjMcsAdjustment> adjustments = new HashSet<>();
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
@@ -230,7 +230,7 @@ public class PreAdjMcsClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjMcsAudit> audits = new HashSet<>();
+  private Set<PartAdjMcsAudit> audits = new HashSet<>();
 
   @OneToMany(
       mappedBy = "idrClmHdIcn",
@@ -238,5 +238,5 @@ public class PreAdjMcsClaim {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @Builder.Default
-  private Set<PreAdjMcsLocation> locations = new HashSet<>();
+  private Set<PartAdjMcsLocation> locations = new HashSet<>();
 }

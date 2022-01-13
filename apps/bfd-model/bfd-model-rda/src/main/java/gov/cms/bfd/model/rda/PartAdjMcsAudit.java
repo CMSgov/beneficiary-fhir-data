@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-/** JPA class for the FissDiagnosisCodes table */
+/** JPA class for the McsAudits table */
 @Entity
 @Getter
 @Setter
@@ -25,37 +25,37 @@ import lombok.experimental.FieldNameConstants;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @FieldNameConstants
-@IdClass(PreAdjFissDiagnosisCode.PK.class)
-@Table(name = "`FissDiagnosisCodes`", schema = "`pre_adj`")
-public class PreAdjFissDiagnosisCode {
+@IdClass(PartAdjMcsAudit.PK.class)
+@Table(name = "`McsAudits`", schema = "`part_adj`")
+public class PartAdjMcsAudit {
   @Id
-  @Column(name = "`dcn`", length = 23, nullable = false)
+  @Column(name = "`idrClmHdIcn`", length = 15, nullable = false)
   @EqualsAndHashCode.Include
-  private String dcn;
+  private String idrClmHdIcn;
 
   @Id
   @Column(name = "`priority`", nullable = false)
   @EqualsAndHashCode.Include
   private short priority;
 
-  @Column(name = "`diagCd2`", length = 7, nullable = false)
-  private String diagCd2;
-
-  @Column(name = "`diagPoaInd`", length = 1)
-  private String diagPoaInd;
-
-  @Column(name = "`bitFlags`", length = 4)
-  private String bitFlags;
-
   @Column(name = "`lastUpdated`")
   private Instant lastUpdated;
 
-  /** PK class for the FissDiagnosisCodes table */
+  @Column(name = "`idrJAuditNum`")
+  private Integer idrJAuditNum;
+
+  @Column(name = "`idrJAuditInd`", length = 1)
+  private String idrJAuditInd;
+
+  @Column(name = "`idrJAuditDisp`", length = 1)
+  private String idrJAuditDisp;
+
+  /** PK class for the McsAudits table */
   @Data
   @NoArgsConstructor
   @AllArgsConstructor
   public static class PK implements Serializable {
-    private String dcn;
+    private String idrClmHdIcn;
 
     private short priority;
   }

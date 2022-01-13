@@ -17,8 +17,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
@@ -312,9 +312,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
   boolean hasNoSamhsaData(MetricRegistry metricRegistry, Object entity) {
     Claim claim;
 
-    if (entity instanceof PreAdjFissClaim) {
+    if (entity instanceof PartAdjFissClaim) {
       claim = FissClaimTransformerV2.transform(metricRegistry, entity);
-    } else if (entity instanceof PreAdjMcsClaim) {
+    } else if (entity instanceof PartAdjMcsClaim) {
       claim = McsClaimTransformerV2.transform(metricRegistry, entity);
     } else {
       throw new IllegalArgumentException(

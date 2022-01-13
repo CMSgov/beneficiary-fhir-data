@@ -2,7 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static org.junit.Assert.assertEquals;
 
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PartAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
@@ -69,11 +69,11 @@ public class FissClaimStreamCallerIT {
         .runWithChannelParam(
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
-              final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
+              final GrpcResponseStream<RdaChange<PartAdjFissClaim>> results =
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
               assertEquals(true, results.hasNext());
 
-              PreAdjFissClaim claim = results.next().getClaim();
+              PartAdjFissClaim claim = results.next().getClaim();
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
               assertEquals(RdaService.RDA_PROTO_VERSION, claim.getApiSource());
@@ -98,7 +98,7 @@ public class FissClaimStreamCallerIT {
         .runWithChannelParam(
             channel -> {
               final FissClaimStreamCaller caller = new FissClaimStreamCaller(transformer);
-              final GrpcResponseStream<RdaChange<PreAdjFissClaim>> results =
+              final GrpcResponseStream<RdaChange<PartAdjFissClaim>> results =
                   caller.callService(channel, CallOptions.DEFAULT, 10L);
               assertEquals(10L, results.next().getSequenceNumber());
               assertEquals(11L, results.next().getSequenceNumber());
