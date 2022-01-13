@@ -22,7 +22,6 @@
         <protoc.version>3.15.8</protoc.version>
         <protobuf.version>3.12.0</protobuf.version>
         <mockito.version>3.8.0</mockito.version>
-        <jackson.version>2.12.3</jackson.version>
     </properties>
 
     <dependencies>
@@ -66,13 +65,6 @@
             <artifactId>protobuf-java-util</artifactId>
             <version>${protobuf.version}</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <!-- Used to serialize and deserialize objects to JSON during testing. -->
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <!-- Used to serialize and deserialize objects to JSON during testing. -->
