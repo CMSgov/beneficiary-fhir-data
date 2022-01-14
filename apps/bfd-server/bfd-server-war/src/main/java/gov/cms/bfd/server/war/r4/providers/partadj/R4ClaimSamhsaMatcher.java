@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers.preadj;
+package gov.cms.bfd.server.war.r4.providers.partadj;
 
 import gov.cms.bfd.server.war.adapters.r4.ClaimAdapter;
 import gov.cms.bfd.server.war.r4.providers.AbstractR4SamhsaMatcher;

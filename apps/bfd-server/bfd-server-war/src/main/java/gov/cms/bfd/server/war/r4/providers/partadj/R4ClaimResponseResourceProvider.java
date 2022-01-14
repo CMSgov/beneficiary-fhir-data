@@ -1,10 +1,10 @@
-package gov.cms.bfd.server.war.r4.providers.preadj;
+package gov.cms.bfd.server.war.r4.providers.partadj;
 
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
+import gov.cms.bfd.server.war.r4.providers.partadj.common.ResourceTypeV2;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;

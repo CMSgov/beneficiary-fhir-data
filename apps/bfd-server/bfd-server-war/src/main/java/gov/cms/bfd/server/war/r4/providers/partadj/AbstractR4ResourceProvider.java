@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers.preadj;
+package gov.cms.bfd.server.war.r4.providers.partadj;
 
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -19,8 +19,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PartAdjFissClaim;
 import gov.cms.bfd.model.rda.PartAdjMcsClaim;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.ClaimDao;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
+import gov.cms.bfd.server.war.r4.providers.partadj.common.ClaimDao;
+import gov.cms.bfd.server.war.r4.providers.partadj.common.ResourceTypeV2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;

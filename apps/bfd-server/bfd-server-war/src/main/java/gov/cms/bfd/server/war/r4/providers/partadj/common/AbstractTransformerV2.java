@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers.preadj.common;
+package gov.cms.bfd.server.war.r4.providers.partadj.common;
 
 import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;

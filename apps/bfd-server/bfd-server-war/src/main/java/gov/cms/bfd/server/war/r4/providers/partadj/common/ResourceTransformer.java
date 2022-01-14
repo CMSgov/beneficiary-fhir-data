@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers.preadj.common;
+package gov.cms.bfd.server.war.r4.providers.partadj.common;
 
 import com.codahale.metrics.MetricRegistry;
 import org.hl7.fhir.instance.model.api.IBaseResource;

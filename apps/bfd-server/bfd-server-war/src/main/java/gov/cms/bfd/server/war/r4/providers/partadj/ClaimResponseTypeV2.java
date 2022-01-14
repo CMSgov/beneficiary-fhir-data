@@ -1,9 +1,9 @@
-package gov.cms.bfd.server.war.r4.providers.preadj;
+package gov.cms.bfd.server.war.r4.providers.partadj;
 
 import gov.cms.bfd.model.rda.PartAdjFissClaim;
 import gov.cms.bfd.model.rda.PartAdjMcsClaim;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTransformer;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.ResourceTypeV2;
+import gov.cms.bfd.server.war.r4.providers.partadj.common.ResourceTransformer;
+import gov.cms.bfd.server.war.r4.providers.partadj.common.ResourceTypeV2;
 import java.util.Optional;
 import javax.persistence.Entity;
 import javax.persistence.Id;

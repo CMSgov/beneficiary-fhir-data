@@ -1,7 +1,7 @@
-package gov.cms.bfd.server.war.r4.providers.preadj.common;
+package gov.cms.bfd.server.war.r4.providers.partadj.common;
 
-import gov.cms.bfd.server.war.r4.providers.preadj.AbstractR4ResourceProvider;
-import gov.cms.bfd.server.war.r4.providers.preadj.ClaimResponseTypeV2;
+import gov.cms.bfd.server.war.r4.providers.partadj.AbstractR4ResourceProvider;
+import gov.cms.bfd.server.war.r4.providers.partadj.ClaimResponseTypeV2;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import org.hl7.fhir.instance.model.api.IBaseResource;

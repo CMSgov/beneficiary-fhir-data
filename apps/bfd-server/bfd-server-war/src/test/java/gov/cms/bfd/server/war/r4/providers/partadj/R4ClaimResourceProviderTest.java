@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers.preadj;
+package gov.cms.bfd.server.war.r4.providers.partadj;
 
 import static org.junit.Assert.assertTrue;
 

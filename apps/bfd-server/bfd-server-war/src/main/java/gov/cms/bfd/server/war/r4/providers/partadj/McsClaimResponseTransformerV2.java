@@ -1,4 +1,4 @@
-package gov.cms.bfd.server.war.r4.providers.preadj;
+package gov.cms.bfd.server.war.r4.providers.partadj;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -8,7 +8,7 @@ import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PartAdjMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
-import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
+import gov.cms.bfd.server.war.r4.providers.partadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.util.ArrayList;
 import java.util.Date;
