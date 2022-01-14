@@ -549,7 +549,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     // setup parentClaim setter/getter
     MethodSpec parentClaimGetter =
-        MethodSpec.methodBuilder(calculateGetterName(parentClaimField, null))
+        MethodSpec.methodBuilder(calculateGetterName(parentClaimField, Optional.empty()))
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return $N", PARENT_CLAIM)
             .returns(mappingSpec.getHeaderEntity())
@@ -557,7 +557,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     lineEntity.addMethod(parentClaimGetter);
 
     MethodSpec.Builder parentClaimSetter =
-        MethodSpec.methodBuilder(calculateSetterName(parentClaimField, null))
+        MethodSpec.methodBuilder(calculateSetterName(parentClaimField, Optional.empty()))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(mappingSpec.getHeaderEntity(), parentClaimField.name);
@@ -585,7 +585,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       lineEntity.addField(lineField);
 
       MethodSpec.Builder lineFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(lineField, null))
+          MethodSpec.methodBuilder(calculateGetterName(lineField, Optional.empty()))
               .addModifiers(Modifier.PUBLIC)
               .returns(
                   selectJavaPropertyType(
@@ -597,7 +597,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       lineEntity.addMethod(lineFieldGetter.build());
 
       MethodSpec.Builder lineFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(lineField, null))
+          MethodSpec.methodBuilder(calculateSetterName(lineField, Optional.empty()))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
               .addParameter(
@@ -710,7 +710,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     beneficiaryMonthlyEntity.addField(parentBeneficiaryField);
 
     MethodSpec parentBeneficiaryGetter =
-        MethodSpec.methodBuilder(calculateGetterName(parentBeneficiaryField, null))
+        MethodSpec.methodBuilder(calculateGetterName(parentBeneficiaryField, Optional.empty()))
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return $N", PARENT_BENEFICIARY)
             .returns(ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"))
@@ -718,7 +718,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     beneficiaryMonthlyEntity.addMethod(parentBeneficiaryGetter);
 
     MethodSpec.Builder parentBeneficiarySetter =
-        MethodSpec.methodBuilder(calculateSetterName(parentBeneficiaryField, null))
+        MethodSpec.methodBuilder(calculateSetterName(parentBeneficiaryField, Optional.empty()))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(
@@ -963,14 +963,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addField(idField);
 
       MethodSpec.Builder idFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(idField, null))
+          MethodSpec.methodBuilder(calculateGetterName(idField, Optional.empty()))
               .addModifiers(Modifier.PUBLIC)
               .returns(idField.type);
       addGetterStatement(false, idField, idFieldGetter);
       headerEntityClass.addMethod(idFieldGetter.build());
 
       MethodSpec.Builder idFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(idField, null))
+          MethodSpec.methodBuilder(calculateSetterName(idField, Optional.empty()))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
               .addParameter(idField.type, idField.name);
@@ -998,7 +998,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addField(headerField);
 
       MethodSpec.Builder headerFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(headerField, null))
+          MethodSpec.methodBuilder(calculateGetterName(headerField, Optional.empty()))
               .addModifiers(Modifier.PUBLIC)
               .returns(
                   selectJavaPropertyType(
@@ -1010,7 +1010,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addMethod(headerFieldGetter.build());
 
       MethodSpec.Builder headerFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(headerField, null))
+          MethodSpec.methodBuilder(calculateSetterName(headerField, Optional.empty()))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
               .addParameter(
@@ -1043,7 +1043,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addField(headerField);
 
       MethodSpec.Builder headerFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(headerField, null))
+          MethodSpec.methodBuilder(calculateGetterName(headerField, Optional.empty()))
               .addModifiers(Modifier.PUBLIC)
               .returns(
                   selectJavaPropertyType(
@@ -1055,7 +1055,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addMethod(headerFieldGetter.build());
 
       MethodSpec.Builder headerFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(headerField, null))
+          MethodSpec.methodBuilder(calculateSetterName(headerField, Optional.empty()))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
               .addParameter(
@@ -1284,7 +1284,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 .findAny()
                 .get();
         parseMethod.addCode(
-            "line.$L(header);\n\n", calculateSetterName(lineEntityParentField, null));
+            "line.$L(header);\n\n", calculateSetterName(lineEntityParentField, Optional.empty()));
       }
 
       // Determine which variables to use in assignment statement.
@@ -1333,7 +1333,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       Map<String, Object> valueAssignmentArgs = new LinkedHashMap<>();
       valueAssignmentArgs.put("entity", entityName);
-      valueAssignmentArgs.put("entitySetter", calculateSetterName(entityField, null));
+      valueAssignmentArgs.put("entitySetter", calculateSetterName(entityField, Optional.empty()));
       valueAssignmentArgs.put("record", recordName);
       valueAssignmentArgs.put("parseUtilsType", parseUtilsType);
       valueAssignmentArgs.put("parseUtilsMethod", parseUtilsMethodName);
@@ -1357,7 +1357,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .filter(f -> f.name.equals(mappingSpec.getHeaderEntityLinesField()))
               .findAny()
               .get();
-      parseMethod.addStatement("header.$L().add(line)", calculateGetterName(linesField, null));
+      parseMethod.addStatement(
+          "header.$L().add(line)", calculateGetterName(linesField, Optional.empty()));
       parseMethod.endControlFlow();
     }
 
@@ -1459,7 +1460,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 .filter(f -> f.name.equalsIgnoreCase(mappingSpec.getHeaderEntityLinesField()))
                 .findAny()
                 .get();
-        String linesFieldGetter = calculateGetterName(linesField, null);
+        String linesFieldGetter = calculateGetterName(linesField, Optional.empty());
         csvWriterMethod.addCode("\n");
         csvWriterMethod.addComment("Convert the line fields.");
         csvWriterMethod.addStatement(
@@ -1576,12 +1577,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     if (field == parentField) {
       // This is the line-level "parent" field.
-      code.append(calculateGetterName(parentField, null)).append("().");
-      code.append(calculateGetterName(headerIdField, null)).append("()");
+      code.append(calculateGetterName(parentField, Optional.empty())).append("().");
+      code.append(calculateGetterName(headerIdField, Optional.empty())).append("()");
     } else if (rifField.isPresent() && rifField.get().isRifColumnOptional()) {
-      code.append(calculateGetterName(field, null)).append("().orElse(null)");
+      code.append(calculateGetterName(field, Optional.empty())).append("().orElse(null)");
     } else {
-      code.append(calculateGetterName(field, null)).append("()");
+      code.append(calculateGetterName(field, Optional.empty())).append("()");
     }
     sb.append(", code=").append(code).append(" ]");
     logNote("%s", sb.toString());
@@ -1858,10 +1859,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     entityField.name
    * @return the name of the Java "getter" for the specified {@link FieldSpec}
    */
-  private static String calculateGetterName(FieldSpec entityField, String overrideName) {
+  private static String calculateGetterName(FieldSpec entityField, Optional<String> overrideName) {
     String name =
-        overrideName != null && overrideName.length() > 0
-            ? capitalize(overrideName)
+        overrideName.isPresent()
+            ? capitalize(overrideName.get())
             : capitalize(convertToCamelCase(entityField.name));
 
     return entityField.type.equals(TypeName.BOOLEAN)
@@ -1898,10 +1899,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     setter
    * @return the name of the Java "setter" for the specified {@link FieldSpec}
    */
-  private static String calculateSetterName(FieldSpec entityField, String overrideName) {
+  private static String calculateSetterName(FieldSpec entityField, Optional<String> overrideName) {
     String name =
-        overrideName != null && overrideName.length() > 0
-            ? capitalize(overrideName)
+        overrideName.isPresent()
+            ? capitalize(overrideName.get())
             : capitalize(convertToCamelCase(entityField.name));
 
     return "set" + name;
@@ -2048,14 +2049,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     lineEntity.addField(lineField);
 
     MethodSpec.Builder lineFieldGetter =
-        MethodSpec.methodBuilder(calculateGetterName(lineField, null))
+        MethodSpec.methodBuilder(calculateGetterName(lineField, Optional.empty()))
             .addModifiers(Modifier.PUBLIC)
             .returns(javaPropType);
     addGetterStatement(rifField.isRifColumnOptional(), lineField, lineFieldGetter);
     lineEntity.addMethod(lineFieldGetter.build());
 
     MethodSpec.Builder lineFieldSetter =
-        MethodSpec.methodBuilder(calculateSetterName(lineField, null))
+        MethodSpec.methodBuilder(calculateSetterName(lineField, Optional.empty()))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(javaPropType, lineField.name);
