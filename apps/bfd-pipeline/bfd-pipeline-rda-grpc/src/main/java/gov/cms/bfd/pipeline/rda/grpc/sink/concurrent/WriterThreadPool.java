@@ -142,7 +142,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    * @throws ProcessingException if scheduled the write fails
    */
   public void updateSequenceNumbers() throws ProcessingException {
-    final long sequenceNumber = sequenceNumbers.getHighestWrittenSequenceNumber();
+    final long sequenceNumber = sequenceNumbers.getSafeResumeSequenceNumber();
     if (sequenceNumber > 0) {
       try {
         sequenceNumberWriter.add(sequenceNumber);
@@ -209,7 +209,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
   }
 
   private void updateSequenceNumberDirectly() throws ProcessingException {
-    final long sequenceNumber = sequenceNumbers.getHighestWrittenSequenceNumber();
+    final long sequenceNumber = sequenceNumbers.getSafeResumeSequenceNumber();
     if (sequenceNumber > 0) {
       try {
         sink.updateLastSequenceNumber(sequenceNumber);

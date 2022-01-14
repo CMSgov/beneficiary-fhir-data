@@ -65,7 +65,7 @@ public class SequenceNumberTracker {
    *
    * @return the best sequence number to send to the RDA API when fetching claims
    */
-  public synchronized long getHighestWrittenSequenceNumber() {
+  public synchronized long getSafeResumeSequenceNumber() {
     if (activeSequenceNumbers.size() > 0) {
       // Since the set is ordered the first value is lowest unwritten value.
       // We return one less so that caller knows to resume at our first unwritten value.
