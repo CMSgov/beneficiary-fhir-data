@@ -33,10 +33,13 @@ public class ClaimDao {
 
   private final EntityManager entityManager;
   private final MetricRegistry metricRegistry;
+  private final boolean isOldMbiHashEnabled;
 
-  public ClaimDao(EntityManager entityManager, MetricRegistry metricRegistry) {
+  public ClaimDao(
+      EntityManager entityManager, MetricRegistry metricRegistry, boolean isOldMbiHashEnabled) {
     this.entityManager = entityManager;
     this.metricRegistry = metricRegistry;
+    this.isOldMbiHashEnabled = isOldMbiHashEnabled;
   }
 
   /**
@@ -101,7 +104,6 @@ public class ClaimDao {
       String mbiRecordAttributeName,
       String mbiSearchValue,
       boolean isMbiSearchValueHashed,
-      boolean isOldMbiHashEnabled,
       DateRangeParam lastUpdated,
       DateRangeParam serviceDate,
       String endDateAttributeName) {

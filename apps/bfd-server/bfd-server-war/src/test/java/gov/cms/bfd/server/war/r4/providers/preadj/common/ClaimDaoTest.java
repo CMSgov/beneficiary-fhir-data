@@ -38,7 +38,7 @@ public class ClaimDaoTest {
 
     ResourceTypeV2<IBaseResource> mockClaimType = new MockClaimType();
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry, true));
 
     // unchecked - This is fine for the purposes of this test.
     //noinspection unchecked
@@ -64,7 +64,7 @@ public class ClaimDaoTest {
     MetricRegistry registry = new MetricRegistry();
     EntityManager mockEntityManager = mock(EntityManager.class);
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, registry, true));
 
     CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
     CriteriaQuery<?> mockQuery = mock(CriteriaQuery.class);
@@ -116,7 +116,7 @@ public class ClaimDaoTest {
     EntityManager mockEntityManager = mock(EntityManager.class);
     MetricRegistry metricRegistry = new MetricRegistry();
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
 
     CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
     // unchecked - Creating mocks, this is ok.
@@ -171,7 +171,6 @@ public class ClaimDaoTest {
             mbiRecordAttributeName,
             mbiSearchValue,
             isMbiSearchValueHashed,
-            false,
             null,
             null,
             endAttribute);
@@ -194,7 +193,7 @@ public class ClaimDaoTest {
     EntityManager mockEntityManager = mock(EntityManager.class);
     MetricRegistry metricRegistry = new MetricRegistry();
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, true));
 
     CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
     // unchecked - Creating mocks, this is ok.
@@ -261,7 +260,6 @@ public class ClaimDaoTest {
             mbiRecordAttributeName,
             mbiSearchValue,
             isMbiSearchValueHashed,
-            true,
             null,
             null,
             endAttribute);
@@ -285,7 +283,7 @@ public class ClaimDaoTest {
     EntityManager mockEntityManager = mock(EntityManager.class);
     MetricRegistry metricRegistry = new MetricRegistry();
 
-    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry));
+    ClaimDao daoSpy = spy(new ClaimDao(mockEntityManager, metricRegistry, false));
 
     CriteriaBuilder mockBuilder = mock(CriteriaBuilder.class);
     // unchecked - Creating mocks, this is ok.
@@ -363,7 +361,6 @@ public class ClaimDaoTest {
             mbiRecordAttributeName,
             mbiSearchValue,
             isMbiSearchValueHashed,
-            false,
             mockLastUpdatedParam,
             mockServiceDateParam,
             endAttribute);
