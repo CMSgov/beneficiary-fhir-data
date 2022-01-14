@@ -415,31 +415,6 @@ public final class CoverageTransformerTest {
         CcwCodebookVariable.PTDPBPID12, beneficiary.getPartDPbpNumberDecId(), coverage);
 
     TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID01, beneficiary.getPartDPbpNumberJanId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID02, beneficiary.getPartDPbpNumberFebId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID03, beneficiary.getPartDPbpNumberMarId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID04, beneficiary.getPartDPbpNumberAprId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID05, beneficiary.getPartDPbpNumberMayId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID06, beneficiary.getPartDPbpNumberJunId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID07, beneficiary.getPartDPbpNumberJulId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID08, beneficiary.getPartDPbpNumberAugId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID09, beneficiary.getPartDPbpNumberSeptId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID10, beneficiary.getPartDPbpNumberOctId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID11, beneficiary.getPartDPbpNumberNovId(), coverage);
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
-        CcwCodebookVariable.PTDPBPID12, beneficiary.getPartDPbpNumberDecId(), coverage);
-
-    TransformerTestUtils.assertExtensionCodingDoesNotExist(
         CcwCodebookVariable.SGMTID01, beneficiary.getPartDSegmentNumberJanId(), coverage);
     TransformerTestUtils.assertExtensionCodingDoesNotExist(
         CcwCodebookVariable.SGMTID02, beneficiary.getPartDSegmentNumberFebId(), coverage);

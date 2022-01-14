@@ -574,11 +574,11 @@ public final class CoverageTransformerV2Test {
     Assert.assertTrue(compare.equalsDeep(ex));
   }
 
-  private static void verifyCodedExtensionIsFalse(
-      Coverage coverage, String url, String code, String display) {
+  private static void verifyCodedExtensionDoestNotExist(Coverage coverage, String url) {
     Optional<Extension> ex =
         coverage.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
-    Assert.assertNull(ex);
+
+    Assert.assertTrue(ex.isEmpty());
   }
 
   private static void verifyCoverageStatus() {
@@ -794,13 +794,9 @@ public final class CoverageTransformerV2Test {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
     // dual_01 thru dual_12
-    for (int i = 1; i < 2; i++) {
+    for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/dual_%02d", i);
-      verifyCodedExtensionIsFalse(
-          coverage,
-          url,
-          "**",
-          "Enrolled in Medicare A and/or B, but no Part D enrollment data for the beneficiary.(This status was indicated as 'XX' for 2006-2009)");
+      verifyCodedExtensionDoestNotExist(coverage, url);
     }
 
     // // buyin01 thru buyin12
