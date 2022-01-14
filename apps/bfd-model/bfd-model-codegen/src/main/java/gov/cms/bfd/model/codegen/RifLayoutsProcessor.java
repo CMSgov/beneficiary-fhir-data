@@ -80,7 +80,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * Both Maven and Eclipse hide compiler messages, so setting this constant to <code>true</code>
    * will also log messages out to a new source file.
    */
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final String DATA_DICTIONARY_LINK =
       "https://bluebutton.cms.gov/resources/variables/";
@@ -549,7 +549,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     // setup parentClaim setter/getter
     MethodSpec parentClaimGetter =
-        MethodSpec.methodBuilder(calculateGetterName(parentClaimField, Optional.empty()))
+        MethodSpec.methodBuilder(calculateGetterName(parentClaimField))
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return $N", PARENT_CLAIM)
             .returns(mappingSpec.getHeaderEntity())
@@ -557,7 +557,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     lineEntity.addMethod(parentClaimGetter);
 
     MethodSpec.Builder parentClaimSetter =
-        MethodSpec.methodBuilder(calculateSetterName(parentClaimField, Optional.empty()))
+        MethodSpec.methodBuilder(calculateSetterName(parentClaimField))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(mappingSpec.getHeaderEntity(), parentClaimField.name);
@@ -585,7 +585,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       lineEntity.addField(lineField);
 
       MethodSpec.Builder lineFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(lineField, Optional.empty()))
+          MethodSpec.methodBuilder(calculateGetterName(lineField))
               .addModifiers(Modifier.PUBLIC)
               .returns(
                   selectJavaPropertyType(
@@ -597,7 +597,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       lineEntity.addMethod(lineFieldGetter.build());
 
       MethodSpec.Builder lineFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(lineField, Optional.empty()))
+          MethodSpec.methodBuilder(calculateSetterName(lineField))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
               .addParameter(
@@ -710,7 +710,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     beneficiaryMonthlyEntity.addField(parentBeneficiaryField);
 
     MethodSpec parentBeneficiaryGetter =
-        MethodSpec.methodBuilder(calculateGetterName(parentBeneficiaryField, Optional.empty()))
+        MethodSpec.methodBuilder(calculateGetterName(parentBeneficiaryField))
             .addModifiers(Modifier.PUBLIC)
             .addStatement("return $N", PARENT_BENEFICIARY)
             .returns(ClassName.get("gov.cms.bfd.model.rif", "Beneficiary"))
@@ -718,7 +718,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     beneficiaryMonthlyEntity.addMethod(parentBeneficiaryGetter);
 
     MethodSpec.Builder parentBeneficiarySetter =
-        MethodSpec.methodBuilder(calculateSetterName(parentBeneficiaryField, Optional.empty()))
+        MethodSpec.methodBuilder(calculateSetterName(parentBeneficiaryField))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(
@@ -963,14 +963,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addField(idField);
 
       MethodSpec.Builder idFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(idField, Optional.empty()))
+          MethodSpec.methodBuilder(calculateGetterName(idField))
               .addModifiers(Modifier.PUBLIC)
               .returns(idField.type);
       addGetterStatement(false, idField, idFieldGetter);
       headerEntityClass.addMethod(idFieldGetter.build());
 
       MethodSpec.Builder idFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(idField, Optional.empty()))
+          MethodSpec.methodBuilder(calculateSetterName(idField))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
               .addParameter(idField.type, idField.name);
@@ -998,7 +998,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addField(headerField);
 
       MethodSpec.Builder headerFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(headerField, Optional.empty()))
+          MethodSpec.methodBuilder(calculateGetterName(headerField))
               .addModifiers(Modifier.PUBLIC)
               .returns(
                   selectJavaPropertyType(
@@ -1010,7 +1010,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addMethod(headerFieldGetter.build());
 
       MethodSpec.Builder headerFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(headerField, Optional.empty()))
+          MethodSpec.methodBuilder(calculateSetterName(headerField))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
               .addParameter(
@@ -1043,7 +1043,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addField(headerField);
 
       MethodSpec.Builder headerFieldGetter =
-          MethodSpec.methodBuilder(calculateGetterName(headerField, Optional.empty()))
+          MethodSpec.methodBuilder(calculateGetterName(headerField))
               .addModifiers(Modifier.PUBLIC)
               .returns(
                   selectJavaPropertyType(
@@ -1055,7 +1055,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       headerEntityClass.addMethod(headerFieldGetter.build());
 
       MethodSpec.Builder headerFieldSetter =
-          MethodSpec.methodBuilder(calculateSetterName(headerField, Optional.empty()))
+          MethodSpec.methodBuilder(calculateSetterName(headerField))
               .addModifiers(Modifier.PUBLIC)
               .returns(void.class)
               .addParameter(
@@ -1190,7 +1190,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
         headerEntityClass.addMethod(childGetter);
       }
     }
-    // lastUpdated now handled by additionalDatabaseFields
     TypeSpec headerEntityFinal = headerEntityClass.build();
     JavaFile headerEntityFile =
         JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
@@ -1283,8 +1282,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                 .filter(f -> f.name.equalsIgnoreCase(mappingSpec.getLineEntityParentField()))
                 .findAny()
                 .get();
-        parseMethod.addCode(
-            "line.$L(header);\n\n", calculateSetterName(lineEntityParentField, Optional.empty()));
+        parseMethod.addCode("line.$L(header);\n\n", calculateSetterName(lineEntityParentField));
       }
 
       // Determine which variables to use in assignment statement.
@@ -1333,7 +1331,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
       Map<String, Object> valueAssignmentArgs = new LinkedHashMap<>();
       valueAssignmentArgs.put("entity", entityName);
-      valueAssignmentArgs.put("entitySetter", calculateSetterName(entityField, Optional.empty()));
+      valueAssignmentArgs.put("entitySetter", calculateSetterName(entityField));
       valueAssignmentArgs.put("record", recordName);
       valueAssignmentArgs.put("parseUtilsType", parseUtilsType);
       valueAssignmentArgs.put("parseUtilsMethod", parseUtilsMethodName);
@@ -1357,8 +1355,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
               .filter(f -> f.name.equals(mappingSpec.getHeaderEntityLinesField()))
               .findAny()
               .get();
-      parseMethod.addStatement(
-          "header.$L().add(line)", calculateGetterName(linesField, Optional.empty()));
+      parseMethod.addStatement("header.$L().add(line)", calculateGetterName(linesField));
       parseMethod.endControlFlow();
     }
 
@@ -1388,150 +1385,129 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   private TypeSpec generateCsvWriter(
       MappingSpec mappingSpec, TypeSpec headerEntity, Optional<TypeSpec> lineEntity)
       throws IOException {
-    try {
-      TypeSpec.Builder csvWriterClass =
-          TypeSpec.classBuilder(mappingSpec.getCsvWriterClass())
-              .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-      // Grab some common types we'll need.
-      ArrayTypeName recordType = ArrayTypeName.of(Object.class);
-      ArrayTypeName recordsListType = ArrayTypeName.of(recordType);
-      ParameterizedTypeName returnType =
-          ParameterizedTypeName.get(
-              ClassName.get(Map.class), ClassName.get(String.class), recordsListType);
+    TypeSpec.Builder csvWriterClass =
+        TypeSpec.classBuilder(mappingSpec.getCsvWriterClass())
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-      MethodSpec.Builder csvWriterMethod =
-          MethodSpec.methodBuilder("toCsvRecordsByTable")
-              .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-              .returns(returnType)
-              .addParameter(mappingSpec.getHeaderEntity(), "entity");
+    // Grab some common types we'll need.
+    ArrayTypeName recordType = ArrayTypeName.of(Object.class);
+    ArrayTypeName recordsListType = ArrayTypeName.of(recordType);
+    ParameterizedTypeName returnType =
+        ParameterizedTypeName.get(
+            ClassName.get(Map.class), ClassName.get(String.class), recordsListType);
 
-      csvWriterMethod.addComment("Verify the input.");
-      csvWriterMethod.addStatement("$T.requireNonNull(entity)", Objects.class);
+    MethodSpec.Builder csvWriterMethod =
+        MethodSpec.methodBuilder("toCsvRecordsByTable")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .returns(returnType)
+            .addParameter(mappingSpec.getHeaderEntity(), "entity");
 
-      csvWriterMethod.addCode("\n");
-      csvWriterMethod.addStatement("$T csvRecordsByTable = new $T<>(2)", returnType, HashMap.class);
+    csvWriterMethod.addComment("Verify the input.");
+    csvWriterMethod.addStatement("$T.requireNonNull(entity)", Objects.class);
 
-      // Generate the header conversion.
-      csvWriterMethod.addCode("\n");
-      csvWriterMethod.addComment("Convert the header fields.");
-      csvWriterMethod.addStatement("$T headerRecords = new $T[2][]", recordsListType, Object.class);
+    csvWriterMethod.addCode("\n");
+    csvWriterMethod.addStatement("$T csvRecordsByTable = new $T<>(2)", returnType, HashMap.class);
 
-      String headerColumnsList =
+    // Generate the header conversion.
+    csvWriterMethod.addCode("\n");
+    csvWriterMethod.addComment("Convert the header fields.");
+    csvWriterMethod.addStatement("$T headerRecords = new $T[2][]", recordsListType, Object.class);
+
+    String headerColumnsList = calculateCsvColumns(headerEntity.fieldSpecs, mappingSpec);
+
+    if (DEBUG) {
+      logNote(
+          "headerColumnsList\n=====================\n%s",
+          headerColumnsList.replaceAll(", ", ",\n"));
+    }
+    csvWriterMethod.addStatement(
+        "headerRecords[0] = new $1T{ $2L }", recordType, headerColumnsList);
+
+    String headerGettersList =
+        headerEntity.fieldSpecs.stream()
+            .filter(
+                f -> {
+                  if (mappingSpec.getHasLines()
+                      && f.name.equals(mappingSpec.getHeaderEntityLinesField())) return false;
+                  return true;
+                })
+            .map(f -> calculateFieldToCsvValueCode("entity", f, mappingSpec, null, null))
+            .collect(Collectors.joining(", "));
+
+    csvWriterMethod.addStatement(
+        "$1T headerRecord = new $1T{ $2L }", recordType, headerGettersList);
+    csvWriterMethod.addStatement("headerRecords[1] = headerRecord");
+    csvWriterMethod.addStatement(
+        "csvRecordsByTable.put($S, headerRecords)", mappingSpec.getHeaderTable());
+
+    // Generate the line conversion.
+    if (mappingSpec.getHasLines()) {
+      FieldSpec linesField =
           headerEntity.fieldSpecs.stream()
-              .filter(
-                  f -> {
-                    if (mappingSpec.getHasLines()
-                        && f.name.equals(mappingSpec.getHeaderEntityLinesField())) return false;
-                    return true;
-                  })
-              .map(f -> "\"" + calculateFieldToCsvColumn(f, mappingSpec) + "\"")
-              .collect(Collectors.joining(", "));
+              .filter(f -> f.name.equalsIgnoreCase(mappingSpec.getHeaderEntityLinesField()))
+              .findAny()
+              .get();
+      String linesFieldGetter = calculateGetterName(linesField);
+      csvWriterMethod.addCode("\n");
+      csvWriterMethod.addComment("Convert the line fields.");
+      csvWriterMethod.addStatement(
+          "$T lineRecords = new $T[entity.$L().size() + 1][]",
+          recordsListType,
+          Object.class,
+          linesFieldGetter);
+
+      csvWriterMethod.addStatement(
+          "csvRecordsByTable.put($S, lineRecords)", mappingSpec.getLineTable());
+
+      String lineColumnsList = calculateCsvColumns(lineEntity.get().fieldSpecs, mappingSpec);
 
       if (DEBUG) {
         logNote(
-            "headerColumnsList\n=====================\n%s",
-            headerColumnsList.replaceAll(", ", ",\n"));
+            "lineColumnsList\n=====================\n%s", lineColumnsList.replaceAll(", ", ",\n"));
       }
-      csvWriterMethod.addStatement(
-          "headerRecords[0] = new $1T{ $2L }", recordType, headerColumnsList);
 
-      String headerGettersList =
+      csvWriterMethod.addStatement("lineRecords[0] = new $1T{ $2L }", recordType, lineColumnsList);
+      csvWriterMethod.beginControlFlow(
+          "for (int lineIndex = 0; lineIndex < entity.$L().size();lineIndex++)", linesFieldGetter);
+      csvWriterMethod.addStatement(
+          "$T lineEntity = entity.$L().get(lineIndex)",
+          mappingSpec.getLineEntity(),
+          linesFieldGetter);
+
+      FieldSpec parentField =
+          lineEntity.get().fieldSpecs.stream()
+              .filter(f -> f.name.equalsIgnoreCase(PARENT_CLAIM))
+              .findAny()
+              .get();
+      FieldSpec headerIdField =
           headerEntity.fieldSpecs.stream()
-              .filter(
+              .filter(f -> f.name.equalsIgnoreCase("claimId"))
+              .findAny()
+              .get();
+
+      String lineGettersList =
+          lineEntity.get().fieldSpecs.stream()
+              .map(
                   f -> {
-                    if (mappingSpec.getHasLines()
-                        && f.name.equals(mappingSpec.getHeaderEntityLinesField())) return false;
-                    return true;
+                    return calculateFieldToCsvValueCode(
+                        "lineEntity", f, mappingSpec, parentField, headerIdField);
                   })
-              .map(f -> calculateFieldToCsvValueCode("entity", f, mappingSpec, null, null))
               .collect(Collectors.joining(", "));
 
-      csvWriterMethod.addStatement(
-          "$1T headerRecord = new $1T{ $2L }", recordType, headerGettersList);
-      csvWriterMethod.addStatement("headerRecords[1] = headerRecord");
-      csvWriterMethod.addStatement(
-          "csvRecordsByTable.put($S, headerRecords)", mappingSpec.getHeaderTable());
-
-      // Generate the line conversion.
-      if (mappingSpec.getHasLines()) {
-        FieldSpec linesField =
-            headerEntity.fieldSpecs.stream()
-                .filter(f -> f.name.equalsIgnoreCase(mappingSpec.getHeaderEntityLinesField()))
-                .findAny()
-                .get();
-        String linesFieldGetter = calculateGetterName(linesField, Optional.empty());
-        csvWriterMethod.addCode("\n");
-        csvWriterMethod.addComment("Convert the line fields.");
-        csvWriterMethod.addStatement(
-            "$T lineRecords = new $T[entity.$L().size() + 1][]",
-            recordsListType,
-            Object.class,
-            linesFieldGetter);
-
-        csvWriterMethod.addStatement(
-            "csvRecordsByTable.put($S, lineRecords)", mappingSpec.getLineTable());
-        String lineColumnsList =
-            lineEntity.get().fieldSpecs.stream()
-                .map(f -> "\"" + calculateFieldToCsvColumn(f, mappingSpec) + "\"")
-                .collect(Collectors.joining(", "));
-
-        if (DEBUG) {
-          logNote(
-              "lineColumnsList\n=====================\n%s",
-              lineColumnsList.replaceAll(", ", ",\n"));
-        }
-
-        csvWriterMethod.addStatement(
-            "lineRecords[0] = new $1T{ $2L }", recordType, lineColumnsList);
-        csvWriterMethod.beginControlFlow(
-            "for (int lineIndex = 0; lineIndex < entity.$L().size();lineIndex++)",
-            linesFieldGetter);
-        csvWriterMethod.addStatement(
-            "$T lineEntity = entity.$L().get(lineIndex)",
-            mappingSpec.getLineEntity(),
-            linesFieldGetter);
-
-        FieldSpec parentField =
-            lineEntity.get().fieldSpecs.stream()
-                .filter(f -> f.name.equalsIgnoreCase(PARENT_CLAIM))
-                .findAny()
-                .get();
-        FieldSpec headerIdField =
-            headerEntity.fieldSpecs.stream()
-                .filter(f -> f.name.equalsIgnoreCase("claimId"))
-                .findAny()
-                .get();
-
-        String lineGettersList =
-            lineEntity.get().fieldSpecs.stream()
-                .map(
-                    f -> {
-                      return calculateFieldToCsvValueCode(
-                          "lineEntity", f, mappingSpec, parentField, headerIdField);
-                    })
-                .collect(Collectors.joining(", "));
-
-        csvWriterMethod.addStatement(
-            "$1T lineRecord = new $1T{ $2L }", recordType, lineGettersList);
-        csvWriterMethod.addStatement("lineRecords[lineIndex + 1] = lineRecord");
-        csvWriterMethod.endControlFlow();
-      }
-
-      csvWriterMethod.addStatement("return csvRecordsByTable");
-      csvWriterClass.addMethod(csvWriterMethod.build());
-
-      TypeSpec parsingClassFinal = csvWriterClass.build();
-      JavaFile parsingClassFile =
-          JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
-      parsingClassFile.writeTo(processingEnv.getFiler());
-      return parsingClassFinal;
-    } catch (Exception e) {
-      StringWriter sw = new StringWriter();
-      e.printStackTrace(new PrintWriter(sw));
-      log(Diagnostic.Kind.ERROR, "FATAL ERROR: " + sw.toString());
+      csvWriterMethod.addStatement("$1T lineRecord = new $1T{ $2L }", recordType, lineGettersList);
+      csvWriterMethod.addStatement("lineRecords[lineIndex + 1] = lineRecord");
+      csvWriterMethod.endControlFlow();
     }
-    return null;
+
+    csvWriterMethod.addStatement("return csvRecordsByTable");
+    csvWriterClass.addMethod(csvWriterMethod.build());
+
+    TypeSpec parsingClassFinal = csvWriterClass.build();
+    JavaFile parsingClassFile =
+        JavaFile.builder(mappingSpec.getPackageName(), parsingClassFinal).build();
+    parsingClassFile.writeTo(processingEnv.getFiler());
+    return parsingClassFinal;
   }
 
   /**
@@ -1577,12 +1553,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
     if (field == parentField) {
       // This is the line-level "parent" field.
-      code.append(calculateGetterName(parentField, Optional.empty())).append("().");
-      code.append(calculateGetterName(headerIdField, Optional.empty())).append("()");
+      code.append(calculateGetterName(parentField)).append("().");
+      code.append(calculateGetterName(headerIdField)).append("()");
     } else if (rifField.isPresent() && rifField.get().isRifColumnOptional()) {
-      code.append(calculateGetterName(field, Optional.empty())).append("().orElse(null)");
+      code.append(calculateGetterName(field)).append("().orElse(null)");
     } else {
-      code.append(calculateGetterName(field, Optional.empty())).append("()");
+      code.append(calculateGetterName(field)).append("()");
     }
     sb.append(", code=").append(code).append(" ]");
     logNote("%s", sb.toString());
@@ -1590,57 +1566,34 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   }
 
   /**
-   * Used in {@link #calculateFieldToCsvColumn(MappingSpec, TypeSpec)} and generates the
-   * field-to-CSV-value conversion code for the specified field.
+   * Used in {@link #calculateCsvColumns(List<FieldSpec>, MappingSpec)} and generates the
+   * field-to-CSV-value header.
    *
-   * @param field the field to generate conversion code for
+   * @param fields {@link List<FieldSpec>} to process
    * @param mappingSpec the {@link MappingSpec} of the field to generate conversion code for
-   * @return the field-to-CSV-value column name for the specified field
+   * @return the string header of column names
    */
-  private String calculateFieldToCsvColumn(FieldSpec field, MappingSpec mappingSpec) {
+  private String calculateCsvColumns(List<FieldSpec> fields, MappingSpec mappingSpec) {
+    StringBuilder sb = new StringBuilder();
+    int cnt = 0;
+    for (FieldSpec field : fields) {
+      Optional<RifField> rifField =
+          mappingSpec.getRifLayout().getRifFields().stream()
+              .filter(f -> field.name.equalsIgnoreCase(f.getJavaFieldName()))
+              .findAny();
 
-    Optional<RifField> rifField =
-        mappingSpec.getRifLayout().getRifFields().stream()
-            .filter(f -> field.name.equalsIgnoreCase(f.getJavaFieldName()))
-            .findAny();
-
-    return rifField != null && rifField.isPresent()
-        ? rifField.get().getRifColumnName()
-        : additonalFieldToCsvColumn(field, mappingSpec);
-  }
-
-  /**
-   * Used in {@link #additonalFieldToCsvColumn(MappingSpec, TypeSpec)} and generates the
-   * field-to-CSV-value conversion code for the specified field.
-   *
-   * @param field the field to generate conversion code for
-   * @param mappingSpec the {@link MappingSpec} of the field to generate conversion code for
-   * @return the field-to-CSV-value column name for the specified field
-   */
-  private String additonalFieldToCsvColumn(FieldSpec field, MappingSpec mappingSpec) {
-
-    Optional<RifField> rifField =
-        mappingSpec.getHeaderEntityAdditionalDatabaseFields().stream()
-            .filter(f -> field.name.equalsIgnoreCase(f.getJavaFieldName()))
-            .findAny();
-
-    return rifField != null && rifField.isPresent()
-        ? rifField.get().getRifColumnName()
-        : lastChanceFieldToCsvColumn(field.name);
-  }
-
-  /**
-   * Used in {@link #lastChanceFieldToCsvColumn(String)} to generate the field-to-CSV-value column
-   * name for the specified field.
-   *
-   * @param fieldName the field to generate conversion code for
-   * @return the field-to-CSV-value conversion code for the specified field
-   */
-  private String lastChanceFieldToCsvColumn(String fieldName) {
-    if (fieldName.equalsIgnoreCase("lastUpdated")) {
-      return "LAST_UPDATED";
+      if (!rifField.isPresent()) {
+        rifField =
+            mappingSpec.getHeaderEntityAdditionalDatabaseFields().stream()
+                .filter(f -> field.name.equalsIgnoreCase(f.getJavaFieldName()))
+                .findAny();
+      }
+      if (rifField.isPresent()) {
+        sb.append(cnt > 0 ? ", \"" : "\"").append(rifField.get().getRifColumnName()).append("\"");
+        cnt++;
+      }
     }
-    return fieldName;
+    return sb.toString();
   }
 
   /**
@@ -1855,15 +1808,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
   /**
    * @param entityField the JPA entity {@link FieldSpec} for the field that the desired getter will
    *     wrap
-   * @param overrideName {@link String} name to use if caller wishes to override the default
-   *     entityField.name
    * @return the name of the Java "getter" for the specified {@link FieldSpec}
    */
-  private static String calculateGetterName(FieldSpec entityField, Optional<String> overrideName) {
-    String name =
-        overrideName.isPresent()
-            ? capitalize(overrideName.get())
-            : capitalize(convertToCamelCase(entityField.name));
+  private static String calculateGetterName(FieldSpec entityField) {
+    String name = capitalize(convertToCamelCase(entityField.name));
 
     return entityField.type.equals(TypeName.BOOLEAN)
             || entityField.type.equals(ClassName.get(Boolean.class))
@@ -1889,8 +1837,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    */
   private static void addGetterStatement(
       boolean optional, FieldSpec entityField, MethodSpec.Builder entityGetter) {
-    if (!optional) entityGetter.addStatement("return $N", entityField);
-    else entityGetter.addStatement("return $T.ofNullable($N)", Optional.class, entityField);
+    if (!optional) {
+      entityGetter.addStatement("return $N", entityField);
+    } else {
+      entityGetter.addStatement("return $T.ofNullable($N)", Optional.class, entityField);
+    }
   }
 
   /**
@@ -1899,13 +1850,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    *     setter
    * @return the name of the Java "setter" for the specified {@link FieldSpec}
    */
-  private static String calculateSetterName(FieldSpec entityField, Optional<String> overrideName) {
-    String name =
-        overrideName.isPresent()
-            ? capitalize(overrideName.get())
-            : capitalize(convertToCamelCase(entityField.name));
-
-    return "set" + name;
+  private static String calculateSetterName(FieldSpec entityField) {
+    return "set" + capitalize(convertToCamelCase(entityField.name));
   }
 
   /**
@@ -1926,8 +1872,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    */
   private static void addSetterStatement(
       boolean optional, FieldSpec entityField, MethodSpec.Builder entitySetter) {
-    if (!optional) entitySetter.addStatement("this.$N = $N", entityField, entityField);
-    else entitySetter.addStatement("this.$N = $N.orElse(null)", entityField, entityField);
+    if (!optional) {
+      entitySetter.addStatement("this.$N = $N", entityField, entityField);
+    } else {
+      entitySetter.addStatement("this.$N = $N.orElse(null)", entityField, entityField);
+    }
   }
 
   /**
@@ -1935,8 +1884,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
    * @return a capitalized {@link String}
    */
   private static String capitalize(String name) {
-    char first = name.charAt(0);
-    return String.format("%s%s", Character.toUpperCase(first), name.substring(1));
+    return String.format("%s%s", Character.toUpperCase(name.charAt(0)), name.substring(1));
   }
 
   /**
@@ -2049,14 +1997,14 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     lineEntity.addField(lineField);
 
     MethodSpec.Builder lineFieldGetter =
-        MethodSpec.methodBuilder(calculateGetterName(lineField, Optional.empty()))
+        MethodSpec.methodBuilder(calculateGetterName(lineField))
             .addModifiers(Modifier.PUBLIC)
             .returns(javaPropType);
     addGetterStatement(rifField.isRifColumnOptional(), lineField, lineFieldGetter);
     lineEntity.addMethod(lineFieldGetter.build());
 
     MethodSpec.Builder lineFieldSetter =
-        MethodSpec.methodBuilder(calculateSetterName(lineField, Optional.empty()))
+        MethodSpec.methodBuilder(calculateSetterName(lineField))
             .addModifiers(Modifier.PUBLIC)
             .returns(void.class)
             .addParameter(javaPropType, lineField.name);
