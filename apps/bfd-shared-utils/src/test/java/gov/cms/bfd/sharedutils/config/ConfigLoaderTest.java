@@ -290,7 +290,7 @@ public class ConfigLoaderTest {
     final List<String> names = new ArrayList<>(System.getenv().keySet());
     final ConfigLoader config = ConfigLoader.builder().addEnvironmentVariables().build();
     for (String name : names) {
-      assertEquals("mismatch for " + name, System.getenv(name), config.stringValue(name, ""));
+      assertEquals(System.getenv(name), config.stringValue(name, ""), "mismatch for " + name);
     }
   }
 
@@ -300,7 +300,7 @@ public class ConfigLoaderTest {
     final ConfigLoader config = ConfigLoader.builder().addSystemProperties().build();
     for (String name : names) {
       assertEquals(
-          "mismatch for " + name, System.getProperty(name, ""), config.stringValue(name, ""));
+          System.getProperty(name, ""), config.stringValue(name, ""), "mismatch for " + name);
     }
   }
 

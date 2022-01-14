@@ -228,13 +228,6 @@
             </exclusions>
         </dependency>
 		<dependency>
-			<!-- Allows junit compatibility with old junit4 tests (TEMPORARY) -->
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<version>${junit.vintage.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
 			<scope>test</scope>
