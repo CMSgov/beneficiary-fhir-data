@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Table(name = "loaded_files")
 public class LoadedFile {
   @Id
-  @Column(name = "loaded_fileid", nullable = false)
+  @Column(name = "loaded_file_id", nullable = false)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedfiles_loadedfileid_seq")
   @SequenceGenerator(
       name = "loadedfiles_loadedfileid_seq",
@@ -24,7 +24,7 @@ public class LoadedFile {
   private Instant created;
 
   @OneToMany(
-      mappedBy = "loadedFileId",
+      mappedBy = "loaded_file_id",
       orphanRemoval = false,
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL)
