@@ -104,7 +104,7 @@ def load_pa_mbis():
         return full_mbi_list[start_index:end_index]
     else:
         configFile = config.load()
-        return mbi.loadData()
+        return pambi.loadData()
 
 
 '''
