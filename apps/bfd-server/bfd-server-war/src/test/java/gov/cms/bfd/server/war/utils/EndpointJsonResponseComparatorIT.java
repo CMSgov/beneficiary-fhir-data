@@ -112,6 +112,10 @@ public final class EndpointJsonResponseComparatorIT {
         (Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifier
       },
       {
+        "patientByIdentifierWithoutReferenceYear",
+        (Supplier<String>) EndpointJsonResponseComparatorIT::patientByIdentifierWithoutReferenceYear
+      },
+      {
         "patientByIdentifierWithIncludeIdentifiers",
         (Supplier<String>)
             EndpointJsonResponseComparatorIT::patientByIdentifierWithIncludeIdentifiers
@@ -567,6 +571,39 @@ public final class EndpointJsonResponseComparatorIT {
     List<Object> loadedRecords =
         ServerTestUtils.get()
             .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+    Beneficiary beneficiary =
+        loadedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    IGenericClient fhirClient = createFhirClientAndSetEncoding();
+    JsonInterceptor jsonInterceptor = createAndRegisterJsonInterceptor(fhirClient);
+
+    fhirClient
+        .search()
+        .forResource(Patient.class)
+        .where(
+            Patient.IDENTIFIER
+                .exactly()
+                .systemAndIdentifier(
+                    TransformerConstants.CODING_BBAPI_BENE_HICN_HASH, beneficiary.getHicn()))
+        .returnBundle(Bundle.class)
+        .execute();
+    return sortPatientIdentifiers(jsonInterceptor.getResponse());
+  }
+
+  /**
+   * @return the results of the {@link
+   *     PatientResourceProvider#searchByIdentifier(ca.uhn.fhir.rest.param.TokenParam)} operation
+   */
+  public static String patientByIdentifierWithoutReferenceYear() {
+    List<Object> loadedRecords =
+        ServerTestUtils.get()
+            .loadData(
+                Arrays.asList(
+                    StaticRifResourceGroup.SAMPLE_A_WITH_NULL_REFERENCE_YEAR.getResources()));
     Beneficiary beneficiary =
         loadedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
