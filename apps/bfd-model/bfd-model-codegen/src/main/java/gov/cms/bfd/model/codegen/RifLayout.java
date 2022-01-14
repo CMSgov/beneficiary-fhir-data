@@ -200,21 +200,21 @@ public final class RifLayout {
         throw new IllegalArgumentException("Missing 'Column Name'");
       }
       if (rifColumnType == null) {
-        throw new IllegalArgumentException("Missing 'Type' for colum name: " + rifColumnName);
+        throw new IllegalArgumentException("Missing 'Type' for column name: " + rifColumnName);
       }
       if (rifColumnLength.isPresent() && rifColumnLength.get() < 0) {
-        throw new IllegalArgumentException("Invalid 'Length' for colum name: " + rifColumnName);
+        throw new IllegalArgumentException("Invalid 'Length' for column name: " + rifColumnName);
       }
       if (rifColumnScale.isPresent() && rifColumnScale.get() < 0) {
-        throw new IllegalArgumentException("Invalid 'Scale' for colum name: " + rifColumnName);
+        throw new IllegalArgumentException("Invalid 'Scale' for column name: " + rifColumnName);
       }
       if (Objects.isNull(javaFieldName)) {
         throw new IllegalArgumentException(
-            "Missing 'Column Label/Value' for colum name: " + rifColumnName);
+            "Missing 'Column Label/Value' for column name: " + rifColumnName);
       }
       if (Strings.isNullOrEmpty(javaFieldName)) {
         throw new IllegalArgumentException(
-            "Missing 'Java Field Name' for colum name: " + rifColumnName);
+            "Missing 'Java Field Name' for column name: " + rifColumnName);
       }
 
       this.rifColumnName = rifColumnName;
