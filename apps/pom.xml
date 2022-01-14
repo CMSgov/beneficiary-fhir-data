@@ -91,7 +91,7 @@
 		<sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.jacoco.itReportPath>target/jacoco-it.exec</sonar.jacoco.itReportPath>
 
-		<metrics.version>4.1.2</metrics.version>
+		<metrics.version>4.1.29</metrics.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
 		<jackson.version>2.13.1</jackson.version>
 		
