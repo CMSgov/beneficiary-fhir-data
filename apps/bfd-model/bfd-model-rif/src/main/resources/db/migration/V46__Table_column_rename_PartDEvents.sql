@@ -46,9 +46,11 @@ alter table public.partd_events ${logic.alter-rename-column} "totalPrescriptionC
 
 -- psql only
 ${logic.psql-only-alter} index if exists public."PartDEvents_pkey" rename to partd_events_pkey;
+${logic.psql-only-alter} table public.partd_events rename constraint "PartDEvents_beneficiaryId_to_Beneficiaries" to partd_events_bene_id_to_beneficiaries;
 
 -- hsql only
 ${logic.hsql-only-alter} table public.partd_events add constraint partd_events_pkey primary key (pde_id); 
+${logic.hsql-only-alter} table public.partd_events add constraint partd_events_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries(bene_id);
 
 -- both psql and hsql
 ALTER INDEX "PartDEvents_beneficiaryId_idx" RENAME TO partd_events_beneid_idx;
