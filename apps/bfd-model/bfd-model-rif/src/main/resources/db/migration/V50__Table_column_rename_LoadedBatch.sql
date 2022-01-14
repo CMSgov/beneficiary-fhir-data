@@ -23,14 +23,14 @@
 --          hsql: "alter"
 --
 alter table public."LoadedFiles" rename to loaded_files;
-alter table public.loaded_files ${logic.alter-rename-column} "loadedFileId" ${logic.rename-to} loaded_fileid;
+alter table public.loaded_files ${logic.alter-rename-column} "loadedFileId" ${logic.rename-to} loaded_file_id;
 alter table public.loaded_files ${logic.alter-rename-column} "rifType" ${logic.rename-to} rif_type;
 ${logic.hsql-only-alter} table public.loaded_files ${logic.alter-rename-column} "created" ${logic.rename-to} created;
 --
 -- LoadedBatches to loaded_batches
 --
 alter table public."LoadedBatches" rename to loaded_batches;
-alter table public.loaded_batches ${logic.alter-rename-column} "loadedBatchId" ${logic.rename-to} loaded_batchid;
+alter table public.loaded_batches ${logic.alter-rename-column} "loadedBatchId" ${logic.rename-to} loaded_batch_id;
 alter table public.loaded_batches ${logic.alter-rename-column} "loadedFileId" ${logic.rename-to} loaded_fileid;
 ${logic.hsql-only-alter} table public.loaded_batches ${logic.alter-rename-column} "beneficiaries" ${logic.rename-to} beneficiaries;
 ${logic.hsql-only-alter} table public.loaded_batches ${logic.alter-rename-column} "created" ${logic.rename-to} created;
@@ -39,13 +39,13 @@ ${logic.hsql-only-alter} table public.loaded_batches ${logic.alter-rename-column
 ${logic.psql-only-alter} index if exists public."LoadedBatches_pkey" rename to loaded_batches_pkey;
 ${logic.psql-only-alter} index if exists public."LoadedFiles_pkey" rename to loaded_files_pkey;
 
-${logic.psql-only-alter} table public.loaded_batches rename constraint "loadedBatches_loadedFileId" to loaded_batches_loaded_fileid;
+${logic.psql-only-alter} table public.loaded_batches rename constraint "loadedBatches_loadedFileId" to loaded_batches_loaded_file_id;
 
 -- hsql only
 -- ${logic.hsql-only-alter} table public.loaded_batches add constraint loaded_batches_pkey primary key (loaded_batchid);  
 -- ${logic.hsql-only-alter} table public.loaded_files add constraint loaded_files_pkey primary key (loaded_fileid);
 
-${logic.hsql-only-alter} table public.loaded_batches ADD CONSTRAINT loaded_batches_loaded_fileid FOREIGN KEY (loaded_fileid) REFERENCES public.loaded_files (loaded_fileid);
+${logic.hsql-only-alter} table public.loaded_batches ADD CONSTRAINT loaded_batches_loaded_fileid FOREIGN KEY (loaded_file_id) REFERENCES public.loaded_files (loaded_file_id);
 
 -- both psql and hsql
 ALTER INDEX "LoadedBatches_created_index" RENAME TO loaded_batches_created_idx;
