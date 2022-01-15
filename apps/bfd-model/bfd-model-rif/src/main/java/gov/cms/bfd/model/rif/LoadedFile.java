@@ -24,7 +24,7 @@ public class LoadedFile {
   private Instant created;
 
   @OneToMany(
-      mappedBy = "loaded_file_id",
+      mappedBy = "loadedFileId",
       orphanRemoval = false,
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL)
