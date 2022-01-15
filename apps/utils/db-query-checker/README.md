@@ -30,22 +30,25 @@ $ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
     cargo run --release
 ```
 
-The default behavior for the query checker is to use a year starting at 2020 and continue
-on thru 2021; lib.rs dynamically builds a year-month date within its loop processing which
-is then added to an array of psql formatted date(s), i.e., '2020-01-01'. If you are running
-the checker vs. a db that contains synthetic data, you will need to pass in the start year
-since the default start year of 2020 will not result in any meaningful tests since no records
-will be found. To run vs. synthetic data (or to not use the default start date of 2020) pass
-in the DB_QUERIES_START_YEAR; for example:
+The query checker uses a couple of optional env variables for creating the start and
+end year(s). The rules for this are:
+
+DB_QUERIES_END_YEAR   - if not provided, will default to the current calendar year.
+DB_QUERIES_START_YEAR - if not provided, will default to the end_year minus one.
+
+The value for the start_year cannot exceed the value for the end_year. An example of
+running the checker with a specified end year plus the default start_year would be:
 
 ```shell
 $ cd beneficiary-fhir-data.git/apps/utils/db-query-checker/
 $ DB_QUERIES_URL=postgres://localuser:insecurelocalpw@localhost:5432/bfd \
     DB_QUERIES_CONNECTIONS=10 \
-    DB_QUERIES_START_YEAR=0003 \
+    DB_QUERIES_END_YEAR=2019 \
     DB_QUERIES_OUTPUT=results/db_query_checker_$(date +"%Y-%m-%d-%H-%M").csv \
     cargo run --release
 ```
+
+The above would run the query checker using a start_year of 2018 and an end_year of 2019.
 
 Alternatively,
   you can instead configure the environment variables in a `.env` file,

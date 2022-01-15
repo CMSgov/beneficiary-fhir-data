@@ -24,6 +24,7 @@ use tokio::{fs::File, sync::Mutex};
 use tracing::{info, warn, Instrument};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, fmt::format::FmtSpan, EnvFilter};
+use chrono::prelude::*;
 
 use crate::query::{fetch_all_monitored, DatabaseQuery, DATABASE_QUERY_SQL};
 
@@ -39,6 +40,8 @@ const BENES_PAGE_SIZE: u32 = 4000;
 pub async fn run_db_query_checker() -> Result<()> {
     dotenv().ok();
 
+    let date_now = Utc::now().date();
+
     // Pull config from environment variables
     let output_path = std::env::var("DB_QUERIES_OUTPUT")
         .unwrap_or_else(|_| "results/db_query_checker.csv".into());
@@ -48,13 +51,24 @@ pub async fn run_db_query_checker() -> Result<()> {
         .unwrap_or_else(|_| "5".into())
         .parse()
         .expect("Unable to parse environment variable: DB_QUERIES_CONNECTIONS");
-    // added to support synthetic data, which has year like '0003'
-    let start_year: u32 = std::env::var("DB_QUERIES_START_YEAR")
-        .unwrap_or_else(|_| "2020".into())
+    let mut end_year: i32 = std::env::var("DB_QUERIES_END_YEAR")
+        .unwrap_or_else(|_| "-1".into())
+        .parse()
+        .expect("Unable to parse environment variable: DB_QUERIES_END_YEAR");
+    if end_year < 0 {
+        end_year = date_now.year();
+    }
+    let mut start_year: i32 = std::env::var("DB_QUERIES_START_YEAR")
+        .unwrap_or_else(|_| "-1".into())
         .parse()
         .expect("Unable to parse environment variable: DB_QUERIES_START_YEAR");
-    let end_year = start_year + 1;
-
+    if start_year < 0 {
+        start_year = end_year -1;
+    }
+    if start_year > end_year {
+        panic!("Invalid start year {} cannot be GT end_year {}", start_year, end_year);
+    }
+    println!("using start_year: {}, end_year: {}", start_year, end_year);
     let fmt_layer = fmt::layer()
         .with_writer(std::io::stderr)
         .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
@@ -68,6 +82,7 @@ pub async fn run_db_query_checker() -> Result<()> {
         .with(tracing_error::ErrorLayer::default())
         .init();
     color_eyre::install()?;
+
 
     /*
      * Create the CSV serializer, which will automatically write out a header row the first time a row is
