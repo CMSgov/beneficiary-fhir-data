@@ -539,7 +539,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
                         String.format(
                                 "%s_%s_to_%s",
                                 mappingSpec.getLineTable(),
-                                mappingSpec.getLineEntityParentField(),
+                                mappingSpec.getHeaderEntityIdField().toLowerCase(),
                                 mappingSpec.getHeaderTable())
                             .toLowerCase())
                     .build())
