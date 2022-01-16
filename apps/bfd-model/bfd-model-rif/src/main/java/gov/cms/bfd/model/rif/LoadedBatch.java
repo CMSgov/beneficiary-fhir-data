@@ -53,8 +53,8 @@ public class LoadedBatch {
   /**
    * Create with known values
    *
-   * @param loaded_batchid unique sequence id
-   * @param loaded_fileid associated file
+   * @param loadedBatchId unique sequence id
+   * @param loadedFileId associated file
    * @param beneficiaries to associate
    * @param created batch creation date
    */
