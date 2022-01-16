@@ -154,7 +154,7 @@ ${logic.psql-only-alter} table public.hospice_claims rename constraint "HospiceC
 ${logic.hsql-only-alter} table public.hospice_claim_lines add constraint hospice_claim_lines_pkey primary key (clm_id, clm_line_num);
 ${logic.hsql-only-alter} table public.hospice_claims add constraint hospice_claims_pkey primary key (clm_id);
 
-${logic.hsql-only-alter} table public.hospice_claim_lines ADD CONSTRAINT hospice_claim_lines_parent_claim_to_hospice_claims FOREIGN KEY (clm_id) REFERENCES public.hospice_claims (clm_id);
+${logic.hsql-only-alter} table public.hospice_claim_lines ADD CONSTRAINT hospice_claim_lines_clm_id_to_hospice_claims FOREIGN KEY (clm_id) REFERENCES public.hospice_claims (clm_id);
 ${logic.hsql-only-alter} table public.hospice_claims ADD CONSTRAINT hospice_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
 
 -- both psql and hsql

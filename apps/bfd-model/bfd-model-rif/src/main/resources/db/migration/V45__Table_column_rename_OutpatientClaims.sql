@@ -259,7 +259,7 @@ ${logic.psql-only-alter} table public.outpatient_claims rename constraint "Outpa
 ${logic.hsql-only-alter} table public.outpatient_claim_lines add constraint outpatient_claim_lines_pkey primary key (clm_id, clm_line_num);
 ${logic.hsql-only-alter} table public.outpatient_claims add constraint outpatient_claims_pkey primary key (clm_id);
 
-${logic.hsql-only-alter} table public.outpatient_claim_lines ADD CONSTRAINT outpatient_claim_lines_parent_claim_to_outpatient_claims FOREIGN KEY (clm_id) REFERENCES public.outpatient_claims (clm_id);
+${logic.hsql-only-alter} table public.outpatient_claim_lines ADD CONSTRAINT outpatient_claim_lines_clm_id_to_outpatient_claims FOREIGN KEY (clm_id) REFERENCES public.outpatient_claims (clm_id);
 ${logic.hsql-only-alter} table public.outpatient_claims ADD CONSTRAINT outpatient_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
 
 -- both psql and hsql
