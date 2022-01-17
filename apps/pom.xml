@@ -94,7 +94,6 @@
 		<metrics.version>4.1.29</metrics.version>
 		<hibernate.version>5.6.1.Final</hibernate.version>
 		<junit.version>5.8.2</junit.version>
-		<junit.vintage.version>5.8.2</junit.vintage.version>
 		<jackson.version>2.13.1</jackson.version>
 
 		<!-- The default DB that will be used in integration tests. -->
