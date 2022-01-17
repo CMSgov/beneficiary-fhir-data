@@ -39,9 +39,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +53,15 @@ public final class RifLoaderIT {
 
   /** Ensures that each test case here starts with a clean/empty database, with the right schema. */
   @BeforeEach
-  public void prepareTestDatabase() {
+  public void prepareTestDatabase(TestInfo testInfo) {
+    LOGGER.info("{}: starting.", testInfo.getDisplayName());
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
+
+  @AfterEach
+  public void finished(TestInfo testInfo) {
+    LOGGER.info("{}: finished.", testInfo.getDisplayName());
+  };
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
   @Test
