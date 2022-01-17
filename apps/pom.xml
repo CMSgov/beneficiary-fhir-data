@@ -305,6 +305,7 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<!-- Needed for parameterized unit tests. -->
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-params</artifactId>
 				<version>${junit.version}</version>
