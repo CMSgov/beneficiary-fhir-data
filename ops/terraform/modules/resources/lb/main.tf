@@ -26,7 +26,6 @@ data "aws_s3_bucket" "logs" {
   bucket = var.log_bucket
 }
 
-
 ## RESOURCES
 #
 
@@ -80,6 +79,18 @@ resource "aws_security_group" "lb" {
     protocol    = "tcp"
     cidr_blocks = var.ingress.cidr_blocks
     description = var.ingress.description
+  }
+
+  # add ingress rules for each prefix list id
+  dynamic "ingress" {
+    for_each = var.ingress.prefix_list_ids
+    content {
+      from_port       = var.ingress.port
+      protocol        = "tcp"
+      to_port         = var.ingress.port
+      prefix_list_ids = [ingress.value]
+      description     = var.ingress.description
+    }
   }
 
   egress {
