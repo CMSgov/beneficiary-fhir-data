@@ -9,21 +9,22 @@ from locust import HttpUser, task, events
 server_public_key = setup.loadServerPublicKey()
 setup.disable_no_cert_warnings(server_public_key, urllib3)
 
-mbis = data.load_mbis()
+bene_ids = data.load_bene_ids()
 client_cert = setup.getClientCert()
 setup.set_locust_env(config.load())
+last_updated = data.get_last_updated()
 
 class BFDUser(HttpUser):
     @task
-    def patient(self):
-        if len(mbis) == 0:
+    def patient_by_id(self):
+        if len(bene_ids) == 0:
             errors.no_data_stop_test(self)
 
-        hashed_mbi = mbis.pop()
-        self.client.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C%0A{hashed_mbi}&_IncludeIdentifiers=mbi',
+        id = bene_ids.pop()
+        self.client.get(f'/v1/fhir/Patient?_id={id}&_lastUpdated=gt{last_updated}&_IncludeIdentifiers=mbi&_IncludeTaxNumbers=true',
                 cert=client_cert,
                 verify=server_public_key,
-                name='/v2/fhir/Patient search by hashed mbi / _IncludeIdentifiers=mbi')
+                name='/v1/fhir/Patient/{id} search by id / lastUpdated (2 weeks) / includeTaxNumbers = true / includeIdentifiers = mbi')
 
 '''
 Adds a global failsafe check to ensure that if this test overwhelms the
@@ -40,3 +41,4 @@ response time percentiles against the SLA for this endpoint.
 @events.test_stop.add_listener
 def on_locust_quit(environment, **_kwargs):
     validation.check_sla_validation(environment, validation.SLA_PATIENT)
+
