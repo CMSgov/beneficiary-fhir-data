@@ -5,7 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,11 +27,7 @@ import lombok.experimental.FieldNameConstants;
 public class Mbi {
   @Id
   @Column(name = "`mbiId`", nullable = false, updatable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mbi_cache_mbi_id_seq")
-  @SequenceGenerator(
-      name = "mbi_cache_mbi_id_seq",
-      sequenceName = "mbi_cache_mbi_id_seq",
-      allocationSize = 50)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long mbiId;
 
   /** Actual MBI value from RDA API. */
