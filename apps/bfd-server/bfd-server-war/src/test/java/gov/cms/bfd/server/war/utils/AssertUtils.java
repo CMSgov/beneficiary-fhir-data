@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.war.utils;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +16,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import org.junit.Assert;
 
 public class AssertUtils {
 
@@ -113,7 +113,7 @@ public class AssertUtils {
       }
     }
 
-    Assert.assertEquals(Collections.emptyList(), actualDiffs);
+    assertEquals(Collections.emptyList(), actualDiffs);
   }
 
   /**

@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.ccw.rif;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import gov.cms.bfd.model.rif.RifFileType;
@@ -15,8 +17,7 @@ import gov.cms.bfd.pipeline.sharedutils.PipelineTestUtils;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +57,9 @@ public final class CcwRifLoadJobIT {
       ccwJob.call();
 
       // Verify that no data sets were generated.
-      Assert.assertEquals(1, listener.getNoDataAvailableEvents());
-      Assert.assertEquals(0, listener.getDataEvents().size());
-      Assert.assertEquals(0, listener.getErrorEvents().size());
+      assertEquals(1, listener.getNoDataAvailableEvents());
+      assertEquals(0, listener.getDataEvents().size());
+      assertEquals(0, listener.getErrorEvents().size());
     } finally {
       if (bucket != null) s3Client.deleteBucket(bucket.getName());
     }
@@ -118,12 +119,12 @@ public final class CcwRifLoadJobIT {
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
-      Assert.assertEquals(0, listener.getNoDataAvailableEvents());
-      Assert.assertEquals(1, listener.getDataEvents().size());
-      Assert.assertEquals(manifest.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
-      Assert.assertEquals(
+      assertEquals(0, listener.getNoDataAvailableEvents());
+      assertEquals(1, listener.getDataEvents().size());
+      assertEquals(manifest.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
+      assertEquals(
           manifest.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
-      Assert.assertEquals(0, listener.getErrorEvents().size());
+      assertEquals(0, listener.getErrorEvents().size());
 
       // Verify that the data set was renamed.
       DataSetTestUtilities.waitForBucketObjectCount(
@@ -213,12 +214,12 @@ public final class CcwRifLoadJobIT {
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
-      Assert.assertEquals(0, listener.getNoDataAvailableEvents());
-      Assert.assertEquals(1, listener.getDataEvents().size());
-      Assert.assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
-      Assert.assertEquals(
+      assertEquals(0, listener.getNoDataAvailableEvents());
+      assertEquals(1, listener.getDataEvents().size());
+      assertEquals(manifestA.getTimestamp(), listener.getDataEvents().get(0).getTimestamp());
+      assertEquals(
           manifestA.getEntries().size(), listener.getDataEvents().get(0).getFileEvents().size());
-      Assert.assertEquals(0, listener.getErrorEvents().size());
+      assertEquals(0, listener.getErrorEvents().size());
 
       /*
        * Verify that the first data set was renamed and the second is
@@ -297,9 +298,9 @@ public final class CcwRifLoadJobIT {
       ccwJob.call();
 
       // Verify what was handed off to the DataSetMonitorListener.
-      Assert.assertEquals(1, listener.getNoDataAvailableEvents());
-      Assert.assertEquals(0, listener.getDataEvents().size());
-      Assert.assertEquals(0, listener.getErrorEvents().size());
+      assertEquals(1, listener.getNoDataAvailableEvents());
+      assertEquals(0, listener.getDataEvents().size());
+      assertEquals(0, listener.getErrorEvents().size());
 
       // Verify that the data set was not renamed.
       DataSetTestUtilities.waitForBucketObjectCount(

@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.benchmarks;
 
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
@@ -57,10 +59,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.junit.Assume;
-import org.junit.AssumptionViolatedException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.TestAbortedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +110,7 @@ public final class PipelineApplicationBenchmark {
    * @throws IOException (shouldn't happen)
    */
   @Test
-  @Ignore("Not enough data to be useful most of the time.")
+  @Disabled("Not enough data to be useful most of the time.")
   public void sampleB() throws IOException {
     runBenchmark(StaticRifResourceGroup.SAMPLE_B);
   }
@@ -294,7 +295,7 @@ public final class PipelineApplicationBenchmark {
 
   /**
    * @param ec2KeyName the name of the AWS EC2 key that the benchmark systems should use
-   * @param ec2KeyFile the {@link Path} to the AWS EC2 key PEM file that the benchmark systems
+   * @param ec2KeyFilePath the {@link Path} to the AWS EC2 key PEM file that the benchmark systems
    *     should use
    * @return the {@link BenchmarkResult}s from the benchmark iterations that completed successfully
    *     (failed iterations will be logged)
@@ -445,8 +446,8 @@ public final class PipelineApplicationBenchmark {
   }
 
   /**
-   * Throws an {@link AssumptionViolatedException} if the OS doesn't support
-   * <strong>graceful</strong> shutdowns via {@link Process#destroy()}.
+   * Throws an {@link TestAbortedException} if the OS doesn't support <strong>graceful</strong>
+   * shutdowns via {@link Process#destroy()}.
    */
   private static void skipOnUnsupportedOs() {
     /*
@@ -461,8 +462,7 @@ public final class PipelineApplicationBenchmark {
      * requests, and handles them gracefully.
      */
 
-    Assume.assumeTrue(
-        "Unsupported OS for this test case.", "Linux".equals(System.getProperty("os.name")));
+    assumeTrue("Linux".equals(System.getProperty("os.name")), "Unsupported OS for this test case.");
   }
 
   /**

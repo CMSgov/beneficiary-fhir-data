@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HospiceClaim;
@@ -16,8 +18,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.HospiceClaimTransformer}. */
 public final class HospiceClaimTransformerTest {
@@ -107,18 +108,18 @@ public final class HospiceClaimTransformerTest {
         claim.getBeneficiaryDischargeDate(),
         Optional.of(claim.getUtilizationDayCount()));
 
-    Assert.assertEquals(4, eob.getDiagnosis().size());
-    Assert.assertEquals(1, eob.getItem().size());
+    assertEquals(4, eob.getDiagnosis().size());
+    assertEquals(1, eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     HospiceClaimLine claimLine1 = claim.getLines().get(0);
-    Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
     TransformerTestUtils.assertExtensionQuantityEquals(
         CcwCodebookVariable.BENE_HOSPC_PRD_CNT,
         claim.getHospicePeriodCount(),
         eob.getHospitalization());
 
-    Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
+    assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     TransformerTestUtils.assertHcpcsCodes(
         eobItem0,

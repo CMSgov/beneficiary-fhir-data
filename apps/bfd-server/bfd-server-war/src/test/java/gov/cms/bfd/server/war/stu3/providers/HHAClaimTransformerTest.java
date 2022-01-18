@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.HHAClaim;
@@ -16,8 +18,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.BenefitCategory;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.HHAClaimTransformer}. */
 public final class HHAClaimTransformerTest {
@@ -88,7 +89,7 @@ public final class HHAClaimTransformerTest {
         claim.getFiDocumentClaimControlNumber(),
         claim.getFiOriginalClaimControlNumber());
 
-    Assert.assertEquals(4, eob.getDiagnosis().size());
+    assertEquals(4, eob.getDiagnosis().size());
 
     if (claim.getClaimLUPACode().isPresent())
       TransformerTestUtils.assertInfoWithCodeEquals(
@@ -109,12 +110,12 @@ public final class HHAClaimTransformerTest {
         claim.getTotalVisitCount().intValue(),
         eob);
 
-    Assert.assertEquals(1, eob.getItem().size());
+    assertEquals(1, eob.getItem().size());
     ItemComponent eobItem0 = eob.getItem().get(0);
     HHAClaimLine claimLine1 = claim.getLines().get(0);
-    Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
-    Assert.assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
+    assertEquals(claim.getProviderStateCode(), eobItem0.getLocationAddress().getState());
 
     TransformerTestUtils.assertAdjudicationReasonEquals(
         CcwCodebookVariable.REV_CNTR_1ST_ANSI_CD,

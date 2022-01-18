@@ -1,11 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RdaSinkTest {
   private final RdaSink<Integer> sink = new TestSink();
@@ -13,23 +15,23 @@ public class RdaSinkTest {
   @Test
   public void batchSuccessful() throws Exception {
     int count = sink.writeBatch(Arrays.asList(1, 2, 3, 4));
-    Assert.assertEquals(4, count);
+    assertEquals(4, count);
   }
 
   @Test
   public void batchFailures() throws Exception {
     try {
       sink.writeBatch(Arrays.asList(1, 2, 5, 4));
-      Assert.fail("sink should have thrown");
+      fail("sink should have thrown");
     } catch (ProcessingException ex) {
-      Assert.assertEquals(12, ex.getProcessedCount());
+      assertEquals(12, ex.getProcessedCount());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(IOException.class));
     }
     try {
       sink.writeBatch(Arrays.asList(1, 2, 6, 5));
-      Assert.fail("sink should have thrown");
+      fail("sink should have thrown");
     } catch (ProcessingException ex) {
-      Assert.assertEquals(2, ex.getProcessedCount());
+      assertEquals(2, ex.getProcessedCount());
       MatcherAssert.assertThat(ex.getCause(), Matchers.instanceOf(RuntimeException.class));
     }
   }
