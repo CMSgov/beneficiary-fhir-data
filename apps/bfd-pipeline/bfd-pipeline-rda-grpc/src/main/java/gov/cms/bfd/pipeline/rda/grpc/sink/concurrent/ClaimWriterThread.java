@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
  * the database using an RdaSink object. Each thread has its own BlockingQueue to receive inbound
  * messages for processing and uses a callback function to report its successes and failures.
  *
- * <p>The thread is stopped by calling its close() method. This adds a special token to the work
- * queue that tells the thread to flush its buffer and exit its run loop.
+ * <p>The thread is stopped by calling its close() method. This sets a flag that causes the thread
+ * to drain its queue and shut down.
  *
  * @param <TMessage> RDA API message class
  * @param <TClaim> JPA entity class
