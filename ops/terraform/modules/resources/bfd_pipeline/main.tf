@@ -28,11 +28,6 @@ data "aws_s3_bucket" "rif" {
   bucket = "bfd-${var.env_config.env}-etl-${var.launch_config.account_id}"
 }
 
-# Locate the noop datalag S3 bucket
-data "aws_s3_bucket" "rif_datalag" {
-  bucket = "bfd-prod-etl-datalag-${var.launch_config.account_id}"
-}
-
 # Locate the customer master key for this environment.
 data "aws_kms_key" "master_key" {
   key_id = "alias/bfd-${var.env_config.env}-cmk"
@@ -177,52 +172,6 @@ resource "aws_iam_policy" "bfd_pipeline_rif" {
 EOF
 }
 
-# Also add a temporary policy for the datalag bucket
-resource "aws_iam_policy" "bfd_datalag_pipeline_rif" {
-  count       = var.env_config.env == "prod" ? 1 : 0
-  name        = "bfd-${var.env_config.env}-datalag-pipeline-rw-s3-rif"
-  description = "Allow the BFD Pipeline application to read-write the datalag S3 bucket"
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "BFDPipelineRWS3RIFKMS",
-      "Action": [
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:ReEncrypt*",
-        "kms:GenerateDataKey*",
-        "kms:DescribeKey"
-      ],
-      "Effect": "Allow",
-      "Resource": ["${data.aws_kms_key.master_key.arn}"]
-    },
-    {
-      "Sid": "BFDPipelineRWS3RIFListBucket",
-      "Action": ["s3:ListBucket"],
-      "Effect": "Allow",
-      "Resource": ["${data.aws_s3_bucket.rif_datalag.arn}"]
-    },
-    {
-      "Sid": "BFDPipelineRWS3RIFReadWriteObjects",
-      "Action": [
-        "s3:ListBucket",
-        "s3:GetBucketLocation",
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:DeleteObject"
-      ],
-      "Effect": "Allow",
-      "Resource": ["${data.aws_s3_bucket.rif_datalag.arn}/*"]
-    }
-  ]
-}
-EOF
-}
-
-# datalag note: both pipelines will run with the same instance profile
 module "iam_profile_bfd_pipeline" {
   source = "../iam"
 
@@ -231,13 +180,6 @@ module "iam_profile_bfd_pipeline" {
 }
 
 resource "aws_iam_role_policy_attachment" "bfd_pipeline_rif" {
-  role       = module.iam_profile_bfd_pipeline.role
-  policy_arn = aws_iam_policy.bfd_pipeline_rif.arn
-}
-
-# attach the datalag policy to the etl instance profile
-resource "aws_iam_role_policy_attachment" "bfd_datalag_pipeline_rif" {
-  count      = var.env_config.env == "prod" ? 1 : 0
   role       = module.iam_profile_bfd_pipeline.role
   policy_arn = aws_iam_policy.bfd_pipeline_rif.arn
 }
@@ -286,8 +228,6 @@ resource "aws_iam_role_policy_attachment" "aws_cli" {
 }
 
 # EC2 Instance to run the BFD Pipeline app.
-# datalag note: this instance will be pointing to the noop bucket/cloned db for the duration of the datalag
-# we will manually deploy a second pipeline that will continue to ingest ccw data in the background
 module "ec2_instance" {
   source = "../ec2"
 

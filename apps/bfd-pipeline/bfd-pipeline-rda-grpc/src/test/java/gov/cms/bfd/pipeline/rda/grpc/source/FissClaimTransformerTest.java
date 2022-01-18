@@ -3,7 +3,8 @@ package gov.cms.bfd.pipeline.rda.grpc.source;
 import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.model.rda.PreAdjFissAuditTrail;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
@@ -50,8 +51,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Arrays;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class FissClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
@@ -63,7 +64,7 @@ public class FissClaimTransformerTest {
   private FissClaim.Builder claimBuilder;
   private PreAdjFissClaim claim;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     changeBuilder = FissClaimChange.newBuilder();
     claimBuilder = FissClaim.newBuilder();

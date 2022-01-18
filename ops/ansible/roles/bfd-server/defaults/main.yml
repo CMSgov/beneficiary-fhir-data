@@ -33,4 +33,4 @@ data_server_v2_enabled: false
 pre_adj_resources_enabled: false
 
 # new relic
-new_relic_agent_version: '7.4.3'
+new_relic_agent_version: '7.5.0'

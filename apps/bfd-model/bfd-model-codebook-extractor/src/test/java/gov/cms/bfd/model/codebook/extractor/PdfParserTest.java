@@ -1,5 +1,11 @@
 package gov.cms.bfd.model.codebook.extractor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import gov.cms.bfd.model.codebook.model.Codebook;
 import gov.cms.bfd.model.codebook.model.Value;
 import gov.cms.bfd.model.codebook.model.Variable;
@@ -16,8 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +49,8 @@ public final class PdfParserTest {
        */
       // writeTextToTempFile(codebookTextLines);
 
-      Assert.assertNotNull(codebookTextLines);
-      Assert.assertTrue(codebookTextLines.size() > 100);
+      assertNotNull(codebookTextLines);
+      assertTrue(codebookTextLines.size() > 100);
     }
   }
 
@@ -72,8 +77,8 @@ public final class PdfParserTest {
         // printSectionsToConsole(variableSections);
 
         for (List<String> variableSection : variableSections) {
-          Assert.assertNotNull(variableSection);
-          Assert.assertTrue(variableSection.size() >= 10);
+          assertNotNull(variableSection);
+          assertTrue(variableSection.size() >= 10);
         }
 
         /*
@@ -87,10 +92,10 @@ public final class PdfParserTest {
             codebookTextLines.stream().filter(searchFieldFilter).collect(Collectors.toList());
 
         // If this fails, we need to pick a different search field.
-        Assert.assertEquals(
-            "Not all instances of that field are unique.",
+        assertEquals(
             searchFieldLines.size(),
-            new HashSet<>(searchFieldLines).size());
+            new HashSet<>(searchFieldLines).size(),
+            "Not all instances of that field are unique.");
 
         for (String searchFieldLine : searchFieldLines) {
           boolean foundSection = false;
@@ -98,16 +103,17 @@ public final class PdfParserTest {
             for (String line : variableSection)
               if (searchFieldLine.equals(line)) foundSection = true;
           }
-          Assert.assertTrue(
-              String.format("Can't find search field line: '%s'", searchFieldLine), foundSection);
+          assertTrue(
+              foundSection, String.format("Can't find search field line: '%s'", searchFieldLine));
         }
       }
     }
   }
 
   /**
-   * Tests {@link gov.cms.bfd.model.codebook.extractor.PdfParser#parseCodebookPdf(InputStream)}
-   * against all {@link gov.cms.bfd.model.codebook.extractor.SupportedCodebook}s.
+   * Tests {@link
+   * gov.cms.bfd.model.codebook.extractor.PdfParser#parseCodebookPdf(SupportedCodebook)} against all
+   * {@link gov.cms.bfd.model.codebook.extractor.SupportedCodebook}s.
    *
    * @throws IOException Indicates test error.
    */
@@ -124,11 +130,11 @@ public final class PdfParserTest {
        * verify some basic facts about the results.
        */
 
-      Assert.assertNotNull(codebook);
+      assertNotNull(codebook);
       // Note: The 2017-05 version of the PDE codebook has 56 variables.
-      Assert.assertTrue(
-          "Not as many variables as expected: " + codebook.getVariables().size(),
-          codebook.getVariables().size() > 50);
+      assertTrue(
+          codebook.getVariables().size() > 50,
+          "Not as many variables as expected: " + codebook.getVariables().size());
 
       for (Variable variable : codebook.getVariables()) {
         assertVariableIsValid(variable);
@@ -137,9 +143,10 @@ public final class PdfParserTest {
   }
 
   /**
-   * Tests {@link gov.cms.bfd.model.codebook.extractor.PdfParser#parseCodebookPdf(InputStream)}
-   * against {@link gov.cms.bfd.model.codebook.extractor.SupportedCodebook#BENEFICIARY_SUMMARY} for
-   * the <code>DUAL_MO</code> variable.
+   * Tests {@link
+   * gov.cms.bfd.model.codebook.extractor.PdfParser#parseCodebookPdf(SupportedCodebook)} against
+   * {@link gov.cms.bfd.model.codebook.extractor.SupportedCodebook#BENEFICIARY_SUMMARY} for the
+   * <code>DUAL_MO</code> variable.
    *
    * @throws IOException Indicates test error.
    */
@@ -167,23 +174,24 @@ public final class PdfParserTest {
             + " populations, refer to a CCW Technical Guidance document entitled: \"Options in Determining Dual"
             + " Eligibles\"";
 
-    Assert.assertEquals("Months of Dual Eligibility", variable.getLabel());
+    assertEquals("Months of Dual Eligibility", variable.getLabel());
     assertParagraphsEquals(Arrays.asList(expectedDescription1), variable.getDescription());
-    Assert.assertEquals("DUAL_MO", variable.getShortName().get());
-    Assert.assertEquals("DUAL_ELGBL_MOS_NUM", variable.getLongName());
-    Assert.assertEquals(VariableType.CHAR, variable.getType().get());
-    Assert.assertEquals(new Integer(2), variable.getLength());
-    Assert.assertEquals("CMS Enrollment Database (EDB) (derived)", variable.getSource().get());
-    Assert.assertEquals(
+    assertEquals("DUAL_MO", variable.getShortName().get());
+    assertEquals("DUAL_ELGBL_MOS_NUM", variable.getLongName());
+    assertEquals(VariableType.CHAR, variable.getType().get());
+    assertEquals(new Integer(2), variable.getLength());
+    assertEquals("CMS Enrollment Database (EDB) (derived)", variable.getSource().get());
+    assertEquals(
         "The value in this field is between '00' through '12'.", variable.getValueFormat().get());
-    Assert.assertFalse(variable.getValueGroups().isPresent());
+    assertFalse(variable.getValueGroups().isPresent());
     assertParagraphsEquals(Arrays.asList(expectedComment1), variable.getComment());
   }
 
   /**
-   * Tests {@link gov.cms.bfd.model.codebook.extractor.PdfParser#parseCodebookPdf(InputStream)}
-   * against {@link gov.cms.bfd.model.codebook.extractor.SupportedCodebook#FFS_CLAIMS} for the
-   * <code>DSH_OP_CLM_VAL_AMT</code> variable.
+   * Tests {@link
+   * gov.cms.bfd.model.codebook.extractor.PdfParser#parseCodebookPdf(SupportedCodebook)}} against
+   * {@link gov.cms.bfd.model.codebook.extractor.SupportedCodebook#FFS_CLAIMS} for the <code>
+   * DSH_OP_CLM_VAL_AMT</code> variable.
    *
    * @throws IOException Indicates test error.
    */
@@ -229,25 +237,26 @@ public final class PdfParserTest {
         "DERIVATION RULES: If there is a value code '18' (i.e., in the Value Code File, if the"
             + " VAL_CD='18') then this dollar amount (VAL_AMT) is used to populate this field.\"";
 
-    Assert.assertEquals("Operating Disproportionate Share (DSH) Amount", variable.getLabel());
+    assertEquals("Operating Disproportionate Share (DSH) Amount", variable.getLabel());
     assertParagraphsEquals(
         Arrays.asList(expectedDescription1, expectedDescription2, expectedDescription3),
         variable.getDescription());
-    Assert.assertEquals("DSH_OP", variable.getShortName().get());
-    Assert.assertEquals("DSH_OP_CLM_VAL_AMT", variable.getLongName());
-    Assert.assertEquals(VariableType.NUM, variable.getType().get());
-    Assert.assertEquals(new Integer(12), variable.getLength());
-    Assert.assertEquals("NCH", variable.getSource().get());
-    Assert.assertEquals("XXX.XX", variable.getValueFormat().get());
-    Assert.assertFalse(variable.getValueGroups().isPresent());
+    assertEquals("DSH_OP", variable.getShortName().get());
+    assertEquals("DSH_OP_CLM_VAL_AMT", variable.getLongName());
+    assertEquals(VariableType.NUM, variable.getType().get());
+    assertEquals(new Integer(12), variable.getLength());
+    assertEquals("NCH", variable.getSource().get());
+    assertEquals("XXX.XX", variable.getValueFormat().get());
+    assertFalse(variable.getValueGroups().isPresent());
     assertParagraphsEquals(
         Arrays.asList(expectedComment1, expectedComment2, expectedComment3), variable.getComment());
   }
 
   /**
-   * Tests {@link gov.cms.bfd.model.codebook.extractor.PdfParser#parseCodebookPdf(InputStream)}
-   * against {@link gov.cms.bfd.model.codebook.extractor.SupportedCodebook#FFS_CLAIMS} for the
-   * <code>CARR_LINE_PRVDR_TYPE_CD</code> variable.
+   * Tests {@link
+   * gov.cms.bfd.model.codebook.extractor.PdfParser#parseCodebookPdf(SupportedCodebook)} against
+   * {@link gov.cms.bfd.model.codebook.extractor.SupportedCodebook#FFS_CLAIMS} for the <code>
+   * CARR_LINE_PRVDR_TYPE_CD</code> variable.
    *
    * @throws IOException Indicates test error.
    */
@@ -271,20 +280,20 @@ public final class PdfParserTest {
         "Code identifying the type of provider furnishing the service for this line"
             + " item on the carrier claim.";
 
-    Assert.assertEquals("Carrier Line Provider Type Code", variable.getLabel());
+    assertEquals("Carrier Line Provider Type Code", variable.getLabel());
     assertParagraphsEquals(Arrays.asList(expectedDescription1), variable.getDescription());
-    Assert.assertEquals("PRV_TYPE", variable.getShortName().get());
-    Assert.assertEquals("CARR_LINE_PRVDR_TYPE_CD", variable.getLongName());
-    Assert.assertEquals(VariableType.CHAR, variable.getType().get());
-    Assert.assertEquals(new Integer(1), variable.getLength());
-    Assert.assertEquals("NCH", variable.getSource().get());
-    Assert.assertFalse(variable.getValueFormat().isPresent());
-    Assert.assertEquals(2, variable.getValueGroups().get().size());
-    Assert.assertEquals(8, variable.getValueGroups().get().get(0).getValues().size());
+    assertEquals("PRV_TYPE", variable.getShortName().get());
+    assertEquals("CARR_LINE_PRVDR_TYPE_CD", variable.getLongName());
+    assertEquals(VariableType.CHAR, variable.getType().get());
+    assertEquals(new Integer(1), variable.getLength());
+    assertEquals("NCH", variable.getSource().get());
+    assertFalse(variable.getValueFormat().isPresent());
+    assertEquals(2, variable.getValueGroups().get().size());
+    assertEquals(8, variable.getValueGroups().get().get(0).getValues().size());
     assertParagraphsEquals(
         Arrays.asList("For Physician/Supplier Claims:"),
         variable.getValueGroups().get().get(0).getDescription());
-    Assert.assertEquals(9, variable.getValueGroups().get().get(1).getValues().size());
+    assertEquals(9, variable.getValueGroups().get().get(1).getValues().size());
     assertParagraphsEquals(
         Arrays.asList(
             "NOTE: PRIOR TO VERSION H, DME claims also used this code; the"
@@ -293,16 +302,16 @@ public final class PdfParserTest {
 
     // Spot-check some of the values:
     Value value_0_3 = variable.getValueGroups().get().get(0).getValues().get(3);
-    Assert.assertEquals("3", value_0_3.getCode());
-    Assert.assertEquals("Institutional provider", value_0_3.getDescription());
+    assertEquals("3", value_0_3.getCode());
+    assertEquals("Institutional provider", value_0_3.getDescription());
     Value value_1_8 = variable.getValueGroups().get().get(1).getValues().get(8);
-    Assert.assertEquals("8", value_1_8.getCode());
-    Assert.assertEquals(
+    assertEquals("8", value_1_8.getCode());
+    assertEquals(
         "Other entities for whom EI numbers are used in coding the ID field or proprietorship"
             + " for whom EI numbers are used in coding the ID field.",
         value_1_8.getDescription());
 
-    Assert.assertFalse(variable.getComment().isPresent());
+    assertFalse(variable.getComment().isPresent());
   }
 
   /**
@@ -321,7 +330,7 @@ public final class PdfParserTest {
         };
 
     String parsedLabel = PdfParser.parseLabel(Arrays.asList(variableSection));
-    Assert.assertEquals(
+    assertEquals(
         "Claim Next Generation (NG) Accountable Care Organization (ACO) Indicator Code – Population-Based"
             + " Payment (PBP)",
         parsedLabel);
@@ -333,7 +342,7 @@ public final class PdfParserTest {
    */
   private static void assertParagraphsEquals(
       List<String> expectedParagraphs, Optional<List<String>> actualParagraphs) {
-    Assert.assertEquals(expectedParagraphs != null, actualParagraphs.isPresent());
+    assertEquals(expectedParagraphs != null, actualParagraphs.isPresent());
     if (actualParagraphs.isPresent())
       assertParagraphsEquals(expectedParagraphs, actualParagraphs.get());
   }
@@ -344,13 +353,12 @@ public final class PdfParserTest {
    */
   private static void assertParagraphsEquals(
       List<String> expectedParagraphs, List<String> actualParagraphs) {
-    if (expectedParagraphs != null) Assert.assertNotNull(actualParagraphs);
-    else Assert.assertNull(actualParagraphs);
-    Assert.assertEquals(
-        "Paragraph count mismatch.", expectedParagraphs.size(), actualParagraphs.size());
+    if (expectedParagraphs != null) assertNotNull(actualParagraphs);
+    else assertNull(actualParagraphs);
+    assertEquals(expectedParagraphs.size(), actualParagraphs.size(), "Paragraph count mismatch.");
 
     for (int pIndex = 0; pIndex < expectedParagraphs.size(); pIndex++) {
-      Assert.assertEquals(expectedParagraphs.get(pIndex), actualParagraphs.get(pIndex));
+      assertEquals(expectedParagraphs.get(pIndex), actualParagraphs.get(pIndex));
     }
   }
 
@@ -418,46 +426,46 @@ public final class PdfParserTest {
    * @param variable the {@link Variable} to validate
    */
   private static void assertVariableIsValid(Variable variable) {
-    Assert.assertNotNull(variable);
+    assertNotNull(variable);
 
-    Assert.assertTrue(variable.getId() != null && !variable.getId().isEmpty());
+    assertTrue(variable.getId() != null && !variable.getId().isEmpty());
 
     String assertionMessage =
         String.format("Invalid parse result for variable '%s'.", variable.getId());
 
-    Assert.assertNotNull(assertionMessage, variable.getCodebook());
+    assertNotNull(variable.getCodebook(), assertionMessage);
 
     if (variable.getDescription().isPresent()) {
-      Assert.assertFalse(assertionMessage, variable.getDescription().get().isEmpty());
+      assertFalse(variable.getDescription().get().isEmpty(), assertionMessage);
       for (String paragraph : variable.getDescription().get())
-        Assert.assertTrue(assertionMessage, paragraph != null && !paragraph.isEmpty());
+        assertTrue(paragraph != null && !paragraph.isEmpty(), assertionMessage);
     }
 
     if (variable.getShortName().isPresent())
-      Assert.assertFalse(assertionMessage, variable.getShortName().get().isEmpty());
+      assertFalse(variable.getShortName().get().isEmpty(), assertionMessage);
 
-    Assert.assertTrue(
-        assertionMessage, variable.getLongName() != null && !variable.getLongName().isEmpty());
+    assertTrue(
+        variable.getLongName() != null && !variable.getLongName().isEmpty(), assertionMessage);
 
     // Note: getLongName() is _usually_ the same as getId(), but not always.
 
     // Note: getType() isn't always present.
 
-    Assert.assertTrue(assertionMessage, variable.getLength() != null && variable.getLength() > 0);
+    assertTrue(variable.getLength() != null && variable.getLength() > 0, assertionMessage);
 
     if (variable.getSource().isPresent())
-      Assert.assertFalse(assertionMessage, variable.getSource().get().isEmpty());
+      assertFalse(variable.getSource().get().isEmpty(), assertionMessage);
 
     if (variable.getValueFormat().isPresent())
-      Assert.assertFalse(assertionMessage, variable.getValueFormat().get().isEmpty());
+      assertFalse(variable.getValueFormat().get().isEmpty(), assertionMessage);
 
     if (variable.getValueGroups().isPresent())
-      Assert.assertFalse(assertionMessage, variable.getValueGroups().get().isEmpty());
+      assertFalse(variable.getValueGroups().get().isEmpty(), assertionMessage);
 
     if (variable.getComment().isPresent()) {
-      Assert.assertFalse(assertionMessage, variable.getComment().get().isEmpty());
+      assertFalse(variable.getComment().get().isEmpty(), assertionMessage);
       for (String paragraph : variable.getComment().get())
-        Assert.assertTrue(assertionMessage, paragraph != null && !paragraph.isEmpty());
+        assertTrue(paragraph != null && !paragraph.isEmpty(), assertionMessage);
     }
   }
 }

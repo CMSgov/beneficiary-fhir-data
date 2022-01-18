@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class R4ClaimResourceProviderTest {
 

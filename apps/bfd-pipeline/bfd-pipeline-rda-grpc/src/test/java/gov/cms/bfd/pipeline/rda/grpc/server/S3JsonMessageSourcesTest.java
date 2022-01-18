@@ -1,10 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import com.amazonaws.services.s3.AmazonS3;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class S3JsonMessageSourcesTest {
   @Test

@@ -4,7 +4,8 @@ import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static gov.cms.bfd.pipeline.rda.grpc.source.TransformerTestUtils.assertListContentsHaveSamePropertyValues;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rda.PreAdjMcsAdjustment;
@@ -45,8 +46,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class McsClaimTransformerTest {
   // using a fixed Clock ensures our timestamp is predictable
@@ -58,7 +59,7 @@ public class McsClaimTransformerTest {
   private McsClaim.Builder claimBuilder;
   private PreAdjMcsClaim claim;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     changeBuilder = McsClaimChange.newBuilder();
     claimBuilder = McsClaim.newBuilder();

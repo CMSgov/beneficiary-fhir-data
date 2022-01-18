@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.launcher;
 
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -18,8 +20,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
-import org.junit.Assume;
-import org.junit.AssumptionViolatedException;
+import org.opentest4j.TestAbortedException;
 
 /** Contains test utilities. */
 public final class ServerTestUtils {
@@ -104,8 +105,8 @@ public final class ServerTestUtils {
   }
 
   /**
-   * Throws an {@link AssumptionViolatedException} if the OS doesn't support
-   * <strong>graceful</strong> shutdowns via {@link Process#destroy()}.
+   * Throws an {@link TestAbortedException} if the OS doesn't support <strong>graceful</strong>
+   * shutdowns via {@link Process#destroy()}.
    */
   static void skipOnUnsupportedOs() {
     /*
@@ -117,9 +118,9 @@ public final class ServerTestUtils {
      * such that it listens on a particular port for shutdown requests, and handles them gracefully.
      */
 
-    Assume.assumeTrue(
-        "Unsupported OS for this test case.",
-        Arrays.asList("Linux", "Mac OS X").contains(System.getProperty("os.name")));
+    assumeTrue(
+        Arrays.asList("Linux", "Mac OS X").contains(System.getProperty("os.name")),
+        "Unsupported OS for this test case.");
   }
 
   /** @return the {@link Path} to the <code>bfd-server-launcher-sample</code> WAR */

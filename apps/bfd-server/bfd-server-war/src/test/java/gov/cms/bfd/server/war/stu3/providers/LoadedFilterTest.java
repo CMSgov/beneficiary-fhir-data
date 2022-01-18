@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -8,8 +11,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import org.apache.spark.util.sketch.BloomFilter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link gov.cms.bfd.server.war.stu3.providers.LoadedFileFilter}. */
 public final class LoadedFilterTest {
@@ -21,60 +23,56 @@ public final class LoadedFilterTest {
         new LoadedFileFilter(
             1, 0, Instant.now().minusSeconds(10), Instant.now().minusSeconds(5), emptyFilter);
 
-    Assert.assertTrue(
-        "Expected null range to be treated as an infinite range", filter1.matchesDateRange(null));
-    Assert.assertTrue(
-        "Expected empty range to be treated as an infinite range",
-        filter1.matchesDateRange(new DateRangeParam()));
+    assertTrue(
+        filter1.matchesDateRange(null), "Expected null range to be treated as an infinite range");
+    assertTrue(
+        filter1.matchesDateRange(new DateRangeParam()),
+        "Expected empty range to be treated as an infinite range");
 
     final DateRangeParam sinceYesterday =
         new DateRangeParam(
             new DateParam()
                 .setPrefix(ParamPrefixEnum.GREATERTHAN)
                 .setValue(Date.from(Instant.now().minus(1, ChronoUnit.DAYS))));
-    Assert.assertTrue(
-        "Expected since yesterday period to cover", filter1.matchesDateRange(sinceYesterday));
+    assertTrue(
+        filter1.matchesDateRange(sinceYesterday), "Expected since yesterday period to cover");
 
     final DateRangeParam beforeNow =
         new DateRangeParam(
             new DateParam().setPrefix(ParamPrefixEnum.LESSTHAN_OR_EQUALS).setValue(new Date()));
-    Assert.assertTrue(
-        "Expected since yesterday period to cover", filter1.matchesDateRange(beforeNow));
+    assertTrue(filter1.matchesDateRange(beforeNow), "Expected since yesterday period to cover");
 
     final DateRangeParam beforeYesterday =
         new DateRangeParam(
             new DateParam()
                 .setPrefix(ParamPrefixEnum.LESSTHAN)
                 .setValue(Date.from(Instant.now().minus(1, ChronoUnit.DAYS))));
-    Assert.assertFalse(
-        "Expected before yesterday period to not match", filter1.matchesDateRange(beforeYesterday));
+    assertFalse(
+        filter1.matchesDateRange(beforeYesterday), "Expected before yesterday period to not match");
 
     final DateRangeParam afterNow =
         new DateRangeParam(
             new DateParam().setPrefix(ParamPrefixEnum.GREATERTHAN_OR_EQUALS).setValue(new Date()));
-    Assert.assertFalse(
-        "Expected after now period to not match", filter1.matchesDateRange(afterNow));
+    assertFalse(filter1.matchesDateRange(afterNow), "Expected after now period to not match");
 
     final DateRangeParam beforeSevenSeconds =
         new DateRangeParam(
             new DateParam()
                 .setPrefix(ParamPrefixEnum.LESSTHAN)
                 .setValue(Date.from(Instant.now().minus(7, ChronoUnit.SECONDS))));
-    Assert.assertTrue(
-        "Expected partial match to match", filter1.matchesDateRange(beforeSevenSeconds));
+    assertTrue(filter1.matchesDateRange(beforeSevenSeconds), "Expected partial match to match");
 
     final DateRangeParam afterSevenSeconds =
         new DateRangeParam(
             new DateParam()
                 .setPrefix(ParamPrefixEnum.GREATERTHAN)
                 .setValue(Date.from(Instant.now().minus(7, ChronoUnit.SECONDS))));
-    Assert.assertTrue(
-        "Expected partial match to match", filter1.matchesDateRange(afterSevenSeconds));
+    assertTrue(filter1.matchesDateRange(afterSevenSeconds), "Expected partial match to match");
 
     final DateRangeParam sevenSeconds =
         new DateRangeParam(
             Date.from(Instant.now().minusSeconds(8)), Date.from(Instant.now().minusSeconds(7)));
-    Assert.assertTrue("Expected partial match to match", filter1.matchesDateRange(sevenSeconds));
+    assertTrue(filter1.matchesDateRange(sevenSeconds), "Expected partial match to match");
   }
 
   @Test
@@ -89,8 +87,8 @@ public final class LoadedFilterTest {
         new LoadedFileFilter(
             1, 1, Instant.now().minusSeconds(10), Instant.now().minusSeconds(5), smallFilter);
 
-    Assert.assertTrue("Expected to contain this", filter1.mightContain("1"));
-    Assert.assertFalse("Expected to not contain this", filter1.mightContain("888"));
-    Assert.assertFalse("Expected to not contain this", filter1.mightContain("BAD"));
+    assertTrue(filter1.mightContain("1"));
+    assertFalse(filter1.mightContain("888"));
+    assertFalse(filter1.mightContain("BAD"));
   }
 }
