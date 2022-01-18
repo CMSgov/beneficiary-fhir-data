@@ -149,14 +149,6 @@ module "etl" {
   log_bucket = module.logs.id
 }
 
-# temp no-op bucket for etl datalag
-module "etl_datalag" {
-  source     = "../resources/s3"
-  role       = "etl-datalag"
-  env_config = local.env_config
-  kms_key_id = data.aws_kms_key.master_key.arn
-  log_bucket = module.logs.id
-}
 
 ## IAM policy, user, and attachment to allow external read-write access to ETL bucket
 # NOTE: We only need this for production, however it is ok to
@@ -197,41 +189,6 @@ resource "aws_iam_policy" "etl_rw_s3" {
 EOF
 }
 
-# datalag policy
-resource "aws_iam_policy" "etl_datalag_rw_s3" {
-  name        = "bfd-${local.env_config.env}-etl-datalag-rw-s3"
-  description = "ETL datalag read-write S3 policy"
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "ETLRWKMS",
-      "Action": ["kms:Decrypt"],
-      "Effect": "Allow",
-      "Resource": ["${data.aws_kms_key.master_key.arn}"]
-    },
-    {
-      "Sid": "ETLRWBucketList",
-      "Action": ["s3:ListBucket"],
-      "Effect": "Allow",
-      "Resource": ["${module.etl_datalag.arn}"]
-    },
-    {
-      "Sid": "ETLRWBucketActions",
-      "Action": [
-        "s3:GetObject",
-        "s3:PutObject"
-      ],
-      "Effect": "Allow",
-      "Resource": ["${module.etl_datalag.arn}/*"]
-    }
-  ]
-}
-EOF
-}
-
 resource "aws_iam_user" "etl" {
   name = "bfd-${local.env_config.env}-etl"
 }
@@ -241,10 +198,6 @@ resource "aws_iam_user_policy_attachment" "etl_rw_s3" {
   policy_arn = aws_iam_policy.etl_rw_s3.arn
 }
 
-resource "aws_iam_user_policy_attachment" "etl_datalag_rw_s3" {
-  user       = aws_iam_user.etl.name
-  policy_arn = aws_iam_policy.etl_datalag_rw_s3.arn
-}
 
 ## S3 bucket, policy, and KMS key for medicare opt out data
 #

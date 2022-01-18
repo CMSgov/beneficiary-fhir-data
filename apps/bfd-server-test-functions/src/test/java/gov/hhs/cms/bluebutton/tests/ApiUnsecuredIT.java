@@ -2,12 +2,14 @@ package gov.hhs.cms.bluebutton.tests;
 
 import org.hl7.fhir.dstu21.model.Bundle;
 import org.hl7.fhir.dstu21.model.Patient;
-import org.junit.Assert;
-import org.junit.Test;
 
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import gov.hhs.cms.bluebutton.tests.FhirClientHelper.ApiUser;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Integration tests for the BlueButton frontend's open/unsecured API, which was
@@ -24,8 +26,8 @@ public final class ApiUnsecuredIT {
 		fhirClient.setEncoding(EncodingEnum.JSON);
 
 		Patient patient = fhirClient.read(Patient.class, apiUser.getPatientId());
-		Assert.assertNotNull(patient);
-		Assert.assertEquals(apiUser.getPatientId(), patient.getId());
+		assertNotNull(patient);
+		assertEquals(apiUser.getPatientId(), patient.getId());
 	}
 
 	/**
@@ -37,7 +39,7 @@ public final class ApiUnsecuredIT {
 		fhirClient.setEncoding(EncodingEnum.JSON);
 
 		Bundle searchResult = fhirClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
-		Assert.assertNotNull(searchResult);
-		Assert.assertEquals(1, searchResult.getEntry().size());
+		assertNotNull(searchResult);
+		assertEquals(1, searchResult.getEntry().size());
 	}
 }

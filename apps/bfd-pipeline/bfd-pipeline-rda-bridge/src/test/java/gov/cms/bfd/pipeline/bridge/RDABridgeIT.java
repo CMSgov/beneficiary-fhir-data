@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.bridge;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +9,7 @@ import com.flipkart.zjsonpatch.JsonDiff;
 import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
+import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -25,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RDABridgeIT {
 
@@ -80,7 +82,7 @@ public class RDABridgeIT {
 
   // DefaultAnnotationParam - Might as well be explicit
   @SuppressWarnings("DefaultAnnotationParam")
-  @Test(expected = Test.None.class)
+  @Test
   public void shouldProduceValidClaimStructures() throws IOException {
     RDABridge bridge = new RDABridge();
 
@@ -114,13 +116,16 @@ public class RDABridgeIT {
     FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
     McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
 
+    RdaChange resultingTransform = null;
     for (MessageOrBuilder message : results) {
       if (message instanceof FissClaimChange) {
-        fissTransformer.transformClaim((FissClaimChange) message);
+        resultingTransform = fissTransformer.transformClaim((FissClaimChange) message);
       } else {
-        mcsTransformer.transformClaim((McsClaimChange) message);
+        resultingTransform = mcsTransformer.transformClaim((McsClaimChange) message);
       }
     }
+    // TODO: Add some better assertions here
+    assertNotNull(resultingTransform);
   }
 
   private void assertJsonEquals(
@@ -155,7 +160,7 @@ public class RDABridgeIT {
       }
     }
 
-    assertTrue(String.join("\n", diffList), diffList.isEmpty());
+    assertTrue(diffList.isEmpty(), String.join("\n", diffList));
   }
 
   private String createDiff(String expectedJson, String actualJson, Set<String> ignorePaths) {

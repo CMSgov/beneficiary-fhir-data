@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.ccw.rif.extract.s3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import gov.cms.bfd.model.rif.RifFileType;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
 import gov.cms.bfd.pipeline.ccw.rif.extract.s3.DataSetManifest.DataSetManifestEntry;
@@ -13,8 +16,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link DataSetManifest}. */
 public final class DataSetManifestTest {
@@ -33,15 +35,15 @@ public final class DataSetManifestTest {
 
     DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
 
-    Assert.assertNotNull(manifest);
-    Assert.assertEquals(
+    assertNotNull(manifest);
+    assertEquals(
         1994,
         LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault())
             .get(ChronoField.YEAR));
-    Assert.assertEquals(1, manifest.getSequenceId());
-    Assert.assertEquals(2, manifest.getEntries().size());
-    Assert.assertEquals("sample-a-beneficiaries.txt", manifest.getEntries().get(0).getName());
-    Assert.assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
+    assertEquals(1, manifest.getSequenceId());
+    assertEquals(2, manifest.getEntries().size());
+    assertEquals("sample-a-beneficiaries.txt", manifest.getEntries().get(0).getName());
+    assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
   }
 
   /**
@@ -60,22 +62,22 @@ public final class DataSetManifestTest {
 
     DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
 
-    Assert.assertNotNull(manifest);
-    Assert.assertNotNull(manifest.getTimestamp());
-    Assert.assertEquals(
+    assertNotNull(manifest);
+    assertNotNull(manifest.getTimestamp());
+    assertEquals(
         2016,
         LocalDateTime.ofInstant(manifest.getTimestamp(), ZoneId.systemDefault())
             .get(ChronoField.YEAR));
-    Assert.assertEquals(1, manifest.getSequenceId());
-    Assert.assertEquals(9, manifest.getEntries().size());
-    Assert.assertEquals("bene.txt", manifest.getEntries().get(0).getName());
+    assertEquals(1, manifest.getSequenceId());
+    assertEquals(9, manifest.getEntries().size());
+    assertEquals("bene.txt", manifest.getEntries().get(0).getName());
     for (int i = 0; i < manifest.getEntries().size(); i++) {
       DataSetManifestEntry entry = manifest.getEntries().get(i);
-      Assert.assertNotNull("Null entry: " + i, entry);
-      Assert.assertNotNull("Null entry name: " + i, entry.getName());
-      Assert.assertNotNull("Null entry type: " + i, entry.getType());
+      assertNotNull(entry, "Null entry: " + i);
+      assertNotNull(entry.getName(), "Null entry name: " + i);
+      assertNotNull(entry.getType(), "Null entry type: " + i);
     }
-    Assert.assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
+    assertEquals(RifFileType.BENEFICIARY, manifest.getEntries().get(0).getType());
   }
 
   /**
@@ -96,8 +98,8 @@ public final class DataSetManifestTest {
 
     DataSetManifest manifest = (DataSetManifest) jaxbUnmarshaller.unmarshal(manifestStream);
 
-    Assert.assertNotNull(manifest);
-    Assert.assertNotNull(manifest.getTimestamp());
+    assertNotNull(manifest);
+    assertNotNull(manifest.getTimestamp());
   }
 
   /**
@@ -111,7 +113,7 @@ public final class DataSetManifestTest {
         CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS + "/2017-07-11T00:00:00.000Z/1_manifest.xml";
     DataSetManifestId manifestId = DataSetManifestId.parseManifestIdFromS3Key(s3Key);
 
-    Assert.assertEquals(s3Key, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS));
+    assertEquals(s3Key, manifestId.computeS3Key(CcwRifLoadJob.S3_PREFIX_PENDING_DATA_SETS));
   }
 
   /**

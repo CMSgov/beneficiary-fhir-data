@@ -1,7 +1,7 @@
 package gov.cms.bfd.model.rda;
 
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rif.schema.DatabaseSchemaManager;
@@ -17,23 +17,23 @@ import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import org.hibernate.tool.schema.Action;
 import org.hsqldb.jdbc.JDBCDataSource;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SchemaMigrationIT {
   public static final String PERSISTENCE_UNIT_NAME = "gov.cms.bfd.rda";
 
   private EntityManager entityManager;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     final JDBCDataSource dataSource = createInMemoryDataSource();
     DatabaseSchemaManager.createOrUpdateSchema(dataSource);
     entityManager = createEntityManager(dataSource);
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     if (entityManager != null && entityManager.isOpen()) {
       entityManager.close();

@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.common.collect.ImmutableMap;
 import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.DMEClaim;
@@ -12,8 +15,7 @@ import gov.cms.bfd.model.rif.SNFClaim;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class ClaimTypeV2Test {
   /**
@@ -72,18 +74,18 @@ public final class ClaimTypeV2Test {
     EnumSet.allOf(ClaimTypeV2.class).stream()
         .forEach(
             claimType ->
-                Assert.assertTrue(
-                    String.format("ClaimType %s not tested", claimType.name()),
-                    claimTypeToClaim.containsKey(claimType)));
+                assertTrue(
+                    claimTypeToClaim.containsKey(claimType),
+                    String.format("ClaimType %s not tested", claimType.name())));
 
     claimTypeToClaim
         .entrySet()
         .forEach(
             entry ->
-                Assert.assertEquals(
-                    String.format(
-                        "Claim type %s does not match expectations", entry.getKey().name()),
+                assertEquals(
                     end,
-                    entry.getKey().getServiceEndAttributeFunction().apply(entry.getValue())));
+                    entry.getKey().getServiceEndAttributeFunction().apply(entry.getValue()),
+                    String.format(
+                        "Claim type %s does not match expectations", entry.getKey().name())));
   }
 }
