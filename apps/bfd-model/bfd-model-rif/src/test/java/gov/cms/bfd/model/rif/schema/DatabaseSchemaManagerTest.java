@@ -1,6 +1,6 @@
 package gov.cms.bfd.model.rif.schema;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.model.rif.schema.DatabaseSchemaManager}. */
 public final class DatabaseSchemaManagerTest {

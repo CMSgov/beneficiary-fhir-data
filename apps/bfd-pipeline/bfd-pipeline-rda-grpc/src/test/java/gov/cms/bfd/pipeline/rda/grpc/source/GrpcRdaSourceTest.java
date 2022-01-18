@@ -1,7 +1,10 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.assertMeterReading;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -25,14 +28,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
-@RunWith(MockitoJUnitRunner.class)
 public class GrpcRdaSourceTest {
   private static final Integer CLAIM_1 = 101;
   private static final Integer CLAIM_2 = 102;
@@ -48,8 +48,9 @@ public class GrpcRdaSourceTest {
   private GrpcRdaSource<Integer, Integer> source;
   private GrpcRdaSource.Metrics metrics;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
+    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     source =
         spy(
@@ -281,7 +282,7 @@ public class GrpcRdaSourceTest {
         new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
       loaded = (GrpcRdaSource.Config) inp.readObject();
     }
-    Assert.assertEquals(original, loaded);
+    assertEquals(original, loaded);
   }
 
   private GrpcResponseStream<Integer> createResponse(int... values) {

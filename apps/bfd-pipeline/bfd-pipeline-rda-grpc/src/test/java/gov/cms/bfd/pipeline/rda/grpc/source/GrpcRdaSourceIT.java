@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,8 +31,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class GrpcRdaSourceIT {
   private static final String SOURCE_CLAIM_1 =
@@ -191,7 +193,7 @@ public class GrpcRdaSourceIT {
   private MetricRegistry appMetrics;
   private JsonCaptureSink sink;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     appMetrics = new MetricRegistry();
     sink = new JsonCaptureSink();
@@ -253,7 +255,7 @@ public class GrpcRdaSourceIT {
                 fail("should have thrown an exception due to missing token");
               } catch (ProcessingException ex) {
                 assertEquals(0, ex.getProcessedCount());
-                assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
+                assertTrue(ex.getOriginalCause() instanceof StatusRuntimeException);
                 assertEquals(
                     Status.UNAUTHENTICATED,
                     ((StatusRuntimeException) ex.getOriginalCause()).getStatus());
@@ -278,7 +280,7 @@ public class GrpcRdaSourceIT {
                 fail("should have thrown an exception due to missing token");
               } catch (ProcessingException ex) {
                 assertEquals(0, ex.getProcessedCount());
-                assertEquals(true, ex.getOriginalCause() instanceof StatusRuntimeException);
+                assertTrue(ex.getOriginalCause() instanceof StatusRuntimeException);
                 assertEquals(
                     Status.UNAUTHENTICATED,
                     ((StatusRuntimeException) ex.getOriginalCause()).getStatus());

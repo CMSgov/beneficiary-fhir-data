@@ -1,26 +1,25 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
-@RunWith(MockitoJUnitRunner.class)
 public class SequenceNumberWriterThreadTest {
   @Mock private RdaSink<Integer, Integer> sink;
   private List<Exception> errors;
   private SequenceNumberWriterThread<Integer, Integer> thread;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
+    MockitoAnnotations.openMocks(this);
     errors = new ArrayList<>();
     thread = new SequenceNumberWriterThread<>(() -> sink, batch -> errors.add(batch.getError()));
   }
@@ -28,7 +27,7 @@ public class SequenceNumberWriterThreadTest {
   @Test
   public void queueIsEmpty() throws Exception {
     var running = thread.runOnce(sink);
-    assertEquals(true, running);
+    assertTrue(running);
     verifyNoInteractions(sink);
   }
 
@@ -36,7 +35,7 @@ public class SequenceNumberWriterThreadTest {
   public void closeRequested() throws Exception {
     thread.close();
     var running = thread.runOnce(sink);
-    assertEquals(false, running);
+    assertFalse(running);
     verifyNoInteractions(sink);
   }
 
@@ -44,7 +43,7 @@ public class SequenceNumberWriterThreadTest {
   public void singleValueInQueue() throws Exception {
     thread.add(1000L);
     var running = thread.runOnce(sink);
-    assertEquals(true, running);
+    assertTrue(running);
     verify(sink).updateLastSequenceNumber(1000);
     verifyNoMoreInteractions(sink);
   }
@@ -55,7 +54,7 @@ public class SequenceNumberWriterThreadTest {
     thread.add(1001L);
     thread.add(1002L);
     var running = thread.runOnce(sink);
-    assertEquals(true, running);
+    assertTrue(running);
     verify(sink).updateLastSequenceNumber(1002);
     verifyNoMoreInteractions(sink);
   }
@@ -66,12 +65,12 @@ public class SequenceNumberWriterThreadTest {
     thread.add(1001L);
     thread.add(1002L);
     var running = thread.runOnce(sink);
-    assertEquals(true, running);
+    assertTrue(running);
     verify(sink).updateLastSequenceNumber(1002);
 
     thread.close();
     running = thread.runOnce(sink);
-    assertEquals(false, running);
+    assertFalse(running);
     verifyNoMoreInteractions(sink);
   }
 
@@ -82,7 +81,7 @@ public class SequenceNumberWriterThreadTest {
     thread.add(1000L);
 
     var running = thread.runOnce(sink);
-    assertEquals(false, running);
+    assertFalse(running);
     verify(sink).updateLastSequenceNumber(1000L);
     verifyNoMoreInteractions(sink);
     assertEquals(ImmutableList.of(error), errors);

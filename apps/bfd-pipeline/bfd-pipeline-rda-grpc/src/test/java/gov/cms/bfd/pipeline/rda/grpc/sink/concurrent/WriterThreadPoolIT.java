@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
@@ -13,7 +13,7 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class WriterThreadPoolIT {
   private static final String VERSION = "Version";
@@ -28,7 +28,7 @@ public class WriterThreadPoolIT {
         pool.addToQueue(VERSION, message);
       }
     }
-    assertTrue("all sinks closed", database.allClosed());
+    assertTrue(database.allClosed(), "all sinks closed");
     assertEquals(expectedClaims(messages), database.getClaims());
     assertEquals(messages.size(), database.getLastSequenceNumber());
   }
@@ -49,12 +49,12 @@ public class WriterThreadPoolIT {
     } catch (Exception ex) {
       error = ex;
     }
-    assertTrue("caught the exception", error instanceof ProcessingException);
+    assertTrue(error instanceof ProcessingException, "caught the exception");
     assertTrue(
-        "exception is a transformation error",
         ((ProcessingException) error).getOriginalCause()
-            instanceof DataTransformer.TransformationException);
-    assertTrue("all sinks closed", database.allClosed());
+            instanceof DataTransformer.TransformationException,
+        "exception is a transformation error");
+    assertTrue(database.allClosed(), "all sinks closed");
   }
 
   @Test
@@ -73,11 +73,11 @@ public class WriterThreadPoolIT {
     } catch (Exception ex) {
       error = ex;
     }
-    assertTrue("caught the exception", error instanceof ProcessingException);
+    assertTrue(error instanceof ProcessingException, "caught the exception");
     assertTrue(
-        "exception is an i/o error",
-        ((ProcessingException) error).getOriginalCause() instanceof IOException);
-    assertTrue("all sinks closed", database.allClosed());
+        ((ProcessingException) error).getOriginalCause() instanceof IOException,
+        "exception is an i/o error");
+    assertTrue(database.allClosed(), "all sinks closed");
   }
 
   private List<TestDatabase.Message> createTestMessages() {

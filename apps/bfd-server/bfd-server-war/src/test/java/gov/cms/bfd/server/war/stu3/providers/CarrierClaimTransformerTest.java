@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.CarrierClaim;
@@ -19,8 +23,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.CareTeamComponent;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit.ItemComponent;
 import org.hl7.fhir.dstu3.model.codesystems.ClaimCareteamrole;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer}. */
 public final class CarrierClaimTransformerTest {
@@ -120,15 +123,15 @@ public final class CarrierClaimTransformerTest {
         claim.getSubmittedChargeAmount(),
         claim.getAllowedChargeAmount());
 
-    Assert.assertEquals(5, eob.getDiagnosis().size());
-    Assert.assertEquals(1, eob.getItem().size());
+    assertEquals(5, eob.getDiagnosis().size());
+    assertEquals(1, eob.getItem().size());
 
     TransformerTestUtils.assertAdjudicationTotalAmountEquals(
         CcwCodebookVariable.PRPAYAMT, claim.getPrimaryPayerPaidAmount(), eob);
 
     CarrierClaimLine claimLine1 = claim.getLines().get(0);
     ItemComponent eobItem0 = eob.getItem().get(0);
-    Assert.assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
+    assertEquals(claimLine1.getLineNumber(), new BigDecimal(eobItem0.getSequence()));
 
     TransformerTestUtils.assertCareTeamEquals(
         claimLine1.getPerformingPhysicianNpi().get(), ClaimCareteamrole.PRIMARY, eob);
@@ -157,9 +160,9 @@ public final class CarrierClaimTransformerTest {
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             claimLine1.getProviderTaxNumber(), eob.getCareTeam());
     if (includedTaxNumbers.orElse(false)) {
-      Assert.assertNotNull(taxNumberCareTeamEntry);
+      assertNotNull(taxNumberCareTeamEntry);
     } else {
-      Assert.assertNull(taxNumberCareTeamEntry);
+      assertNull(taxNumberCareTeamEntry);
     }
 
     TransformerTestUtils.assertExtensionCodingEquals(
@@ -182,7 +185,7 @@ public final class CarrierClaimTransformerTest {
         null,
         claimLine1.getHcpcsCode().get(),
         eobItem0.getService().getCoding());
-    Assert.assertEquals(1, eobItem0.getModifier().size());
+    assertEquals(1, eobItem0.getModifier().size());
     TransformerTestUtils.assertHcpcsCodes(
         eobItem0,
         claimLine1.getHcpcsCode(),

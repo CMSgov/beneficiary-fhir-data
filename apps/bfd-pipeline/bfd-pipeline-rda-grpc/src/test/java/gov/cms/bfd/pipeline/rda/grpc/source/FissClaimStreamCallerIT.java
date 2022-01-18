@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
@@ -14,7 +16,7 @@ import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FissClaimStreamCallerIT {
   private static final String CLAIM_1 =
@@ -75,17 +77,17 @@ public class FissClaimStreamCallerIT {
 
               final GrpcResponseStream<FissClaimChange> results =
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
               PreAdjFissClaim claim = transform(results.next());
               assertEquals("63843470", claim.getDcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
               claim = transform(results.next());
               assertEquals("2643602", claim.getDcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-              assertEquals(false, results.hasNext());
+              assertFalse(results.hasNext());
             });
   }
 
@@ -107,7 +109,7 @@ public class FissClaimStreamCallerIT {
               assertEquals(Long.valueOf(12), transform(results.next()).getSequenceNumber());
               assertEquals(Long.valueOf(13), transform(results.next()).getSequenceNumber());
               assertEquals(Long.valueOf(14), transform(results.next()).getSequenceNumber());
-              assertEquals(false, results.hasNext());
+              assertFalse(results.hasNext());
             });
   }
 

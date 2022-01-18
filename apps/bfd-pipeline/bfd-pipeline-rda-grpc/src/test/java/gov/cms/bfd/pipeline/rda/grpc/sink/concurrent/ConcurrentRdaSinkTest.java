@@ -1,25 +1,24 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ConcurrentRdaSinkTest {
   private static final String VERSION = "Version";
 
   @Mock private WriterThreadPool<TestDatabase.Message, TestDatabase.Claim> pool;
   private ConcurrentRdaSink<TestDatabase.Message, TestDatabase.Claim> sink;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
+    MockitoAnnotations.openMocks(this);
     sink = new ConcurrentRdaSink<>(pool);
   }
 

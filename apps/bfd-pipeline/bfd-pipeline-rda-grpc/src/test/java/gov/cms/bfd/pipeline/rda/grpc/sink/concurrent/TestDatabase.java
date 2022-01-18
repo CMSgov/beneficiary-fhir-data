@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
@@ -46,7 +46,7 @@ public class TestDatabase {
   }
 
   private synchronized void setLastSequenceNumber(long value) {
-    assertTrue("sequenceNumber should only increase", value >= lastSequenceNumber);
+    assertTrue(value >= lastSequenceNumber, "sequenceNumber should only increase");
     lastSequenceNumber = value;
   }
 

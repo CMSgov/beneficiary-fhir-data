@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink.concurrent;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableList;
@@ -11,8 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ClaimWriterThreadTest {
   private static final String VERSION = "Version";
@@ -23,7 +25,7 @@ public class ClaimWriterThreadTest {
   private ClaimWriterThread<TestDatabase.Message, TestDatabase.Claim> thread;
   private ClaimWriterThread.Buffer<TestDatabase.Message, TestDatabase.Claim> buffer;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     database = new TestDatabase();
     sink = spy(database.createSink());
@@ -35,7 +37,7 @@ public class ClaimWriterThreadTest {
   @Test
   public void queueIsEmpty() throws Exception {
     var running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(Collections.emptyList(), callbacks);
     assertEquals(Collections.emptyList(), database.getClaims());
     assertEquals(0, buffer.getFullCount());
@@ -51,7 +53,7 @@ public class ClaimWriterThreadTest {
     thread.add(VERSION, claimA2.toMessage());
     // first loop finds claimA1
     var running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(ImmutableList.of(claimA1.toMessage()), buffer.getMessages());
     assertEquals(ImmutableList.of(claimA1), buffer.getClaims());
     assertEquals(ImmutableList.of(), database.getClaims());
@@ -59,7 +61,7 @@ public class ClaimWriterThreadTest {
 
     // second loop finds claimB1
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(ImmutableList.of(claimA1.toMessage(), claimB1.toMessage()), buffer.getMessages());
     assertEquals(ImmutableList.of(claimA1, claimB1), buffer.getClaims());
     assertEquals(ImmutableList.of(), database.getClaims());
@@ -67,7 +69,7 @@ public class ClaimWriterThreadTest {
 
     // third loop finds claimA2 which replaces claimA1
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(
         ImmutableList.of(claimA1.toMessage(), claimB1.toMessage(), claimA2.toMessage()),
         buffer.getMessages());
@@ -89,7 +91,7 @@ public class ClaimWriterThreadTest {
 
     // first loop finds claimA1
     var running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(ImmutableList.of(claimA1.toMessage()), buffer.getMessages());
     assertEquals(ImmutableList.of(claimA1), buffer.getClaims());
     assertEquals(ImmutableList.of(), database.getClaims());
@@ -97,7 +99,7 @@ public class ClaimWriterThreadTest {
 
     // second loop finds claimB1
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(ImmutableList.of(claimA1.toMessage(), claimB1.toMessage()), buffer.getMessages());
     assertEquals(ImmutableList.of(claimA1, claimB1), buffer.getClaims());
     assertEquals(ImmutableList.of(), database.getClaims());
@@ -105,7 +107,7 @@ public class ClaimWriterThreadTest {
 
     // third loop finds claimA2 which replaces claimA1
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(
         ImmutableList.of(claimA1.toMessage(), claimB1.toMessage(), claimA2.toMessage()),
         buffer.getMessages());
@@ -115,7 +117,7 @@ public class ClaimWriterThreadTest {
 
     // fourth loop finds claimC1 which creates full batch and triggers write
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(ImmutableList.of(), buffer.getMessages());
     assertEquals(ImmutableList.of(), buffer.getClaims());
     assertEquals(ImmutableList.of(claimA2, claimB1, claimC1), database.getClaims());
@@ -142,7 +144,7 @@ public class ClaimWriterThreadTest {
 
     // first loop finds claimA1
     var running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(ImmutableList.of(claimA1.toMessage()), buffer.getMessages());
     assertEquals(ImmutableList.of(claimA1), buffer.getClaims());
     assertEquals(ImmutableList.of(), database.getClaims());
@@ -150,7 +152,7 @@ public class ClaimWriterThreadTest {
 
     // second loop finds claimB1
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(ImmutableList.of(claimA1.toMessage(), claimB1.toMessage()), buffer.getMessages());
     assertEquals(ImmutableList.of(claimA1, claimB1), buffer.getClaims());
     assertEquals(ImmutableList.of(), database.getClaims());
@@ -158,7 +160,7 @@ public class ClaimWriterThreadTest {
 
     // third loop finds shutdown requested so flushes buffer and returns false to end loop
     running = thread.runOnce(sink, buffer);
-    assertEquals(false, running);
+    assertFalse(running);
     assertEquals(ImmutableList.of(), buffer.getMessages());
     assertEquals(ImmutableList.of(), buffer.getClaims());
     assertEquals(ImmutableList.of(claimA1, claimB1), database.getClaims());
@@ -178,15 +180,15 @@ public class ClaimWriterThreadTest {
 
     // first loop finds claimA1
     var running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
 
     // second loop finds claimB1
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
 
     // third loop finds no new entries and flushes buffer but does not shut down
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     assertEquals(ImmutableList.of(), buffer.getMessages());
     assertEquals(ImmutableList.of(), buffer.getClaims());
     assertEquals(ImmutableList.of(claimA1, claimB1), database.getClaims());
@@ -211,11 +213,11 @@ public class ClaimWriterThreadTest {
 
     // first loop finds claimA1
     var running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     running = thread.runOnce(sink, buffer);
-    assertEquals(true, running);
+    assertTrue(running);
     running = thread.runOnce(sink, buffer);
-    assertEquals(false, running);
+    assertFalse(running);
     assertEquals(
         ImmutableList.of(
             new ProcessedBatch<>(

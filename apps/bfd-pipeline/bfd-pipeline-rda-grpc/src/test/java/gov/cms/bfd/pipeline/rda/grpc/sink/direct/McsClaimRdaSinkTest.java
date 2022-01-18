@@ -2,7 +2,8 @@ package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 import com.codahale.metrics.MetricRegistry;
@@ -24,13 +25,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
-@RunWith(MockitoJUnitRunner.class)
 public class McsClaimRdaSinkTest {
   private static final String VERSION = "version";
 
@@ -44,8 +43,9 @@ public class McsClaimRdaSinkTest {
   private McsClaimRdaSink sink;
   private long nextSeq = 0L;
 
-  @Before
+  @BeforeEach
   public void setUp() {
+    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();

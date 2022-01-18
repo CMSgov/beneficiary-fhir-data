@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.launcher;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +22,6 @@ import java.util.regex.Pattern;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.awaitility.core.ConditionTimeoutException;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,11 +77,11 @@ public final class ServerProcess implements AutoCloseable {
             Pattern.MULTILINE);
     String logText = appRunConsumer.getStdoutContents().toString();
     Matcher serverUriMatcher = serverUriPattern.matcher(logText);
-    Assert.assertTrue(
+    assertTrue(
+        serverUriMatcher.find(),
         String.format(
             "Unable to find server start message (/%s/) in log:\n%s",
-            serverUriPattern.pattern(), logText),
-        serverUriMatcher.find());
+            serverUriPattern.pattern(), logText));
     try {
       this.serverUri = new URI(serverUriMatcher.group(1));
     } catch (URISyntaxException e) {
@@ -282,7 +283,7 @@ public final class ServerProcess implements AutoCloseable {
      * Constructs a new {@link ProcessOutputConsumer} instance.
      *
      * @param process the {@link ProcessOutputConsumer} whose output should be consumed
-     * @param out
+     * @param teeTarget the teeTarget
      */
     public ProcessOutputConsumer(Process process, Optional<PrintStream> teeTarget) {
       /*

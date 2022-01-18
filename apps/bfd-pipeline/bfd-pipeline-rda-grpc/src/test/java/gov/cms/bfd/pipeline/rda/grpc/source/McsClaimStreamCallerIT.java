@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
@@ -11,7 +11,7 @@ import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class McsClaimStreamCallerIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
@@ -32,19 +32,19 @@ public class McsClaimStreamCallerIT {
               final McsClaimStreamCaller caller = new McsClaimStreamCaller();
               final GrpcResponseStream<McsClaimChange> results =
                   caller.callService(channel, CallOptions.DEFAULT, 0L);
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
               PreAdjMcsClaim claim = transform(results.next());
               assertEquals("75302", claim.getIdrClmHdIcn());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
-              assertEquals(true, results.hasNext());
+              assertTrue(results.hasNext());
 
               claim = transform(results.next());
               assertEquals("972078", claim.getIdrClmHdIcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
-              assertEquals(false, results.hasNext());
+              assertFalse(results.hasNext());
             });
   }
 
@@ -66,7 +66,7 @@ public class McsClaimStreamCallerIT {
               assertEquals(Long.valueOf(12), transform(results.next()).getSequenceNumber());
               assertEquals(Long.valueOf(13), transform(results.next()).getSequenceNumber());
               assertEquals(Long.valueOf(14), transform(results.next()).getSequenceNumber());
-              assertEquals(false, results.hasNext());
+              assertFalse(results.hasNext());
             });
   }
 
