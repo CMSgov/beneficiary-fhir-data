@@ -1,5 +1,6 @@
 package gov.cms.bfd.model.rda;
 
+import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -47,6 +48,9 @@ public class Mbi {
   @Column(name = "`oldHash`", length = 64)
   private String oldHash;
 
+  @Column(name = "`lastUpdated`", nullable = false)
+  private Instant lastUpdated;
+
   /**
    * Convenience constructor to create a record with a non-null ID and no oldHash value.
    *
@@ -55,7 +59,7 @@ public class Mbi {
    * @param hash hash value
    */
   public Mbi(long mbiId, String mbi, String hash) {
-    this(mbiId, mbi, hash, null);
+    this(mbiId, mbi, hash, null, Instant.now());
   }
 
   /**
@@ -65,6 +69,6 @@ public class Mbi {
    * @param hash hash value
    */
   public Mbi(String mbi, String hash) {
-    this(null, mbi, hash, null);
+    this(null, mbi, hash, null, Instant.now());
   }
 }
