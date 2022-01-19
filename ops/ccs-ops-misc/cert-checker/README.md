@@ -1,5 +1,8 @@
-To Run Script
-********************
+## To run this script:
+
+```shell
+chmod +x ./cert-checker
 mv .env.sample .env
-vi .env # with the correct settings can be found in keybase under a file name labeled cert.env
-. .env ./cert-checker
+vi .env # (see ops for the correct settings)
+source .env && ./cert-checker
+```
