@@ -67,8 +67,11 @@ public class McsTransformer extends AbstractTransformer {
             // RIF mappings are  0 - unknown, 1 - male, 2 - female
             // RDA mappings are -1 - unrecognized, 0 - male, 1 - female
             int enumValue = Integer.parseInt(value);
-            enumValue = (enumValue == 1 || enumValue == 2) ? enumValue - 1 : -1;
-            claimBuilder.setIdrBeneSexEnumValue(enumValue);
+            if (enumValue != 0) { // Skip RIF "unknown" values since they don't map to MCS RDA
+              --enumValue; // Transform to RDA values
+              enumValue = (enumValue == 0 || enumValue == 1) ? enumValue : -1;
+              claimBuilder.setIdrBeneSexEnumValue(enumValue);
+            }
           });
       data.getFromType(Mcs.CLM_FRM_DT, Parser.Data.Type.DATE)
           .ifPresent(claimBuilder::setIdrHdrFromDos);
