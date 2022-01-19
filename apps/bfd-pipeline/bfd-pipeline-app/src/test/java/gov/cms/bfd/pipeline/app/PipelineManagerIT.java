@@ -1,5 +1,8 @@
 package gov.cms.bfd.pipeline.app;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.pipeline.app.scheduler.SchedulerJob;
@@ -20,13 +23,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.awaitility.Awaitility;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,21 +36,15 @@ import org.slf4j.LoggerFactory;
 public final class PipelineManagerIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(PipelineManagerIT.class);
 
-  @Rule
-  public TestWatcher testCaseEntryExitLogger =
-      new TestWatcher() {
-        /** @see org.junit.rules.TestWatcher#starting(org.junit.runner.Description) */
-        @Override
-        protected void starting(Description description) {
-          LOGGER.info("{}: starting.", description.getDisplayName());
-        }
+  @BeforeEach
+  public void starting(TestInfo testInfo) {
+    LOGGER.info("{}: starting.", testInfo.getDisplayName());
+  }
 
-        /** @see org.junit.rules.TestWatcher#finished(org.junit.runner.Description) */
-        @Override
-        protected void finished(Description description) {
-          LOGGER.info("{}: finished.", description.getDisplayName());
-        };
-      };
+  @AfterEach
+  public void finished(TestInfo testInfo) {
+    LOGGER.info("{}: finished.", testInfo.getDisplayName());
+  };
 
   /**
    * Verifies that {@link PipelineManager} automatically runs {@link MockJob} and {@link
@@ -66,11 +62,14 @@ public final class PipelineManagerIT {
         new PipelineManager(
             PipelineTestUtils.get().getPipelineApplicationState().getMetrics(), jobRecordStore)) {
       // Verify that there are job records for the built-ins.
-      Assert.assertEquals(2, jobRecordStore.getJobRecords().size());
-      Assert.assertTrue(
+
+      assertEquals(2, jobRecordStore.getJobRecords().size());
+
+      assertTrue(
           jobRecordStore.getJobRecords().stream()
               .anyMatch(j -> VolunteerJob.JOB_TYPE.equals(j.getJobType())));
-      Assert.assertTrue(
+
+      assertTrue(
           jobRecordStore.getJobRecords().stream()
               .anyMatch(j -> SchedulerJob.JOB_TYPE.equals(j.getJobType())));
     }
@@ -109,8 +108,8 @@ public final class PipelineManagerIT {
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
               .findAny();
-      Assert.assertEquals(
-          Optional.of(PipelineJobOutcome.WORK_DONE), mockJobRecord.get().getOutcome());
+
+      assertEquals(Optional.of(PipelineJobOutcome.WORK_DONE), mockJobRecord.get().getOutcome());
     }
   }
 
@@ -152,8 +151,10 @@ public final class PipelineManagerIT {
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
               .findAny();
-      Assert.assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
-      Assert.assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
+
+      assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
+
+      assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
     }
   }
 
@@ -193,8 +194,8 @@ public final class PipelineManagerIT {
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
               .findAny();
-      Assert.assertEquals(
-          Optional.of(PipelineJobOutcome.WORK_DONE), mockJobRecord.get().getOutcome());
+
+      assertEquals(Optional.of(PipelineJobOutcome.WORK_DONE), mockJobRecord.get().getOutcome());
     }
   }
 
@@ -236,11 +237,14 @@ public final class PipelineManagerIT {
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && j.isCompleted())
               .findAny();
-      Assert.assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
-      Assert.assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
+
+      assertEquals(RuntimeException.class, mockJobRecord.get().getFailure().get().getType());
+
+      assertEquals("boom", mockJobRecord.get().getFailure().get().getMessage());
 
       // Make sure that the job stopped trying to execute after it failed.
-      Assert.assertEquals(
+
+      assertEquals(
           1,
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()))
@@ -287,8 +291,10 @@ public final class PipelineManagerIT {
       pipelineManager.stop();
       PipelineJobRecord<NullPipelineJobArguments> mockJobRecord =
           jobRecordStore.findMostRecent(MockJob.JOB_TYPE).get();
-      Assert.assertTrue(mockJobRecord.getCanceledTime().isPresent());
-      Assert.assertTrue(mockJobRecord.getDuration().get().toMillis() < 500);
+
+      assertTrue(mockJobRecord.getCanceledTime().isPresent());
+
+      assertTrue(mockJobRecord.getDuration().get().toMillis() < 500);
     }
   }
 
@@ -387,7 +393,8 @@ public final class PipelineManagerIT {
 
       // Stop the pipeline and verify that at least one job was cancelled before it started.
       pipelineManager.stop();
-      Assert.assertTrue(
+
+      assertTrue(
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isStarted())
               .findAny()
@@ -407,7 +414,7 @@ public final class PipelineManagerIT {
    * @throws Exception Any unhandled {@link Exception}s will cause this test case to fail.
    */
   @Test
-  @Ignore
+  @Disabled
   public void runWayTooManyJobsThenStop() throws Exception {
     // Let's speed things up a bit, so we can run more iterations, faster.
     SchedulerJob.SCHEDULER_TICK_MILLIS = 1;
@@ -478,7 +485,8 @@ public final class PipelineManagerIT {
           jobRecordStore.getJobRecords().stream()
               .filter(j -> MockJob.JOB_TYPE.equals(j.getJobType()) && !j.isCompletedSuccessfully())
               .collect(Collectors.toSet());
-      Assert.assertEquals(0, unsuccessfulJobs.size());
+
+      assertEquals(0, unsuccessfulJobs.size());
 
       // Ensure that the final metrics get logged.
       Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build().report();
@@ -488,7 +496,7 @@ public final class PipelineManagerIT {
   }
 
   /** Reduce tick time on built-in jobs, to speed test execution. */
-  @BeforeClass
+  @BeforeAll
   public static void configureTimers() {
     VolunteerJob.VOLUNTEER_TICK_MILLIS = 10;
     SchedulerJob.SCHEDULER_TICK_MILLIS = 10;

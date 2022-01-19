@@ -1,5 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import java.io.ByteArrayInputStream;
@@ -8,8 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RdaLoadOptionsTest {
   @Test
@@ -38,6 +39,6 @@ public class RdaLoadOptionsTest {
         new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
       loaded = (RdaLoadOptions) inp.readObject();
     }
-    Assert.assertEquals(original, loaded);
+    assertEquals(original, loaded);
   }
 }

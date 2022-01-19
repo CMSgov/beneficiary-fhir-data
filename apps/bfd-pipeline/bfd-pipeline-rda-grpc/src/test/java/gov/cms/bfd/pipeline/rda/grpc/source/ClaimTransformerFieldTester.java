@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -79,8 +80,8 @@ public abstract class ClaimTransformerFieldTester<
    * @param getter method reference of lambda to get a value of the hashed value field from an
    *     entity object
    * @param maxLength maximum valid length for the string field being hashed
-   * @param idHasher {@link gov.cms.bfd.pipeline.sharedutils.IdHasher} object used to compute a
-   *     hashed value
+   * @param hasher {@link gov.cms.bfd.pipeline.sharedutils.IdHasher} object used to compute a hashed
+   *     value
    * @return this object so that calls can be chained
    */
   @CanIgnoreReturnValue

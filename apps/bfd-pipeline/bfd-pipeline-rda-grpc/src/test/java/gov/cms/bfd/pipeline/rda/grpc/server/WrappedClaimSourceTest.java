@@ -1,6 +1,9 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import gov.cms.mpsm.rda.v1.ChangeType;
@@ -11,7 +14,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.time.Clock;
 import java.util.Iterator;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class WrappedClaimSourceTest {
   @Test
@@ -19,7 +22,7 @@ public class WrappedClaimSourceTest {
     final MessageSource<FissClaim> realSource = new EmptyMessageSource<>();
     final MessageSource<FissClaimChange> wrapped =
         WrappedClaimSource.wrapFissClaims(realSource, Clock.systemUTC(), 1000L);
-    assertEquals(false, wrapped.hasNext());
+    assertFalse(wrapped.hasNext());
   }
 
   @Test
@@ -34,12 +37,12 @@ public class WrappedClaimSourceTest {
         WrappedClaimSource.wrapFissClaims(realSource, Clock.systemUTC(), 1000L);
 
     for (int index = 0; index < claims.size(); ++index) {
-      assertEquals(true, wrapped.hasNext());
+      assertTrue(wrapped.hasNext());
       FissClaimChange change = wrapped.next();
       assertEquals(1000L + index, change.getSeq());
       assertSame(claims.get(index), change.getClaim());
     }
-    assertEquals(false, wrapped.hasNext());
+    assertFalse(wrapped.hasNext());
   }
 
   @Test
@@ -58,12 +61,12 @@ public class WrappedClaimSourceTest {
         WrappedClaimSource.wrapMcsClaims(realSource, Clock.systemUTC(), 1000L).skip(3);
 
     for (int index = 3; index < claims.size(); ++index) {
-      assertEquals(true, wrapped.hasNext());
+      assertTrue(wrapped.hasNext());
       McsClaimChange change = wrapped.next();
       assertEquals(1000L + index, change.getSeq());
       assertSame(claims.get(index), change.getClaim());
     }
-    assertEquals(false, wrapped.hasNext());
+    assertFalse(wrapped.hasNext());
   }
 
   @Test
@@ -93,45 +96,45 @@ public class WrappedClaimSourceTest {
                     .setSeq(seq)
                     .setClaim(claim)
                     .build());
-    assertEquals(true, wrapped.hasNext());
+    assertTrue(wrapped.hasNext());
     McsClaimChange change = wrapped.next();
     assertEquals("a", change.getClaim().getIdrHic());
     assertEquals(ChangeType.CHANGE_TYPE_INSERT, change.getChangeType());
 
-    assertEquals(true, wrapped.hasNext());
+    assertTrue(wrapped.hasNext());
     change = wrapped.next();
     assertEquals("b", change.getClaim().getIdrHic());
     assertEquals(ChangeType.CHANGE_TYPE_INSERT, change.getChangeType());
 
-    assertEquals(true, wrapped.hasNext());
+    assertTrue(wrapped.hasNext());
     change = wrapped.next();
     assertEquals("c", change.getClaim().getIdrHic());
     assertEquals(ChangeType.CHANGE_TYPE_INSERT, change.getChangeType());
 
     // a is not an UPDATE since it's in the cache
-    assertEquals(true, wrapped.hasNext());
+    assertTrue(wrapped.hasNext());
     change = wrapped.next();
     assertEquals("a", change.getClaim().getIdrHic());
     assertEquals(ChangeType.CHANGE_TYPE_UPDATE, change.getChangeType());
 
     // reading three more will cause a to fall out of the cache
-    assertEquals(true, wrapped.hasNext());
+    assertTrue(wrapped.hasNext());
     change = wrapped.next();
     assertEquals("e", change.getClaim().getIdrHic());
     assertEquals(ChangeType.CHANGE_TYPE_INSERT, change.getChangeType());
 
-    assertEquals(true, wrapped.hasNext());
+    assertTrue(wrapped.hasNext());
     change = wrapped.next();
     assertEquals("f", change.getClaim().getIdrHic());
     assertEquals(ChangeType.CHANGE_TYPE_INSERT, change.getChangeType());
 
-    assertEquals(true, wrapped.hasNext());
+    assertTrue(wrapped.hasNext());
     change = wrapped.next();
     assertEquals("g", change.getClaim().getIdrHic());
     assertEquals(ChangeType.CHANGE_TYPE_INSERT, change.getChangeType());
 
     // now a is an INSERT again since it's not cached
-    assertEquals(true, wrapped.hasNext());
+    assertTrue(wrapped.hasNext());
     change = wrapped.next();
     assertEquals("a", change.getClaim().getIdrHic());
     assertEquals(ChangeType.CHANGE_TYPE_INSERT, change.getChangeType());
