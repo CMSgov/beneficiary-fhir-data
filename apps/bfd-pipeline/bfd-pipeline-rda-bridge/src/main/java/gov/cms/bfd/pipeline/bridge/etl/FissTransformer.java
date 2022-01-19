@@ -13,7 +13,6 @@ import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -44,7 +43,6 @@ public class FissTransformer extends AbstractTransformer {
       FissClaim.Builder claimBuilder =
           FissClaim.newBuilder()
               .setDcn(
-                  // TODO: Do we need a switch?
                   ifNull(data.get(Fiss.FI_DOC_CLM_CNTRL_NUM).orElse(null), () -> convertDcn(data)))
               .setMbi(mbiMap.get(beneId).getMbi())
               .setHicNo(mbiMap.get(beneId).getHicNo())
@@ -69,8 +67,14 @@ public class FissTransformer extends AbstractTransformer {
       consumeIf(
           data.get(mbiMap.get(beneId).getGender()).orElse(null),
           NumberUtils::isDigits,
-          value -> payerBuilder.setBeneSexEnumValue(Integer.parseInt(value)));
-      consumeIf(mbiMap.get(beneId).getDob(), Objects::nonNull, payerBuilder::setBeneDob);
+          value -> {
+            // RIF mappings are  0 - unknown, 1 - male, 2 - female
+            // RDA mappings are -1 - unrecognized, 0 - female, 1 - male, 2 - unknown
+            int enumValue = Integer.parseInt(value);
+            enumValue = (enumValue >= 0 && enumValue <= 2) ? 2 - enumValue : -1;
+            payerBuilder.setBeneSexEnumValue(enumValue);
+          });
+      consumeIfNotNull(mbiMap.get(beneId).getDob(), payerBuilder::setBeneDob);
 
       claimBuilder.addFissPayers(
           FissPayer.newBuilder().setBeneZPayer(payerBuilder.build()).build());
@@ -135,8 +139,7 @@ public class FissTransformer extends AbstractTransformer {
           .ifPresent(
               value -> {
                 FissDiagnosisCode.Builder diagBuilder =
-                    FissDiagnosisCode.newBuilder()
-                        .setDiagCd2(data.get(Fiss.ICD_DGNS_CD + INDEX).orElse(""));
+                    FissDiagnosisCode.newBuilder().setDiagCd2(value);
 
                 consumeIf(
                     data.get(Fiss.CLM_POA_IND_SW + INDEX).orElse(null),

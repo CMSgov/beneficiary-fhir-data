@@ -35,23 +35,20 @@ public class McsTransformer extends AbstractTransformer {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
 
     // Carrier claims break claims into multiple lines (rows).  Synthea isn't doing this, but just
-    // to protect against it
-    // if it does happen, we'll ignore any row with LINE_NUM > 1
+    // to protect against it if it does happen, we'll ignore any row with LINE_NUM > 1
     if (isFirstLineNum(data)) {
       McsClaim.Builder claimBuilder =
           McsClaim.newBuilder()
               .setIdrClmHdIcn(
-                  // TODO: Do we need a switch?
                   ifNull(data.get(Mcs.CARR_CLM_CNTRL_NUM).orElse(null), () -> convertIcn(data)))
               .setIdrClaimMbi(mbiMap.get(beneId).getMbi())
               // Not generated
               .setIdrBillProvEin("XX-XXXXXXX")
-              .setIdrBillProvNum("0000000000") // TODO: Still valid???
               .setIdrBillProvSpec("01")
               .setIdrBillProvType("20")
               .setIdrClaimReceiptDate("1970-01-01")
               .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL) // "3"
-              .setIdrContrId("00000") // TODO: Still valid???
+              .setIdrContrId("00000")
               .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A)
               .setIdrStatusDate("1970-01-01");
 
@@ -64,10 +61,15 @@ public class McsTransformer extends AbstractTransformer {
       consumeIfNotNull(
           mbiMap.get(beneId).getMidName(),
           value -> claimBuilder.setIdrBeneMidInit(value.substring(0, 1)));
-      // TODO: What is the RIF -> RDA conversion for this value?
       consumeIfNotNull(
           mbiMap.get(beneId).getGender(),
-          value -> claimBuilder.setIdrBeneSexEnumValue(Integer.parseInt(value)));
+          value -> {
+            // RIF mappings are  0 - unknown, 1 - male, 2 - female
+            // RDA mappings are -1 - unrecognized, 0 - male, 1 - female
+            int enumValue = Integer.parseInt(value);
+            enumValue = (enumValue == 1 || enumValue == 2) ? enumValue - 1 : -1;
+            claimBuilder.setIdrBeneSexEnumValue(enumValue);
+          });
       data.getFromType(Mcs.CLM_FRM_DT, Parser.Data.Type.DATE)
           .ifPresent(claimBuilder::setIdrHdrFromDos);
       data.getFromType(Mcs.CLM_THRU_DT, Parser.Data.Type.DATE)
