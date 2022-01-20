@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -14,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import lombok.Getter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class S3BucketMessageSourceFactoryTest {
   @Test
@@ -62,7 +64,7 @@ public class S3BucketMessageSourceFactoryTest {
   public void noSourcesToConsume() throws Exception {
     S3BucketMessageSourceFactory<Long> factory = createFactory();
     MessageSource<Long> source = factory.apply(0);
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
   }
 
   @Test
@@ -71,7 +73,7 @@ public class S3BucketMessageSourceFactoryTest {
     MockMessageSource source2 = new MockMessageSource(118, 195);
     S3BucketMessageSourceFactory<Long> factory = createFactory(source2, source1);
     MessageSource<Long> empty = factory.apply(200);
-    assertEquals(false, empty.hasNext());
+    assertFalse(empty.hasNext());
 
     MessageSource<Long> source = factory.apply(87);
     Long expected = 87L;
@@ -80,8 +82,8 @@ public class S3BucketMessageSourceFactoryTest {
       expected += 1;
     }
     source.close();
-    assertEquals(true, source1.isClosed());
-    assertEquals(true, source2.isClosed());
+    assertTrue(source1.isClosed());
+    assertTrue(source2.isClosed());
   }
 
   @Test
@@ -90,7 +92,7 @@ public class S3BucketMessageSourceFactoryTest {
     MockMessageSource source2 = new MockMessageSource(118, 195);
     S3BucketMessageSourceFactory<Long> factory = createFactory(source2, source1);
     MessageSource<Long> empty = factory.apply(200);
-    assertEquals(false, empty.hasNext());
+    assertFalse(empty.hasNext());
 
     MessageSource<Long> source = factory.apply(118);
     Long expected = 118L;
@@ -99,8 +101,8 @@ public class S3BucketMessageSourceFactoryTest {
       expected += 1;
     }
     source.close();
-    assertEquals(false, source1.isClosed());
-    assertEquals(true, source2.isClosed());
+    assertFalse(source1.isClosed());
+    assertTrue(source2.isClosed());
   }
 
   private AmazonS3 createS3Client(String... filenames) {

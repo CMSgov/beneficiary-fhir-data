@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -22,8 +25,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.BeneficiaryTransformer}. */
 public final class BeneficiaryTransformerTest {
@@ -41,7 +43,7 @@ public final class BeneficiaryTransformerTest {
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patient, requestHeader);
 
-    Assert.assertEquals("Number of identifiers should be 2", 2, patient.getIdentifier().size());
+    assertEquals(2, patient.getIdentifier().size(), "Number of identifiers should be 2");
 
     // Verify identifiers and values match.
     assertValuesInPatientIdentifiers(
@@ -63,7 +65,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patient, requestHeader);
-    Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
+    assertEquals(8, patient.getIdentifier().size(), "Number of identifiers should be 8");
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
@@ -96,7 +98,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patient, requestHeader);
-    Assert.assertEquals("Number of identifiers should be 8", 8, patient.getIdentifier().size());
+    assertEquals(8, patient.getIdentifier().size(), "Number of identifiers should be 8");
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
@@ -130,7 +132,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patient, requestHeader);
-    Assert.assertEquals("Number of identifiers should be 6", 6, patient.getIdentifier().size());
+    assertEquals(6, patient.getIdentifier().size(), "Number of identifiers should be 6");
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
@@ -170,7 +172,7 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patient, requestHeader);
-    Assert.assertEquals("Number of identifiers should be 4", 4, patient.getIdentifier().size());
+    assertEquals(4, patient.getIdentifier().size(), "Number of identifiers should be 4");
     // Verify patient identifiers and values match.
     assertValuesInPatientIdentifiers(
         patient, CCWUtils.calculateVariableReferenceUrl(CcwCodebookVariable.BENE_ID), "567834");
@@ -199,14 +201,14 @@ public final class BeneficiaryTransformerTest {
         break;
       }
     }
-    Assert.assertEquals(
+    assertEquals(
+        identifierFound,
+        true,
         "Identifier "
             + identifierSystem
             + " value = "
             + identifierValue
-            + " does not match an expected value.",
-        identifierFound,
-        true);
+            + " does not match an expected value.");
   }
 
   /**
@@ -258,7 +260,7 @@ public final class BeneficiaryTransformerTest {
     Optional<Extension> ex =
         patient.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
 
-    Assert.assertTrue(ex.isEmpty());
+    assertEquals(true, ex.isEmpty());
   }
 
   /**
@@ -398,25 +400,22 @@ public final class BeneficiaryTransformerTest {
       Beneficiary beneficiary, Patient patient, RequestHeaders requestHeader) {
     TransformerTestUtils.assertNoEncodedOptionals(patient);
 
-    Assert.assertEquals(beneficiary.getBeneficiaryId(), patient.getIdElement().getIdPart());
+    assertEquals(beneficiary.getBeneficiaryId(), patient.getIdElement().getIdPart());
 
-    Assert.assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
+    assertEquals(java.sql.Date.valueOf(beneficiary.getBirthDate()), patient.getBirthDate());
 
     if (beneficiary.getSex() == Sex.MALE.getCode())
-      Assert.assertEquals(
-          AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());
+      assertEquals(AdministrativeGender.MALE.toString(), patient.getGender().toString().trim());
     else if (beneficiary.getSex() == Sex.FEMALE.getCode())
-      Assert.assertEquals(
-          AdministrativeGender.FEMALE.toString(), patient.getGender().toString().trim());
+      assertEquals(AdministrativeGender.FEMALE.toString(), patient.getGender().toString().trim());
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.RACE, beneficiary.getRace(), patient);
-    Assert.assertEquals(
-        beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
+    assertEquals(beneficiary.getNameGiven(), patient.getName().get(0).getGiven().get(0).toString());
     if (beneficiary.getNameMiddleInitial().isPresent())
-      Assert.assertEquals(
+      assertEquals(
           beneficiary.getNameMiddleInitial().get().toString(),
           patient.getName().get(0).getGiven().get(1).toString());
-    Assert.assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());
+    assertEquals(beneficiary.getNameSurname(), patient.getName().get(0).getFamily());
 
     if (beneficiary.getMedicaidDualEligibilityFebCode().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(
@@ -432,42 +431,42 @@ public final class BeneficiaryTransformerTest {
             requestHeader.getValue(PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS);
 
     if (inclAddrFlds != null && inclAddrFlds) {
-      Assert.assertEquals(1, patient.getAddress().size());
+      assertEquals(1, patient.getAddress().size());
       // assert address fields etc.
-      Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+      assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
       // assert CountyCode is no longer mapped
-      Assert.assertNull(patient.getAddress().get(0).getDistrict());
-      Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
-      Assert.assertEquals(
+      assertNull(patient.getAddress().get(0).getDistrict());
+      assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+      assertEquals(
           beneficiary.getDerivedCityName().orElse(null), patient.getAddress().get(0).getCity());
 
-      Assert.assertEquals(
+      assertEquals(
           beneficiary.getDerivedMailingAddress1().orElse(""),
           patient.getAddress().get(0).getLine().get(0).getValueNotNull());
-      Assert.assertEquals(
+      assertEquals(
           beneficiary.getDerivedMailingAddress2().orElse(""),
           patient.getAddress().get(0).getLine().get(1).getValueNotNull());
-      Assert.assertEquals(
+      assertEquals(
           beneficiary.getDerivedMailingAddress3().orElse(""),
           patient.getAddress().get(0).getLine().get(2).getValueNotNull());
-      Assert.assertEquals(
+      assertEquals(
           beneficiary.getDerivedMailingAddress4().orElse(""),
           patient.getAddress().get(0).getLine().get(3).getValueNotNull());
-      Assert.assertEquals(
+      assertEquals(
           beneficiary.getDerivedMailingAddress5().orElse(""),
           patient.getAddress().get(0).getLine().get(4).getValueNotNull());
-      Assert.assertEquals(
+      assertEquals(
           beneficiary.getDerivedMailingAddress6().orElse(""),
           patient.getAddress().get(0).getLine().get(5).getValueNotNull());
     } else {
-      Assert.assertEquals(1, patient.getAddress().size());
-      Assert.assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
+      assertEquals(1, patient.getAddress().size());
+      assertEquals(beneficiary.getStateCode(), patient.getAddress().get(0).getState());
       // assert CountyCode is no longer mapped
-      Assert.assertNull(patient.getAddress().get(0).getDistrict());
-      Assert.assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
+      assertNull(patient.getAddress().get(0).getDistrict());
+      assertEquals(beneficiary.getPostalCode(), patient.getAddress().get(0).getPostalCode());
       // assert address city name and line 0 - 5 fields etc.
-      Assert.assertNull(patient.getAddress().get(0).getCity());
-      Assert.assertEquals(0, patient.getAddress().get(0).getLine().size());
+      assertNull(patient.getAddress().get(0).getCity());
+      assertEquals(0, patient.getAddress().get(0).getLine().size());
     }
   }
 

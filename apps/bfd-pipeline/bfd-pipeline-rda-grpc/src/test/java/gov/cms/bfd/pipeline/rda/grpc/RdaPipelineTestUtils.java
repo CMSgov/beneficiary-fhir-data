@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
 import static gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState.RDA_PERSISTENCE_UNIT_NAME;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
@@ -17,11 +17,11 @@ import javax.persistence.EntityManager;
 
 public class RdaPipelineTestUtils {
   public static void assertMeterReading(long expected, String meterName, Meter meter) {
-    assertEquals("Meter " + meterName, expected, meter.getCount());
+    assertEquals(expected, meter.getCount(), "Meter " + meterName);
   }
 
   public static void assertGaugeReading(long expected, String gaugeName, Gauge<?> gauge) {
-    assertEquals("Gauge " + gaugeName, Long.valueOf(expected), gauge.getValue());
+    assertEquals(Long.valueOf(expected), gauge.getValue(), "Gauge " + gaugeName);
   }
 
   /**

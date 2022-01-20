@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -33,8 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class RdaLoadJobIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
@@ -47,7 +49,7 @@ public class RdaLoadJobIT {
   private ImmutableList<String> fissClaimJson;
   private ImmutableList<String> mcsClaimJson;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     if (fissClaimJson == null) {
       fissClaimJson = fissClaimsSource.readLines();

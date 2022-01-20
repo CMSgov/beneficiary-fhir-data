@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
@@ -8,7 +8,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RandomFissClaimGeneratorTest {
   @Test

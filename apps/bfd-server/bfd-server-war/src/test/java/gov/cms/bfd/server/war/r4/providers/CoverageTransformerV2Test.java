@@ -1,5 +1,9 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -22,10 +26,9 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformerV2}. */
 public final class CoverageTransformerV2Test {
@@ -35,7 +38,7 @@ public final class CoverageTransformerV2Test {
   private static MedicareSegment currSegment = null;
   private static Coverage coverage = null;
 
-  @Before
+  @BeforeEach
   public void setup() {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
@@ -54,35 +57,35 @@ public final class CoverageTransformerV2Test {
   }
 
   /** Standalone wrapper to output PART_A */
-  @Ignore
+  @Disabled
   @Test
   public void outputTransformCoveragePartA() throws FHIRException {
     transformCoverage(MedicareSegment.PART_A, true);
-    Assert.assertNotNull(coverage);
+    assertNotNull(coverage);
   }
 
   /** Standalone wrapper to output PART_B */
-  @Ignore
+  @Disabled
   @Test
   public void outputTransformCoveragePartB() throws FHIRException {
     transformCoverage(MedicareSegment.PART_B, true);
-    Assert.assertNotNull(coverage);
+    assertNotNull(coverage);
   }
 
   /** Standalone wrapper to output PART_C */
-  @Ignore
+  @Disabled
   @Test
   public void outputTransformCoveragePartC() throws FHIRException {
     transformCoverage(MedicareSegment.PART_C, true);
-    Assert.assertNotNull(coverage);
+    assertNotNull(coverage);
   }
 
   /** Standalone wrapper to output PART_D */
-  @Ignore
+  @Disabled
   @Test
   public void outputTransformCoveragePartD() throws FHIRException {
     transformCoverage(MedicareSegment.PART_D, true);
-    Assert.assertNotNull(coverage);
+    assertNotNull(coverage);
   }
 
   // ==================
@@ -107,7 +110,7 @@ public final class CoverageTransformerV2Test {
   }
 
   private static void verifyExtensionsPartA() {
-    Assert.assertEquals(30, coverage.getExtension().size());
+    assertEquals(30, coverage.getExtension().size());
 
     // ms_cd
     // rfrnc_yr
@@ -234,7 +237,7 @@ public final class CoverageTransformerV2Test {
   }
 
   private static void verifyExtensionsPartB() {
-    Assert.assertEquals(27, coverage.getExtension().size());
+    assertEquals(27, coverage.getExtension().size());
 
     // ms_cd
     // rfrnc_yr
@@ -316,7 +319,7 @@ public final class CoverageTransformerV2Test {
   }
 
   private static void verifyExtensionsPartC() {
-    Assert.assertEquals(57, coverage.getExtension().size());
+    assertEquals(57, coverage.getExtension().size());
 
     // ptc_cntrct_id_01 thru ptc_cntrct_id_12
     for (int i = 1; i < 13; i++) {
@@ -417,7 +420,7 @@ public final class CoverageTransformerV2Test {
   }
 
   private static void verifyExtensionsPartD(int expectedSize) {
-    Assert.assertTrue(coverage.getExtension().size() == expectedSize);
+    assertTrue(coverage.getExtension().size() == expectedSize);
 
     // ms_cd
     // rfrnc_yr
@@ -525,15 +528,15 @@ public final class CoverageTransformerV2Test {
   // Begin Common tests
   // ==================
   private static void verifyID(String idRef) {
-    Assert.assertEquals("Coverage", coverage.getIdElement().getResourceType());
-    Assert.assertEquals("Coverage/" + idRef, coverage.getIdElement().toString());
+    assertEquals("Coverage", coverage.getIdElement().getResourceType());
+    assertEquals("Coverage/" + idRef, coverage.getIdElement().toString());
   }
 
   private static void verifyMeta() {
-    Assert.assertNotNull(coverage.getMeta().getLastUpdated());
+    assertNotNull(coverage.getMeta().getLastUpdated());
 
     // The base CanonicalType doesn't seem to compare correctly so lets convert it to a string
-    Assert.assertTrue(
+    assertTrue(
         coverage.getMeta().getProfile().stream()
             .map(ct -> ct.getValueAsString())
             .anyMatch(v -> v.equals(ProfileConstants.C4BB_COVERAGE_URL)));
@@ -553,7 +556,7 @@ public final class CoverageTransformerV2Test {
         new Extension(
             "https://bluebutton.cms.gov/resources/variables/rfrnc_yr", new DateType("2018"));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
 
     // dual_01 thru dual_12
     for (int i = 1; i < 13; i++) {
@@ -570,18 +573,18 @@ public final class CoverageTransformerV2Test {
 
     Extension compare = new Extension(url, new Coding(url, code, display));
 
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   private static void verifyCodedExtensionDoestNotExist(Coverage inCoverage, String url) {
     Optional<Extension> ex =
         inCoverage.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
 
-    Assert.assertTrue(ex.isEmpty());
+    assertEquals(true, ex.isEmpty());
   }
 
   private static void verifyCoverageStatus() {
-    Assert.assertEquals("active", coverage.getStatus().toCode());
+    assertEquals("active", coverage.getStatus().toCode());
   }
 
   private static void verifyType() {
@@ -594,14 +597,14 @@ public final class CoverageTransformerV2Test {
                 Arrays.asList(
                     new Coding(
                         "http://terminology.hl7.org/CodeSystem/v3-ActCode", "SUBSIDIZ", null)));
-    Assert.assertTrue(compare.equalsDeep(typ));
+    assertTrue(compare.equalsDeep(typ));
   }
 
   private static void verifySubscriber() {
-    Assert.assertEquals("3456789", coverage.getSubscriberId());
+    assertEquals("3456789", coverage.getSubscriberId());
     Reference ex = coverage.getBeneficiary();
     Reference compare = TransformerUtilsV2.referencePatient("567834");
-    Assert.assertTrue(compare.equalsDeep(ex));
+    assertTrue(compare.equalsDeep(ex));
   }
 
   private static void verifyRelationship() {
@@ -614,29 +617,29 @@ public final class CoverageTransformerV2Test {
                         "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
                         "self",
                         "Self")));
-    Assert.assertTrue(compare.equalsDeep(typ));
+    assertTrue(compare.equalsDeep(typ));
   }
 
   private static void verifyPeriod() {
     Period per = coverage.getPeriod();
     Period compare = new Period();
     TransformerUtilsV2.setPeriodStart(compare, LocalDate.parse("1963-10-03"));
-    Assert.assertTrue(compare.equalsDeep(per));
+    assertTrue(compare.equalsDeep(per));
   }
 
   private static void verifyPayor() {
     List<Reference> payers = coverage.getPayor();
-    Assert.assertNotNull(payers);
-    Assert.assertEquals(1, payers.size());
+    assertNotNull(payers);
+    assertEquals(1, payers.size());
     Coverage compare = new Coverage();
     compare
         .addPayor()
         .setIdentifier(new Identifier().setValue("Centers for Medicare and Medicaid Services"));
-    Assert.assertTrue(compare.getPayor().get(0).equalsDeep(coverage.getPayor().get(0)));
+    assertTrue(compare.getPayor().get(0).equalsDeep(coverage.getPayor().get(0)));
   }
 
   private static void verifyCoverageClass(String className) {
-    Assert.assertEquals(2, coverage.getClass_().size());
+    assertEquals(2, coverage.getClass_().size());
 
     Coverage compare = new Coverage();
     compare
@@ -656,17 +659,17 @@ public final class CoverageTransformerV2Test {
         .setDisplay("Plan")
         .setSystem("http://terminology.hl7.org/CodeSystem/coverage-class");
 
-    Assert.assertTrue(compare.getClass_().get(0).equalsDeep(coverage.getClass_().get(0)));
-    Assert.assertTrue(compare.getClass_().get(1).equalsDeep(coverage.getClass_().get(1)));
+    assertTrue(compare.getClass_().get(0).equalsDeep(coverage.getClass_().get(0)));
+    assertTrue(compare.getClass_().get(1).equalsDeep(coverage.getClass_().get(1)));
   }
 
   private static void verifyCoverageContract(String partId) {
-    Assert.assertEquals(2, coverage.getContract().size());
+    assertEquals(2, coverage.getContract().size());
     Coverage compare = new Coverage();
     compare.addContract().setId("contract1");
     compare.addContract().setReference("Coverage/" + partId + "-contract1");
-    Assert.assertTrue(compare.getContract().get(0).equalsDeep(coverage.getContract().get(0)));
-    Assert.assertTrue(compare.getContract().get(1).equalsDeep(coverage.getContract().get(1)));
+    assertTrue(compare.getContract().get(0).equalsDeep(coverage.getContract().get(0)));
+    assertTrue(compare.getContract().get(1).equalsDeep(coverage.getContract().get(1)));
   }
 
   /** Standalone wrapper to create and optionall printout a MedicareSegment coverage */
@@ -685,49 +688,49 @@ public final class CoverageTransformerV2Test {
    * Verifies that the specified {@link
    * gov.cms.bfd.server.war.stu3.providers.MedicareSegment#PART_A} {@link Coverage} "looks like" it
    * should, if it were produced from the specified {@link Beneficiary}.
-   *
-   * @param beneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
-   * @param coverage the {@link Coverage} to verify
    */
-  @Ignore // test only used to verify support for IT (intgration Test)
+  @Disabled // test only used to verify support for IT (intgration Test)
   @Test
   public void verifyIntegrationPartA() {
     transformCoverage(MedicareSegment.PART_A, false);
     assertPartAMatches(beneficiary, coverage);
   }
 
-  @Ignore // test only used to verify support for IT (intgration Test)
+  @Disabled // test only used to verify support for IT (intgration Test)
   @Test
   public void verifyIntegrationPartB() {
     transformCoverage(MedicareSegment.PART_B, false);
     assertPartBMatches(beneficiary, coverage);
   }
 
-  @Ignore // test only used to verify support for IT (intgration Test)
+  @Disabled // test only used to verify support for IT (intgration Test)
   @Test
   public void verifyIntegrationPartC() {
     transformCoverage(MedicareSegment.PART_C, false);
     assertPartCMatches(beneficiary, coverage);
   }
 
-  @Ignore // test only used to verify support for IT (intgration Test)
+  @Disabled // test only used to verify support for IT (intgration Test)
   @Test
   public void verifyIntegrationPartD() {
     transformCoverage(MedicareSegment.PART_D, false);
     assertPartDMatches(beneficiary, coverage);
   }
 
-  /*
-   ** The following 4 aggregated tests will be called from the R4CoverageResourceProviderIT
-   ** (integration tests); as such they may have different results from the standalone
-   ** CoverageTransformerV2.
+  /**
+   * The following 4 aggregated tests will be called from the R4CoverageResourceProviderIT
+   * (integration tests); as such they may have different results from the standalone *
+   * CoverageTransformerV2.
+   *
+   * @param inBeneficiary the {@link Beneficiary} that the specified {@link Coverage} should match
+   * @param inCoverage the {@link Coverage} to verify
    */
   static void assertPartAMatches(Beneficiary inBeneficiary, Coverage inCoverage) {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
     currSegment = MedicareSegment.PART_A;
-    Assert.assertNotNull(coverage);
-    Assert.assertNotNull(beneficiary);
+    assertNotNull(coverage);
+    assertNotNull(beneficiary);
 
     verifyCoverageClass("Part A");
     verifyMeta();
@@ -745,8 +748,8 @@ public final class CoverageTransformerV2Test {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
     currSegment = MedicareSegment.PART_B;
-    Assert.assertNotNull(coverage);
-    Assert.assertNotNull(beneficiary);
+    assertNotNull(coverage);
+    assertNotNull(beneficiary);
     verifyCoverageClass("Part B");
 
     verifyMeta();
@@ -763,8 +766,8 @@ public final class CoverageTransformerV2Test {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
     currSegment = MedicareSegment.PART_C;
-    Assert.assertNotNull(coverage);
-    Assert.assertNotNull(beneficiary);
+    assertNotNull(coverage);
+    assertNotNull(beneficiary);
     verifyCoverageClass("Part C");
     verifyExtensionsPartC();
     verifyCoverageStatus();
@@ -778,8 +781,8 @@ public final class CoverageTransformerV2Test {
     beneficiary = inBeneficiary;
     coverage = inCoverage;
     currSegment = MedicareSegment.PART_D;
-    Assert.assertNotNull(coverage);
-    Assert.assertNotNull(beneficiary);
+    assertNotNull(coverage);
+    assertNotNull(beneficiary);
     verifyCoverageClass("Part D");
     verifyExtensionsPartD(84);
     verifyCoverageStatus();

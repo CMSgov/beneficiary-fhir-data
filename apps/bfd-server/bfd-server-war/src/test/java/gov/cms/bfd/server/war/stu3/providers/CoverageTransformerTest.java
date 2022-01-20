@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.Beneficiary;
@@ -15,8 +18,7 @@ import java.util.Optional;
 import org.hl7.fhir.dstu3.model.Coverage;
 import org.hl7.fhir.dstu3.model.Coverage.CoverageStatus;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link gov.cms.bfd.server.war.stu3.providers.CoverageTransformer}. */
 public final class CoverageTransformerTest {
@@ -66,8 +68,7 @@ public final class CoverageTransformerTest {
   @Test
   public void transformSampleARecordWithNullReferenceYear() throws FHIRException {
     List<Object> parsedRecords =
-        ServerTestUtils.parseData(
-            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_WITH_NULL_REFERENCE_YEAR.getResources()));
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
     Beneficiary beneficiary =
         parsedRecords.stream()
             .filter(r -> r instanceof Beneficiary)
@@ -75,6 +76,7 @@ public final class CoverageTransformerTest {
             .findFirst()
             .get();
     beneficiary.setLastUpdated(Instant.now());
+    beneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
 
     Coverage partACoverage =
         CoverageTransformer.transform(new MetricRegistry(), MedicareSegment.PART_A, beneficiary);
@@ -110,15 +112,14 @@ public final class CoverageTransformerTest {
   static void assertPartAMatches(Beneficiary beneficiary, Coverage coverage) {
     TransformerTestUtils.assertNoEncodedOptionals(coverage);
 
-    Assert.assertNotNull(coverage);
+    assertNotNull(coverage);
 
-    Assert.assertEquals(
+    assertEquals(
         TransformerUtils.buildCoverageId(MedicareSegment.PART_A, beneficiary).getIdPart(),
         coverage.getIdElement().getIdPart());
-    Assert.assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
-    Assert.assertEquals(
-        TransformerConstants.COVERAGE_PLAN_PART_A, coverage.getGrouping().getSubPlan());
-    Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
+    assertEquals(TransformerConstants.COVERAGE_PLAN_PART_A, coverage.getGrouping().getSubPlan());
+    assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getMedicareCoverageStartDate().isPresent())
@@ -166,15 +167,14 @@ public final class CoverageTransformerTest {
    * @param coverage the {@link Coverage} to verify
    */
   static void assertPartBMatches(Beneficiary beneficiary, Coverage coverage) {
-    Assert.assertNotNull(coverage);
+    assertNotNull(coverage);
 
-    Assert.assertEquals(
+    assertEquals(
         TransformerUtils.buildCoverageId(MedicareSegment.PART_B, beneficiary).getIdPart(),
         coverage.getIdElement().getIdPart());
-    Assert.assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
-    Assert.assertEquals(
-        TransformerConstants.COVERAGE_PLAN_PART_B, coverage.getGrouping().getSubPlan());
-    Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
+    assertEquals(TransformerConstants.COVERAGE_PLAN_PART_B, coverage.getGrouping().getSubPlan());
+    assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getMedicareCoverageStartDate().isPresent())
@@ -213,15 +213,14 @@ public final class CoverageTransformerTest {
    * @param coverage the {@link Coverage} to verify
    */
   static void assertPartCMatches(Beneficiary beneficiary, Coverage coverage) {
-    Assert.assertNotNull(coverage);
+    assertNotNull(coverage);
 
-    Assert.assertEquals(
+    assertEquals(
         TransformerUtils.buildCoverageId(MedicareSegment.PART_C, beneficiary).getIdPart(),
         coverage.getIdElement().getIdPart());
-    Assert.assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
-    Assert.assertEquals(
-        TransformerConstants.COVERAGE_PLAN_PART_C, coverage.getGrouping().getSubPlan());
-    Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
+    assertEquals(TransformerConstants.COVERAGE_PLAN_PART_C, coverage.getGrouping().getSubPlan());
+    assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
@@ -263,19 +262,18 @@ public final class CoverageTransformerTest {
    * @param coverage the {@link Coverage} to verify
    */
   static void assertPartDMatches(Beneficiary beneficiary, Coverage coverage) {
-    Assert.assertNotNull(coverage);
+    assertNotNull(coverage);
 
-    Assert.assertEquals(
+    assertEquals(
         TransformerUtils.buildCoverageId(MedicareSegment.PART_D, beneficiary).getIdPart(),
         coverage.getIdElement().getIdPart());
-    Assert.assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
-    Assert.assertEquals(
-        TransformerConstants.COVERAGE_PLAN_PART_D, coverage.getGrouping().getSubPlan());
+    assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
+    assertEquals(TransformerConstants.COVERAGE_PLAN_PART_D, coverage.getGrouping().getSubPlan());
 
     if (beneficiary.getMedicareEnrollmentStatusCode().isPresent())
       TransformerTestUtils.assertExtensionCodingEquals(
           CcwCodebookVariable.MS_CD, beneficiary.getMedicareEnrollmentStatusCode(), coverage);
-    Assert.assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
+    assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
     TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {

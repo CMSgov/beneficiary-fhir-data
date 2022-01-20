@@ -1,65 +1,51 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.common.collect.ImmutableMap;
 import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissPayer;
+import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
+import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.codesystems.ClaimType;
 
 /** Transforms FISS/MCS instances into FHIR {@link ClaimResponse} resources. */
-public class FissClaimResponseTransformerV2 {
+public class FissClaimResponseTransformerV2 extends AbstractTransformerV2 {
 
   private static final String METRIC_NAME =
       MetricRegistry.name(FissClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
-  private static final Map<Character, String> STATUS_TEXT;
-
-  static {
-    STATUS_TEXT =
-        ImmutableMap.<Character, String>builder()
-            .put(' ', "Unknown")
-            .put('a', "Accepted")
-            .put('s', "Suspend")
-            .put('p', "Paid")
-            .put('d', "Denied")
-            .put('i', "Inactive")
-            .put('r', "Rejected")
-            .put('t', "Return To Provider")
-            .put('m', "Move")
-            .build();
-  }
-
-  private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME;
-
-  static {
-    STATUS_TO_OUTCOME =
-        ImmutableMap.<Character, ClaimResponse.RemittanceOutcome>builder()
-            .put(' ', ClaimResponse.RemittanceOutcome.QUEUED)
-            .put('a', ClaimResponse.RemittanceOutcome.QUEUED)
-            .put('s', ClaimResponse.RemittanceOutcome.PARTIAL)
-            .put('p', ClaimResponse.RemittanceOutcome.COMPLETE)
-            .put('d', ClaimResponse.RemittanceOutcome.COMPLETE)
-            .put('i', ClaimResponse.RemittanceOutcome.PARTIAL)
-            .put('r', ClaimResponse.RemittanceOutcome.COMPLETE)
-            .put('t', ClaimResponse.RemittanceOutcome.PARTIAL)
-            .put('m', ClaimResponse.RemittanceOutcome.PARTIAL)
-            .build();
-  }
+  private static final Map<Character, ClaimResponse.RemittanceOutcome> STATUS_TO_OUTCOME =
+      Map.of(
+          ' ', ClaimResponse.RemittanceOutcome.QUEUED,
+          'a', ClaimResponse.RemittanceOutcome.QUEUED,
+          's', ClaimResponse.RemittanceOutcome.PARTIAL,
+          'p', ClaimResponse.RemittanceOutcome.COMPLETE,
+          'd', ClaimResponse.RemittanceOutcome.COMPLETE,
+          'i', ClaimResponse.RemittanceOutcome.PARTIAL,
+          'r', ClaimResponse.RemittanceOutcome.COMPLETE,
+          't', ClaimResponse.RemittanceOutcome.PARTIAL,
+          'm', ClaimResponse.RemittanceOutcome.PARTIAL);
 
   private FissClaimResponseTransformerV2() {}
 
@@ -88,34 +74,83 @@ public class FissClaimResponseTransformerV2 {
     ClaimResponse claim = new ClaimResponse();
 
     claim.setId("f-" + claimGroup.getDcn());
-    claim.setMeta(new Meta().setLastUpdated(Date.from(claimGroup.getLastUpdated())));
+    claim.setContained(List.of(getContainedPatient(claimGroup)));
     claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
     claim.setStatus(ClaimResponse.ClaimResponseStatus.ACTIVE);
     claim.setOutcome(STATUS_TO_OUTCOME.get(Character.toLowerCase(claimGroup.getCurrStatus())));
     claim.setType(getType());
     claim.setUse(ClaimResponse.Use.CLAIM);
-    claim.setCreated(new Date());
     claim.setInsurer(new Reference().setIdentifier(new Identifier().setValue("CMS")));
-    claim.setPatient(getPatient(claimGroup));
+    claim.setPatient(new Reference("#patient"));
     claim.setRequest(new Reference(String.format("Claim/f-%s", claimGroup.getDcn())));
+
+    FhirContext ctx = FhirContext.forR4();
+    IParser parser = ctx.newJsonParser();
+
+    String claimContent = parser.encodeResourceToString(claim);
+
+    String resourceHash = DigestUtils.sha1Hex(claimContent);
+
+    claim.setMeta(
+        new Meta()
+            .setLastUpdated(Date.from(claimGroup.getLastUpdated()))
+            .setVersionId("f-" + claimGroup.getDcn() + "-" + resourceHash));
+    claim.setCreated(new Date());
 
     return claim;
   }
 
+  private static Resource getContainedPatient(PreAdjFissClaim claimGroup) {
+    Optional<PreAdjFissPayer> optional =
+        claimGroup.getPayers().stream()
+            .filter(p -> p.getPayerType() == PreAdjFissPayer.PayerType.BeneZ)
+            .findFirst();
+
+    Patient patient;
+
+    if (optional.isPresent()) {
+      PreAdjFissPayer benePayer = optional.get();
+
+      patient =
+          getContainedPatient(
+              claimGroup.getMbi(),
+              new PatientInfo(
+                  benePayer.getBeneFirstName(),
+                  benePayer.getBeneLastName(),
+                  ifNotNull(benePayer.getBeneMidInit(), s -> s.charAt(0) + "."),
+                  benePayer.getBeneDob(),
+                  benePayer.getBeneSex()));
+    } else {
+      patient = getContainedPatient(claimGroup.getMbi(), null);
+    }
+
+    return patient;
+  }
+
   private static List<Extension> getExtension(PreAdjFissClaim claimGroup) {
-    return Collections.singletonList(
-        new Extension()
-            .setUrl("https://dcgeo.cms.gov/resources/variables/fiss-status")
+    List<Extension> extensions = new ArrayList<>();
+    extensions.add(
+        new Extension(BBCodingSystems.FISS.CURR_STATUS)
             .setValue(
                 new Coding(
-                    "https://dcgeo.cms.gov/resources/variables/fiss-status",
-                    "" + claimGroup.getCurrStatus(),
-                    STATUS_TEXT.get(Character.toLowerCase(claimGroup.getCurrStatus())))));
+                    BBCodingSystems.FISS.CURR_STATUS, "" + claimGroup.getCurrStatus(), null)));
+
+    if (claimGroup.getReceivedDate() != null) {
+      extensions.add(
+          new Extension(BBCodingSystems.FISS.RECD_DT_CYMD)
+              .setValue(new DateType(localDateToDate(claimGroup.getReceivedDate()))));
+    }
+
+    if (claimGroup.getCurrTranDate() != null) {
+      extensions.add(new Extension(BBCodingSystems.FISS.CURR_TRAN_DT_CYMD));
+    }
+
+    return List.copyOf(extensions);
   }
 
   private static List<Identifier> getIdentifier(PreAdjFissClaim claimGroup) {
-    return Collections.singletonList(
+    return List.of(
         new Identifier()
             .setType(
                 new CodeableConcept(
@@ -123,34 +158,17 @@ public class FissClaimResponseTransformerV2 {
                         C4BBIdentifierType.UC.getSystem(),
                         C4BBIdentifierType.UC.toCode(),
                         C4BBIdentifierType.UC.getDisplay())))
-            .setSystem("https://dcgeo.cms.gov/resources/variables/dcn")
+            .setSystem(BBCodingSystems.FI_DOC_CLM_CONTROL_NUM)
             .setValue(claimGroup.getDcn()));
   }
 
   private static CodeableConcept getType() {
     return new CodeableConcept()
         .setCoding(
-            Arrays.asList(
-                new Coding("https://dcgeo.cms.gov/resources/codesystem/rda-type", "FISS", null),
+            List.of(
                 new Coding(
                     ClaimType.INSTITUTIONAL.getSystem(),
                     ClaimType.INSTITUTIONAL.toCode(),
                     ClaimType.INSTITUTIONAL.getDisplay())));
-  }
-
-  private static Reference getPatient(PreAdjFissClaim claimGroup) {
-    return new Reference()
-        .setIdentifier(
-            new Identifier()
-                .setType(
-                    new CodeableConcept()
-                        .setCoding(
-                            Collections.singletonList(
-                                new Coding(
-                                    "http://terminology.hl7.org/CodeSystem/v2-0203",
-                                    "MC",
-                                    "Patient's Medicare number"))))
-                .setSystem("http://hl7.org/fhir/sid/us-mbi")
-                .setValue(claimGroup.getMbi()));
   }
 }

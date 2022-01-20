@@ -1,5 +1,10 @@
 package gov.cms.bfd.server.war.r4.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
@@ -42,7 +47,6 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.junit.Assert;
 
 public final class TransformerTestUtilsV2 {
   /* Do this very slow operation once */
@@ -75,8 +79,7 @@ public final class TransformerTestUtilsV2 {
 
     assertNoEncodedOptionals(eob);
 
-    Assert.assertEquals(
-        TransformerUtilsV2.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
+    assertEquals(TransformerUtilsV2.buildEobId(claimType, claimId), eob.getIdElement().getIdPart());
 
     if (claimType.equals(ClaimTypeV2.PDE)) {
       assertHasIdentifier(CcwCodebookVariable.PDE_ID, claimId, eob.getIdentifier());
@@ -89,27 +92,27 @@ public final class TransformerTestUtilsV2 {
         claimGroupId,
         eob.getIdentifier());
 
-    Assert.assertEquals(
+    assertEquals(
         TransformerUtilsV2.referencePatient(beneficiaryId).getReference(),
         eob.getPatient().getReference());
 
-    Assert.assertEquals(
+    assertEquals(
         TransformerUtilsV2.referenceCoverage(beneficiaryId, coverageType).getReference(),
         eob.getInsuranceFirstRep().getCoverage().getReference());
 
     switch (finalAction) {
       case 'F':
-        Assert.assertEquals("active", eob.getStatus().toCode());
+        assertEquals("active", eob.getStatus().toCode());
         break;
       case 'N':
-        Assert.assertEquals("cancelled", eob.getStatus().toCode());
+        assertEquals("cancelled", eob.getStatus().toCode());
         break;
       default:
         throw new BadCodeMonkeyException();
     }
 
     if (paymentAmount.isPresent()) {
-      Assert.assertEquals(paymentAmount.get(), eob.getPayment().getAmount().getValue());
+      assertEquals(paymentAmount.get(), eob.getPayment().getAmount().getValue());
     }
   }
 
@@ -121,7 +124,7 @@ public final class TransformerTestUtilsV2 {
    */
   static void assertNoEncodedOptionals(Resource resource) {
     String encodedResourceXml = fhirContext.newXmlParser().encodeResourceToString(resource);
-    Assert.assertFalse(encodedResourceXml.contains("Optional"));
+    assertFalse(encodedResourceXml.contains("Optional"));
   }
 
   /**
@@ -135,9 +138,9 @@ public final class TransformerTestUtilsV2 {
   static void assertProviderNPI(ExplanationOfBenefit eob, Optional<String> providerNumber) {
     Reference reference = eob.getProvider();
 
-    Assert.assertTrue("Bad reference: " + reference, reference.hasIdentifier());
-    Assert.assertEquals(TransformerConstants.CODING_NPI_US, reference.getIdentifier().getSystem());
-    Assert.assertEquals(providerNumber.get(), reference.getIdentifier().getValue());
+    assertTrue(reference.hasIdentifier(), "Bad reference: " + reference);
+    assertEquals(TransformerConstants.CODING_NPI_US, reference.getIdentifier().getSystem());
+    assertEquals(providerNumber.get(), reference.getIdentifier().getValue());
   }
 
   /**
@@ -147,7 +150,7 @@ public final class TransformerTestUtilsV2 {
    */
   static void assertIdentifierExists(
       String expectedSystem, String expectedId, List<Identifier> actuals) {
-    Assert.assertTrue(
+    assertTrue(
         actuals.stream()
             .filter(i -> expectedSystem.equals(i.getSystem()))
             .anyMatch(i -> expectedId.equals(i.getValue())));
@@ -160,10 +163,10 @@ public final class TransformerTestUtilsV2 {
    */
   static void assertReferenceIdentifierEquals(
       String expectedIdentifierSystem, String expectedIdentifierValue, Reference reference) {
-    Assert.assertTrue("Bad reference: " + reference, reference.hasIdentifier());
-    Assert.assertEquals(expectedIdentifierSystem, reference.getIdentifier().getSystem());
-    Assert.assertEquals(expectedIdentifierValue, reference.getIdentifier().getValue());
-    Assert.assertEquals(
+    assertTrue(reference.hasIdentifier(), "Bad reference: " + reference);
+    assertEquals(expectedIdentifierSystem, reference.getIdentifier().getSystem());
+    assertEquals(expectedIdentifierValue, reference.getIdentifier().getValue());
+    assertEquals(
         TransformerUtilsV2.retrieveNpiCodeDisplay(expectedIdentifierValue), reference.getDisplay());
   }
 
@@ -175,11 +178,11 @@ public final class TransformerTestUtilsV2 {
    */
   private static void assertReferenceIdentifierEquals(
       CcwCodebookInterface ccwVariable, String expectedIdentifierValue, Reference actualReference) {
-    Assert.assertTrue("Bad reference: " + actualReference, actualReference.hasIdentifier());
-    Assert.assertEquals(
+    assertTrue(actualReference.hasIdentifier(), "Bad reference: " + actualReference);
+    assertEquals(
         CCWUtils.calculateVariableReferenceUrl(ccwVariable),
         actualReference.getIdentifier().getSystem());
-    Assert.assertEquals(expectedIdentifierValue, actualReference.getIdentifier().getValue());
+    assertEquals(expectedIdentifierValue, actualReference.getIdentifier().getValue());
   }
 
   /**
@@ -214,7 +217,7 @@ public final class TransformerTestUtilsV2 {
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
             .findFirst();
 
-    Assert.assertEquals(expectedCode.isPresent(), extensionForUrl.isPresent());
+    assertEquals(expectedCode.isPresent(), extensionForUrl.isPresent());
     if (expectedCode.isPresent())
       assertCodingEquals(
           expectedCodingSystem, expectedCode.get(), (Coding) extensionForUrl.get().getValue());
@@ -249,7 +252,7 @@ public final class TransformerTestUtilsV2 {
       CcwCodebookInterface ccwVariable, String expectedValue, List<Identifier> actualIdentifiers) {
     if (expectedValue == null) throw new IllegalArgumentException();
 
-    Assert.assertNotNull(actualIdentifiers);
+    assertNotNull(actualIdentifiers);
 
     String expectedSystem = CCWUtils.calculateVariableReferenceUrl(ccwVariable);
     Optional<Identifier> matchingIdentifier =
@@ -257,7 +260,7 @@ public final class TransformerTestUtilsV2 {
             .filter(i -> expectedSystem.equals(i.getSystem()))
             .filter(i -> expectedValue.equals(i.getValue()))
             .findAny();
-    Assert.assertTrue(matchingIdentifier.isPresent());
+    assertTrue(matchingIdentifier.isPresent());
   }
 
   /**
@@ -291,8 +294,7 @@ public final class TransformerTestUtilsV2 {
       String expectedDisplay,
       String expectedCode,
       List<Coding> actualCode) {
-    Assert.assertTrue(
-        "No matching Coding found: " + actualCode.toString(),
+    assertTrue(
         actualCode.stream()
             .anyMatch(
                 c -> {
@@ -303,7 +305,8 @@ public final class TransformerTestUtilsV2 {
                     return false;
                   }
                   return true;
-                }));
+                }),
+        "No matching Coding found: " + actualCode.toString());
   }
 
   /**
@@ -315,9 +318,9 @@ public final class TransformerTestUtilsV2 {
       CcwCodebookInterface ccwVariable, String expectedValue, Identifier actual) {
     if (expectedValue == null) throw new IllegalArgumentException();
 
-    Assert.assertNotNull(actual);
-    Assert.assertEquals(CCWUtils.calculateVariableReferenceUrl(ccwVariable), actual.getSystem());
-    Assert.assertEquals(expectedValue, actual.getValue());
+    assertNotNull(actual);
+    assertEquals(CCWUtils.calculateVariableReferenceUrl(ccwVariable), actual.getSystem());
+    assertEquals(expectedValue, actual.getValue());
   }
 
   /**
@@ -325,8 +328,8 @@ public final class TransformerTestUtilsV2 {
    * @param actual the actual {@link BaseDateTimeType} to verify
    */
   static void assertDateEquals(LocalDate expected, BaseDateTimeType actual) {
-    Assert.assertEquals(TransformerUtilsV2.convertToDate(expected), actual.getValue());
-    Assert.assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
+    assertEquals(TransformerUtilsV2.convertToDate(expected), actual.getValue());
+    assertEquals(TemporalPrecisionEnum.DAY, actual.getPrecision());
   }
 
   /**
@@ -450,7 +453,7 @@ public final class TransformerTestUtilsV2 {
    * Outpatient, DME, Hospice and HHA.
    *
    * @param item the {@link ItemComponent} this method will test against
-   * @param hcpcCode the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing the hcpcs
+   * @param hcpcsCode the {@link Optional}&lt;{@link String}&gt; HCPCS_CD: representing the hcpcs
    *     code for the claim
    * @param hcpcsInitialModifierCode the {@link Optional}&lt;{@link String}&gt; HCPCS_1ST_MDFR_CD:
    *     representing the expected hcpcs initial modifier code for the claim
@@ -498,7 +501,7 @@ public final class TransformerTestUtilsV2 {
     }
     */
 
-    Assert.assertFalse(hcpcsSecondModifierCode.isPresent());
+    assertFalse(hcpcsSecondModifierCode.isPresent());
   }
 
   /**
@@ -562,7 +565,7 @@ public final class TransformerTestUtilsV2 {
       Optional<String> nationalDrugCode)
       throws FHIRException {
 
-    Assert.assertEquals(serviceCount, item.getQuantity().getValue());
+    assertEquals(serviceCount, item.getQuantity().getValue());
 
     assertHasCoding(
         CcwCodebookVariable.LINE_CMS_TYPE_SRVC_CD, cmsServiceTypeCode, item.getCategory());
@@ -611,14 +614,14 @@ public final class TransformerTestUtilsV2 {
         item.getExtensionsByUrl(
             TransformerUtils.calculateVariableReferenceUrl(
                 CcwCodebookVariable.LINE_HCT_HGB_RSLT_NUM));
-    Assert.assertEquals(1, hctHgbObservationExtension.size());
-    Assert.assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
+    assertEquals(1, hctHgbObservationExtension.size());
+    assertTrue(hctHgbObservationExtension.get(0).getValue() instanceof Reference);
     Reference hctHgbReference = (Reference) hctHgbObservationExtension.get(0).getValue();
-    Assert.assertTrue(hctHgbReference.getResource() instanceof Observation);
+    assertTrue(hctHgbReference.getResource() instanceof Observation);
     Observation hctHgbObservation = (Observation) hctHgbReference.getResource();
     assertHasCoding(
         CcwCodebookVariable.LINE_HCT_HGB_TYPE_CD, hctHgbTestTypeCode, hctHgbObservation.getCode());
-    Assert.assertEquals(hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
+    assertEquals(hctHgbTestResult, hctHgbObservation.getValueQuantity().getValue());
 
     assertExtensionCodingEquals(
         item,
@@ -646,7 +649,7 @@ public final class TransformerTestUtilsV2 {
                         TransformerConstants.CODING_BBAPI_INFORMATION_CATEGORY,
                         CCWUtils.calculateVariableReferenceUrl(categoryVariable)))
             .findFirst();
-    Assert.assertTrue(info.isPresent());
+    assertTrue(info.isPresent());
 
     return info.get();
   }
@@ -700,7 +703,7 @@ public final class TransformerTestUtilsV2 {
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
             .findFirst();
 
-    Assert.assertEquals(expectedDateYear.isPresent(), extensionForUrl.isPresent());
+    assertEquals(expectedDateYear.isPresent(), extensionForUrl.isPresent());
   }
 
   /**
@@ -729,7 +732,7 @@ public final class TransformerTestUtilsV2 {
             .filter(c -> c.getSystem().equals(expectedCodingSystem))
             .findFirst();
 
-    Assert.assertEquals(expectedCode.isPresent(), codingForSystem.isPresent());
+    assertEquals(expectedCode.isPresent(), codingForSystem.isPresent());
     if (expectedCode.isPresent()) {
       assertCodingEquals(expectedCodingSystem, expectedCode.get(), codingForSystem.get());
     }
@@ -752,17 +755,17 @@ public final class TransformerTestUtilsV2 {
    */
   private static void assertCodingEquals(
       String expectedSystem, String expectedVersion, Object expectedCode, Coding actual) {
-    Assert.assertEquals(expectedSystem, actual.getSystem());
-    Assert.assertEquals(expectedVersion, actual.getVersion());
+    assertEquals(expectedSystem, actual.getSystem());
+    assertEquals(expectedVersion, actual.getVersion());
 
     /*
      * The code parameter is an Object to avoid needing multiple copies of this and
      * related methods. This if-else block is the price to be paid for that, though.
      */
     if (expectedCode instanceof Character) {
-      Assert.assertEquals(((Character) expectedCode).toString(), actual.getCode());
+      assertEquals(((Character) expectedCode).toString(), actual.getCode());
     } else if (expectedCode instanceof String) {
-      Assert.assertEquals(((String) expectedCode).trim(), actual.getCode());
+      assertEquals(((String) expectedCode).trim(), actual.getCode());
     } else {
       throw new BadCodeMonkeyException();
     }
@@ -773,9 +776,9 @@ public final class TransformerTestUtilsV2 {
    * @param actual the actual {@link Quantity} to verify
    */
   static void assertQuantityEquals(Number expectedValue, Quantity actual) {
-    Assert.assertNotNull(actual);
+    assertNotNull(actual);
 
-    if (expectedValue instanceof BigDecimal) Assert.assertEquals(expectedValue, actual.getValue());
+    if (expectedValue instanceof BigDecimal) assertEquals(expectedValue, actual.getValue());
     else throw new BadCodeMonkeyException();
   }
 
@@ -793,10 +796,10 @@ public final class TransformerTestUtilsV2 {
     String expectedExtensionUrl = CCWUtils.calculateVariableReferenceUrl(categoryVariable);
     Optional<Extension> adjudicationTotalExtension =
         eob.getExtension().stream().filter(e -> expectedExtensionUrl.equals(e.getUrl())).findAny();
-    Assert.assertEquals(expectedAmountValue.isPresent(), adjudicationTotalExtension.isPresent());
+    assertEquals(expectedAmountValue.isPresent(), adjudicationTotalExtension.isPresent());
 
     if (expectedAmountValue.isPresent()) {
-      Assert.assertNotNull(adjudicationTotalExtension.get().getValue());
+      assertNotNull(adjudicationTotalExtension.get().getValue());
       assertMoneyValue(
           expectedAmountValue.get(), (Money) adjudicationTotalExtension.get().getValue());
     }
@@ -822,9 +825,8 @@ public final class TransformerTestUtilsV2 {
    */
   private static void assertMoneyValue(BigDecimal expectedAmountValue, Money actualValue) {
     /**
-     * TODO: Money coding? Assert.assertEquals(TransformerConstants.CODING_MONEY,
-     * actualValue.getSystem()); Assert.assertEquals(TransformerConstants.CODED_MONEY_USD,
-     * actualValue.getCode());
+     * TODO: Money coding? assertEquals(TransformerConstants.CODING_MONEY, actualValue.getSystem());
+     * assertEquals(TransformerConstants.CODED_MONEY_USD, actualValue.getCode());
      */
     assertEquivalent(expectedAmountValue, actualValue.getValue());
   }
@@ -837,9 +839,9 @@ public final class TransformerTestUtilsV2 {
    * @param actual the "actual" {@link BigDecimal} value
    */
   static void assertEquivalent(BigDecimal expected, BigDecimal actual) {
-    Assert.assertTrue(actual.precision() >= expected.precision());
-    Assert.assertTrue(actual.scale() >= expected.scale());
-    Assert.assertEquals(0, expected.compareTo(actual));
+    assertTrue(actual.precision() >= expected.precision());
+    assertTrue(actual.scale() >= expected.scale());
+    assertEquals(0, expected.compareTo(actual));
   }
 
   /**
@@ -868,7 +870,7 @@ public final class TransformerTestUtilsV2 {
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
             .findFirst();
 
-    Assert.assertEquals(expectedValue.isPresent(), extensionForUrl.isPresent());
+    assertEquals(expectedValue.isPresent(), extensionForUrl.isPresent());
     if (expectedValue.isPresent())
       assertIdentifierEquals(
           ccwVariable, expectedValue.get(), (Identifier) extensionForUrl.get().getValue());
@@ -901,7 +903,7 @@ public final class TransformerTestUtilsV2 {
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
             .findFirst();
 
-    Assert.assertEquals(expectedValue.isPresent(), extensionForUrl.isPresent());
+    assertEquals(expectedValue.isPresent(), extensionForUrl.isPresent());
     if (expectedValue.isPresent())
       assertQuantityEquals(expectedValue.get(), (Quantity) extensionForUrl.get().getValue());
   }
@@ -944,14 +946,14 @@ public final class TransformerTestUtilsV2 {
       final Instant expectedLastUpdated = expectedDateTime.get();
       final Instant actualLastUpdated = actualResource.getMeta().getLastUpdated().toInstant();
       final Duration diff = Duration.between(expectedLastUpdated, actualLastUpdated);
-      Assert.assertTrue(
-          "Expect the actual lastUpdated to be equal or after the loaded resources",
-          diff.compareTo(Duration.ofSeconds(10)) <= 0);
+      assertTrue(
+          diff.compareTo(Duration.ofSeconds(10)) <= 0,
+          "Expect the actual lastUpdated to be equal or after the loaded resources");
     } else {
-      Assert.assertEquals(
-          "Expect lastUpdated to be the fallback value",
+      assertEquals(
           TransformerConstants.FALLBACK_LAST_UPDATED,
-          actualResource.getMeta().getLastUpdated().toInstant());
+          actualResource.getMeta().getLastUpdated().toInstant(),
+          "Expect lastUpdated to be the fallback value");
     }
   }
 
@@ -992,14 +994,14 @@ public final class TransformerTestUtilsV2 {
 
     /*
         ReferralRequest referral = (ReferralRequest) eob.getReferral().getResource();
-        Assert.assertEquals(
+        assertEquals(
             TransformerUtilsV2.referencePatient(beneficiaryId).getReference(),
             referral.getSubject().getReference());
         assertReferenceIdentifierEquals(
             TransformerConstants.CODING_NPI_US,
             referringPhysicianNpi.get(),
             referral.getRequester().getAgent());
-        Assert.assertEquals(1, referral.getRecipient().size());
+        assertEquals(1, referral.getRecipient().size());
         assertReferenceIdentifierEquals(
             TransformerConstants.CODING_NPI_US,
             referringPhysicianNpi.get(),
@@ -1031,7 +1033,7 @@ public final class TransformerTestUtilsV2 {
       Optional<LocalDate> expectedStartDate,
       Optional<LocalDate> expectedEndDate,
       Period actualPeriod) {
-    Assert.assertTrue(expectedStartDate.isPresent() || expectedEndDate.isPresent());
+    assertTrue(expectedStartDate.isPresent() || expectedEndDate.isPresent());
     if (expectedStartDate.isPresent())
       assertDateEquals(expectedStartDate.get(), actualPeriod.getStartElement());
     if (expectedEndDate.isPresent())
@@ -1048,7 +1050,7 @@ public final class TransformerTestUtilsV2 {
     Optional<Identifier> id =
         identifiers.stream().filter(i -> system.equals(i.getSystem())).findFirst();
 
-    Assert.assertTrue(id.isPresent());
+    assertTrue(id.isPresent());
 
     return id.get();
   }
@@ -1078,7 +1080,7 @@ public final class TransformerTestUtilsV2 {
   static Extension findExtensionByUrl(String url, List<Extension> extensions) {
     Optional<Extension> ex = extensions.stream().filter(e -> url.equals(e.getUrl())).findFirst();
 
-    Assert.assertTrue(ex.isPresent());
+    assertTrue(ex.isPresent());
 
     return ex.get();
   }
@@ -1093,7 +1095,7 @@ public final class TransformerTestUtilsV2 {
     Optional<Coding> coding =
         codings.stream().filter(c -> system.equals(c.getSystem())).findFirst();
 
-    Assert.assertTrue(coding.isPresent());
+    assertTrue(coding.isPresent());
 
     return coding.get();
   }
@@ -1107,7 +1109,7 @@ public final class TransformerTestUtilsV2 {
   static CareTeamComponent findCareTeamBySequence(int seq, List<CareTeamComponent> team) {
     Optional<CareTeamComponent> ctc = team.stream().filter(c -> c.getSequence() == seq).findFirst();
 
-    Assert.assertTrue(ctc.isPresent());
+    assertTrue(ctc.isPresent());
 
     return ctc.get();
   }
@@ -1157,7 +1159,7 @@ public final class TransformerTestUtilsV2 {
                         > 0)
             .findFirst();
 
-    Assert.assertTrue(si.isPresent());
+    assertTrue(si.isPresent());
 
     return si.get();
   }
@@ -1210,7 +1212,7 @@ public final class TransformerTestUtilsV2 {
                         > 0)
             .findFirst();
 
-    Assert.assertTrue(diag.isPresent());
+    assertTrue(diag.isPresent());
 
     return diag.get();
   }
@@ -1280,7 +1282,7 @@ public final class TransformerTestUtilsV2 {
                         > 0)
             .findFirst();
 
-    Assert.assertTrue(proc.isPresent());
+    assertTrue(proc.isPresent());
 
     return proc.get();
   }
@@ -1323,7 +1325,7 @@ public final class TransformerTestUtilsV2 {
                         > 0)
             .findFirst();
 
-    Assert.assertTrue(adjudication.isPresent());
+    assertTrue(adjudication.isPresent());
 
     return adjudication.get();
   }
@@ -1351,7 +1353,7 @@ public final class TransformerTestUtilsV2 {
                         > 0)
             .findFirst();
 
-    Assert.assertTrue(adjudication.isPresent());
+    assertTrue(adjudication.isPresent());
 
     return adjudication.get();
   }
@@ -1375,7 +1377,7 @@ public final class TransformerTestUtilsV2 {
                         > 0)
             .findFirst();
 
-    Assert.assertTrue(adjudication.isPresent());
+    assertTrue(adjudication.isPresent());
 
     return adjudication.get();
   }
@@ -1396,7 +1398,7 @@ public final class TransformerTestUtilsV2 {
                         > 0)
             .findFirst();
 
-    Assert.assertTrue(benefit.isPresent());
+    assertTrue(benefit.isPresent());
 
     return benefit.get();
   }
@@ -1417,6 +1419,6 @@ public final class TransformerTestUtilsV2 {
             .filter(e -> e.getUrl().equals(expectedExtensionUrl))
             .findFirst();
 
-    Assert.assertFalse(extensionForUrl.isPresent());
+    assertEquals(false, extensionForUrl.isPresent());
   }
 }

@@ -3644,4 +3644,10 @@ public final class TransformerUtilsV2 {
         return RaceCategory.UNKNOWN;
     }
   }
+
+  public static void logMbiHashToMdc(String mbiHash) {
+    if (!Strings.isNullOrEmpty(mbiHash)) {
+      MDC.put("mbi_hash", mbiHash);
+    }
+  }
 }
