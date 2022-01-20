@@ -220,6 +220,8 @@ https://bluebutton.cms.gov/resources/
   rda/
 ```
 
+Similarly, new CCW fields should use a base URI of `https://bluebutton.cms.gov/resources/ccw/`.
+
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
