@@ -15,4 +15,4 @@
 *.iws
 
 # ignore cargo.lock
-cargo.lock
+Cargo.lock
