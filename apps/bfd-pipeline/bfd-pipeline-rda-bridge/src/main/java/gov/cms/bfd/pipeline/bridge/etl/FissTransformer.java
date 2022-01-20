@@ -99,7 +99,8 @@ public class FissTransformer extends AbstractTransformer {
           value -> claimBuilder.setLobCdEnumValue(Integer.parseInt(value)));
       data.get(Fiss.ORG_NPI_NUM).ifPresent(claimBuilder::setNpiNumber);
       data.get(Fiss.PRNCPAL_DGNS_CD).ifPresent(claimBuilder::setPrincipleDiag);
-      data.get(Fiss.PRVDR_NUM).ifPresent(claimBuilder::setMedaProv6);
+      data.get(Fiss.PRVDR_NUM)
+          .ifPresent(value -> claimBuilder.setMedaProv6(String.format("%.6s", value)));
 
       addDiagCodes(claimBuilder, data);
       addProcCodes(claimBuilder, data);
