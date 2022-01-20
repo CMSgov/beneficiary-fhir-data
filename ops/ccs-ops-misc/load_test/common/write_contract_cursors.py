@@ -6,7 +6,7 @@ import yaml
 import urllib3
 import requests
 import json
-from common import config
+import config
 
 '''
 Takes the args (expected from calling this file directly as a standalone script) and makes a database call
@@ -74,10 +74,7 @@ def loadDataFromArgs(argv):
         url = envHost + (f'/{version}/fhir/Patient'
                       f'?_has%3ACoverage.extension=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fvariables%2Fptdcntrct{month}%7C{contractId}')
 
-        ## v2 has coverage by year
-        if version is "v2":
-            url += f'&_has%3ACoverage.rfrncyr=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fvariables%2Frfrnc_yr%7C{year}'
-
+        url += f'&_has%3ACoverage.rfrncyr=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fvariables%2Frfrnc_yr%7C{year}'
         url += (f'&_count={count}&_format=json')
 
         # Write in the initial (first page) request
@@ -85,6 +82,7 @@ def loadDataFromArgs(argv):
         totalContractCount += 1
         # keep writing cursors to the file as long as the response has "next" cursor entries
         while url:
+
             contents = requests.get(url, cert=certFile, verify="", headers={"IncludeIdentifiers": "mbi"})
             # Reset the next url to hit, so if no "next" page we exit loop
             url = ""

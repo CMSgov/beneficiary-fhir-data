@@ -11,7 +11,6 @@ import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.IcdCode;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimIdentifierType;
 import gov.cms.bfd.server.war.commons.carin.C4BBIdentifierType;
@@ -20,7 +19,6 @@ import gov.cms.bfd.server.war.commons.carin.C4BBSupportingInfoType;
 import gov.cms.bfd.server.war.r4.providers.preadj.common.AbstractTransformerV2;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -35,7 +33,6 @@ import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Money;
@@ -93,7 +90,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
     claim.setIdentifier(getIdentifier(claimGroup));
     claim.setExtension(getExtension(claimGroup));
     claim.setStatus(Claim.ClaimStatus.ACTIVE);
-    claim.setType(getType());
+    claim.setType(getType(claimGroup));
     claim.setSupportingInfo(getSupportingInfo(claimGroup));
     claim.setBillablePeriod(getBillablePeriod(claimGroup));
     claim.setUse(Claim.Use.CLAIM);
@@ -147,14 +144,18 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
                         null)));
   }
 
-  private static CodeableConcept getType() {
+  private static CodeableConcept getType(PreAdjFissClaim claimGroup) {
     return new CodeableConcept()
         .setCoding(
             List.of(
                 new Coding(
                     ClaimType.INSTITUTIONAL.getSystem(),
                     ClaimType.INSTITUTIONAL.toCode(),
-                    ClaimType.INSTITUTIONAL.getDisplay())));
+                    ClaimType.INSTITUTIONAL.getDisplay()),
+                new Coding(
+                    BBCodingSystems.CLM_SERVICE_CLSFCTN_TYPE_CODE,
+                    claimGroup.getServTypeCd(),
+                    null)));
   }
 
   private static List<Claim.SupportingInformationComponent> getSupportingInfo(
@@ -210,62 +211,25 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             .filter(p -> p.getPayerType() == PreAdjFissPayer.PayerType.BeneZ)
             .findFirst();
 
-    Patient patient =
-        new Patient()
-            .setIdentifier(
-                List.of(
-                    new Identifier()
-                        .setType(
-                            new CodeableConcept(
-                                new Coding(
-                                    IdentifierType.MC.getSystem(),
-                                    IdentifierType.MC.getCode(),
-                                    IdentifierType.MC.getDisplay())))
-                        .setSystem(
-                            TransformerConstants.CODING_BBAPI_MEDICARE_BENEFICIARY_ID_UNHASHED)
-                        .setValue(claimGroup.getMbi())));
-    patient.setId("patient");
+    Patient patient;
 
     if (optional.isPresent()) {
       PreAdjFissPayer benePayer = optional.get();
-      patient
-          .setName(getBeneName(benePayer))
-          .setBirthDate(localDateToDate(benePayer.getBeneDob()))
-          .setGender(
-              benePayer.getBeneSex() == null
-                  ? null
-                  : genderMap().get(benePayer.getBeneSex().toLowerCase()));
+
+      patient =
+          getContainedPatient(
+              claimGroup.getMbi(),
+              new PatientInfo(
+                  benePayer.getBeneFirstName(),
+                  benePayer.getBeneLastName(),
+                  ifNotNull(benePayer.getBeneMidInit(), s -> s.charAt(0) + "."),
+                  benePayer.getBeneDob(),
+                  benePayer.getBeneSex()));
+    } else {
+      patient = getContainedPatient(claimGroup.getMbi(), null);
     }
 
     return patient;
-  }
-
-  private static List<HumanName> getBeneName(PreAdjFissPayer benePayer) {
-    List<HumanName> names;
-
-    if (benePayer.getBeneLastName() != null
-        || benePayer.getBeneFirstName() != null
-        || benePayer.getBeneMidInit() != null) {
-      HumanName name = new HumanName();
-
-      if (benePayer.getBeneLastName() != null) {
-        name.setFamily(benePayer.getBeneLastName());
-      }
-
-      if (benePayer.getBeneFirstName() != null || benePayer.getBeneMidInit() != null) {
-        name.setGiven(
-            List.of(
-                new StringType(benePayer.getBeneFirstName()),
-                new StringType(
-                    benePayer.getBeneMidInit() == null ? null : benePayer.getBeneMidInit() + ".")));
-      }
-
-      names = List.of(name);
-    } else {
-      names = null;
-    }
-
-    return names;
   }
 
   private static Resource getContainedProvider(PreAdjFissClaim claimGroup) {
@@ -441,21 +405,5 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2 {
             })
         .sorted(Comparator.comparing(Claim.InsuranceComponent::getSequence))
         .collect(Collectors.toList());
-  }
-
-  private static Date localDateToDate(LocalDate localDate) {
-    return localDate == null
-        ? null
-        : Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-  }
-
-  private static String normalizeIcdCode(String code) {
-    return code.trim().replace(".", "").toUpperCase();
-  }
-
-  private static boolean codesAreEqual(String code1, String code2) {
-    return code1 != null
-        && code2 != null
-        && normalizeIcdCode(code1).equals(normalizeIcdCode(code2));
   }
 }
