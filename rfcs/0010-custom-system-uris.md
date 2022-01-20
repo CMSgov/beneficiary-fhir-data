@@ -222,6 +222,8 @@ https://bluebutton.cms.gov/resources/
 
 Similarly, new CCW fields should use a base URI of `https://bluebutton.cms.gov/resources/ccw/`.
 
+Any backwards-compatible changes to terminologies represented by these URIs should keep the same URIs.
+
 
 ### Proposed Solution: Unresolved Questions
 [Proposed Solution: Unresolved Questions]: #proposed-solution-unresolved-questions
@@ -237,6 +239,10 @@ Collect a list of action items to be resolved or officially deferred before this
 The primary unresolved question is whether or not this decision should be revisited in a future v3 of the API.
 This RFC recommends reconsidering it, but framing the decision in terms of user value,
   e.g. "Is this worth doing if it adds burden to application developers that we will already have a hard time convincing to adopt the new version of our API?"
+
+An additional unresolved question is how to handle backwards-incompatible changes to terminologies / code sets.
+That question is not urgent, though, and should not block the adoption of this RFC's other recommendations.
+See this Slack thread for details: <https://cmsgov.slack.com/archives/CMT1YS2KY/p1642702722039300>.
 
 
 ### Proposed Solution: Drawbacks
