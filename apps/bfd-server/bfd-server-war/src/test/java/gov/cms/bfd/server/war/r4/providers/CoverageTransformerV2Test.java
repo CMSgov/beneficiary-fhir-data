@@ -53,24 +53,6 @@ public final class CoverageTransformerV2Test {
     beneficiary.setLastUpdated(calen.getTime().toInstant());
   }
 
-  public void setEnrollmentYearToNull() {
-    List<Object> parsedRecords =
-        ServerTestUtils.parseData(
-            Arrays.asList(StaticRifResourceGroup.SAMPLE_A_WITH_NULL_REFERENCE_YEAR.getResources()));
-
-    // Pull out the base Beneficiary record and fix its HICN and MBI-HASH fields.
-    beneficiary =
-        parsedRecords.stream()
-            .filter(r -> r instanceof Beneficiary)
-            .map(r -> (Beneficiary) r)
-            .findFirst()
-            .get();
-
-    Calendar calen = Calendar.getInstance();
-    calen.set(2021, 3, 17);
-    beneficiary.setLastUpdated(calen.getTime().toInstant());
-  }
-
   /** Standalone wrapper to output PART_A */
   @Ignore
   @Test
@@ -208,9 +190,26 @@ public final class CoverageTransformerV2Test {
 
   @Test
   public void verifyPartAWithoutReferenceYear() {
-    setEnrollmentYearToNull();
-    transformCoverage(MedicareSegment.PART_A, false);
-    checkForNoYearlyDate(beneficiary, coverage);
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    // Pull out the base Beneficiary record and fix its HICN and MBI-HASH fields.
+    Beneficiary newBeneficiary =
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    Calendar calen = Calendar.getInstance();
+    calen.set(2021, 3, 17);
+    newBeneficiary.setLastUpdated(calen.getTime().toInstant());
+    newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
+
+    Coverage newCoverage =
+        CoverageTransformerV2.transform(
+            new MetricRegistry(), MedicareSegment.PART_A, newBeneficiary);
+    checkForNoYearlyDate(newBeneficiary, newCoverage);
   }
 
   // ==================
@@ -574,9 +573,9 @@ public final class CoverageTransformerV2Test {
     Assert.assertTrue(compare.equalsDeep(ex));
   }
 
-  private static void verifyCodedExtensionDoestNotExist(Coverage coverage, String url) {
+  private static void verifyCodedExtensionDoestNotExist(Coverage inCoverage, String url) {
     Optional<Extension> ex =
-        coverage.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
+        inCoverage.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
 
     Assert.assertTrue(ex.isEmpty());
   }
@@ -791,88 +790,44 @@ public final class CoverageTransformerV2Test {
   }
 
   static void checkForNoYearlyDate(Beneficiary inBeneficiary, Coverage inCoverage) {
-    beneficiary = inBeneficiary;
-    coverage = inCoverage;
     // dual_01 thru dual_12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/dual_%02d", i);
-      verifyCodedExtensionDoestNotExist(coverage, url);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
     }
 
-    // // buyin01 thru buyin12
-    // for (int i = 1; i < 13; i++) {
-    //   String url = String.format("https://bluebutton.cms.gov/resources/variables/buyin%02d", i);
-    //   verifyCodedExtensionIsFalse(url, "C", "Part A and Part B state buy-in");
-    // }
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/buyin%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
 
-    // // ptdcntrct01 thru ptdcntrct12
-    // for (int i = 1; i < 13; i++) {
-    //   String url = String.format("https://bluebutton.cms.gov/resources/variables/ptdcntrct%02d",
-    // i);
-    //   String code = i < 12 ? "S4607" : "0";
-    //   String display = i < 12 ? null : "Not Medicare enrolled for the month";
-    //   verifyCodedExtensionIsFalse(url, code, display);
-    // }
+    // ptdcntrct01 thru ptdcntrct12
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/ptdcntrct%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
 
-    // // ptdpbpid01 thru ptdpbpid11
-    // for (int i = 1; i < 12; i++) {
-    //   String url = String.format("https://bluebutton.cms.gov/resources/variables/ptdpbpid%02d",
-    // i);
-    //   verifyCodedExtensionIsFalse(url, "003", null);
-    // }
+    // ptdpbpid01 thru ptdpbpid11
+    for (int i = 1; i < 12; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/ptdpbpid%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
 
-    // // sgmtid01 thru sgmtid11
-    // for (int i = 1; i < 12; i++) {
-    //   String url = String.format("https://bluebutton.cms.gov/resources/variables/sgmtid%02d", i);
-    //   verifyCodedExtensionIsFalse(url, "000", null);
-    // }
+    // sgmtid01 thru sgmtid11
+    for (int i = 1; i < 12; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/sgmtid%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
 
-    // // cstshr01 thru cstshr12
-    // ArrayList<String> displayList =
-    //     new ArrayList<String>(
-    //         Arrays.asList(
-    //             "",
-    //             "Not Medicare enrolled for the month",
-    //             "Not Medicare enrolled for the month",
-    //             "Beneficiary enrolled in Parts A and/or B, and Part D; deemed eligible for LIS
-    // with 100% premium subsidy and no copayment",
-    //             "Beneficiary enrolled in Parts A and/or B, and Part D; deemed eligible for LIS
-    // with 100% premium subsidy and no copayment",
-    //             "Beneficiary enrolled in Parts A and/or B, and Part D; enrolled in LIS with 100%
-    // premium subsidy and 15% copayment",
-    //             "Beneficiary enrolled in Parts A and/or B, and Part D; enrolled in LIS with 75%
-    // premium subsidy and 15% copayment",
-    //             "Beneficiary enrolled in Parts A and/or B, and Part D; enrolled in LIS with 50%
-    // premium subsidy and 15% copayment",
-    //             "Beneficiary enrolled in Parts A and/or B, and Part D; enrolled in LIS with 25%
-    // premium subsidy and 15% copayment",
-    //             "Beneficiary enrolled in Parts A and/or B, and Part D; deemed eligible for LIS
-    // with 100% premium subsidy and no copayment",
-    //             "Beneficiary enrolled in Parts A and/or B, and Part D; deemed eligible for LIS
-    // with 100% premium subsidy and low copayment",
-    //             "Not Medicare enrolled for the month",
-    //             "Not Medicare enrolled for the month"));
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/cstshr%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
 
-    // for (int i = 1; i < 13; i++) {
-    //   String url = String.format("https://bluebutton.cms.gov/resources/variables/cstshr%02d", i);
-    //   String code =
-    //       i < 3
-    //           ? "00"
-    //           : i < 5
-    //               ? "01"
-    //               : i < 9 ? String.format("%02d", i) : i == 9 ? "01" : i == 10 ? "02" : "00";
-    //   verifyCodedExtensionIsFalse(url, code, displayList.get(i));
-    // }
-
-    // // rdsind01 thru rdsind10
-    // for (int i = 1; i < 13; i++) {
-    //   String url = String.format("https://bluebutton.cms.gov/resources/variables/rdsind%02d", i);
-    //   String code = i > 11 ? "N" : "Y";
-    //   String display =
-    //       i > 11
-    //           ? "No employer subsidization for the retired beneficiary"
-    //           : "Employer subsidized for the retired beneficiary";
-    //   verifyCodedExtensionIsFalse(url, code, display);
-    // }
+    // rdsind01 thru rdsind10
+    for (int i = 1; i < 13; i++) {
+      String url = String.format("https://bluebutton.cms.gov/resources/variables/rdsind%02d", i);
+      verifyCodedExtensionDoestNotExist(inCoverage, url);
+    }
   }
 }
