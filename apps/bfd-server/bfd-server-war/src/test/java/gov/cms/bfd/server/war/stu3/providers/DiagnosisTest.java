@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import gov.cms.bfd.server.war.commons.Diagnosis;
 import gov.cms.bfd.server.war.commons.Diagnosis.DiagnosisLabel;
 import java.util.Arrays;
@@ -9,8 +12,7 @@ import java.util.Set;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /*
  * Unit tests for {@link diagnosis}.
@@ -48,8 +50,8 @@ public class DiagnosisTest {
 
     Optional<Diagnosis> diagnosis = Diagnosis.from(code, Optional.of(version), prsntOnAdmsn);
 
-    Assert.assertEquals(prsntOnAdmsn, diagnosis.get().getPresentOnAdmission());
-    Assert.assertEquals(system, diagnosis.get().getFhirSystem());
+    assertEquals(prsntOnAdmsn, diagnosis.get().getPresentOnAdmission());
+    assertEquals(system, diagnosis.get().getFhirSystem());
 
     TransformerTestUtils.assertHasCoding(
         system, code.get(), diagnosis.get().toCodeableConcept().getCoding());
@@ -58,7 +60,7 @@ public class DiagnosisTest {
     Coding coding = codeableConcept.addCoding();
     coding.setSystem(system).setCode(code.get());
 
-    Assert.assertTrue(diagnosis.get().isContainedIn(codeableConcept));
+    assertTrue(diagnosis.get().isContainedIn(codeableConcept));
   }
 
   static void assertDiagnosisLabelsMatch() {
@@ -72,12 +74,12 @@ public class DiagnosisTest {
     Set<DiagnosisLabel> setPrincipal = new HashSet<>(Arrays.asList(DiagnosisLabel.PRINCIPAL));
 
     Optional<Diagnosis> diagnosis1 = Diagnosis.from(code, version, DiagnosisLabel.ADMITTING);
-    Assert.assertEquals(setAdmitting, diagnosis1.get().getLabels());
+    assertEquals(setAdmitting, diagnosis1.get().getLabels());
 
     Optional<Diagnosis> diagnosis2 = Diagnosis.from(code, version, DiagnosisLabel.FIRSTEXTERNAL);
-    Assert.assertEquals(setFirstExternal, diagnosis2.get().getLabels());
+    assertEquals(setFirstExternal, diagnosis2.get().getLabels());
 
     Optional<Diagnosis> diagnosis3 = Diagnosis.from(code, version, DiagnosisLabel.PRINCIPAL);
-    Assert.assertEquals(setPrincipal, diagnosis3.get().getLabels());
+    assertEquals(setPrincipal, diagnosis3.get().getLabels());
   }
 }

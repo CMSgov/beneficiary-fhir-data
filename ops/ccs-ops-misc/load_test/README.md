@@ -178,7 +178,9 @@ The results will look the same whether running in distributed or non-distributed
     
 ## Improvements
 This is a list of some improvements that could be made to the tests moving forward:
+- (Consider) Move all tests into one script with each test being a @Task
+- Set up tests to all run at once to simulate actual load across the whole system (i.e. during big spike loads)
+- Since each test shares boilerplate setup, commonize what is inside the tasks to take the url and name of the test with any required setup params.
 - Currently, when running with params, the test run time begins counting down when the initial data setup is happening, meaning the test will run slightly shorter than intended. An improvement could be made to fix this to "start" the test time only when locust main runs.
 - Add the ability for the tests to dynamically add the next page of results (if any) to the pool of ids to use for testing, to better test page 2 and on for various endpoints
-- Add/Correct any use cases that are missing from the existing tests. The idea was to capture realistic endpoint calls, so these tests should reflect real user calls to most accurately test the system.
 - Once test data is fixed, switch back to using tablesample for randomized results instead of a static query (check the common pull_hashed_mbis and pull_bene_ids files)

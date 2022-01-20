@@ -34,7 +34,7 @@ public enum IdentifierType {
   public final String code;
   public final String display;
 
-  private IdentifierType(String system, String code, String display) {
+  IdentifierType(String system, String code, String display) {
     this.system = system;
     this.code = code;
     this.display = display;

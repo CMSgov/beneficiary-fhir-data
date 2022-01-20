@@ -1,14 +1,14 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableSet;
 import gov.cms.mpsm.rda.v1.fiss.FissClaim;
 import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class EnumStringExtractorTest {
   private final EnumStringExtractor<FissClaim, FissClaimStatus> fissStatusExtractor =
@@ -32,7 +32,7 @@ public class EnumStringExtractorTest {
   private FissClaim.Builder fissClaim;
   private McsClaim.Builder mcsClaim;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     fissClaim = FissClaim.newBuilder();
     mcsClaim = McsClaim.newBuilder();

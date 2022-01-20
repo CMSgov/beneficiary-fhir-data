@@ -1,10 +1,13 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 import java.util.NoSuchElementException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FilteredMessageSourceTest {
   @Test
@@ -41,19 +44,28 @@ public class FilteredMessageSourceTest {
     verify(source, times(2)).hasNext();
   }
 
-  @Test(expected = NoSuchElementException.class)
+  @Test
   public void nextWithoutHasNextFails() throws Exception {
     MessageSource<Integer> source = createSource();
-    MessageSource<Integer> filtered = new FilteredMessageSource<>(source, i -> i < 10);
-    filtered.next();
+    assertThrows(
+        NoSuchElementException.class,
+        () -> {
+          MessageSource<Integer> filtered = new FilteredMessageSource<>(source, i -> i < 10);
+          filtered.next();
+        });
   }
 
-  @Test(expected = NoSuchElementException.class)
+  @Test
   public void nextPastTheEndFails() throws Exception {
     MessageSource<Integer> source = createSource();
-    MessageSource<Integer> filtered = new FilteredMessageSource<>(source, i -> i < 10).skip(10);
-    assertFalse(filtered.hasNext());
-    filtered.next();
+    assertThrows(
+        NoSuchElementException.class,
+        () -> {
+          MessageSource<Integer> filtered =
+              new FilteredMessageSource<>(source, i -> i < 10).skip(10);
+          assertFalse(filtered.hasNext());
+          filtered.next();
+        });
   }
 
   private MessageSource<Integer> createSource() throws Exception {
