@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Assert;
@@ -244,6 +245,20 @@ public final class BeneficiaryTransformerTest {
     Patient patient =
         BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
     assertMatches(beneficiary, patient, requestHeader);
+  }
+
+  @Test
+  public void transformSampleARecordWithoutReferenceYear() {
+    Beneficiary beneficiary = loadSampleABeneficiary();
+    beneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
+    RequestHeaders requestHeader = getRHwithIncldIdntityHdr("");
+    Patient patient =
+        BeneficiaryTransformer.transform(new MetricRegistry(), beneficiary, requestHeader);
+    String url = "https://bluebutton.cms.gov/resources/variables/rfrnc_yr";
+    Optional<Extension> ex =
+        patient.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    Assert.assertTrue(ex.isEmpty());
   }
 
   /**

@@ -363,6 +363,58 @@ public final class BeneficiaryTransformerV2Test {
     Assert.assertTrue(compare.equalsDeep(ex));
   }
 
+  @Test
+  public void shouldNotHaveReferenceYearExtension() {
+    List<Object> parsedRecords =
+        ServerTestUtils.parseData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
+
+    // Pull out the base Beneficiary record and fix its HICN and MBI-HASH fields.
+    Beneficiary newBeneficiary =
+        parsedRecords.stream()
+            .filter(r -> r instanceof Beneficiary)
+            .map(r -> (Beneficiary) r)
+            .findFirst()
+            .get();
+
+    newBeneficiary.setLastUpdated(Instant.now());
+    newBeneficiary.setMbiHash(Optional.of("someMBIhash"));
+    newBeneficiary.setBeneEnrollmentReferenceYear(Optional.empty());
+
+    // Add the history records to the Beneficiary, but nill out the HICN fields.
+    Set<BeneficiaryHistory> beneficiaryHistories =
+        parsedRecords.stream()
+            .filter(r -> r instanceof BeneficiaryHistory)
+            .map(r -> (BeneficiaryHistory) r)
+            .filter(r -> newBeneficiary.getBeneficiaryId().equals(r.getBeneficiaryId()))
+            .collect(Collectors.toSet());
+
+    newBeneficiary.getBeneficiaryHistories().addAll(beneficiaryHistories);
+
+    // Add the MBI history records to the Beneficiary.
+    Set<MedicareBeneficiaryIdHistory> beneficiaryMbis =
+        parsedRecords.stream()
+            .filter(r -> r instanceof MedicareBeneficiaryIdHistory)
+            .map(r -> (MedicareBeneficiaryIdHistory) r)
+            .filter(
+                r -> newBeneficiary.getBeneficiaryId().equals(r.getBeneficiaryId().orElse(null)))
+            .collect(Collectors.toSet());
+    newBeneficiary.getMedicareBeneficiaryIdHistories().addAll(beneficiaryMbis);
+    assertThat(newBeneficiary, is(notNullValue()));
+
+    Patient genPatient =
+        BeneficiaryTransformerV2.transform(
+            new MetricRegistry(), newBeneficiary, RequestHeaders.getHeaderWrapper());
+    IParser parser = fhirContext.newJsonParser();
+    String json = parser.encodeResourceToString(genPatient);
+    Patient newPatient = parser.parseResource(Patient.class, json);
+
+    String url = "https://bluebutton.cms.gov/resources/variables/rfrnc_yr";
+    Optional<Extension> ex =
+        newPatient.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    Assert.assertTrue(ex.isEmpty());
+  }
+
   /**
    * test to verify that {@link gov.cms.bfd.server.war.r4.providers.BeneficiaryTransformerV2} sets a
    * valid extension date.
