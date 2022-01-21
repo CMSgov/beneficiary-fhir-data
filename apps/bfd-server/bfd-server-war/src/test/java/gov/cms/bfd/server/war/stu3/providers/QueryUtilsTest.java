@@ -1,11 +1,13 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.server.war.commons.QueryUtils;
 import java.time.Instant;
 import java.util.Date;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class QueryUtilsTest {
   @Test
@@ -21,25 +23,22 @@ public class QueryUtilsTest {
     Instant upperInstant = Instant.now().plusSeconds(1000);
     Date upperDate = Date.from(Instant.now().plusSeconds(1000));
 
-    Assert.assertTrue(
+    assertTrue(
         QueryUtils.isInRange(
             upperInstant, new DateRangeParam().setLowerBoundExclusive(middleDate)));
-    Assert.assertFalse(
+    assertFalse(
         QueryUtils.isInRange(
             lowerInstant, new DateRangeParam().setLowerBoundInclusive(middleDate)));
-    Assert.assertTrue(
+    assertTrue(
         QueryUtils.isInRange(
             lowerInstant, new DateRangeParam().setUpperBoundExclusive(middleDate)));
-    Assert.assertFalse(
+    assertFalse(
         QueryUtils.isInRange(
             upperInstant, new DateRangeParam().setUpperBoundInclusive(middleDate)));
 
-    Assert.assertTrue(
-        QueryUtils.isInRange(middleInstant, new DateRangeParam(lowerDate, upperDate)));
-    Assert.assertFalse(
-        QueryUtils.isInRange(lowerInstant, new DateRangeParam(middleDate, upperDate)));
-    Assert.assertFalse(
-        QueryUtils.isInRange(upperInstant, new DateRangeParam(lowerDate, middleDate)));
+    assertTrue(QueryUtils.isInRange(middleInstant, new DateRangeParam(lowerDate, upperDate)));
+    assertFalse(QueryUtils.isInRange(lowerInstant, new DateRangeParam(middleDate, upperDate)));
+    assertFalse(QueryUtils.isInRange(upperInstant, new DateRangeParam(lowerDate, middleDate)));
   }
 
   @Test
@@ -47,14 +46,10 @@ public class QueryUtilsTest {
     Date lowerDate = new Date();
     Date upperDate = Date.from(Instant.now().plusSeconds(1000));
 
-    Assert.assertFalse(
-        QueryUtils.isInRange(null, new DateRangeParam().setLowerBoundExclusive(lowerDate)));
-    Assert.assertFalse(
-        QueryUtils.isInRange(null, new DateRangeParam().setLowerBoundInclusive(lowerDate)));
-    Assert.assertTrue(
-        QueryUtils.isInRange(null, new DateRangeParam().setUpperBoundExclusive(lowerDate)));
-    Assert.assertTrue(
-        QueryUtils.isInRange(null, new DateRangeParam().setUpperBoundInclusive(lowerDate)));
-    Assert.assertFalse(QueryUtils.isInRange(null, new DateRangeParam(lowerDate, upperDate)));
+    assertFalse(QueryUtils.isInRange(null, new DateRangeParam().setLowerBoundExclusive(lowerDate)));
+    assertFalse(QueryUtils.isInRange(null, new DateRangeParam().setLowerBoundInclusive(lowerDate)));
+    assertTrue(QueryUtils.isInRange(null, new DateRangeParam().setUpperBoundExclusive(lowerDate)));
+    assertTrue(QueryUtils.isInRange(null, new DateRangeParam().setUpperBoundInclusive(lowerDate)));
+    assertFalse(QueryUtils.isInRange(null, new DateRangeParam(lowerDate, upperDate)));
   }
 }

@@ -1,47 +1,49 @@
 package gov.cms.bfd.pipeline.rda.grpc.server;
 
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
 import java.util.NoSuchElementException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RandomMcsClaimSourceTest {
   @Test
   public void zeroMaxToReturn() throws Exception {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 0);
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
   @Test
   public void oneMaxToReturn() throws Exception {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 1);
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     McsClaim claim = source.next();
     assertEquals("08642205", claim.getIdrClmHdIcn());
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
   @Test
   public void threeMaxToReturn() throws Exception {
     RandomMcsClaimSource source = new RandomMcsClaimSource(0, 3);
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     McsClaim claim = source.next();
     assertEquals("08642205", claim.getIdrClmHdIcn());
 
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     claim = source.next();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
 
-    assertEquals(true, source.hasNext());
+    assertTrue(source.hasNext());
     claim = source.next();
     assertTrue(claim.getIdrClmHdIcn().length() > 0);
 
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
     assertNextPastEndOfDataThrowsException(source);
   }
 
@@ -51,7 +53,7 @@ public class RandomMcsClaimSourceTest {
     assertEquals(3L, source.next().getSeq());
     assertEquals(4L, source.next().getSeq());
     assertEquals(5L, source.next().getSeq());
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
   }
 
   private void assertNextPastEndOfDataThrowsException(MessageSource source) throws Exception {
@@ -62,7 +64,7 @@ public class RandomMcsClaimSourceTest {
       // expected
     }
     // ensures calling hasNext() multiple times past the end is safe
-    assertEquals(false, source.hasNext());
-    assertEquals(false, source.hasNext());
+    assertFalse(source.hasNext());
+    assertFalse(source.hasNext());
   }
 }

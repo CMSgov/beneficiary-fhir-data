@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.launcher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugAttachMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugEnableMode;
 import gov.cms.bfd.server.launcher.ServerProcess.JvmDebugOptions;
@@ -12,8 +15,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests for {@link DataServerLauncherApp}.
@@ -58,7 +60,7 @@ public final class DataServerLauncherAppIT {
     appRunConsumerThread.join();
 
     // Verify that the application exited as expected.
-    Assert.assertEquals(DataServerLauncherApp.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
+    assertEquals(DataServerLauncherApp.EXIT_CODE_BAD_CONFIG, appProcess.exitValue());
   }
 
   /**
@@ -83,10 +85,10 @@ public final class DataServerLauncherAppIT {
               ServerTestUtils.createHttpClient(Optional.of(ClientSslIdentity.TRUSTED));
           CloseableHttpResponse httpResponse =
               httpClient.execute(new HttpGet(serverProcess.getServerUri())); ) {
-        Assert.assertEquals(200, httpResponse.getStatusLine().getStatusCode());
+        assertEquals(200, httpResponse.getStatusLine().getStatusCode());
 
         String httpResponseContent = EntityUtils.toString(httpResponse.getEntity());
-        Assert.assertEquals("Johnny 5 is alive on HTTP!", httpResponseContent);
+        assertEquals("Johnny 5 is alive on HTTP!", httpResponseContent);
       }
 
       // Verify that the access log is working, as expected.
@@ -100,15 +102,15 @@ public final class DataServerLauncherAppIT {
               .resolve("target")
               .resolve("server-work")
               .resolve("access.log");
-      Assert.assertTrue(Files.isReadable(accessLog));
-      Assert.assertTrue(Files.size(accessLog) > 0);
+      assertTrue(Files.isReadable(accessLog));
+      assertTrue(Files.size(accessLog) > 0);
       Path accessLogJson =
           ServerTestUtils.getLauncherProjectDirectory()
               .resolve("target")
               .resolve("server-work")
               .resolve("access.json");
-      Assert.assertTrue(Files.isReadable(accessLogJson));
-      Assert.assertTrue(Files.size(accessLogJson) > 0);
+      assertTrue(Files.isReadable(accessLogJson));
+      assertTrue(Files.size(accessLogJson) > 0);
 
       // Stop the application.
       serverProcess.close();
@@ -118,13 +120,13 @@ public final class DataServerLauncherAppIT {
        * http://unix.stackexchange.com/a/99143), applications that exit due to a signal should
        * return an exit code that is 128 + the signal number.
        */
-      Assert.assertEquals(128 + SIGTERM, (int) serverProcess.getResultCode().get());
-      Assert.assertTrue(
-          "Application's housekeeping shutdown hook did not run: "
-              + serverProcess.getProcessOutput(),
+      assertEquals(128 + SIGTERM, (int) serverProcess.getResultCode().get());
+      assertTrue(
           serverProcess
               .getProcessOutput()
-              .contains(DataServerLauncherApp.LOG_MESSAGE_SHUTDOWN_HOOK_COMPLETE));
+              .contains(DataServerLauncherApp.LOG_MESSAGE_SHUTDOWN_HOOK_COMPLETE),
+          "Application's housekeeping shutdown hook did not run: "
+              + serverProcess.getProcessOutput());
     } finally {
       if (serverProcess != null) serverProcess.close();
     }
