@@ -162,8 +162,6 @@ public final class EndpointJsonResponseComparatorV2IT {
         arguments("eobReadSnf", (Supplier<String>) EndpointJsonResponseComparatorV2IT::eobReadSnf));
   }
 
-  private final String endpointId;
-  private final Supplier<String> endpointOperation;
   private static final String IGNORED_FIELD_TEXT = "IGNORED_FIELD";
 
   private static final Set<String> IGNORED_PATHS =
@@ -182,21 +180,6 @@ public final class EndpointJsonResponseComparatorV2IT {
           "\"/procedure/[0-9]/date\"",
           "\"/entry/[0-9]/resource/procedure/[0-9]/date\"",
           "\"/software/version\"");
-
-  /**
-   * Parameterized test constructor: JUnit will construct a new instance of this class for every
-   * top-level element returned by the {@link #data()} {@link Parameters} test data generator, and
-   * then run the test cases in this class using that specific test data element.
-   *
-   * @param endpointId the name of the operation being tested, which is also used to locate the
-   *     "approved" operation response file in the src/test/resources/endpoint-responses source
-   *     directory
-   * @param endpointOperation the operation to be tested
-   */
-  public EndpointJsonResponseComparatorV2IT(String endpointId, Supplier<String> endpointOperation) {
-    this.endpointId = endpointId;
-    this.endpointOperation = endpointOperation;
-  }
 
   /**
    * Ensures that {@link PipelineTestUtils#truncateTablesInDataSource()} is called once to make sure
@@ -222,7 +205,7 @@ public final class EndpointJsonResponseComparatorV2IT {
    */
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
-  public void verifyCorrectEndpointResponse() {
+  public void verifyCorrectEndpointResponse(String endpointId, Supplier<String> endpointOperation) {
     Path targetResponseDir = getTargetResponseDir();
 
     // Call the server endpoint and save its result out to a file corresponding to
@@ -240,7 +223,7 @@ public final class EndpointJsonResponseComparatorV2IT {
   @Disabled
   @ParameterizedTest(name = "endpointId = {0}")
   @MethodSource("data")
-  public void generateApprovedResponseFiles() {
+  public void generateApprovedResponseFiles(String endpointId, Supplier<String> endpointOperation) {
     Path approvedResponseDir = getApprovedResponseDir();
 
     // Call the server endpoint and save its result out to a file corresponding to
