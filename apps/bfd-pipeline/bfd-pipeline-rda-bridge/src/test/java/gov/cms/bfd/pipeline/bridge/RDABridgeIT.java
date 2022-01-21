@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.bridge;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,7 +9,6 @@ import com.flipkart.zjsonpatch.JsonDiff;
 import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
-import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
@@ -80,8 +79,11 @@ public class RDABridgeIT {
     assertJsonEquals(expectedMcsJson, actualMcsJson, ignorePaths);
   }
 
-  // DefaultAnnotationParam - Might as well be explicit
-  @SuppressWarnings("DefaultAnnotationParam")
+  /**
+   * Ensures that no exceptions are thrown while transforming Fiss and MCS claims.
+   *
+   * @throws IOException if there is a setup issue loading the test data
+   */
   @Test
   public void shouldProduceValidClaimStructures() throws IOException {
     RDABridge bridge = new RDABridge();
@@ -106,26 +108,26 @@ public class RDABridgeIT {
           public void close() throws IOException {}
         };
 
-    bridge.executeTransformation(
-        RDABridge.SourceType.FISS, resourcesDir, inpatientData, mbiMap, testSink);
-    bridge.executeTransformation(
-        RDABridge.SourceType.MCS, resourcesDir, carrierData, mbiMap, testSink);
+    assertDoesNotThrow(
+        () -> {
+          bridge.executeTransformation(
+              RDABridge.SourceType.FISS, resourcesDir, inpatientData, mbiMap, testSink);
+          bridge.executeTransformation(
+              RDABridge.SourceType.MCS, resourcesDir, carrierData, mbiMap, testSink);
 
-    Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-    IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-    FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
-    McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
+          Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+          IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
+          FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
+          McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
 
-    RdaChange resultingTransform = null;
-    for (MessageOrBuilder message : results) {
-      if (message instanceof FissClaimChange) {
-        resultingTransform = fissTransformer.transformClaim((FissClaimChange) message);
-      } else {
-        resultingTransform = mcsTransformer.transformClaim((McsClaimChange) message);
-      }
-    }
-    // TODO: Add some better assertions here
-    assertNotNull(resultingTransform);
+          for (MessageOrBuilder message : results) {
+            if (message instanceof FissClaimChange) {
+              fissTransformer.transformClaim((FissClaimChange) message);
+            } else {
+              mcsTransformer.transformClaim((McsClaimChange) message);
+            }
+          }
+        });
   }
 
   private void assertJsonEquals(
