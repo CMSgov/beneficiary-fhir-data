@@ -7,6 +7,7 @@ import gov.cms.bfd.pipeline.bridge.model.Mcs;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
+import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
@@ -17,7 +18,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 /** Transforms data into MCS FISS claim change objects. */
 @RequiredArgsConstructor
-public class McsTransformer implements AbstractTransformer {
+public class McsTransformer extends AbstractTransformer {
 
   private static final int MAX_DIAGNOSIS_CODES = 12;
 
@@ -32,31 +33,67 @@ public class McsTransformer implements AbstractTransformer {
   @Override
   public MessageOrBuilder transform(Parser.Data<String> data) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
-    String icn = convertIcn(data);
 
     // Carrier claims break claims into multiple lines (rows).  Synthea isn't doing this, but just
-    // to protect against it
-    // if it does happen, we'll ignore any row with LINE_NUM > 1
+    // to protect against it if it does happen, we'll ignore any row with LINE_NUM > 1
     if (isFirstLineNum(data)) {
       McsClaim.Builder claimBuilder =
           McsClaim.newBuilder()
-              // Prefixed ICN numbers with '*' to designate synthetic data
-              .setIdrClmHdIcn(icn)
-              .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A) // Not generated
-              .setIdrBillProvNpi("0000000000") // Not generated
-              .setIdrTotBilledAmt(data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).orElse(""))
+              .setIdrClmHdIcn(
+                  ifNull(data.get(Mcs.CARR_CLM_CNTRL_NUM).orElse(null), () -> convertIcn(data)))
               .setIdrClaimMbi(mbiMap.get(beneId).getMbi())
-              .setIdrContrId("00000") // Not generated
-              .setIdrClaimTypeUnrecognized("?") // Not generated
-              .setIdrBillProvNum("0000000000"); // Not generated
+              // Not generated
+              .setIdrBillProvEin("XX-XXXXXXX")
+              .setIdrBillProvSpec("01")
+              .setIdrBillProvType("20")
+              .setIdrClaimReceiptDate("1970-01-01")
+              .setIdrClaimTypeEnum(McsClaimType.CLAIM_TYPE_MEDICAL) // "3"
+              .setIdrContrId("00000")
+              .setIdrStatusCodeEnum(McsStatusCode.STATUS_CODE_ACTIVE_A)
+              .setIdrStatusDate("1970-01-01");
 
-      claimBuilder.addMcsDetails(
-          McsDetail.newBuilder()
-              .setIdrProcCode(data.get(Mcs.HCPCS_CD).orElse("00000"))
-              .setIdrDtlToDate(data.getFromType(Mcs.CLM_THRU_DT, Parser.Data.Type.DATE).orElse(""))
-              .build());
+      consumeIfNotNull(
+          mbiMap.get(beneId).getFirstName(),
+          value -> claimBuilder.setIdrBeneFirstInit(value.substring(0, 1)));
+      consumeIfNotNull(
+          mbiMap.get(beneId).getLastName(),
+          value -> claimBuilder.setIdrBeneLast16(String.format("%.6s", value)));
+      consumeIfNotNull(
+          mbiMap.get(beneId).getMidName(),
+          value -> claimBuilder.setIdrBeneMidInit(value.substring(0, 1)));
+      consumeIfNotNull(
+          mbiMap.get(beneId).getGender(),
+          value -> {
+            // RIF mappings are  0 - unknown, 1 - male, 2 - female
+            // RDA mappings are -1 - unrecognized, 0 - male, 1 - female
+            int enumValue = Integer.parseInt(value);
+            if (enumValue != 0) { // Skip RIF "unknown" values since they don't map to MCS RDA
+              --enumValue; // Transform to RDA values
+              enumValue = (enumValue == 0 || enumValue == 1) ? enumValue : -1;
+              claimBuilder.setIdrBeneSexEnumValue(enumValue);
+            }
+          });
+      data.getFromType(Mcs.CLM_FRM_DT, Parser.Data.Type.DATE)
+          .ifPresent(claimBuilder::setIdrHdrFromDos);
+      data.getFromType(Mcs.CLM_THRU_DT, Parser.Data.Type.DATE)
+          .ifPresent(claimBuilder::setIdrHdrToDos);
+      data.get(Mcs.NCH_CARR_CLM_SBMTD_CHRG_AMT).ifPresent(claimBuilder::setIdrTotBilledAmt);
+      data.get(Mcs.ORG_NPI_NUM).ifPresent(claimBuilder::setIdrBillProvNpi);
 
-      addDiagnosisCodes(claimBuilder, data, icn);
+      McsDetail.Builder detailBuilder = McsDetail.newBuilder();
+
+      data.get(Mcs.LINE_ICD_DGNS_CD).ifPresent(detailBuilder::setIdrDtlPrimaryDiagCode);
+      data.get(Mcs.HCPCS_CD).ifPresent(detailBuilder::setIdrProcCode);
+      data.get(Mcs.HCPCS_1_MDFR_CD).ifPresent(detailBuilder::setIdrModOne);
+      data.get(Mcs.HCPCS_2_MDFR_CD).ifPresent(detailBuilder::setIdrModTwo);
+      data.getFromType(Mcs.LINE_1ST_EXPNS_DT, Parser.Data.Type.DATE)
+          .ifPresent(detailBuilder::setIdrDtlFromDate);
+      data.getFromType(Mcs.LINE_LAST_EXPNS_DT, Parser.Data.Type.DATE)
+          .ifPresent(detailBuilder::setIdrDtlToDate);
+
+      claimBuilder.addMcsDetails(detailBuilder.build());
+
+      addDiagnosisCodes(claimBuilder, data, claimBuilder.getIdrClmHdIcn());
 
       return McsClaimChange.newBuilder()
           .setClaim(claimBuilder)
@@ -72,7 +109,7 @@ public class McsTransformer implements AbstractTransformer {
   boolean isFirstLineNum(Parser.Data<String> data) {
     Optional<String> lineNum = data.get(Mcs.LINE_NUM);
 
-    return !lineNum.isPresent() || lineNum.get().equals("1");
+    return lineNum.isEmpty() || lineNum.get().equals("1");
   }
 
   @VisibleForTesting
@@ -90,11 +127,11 @@ public class McsTransformer implements AbstractTransformer {
 
       data.get(Mcs.ICD_DGNS_CD + i)
           .ifPresent(
-              value ->
+              diagnosisCode ->
                   claimBuilder.addMcsDiagnosisCodes(
                       McsDiagnosisCode.newBuilder()
                           .setIdrClmHdIcn(icn)
-                          .setIdrDiagCode(data.get(Mcs.ICD_DGNS_CD + INDEX).orElse(""))
+                          .setIdrDiagCode(diagnosisCode)
                           .setIdrDiagIcdTypeEnumValue(
                               data.get(Mcs.ICD_DGNS_VRSN_CD + INDEX)
                                   .map(

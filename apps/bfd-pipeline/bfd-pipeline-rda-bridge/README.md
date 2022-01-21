@@ -19,12 +19,12 @@ mvn clean package
 ## Run
 Execute the shell script
 ```shell
-./run_bridge <Path to Rif Dir> [options]
+./run_bridge.sh <Path to Rif Dir> [options]
 ```
 
 ## Optional Parameters
 ```
-usage: run_bridge sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
+usage: run_bridge.sh sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
        <arg>] [-n <arg>] [-o <arg>]
     -b <arg>    Benefit History file to read from
     -e <arg>    Path to yaml file containing run configs
@@ -38,12 +38,12 @@ usage: run_bridge sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
 ## Example execution commands
 ### CLI Based
 ```shell
-./run_bridge path/to/rif/ \
+./run_bridge.sh path/to/rif/ \
     -o output/ \
     -g rda-fiss-out.ndjson \
     -n rda-mcs-out.ndjson \
     -f inpatient.csv \
-    -f outpatie.csv \
+    -f outpatient.csv \
     -m carrier.csv \
     -b beneficiary_history.csv
 ```
