@@ -1,5 +1,10 @@
 package gov.cms.bfd.pipeline.ccw.rif.load;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.bfd.model.rif.Beneficiary;
 import gov.cms.bfd.model.rif.BeneficiaryHistory;
@@ -34,13 +39,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.sql.DataSource;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,27 +51,17 @@ import org.slf4j.LoggerFactory;
 public final class RifLoaderIT {
   private static final Logger LOGGER = LoggerFactory.getLogger(RifLoaderIT.class);
 
-  @Rule
-  public TestWatcher testCaseEntryExitLogger =
-      new TestWatcher() {
-        /** @see org.junit.rules.TestWatcher#starting(org.junit.runner.Description) */
-        @Override
-        protected void starting(Description description) {
-          LOGGER.info("{}: starting.", description.getDisplayName());
-        }
-
-        /** @see org.junit.rules.TestWatcher#finished(org.junit.runner.Description) */
-        @Override
-        protected void finished(Description description) {
-          LOGGER.info("{}: finished.", description.getDisplayName());
-        };
-      };
-
   /** Ensures that each test case here starts with a clean/empty database, with the right schema. */
-  @Before
-  public void prepareTestDatabase() {
+  @BeforeEach
+  public void prepareTestDatabase(TestInfo testInfo) {
+    LOGGER.info("{}: starting.", testInfo.getDisplayName());
     PipelineTestUtils.get().truncateTablesInDataSource();
   }
+
+  @AfterEach
+  public void finished(TestInfo testInfo) {
+    LOGGER.info("{}: finished.", testInfo.getDisplayName());
+  };
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_A} data. */
   @Test
@@ -87,26 +80,24 @@ public final class RifLoaderIT {
               loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-              Assert.assertTrue(
-                  "Expected to have many loaded files in SAMPLE A", loadedFiles.size() > 1);
+              assertTrue(loadedFiles.size() > 1, "Expected to have many loaded files in SAMPLE A");
               final LoadedFile loadedFile = loadedFiles.get(0);
-              Assert.assertNotNull(loadedFile.getCreated());
+              assertNotNull(loadedFile.getCreated());
 
               // Verify that beneficiaries table was loaded
               final List<LoadedBatch> batches =
                   loadBatches(entityManager, loadedFile.getLoadedFileId());
               final LoadedBatch allBatches = batches.stream().reduce(null, LoadedBatch::combine);
-              Assert.assertTrue(
-                  "Expected to have at least one beneficiary loaded", batches.size() > 0);
-              Assert.assertEquals(
-                  "Expected to match the sample-a beneficiary",
+              assertTrue(batches.size() > 0, "Expected to have at least one beneficiary loaded");
+              assertEquals(
                   "567834",
-                  allBatches.getBeneficiariesAsList().get(0));
+                  allBatches.getBeneficiariesAsList().get(0),
+                  "Expected to match the sample-a beneficiary");
             });
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void multipleFileLoads() {
     PipelineTestUtils.get()
         .doTestWithDb(
@@ -115,7 +106,7 @@ public final class RifLoaderIT {
               loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
               final List<LoadedFile> beforeLoadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-              Assert.assertTrue("Expected to have at least one file", beforeLoadedFiles.size() > 0);
+              assertTrue(beforeLoadedFiles.size() > 0, "Expected to have at least one file");
               LoadedFile beforeLoadedFile = beforeLoadedFiles.get(0);
               LoadedFile beforeOldestFile = beforeLoadedFiles.get(beforeLoadedFiles.size() - 1);
 
@@ -125,18 +116,18 @@ public final class RifLoaderIT {
               // Verify that the loaded list was updated properly
               final List<LoadedFile> afterLoadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-              Assert.assertTrue(
-                  "Expected to have more loaded files",
-                  beforeLoadedFiles.size() < afterLoadedFiles.size());
+              assertTrue(
+                  beforeLoadedFiles.size() < afterLoadedFiles.size(),
+                  "Expected to have more loaded files");
               final LoadedFile afterLoadedFile = afterLoadedFiles.get(0);
               final LoadedFile afterOldestFile = afterLoadedFiles.get(afterLoadedFiles.size() - 1);
-              Assert.assertEquals(
-                  "Expected same oldest file",
+              assertEquals(
                   beforeOldestFile.getLoadedFileId(),
-                  afterOldestFile.getLoadedFileId());
-              Assert.assertTrue(
-                  "Expected range to expand",
-                  beforeLoadedFile.getCreated().isBefore(afterLoadedFile.getCreated()));
+                  afterOldestFile.getLoadedFileId(),
+                  "Expected same oldest file");
+              assertTrue(
+                  beforeLoadedFile.getCreated().isBefore(afterLoadedFile.getCreated()),
+                  "Expected range to expand");
             });
   }
 
@@ -159,9 +150,9 @@ public final class RifLoaderIT {
               final List<LoadedFile> beforeFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
               final Instant oldDate = Instant.now().minus(99, ChronoUnit.DAYS);
-              Assert.assertTrue(
-                  "Expect to have old files",
-                  beforeFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)));
+              assertTrue(
+                  beforeFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)),
+                  "Expect to have old files");
 
               // Load another set that will cause the old file to be trimmed
               loadSample(dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_U.getResources()));
@@ -169,13 +160,13 @@ public final class RifLoaderIT {
               // Verify that old file was trimmed
               final List<LoadedFile> afterFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-              Assert.assertFalse(
-                  "Expect to not have old files",
-                  afterFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)));
+              assertFalse(
+                  afterFiles.stream().anyMatch(file -> file.getCreated().isBefore(oldDate)),
+                  "Expect to not have old files");
             });
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void buildSyntheticLoadedFiles() {
     PipelineTestUtils.get()
@@ -186,16 +177,16 @@ public final class RifLoaderIT {
               // Verify that a loaded files exsits
               final List<LoadedFile> loadedFiles =
                   PipelineTestUtils.get().findLoadedFiles(entityManager);
-              Assert.assertTrue("Expected to have at least one file", loadedFiles.size() > 0);
+              assertTrue(loadedFiles.size() > 0, "Expected to have at least one file");
               final LoadedFile file = loadedFiles.get(0);
               final List<LoadedBatch> batches = loadBatches(entityManager, file.getLoadedFileId());
-              Assert.assertTrue(batches.size() > 0);
+              assertTrue(batches.size() > 0);
             });
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_U} data. */
   @Test
-  @Ignore
+  @Disabled
   public void loadSampleU() {
     DataSource dataSource =
         PipelineTestUtils.get().getPipelineApplicationState().getPooledDataSource();
@@ -220,65 +211,62 @@ public final class RifLoaderIT {
                       beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
               .getResultList();
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
-        Assert.assertEquals("567834", beneHistory.getBeneficiaryId());
+        assertEquals("567834", beneHistory.getBeneficiaryId());
         // A recent lastUpdated timestamp
-        Assert.assertTrue("Expected a lastUpdated field", beneHistory.getLastUpdated().isPresent());
+        assertTrue(beneHistory.getLastUpdated().isPresent(), "Expected a lastUpdated field");
         beneHistory
             .getLastUpdated()
             .ifPresent(
                 lastUpdated -> {
-                  Assert.assertTrue(
-                      "Expected a recent lastUpdated timestamp",
-                      lastUpdated.isAfter(Instant.now().minus(10, ChronoUnit.MINUTES)));
+                  assertTrue(
+                      lastUpdated.isAfter(Instant.now().minus(10, ChronoUnit.MINUTES)),
+                      "Expected a recent lastUpdated timestamp");
                 });
       }
-      Assert.assertEquals(4, beneficiaryHistoryEntries.size());
+      assertEquals(4, beneficiaryHistoryEntries.size());
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
       // Last Name inserted with value of "Johnson"
-      Assert.assertEquals("Johnson", beneficiaryFromDb.getNameSurname());
+      assertEquals("Johnson", beneficiaryFromDb.getNameSurname());
       // Following fields were NOT changed in update record
-      Assert.assertEquals("John", beneficiaryFromDb.getNameGiven());
-      Assert.assertEquals(new Character('A'), beneficiaryFromDb.getNameMiddleInitial().get());
-      Assert.assertEquals(
-          "Beneficiary has MBI", Optional.of("SSSS"), beneficiaryFromDb.getMedicareBeneficiaryId());
-      Assert.assertEquals(
-          "Beneficiary has mbiHash",
+      assertEquals("John", beneficiaryFromDb.getNameGiven());
+      assertEquals(new Character('A'), beneficiaryFromDb.getNameMiddleInitial().get());
+      assertEquals(
+          Optional.of("SSSS"), beneficiaryFromDb.getMedicareBeneficiaryId(), "Beneficiary has MBI");
+      assertEquals(
           Optional.of("401441595efcc68bc5b26f4e88bd9fa550004e068d69ff75761ab946ec553a02"),
-          beneficiaryFromDb.getMbiHash());
+          beneficiaryFromDb.getMbiHash(),
+          "Beneficiary has mbiHash");
       // A recent lastUpdated timestamp
-      Assert.assertTrue(
-          "Expected a lastUpdated field", beneficiaryFromDb.getLastUpdated().isPresent());
+      assertTrue(beneficiaryFromDb.getLastUpdated().isPresent(), "Expected a lastUpdated field");
       beneficiaryFromDb
           .getLastUpdated()
           .ifPresent(
               lastUpdated -> {
-                Assert.assertTrue(
-                    "Expected a recent lastUpdated timestamp",
-                    lastUpdated.isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)));
+                assertTrue(
+                    lastUpdated.isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)),
+                    "Expected a recent lastUpdated timestamp");
               });
 
       CarrierClaim carrierRecordFromDb = entityManager.find(CarrierClaim.class, "9991831999");
-      Assert.assertEquals('N', carrierRecordFromDb.getFinalAction());
+      assertEquals('N', carrierRecordFromDb.getFinalAction());
       // DateThrough inserted with value 10-27-1999
-      Assert.assertEquals(
-          LocalDate.of(2000, Month.OCTOBER, 27), carrierRecordFromDb.getDateThrough());
-      Assert.assertEquals(1, carrierRecordFromDb.getLines().size());
+      assertEquals(LocalDate.of(2000, Month.OCTOBER, 27), carrierRecordFromDb.getDateThrough());
+      assertEquals(1, carrierRecordFromDb.getLines().size());
       // A recent lastUpdated timestamp
-      Assert.assertTrue(
-          "Expected a lastUpdated field", carrierRecordFromDb.getLastUpdated().isPresent());
+      assertTrue(carrierRecordFromDb.getLastUpdated().isPresent(), "Expected a lastUpdated field");
       carrierRecordFromDb
           .getLastUpdated()
           .ifPresent(
               lastUpdated -> {
-                Assert.assertTrue(
-                    "Expected a recent lastUpdated timestamp",
-                    lastUpdated.isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)));
+                assertTrue(
+                    lastUpdated.isAfter(Instant.now().minus(1, ChronoUnit.MINUTES)),
+                    "Expected a recent lastUpdated timestamp");
               });
 
       CarrierClaimLine carrierLineRecordFromDb = carrierRecordFromDb.getLines().get(0);
       // CliaLabNumber inserted with value BB889999AA
-      Assert.assertEquals("GG443333HH", carrierLineRecordFromDb.getCliaLabNumber().get());
+      assertEquals("GG443333HH", carrierLineRecordFromDb.getCliaLabNumber().get());
     } finally {
       if (entityManager != null) entityManager.close();
     }
@@ -319,9 +307,9 @@ public final class RifLoaderIT {
                       beneficiaryHistoryCriteria.from(BeneficiaryHistory.class)))
               .getResultList();
       for (BeneficiaryHistory beneHistory : beneficiaryHistoryEntries) {
-        Assert.assertEquals("567834", beneHistory.getBeneficiaryId());
+        assertEquals("567834", beneHistory.getBeneficiaryId());
         // A recent lastUpdated timestamp
-        Assert.assertTrue("Expected a lastUpdated field", beneHistory.getLastUpdated().isPresent());
+        assertTrue(beneHistory.getLastUpdated().isPresent(), "Expected a lastUpdated field");
         long end = System.currentTimeMillis();
         // finding the time difference and converting it into seconds
         long secs = (end - start) / 1000L;
@@ -329,14 +317,14 @@ public final class RifLoaderIT {
             .getLastUpdated()
             .ifPresent(
                 lastUpdated -> {
-                  Assert.assertFalse(
-                      "Expected not a recent lastUpdated timestamp",
-                      lastUpdated.isAfter(Instant.now().minusSeconds(secs)));
+                  assertFalse(
+                      lastUpdated.isAfter(Instant.now().minusSeconds(secs)),
+                      "Expected not a recent lastUpdated timestamp");
                 });
       }
       // Make sure the size is the same and no records have been inserted if the same fields in the
       // beneficiary history table are the same.
-      Assert.assertEquals(4, beneficiaryHistoryEntries.size());
+      assertEquals(4, beneficiaryHistoryEntries.size());
 
     } finally {
       if (entityManager != null) entityManager.close();
@@ -367,7 +355,7 @@ public final class RifLoaderIT {
       entityManager = entityManagerFactory.createEntityManager();
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
       // Checks all 12 months are in beneficiary monthlys for that beneficiary
-      Assert.assertEquals(12, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      assertEquals(12, beneficiaryFromDb.getBeneficiaryMonthlys().size());
       // Checks every month in the beneficiary monthly table
       assertBeneficiaryMonthly(beneficiaryFromDb);
 
@@ -397,7 +385,7 @@ public final class RifLoaderIT {
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
       // Checks to make sure we have 2 years or 24 months of data
-      Assert.assertEquals(24, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      assertEquals(24, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
       if (entityManager != null) entityManager.close();
     }
@@ -428,7 +416,7 @@ public final class RifLoaderIT {
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
       // Checks to make sure we only have 20 months of data
-      Assert.assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
     } finally {
       if (entityManager != null) entityManager.close();
     }
@@ -456,23 +444,23 @@ public final class RifLoaderIT {
       entityManager = entityManagerFactory.createEntityManager();
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      Assert.assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      assertEquals(20, beneficiaryFromDb.getBeneficiaryMonthlys().size());
 
       BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
-      Assert.assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
-      Assert.assertEquals("C", augustMonthly.getEntitlementBuyInInd().get().toString());
-      Assert.assertEquals("AA", augustMonthly.getFipsStateCntyCode().get());
-      Assert.assertFalse(augustMonthly.getHmoIndicatorInd().isPresent());
-      Assert.assertEquals("AA", augustMonthly.getMedicaidDualEligibilityCode().get());
-      Assert.assertEquals("AA", augustMonthly.getMedicareStatusCode().get());
-      Assert.assertEquals("C", augustMonthly.getPartCContractNumberId().get());
-      Assert.assertEquals("C", augustMonthly.getPartCPbpNumberId().get());
-      Assert.assertEquals("C", augustMonthly.getPartCPlanTypeCode().get());
-      Assert.assertEquals("C", augustMonthly.getPartDContractNumberId().get());
-      Assert.assertEquals("AA", augustMonthly.getPartDLowIncomeCostShareGroupCode().get());
-      Assert.assertFalse(augustMonthly.getPartDPbpNumberId().isPresent());
-      Assert.assertEquals("C", augustMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
-      Assert.assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
+      assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
+      assertEquals("C", augustMonthly.getEntitlementBuyInInd().get().toString());
+      assertEquals("AA", augustMonthly.getFipsStateCntyCode().get());
+      assertFalse(augustMonthly.getHmoIndicatorInd().isPresent());
+      assertEquals("AA", augustMonthly.getMedicaidDualEligibilityCode().get());
+      assertEquals("AA", augustMonthly.getMedicareStatusCode().get());
+      assertEquals("C", augustMonthly.getPartCContractNumberId().get());
+      assertEquals("C", augustMonthly.getPartCPbpNumberId().get());
+      assertEquals("C", augustMonthly.getPartCPlanTypeCode().get());
+      assertEquals("C", augustMonthly.getPartDContractNumberId().get());
+      assertEquals("AA", augustMonthly.getPartDLowIncomeCostShareGroupCode().get());
+      assertFalse(augustMonthly.getPartDPbpNumberId().isPresent());
+      assertEquals("C", augustMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
 
     } finally {
       if (entityManager != null) entityManager.close();
@@ -487,46 +475,46 @@ public final class RifLoaderIT {
       entityManager = entityManagerFactory.createEntityManager();
 
       Beneficiary beneficiaryFromDb = entityManager.find(Beneficiary.class, "567834");
-      Assert.assertEquals(21, beneficiaryFromDb.getBeneficiaryMonthlys().size());
+      assertEquals(21, beneficiaryFromDb.getBeneficiaryMonthlys().size());
       BeneficiaryMonthly augustMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(19);
-      Assert.assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
-      Assert.assertEquals("C", augustMonthly.getEntitlementBuyInInd().get().toString());
-      Assert.assertEquals("AA", augustMonthly.getFipsStateCntyCode().get());
+      assertEquals("2019-08-01", augustMonthly.getYearMonth().toString());
+      assertEquals("C", augustMonthly.getEntitlementBuyInInd().get().toString());
+      assertEquals("AA", augustMonthly.getFipsStateCntyCode().get());
       // Updated in file
-      Assert.assertEquals("C", augustMonthly.getHmoIndicatorInd().get().toString());
-      Assert.assertEquals("AA", augustMonthly.getMedicaidDualEligibilityCode().get());
-      Assert.assertEquals("AA", augustMonthly.getMedicareStatusCode().get());
-      Assert.assertEquals("C", augustMonthly.getPartCContractNumberId().get());
-      Assert.assertEquals("C", augustMonthly.getPartCPbpNumberId().get());
-      Assert.assertEquals("C", augustMonthly.getPartCPlanTypeCode().get());
-      Assert.assertEquals("C", augustMonthly.getPartDContractNumberId().get());
-      Assert.assertEquals("AA", augustMonthly.getPartDLowIncomeCostShareGroupCode().get());
-      Assert.assertFalse(augustMonthly.getPartDPbpNumberId().isPresent());
-      Assert.assertEquals("C", augustMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
-      Assert.assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
+      assertEquals("C", augustMonthly.getHmoIndicatorInd().get().toString());
+      assertEquals("AA", augustMonthly.getMedicaidDualEligibilityCode().get());
+      assertEquals("AA", augustMonthly.getMedicareStatusCode().get());
+      assertEquals("C", augustMonthly.getPartCContractNumberId().get());
+      assertEquals("C", augustMonthly.getPartCPbpNumberId().get());
+      assertEquals("C", augustMonthly.getPartCPlanTypeCode().get());
+      assertEquals("C", augustMonthly.getPartDContractNumberId().get());
+      assertEquals("AA", augustMonthly.getPartDLowIncomeCostShareGroupCode().get());
+      assertFalse(augustMonthly.getPartDPbpNumberId().isPresent());
+      assertEquals("C", augustMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      assertFalse(augustMonthly.getPartDSegmentNumberId().isPresent());
 
       BeneficiaryMonthly septMonthly = beneficiaryFromDb.getBeneficiaryMonthlys().get(20);
-      Assert.assertEquals("2019-09-01", septMonthly.getYearMonth().toString());
-      Assert.assertFalse(septMonthly.getEntitlementBuyInInd().isPresent());
-      Assert.assertFalse(septMonthly.getFipsStateCntyCode().isPresent());
-      Assert.assertFalse(septMonthly.getHmoIndicatorInd().isPresent());
-      Assert.assertEquals("AA", septMonthly.getMedicaidDualEligibilityCode().get());
-      Assert.assertFalse(septMonthly.getMedicareStatusCode().isPresent());
-      Assert.assertFalse(septMonthly.getPartCContractNumberId().isPresent());
-      Assert.assertFalse(septMonthly.getPartCPbpNumberId().isPresent());
-      Assert.assertFalse(septMonthly.getPartCPlanTypeCode().isPresent());
-      Assert.assertFalse(septMonthly.getPartDContractNumberId().isPresent());
-      Assert.assertFalse(septMonthly.getPartDLowIncomeCostShareGroupCode().isPresent());
-      Assert.assertFalse(septMonthly.getPartDPbpNumberId().isPresent());
-      Assert.assertEquals("C", septMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
-      Assert.assertFalse(septMonthly.getPartDSegmentNumberId().isPresent());
+      assertEquals("2019-09-01", septMonthly.getYearMonth().toString());
+      assertFalse(septMonthly.getEntitlementBuyInInd().isPresent());
+      assertFalse(septMonthly.getFipsStateCntyCode().isPresent());
+      assertFalse(septMonthly.getHmoIndicatorInd().isPresent());
+      assertEquals("AA", septMonthly.getMedicaidDualEligibilityCode().get());
+      assertFalse(septMonthly.getMedicareStatusCode().isPresent());
+      assertFalse(septMonthly.getPartCContractNumberId().isPresent());
+      assertFalse(septMonthly.getPartCPbpNumberId().isPresent());
+      assertFalse(septMonthly.getPartCPlanTypeCode().isPresent());
+      assertFalse(septMonthly.getPartDContractNumberId().isPresent());
+      assertFalse(septMonthly.getPartDLowIncomeCostShareGroupCode().isPresent());
+      assertFalse(septMonthly.getPartDPbpNumberId().isPresent());
+      assertEquals("C", septMonthly.getPartDRetireeDrugSubsidyInd().get().toString());
+      assertFalse(septMonthly.getPartDSegmentNumberId().isPresent());
     } finally {
       if (entityManager != null) entityManager.close();
     }
   }
 
   /** Runs {@link RifLoader} against the {@link StaticRifResourceGroup#SAMPLE_B} data. */
-  @Ignore
+  @Disabled
   @Test
   public void loadSampleB() {
     DataSource dataSource =
@@ -539,7 +527,7 @@ public final class RifLoaderIT {
    *
    * <p>This test only works with a PostgreSQL database instance. It 10s or minutes to run.
    */
-  @Ignore
+  @Disabled
   @Test
   public void loadSyntheticData() {
     /*Assume.assumeTrue(
@@ -566,7 +554,7 @@ public final class RifLoaderIT {
         dataSource, Arrays.asList(StaticRifResourceGroup.SAMPLE_MCT_UPDATE_3.getResources()));
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void loadSyntheaData() {
     DataSource dataSource =
@@ -578,7 +566,7 @@ public final class RifLoaderIT {
    * Runs {@link RifLoader} against the specified {@link StaticRifResourceGroup}.
    *
    * @param dataSource a {@link DataSource} for the test DB to use
-   * @param sampleGroup the {@link StaticRifResourceGroup} to load
+   * @param sampleResources the {@link StaticRifResourceGroup} to load
    */
   private void loadSample(DataSource dataSource, List<StaticRifResource> sampleResources) {
     LOGGER.info("Loading RIF file from {}...", sampleResources.get(0).getResourceUrl().toString());
@@ -618,11 +606,11 @@ public final class RifLoaderIT {
         .report();
 
     // Verify that the expected number of records were run successfully.
-    Assert.assertEquals(0, failureCount.get());
-    Assert.assertEquals(
-        "Unexpected number of loaded records.",
+    assertEquals(0, failureCount.get());
+    assertEquals(
         sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
-        loadCount.get());
+        loadCount.get(),
+        "Unexpected number of loaded records.");
 
     /*
      * Run the extraction an extra time and verify that each record can now
@@ -719,12 +707,12 @@ public final class RifLoaderIT {
 
           List<BeneficiaryHistory> beneficiaryHistoryFound =
               entityManager.createQuery(query).getResultList();
-          Assert.assertNotNull(beneficiaryHistoryFound);
-          Assert.assertFalse(beneficiaryHistoryFound.isEmpty());
+          assertNotNull(beneficiaryHistoryFound);
+          assertFalse(beneficiaryHistoryFound.isEmpty());
         } else {
           Object recordId = entityManagerFactory.getPersistenceUnitUtil().getIdentifier(record);
           Object recordFromDb = entityManager.find(record.getClass(), recordId);
-          Assert.assertNotNull(recordFromDb);
+          assertNotNull(recordFromDb);
         }
       }
     } finally {
@@ -970,34 +958,29 @@ public final class RifLoaderIT {
       Optional<Character> partDRetireeDrugSubsidyInd,
       Optional<String> partDSegmentNumberId) {
 
-    Assert.assertEquals(LocalDate.of(referenceYear, month, 1), enrollment.getYearMonth());
-    Assert.assertEquals(
+    assertEquals(LocalDate.of(referenceYear, month, 1), enrollment.getYearMonth());
+    assertEquals(
         entitlementBuyInInd.orElse(null), enrollment.getEntitlementBuyInInd().orElse(null));
-    Assert.assertEquals(
-        fipsStateCntyCode.orElse(null), enrollment.getFipsStateCntyCode().orElse(null));
-    Assert.assertEquals(hmoIndicatorInd.orElse(null), enrollment.getHmoIndicatorInd().orElse(null));
-    Assert.assertEquals(
+    assertEquals(fipsStateCntyCode.orElse(null), enrollment.getFipsStateCntyCode().orElse(null));
+    assertEquals(hmoIndicatorInd.orElse(null), enrollment.getHmoIndicatorInd().orElse(null));
+    assertEquals(
         medicaidDualEligibilityCode.orElse(null),
         enrollment.getMedicaidDualEligibilityCode().orElse(null));
-    Assert.assertEquals(
-        medicareStatusCode.orElse(null), enrollment.getMedicareStatusCode().orElse(null));
-    Assert.assertEquals(
+    assertEquals(medicareStatusCode.orElse(null), enrollment.getMedicareStatusCode().orElse(null));
+    assertEquals(
         partCContractNumberId.orElse(null), enrollment.getPartCContractNumberId().orElse(null));
-    Assert.assertEquals(
-        partCPbpNumberId.orElse(null), enrollment.getPartCPbpNumberId().orElse(null));
-    Assert.assertEquals(
-        partCPlanTypeCode.orElse(null), enrollment.getPartCPlanTypeCode().orElse(null));
-    Assert.assertEquals(
+    assertEquals(partCPbpNumberId.orElse(null), enrollment.getPartCPbpNumberId().orElse(null));
+    assertEquals(partCPlanTypeCode.orElse(null), enrollment.getPartCPlanTypeCode().orElse(null));
+    assertEquals(
         partDContractNumberId.orElse(null), enrollment.getPartDContractNumberId().orElse(null));
-    Assert.assertEquals(
+    assertEquals(
         partDLowIncomeCostShareGroupCode.orElse(null),
         enrollment.getPartDLowIncomeCostShareGroupCode().orElse(null));
-    Assert.assertEquals(
-        partDPbpNumberId.orElse(null), enrollment.getPartDPbpNumberId().orElse(null));
-    Assert.assertEquals(
+    assertEquals(partDPbpNumberId.orElse(null), enrollment.getPartDPbpNumberId().orElse(null));
+    assertEquals(
         partDRetireeDrugSubsidyInd.orElse(null),
         enrollment.getPartDRetireeDrugSubsidyInd().orElse(null));
-    Assert.assertEquals(
+    assertEquals(
         partDSegmentNumberId.orElse(null), enrollment.getPartDSegmentNumberId().orElse(null));
   }
 }

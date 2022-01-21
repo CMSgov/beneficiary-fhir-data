@@ -3,7 +3,10 @@ package gov.cms.bfd.pipeline.rda.grpc.sink;
 import static gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils.*;
 import static gov.cms.bfd.pipeline.rda.grpc.sink.AbstractClaimRdaSink.isDuplicateKeyException;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -27,13 +30,11 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
-@RunWith(MockitoJUnitRunner.class)
 public class FissClaimRdaSinkTest {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   @Mock private HikariDataSource dataSource;
@@ -44,8 +45,9 @@ public class FissClaimRdaSinkTest {
   private FissClaimRdaSink sink;
   private long nextSeq = 0L;
 
-  @Before
+  @BeforeEach
   public void setUp() {
+    MockitoAnnotations.openMocks(this);
     appMetrics = new MetricRegistry();
     doReturn(entityManager).when(entityManagerFactory).createEntityManager();
     doReturn(transaction).when(entityManager).getTransaction();
@@ -203,9 +205,9 @@ public class FissClaimRdaSinkTest {
 
   @Test
   public void exceptionMessageDuplicateKeyDetection() {
-    assertEquals(
-        true, isDuplicateKeyException(new RuntimeException(new IOException("key already existS"))));
-    assertEquals(false, isDuplicateKeyException(new IOException("nothing to see here")));
+    assertTrue(
+        isDuplicateKeyException(new RuntimeException(new IOException("key already existS"))));
+    assertFalse(isDuplicateKeyException(new IOException("nothing to see here")));
   }
 
   private RdaChange<PreAdjFissClaim> createClaim(String dcn) {
