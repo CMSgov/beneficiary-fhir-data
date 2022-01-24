@@ -23,10 +23,10 @@ public class S3BucketMessageSourceFactoryTest {
   public void listFilesTest() {
     AmazonS3 s3Client =
         createS3Client(
-            "mcs-215-275.ndjson",
+            "mcs-215-275.ndjson.gz",
             "fiss.ndjson",
             "fiss-101-250.ndjson",
-            "mcs-83-214.ndjson",
+            "mcs-83-214.ndjson.gz",
             "this-won't-match",
             "fiss-0-100.ndjson");
 
@@ -50,12 +50,12 @@ public class S3BucketMessageSourceFactoryTest {
             s3Client, "bucket", "mcs", "ndjson", s -> new EmptyMessageSource<>(), r -> 0L);
     assertEquals(
         Arrays.asList(
-            new S3BucketMessageSourceFactory.FileEntry("mcs-83-214.ndjson", 83, 214),
-            new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson", 215, 275)),
+            new S3BucketMessageSourceFactory.FileEntry("mcs-83-214.ndjson.gz", 83, 214),
+            new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson.gz", 215, 275)),
         mcsFactory.listFiles(44L));
     assertEquals(
         Collections.singletonList(
-            new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson", 215, 275)),
+            new S3BucketMessageSourceFactory.FileEntry("mcs-215-275.ndjson.gz", 215, 275)),
         mcsFactory.listFiles(215L));
     assertEquals(Collections.emptyList(), mcsFactory.listFiles(276L));
   }
