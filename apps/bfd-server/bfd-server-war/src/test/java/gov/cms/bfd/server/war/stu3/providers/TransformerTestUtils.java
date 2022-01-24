@@ -1445,7 +1445,7 @@ final class TransformerTestUtils {
         diagnosisRelatedGroupCd,
         eob.getDiagnosisFirstRep().getPackageCode());
 
-    Assert.assertEquals(1, eob.getDiagnosisFirstRep().getSequence());
+    assertEquals(1, eob.getDiagnosisFirstRep().getSequence());
   }
 
   /**
