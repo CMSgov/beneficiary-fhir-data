@@ -51,7 +51,7 @@ public class S3BucketMessageSourceFactory<T> implements MessageSource.Factory<T>
     this.sequenceNumberGetter = sequenceNumberGetter;
     matchPattern =
         Pattern.compile(
-            String.format("^%s(-(\\d+)-(\\d+))?\\.%s$", filePrefix, fileSuffix),
+            String.format("^%s(-(\\d+)-(\\d+))?\\.%s(\\.gz)?$", filePrefix, fileSuffix),
             Pattern.CASE_INSENSITIVE);
   }
 

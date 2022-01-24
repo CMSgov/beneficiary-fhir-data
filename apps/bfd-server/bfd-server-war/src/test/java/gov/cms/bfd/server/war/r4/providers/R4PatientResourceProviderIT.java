@@ -510,7 +510,7 @@ public final class R4PatientResourceProviderIT {
             .getValue();
 
     assertEquals(
-        "mbiHash identifier exists", beneficiary.getMedicareBeneficiaryId().get(), mbiIdentifier);
+        beneficiary.getMedicareBeneficiaryId().get(), mbiIdentifier, "mbiHash identifier exists");
   }
 
   /**
