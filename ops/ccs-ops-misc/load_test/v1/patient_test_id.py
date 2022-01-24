@@ -1,23 +1,15 @@
-import csv
-import datetime
-import os
-import sys
 import urllib3
 import common.config as config
+import common.data as data
+import common.errors as errors
 import common.test_setup as setup
-import locust.exception as locust_exception
-from locust import HttpUser, task
+import common.validation as validation
+from locust import HttpUser, task, events
 
 server_public_key = setup.loadServerPublicKey()
+setup.disable_no_cert_warnings(server_public_key, urllib3)
 
-'''
-If there is no server cert, the warnings are disabled because thousands will appear in the logs and make it difficult
-to see anything else.
-'''
-if not server_public_key:
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-bene_ids = setup.generateAndLoadIds()
+bene_ids = data.load_bene_ids()
 client_cert = setup.getClientCert()
 setup.set_locust_env(config.load())
 
@@ -25,12 +17,27 @@ class BFDUser(HttpUser):
     @task
     def patient_by_id(self):
         if len(bene_ids) == 0:
-            print("Ran out of data, stopping test...")
-            raise locust_exception.StopUser()
+            errors.no_data_stop_test(self)
 
         id = bene_ids.pop()
         self.client.get(f'/v1/fhir/Patient/{id}',
                 cert=client_cert,
                 verify=server_public_key,
                 name='/v1/fhir/Patient/{id}')
+
+'''
+Adds a global failsafe check to ensure that if this test overwhelms the
+database, we bail out and stop hitting the server.
+'''
+@events.init.add_listener
+def on_locust_init(environment, **_kwargs):
+    validation.setup_failsafe_event(environment, validation.SLA_PATIENT)
+
+'''
+Adds a listener that will run when the test ends which checks the various
+response time percentiles against the SLA for this endpoint.
+'''
+@events.test_stop.add_listener
+def on_locust_quit(environment, **_kwargs):
+    validation.check_sla_validation(environment, validation.SLA_PATIENT)
 

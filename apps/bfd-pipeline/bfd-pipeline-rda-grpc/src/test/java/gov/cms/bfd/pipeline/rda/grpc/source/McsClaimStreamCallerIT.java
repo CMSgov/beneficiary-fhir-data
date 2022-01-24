@@ -1,6 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
@@ -11,7 +11,7 @@ import io.grpc.CallOptions;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class McsClaimStreamCallerIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
@@ -41,7 +41,7 @@ public class McsClaimStreamCallerIT {
               assertEquals(true, results.hasNext());
 
               claim = results.next().getClaim();
-              assertEquals("43644459", claim.getIdrClmHdIcn());
+              assertEquals("972078", claim.getIdrClmHdIcn());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertEquals(false, results.hasNext());

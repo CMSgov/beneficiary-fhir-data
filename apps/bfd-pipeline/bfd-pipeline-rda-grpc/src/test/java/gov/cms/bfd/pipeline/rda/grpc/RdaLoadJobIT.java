@@ -1,6 +1,8 @@
 package gov.cms.bfd.pipeline.rda.grpc;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -12,7 +14,10 @@ import gov.cms.bfd.pipeline.rda.grpc.server.ExceptionMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.JsonMessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.MessageSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.source.DataTransformer;
+import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
+import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -30,8 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class RdaLoadJobIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
@@ -44,13 +49,33 @@ public class RdaLoadJobIT {
   private ImmutableList<String> fissClaimJson;
   private ImmutableList<String> mcsClaimJson;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     if (fissClaimJson == null) {
       fissClaimJson = fissClaimsSource.readLines();
     }
     if (mcsClaimJson == null) {
       mcsClaimJson = mcsClaimsSource.readLines();
+    }
+  }
+
+  /**
+   * All of our test claims should be valid for our IT tests to succeed. This test ensures this is
+   * the case and catches any incompatibility issues when a new RDA API version contains breaking
+   * changes.
+   */
+  @Test
+  public void fissClaimsAreValid() throws Exception {
+    final ImmutableList<FissClaimChange> expectedClaims =
+        JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
+    final FissClaimTransformer transformer =
+        new FissClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+    for (FissClaimChange claim : expectedClaims) {
+      try {
+        transformer.transformClaim(claim);
+      } catch (DataTransformer.TransformationException ex) {
+        fail(String.format("bad sample claim: seq=%d error=%s", claim.getSeq(), ex.getErrors()));
+      }
     }
   }
 
@@ -123,6 +148,26 @@ public class RdaLoadJobIT {
           List<PreAdjFissClaim> claims = getPreAdjFissClaims(entityManager);
           assertEquals(fullBatchSize, claims.size());
         });
+  }
+
+  /**
+   * All of our test claims should be valid for our IT tests to succeed. This test ensures this is
+   * the case and catches any incompatibility issues when a new RDA API version contains breaking
+   * changes.
+   */
+  @Test
+  public void mcsClaimsAreValid() throws Exception {
+    final ImmutableList<McsClaimChange> expectedClaims =
+        JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
+    final McsClaimTransformer transformer =
+        new McsClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+    for (McsClaimChange claim : expectedClaims) {
+      try {
+        transformer.transformClaim(claim);
+      } catch (DataTransformer.TransformationException ex) {
+        fail(String.format("bad sample claim: seq=%d error=%s", claim.getSeq(), ex.getErrors()));
+      }
+    }
   }
 
   @Test

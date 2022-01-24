@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.rda.grpc.sink;
 
 import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
@@ -12,7 +12,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class McsClaimRdaSinkIT {
   @Test
@@ -42,6 +42,7 @@ public class McsClaimRdaSinkIT {
           diagCode.setIdrClmHdIcn(claim.getIdrClmHdIcn());
           diagCode.setPriority((short) 0);
           diagCode.setIdrDiagIcdType("T");
+          diagCode.setIdrDiagCode("D");
           claim.getDiagCodes().add(diagCode);
 
           int count =

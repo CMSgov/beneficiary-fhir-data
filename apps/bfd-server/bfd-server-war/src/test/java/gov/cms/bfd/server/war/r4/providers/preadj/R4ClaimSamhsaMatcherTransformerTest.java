@@ -1,30 +1,31 @@
 package gov.cms.bfd.server.war.r4.providers.preadj;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
+import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Claim;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * These tests check if the transformed fiss claims result in the expected SAMHSA filtering
- * outcomes.
+ * "Higher" level testing to see if the transformers are in line with the expectations of the SAMHSA
+ * filtering mechanics
  */
-@RunWith(Enclosed.class)
 public class R4ClaimSamhsaMatcherTransformerTest {
 
   private static final String NON_SAMHSA_CODE = "NOTSAMHSA";
@@ -33,249 +34,234 @@ public class R4ClaimSamhsaMatcherTransformerTest {
   private static final String ICD_9_PROC_SAMHSA_CODE = "94.45";
   private static final String ICD_10_DX_SAMHSA_CODE = "F10.10";
   private static final String ICD_10_PROC_SAMHSA_CODE = "HZ30ZZZ";
+  private static final String CPT_SAMHSA_CODE = "H0005";
 
-  @RunWith(Parameterized.class)
-  public static class FissTests {
+  private static final LocalDate ICD_9_DATE = LocalDate.of(2000, 1, 1);
+  private static final LocalDate ICD_10_DATE = LocalDate.of(2020, 1, 1);
 
-    @Parameterized.Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> parameters() {
-      return List.of(
-          new Object[][] {
-            // TODO: [PACA-263] ICD 9 codes not implemented yet, enable this test case when it is
-            // {
-            //      "SAMHSA ICD 9 Diagnosis code (Admitting)",
-            //      NON_SAMHSA_CODE,
-            //      ICD_9_DX_SAMHSA_CODE,
-            //      List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
-            //      true,
-            //      "not correctly detected."
-            // },
-            // {
-            //      "SAMHSA ICD 9 Diagnosis code (Principal)",
-            //      ICD_9_DX_SAMHSA_CODE,
-            //      NON_SAMHSA_CODE,
-            //      List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
-            //      true,
-            //      "not correctly detected."
-            // },
-            {
-              "SAMHSA ICD 10 Diagnosis code (Admitting)",
-              NON_SAMHSA_CODE,
-              ICD_10_DX_SAMHSA_CODE,
-              List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
-              true,
-              "not correctly detected."
-            },
-            {
-              "SAMHSA ICD 10 Diagnosis code (Principal)",
-              ICD_10_DX_SAMHSA_CODE,
-              NON_SAMHSA_CODE,
-              List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
-              true,
-              "not correctly detected."
-            },
-            // TODO: [PACA-263] ICD 9 codes not implemented yet, enable this test case when it is
-            // {
-            //      "SAMHSA ICD 9 Proc code",
-            //      NON_SAMHSA_CODE,
-            //      NON_SAMHSA_CODE,
-            //      List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_9_PROC_SAMHSA_CODE),
-            //      true,
-            //      "not correctly detected."
-            // },
-            {
-              "SAMHSA ICD 10 Proc code",
-              NON_SAMHSA_CODE,
-              NON_SAMHSA_CODE,
-              List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_10_PROC_SAMHSA_CODE),
-              true,
-              "not correctly detected."
-            },
-            {
-              "Non-Samhsa codes",
-              NON_SAMHSA_CODE,
-              NON_SAMHSA_CODE,
-              List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
-              false,
-              "incorrectly detected."
-            },
-          });
-    }
-
-    private final String testName;
-    private final String principalDxCode;
-    private final String admittingDxCode;
-    private final List<String> procCodes;
-    private final boolean expectedResult;
-    private final String errorMessagePostFix;
-
-    public FissTests(
-        String testName,
-        String principalDxCode,
-        String admittingDxCode,
-        List<String> procCodes,
-        boolean expectedResult,
-        String errorMessagePostFix) {
-      this.testName = testName;
-      this.principalDxCode = principalDxCode;
-      this.admittingDxCode = admittingDxCode;
-      this.procCodes = procCodes;
-      this.expectedResult = expectedResult;
-      this.errorMessagePostFix = errorMessagePostFix;
-    }
-
-    @Test
-    public void test() {
-      PreAdjFissClaim entity = new PreAdjFissClaim();
-
-      entity.setDcn("abc123");
-      entity.setLastUpdated(Instant.ofEpochMilli(1));
-      entity.setTotalChargeAmount(new BigDecimal("1.00"));
-      entity.setMedaProvId("abc123");
-      entity.setNpiNumber("npinpinpin");
-      entity.setMbi("mbimbimbimbi");
-      entity.setPrincipleDiag(principalDxCode);
-      entity.setAdmitDiagCode(admittingDxCode);
-
-      Set<PreAdjFissProcCode> procedures =
-          IntStream.range(0, procCodes.size())
-              .mapToObj(
-                  i -> {
-                    PreAdjFissProcCode procCode = new PreAdjFissProcCode();
-                    procCode.setProcDate(LocalDate.EPOCH);
-                    procCode.setPriority((short) i);
-                    procCode.setProcCode(procCodes.get(i));
-
-                    return procCode;
-                  })
-              .collect(Collectors.toSet());
-
-      entity.setProcCodes(procedures);
-
-      Claim claim = FissClaimTransformerV2.transform(new MetricRegistry(), entity);
-
-      R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
-
-      assertEquals(testName + " " + errorMessagePostFix, expectedResult, matcher.test(claim));
-    }
+  /**
+   * Data method for the fissTest. Used automatically via the MethodSource annotation.
+   *
+   * @return the data for the test
+   */
+  public static Stream<Arguments> fissTest() {
+    return Stream.of(
+        arguments(
+            "SAMHSA ICD 9 Diagnosis code (Admitting)",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "SAMHSA ICD 9 Diagnosis code (Principal)",
+            ICD_9_DATE,
+            List.of(ICD_9_DX_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "SAMHSA ICD 9 Diagnosis code (Other)",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_9_DX_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "SAMHSA ICD 10 Diagnosis code (Admitting)",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, ICD_10_DX_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "SAMHSA ICD 10 Diagnosis code (Principal)",
+            ICD_10_DATE,
+            List.of(ICD_10_DX_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "SAMHSA ICD 10 Diagnosis code (Other)",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_10_DX_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "SAMHSA ICD 9 Proc code",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, ICD_9_PROC_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "SAMHSA ICD 10 Proc code",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, ICD_10_PROC_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "SHOULD be filtered but was NOT."),
+        arguments(
+            "Non-Samhsa codes (ICD-9)",
+            ICD_9_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            false,
+            "should NOT be filtered but WAS."),
+        arguments(
+            "Non-Samhsa codes (ICD-10)",
+            ICD_10_DATE,
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            false,
+            "should NOT be filtered but WAS."));
   }
 
-  @RunWith(Parameterized.class)
-  public static class McsTests {
+  /**
+   * These tests check if the transformed FISS claims result in the expected SAMHSA filtering
+   * outcomes.
+   */
+  @ParameterizedTest(name = "{index}: {0}")
+  @MethodSource
+  public void fissTest(
+      String testName,
+      LocalDate toDate,
+      List<String> diagCodes,
+      List<String> procCodes,
+      boolean expectedResult,
+      String errorMessagePostFix) {
+    PreAdjFissClaim entity = new PreAdjFissClaim();
 
-    @Parameterized.Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> parameters() {
-      return List.of(
-          new Object[][] {
-            {
-              "SAMHSA ICD 9 Diagnosis code",
-              List.of("0:" + NON_SAMHSA_CODE, "1:" + ICD_9_DX_SAMHSA_CODE),
-              List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
-              true,
-              "not correctly detected."
-            },
-            {
-              "SAMHSA ICD 10 Diagnosis code",
-              List.of("0:" + NON_SAMHSA_CODE, "0:" + ICD_10_DX_SAMHSA_CODE),
-              List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
-              true,
-              "not correctly detected."
-            },
-            // TODO: [PACA-323] Proc codes for MCS claims will be altered in a future ticket to use
-            // ICD
-            //  code systems, add these test cases when they are
-            // {
-            //  "SAMHSA ICD 9 Proc code",
-            //     List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
-            //  List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_9_PROC_SAMHSA_CODE),
-            //  true,
-            //  "not correctly detected."
-            // },
-            // {
-            //    "SAMHSA ICD 10 Proc code",
-            //    List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
-            //    List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, ICD_10_PROC_SAMHSA_CODE),
-            //    true,
-            //    "not correctly detected."
-            // },
-            {
-              "Non-Samhsa codes",
-              List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
-              List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
-              false,
-              "incorrectly detected."
-            },
-          });
-    }
+    String principalDxCode = diagCodes.get(0);
+    String admittingDxCode = diagCodes.get(1);
 
-    private final String testName;
-    private final List<String> diagCodes;
-    private final List<String> procCodes;
-    private final boolean expectedResult;
-    private final String errorMessagePostFix;
+    entity.setLastUpdated(Instant.ofEpochMilli(1));
+    entity.setStmtCovToDate(toDate);
+    entity.setPrincipleDiag(principalDxCode);
+    entity.setAdmitDiagCode(admittingDxCode);
 
-    public McsTests(
-        String testName,
-        List<String> diagCodes,
-        List<String> procCodes,
-        boolean expectedResult,
-        String errorMessagePostFix) {
-      this.testName = testName;
-      this.diagCodes = diagCodes;
-      this.procCodes = procCodes;
-      this.expectedResult = expectedResult;
-      this.errorMessagePostFix = errorMessagePostFix;
-    }
+    Set<PreAdjFissDiagnosisCode> diagnoses =
+        IntStream.range(0, diagCodes.size())
+            .mapToObj(
+                i -> {
+                  PreAdjFissDiagnosisCode diagCode = new PreAdjFissDiagnosisCode();
+                  diagCode.setPriority((short) i);
+                  diagCode.setDiagCd2(diagCodes.get(i));
 
-    @Test
-    public void test() {
-      PreAdjMcsClaim entity = new PreAdjMcsClaim();
+                  return diagCode;
+                })
+            .collect(Collectors.toSet());
 
-      entity.setIdrClmHdIcn("abc123");
-      entity.setLastUpdated(Instant.ofEpochMilli(1));
-      entity.setIdrTotAllowed(new BigDecimal("1.00"));
-      entity.setIdrBillProvNum("abc123");
-      entity.setIdrBillProvNpi("npinpinpin");
-      entity.setIdrClaimMbi("mbimbimbimbi");
+    entity.setDiagCodes(diagnoses);
 
-      Set<PreAdjMcsDiagnosisCode> diagnoses =
-          IntStream.range(0, diagCodes.size())
-              .mapToObj(
-                  i -> {
-                    String[] dx = diagCodes.get(i).split(":");
+    Set<PreAdjFissProcCode> procedures =
+        IntStream.range(0, procCodes.size())
+            .mapToObj(
+                i -> {
+                  PreAdjFissProcCode procCode = new PreAdjFissProcCode();
+                  procCode.setProcDate(LocalDate.EPOCH);
+                  procCode.setPriority((short) i);
+                  procCode.setProcCode(procCodes.get(i));
 
-                    PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
-                    diagCode.setPriority((short) i);
-                    diagCode.setIdrDiagIcdType(dx[0]);
-                    diagCode.setIdrDiagCode(dx[1]);
+                  return procCode;
+                })
+            .collect(Collectors.toSet());
 
-                    return diagCode;
-                  })
-              .collect(Collectors.toSet());
+    entity.setProcCodes(procedures);
 
-      entity.setDiagCodes(diagnoses);
+    Claim claim = FissClaimTransformerV2.transform(new MetricRegistry(), entity);
 
-      // TODO: Enable proc codes when MCS claims have been updated to use ICD code systems
-      //            Set<PreAdjMcsDetail> procedures =
-      //                    IntStream.range(0, procCodes.size())
-      //                            .mapToObj(
-      //                                    i -> {
-      //                                        PreAdjMcsDetail procCode = new PreAdjMcsDetail();
-      //                                        procCode.setIdrDtlToDate(LocalDate.EPOCH);
-      //                                        procCode.setPriority((short) i);
-      //                                        procCode.setIdrProcCode(procCodes.get(i));
-      //
-      //                                        return procCode;
-      //                                    })
-      //                            .collect(Collectors.toSet());
-      //
-      //            entity.setDetails(procedures);
+    R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
 
-      Claim claim = McsClaimTransformerV2.transform(new MetricRegistry(), entity);
+    assertEquals(expectedResult, matcher.test(claim), testName + " " + errorMessagePostFix);
+  }
 
-      R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
+  /**
+   * Data method for the mcsTest. Used automatically via the MethodSource annotation.
+   *
+   * @return the data for the test
+   */
+  public static Stream<Arguments> mcsTest() {
+    return Stream.of(
+        arguments(
+            "SAMHSA ICD 9 Diagnosis code",
+            List.of("0:" + NON_SAMHSA_CODE, "1:" + ICD_9_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."),
+        arguments(
+            "SAMHSA ICD 10 Diagnosis code",
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + ICD_10_DX_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."),
+        arguments(
+            "SAMHSA CPT Proc code",
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, CPT_SAMHSA_CODE, NON_SAMHSA_CODE),
+            true,
+            "not correctly detected."),
+        arguments(
+            "Non-Samhsa codes",
+            List.of("0:" + NON_SAMHSA_CODE, "0:" + NON_SAMHSA_CODE),
+            List.of(NON_SAMHSA_CODE, NON_SAMHSA_CODE, NON_SAMHSA_CODE),
+            false,
+            "incorrectly detected."));
+  }
 
-      assertEquals(testName + " " + errorMessagePostFix, expectedResult, matcher.test(claim));
-    }
+  /**
+   * These tests check if the transformed MCS claims result in the expected SAMHSA filtering
+   * outcomes.
+   */
+  @ParameterizedTest(name = "{index}: {0}")
+  @MethodSource
+  public void mcsTest(
+      String testName,
+      List<String> diagCodes,
+      List<String> procCodes,
+      boolean expectedResult,
+      String errorMessagePostFix) {
+    PreAdjMcsClaim entity = new PreAdjMcsClaim();
+
+    entity.setLastUpdated(Instant.ofEpochMilli(1));
+
+    Set<PreAdjMcsDiagnosisCode> diagnoses =
+        IntStream.range(0, diagCodes.size())
+            .mapToObj(
+                i -> {
+                  String[] dx = diagCodes.get(i).split(":");
+
+                  PreAdjMcsDiagnosisCode diagCode = new PreAdjMcsDiagnosisCode();
+                  diagCode.setPriority((short) i);
+                  diagCode.setIdrDiagIcdType(dx[0]);
+                  diagCode.setIdrDiagCode(dx[1]);
+
+                  return diagCode;
+                })
+            .collect(Collectors.toSet());
+
+    entity.setDiagCodes(diagnoses);
+
+    Set<PreAdjMcsDetail> procedures =
+        IntStream.range(0, procCodes.size())
+            .mapToObj(
+                i -> {
+                  PreAdjMcsDetail procCode = new PreAdjMcsDetail();
+                  procCode.setIdrDtlToDate(LocalDate.EPOCH);
+                  procCode.setPriority((short) i);
+                  procCode.setIdrProcCode(procCodes.get(i));
+
+                  return procCode;
+                })
+            .collect(Collectors.toSet());
+
+    entity.setDetails(procedures);
+
+    Claim claim = McsClaimTransformerV2.transform(new MetricRegistry(), entity);
+
+    R4ClaimSamhsaMatcher matcher = new R4ClaimSamhsaMatcher();
+
+    assertEquals(expectedResult, matcher.test(claim), testName + " " + errorMessagePostFix);
   }
 }

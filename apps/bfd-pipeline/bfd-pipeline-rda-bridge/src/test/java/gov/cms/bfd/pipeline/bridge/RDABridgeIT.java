@@ -1,6 +1,7 @@
 package gov.cms.bfd.pipeline.bridge;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class RDABridgeIT {
 
@@ -78,9 +79,12 @@ public class RDABridgeIT {
     assertJsonEquals(expectedMcsJson, actualMcsJson, ignorePaths);
   }
 
-  // DefaultAnnotationParam - Might as well be explicit
-  @SuppressWarnings("DefaultAnnotationParam")
-  @Test(expected = Test.None.class)
+  /**
+   * Ensures that no exceptions are thrown while transforming Fiss and MCS claims.
+   *
+   * @throws IOException if there is a setup issue loading the test data
+   */
+  @Test
   public void shouldProduceValidClaimStructures() throws IOException {
     RDABridge bridge = new RDABridge();
 
@@ -104,23 +108,26 @@ public class RDABridgeIT {
           public void close() throws IOException {}
         };
 
-    bridge.executeTransformation(
-        RDABridge.SourceType.FISS, resourcesDir, inpatientData, mbiMap, testSink);
-    bridge.executeTransformation(
-        RDABridge.SourceType.MCS, resourcesDir, carrierData, mbiMap, testSink);
+    assertDoesNotThrow(
+        () -> {
+          bridge.executeTransformation(
+              RDABridge.SourceType.FISS, resourcesDir, inpatientData, mbiMap, testSink);
+          bridge.executeTransformation(
+              RDABridge.SourceType.MCS, resourcesDir, carrierData, mbiMap, testSink);
 
-    Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-    IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-    FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
-    McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
+          Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
+          IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
+          FissClaimTransformer fissTransformer = new FissClaimTransformer(clock, hasher);
+          McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasher);
 
-    for (MessageOrBuilder message : results) {
-      if (message instanceof FissClaimChange) {
-        fissTransformer.transformClaim((FissClaimChange) message);
-      } else {
-        mcsTransformer.transformClaim((McsClaimChange) message);
-      }
-    }
+          for (MessageOrBuilder message : results) {
+            if (message instanceof FissClaimChange) {
+              fissTransformer.transformClaim((FissClaimChange) message);
+            } else {
+              mcsTransformer.transformClaim((McsClaimChange) message);
+            }
+          }
+        });
   }
 
   private void assertJsonEquals(
@@ -155,7 +162,7 @@ public class RDABridgeIT {
       }
     }
 
-    assertTrue(String.join("\n", diffList), diffList.isEmpty());
+    assertTrue(diffList.isEmpty(), String.join("\n", diffList));
   }
 
   private String createDiff(String expectedJson, String actualJson, Set<String> ignorePaths) {

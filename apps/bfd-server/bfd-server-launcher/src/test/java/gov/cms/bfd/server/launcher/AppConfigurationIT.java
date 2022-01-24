@@ -1,5 +1,10 @@
 package gov.cms.bfd.server.launcher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,8 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit(ish) tests for {@link AppConfiguration}.
@@ -67,22 +71,21 @@ public final class AppConfigurationIT {
      */
     String output = "";
     if (testAppExitCode != 0) output = collectOutput(testApp);
-    Assert.assertEquals(
-        String.format("Wrong exit code. Output[\n%s]\n", output), 0, testAppExitCode);
+    assertEquals(0, testAppExitCode, String.format("Wrong exit code. Output[\n%s]\n", output));
 
     ObjectInputStream testAppOutput = new ObjectInputStream(testApp.getErrorStream());
     AppConfiguration testAppConfig = (AppConfiguration) testAppOutput.readObject();
-    Assert.assertNotNull(testAppConfig);
-    Assert.assertEquals(
+    assertNotNull(testAppConfig);
+    assertEquals(
         Integer.parseInt(testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_PORT)),
         testAppConfig.getPort());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_KEYSTORE),
         testAppConfig.getKeystore().toString());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_TRUSTSTORE),
         testAppConfig.getTruststore().toString());
-    Assert.assertEquals(
+    assertEquals(
         testAppBuilder.environment().get(AppConfiguration.ENV_VAR_KEY_WAR),
         testAppConfig.getWar().toString());
   }
@@ -127,12 +130,12 @@ public final class AppConfigurationIT {
     ProcessBuilder testAppBuilder = createProcessBuilderForTestDriver();
     Process testApp = testAppBuilder.start();
 
-    Assert.assertNotEquals(0, testApp.waitFor());
+    assertNotEquals(0, testApp.waitFor());
     String testAppError =
         new BufferedReader(new InputStreamReader(testApp.getErrorStream()))
             .lines()
             .collect(Collectors.joining("\n"));
-    Assert.assertTrue(testAppError.contains(AppConfigurationException.class.getName()));
+    assertTrue(testAppError.contains(AppConfigurationException.class.getName()));
   }
 
   /**
