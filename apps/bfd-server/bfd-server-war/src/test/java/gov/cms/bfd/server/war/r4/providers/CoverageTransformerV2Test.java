@@ -576,13 +576,6 @@ public final class CoverageTransformerV2Test {
     assertTrue(compare.equalsDeep(ex));
   }
 
-  private static void verifyCodedExtensionDoestNotExist(Coverage inCoverage, String url) {
-    Optional<Extension> ex =
-        inCoverage.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
-
-    assertEquals(true, ex.isEmpty());
-  }
-
   private static void verifyCoverageStatus() {
     assertEquals("active", coverage.getStatus().toCode());
   }
@@ -792,7 +785,14 @@ public final class CoverageTransformerV2Test {
     verifyPayor();
   }
 
-  static void checkForNoYearlyDate(Beneficiary inBeneficiary, Coverage inCoverage) {
+  private static void verifyCodedExtensionDoestNotExist(Coverage inCoverage, String url) {
+    Optional<Extension> ex =
+        inCoverage.getExtension().stream().filter(e -> url.equals(e.getUrl())).findFirst();
+
+    assertEquals(true, ex.isEmpty());
+  }
+
+  private static void checkForNoYearlyDate(Beneficiary inBeneficiary, Coverage inCoverage) {
     // dual_01 thru dual_12
     for (int i = 1; i < 13; i++) {
       String url = String.format("https://bluebutton.cms.gov/resources/variables/dual_%02d", i);

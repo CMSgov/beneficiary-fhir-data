@@ -747,8 +747,6 @@ final class TransformerTestUtils {
   }
 
   /**
-   * FIXME change name of this and related methods to assertHasExtensionCoding(...)
-   *
    * @param ccwVariable the {@link CcwCodebookVariable} that the expected {@link Extension} / {@link
    *     Coding} are for
    * @param expectedCode the expected {@link Coding#getCode()}
