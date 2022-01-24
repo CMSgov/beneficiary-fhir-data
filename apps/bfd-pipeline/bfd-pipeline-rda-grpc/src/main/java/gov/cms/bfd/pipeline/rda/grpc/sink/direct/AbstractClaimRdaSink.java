@@ -1,45 +1,66 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
+import gov.cms.bfd.model.rda.RdaApiProgress;
 import gov.cms.bfd.pipeline.rda.grpc.ProcessingException;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaSink;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
-import javax.persistence.EntityExistsException;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RdaSink implementation that writes TClaim objects to the database in batches.
+ * RdaSink implementation that writes TClaim objects to the database in batches within the calling
+ * thread. This class is abstract and derived classes implement the methods that depend on the
+ * actual class of RDA API message and database entity.
  *
+ * @param <TMessage> type of RDA API messages written to the database
  * @param <TClaim> type of entity objects written to the database
  */
-abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>> {
+abstract class AbstractClaimRdaSink<TMessage, TClaim>
+    implements RdaSink<TMessage, RdaChange<TClaim>> {
   protected final EntityManager entityManager;
   protected final Metrics metrics;
   protected final Clock clock;
   protected final Logger logger;
+  protected final RdaApiProgress.ClaimType claimType;
+  protected final boolean autoUpdateLastSeq;
 
-  protected AbstractClaimRdaSink(PipelineApplicationState appState) {
+  /**
+   * Constructs an instance using the provided appState and claimType. Sequence numbers can either
+   * be written in the same transaction as their associated claims (autoUpdateLastSeq=true) or not
+   * auto updated (autoUpdateLastSeq=false). Generally the former is used for single-threaded
+   * processing and the latter for multi-threaded processing.
+   *
+   * @param appState provides database and metrics configuration
+   * @param claimType used to write claim type when recording sequence number updates
+   * @param autoUpdateLastSeq controls whether sequence numbers are automatically written to the
+   *     database
+   */
+  protected AbstractClaimRdaSink(
+      PipelineApplicationState appState,
+      RdaApiProgress.ClaimType claimType,
+      boolean autoUpdateLastSeq) {
     entityManager = appState.getEntityManagerFactory().createEntityManager();
     metrics = new Metrics(getClass(), appState.getMetrics());
     clock = appState.getClock();
     logger = LoggerFactory.getLogger(getClass());
+    this.claimType = claimType;
+    this.autoUpdateLastSeq = autoUpdateLastSeq;
   }
 
   @Override
@@ -49,33 +70,84 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
     }
   }
 
-  public int writeBatch(Collection<RdaChange<TClaim>> allClaims) throws ProcessingException {
-    final Collection<RdaChange<TClaim>> claims = dedupChanges(allClaims);
+  /**
+   * Queries the RdaApiProgress table to get the maximum sequence number for our claim type.
+   *
+   * @return max sequence number or empty if there is no record for this claim type
+   * @throws ProcessingException if the operation fails
+   */
+  @Override
+  public Optional<Long> readMaxExistingSequenceNumber() throws ProcessingException {
+    try {
+      logger.info("running query to find max sequence number");
+      String query =
+          String.format(
+              "select p.%s from RdaApiProgress p where p.claimType='%s'",
+              RdaApiProgress.Fields.lastSequenceNumber, claimType.name());
+      final List<Long> sequenceNumber =
+          entityManager.createQuery(query, Long.class).getResultList();
+      final Optional<Long> answer =
+          sequenceNumber.isEmpty() ? Optional.empty() : Optional.of(sequenceNumber.get(0));
+      logger.info(
+          "max sequence number result is {}", answer.map(n -> Long.toString(n)).orElse("none"));
+      return answer;
+    } catch (Exception ex) {
+      throw new ProcessingException(ex, 0);
+    }
+  }
+
+  /**
+   * Writes the sequence number to the database in the calling thread.
+   *
+   * @param lastSequenceNumber value to write to the database
+   */
+  @Override
+  public void updateLastSequenceNumber(long lastSequenceNumber) {
+    boolean commit = false;
+    entityManager.getTransaction().begin();
+    try {
+      updateLastSequenceNumberImpl(lastSequenceNumber);
+      commit = true;
+    } finally {
+      if (commit) {
+        entityManager.getTransaction().commit();
+      } else {
+        entityManager.getTransaction().rollback();
+      }
+    }
+  }
+
+  /**
+   * Writes the claims immediately and returns the number written.
+   *
+   * @param apiVersion value for the apiSource column of the claim record
+   * @param messages zero or more objects to be written to the data store
+   * @return number of objects successfully processed
+   * @throws ProcessingException if the operation fails
+   */
+  @Override
+  public int writeMessages(String apiVersion, List<TMessage> messages) throws ProcessingException {
+    final List<RdaChange<TClaim>> claims = transformMessages(apiVersion, messages);
+    return writeClaims(claims);
+  }
+
+  /**
+   * Writes the claims to the database in the calling thread.
+   *
+   * @param claims objects to be written
+   * @return number successfully written
+   * @throws ProcessingException if the operation fails
+   */
+  @Override
+  public int writeClaims(Collection<RdaChange<TClaim>> claims) throws ProcessingException {
     final long maxSeq = maxSequenceInBatch(claims);
     try {
       metrics.calls.mark();
-      try {
-        updateLatencyMetric(claims);
-        persistBatch(claims);
-        metrics.objectsPersisted.mark(claims.size());
-        metrics.setLatestSequenceNumber(maxSeq);
-        logger.info(
-            "writeBatch succeeded using persist: size={} maxSeq={} ", claims.size(), maxSeq);
-      } catch (Throwable error) {
-        if (isDuplicateKeyException(error)) {
-          logger.info(
-              "writeBatch switching to merge due to duplicate key exception: size={} maxSeq={}",
-              claims.size(),
-              maxSeq);
-          mergeBatch(claims);
-          metrics.objectsMerged.mark(claims.size());
-          metrics.setLatestSequenceNumber(maxSeq);
-          logger.info(
-              "writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
-        } else {
-          throw error;
-        }
-      }
+      updateLatencyMetric(claims);
+      mergeBatch(maxSeq, claims);
+      metrics.objectsMerged.mark(claims.size());
+      metrics.setLatestSequenceNumber(maxSeq);
+      logger.info("writeBatch succeeded using merge: size={} maxSeq={} ", claims.size(), maxSeq);
     } catch (Exception error) {
       logger.error(
           "writeBatch failed: size={} maxSeq={} error={}",
@@ -91,41 +163,50 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
     return claims.size();
   }
 
+  /**
+   * Always returns zero since all claims are written synchronously by writeMessages.
+   *
+   * @return zero
+   * @throws ProcessingException if the operation fails
+   */
+  @Override
+  public int getProcessedCount() throws ProcessingException {
+    return 0;
+  }
+
+  /**
+   * Does nothing since there is no thread pool to close.
+   *
+   * @param waitTime maximum amount of time to wait for shutdown to complete
+   * @throws ProcessingException if the operation fails
+   */
+  @Override
+  public void shutdown(Duration waitTime) throws ProcessingException {}
+
   @VisibleForTesting
   Metrics getMetrics() {
     return metrics;
   }
 
-  private void persistBatch(Iterable<RdaChange<TClaim>> changes) {
-    boolean commit = false;
-    try {
-      entityManager.getTransaction().begin();
-      for (RdaChange<TClaim> change : changes) {
-        switch (change.getType()) {
-          case INSERT:
-            entityManager.persist(change.getClaim());
-            break;
-          case UPDATE:
-            entityManager.merge(change.getClaim());
-            break;
-          case DELETE:
-            // TODO: [DCGEO-131] accept DELETE changes from RDA API
-            throw new IllegalArgumentException(
-                "RDA API DELETE changes are not currently supported");
-        }
-      }
-      commit = true;
-    } finally {
-      if (commit) {
-        entityManager.getTransaction().commit();
-      } else {
-        entityManager.getTransaction().rollback();
-      }
-      entityManager.clear();
-    }
+  private void updateLastSequenceNumberImpl(long lastSequenceNumber) {
+    RdaApiProgress progress =
+        RdaApiProgress.builder()
+            .claimType(claimType)
+            .lastSequenceNumber(lastSequenceNumber)
+            .lastUpdated(clock.instant())
+            .build();
+    entityManager.merge(progress);
+    logger.info("updated max sequence number: type={} seq={}", claimType, lastSequenceNumber);
   }
 
-  private void mergeBatch(Iterable<RdaChange<TClaim>> changes) {
+  private List<RdaChange<TClaim>> transformMessages(
+      String apiVersion, Collection<TMessage> messages) {
+    return messages.stream()
+        .map(message -> transformMessage(apiVersion, message))
+        .collect(Collectors.toList());
+  }
+
+  private void mergeBatch(long maxSeq, Iterable<RdaChange<TClaim>> changes) {
     boolean commit = false;
     try {
       entityManager.getTransaction().begin();
@@ -136,6 +217,9 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
           // TODO: [DCGEO-131] accept DELETE changes from RDA API
           throw new IllegalArgumentException("RDA API DELETE changes are not currently supported");
         }
+      }
+      if (autoUpdateLastSeq) {
+        updateLastSequenceNumberImpl(maxSeq);
       }
       commit = true;
     } finally {
@@ -184,53 +268,6 @@ abstract class AbstractClaimRdaSink<TClaim> implements RdaSink<RdaChange<TClaim>
       final long age = Math.max(0L, nowMillis - changeMillis);
       metrics.changeAgeMillis.update(age);
     }
-  }
-
-  @VisibleForTesting
-  static boolean isDuplicateKeyException(Throwable error) {
-    while (error != null) {
-      if (error instanceof EntityExistsException) {
-        return true;
-      }
-      final String errorMessage = Strings.nullToEmpty(error.getMessage()).toLowerCase();
-      if (errorMessage.contains("already exists") || errorMessage.contains("duplicate key")) {
-        return true;
-      }
-      error = error.getCause() == error ? null : error.getCause();
-    }
-    return false;
-  }
-
-  /**
-   * Hibernate has a bug that causes detail table records to become corrupted if a single batch of
-   * updates includes more than one object for the same claim. This is unlikely to happen with real
-   * data from the RDA API but it does happen in testing. This method ensures that if a batch
-   * contains more than one change for the same claim that we only store the last one.
-   *
-   * <p>NOTE: This code depends on the fact that the entities have equals methods that only compare
-   * primary key values. This is a reasonable assumption since Hibernate/JPA requires this behavior
-   * in entity objects.
-   */
-  private Collection<RdaChange<TClaim>> dedupChanges(Collection<RdaChange<TClaim>> changes) {
-    // Build a map of changes keyed on the primary key.
-    // Only the last object will be retained for each key.
-    // Can't use a Set here because that would keep the first version.
-    final Map<TClaim, RdaChange<TClaim>> dedupMap = new LinkedHashMap<>();
-    for (RdaChange<TClaim> claim : changes) {
-      dedupMap.put(claim.getClaim(), claim);
-    }
-    final Collection<RdaChange<TClaim>> newChanges = ImmutableList.copyOf(dedupMap.values());
-    if (logger.isDebugEnabled()) {
-      if (changes.size() != newChanges.size()) {
-        for (RdaChange<TClaim> claim : changes) {
-          logger.debug("received: {}", claim);
-        }
-      }
-      for (RdaChange<TClaim> claim : newChanges) {
-        logger.debug("writing: {}", claim);
-      }
-    }
-    return newChanges;
   }
 
   /**
