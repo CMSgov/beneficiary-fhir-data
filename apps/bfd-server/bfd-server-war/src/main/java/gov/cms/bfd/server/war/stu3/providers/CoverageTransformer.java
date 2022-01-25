@@ -933,7 +933,7 @@ final class CoverageTransformer {
     return coverage;
   }
 
-  private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+  private static Coverage transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartDPbpNumberJanId().isPresent()) {
       coverage.addExtension(
