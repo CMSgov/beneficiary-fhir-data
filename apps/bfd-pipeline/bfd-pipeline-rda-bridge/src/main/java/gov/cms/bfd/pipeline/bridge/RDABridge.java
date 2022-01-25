@@ -13,6 +13,7 @@ import gov.cms.bfd.pipeline.bridge.etl.RifParser;
 import gov.cms.bfd.pipeline.bridge.io.NdJsonSink;
 import gov.cms.bfd.pipeline.bridge.io.RifSource;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
+import gov.cms.bfd.pipeline.bridge.io.SinkArguments;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
@@ -64,7 +65,8 @@ public class RDABridge {
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
       Map.of("csv", filePath -> new RifParser(new RifSource(filePath)));
 
-  private static final Map<String, ThrowingFunction<Sink<MessageOrBuilder>, Path, IOException>>
+  private static final Map<
+          String, ThrowingFunction<Sink<MessageOrBuilder>, SinkArguments, IOException>>
       sinkMap = Map.of("ndjson", NdJsonSink::new);
 
   /**
@@ -153,8 +155,10 @@ public class RDABridge {
       throw new IllegalArgumentException(
           "Unsupported mcs output file type '" + mcsOutputType + "'");
     } else {
-      try (Sink<MessageOrBuilder> fissSink = sinkMap.get(fissOutputType).apply(fissOutputPath);
-          Sink<MessageOrBuilder> mcsSink = sinkMap.get(mcsOutputType).apply(mcsOutputPath)) {
+      try (Sink<MessageOrBuilder> fissSink =
+              sinkMap.get(fissOutputType).apply(new SinkArguments(fissOutputPath, fissSequence));
+          Sink<MessageOrBuilder> mcsSink =
+              sinkMap.get(mcsOutputType).apply(new SinkArguments(mcsOutputPath, mcsSequence))) {
         // Sorting the files so tests are more deterministic
         List<String> fissSources = config.stringValues(AppConfig.Fields.fissSources);
         Collections.sort(fissSources);
