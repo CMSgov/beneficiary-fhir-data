@@ -2,8 +2,10 @@ package gov.cms.bfd.pipeline.bridge.etl;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.Timestamp;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.model.Fiss;
+import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissBeneZPayer;
@@ -34,7 +36,7 @@ public class FissTransformer extends AbstractTransformer {
    * @return The RDA {@link FissClaimChange} object generated from the given data.
    */
   @Override
-  public MessageOrBuilder transform(Parser.Data<String> data) {
+  public MessageOrBuilder transform(WrappedCounter sequenceNumber, Parser.Data<String> data) {
     String beneId = data.get(Fiss.BENE_ID).orElse("");
 
     // Some break claims into multiple lines (rows).  Synthea isn't doing this, but just
@@ -106,6 +108,9 @@ public class FissTransformer extends AbstractTransformer {
       addProcCodes(claimBuilder, data);
 
       return FissClaimChange.newBuilder()
+          .setTimestamp(
+              Timestamp.newBuilder().setSeconds(System.currentTimeMillis() / 1000).build())
+          .setSeq(sequenceNumber.inc())
           .setClaim(claimBuilder.build())
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
           .build();

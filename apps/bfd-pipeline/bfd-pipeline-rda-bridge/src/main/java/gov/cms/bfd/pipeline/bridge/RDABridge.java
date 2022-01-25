@@ -14,6 +14,7 @@ import gov.cms.bfd.pipeline.bridge.io.NdJsonSink;
 import gov.cms.bfd.pipeline.bridge.io.RifSource;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
+import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
 import java.io.FileNotFoundException;
@@ -56,6 +57,8 @@ public class RDABridge {
   private static final String MCS_FLAG = "m";
   private static final String FISS_OUTPUT_FLAG = "g";
   private static final String MCS_OUTPUT_FLAG = "n";
+  private static final String FISS_SEQ_START = "s";
+  private static final String MCS_SEQ_START = "z";
   private static final String EXTERNAL_CONFIG_FLAG = "e";
 
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
@@ -81,7 +84,9 @@ public class RDABridge {
               .addOption(MCS_FLAG, true, "MCS file to read from")
               .addOption(FISS_OUTPUT_FLAG, true, "FISS RDA output file")
               .addOption(MCS_OUTPUT_FLAG, true, "MCS RDA output file")
-              .addOption(EXTERNAL_CONFIG_FLAG, true, "Path to yaml file containing run configs");
+              .addOption(EXTERNAL_CONFIG_FLAG, true, "Path to yaml file containing run configs")
+              .addOption(FISS_SEQ_START, true, "Starting point for FISS sequence values")
+              .addOption(MCS_SEQ_START, true, "Starting point for MCS sequence values");
 
       CommandLineParser parser = new DefaultParser();
       CommandLine cmd = parser.parse(options, args);
@@ -112,24 +117,31 @@ public class RDABridge {
    * @throws IOException If there was an issue accessing any of the files.
    */
   public void run(ConfigLoader config) throws IOException {
-    Path path = Paths.get(config.stringValue(AppConfig.Fields.inputDirPath));
-    Map<String, BeneficiaryData> mbiMap =
-        parseMbiNumbers(path.resolve(config.stringValue(AppConfig.Fields.mbiSource)));
+    WrappedCounter fissSequence =
+        new WrappedCounter(config.intValue(AppConfig.Fields.fissSeqStart));
+    WrappedCounter mcsSequence = new WrappedCounter(config.intValue(AppConfig.Fields.mcsSeqStart));
 
-    Path outputPath =
+    if (fissSequence.get() < 1 || mcsSequence.get() < 1) {
+      throw new IllegalArgumentException("Sequences must start at 1 or higher.");
+    }
+
+    Path inputDirectory = Paths.get(config.stringValue(AppConfig.Fields.inputDirPath));
+    Map<String, BeneficiaryData> mbiMap =
+        parseMbiNumbers(inputDirectory.resolve(config.stringValue(AppConfig.Fields.mbiSource)));
+
+    Path outputDirectory =
         Paths.get(config.stringOption(AppConfig.Fields.outputDirPath).orElse("output"));
 
     // ResultOfMethodCallIgnored - Don't need to know if it had to be created.
     //noinspection ResultOfMethodCallIgnored
-    outputPath.toFile().mkdir();
+    outputDirectory.toFile().mkdir();
 
     String fissOutputFile =
-        config.stringOption(AppConfig.Fields.fissOutputFile).orElse("rda-fiss.ndjson");
-    String mcsOutputFile =
-        config.stringOption(AppConfig.Fields.mcsOutputFile).orElse("rda-mcs.ndjson");
+        config.stringOption(AppConfig.Fields.fissOutputFile).orElse("FISS.ndjson");
+    String mcsOutputFile = config.stringOption(AppConfig.Fields.mcsOutputFile).orElse("MCS.ndjson");
 
-    Path fissOutputPath = outputPath.resolve(fissOutputFile);
-    Path mcsOutputPath = outputPath.resolve(mcsOutputFile);
+    Path fissOutputPath = outputDirectory.resolve(fissOutputFile);
+    Path mcsOutputPath = outputDirectory.resolve(mcsOutputFile);
 
     String fissOutputType = FilenameUtils.getExtension(fissOutputPath.getFileName().toString());
     String mcsOutputType = FilenameUtils.getExtension(mcsOutputPath.getFileName().toString());
@@ -148,7 +160,8 @@ public class RDABridge {
         Collections.sort(fissSources);
 
         for (String fissSource : fissSources) {
-          executeTransformation(SourceType.FISS, path, fissSource, mbiMap, fissSink);
+          executeTransformation(
+              SourceType.FISS, inputDirectory, fissSource, fissSequence, mbiMap, fissSink);
         }
 
         // Sorting the files so tests are more deterministic
@@ -156,7 +169,8 @@ public class RDABridge {
         Collections.sort(mcsSources);
 
         for (String mcsSource : mcsSources) {
-          executeTransformation(SourceType.MCS, path, mcsSource, mbiMap, mcsSink);
+          executeTransformation(
+              SourceType.MCS, inputDirectory, mcsSource, mcsSequence, mbiMap, mcsSink);
         }
       }
     }
@@ -177,21 +191,23 @@ public class RDABridge {
       SourceType sourceType,
       Path path,
       String sourceName,
+      WrappedCounter sequenceCounter,
       Map<String, BeneficiaryData> mbiMap,
       Sink<MessageOrBuilder> sink)
       throws IOException {
+    long claimsWritten = 0;
     Path file = path.resolve(sourceName);
     String fileType = FilenameUtils.getExtension(file.getFileName().toString());
 
     if (parserMap.containsKey(fileType)) {
       try (Parser<String> parser = parserMap.get(fileType).apply(file)) {
         parser.init();
-        int claimsWritten = 0;
 
         AbstractTransformer transformer = createTransformer(sourceType, mbiMap);
 
         while (parser.hasData()) {
-          MessageOrBuilder message = transformer.transform(parser.read());
+          MessageOrBuilder message = transformer.transform(sequenceCounter, parser.read());
+
           if (message != null) {
             sink.write(message);
           }
@@ -274,6 +290,8 @@ public class RDABridge {
               .put(AppConfig.Fields.outputDirPath, Collections.singleton(appConfig.outputDirPath))
               .put(AppConfig.Fields.fissOutputFile, Collections.singleton(appConfig.fissOutputFile))
               .put(AppConfig.Fields.mcsOutputFile, Collections.singleton(appConfig.mcsOutputFile))
+              .put(AppConfig.Fields.fissSeqStart, Collections.singleton(appConfig.fissSeqStart))
+              .put(AppConfig.Fields.mcsSeqStart, Collections.singleton(appConfig.mcsSeqStart))
               .put(AppConfig.Fields.fissSources, appConfig.fissSources)
               .put(AppConfig.Fields.mcsSources, appConfig.mcsSources)
               .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.mbiSource))
@@ -298,6 +316,8 @@ public class RDABridge {
     putIfNotNull(builder, AppConfig.Fields.fissOutputFile, cmd.getOptionValue(FISS_OUTPUT_FLAG));
     putIfNotNull(builder, AppConfig.Fields.mcsOutputFile, cmd.getOptionValue(MCS_OUTPUT_FLAG));
     putIfNotNull(builder, AppConfig.Fields.fissSources, cmd.getOptionValues(FISS_FLAG));
+    putIfNotNull(builder, AppConfig.Fields.fissSeqStart, cmd.getOptionValue(FISS_SEQ_START));
+    putIfNotNull(builder, AppConfig.Fields.mcsSeqStart, cmd.getOptionValue(MCS_SEQ_START));
     putIfNotNull(builder, AppConfig.Fields.mcsSources, cmd.getOptionValues(MCS_FLAG));
     putIfNotNull(builder, AppConfig.Fields.mbiSource, cmd.getOptionValue(MBI_FLAG));
 
@@ -348,6 +368,8 @@ public class RDABridge {
     private String fissOutputFile;
     private String mcsOutputFile;
     private String mbiSource;
+    private String fissSeqStart;
+    private String mcsSeqStart;
     private Set<String> fissSources = new HashSet<>();
     private Set<String> mcsSources = new HashSet<>();
   }
