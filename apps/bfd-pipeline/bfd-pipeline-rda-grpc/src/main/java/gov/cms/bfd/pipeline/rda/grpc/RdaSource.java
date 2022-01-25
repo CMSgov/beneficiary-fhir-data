@@ -6,9 +6,10 @@ package gov.cms.bfd.pipeline.rda.grpc;
  * database connection. Implementations of this class MUST provide orderly shutdown when their
  * thread receives an InterruptedException.
  *
- * @param <T> the type of objects processed
+ * @param <TMessage> RDA API message class
+ * @param <TClaim> JPA entity class
  */
-public interface RdaSource<T> extends AutoCloseable {
+public interface RdaSource<TMessage, TClaim> extends AutoCloseable {
   /**
    * Retrieve some number of objects from the source and pass them to the sink for processing.
    *
@@ -18,5 +19,6 @@ public interface RdaSource<T> extends AutoCloseable {
    * @throws ProcessingException wraps any error and includes number of records successfully
    *     processed before the error
    */
-  int retrieveAndProcessObjects(int maxPerBatch, RdaSink<T> sink) throws ProcessingException;
+  int retrieveAndProcessObjects(int maxPerBatch, RdaSink<TMessage, TClaim> sink)
+      throws ProcessingException;
 }
