@@ -13,6 +13,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -98,8 +99,7 @@ public class McsTransformer extends AbstractTransformer {
       addDiagnosisCodes(claimBuilder, data, claimBuilder.getIdrClmHdIcn());
 
       return McsClaimChange.newBuilder()
-          .setTimestamp(
-              Timestamp.newBuilder().setSeconds(System.currentTimeMillis() / 1000).build())
+          .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
           .setSeq(sequenceNumber.inc())
           .setClaim(claimBuilder)
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)

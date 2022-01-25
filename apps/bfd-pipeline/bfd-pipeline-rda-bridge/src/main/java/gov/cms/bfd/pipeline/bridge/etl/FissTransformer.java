@@ -14,6 +14,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissClaimStatus;
 import gov.cms.mpsm.rda.v1.fiss.FissDiagnosisCode;
 import gov.cms.mpsm.rda.v1.fiss.FissPayer;
 import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -108,8 +109,7 @@ public class FissTransformer extends AbstractTransformer {
       addProcCodes(claimBuilder, data);
 
       return FissClaimChange.newBuilder()
-          .setTimestamp(
-              Timestamp.newBuilder().setSeconds(System.currentTimeMillis() / 1000).build())
+          .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
           .setSeq(sequenceNumber.inc())
           .setClaim(claimBuilder.build())
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
