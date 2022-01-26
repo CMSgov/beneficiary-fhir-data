@@ -13,6 +13,3 @@
 *.iml
 *.ipr
 *.iws
-
-# ignore cargo.lock
-Cargo.lock
