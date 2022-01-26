@@ -726,8 +726,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
     addSetterStatement(false, parentBeneficiaryField, parentBeneficiarySetter);
     beneficiaryMonthlyEntity.addMethod(parentBeneficiarySetter.build());
 
-    // converted to using RifField to at least provide a migration path to using the
-    // excel spreadsheet.
+    // These aren't "real" RifFields, as they're not in the spreadsheet; representing them here as
+    // such, to make
+    // it easier to add them into the spreadsheet in the future.
     RifField rifField =
         new RifField(
             "YEAR_MONTH",
@@ -1793,16 +1794,18 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
       return fieldName;
     }
     // Capitalize first letter of string
-    String rslt = fieldName.toLowerCase();
-    rslt = rslt.substring(0, 1).toUpperCase() + rslt.substring(1);
+    String camelCaseResult = fieldName.toLowerCase();
+    camelCaseResult = camelCaseResult.substring(0, 1).toUpperCase() + camelCaseResult.substring(1);
 
     // iterate over string looking for '_' (underscore)
-    while (rslt.contains("_")) {
-      rslt =
-          rslt.replaceFirst(
-              "_[a-z]", String.valueOf(Character.toUpperCase(rslt.charAt(rslt.indexOf("_") + 1))));
+    while (camelCaseResult.contains("_")) {
+      camelCaseResult =
+          camelCaseResult.replaceFirst(
+              "_[a-z]",
+              String.valueOf(
+                  Character.toUpperCase(camelCaseResult.charAt(camelCaseResult.indexOf("_") + 1))));
     }
-    return rslt;
+    return camelCaseResult;
   }
 
   /**
