@@ -1,3 +1,10 @@
+-- The V40 through V52 migrations rename our tables and columns for CCW-sourced data, such that:
+-- 1. We follow PostgreSQL's general snake_case naming conventions, to improve the developer experience: DB
+--    object names won't have to be quoted all over the place, anymore.
+-- 2. Column names match those in our upstream source system, the CCW, to improve traceability as data flows
+--    through our systems.
+-- 3. Rename the "parentXXX" foreign key columns to instead have names that match their target column.
+
 -- Rename tables and table columns; syntax:
 --
 --      psql: alter table public.beneficiaries rename column "beneficiaryId" to bene_id;
