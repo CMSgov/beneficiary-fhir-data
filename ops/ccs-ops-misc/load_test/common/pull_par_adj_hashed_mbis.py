@@ -1,6 +1,4 @@
-import os
 import psycopg2 as p
-import yaml
 from common import config
 
 
@@ -13,7 +11,14 @@ def loadData():
         return -1
 
     fileName = "mbis.txt"
-    beneQuery = "select f.\"mbiHash\" from \"pre_adj\".\"FissClaims\" f where f.\"mbi\" IS NOT NULL union select m.\"idrClaimMbiHash\" from \"pre_adj\".\"McsClaims\" m where m.\"idrClaimMbi\" IS NOT NULL LIMIT 100000;"
+    beneQuery = """select f.\"mbiHash\" 
+                    from \"pre_adj\".\"FissClaims\" f 
+                    where f.\"mbi\" IS NOT NULL 
+                    union 
+                    select m.\"idrClaimMbiHash\" 
+                    from \"pre_adj\".\"McsClaims\" m 
+                    where m.\"idrClaimMbi\" IS NOT NULL 
+                    LIMIT 100000;"""
 
     ## Make the query to the DB
     conn = p.connect(
@@ -24,13 +29,13 @@ def loadData():
         database='fhirdb'
     )
 
-    cursor = conn.cursor()
-    cursor.execute(beneQuery)
-    results = cursor.fetchall()
+    with conn:
+        with conn.cursor() as cursor:
+            cursor.execute(beneQuery)
+            results = cursor.fetchall()
+    conn.close()
 
-    eob_ids = []
-    for row in results:
-        eob_ids.append(str(row[0]))
+    eob_ids = [str(r[0]) for r in results]
 
     print("Returned " + str(len(results)) + " results from the database for the test.")
     return eob_ids
