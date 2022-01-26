@@ -367,6 +367,9 @@ public class GrpcRdaSourceIT {
     public RdaChange<PreAdjFissClaim> transformMessage(String apiVersion, FissClaimChange message) {
       var change = transformer.transformClaim(message);
       change.getClaim().setApiSource(apiVersion);
+      if (change.getClaim().getMbiRecord() != null) {
+        change.getClaim().getMbiRecord().setLastUpdated(null);
+      }
       return change;
     }
 
