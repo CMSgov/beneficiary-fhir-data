@@ -1,3 +1,15 @@
+-- Rename tables and table columns; syntax:
+--
+--      psql: alter table public.beneficiaries rename column "beneficiaryId" to bene_id;
+--      hsql: alter table public.beneficiaries alter column  "beneficiaryId" rename to bene_id;
+--
+--      ${logic.alter-rename-column}
+--          psql: "rename column"
+--          hsql: "alter column"
+--
+--      ${logic.rename-to}
+--          psql: "to"
+--          hsql: "rename to"
 --
 -- PartDEvents to partd_events
 --
@@ -52,5 +64,5 @@ ${logic.psql-only-alter} table public.partd_events rename constraint "PartDEvent
 ${logic.hsql-only-alter} table public.partd_events add constraint partd_events_pkey primary key (pde_id); 
 ${logic.hsql-only-alter} table public.partd_events add constraint partd_events_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries(bene_id);
 
--- both psql and hsql
-ALTER INDEX "PartDEvents_beneficiaryId_idx" RENAME TO partd_events_beneid_idx;
+-- both psql and hsql support non-primary key index renaming
+ALTER INDEX "PartDEvents_beneficiaryId_idx" RENAME TO partd_events_bene_id_idx;

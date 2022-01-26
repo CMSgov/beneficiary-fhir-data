@@ -1,9 +1,15 @@
+-- Rename tables and table columns; syntax:
 --
--- NOTES:
---   1. when you rename a table, indexes/constraints will trickle down to contraint & index directives,
---      BUT do not modify constraint or index names themselves
---   2. don't try to rename a column that already has the name (i.e., "hicn" ${logic.rename-to} hicn)
---   3. optionally rename contraint and/or index names (i.e., remove camelCase)
+--      psql: alter table public.beneficiaries rename column "beneficiaryId" to bene_id;
+--      hsql: alter table public.beneficiaries alter column  "beneficiaryId" rename to bene_id;
+--
+--      ${logic.alter-rename-column}
+--          psql: "rename column"
+--          hsql: "alter column"
+--
+--      ${logic.rename-to}
+--          psql: "to"
+--          hsql: "rename to"
 --
 -- BeneficiariesHistory to beneficiaries_history
 --
@@ -43,7 +49,7 @@ ${logic.hsql-only-alter} table public.beneficiaries_history_invalid_beneficiarie
 
 ${logic.hsql-only-alter} table public.beneficiaries_history ADD CONSTRAINT beneficiaries_history_bene_id_to_beneficiary FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
 
--- psql and hsql
+-- both psql and hsql support non-primary key index renaming
 ALTER INDEX "BeneficiariesHistory_beneficiaryId_idx" RENAME TO beneficiaries_history_bene_id_idx;
 ALTER INDEX "BeneficiariesHistory_hicn_idx" RENAME TO beneficiaries_history_hicn_idx;
 ALTER INDEX "Beneficiaries_history_mbi_hash_idx" RENAME TO beneficiaries_history_mbi_hash_idx;

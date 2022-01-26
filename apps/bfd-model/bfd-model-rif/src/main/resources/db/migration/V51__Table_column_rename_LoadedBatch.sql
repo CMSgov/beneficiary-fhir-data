@@ -1,9 +1,15 @@
+-- Rename tables and table columns; syntax:
 --
--- NOTES:
---   1. when you rename a table, indexes/constraints will trickle down to contraint & index directives,
---      BUT do not modify constraint or index names themselves
---   2. don't try to rename a column that already has the name (i.e., "hicn" ${logic.rename-to} hicn)
---   3. optionally rename contraint and/or index names (i.e., remove camelCase)
+--      psql: alter table public.beneficiaries rename column "beneficiaryId" to bene_id;
+--      hsql: alter table public.beneficiaries alter column  "beneficiaryId" rename to bene_id;
+--
+--      ${logic.alter-rename-column}
+--          psql: "rename column"
+--          hsql: "alter column"
+--
+--      ${logic.rename-to}
+--          psql: "to"
+--          hsql: "rename to"
 --
 -- LoadedFiles to loaded_files
 --
@@ -47,5 +53,5 @@ ${logic.psql-only-alter} table public.loaded_batches rename constraint "loadedBa
 
 ${logic.hsql-only-alter} table public.loaded_batches ADD CONSTRAINT loaded_batches_loaded_file_id FOREIGN KEY (loaded_file_id) REFERENCES public.loaded_files (loaded_file_id);
 
--- both psql and hsql
+-- both psql and hsql support non-primary key index renaming
 ALTER INDEX "LoadedBatches_created_index" RENAME TO loaded_batches_created_idx;

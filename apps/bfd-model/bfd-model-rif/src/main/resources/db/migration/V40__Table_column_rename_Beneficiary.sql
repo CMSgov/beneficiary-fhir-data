@@ -1,12 +1,15 @@
---
 -- NOTES:
---   1. when you rename a table, indexes/constraints will trickle down to contraint & index directives,
---      BUT do not modify constraint or index names themselves
---   2. don't try to rename a column that already has the name (i.e., "hicn" ${logic.rename-to} hicn)
---   3. optionally rename contraint and/or index names (i.e., remove camelCase)
+--   Postgres (psql) and Hmem (hsql) differ in their support for renaming in place db artifacts;
+--   the rules can be summarized as:
+--      psql - supports table, table column, table constraint and table index renaming
+--      hsql - supports table and table column renaming, but does not support renaming a constraint;
+--             it also does not allow you to rename a primary key index, but does allow a rename for
+--             index that is not a primary key. Thus for primary key index name and table constraint
+--             name, the original index or constraint will need to be dropped and re-built.
 --
--- uncomment the following SCRIPT directive to dump the hsql database schema
--- to a file prior to performing table or column rename.
+-- uncomment the following SCRIPT directive if you want to to dump the hsql database schema to a file
+-- prior to performing table or column renaming.
+--
 -- SCRIPT './bfd_schema_pre.txt';
 --
 -- Drop foreign key constraints (hsql only)
@@ -31,9 +34,7 @@ ${logic.hsql-only-alter} table public."SNFClaimLines" drop constraint "SNFClaimL
 ${logic.hsql-only-alter} table public."SNFClaims" drop constraint "SNFClaims_beneficiaryId_to_Beneficiaries";
 ${logic.hsql-only-alter} table public."LoadedBatches" drop constraint "loadedBatches_loadedFileId";
 --
--- Drop primary key constraints fo hsql; hsql does not support rename constraint
---
---      hsql: alter table public."BeneficiariesHistoryInvalidBeneficiaries" drop constraint "BeneficiariesHistoryInvalidBeneficiaries_pkey";
+-- Drop primary key constraints for hsql; hsql does not support rename constraint
 --
 --      ${logic.hsql-only-alter}
 --          psql: "-- alter"
@@ -290,10 +291,9 @@ ${logic.psql-only-alter} table public."Beneficiaries_pkey" rename to beneficiari
 -- hsql only
 ${logic.hsql-only-alter} table public.beneficiaries add constraint beneficiaries_pkey primary key (bene_id);
 
+-- both psql and hsql support non-primary key index renaming
 ALTER INDEX "Beneficiaries_hicn_idx" RENAME TO beneficiaries_hicn_idx;
 ALTER INDEX "Beneficiaries_mbi_hash_idx" RENAME TO beneficiaries_mbi_hash_idx;
-
--- CHECK THIS - why do we even have these???
 ALTER INDEX "Beneficiaries_partd_contract_number_apr_id_idx" RENAME  TO beneficiaries_partd_contract_number_apr_id_idx;
 ALTER INDEX "Beneficiaries_partd_contract_number_aug_id_idx" RENAME  TO beneficiaries_partd_contract_number_aug_id_idx;
 ALTER INDEX "Beneficiaries_partd_contract_number_dec_id_idx" RENAME  TO beneficiaries_partd_contract_number_dec_id_idx;

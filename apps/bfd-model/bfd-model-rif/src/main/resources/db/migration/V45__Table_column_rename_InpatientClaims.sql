@@ -1,9 +1,15 @@
+-- Rename tables and table columns; syntax:
 --
--- NOTES:
---   1. when you rename a table, indexes/constraints will trickle down to contraint & index directives,
---      BUT do not modify constraint or index names themselves
---   2. don't try to rename a column that already has the name (i.e., "hicn" ${logic.rename-to} hicn)
---   3. optionally rename contraint and/or index names (i.e., remove camelCase)
+--      psql: alter table public.beneficiaries rename column "beneficiaryId" to bene_id;
+--      hsql: alter table public.beneficiaries alter column  "beneficiaryId" rename to bene_id;
+--
+--      ${logic.alter-rename-column}
+--          psql: "rename column"
+--          hsql: "alter column"
+--
+--      ${logic.rename-to}
+--          psql: "to"
+--          hsql: "rename to"
 --
 -- InpatientClaims to inpatient_claims
 --
@@ -301,4 +307,5 @@ ${logic.hsql-only-alter} table public.inpatient_claims add constraint inpatient_
 ${logic.hsql-only-alter} table public.inpatient_claim_lines ADD CONSTRAINT inpatient_claim_lines_clm_id_to_inpatient_claims FOREIGN KEY (clm_id) REFERENCES public.inpatient_claims (clm_id);
 ${logic.hsql-only-alter} table public.inpatient_claims ADD CONSTRAINT inpatient_claims_bene_id_to_beneficiaries FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
 
-ALTER INDEX "InpatientClaims_beneficiaryId_idx" RENAME TO inpatient_claims_beneid_idx;
+-- both psql and hsql support non-primary key index renaming
+ALTER INDEX "InpatientClaims_beneficiaryId_idx" RENAME TO inpatient_claims_bene_id_idx;

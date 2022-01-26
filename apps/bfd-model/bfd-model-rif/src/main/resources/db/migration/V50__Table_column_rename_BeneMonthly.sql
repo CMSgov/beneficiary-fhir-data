@@ -1,9 +1,15 @@
+-- Rename tables and table columns; syntax:
 --
--- NOTES:
---   1. when you rename a table, indexes/constraints will trickle down to contraint & index directives,
---      BUT do not modify constraint or index names themselves
---   2. don't try to rename a column that already has the name (i.e., "hicn" ${logic.rename-to} hicn)
---   3. optionally rename contraint and/or index names (i.e., remove camelCase)
+--      psql: alter table public.beneficiaries rename column "beneficiaryId" to bene_id;
+--      hsql: alter table public.beneficiaries alter column  "beneficiaryId" rename to bene_id;
+--
+--      ${logic.alter-rename-column}
+--          psql: "rename column"
+--          hsql: "alter column"
+--
+--      ${logic.rename-to}
+--          psql: "to"
+--          hsql: "rename to"
 --
 -- BeneficiaryMonthly to beneficiary_monthly
 --
@@ -34,6 +40,6 @@ ${logic.hsql-only-alter} table public.beneficiary_monthly add constraint benefic
     
 ${logic.hsql-only-alter} table public.beneficiary_monthly ADD CONSTRAINT beneficiary_monthly_bene_id_to_beneficiary FOREIGN KEY (bene_id) REFERENCES public.beneficiaries (bene_id);
 
--- both psql and hsql
-ALTER INDEX "BeneficiaryMonthly_partDContractNumId_yearMonth_parentBene_idx" RENAME TO beneficiary_monthly_year_month_partd_contract_beneid_idx;
+-- both psql and hsql support non-primary key index renaming
+ALTER INDEX "BeneficiaryMonthly_partDContractNumId_yearMonth_parentBene_idx" RENAME TO beneficiary_monthly_year_month_partd_contract_bene_id_idx;
 ALTER INDEX "BeneficiaryMonthly_partDContractNumberId_yearmonth_idx" RENAME TO beneficiary_monthly_partd_contract_number_year_month_idx;
