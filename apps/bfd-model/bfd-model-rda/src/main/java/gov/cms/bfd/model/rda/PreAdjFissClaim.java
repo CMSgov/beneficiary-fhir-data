@@ -79,9 +79,7 @@ public class PreAdjFissClaim {
   @Column(name = "`npiNumber`", length = 10)
   private String npiNumber;
 
-  @ManyToOne(
-      fetch = FetchType.EAGER,
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "`mbiId`")
   private Mbi mbiRecord;
 

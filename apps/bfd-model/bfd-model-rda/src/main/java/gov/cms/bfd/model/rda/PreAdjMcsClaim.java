@@ -116,9 +116,7 @@ public class PreAdjMcsClaim {
   @Column(name = "`idrClaimReceiptDate`")
   private LocalDate idrClaimReceiptDate;
 
-  @ManyToOne(
-      fetch = FetchType.EAGER,
-      cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "`mbiId`")
   private Mbi mbiRecord;
 
