@@ -314,29 +314,29 @@ final class BeneficiaryTransformerV2 {
 
   private static void transformMedicaidDualEligibility(Patient patient, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_01, beneficiary.getMedicaidDualEligibilityJanCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_02, beneficiary.getMedicaidDualEligibilityFebCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_03, beneficiary.getMedicaidDualEligibilityMarCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_04, beneficiary.getMedicaidDualEligibilityAprCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_05, beneficiary.getMedicaidDualEligibilityMayCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_06, beneficiary.getMedicaidDualEligibilityJunCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_07, beneficiary.getMedicaidDualEligibilityJulCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_08, beneficiary.getMedicaidDualEligibilityAugCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_09, beneficiary.getMedicaidDualEligibilitySeptCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_10, beneficiary.getMedicaidDualEligibilityOctCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_11, beneficiary.getMedicaidDualEligibilityNovCode());
-    addCoverageExtension(
+    addPatientExtension(
         patient, CcwCodebookVariable.DUAL_12, beneficiary.getMedicaidDualEligibilityDecCode());
   }
 
@@ -349,7 +349,7 @@ final class BeneficiaryTransformerV2 {
    * @param ccwVariable The {@link CcwCodebookVariable} variable associated with the Coverage
    * @param optVal The {@link String} value associated with the Coverage
    */
-  static void addCoverageExtension(
+  static void addPatientExtension(
       Patient patient, CcwCodebookVariable ccwVariable, Optional<String> optVal) {
     optVal.ifPresent(
         value ->

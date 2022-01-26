@@ -268,6 +268,8 @@ final class CoverageTransformer {
       transformMedicaidDualEligibility(coverage, beneficiary);
     }
 
+    TransformerUtils.setLastUpdated(coverage, beneficiary.getLastUpdated());
+
     timer.stop();
     return coverage;
   }
@@ -373,7 +375,7 @@ final class CoverageTransformer {
     return coverage;
   }
 
-  private static Coverage transformHmoIndicator(Coverage coverage, Beneficiary beneficiary) {
+  private static void transformHmoIndicator(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare Advantage (MA) enrollment indicators:
     if (beneficiary.getHmoIndicatorJanInd().isPresent()) {
       coverage.addExtension(
@@ -435,11 +437,9 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.HMO_IND_12, beneficiary.getHmoIndicatorDecInd()));
     }
-
-    return coverage;
   }
 
-  private static Coverage transformPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+  private static void transformPartCPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartCPbpNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -501,10 +501,9 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTC_PBP_ID_12, beneficiary.getPartCPbpNumberDecId()));
     }
-    return coverage;
   }
 
-  private static Coverage transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
+  private static void transformPartCPlanType(Coverage coverage, Beneficiary beneficiary) {
     // Plan Type
     if (beneficiary.getPartCPlanTypeJanCode().isPresent()) {
       coverage.addExtension(
@@ -590,10 +589,9 @@ final class CoverageTransformer {
               CcwCodebookVariable.PTC_PLAN_TYPE_CD_12,
               beneficiary.getPartCPlanTypeDecCode()));
     }
-    return coverage;
   }
 
-  private static Coverage transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
+  private static void transformPartCContractNumber(Coverage coverage, Beneficiary beneficiary) {
     // Contract Number
     if (beneficiary.getPartCContractNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -679,7 +677,6 @@ final class CoverageTransformer {
               CcwCodebookVariable.PTC_CNTRCT_ID_12,
               beneficiary.getPartCContractNumberDecId()));
     }
-    return coverage;
   }
 
   /**
@@ -687,7 +684,7 @@ final class CoverageTransformer {
    * @param beneficiary the {@link Beneficiary} to generate Coverage for
    * @return {@link Coverage} resource for the
    */
-  private static Coverage transformEntitlementBuyInIndicators(
+  private static void transformEntitlementBuyInIndicators(
       Coverage coverage, Beneficiary beneficiary) {
 
     // Medicare Entitlement Buy In Indicator
@@ -751,11 +748,9 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.BUYIN12, beneficiary.getEntitlementBuyInDecInd()));
     }
-    return coverage;
   }
 
-  private static Coverage transformMedicaidDualEligibility(
-      Coverage coverage, Beneficiary beneficiary) {
+  private static void transformMedicaidDualEligibility(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Medicare-Medicaid dual eligibility codes
     if (beneficiary.getMedicaidDualEligibilityJanCode().isPresent()) {
       coverage.addExtension(
@@ -841,11 +836,9 @@ final class CoverageTransformer {
               CcwCodebookVariable.DUAL_12,
               beneficiary.getMedicaidDualEligibilityDecCode()));
     }
-
-    return coverage;
   }
 
-  private static Coverage transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
+  private static void transformPartDContractNumber(Coverage coverage, Beneficiary beneficiary) {
     if (beneficiary.getPartDContractNumberJanId().isPresent()) {
       coverage.addExtension(
           TransformerUtils.createExtensionCoding(
@@ -930,10 +923,9 @@ final class CoverageTransformer {
               CcwCodebookVariable.PTDCNTRCT12,
               beneficiary.getPartDContractNumberDecId()));
     }
-    return coverage;
   }
 
-  private static Coverage transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
+  private static void transformPartDPbpNumber(Coverage coverage, Beneficiary beneficiary) {
     // PBP
     if (beneficiary.getPartDPbpNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -995,10 +987,9 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.PTDPBPID12, beneficiary.getPartDPbpNumberDecId()));
     }
-    return coverage;
   }
 
-  private static Coverage transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
+  private static void transformPartDSegmentNumber(Coverage coverage, Beneficiary beneficiary) {
     // Segment Number
     if (beneficiary.getPartDSegmentNumberJanId().isPresent()) {
       coverage.addExtension(
@@ -1060,10 +1051,9 @@ final class CoverageTransformer {
           TransformerUtils.createExtensionCoding(
               coverage, CcwCodebookVariable.SGMTID12, beneficiary.getPartDSegmentNumberDecId()));
     }
-    return coverage;
   }
 
-  private static Coverage transformPartDLowIncomeCostShareGroup(
+  private static void transformPartDLowIncomeCostShareGroup(
       Coverage coverage, Beneficiary beneficiary) {
     // Monthly cost sharing group
     if (beneficiary.getPartDLowIncomeCostShareGroupJanCode().isPresent()) {
@@ -1150,11 +1140,9 @@ final class CoverageTransformer {
               CcwCodebookVariable.CSTSHR12,
               beneficiary.getPartDLowIncomeCostShareGroupDecCode()));
     }
-    return coverage;
   }
 
-  private static Coverage transformPartDRetireeDrugSubsidy(
-      Coverage coverage, Beneficiary beneficiary) {
+  private static void transformPartDRetireeDrugSubsidy(Coverage coverage, Beneficiary beneficiary) {
     // Monthly Part D Retiree Drug Subsidy Indicators
     if (beneficiary.getPartDRetireeDrugSubsidyJanInd().isPresent()) {
       coverage.addExtension(
@@ -1240,6 +1228,5 @@ final class CoverageTransformer {
               CcwCodebookVariable.RDSIND12,
               beneficiary.getPartDRetireeDrugSubsidyDecInd()));
     }
-    return coverage;
   }
 }

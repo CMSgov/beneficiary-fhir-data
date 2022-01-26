@@ -221,7 +221,7 @@ public final class CoverageTransformerTest {
     assertEquals(TransformerConstants.COVERAGE_PLAN, coverage.getGrouping().getSubGroup());
     assertEquals(TransformerConstants.COVERAGE_PLAN_PART_C, coverage.getGrouping().getSubPlan());
     assertEquals(CoverageStatus.ACTIVE, coverage.getStatus());
-    // TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
+    TransformerTestUtils.assertLastUpdatedEquals(beneficiary.getLastUpdated(), coverage);
 
     if (beneficiary.getBeneEnrollmentReferenceYear().isPresent()) {
       if (beneficiary.getPartCContractNumberAugId().isPresent())
