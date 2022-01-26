@@ -227,6 +227,42 @@ resource "aws_iam_role_policy_attachment" "aws_cli" {
   policy_arn = aws_iam_policy.aws_cli.arn
 }
 
+# Policy to allow pipeline instance role read only access to environment scoped
+# parameter store variables
+resource "aws_iam_policy" "parameter_store" {
+  name        = "bfd-${var.env_config.env}-pipeline-ro-parameter-store"
+  description = "Read-only permissions to environment scoped parameter store variables"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameterHistory",
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/test/shared/*",
+                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/test/pipeline/*"
+
+            ]
+        }
+    ]
+}
+EOF
+
+}
+
+resource "aws_iam_role_policy_attachment" "parameter_store" {
+  role       = module.iam_profile_bfd_pipeline.role
+  policy_arn = aws_iam_policy.parameter_store.arn
+}
+
 # EC2 Instance to run the BFD Pipeline app.
 module "ec2_instance" {
   source = "../ec2"
