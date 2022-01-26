@@ -11,13 +11,16 @@ def loadData():
         return -1
 
     fileName = "mbis.txt"
-    beneQuery = """select f.\"mbiHash\" 
-                    from \"pre_adj\".\"FissClaims\" f 
-                    where f.\"mbi\" IS NOT NULL 
-                    union 
-                    select m.\"idrClaimMbiHash\" 
-                    from \"pre_adj\".\"McsClaims\" m 
-                    where m.\"idrClaimMbi\" IS NOT NULL 
+    beneQuery = """select distinct f."mbi"
+                    from "pre_adj"."FissClaims" f
+                    where f."mbi" IS NOT NULL
+                    union
+                    select distinct m."idrClaimMbi"
+                    from "pre_adj"."McsClaims" m
+                    where m."idrClaimMbi" IS NOT NULL
+                    and m."idrClaimMbi" NOT IN (
+                        select distinct "idrClaimMbi" from "pre_adj"."McsClaims" where "idrStatusCode" IS NULL
+                    )
                     LIMIT 100000;"""
 
     ## Make the query to the DB
