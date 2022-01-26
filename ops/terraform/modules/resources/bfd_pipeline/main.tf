@@ -249,7 +249,6 @@ resource "aws_iam_policy" "parameter_store" {
             "Resource": [
                 "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/${var.env_config.env}/shared/*",
                 "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/${var.env_config.env}/pipeline/*"
-
             ]
         }
     ]

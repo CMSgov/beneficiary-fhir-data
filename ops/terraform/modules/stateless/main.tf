@@ -142,6 +142,41 @@ resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
   policy_arn = data.aws_iam_policy.ansible_vault_pw_ro_s3.arn
 }
 
+# Policy to allow fhir server instance role read only access to environment scoped
+# parameter store variables
+#
+resource "aws_iam_policy" "fhir_parameter_store" {
+  name        = "bfd-${var.env_config.env}-pipeline-ro-parameter-store"
+  description = "Read-only permissions to environment scoped parameter store variables"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameterHistory",
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/${var.env_config.env}/shared/*",
+                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/${var.env_config.env}/server/*"
+            ]
+        }
+    ]
+}
+EOF
+
+}
+
+resource "aws_iam_role_policy_attachment" "fhir_parameter_store" {
+  role       = module.fhir_iam.role
+  policy_arn = aws_iam_policy.fhir_parameter_store.arn
+}
 
 ## NLB for the FHIR server (SSL terminated by the FHIR server)
 #
