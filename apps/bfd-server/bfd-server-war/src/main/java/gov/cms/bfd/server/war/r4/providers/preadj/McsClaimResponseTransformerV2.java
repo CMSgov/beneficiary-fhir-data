@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -96,11 +97,22 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     claim.setContained(List.of(getContainedPatient(claimGroup)));
     claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
-    claim.setStatus(
-        CANCELLED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
-            ? ClaimResponse.ClaimResponseStatus.CANCELLED
-            : ClaimResponse.ClaimResponseStatus.ACTIVE);
-    claim.setOutcome(OUTCOME_MAP.get(claimGroup.getIdrStatusCode()));
+
+    // Some status codes for MCS can be null.
+    // These will be interpreted as status=active, outcome=queued.
+    if (claimGroup.getIdrStatusCode() == null) {
+      claim.setStatus(ClaimResponse.ClaimResponseStatus.ACTIVE);
+    } else {
+      claim.setStatus(
+          CANCELLED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
+              ? ClaimResponse.ClaimResponseStatus.CANCELLED
+              : ClaimResponse.ClaimResponseStatus.ACTIVE);
+    }
+
+    claim.setOutcome(
+        ObjectUtils.defaultIfNull(
+            OUTCOME_MAP.get(ObjectUtils.defaultIfNull(claimGroup.getIdrStatusCode(), "")),
+            ClaimResponse.RemittanceOutcome.QUEUED));
     claim.setType(getType());
     claim.setUse(ClaimResponse.Use.CLAIM);
     claim.setInsurer(new Reference().setIdentifier(new Identifier().setValue("CMS")));
