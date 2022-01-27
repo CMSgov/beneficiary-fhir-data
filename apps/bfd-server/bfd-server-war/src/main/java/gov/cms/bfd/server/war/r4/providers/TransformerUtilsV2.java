@@ -3649,6 +3649,22 @@ public final class TransformerUtilsV2 {
     }
   }
 
+  /**
+   * Sets the provider number field which is common among these claim types: Inpatient, Outpatient,
+   * Hospice, HHA and SNF.
+   *
+   * @param eob the {@link ExplanationOfBenefit} this method will modify
+   * @param providerNumber a {@link String} PRVDR_NUM: representing the provider number for the
+   *     claim
+   */
+  static void setProviderNumber(ExplanationOfBenefit eob, String providerNumber) {
+    eob.setProvider(
+        new Reference()
+            .setIdentifier(
+                TransformerUtilsV2.createIdentifier(
+                    CcwCodebookVariable.PRVDR_NUM, providerNumber)));
+  }
+
   public static void logMbiHashToMdc(String mbiHash) {
     if (!Strings.isNullOrEmpty(mbiHash)) {
       MDC.put("mbi_hash", mbiHash);

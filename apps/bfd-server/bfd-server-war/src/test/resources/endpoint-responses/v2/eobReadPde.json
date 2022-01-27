@@ -61,6 +61,12 @@
       "value" : "CMS"
     }
   },
+  "provider" : {
+    "identifier" : {
+      "system" : "https://bluebutton.cms.gov/resources/variables/prvdr_num",
+      "value" : "1023011079"
+    }
+  },
   "facility" : {
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/resources/variables/phrmcy_srvc_type_cd",
