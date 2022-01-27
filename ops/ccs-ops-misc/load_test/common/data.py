@@ -1,12 +1,7 @@
 import os
 import datetime
-import sys
-import common.config as config
-import common.pull_bene_ids as benes
-import common.pull_hashed_mbis as mbi
-import common.pull_par_adj_hashed_mbis as pambi
-import common.read_contract_cursors as cursors
-import common.test_setup as setup
+
+from . import config, db, read_contract_cursors as cursors, test_setup as setup
 
 '''
 Gets the cursor data and either returns all the data in a list if not a distributed test,
@@ -46,7 +41,7 @@ def load_bene_ids():
             num_workers = os.environ['LOCUST_NUM_WORKERS']
             print(f"Worker {worker_number} starting...")
             configFile = config.load()
-            full_eob_list = benes.loadData()
+            full_eob_list = db.get_bene_ids(configFile['dbUri'])
             data_per_user = len(full_eob_list) // int(num_workers)
             start_index = int(worker_number) * data_per_user
             end_index = start_index + data_per_user - 1
@@ -54,7 +49,7 @@ def load_bene_ids():
             return full_eob_list[start_index:end_index]
     else:
         configFile = config.load()
-        return benes.loadData()
+        return db.get_bene_ids(configFile['dbUri'])
 
 '''
 Gets the hashed mbi data and either returns all the data in a list if not a distributed test,
@@ -71,7 +66,7 @@ def load_mbis():
         num_workers = os.environ['LOCUST_NUM_WORKERS']
         print(f"Worker {worker_number} starting...")
         configFile = config.load()
-        full_mbi_list = mbi.loadData()
+        full_mbi_list = db.get_hashed_mbis(configFile['dbUri'])
         data_per_user = len(full_mbi_list) // int(num_workers)
         start_index = int(worker_number) * data_per_user
         end_index = start_index + data_per_user - 1
@@ -79,7 +74,7 @@ def load_mbis():
         return full_mbi_list[start_index:end_index]
     else:
         configFile = config.load()
-        return mbi.loadData()
+        return db.get_hashed_mbis(configFile['dbUri'])
 
 '''
 Gets the hashed partially adjudicated mbi data and either returns all the data in a list if
@@ -96,7 +91,7 @@ def load_pa_mbis():
         num_workers = os.environ['LOCUST_NUM_WORKERS']
         print(f"Worker {worker_number} starting...")
         configFile = config.load()
-        full_mbi_list = pambi.loadData()
+        full_mbi_list = db.get_partially_adj_hashed_mbis(configFile['dbUri'])
         data_per_user = len(full_mbi_list) // int(num_workers)
         start_index = int(worker_number) * data_per_user
         end_index = start_index + data_per_user - 1
@@ -104,7 +99,7 @@ def load_pa_mbis():
         return full_mbi_list[start_index:end_index]
     else:
         configFile = config.load()
-        return pambi.loadData()
+        return db.get_partially_adj_hashed_mbis(configFile['dbUri'])
 
 
 '''
