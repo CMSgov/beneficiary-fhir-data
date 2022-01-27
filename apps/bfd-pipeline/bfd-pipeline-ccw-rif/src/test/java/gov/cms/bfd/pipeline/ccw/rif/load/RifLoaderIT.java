@@ -596,8 +596,11 @@ public final class RifLoaderIT {
             LOGGER.warn("Record(s) failed to load.", error);
           },
           result -> {
-            // ignore UPDATE and DELETE rows
-            if (result.getRifRecordEvent().getRecordAction() == RecordAction.INSERT) {
+            // ignore UPDATE and DELETE rows for Synthea Data
+            if (sampleResources == Arrays.asList(StaticRifResourceGroup.SYNTHEA_DATA.getResources())
+                && result.getRifRecordEvent().getRecordAction() == RecordAction.INSERT) {
+              loadCount.incrementAndGet();
+            } else {
               loadCount.incrementAndGet();
             }
           });
