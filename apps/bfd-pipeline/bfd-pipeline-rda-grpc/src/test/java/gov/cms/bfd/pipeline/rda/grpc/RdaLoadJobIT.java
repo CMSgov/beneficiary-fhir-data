@@ -67,7 +67,7 @@ public class RdaLoadJobIT {
     final ImmutableList<FissClaimChange> expectedClaims =
         JsonMessageSource.parseAll(fissClaimJson, JsonMessageSource::parseFissClaimChange);
     final FissClaimTransformer transformer =
-        new FissClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+        new FissClaimTransformer(clock, new IdHasher.Config(1, "testing"));
     for (FissClaimChange claim : expectedClaims) {
       try {
         transformer.transformClaim(claim);
@@ -158,7 +158,7 @@ public class RdaLoadJobIT {
     final ImmutableList<McsClaimChange> expectedClaims =
         JsonMessageSource.parseAll(mcsClaimJson, JsonMessageSource::parseMcsClaimChange);
     final McsClaimTransformer transformer =
-        new McsClaimTransformer(clock, new IdHasher(new IdHasher.Config(1, "testing")));
+        new McsClaimTransformer(clock, new IdHasher.Config(1, "testing"));
     for (McsClaimChange claim : expectedClaims) {
       try {
         transformer.transformClaim(claim);

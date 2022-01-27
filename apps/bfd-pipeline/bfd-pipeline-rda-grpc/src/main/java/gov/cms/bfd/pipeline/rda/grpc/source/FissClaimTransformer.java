@@ -7,6 +7,7 @@ import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
@@ -39,6 +40,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissSourceOfAdmission;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import lombok.Getter;
 
 /**
  * Transforms a gRPC FissClaim object into a Hibernate PreAdjFissClaim object. Note that the gRPC
@@ -152,11 +154,15 @@ public class FissClaimTransformer {
       PreAdjFissAuditTrail_badtStatus_Extractor;
 
   private final Clock clock;
-  private final IdHasher idHasher;
+  @Getter private final MbiCache mbiCache;
 
-  public FissClaimTransformer(Clock clock, IdHasher idHasher) {
+  public FissClaimTransformer(Clock clock, IdHasher.Config hasherConfig) {
+    this(clock, MbiCache.computedCache(hasherConfig));
+  }
+
+  private FissClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
-    this.idHasher = idHasher;
+    this.mbiCache = mbiCache;
     PreAdjFissClaim_currStatus_Extractor =
         new EnumStringExtractor<>(
             FissClaim::hasCurrStatusEnum,
@@ -476,6 +482,17 @@ public class FissClaimTransformer {
             ImmutableSet.of());
   }
 
+  /**
+   * Hook to allow the FissClaimRdaSink to install an alternative MbiCache implementation that
+   * supports caching MBI values in a database table.
+   *
+   * @param mbiCache alternative MbiCache to use for obtaining Mbi instances
+   * @return a new transformer with the same clock but alternative MbiCache
+   */
+  public FissClaimTransformer withMbiCache(MbiCache mbiCache) {
+    return new FissClaimTransformer(clock, mbiCache);
+  }
+
   public RdaChange<PreAdjFissClaim> transformClaim(FissClaimChange change) {
     FissClaim from = change.getClaim();
     final DataTransformer transformer = new DataTransformer();
@@ -575,15 +592,15 @@ public class FissClaimTransformer {
         from::hasNpiNumber,
         from::getNpiNumber,
         to::setNpiNumber);
-    transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.mbi, 1, 13, from::hasMbi, from::getMbi, to::setMbi);
-    transformer.copyOptionalString(
-        namePrefix + PreAdjFissClaim.Fields.mbiHash,
-        1,
-        64,
-        from::hasMbi,
-        () -> idHasher.computeIdentifierHash(from.getMbi()),
-        to::setMbiHash);
+    if (from.hasMbi()) {
+      final var mbi = from.getMbi();
+      if (transformer.validateString(namePrefix + PreAdjFissClaim.Fields.mbi, false, 1, 13, mbi)) {
+        var mbiRecord = mbiCache.lookupMbi(mbi);
+        to.setMbiRecord(mbiRecord);
+        to.setMbi(mbiRecord.getMbi());
+        to.setMbiHash(mbiRecord.getHash());
+      }
+    }
     transformer.copyOptionalString(
         namePrefix + PreAdjFissClaim.Fields.fedTaxNumber,
         1,

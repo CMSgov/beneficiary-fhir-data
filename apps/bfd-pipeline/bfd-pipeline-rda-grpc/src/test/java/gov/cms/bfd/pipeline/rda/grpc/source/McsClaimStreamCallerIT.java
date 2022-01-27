@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 public class McsClaimStreamCallerIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
-  private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-  private final McsClaimTransformer transformer = new McsClaimTransformer(clock, hasher);
+  private final McsClaimTransformer transformer =
+      new McsClaimTransformer(clock, new IdHasher.Config(10, "justsomestring"));
 
   @Test
   public void basicCall() throws Exception {
@@ -35,14 +35,12 @@ public class McsClaimStreamCallerIT {
               assertTrue(results.hasNext());
 
               PreAdjMcsClaim claim = transform(results.next());
-              assertEquals("75302", claim.getIdrClmHdIcn());
-              assertEquals(Long.valueOf(0), claim.getSequenceNumber());
+              assertTrue(claim.getIdrClmHdIcn().length() > 0);
               assertEquals(Long.valueOf(0), claim.getSequenceNumber());
               assertTrue(results.hasNext());
 
               claim = transform(results.next());
-              assertEquals("972078", claim.getIdrClmHdIcn());
-              assertEquals(Long.valueOf(1), claim.getSequenceNumber());
+              assertTrue(claim.getIdrClmHdIcn().length() > 0);
               assertEquals(Long.valueOf(1), claim.getSequenceNumber());
               assertFalse(results.hasNext());
             });
