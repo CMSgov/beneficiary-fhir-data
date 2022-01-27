@@ -112,7 +112,7 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
               ClaimResponse.ClaimResponseStatus.ACTIVE));
       claim.setOutcome(
           OUTCOME_MAP.getOrDefault(
-              claimGroup.getIdrStatusCode(), ClaimResponse.RemittanceOutcome.QUEUED));
+              claimGroup.getIdrStatusCode().toLowerCase(), ClaimResponse.RemittanceOutcome.QUEUED));
     }
 
     claim.setType(getType());
