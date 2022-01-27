@@ -10,7 +10,9 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.Builder;
@@ -26,7 +28,12 @@ public class RdaServer {
    * @return a running RDA API Server object
    */
   public static Server startLocal(LocalConfig config) throws IOException {
-    return ServerBuilder.forPort(config.getPort())
+    final ServerBuilder<?> serverBuilder =
+        config.hasHostname()
+            ? NettyServerBuilder.forAddress(
+                new InetSocketAddress(config.getHostname(), config.getPort()))
+            : ServerBuilder.forPort(config.getPort());
+    return serverBuilder
         .addService(config.createService())
         .intercept(new SimpleAuthorizationInterceptor(config.getAuthorizedTokens()))
         .build()
@@ -159,6 +166,8 @@ public class RdaServer {
   /** Configuration data for running a server on a local port. */
   @Getter
   public static class LocalConfig extends BaseConfig {
+    private final String hostname;
+
     /**
      * The port for the server to listen on. A value of zero causes the server to allocate any open
      * port. Default for the builder is zero.
@@ -171,8 +180,10 @@ public class RdaServer {
         MessageSource.Factory<FissClaimChange> fissSourceFactory,
         MessageSource.Factory<McsClaimChange> mcsSourceFactory,
         @NonNull @Singular Set<String> authorizedTokens,
+        String hostname,
         int port) {
       super(version, fissSourceFactory, mcsSourceFactory, authorizedTokens);
+      this.hostname = Strings.isNullOrEmpty(hostname) ? "localhost" : hostname;
       this.port = port;
     }
 
@@ -182,6 +193,10 @@ public class RdaServer {
      */
     public void runWithPortParam(ThrowableConsumer<Integer> action) throws Exception {
       runWithLocalServer(this, action);
+    }
+
+    public boolean hasHostname() {
+      return !Strings.isNullOrEmpty(hostname);
     }
   }
 

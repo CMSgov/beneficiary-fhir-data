@@ -1,9 +1,6 @@
 package gov.cms.bfd.pipeline.rda.grpc.source;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
-import gov.cms.bfd.model.rda.PreAdjFissClaim;
-import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.mpsm.rda.v1.ClaimRequest;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.RDAServiceGrpc;
@@ -20,12 +17,9 @@ import org.slf4j.LoggerFactory;
  * development there is no way to resume a stream from a given point in time so every time the
  * service is called it sends all of its values.
  */
-public class FissClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjFissClaim>> {
-  private final FissClaimTransformer transformer;
-
-  public FissClaimStreamCaller(FissClaimTransformer transformer) {
+public class FissClaimStreamCaller extends GrpcStreamCaller<FissClaimChange> {
+  public FissClaimStreamCaller() {
     super(LoggerFactory.getLogger(FissClaimStreamCaller.class));
-    this.transformer = transformer;
   }
 
   /**
@@ -38,10 +32,9 @@ public class FissClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjFiss
    * @throws Exception passes through any gRPC framework exceptions
    */
   @Override
-  public GrpcResponseStream<RdaChange<PreAdjFissClaim>> callService(
+  public GrpcResponseStream<FissClaimChange> callService(
       ManagedChannel channel, CallOptions callOptions, long startingSequenceNumber)
       throws Exception {
-    final String apiSource = callVersionService(channel, callOptions);
     logger.info("calling service");
     Preconditions.checkNotNull(channel);
     final ClaimRequest request = ClaimRequest.newBuilder().setSince(startingSequenceNumber).build();
@@ -50,14 +43,6 @@ public class FissClaimStreamCaller extends GrpcStreamCaller<RdaChange<PreAdjFiss
     final ClientCall<ClaimRequest, FissClaimChange> call = channel.newCall(method, callOptions);
     final Iterator<FissClaimChange> apiResults =
         ClientCalls.blockingServerStreamingCall(call, request);
-    final Iterator<RdaChange<PreAdjFissClaim>> transformedResults =
-        Iterators.transform(
-            apiResults,
-            apiClaim -> {
-              RdaChange<PreAdjFissClaim> fissChange = transformer.transformClaim(apiClaim);
-              fissChange.getClaim().setApiSource(apiSource);
-              return fissChange;
-            });
-    return new GrpcResponseStream<>(call, transformedResults);
+    return new GrpcResponseStream<>(call, apiResults);
   }
 }

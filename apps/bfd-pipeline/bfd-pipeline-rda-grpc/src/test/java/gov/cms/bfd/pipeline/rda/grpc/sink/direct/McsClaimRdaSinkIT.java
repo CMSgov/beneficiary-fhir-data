@@ -1,13 +1,15 @@
-package gov.cms.bfd.pipeline.rda.grpc.sink;
+package gov.cms.bfd.pipeline.rda.grpc.sink.direct;
 
-import static gov.cms.bfd.pipeline.rda.grpc.RdaChange.MIN_SEQUENCE_NUM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.RdaPipelineTestUtils;
+import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
+import gov.cms.mpsm.rda.v1.McsClaimChange;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -21,10 +23,6 @@ public class McsClaimRdaSinkIT {
         McsClaimRdaSinkIT.class,
         Clock.systemUTC(),
         (appState, entityManager) -> {
-          final McsClaimRdaSink sink = new McsClaimRdaSink(appState);
-
-          assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
-
           final PreAdjMcsClaim claim = new PreAdjMcsClaim();
           claim.setSequenceNumber(7L);
           claim.setIdrClmHdIcn("3");
@@ -45,9 +43,22 @@ public class McsClaimRdaSinkIT {
           diagCode.setIdrDiagCode("D");
           claim.getDiagCodes().add(diagCode);
 
-          int count =
-              sink.writeObject(
-                  new RdaChange<>(MIN_SEQUENCE_NUM, RdaChange.Type.INSERT, claim, Instant.now()));
+          final RdaChange<PreAdjMcsClaim> change =
+              new RdaChange<>(
+                  claim.getSequenceNumber(), RdaChange.Type.INSERT, claim, Instant.now());
+          final McsClaimChange message =
+              McsClaimChange.newBuilder()
+                  .setIcn(claim.getIdrClmHdIcn())
+                  .setSeq(claim.getSequenceNumber())
+                  .build();
+          final McsClaimTransformer transformer = mock(McsClaimTransformer.class);
+          doReturn(change).when(transformer).transformClaim(message);
+
+          final McsClaimRdaSink sink = new McsClaimRdaSink(appState, transformer, true);
+
+          assertEquals(Optional.empty(), sink.readMaxExistingSequenceNumber());
+
+          int count = sink.writeMessage("version", message);
           assertEquals(1, count);
 
           List<PreAdjMcsClaim> resultClaims =
