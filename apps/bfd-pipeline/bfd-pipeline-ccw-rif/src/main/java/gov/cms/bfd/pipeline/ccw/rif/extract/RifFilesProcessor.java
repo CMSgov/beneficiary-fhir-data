@@ -115,7 +115,7 @@ public final class RifFilesProcessor {
      * (specifically, group by claim ID/lines).
      */
     CsvRecordGrouper grouper =
-        new ColumnValueCsvRecordGrouper(isGrouped ? file.getFileType().getIdColumn() : null);
+        new ColumnValueCsvRecordGrouper(isGrouped ? file.getFileType().getIdColumn().get() : null);
     Iterator<List<CSVRecord>> csvIterator = new CsvRecordGroupingIterator(parser, grouper);
     Spliterator<List<CSVRecord>> spliterator =
         Spliterators.spliteratorUnknownSize(csvIterator, Spliterator.ORDERED | Spliterator.NONNULL);
