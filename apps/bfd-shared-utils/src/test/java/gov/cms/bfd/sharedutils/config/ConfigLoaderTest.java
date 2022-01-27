@@ -1,14 +1,7 @@
 package gov.cms.bfd.sharedutils.config;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
@@ -263,8 +256,8 @@ public class ConfigLoaderTest {
   @Test
   public void optionalBooleanValue() {
     values.put("a", "True");
-    assertEquals(true, loader.booleanValue("a", false));
-    assertEquals(false, loader.booleanValue("z", false));
+    assertTrue(loader.booleanValue("a", false));
+    assertFalse(loader.booleanValue("z", false));
   }
 
   @Test
