@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -113,6 +115,10 @@ public class PreAdjMcsClaim {
 
   @Column(name = "`idrClaimReceiptDate`")
   private LocalDate idrClaimReceiptDate;
+
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "`mbiId`")
+  private Mbi mbiRecord;
 
   @Column(name = "`idrClaimMbi`", length = 13)
   private String idrClaimMbi;

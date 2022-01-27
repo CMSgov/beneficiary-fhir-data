@@ -53,7 +53,8 @@ public class FissClaimStreamCallerIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
-  private final FissClaimTransformer transformer = new FissClaimTransformer(clock, hasher);
+  private final FissClaimTransformer transformer =
+      new FissClaimTransformer(clock, hasher.getConfig());
 
   @Test
   public void basicCall() throws Exception {
