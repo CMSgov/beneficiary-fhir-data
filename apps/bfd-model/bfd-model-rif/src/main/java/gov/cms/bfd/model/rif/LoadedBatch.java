@@ -7,28 +7,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
-/** JPA class for the LoadedBatches table */
+/** JPA class for the loaded_batches table */
 @Entity
-@Table(name = "`LoadedBatches`")
+@Table(name = "loaded_batches")
 public class LoadedBatch {
   public static final String SEPARATOR = ",";
 
   @Id
-  @Column(name = "`loadedBatchId`", nullable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedBatches_loadedBatchId_seq")
+  @Column(name = "loaded_batch_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedbatches_loadedbatchid_seq")
   @SequenceGenerator(
-      name = "loadedBatches_loadedBatchId_seq",
-      sequenceName = "loadedBatches_loadedBatchId_seq",
+      name = "loadedbatches_loadedbatchid_seq",
+      sequenceName = "loadedbatches_loadedbatchid_seq",
       allocationSize = 20)
   private long loadedBatchId;
 
-  @Column(name = "`loadedFileId`", nullable = false)
+  @Column(name = "loaded_file_id", nullable = false)
   private long loadedFileId;
 
-  @Column(name = "`beneficiaries`", columnDefinition = "varchar", nullable = false)
+  @Column(name = "beneficiaries", columnDefinition = "varchar", nullable = false)
   private String beneficiaries;
 
-  @Column(name = "`created`", nullable = false)
+  @Column(name = "created", nullable = false)
   private Instant created;
 
   /** default constructor */
@@ -69,7 +69,7 @@ public class LoadedBatch {
 
   /** @return the loadedBatchId */
   public long getLoadedBatchId() {
-    return loadedFileId;
+    return loadedBatchId;
   }
 
   /** @param loadedBatchId the identifier to set */
@@ -153,16 +153,14 @@ public class LoadedBatch {
    * slightly simpler and, since conversion is done once, just as efficient.
    */
   private static String convertToString(List<String> list) {
-    if (list == null || list.isEmpty()) {
-      return "";
-    }
-    return list.stream().collect(Collectors.joining(SEPARATOR));
+    return (list == null || list.isEmpty())
+        ? ""
+        : list.stream().collect(Collectors.joining(SEPARATOR));
   }
 
   private static List<String> convertToList(String commaSeparated) {
-    if (commaSeparated == null || commaSeparated.isEmpty()) {
-      return new ArrayList<>();
-    }
-    return Arrays.asList(commaSeparated.split(SEPARATOR, -1));
+    return (commaSeparated == null || commaSeparated.isEmpty())
+        ? new ArrayList<>()
+        : Arrays.asList(commaSeparated.split(SEPARATOR, -1));
   }
 }
