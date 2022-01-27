@@ -16,6 +16,9 @@ https://confluence.cms.gov/display/BB2/Run+the+BFD+Load+Tests
 The tests use a few python libraries that will need to be installed on the run box prior to starting the tests. Below are the required
 libraries, what they do, and the command to install them.
 
+To install everything below at the same time you can use the provided requirements file
+`pip3 install -r requirements.txt`
+
 **Pyyaml**
 
 What: Library for reading/writing yaml files
