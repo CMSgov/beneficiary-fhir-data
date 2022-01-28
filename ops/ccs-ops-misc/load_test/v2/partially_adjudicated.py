@@ -39,17 +39,17 @@ class BFDUser(HttpUser):
     @tag('claim', 'service-date')
     @task
     def get_claim_with_service_date(self):
-        self.base_query(f'/v2/fhir/Claim?mbi={self.hashed_mbi()}&service-date={SERVICE_DATE}', 'claimServiceDate')
+        self.base_query(f'/v2/fhir/Claim?mbi={self.hashed_mbi()}&service-date={self.SERVICE_DATE}', 'claimServiceDate')
 
     @tag('claim', 'last-updated')
     @task
     def get_claim_with_last_updated(self):
-        self.base_query(f'/v2/fhir/Claim?mbi={self.hashed_mbi()}&_lastUpdated={LAST_UPDATED}', 'claimLastUpdated')
+        self.base_query(f'/v2/fhir/Claim?mbi={self.hashed_mbi()}&_lastUpdated={self.LAST_UPDATED}', 'claimLastUpdated')
 
     @tag('claim', 'service-date', 'last-updated')
     @task
     def get_claim_with_service_date_and_last_updated(self):
-        self.base_query(f'/v2/fhir/Claim?mbi={self.hashed_mbi()}&_lastUpdated={LAST_UPDATED}&service-date={SERVICE_DATE}', 'claimServiceDateLastUpdated')
+        self.base_query(f'/v2/fhir/Claim?mbi={self.hashed_mbi()}&_lastUpdated={self.LAST_UPDATED}&service-date={self.SERVICE_DATE}', 'claimServiceDateLastUpdated')
 
     @tag("claim-response")
     @task
@@ -59,14 +59,14 @@ class BFDUser(HttpUser):
     @tag('claim-response', 'service-date')
     @task
     def get_claim_response_with_service_date(self):
-        self.base_query(f'/v2/fhir/ClaimResponse?mbi={self.hashed_mbi()}&service-date={SERVICE_DATE}', 'claimResponseServiceDate')
+        self.base_query(f'/v2/fhir/ClaimResponse?mbi={self.hashed_mbi()}&service-date={self.SERVICE_DATE}', 'claimResponseServiceDate')
 
     @tag('claim-response', 'last-updated')
     @task
     def get_claim_response_with_last_updated(self):
-        self.base_query(f'/v2/fhir/ClaimResponse?mbi={self.hashed_mbi()}&_lastUpdated={LAST_UPDATED}', 'claimResponseLastUpdated')
+        self.base_query(f'/v2/fhir/ClaimResponse?mbi={self.hashed_mbi()}&_lastUpdated={self.LAST_UPDATED}', 'claimResponseLastUpdated')
 
     @tag('claim-response', 'service-date', 'last-updated')
     @task
     def get_claim_response_with_service_date_and_last_updated(self):
-        self.base_query(f'/v2/fhir/ClaimResponse?mbi={self.hashed_mbi()}&_lastUpdated={LAST_UPDATED}&service-date={SERVICE_DATE}', 'claimResponseServiceDateLastUpdated')
+        self.base_query(f'/v2/fhir/ClaimResponse?mbi={self.hashed_mbi()}&_lastUpdated={self.LAST_UPDATED}&service-date={self.SERVICE_DATE}', 'claimResponseServiceDateLastUpdated')
