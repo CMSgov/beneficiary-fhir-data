@@ -78,6 +78,11 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "--");
         placeholders.put("logic.alter-column-type", "");
+        placeholders.put("logic.hsql-only-alter", "alter");
+        placeholders.put("logic.psql-only-alter", "-- alter");
+        placeholders.put("logic.alter-rename-column", "alter column");
+        placeholders.put("logic.alter-rename-constraint", "alter constraint");
+        placeholders.put("logic.rename-to", "rename to");
         placeholders.put("logic.index-create-concurrently", "");
         placeholders.put("logic.sequence-start", "start with");
         placeholders.put("logic.sequence-increment", "increment by");
@@ -88,6 +93,11 @@ public final class DatabaseSchemaManager {
         placeholders.put("logic.tablespaces-escape", "--");
         placeholders.put("logic.drop-tablespaces-escape", "");
         placeholders.put("logic.alter-column-type", "type");
+        placeholders.put("logic.hsql-only-alter", "-- alter");
+        placeholders.put("logic.psql-only-alter", "alter");
+        placeholders.put("logic.alter-rename-column", "rename column");
+        placeholders.put("logic.alter-rename-constraint", "rename constraint");
+        placeholders.put("logic.rename-to", "to");
         placeholders.put("logic.index-create-concurrently", "concurrently");
         placeholders.put("logic.sequence-start", "start");
         placeholders.put("logic.sequence-increment", "increment");

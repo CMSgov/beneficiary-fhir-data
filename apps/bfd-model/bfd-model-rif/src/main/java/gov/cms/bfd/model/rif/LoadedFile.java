@@ -6,21 +6,21 @@ import java.util.Set;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "`LoadedFiles`")
+@Table(name = "loaded_files")
 public class LoadedFile {
   @Id
-  @Column(name = "`loadedFileId`", nullable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedFiles_loadedFileId_seq")
+  @Column(name = "loaded_file_id", nullable = false)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loadedfiles_loadedfileid_seq")
   @SequenceGenerator(
-      name = "loadedFiles_loadedFileId_seq",
-      sequenceName = "loadedFiles_loadedFileId_seq",
+      name = "loadedfiles_loadedfileid_seq",
+      sequenceName = "loadedfiles_loadedfileid_seq",
       allocationSize = 1)
   private long loadedFileId;
 
-  @Column(name = "`rifType`", nullable = false)
+  @Column(name = "rif_type", nullable = false)
   private String rifType;
 
-  @Column(name = "`created`", nullable = false)
+  @Column(name = "created", nullable = false)
   private Instant created;
 
   @OneToMany(
