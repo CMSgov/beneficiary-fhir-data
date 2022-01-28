@@ -1,4 +1,4 @@
 SELECT count(*)
-FROM "BeneficiaryMonthly"
-WHERE "yearMonth" = $1::date
-AND "partDContractNumberId" = $2
+FROM beneficiary_monthly
+WHERE year_month = $1::date
+AND partd_contract_number_id = $2

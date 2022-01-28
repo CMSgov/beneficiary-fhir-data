@@ -173,6 +173,14 @@ public final class AppConfiguration implements Serializable {
   public static final int DEFAULT_RDA_JOB_BATCH_SIZE = 1;
 
   /**
+   * The name of the environment variable that should be used to provide the {@link
+   * #getRdaLoadOptions()} {@link RdaLoadJob.Config#getWriteThreads()} value.
+   */
+  public static final String ENV_VAR_KEY_RDA_JOB_WRITE_THREADS = "RDA_JOB_WRITE_THREADS";
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_WRITE_THREADS}. */
+  public static final int DEFAULT_RDA_JOB_WRITE_THREADS = 1;
+
+  /**
    * The name of the environment variable that specifies which type of RDA API server to connect to.
    * {@link GrpcRdaSource.Config#getServerType()}
    */
@@ -493,7 +501,10 @@ public final class AppConfiguration implements Serializable {
                         .orElse(DEFAULT_RDA_JOB_INTERVAL_SECONDS)))
             .batchSize(
                 readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_BATCH_SIZE, Integer::parseInt)
-                    .orElse(DEFAULT_RDA_JOB_BATCH_SIZE));
+                    .orElse(DEFAULT_RDA_JOB_BATCH_SIZE))
+            .writeThreads(
+                readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_WRITE_THREADS, Integer::parseInt)
+                    .orElse(DEFAULT_RDA_JOB_WRITE_THREADS));
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM, Long::parseLong)
         .ifPresent(jobConfig::startingFissSeqNum);
     readEnvParsedOptional(ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM, Long::parseLong)

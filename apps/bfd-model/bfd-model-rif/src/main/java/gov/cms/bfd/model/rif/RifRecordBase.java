@@ -7,5 +7,9 @@ import java.util.Optional;
 public interface RifRecordBase {
   Optional<Instant> getLastUpdated();
 
-  void setLastUpdated(Instant lastUpdated);
+  default void setLastUpdated(Instant lastUpdated) {
+    setLastUpdated(lastUpdated != null ? Optional.of(lastUpdated) : Optional.empty());
+  }
+
+  void setLastUpdated(Optional<Instant> lastUpdated);
 }

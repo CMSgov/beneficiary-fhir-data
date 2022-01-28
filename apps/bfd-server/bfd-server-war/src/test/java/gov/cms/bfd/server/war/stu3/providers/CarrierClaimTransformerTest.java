@@ -50,7 +50,7 @@ public final class CarrierClaimTransformerTest {
         CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
     assertMatches(claim, eobWithLastUpdated, Optional.of(true));
 
-    claim.setLastUpdated(null);
+    claim.setLastUpdated(Optional.empty());
     ExplanationOfBenefit eobWithoutLastUpdated =
         CarrierClaimTransformer.transform(new MetricRegistry(), claim, Optional.of(true));
     assertMatches(claim, eobWithoutLastUpdated, Optional.of(true));
