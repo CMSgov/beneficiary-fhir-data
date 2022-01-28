@@ -25,9 +25,6 @@ ALTER TABLE "pre_adj"."FissClaims"
 ALTER TABLE "pre_adj"."FissClaims"
     ADD CONSTRAINT "FK_FissClaims_mbiId" FOREIGN KEY ("mbiId") REFERENCES "pre_adj"."MbiCache"("mbiId");
 
-/*
- * Replace the idrClaimMbi and idrClaimMbiHash columns in FissClaims with a mbiId foreign key column.
- */
 ALTER TABLE "pre_adj"."McsClaims"
     ADD "mbiId" bigint;
 ALTER TABLE "pre_adj"."McsClaims"
