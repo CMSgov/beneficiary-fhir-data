@@ -339,7 +339,7 @@ public class SpringConfiguration {
 
   /**
    * Determines if the fhir resources related to pre adj claim data should be accessible via the
-   * fhir api seice.
+   * fhir api service.
    *
    * @return True if the resources should be available to consume, False otherwise.
    */
@@ -347,6 +347,19 @@ public class SpringConfiguration {
     return Boolean.TRUE
         .toString()
         .equalsIgnoreCase(System.getProperty("bfdServer.preadj.enabled", "false"));
+  }
+
+  /**
+   * Determines if the fhir resources related to pre adj claim data will accept {@link
+   * gov.cms.bfd.model.rda.Mbi#oldHash} values for queries. This is off by default but when enabled
+   * will simplify rotation of hash values.
+   *
+   * @return True if the resources should use oldHash values in queries, False otherwise.
+   */
+  public static boolean isPreAdjOldMbiHashEnabled() {
+    return Boolean.TRUE
+        .toString()
+        .equalsIgnoreCase(System.getProperty("bfdServer.preadj.oldMbiHash.enabled", "false"));
   }
 
   /**

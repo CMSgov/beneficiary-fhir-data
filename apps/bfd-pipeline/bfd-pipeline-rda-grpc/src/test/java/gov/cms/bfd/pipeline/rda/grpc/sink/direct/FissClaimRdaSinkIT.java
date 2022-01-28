@@ -42,8 +42,6 @@ public class FissClaimRdaSinkIT {
           claim.setCurrLoc2("1A");
           claim.setPracLocCity("city name can be very long indeed");
           claim.setMbiRecord(new Mbi(1L, "1234567890123", "hash-of-1234567890123"));
-          claim.setMbi(claim.getMbiRecord().getMbi());
-          claim.setMbiHash(claim.getMbiRecord().getHash());
 
           final PreAdjFissProcCode procCode0 = new PreAdjFissProcCode();
           procCode0.setDcn(claim.getDcn());
