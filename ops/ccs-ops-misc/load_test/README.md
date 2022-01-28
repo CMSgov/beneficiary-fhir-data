@@ -50,9 +50,9 @@ In addition to these libraries, you'll also need to copy a PEM (credentials) fil
 Run the following two commands on the box from your local directory:
 
 ```
-sudo cp /usr/local/bfd-server/bluebutton-backend-test-data-server-client-test-keypair.pem ./
+sudo cp /usr/local/bfd-server/bluebutton-backend-test-data-server-client-test-keypair.pem ~/
 
-sudo chown <SSH-username>:<SSH-username> bluebutton-backend-test-data-server-client-test-keypair.pem
+sudo chown <SSH-username>:<SSH-username> ~/bluebutton-backend-test-data-server-client-test-keypair.pem
 ```
 
 Once this is done you'll have a modified PEM to use for the tests in your user directory.
