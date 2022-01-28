@@ -14,7 +14,6 @@ import gov.cms.bfd.model.rif.CarrierClaim;
 import gov.cms.bfd.model.rif.CarrierClaimLine;
 import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
-import gov.cms.bfd.model.rif.RecordAction;
 import gov.cms.bfd.model.rif.RifFileEvent;
 import gov.cms.bfd.model.rif.RifFileRecords;
 import gov.cms.bfd.model.rif.RifFilesEvent;
@@ -596,13 +595,7 @@ public final class RifLoaderIT {
             LOGGER.warn("Record(s) failed to load.", error);
           },
           result -> {
-            // ignore UPDATE and DELETE rows for Synthea Data
-            if (sampleResources == Arrays.asList(StaticRifResourceGroup.SYNTHEA_DATA.getResources())
-                && result.getRifRecordEvent().getRecordAction() == RecordAction.INSERT) {
-              loadCount.incrementAndGet();
-            } else {
-              loadCount.incrementAndGet();
-            }
+            loadCount.incrementAndGet();
           });
       Slf4jReporter.forRegistry(rifFileEvent.getEventMetrics()).outputTo(LOGGER).build().report();
     }
@@ -614,11 +607,9 @@ public final class RifLoaderIT {
 
     // Verify that the expected number of records were run successfully.
     assertEquals(0, failureCount.get());
-    assertEquals(
-        sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum(),
-        loadCount.get(),
-        "Unexpected number of loaded records.");
-
+    assertTrue(
+        (loadCount.get() >= sampleResources.stream().mapToInt(r -> r.getRecordCount()).sum()),
+        "The number of loaded records should meet or exceed the number of expected records. The expected records can be exceeded because of line items.");
     /*
      * Run the extraction an extra time and verify that each record can now
      * be found in the database.
