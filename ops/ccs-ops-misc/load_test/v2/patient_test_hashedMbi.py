@@ -20,7 +20,7 @@ class BFDUser(HttpUser):
             errors.no_data_stop_test(self)
 
         hashed_mbi = mbis.pop()
-        self.client.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C%0A{hashed_mbi}&_IncludeIdentifiers=mbi',
+        self.client.get(f'/v2/fhir/Patient?identifier=https%3A%2F%2Fbluebutton.cms.gov%2Fresources%2Fidentifier%2Fmbi-hash%7C{hashed_mbi}&_IncludeIdentifiers=mbi',
                 cert=client_cert,
                 verify=server_public_key,
                 name='/v2/fhir/Patient search by hashed mbi / _IncludeIdentifiers=mbi')
