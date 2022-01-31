@@ -1,3 +1,3 @@
-SELECT DISTINCT "partDContractNumberId"
-FROM "BeneficiaryMonthly"
-WHERE "partDContractNumberId" IS NOT NULL
+SELECT DISTINCT partd_contract_number_id
+FROM beneficiary_monthly
+WHERE partd_contract_number_id IS NOT NULL
