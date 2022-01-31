@@ -2,8 +2,10 @@ package gov.cms.bfd.pipeline.bridge.etl;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.Timestamp;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.model.Mcs;
+import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsClaim;
@@ -11,6 +13,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsClaimType;
 import gov.cms.mpsm.rda.v1.mcs.McsDetail;
 import gov.cms.mpsm.rda.v1.mcs.McsDiagnosisCode;
 import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +34,7 @@ public class McsTransformer extends AbstractTransformer {
    * @return The RDA {@link McsClaimChange} object generated from the given data.
    */
   @Override
-  public MessageOrBuilder transform(Parser.Data<String> data) {
+  public MessageOrBuilder transform(WrappedCounter sequenceNumber, Parser.Data<String> data) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
 
     // Carrier claims break claims into multiple lines (rows).  Synthea isn't doing this, but just
@@ -96,6 +99,8 @@ public class McsTransformer extends AbstractTransformer {
       addDiagnosisCodes(claimBuilder, data, claimBuilder.getIdrClmHdIcn());
 
       return McsClaimChange.newBuilder()
+          .setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build())
+          .setSeq(sequenceNumber.inc())
           .setClaim(claimBuilder)
           .setChangeType(ChangeType.CHANGE_TYPE_UPDATE)
           .build();
