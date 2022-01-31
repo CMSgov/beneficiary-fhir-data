@@ -8,19 +8,21 @@ import psycopg2
 
 LIMIT = 100000  # global limit on the number of records to return
 
+
 def _execute(uri, query):
     """
     Execute a PSQL select statement and return its results
     """
     print('Collecting test data...')
-    conn = psycopg2.connect(uri)
-    with conn:
+
+    with psycopg2.connect(uri) as conn:
         with conn.cursor() as cursor:
             cursor.execute(query)
             results = cursor.fetchall()
             print(f'Returned {len(results)} results from the database for the test.')
-    conn.close()
+
     return results
+
 
 def get_bene_ids(uri):
     """
