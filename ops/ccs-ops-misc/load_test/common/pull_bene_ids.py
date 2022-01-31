@@ -20,10 +20,10 @@ def loadData():
     fileLimit = "100000"
 
     ## Use this until the data is cleaned up; right now there are tons of benes with null ref year which return 404 if we use them
-    beneQuery = "SELECT \"beneficiaryId\" FROM \"Beneficiaries\" WHERE \"beneEnrollmentReferenceYear\" IS NOT NULL LIMIT " + fileLimit + ";"
+    beneQuery = "SELECT bene_id FROM beneficiaries WHERE rfrnc_yr IS NOT NULL LIMIT " + fileLimit + ";"
 
     ## Use this query once the data is cleaned up, which will use random benes to avoid caching issues
-    ## beneQuery = "SELECT \"beneficiaryId\" FROM \"Beneficiaries\" TABLESAMPLE SYSTEM (0.25) LIMIT 100000;"
+    ## beneQuery = "SELECT bene_id FROM beneficiaries TABLESAMPLE SYSTEM (0.25) LIMIT " + fileLimit + ";"
 
     print("Collecting test data...")
 

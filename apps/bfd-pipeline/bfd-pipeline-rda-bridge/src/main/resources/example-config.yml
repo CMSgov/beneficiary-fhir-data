@@ -2,6 +2,8 @@ inputDirPath: path/to/rif/data/
 outputDirPath: output/
 fissOutputFile: rda-fiss.ndjson
 mcsOutputFile: rda-mcs.ndjson
+fissSeqStart: 1 # Sequence numbers must be 1 or higher
+mcsSeqStart: 1  # Sequence numbers must be 1 or higher
 fissSources:
   - inpatient.csv
   - outpatient.csv

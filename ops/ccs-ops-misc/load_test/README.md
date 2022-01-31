@@ -47,12 +47,12 @@ See: http://docs.locust.io/en/stable/installation.html
 
 
 In addition to these libraries, you'll also need to copy a PEM (credentials) file and set the user to your SSH username on the test box. 
-Run the following two commands on the box:
+Run the following two commands on the box from your local directory:
 
 ```
 sudo cp /usr/local/bfd-server/bluebutton-backend-test-data-server-client-test-keypair.pem ~/
 
-sudo chown <SSH-username>:<SSH-username> bluebutton-backend-test-data-server-client-test-keypair.pem
+sudo chown <SSH-username>:<SSH-username> ~/bluebutton-backend-test-data-server-client-test-keypair.pem
 ```
 
 Once this is done you'll have a modified PEM to use for the tests in your user directory.
@@ -65,13 +65,13 @@ The tests run headless, i.e. without the web GUI, because we'll be executing the
 
 The tests are run with parameters that specify all the test params and test file to use, so the test can be run in a single line. This is primarily meant to allow support for running tests in Jenkins, but can also be used to automate test suites.
 
-A single-line test will look like this:
+A single-line test will look like this (placeholders to replace in brackets):
 
-_python3 runtests.py --homePath="~/" --clientCertPath="~/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseHost="**<AWS_DB_host>**" --databaseUsername="**<db_username_from_keybase>**" --databasePassword="**<db_password_from_keybase>**" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"_
+    python3 runtests.py --homePath="<home_directory_path>" --clientCertPath="<home_directory_path>/bluebutton-backend-test-data-server-client-test-keypair.pem" --databaseHost="<AWS_DB_host>" --databaseUsername="<db_username_from_keybase>" --databasePassword="<db_password_from_keybase>" --testHost="https://test.bfd.cms.gov" --testFile="./v2/eob_test_id_count.py" --testRunTime="1m" --maxClients="100" --clientsPerSecond="5"
 
 Essentially, all the items you would set up in the config file are set in a single line. There are some optional, and some required parameters here:
 
-**--homePath** : (Required) : The path to your home directory on the local box, such as /home/logan.mitchell/ or ~/
+**--homePath** : (Required) : The path to your home directory on the local box, such as /home/logan.mitchell/
 
 **--clientCertPath** : (Required) : The path to the PEM file we copied/modified earlier. Should be located in your home directory like this: ~/bluebutton-backend-test-data-server-client-test-keypair.pem
 
@@ -81,7 +81,7 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 **--databasePassword** : (Required) : The password for connecting to the database, can be found in Keybase. Make sure to use the correct one for the environment you're connecting to.
 
-**--testHost** : (Required) : The load balancer or single node to run the tests against. The environment used here should match the same environment (test, prod-sbx, prod) as the database, so we pull the appropriate data for the environment tested against.
+**--testHost** : (Required) : The load balancer or single node to run the tests against. The environment used here should match the same environment (test, prod-sbx, prod) as the database, so we pull the appropriate data for the environment tested against. Note that when using a single node, you should specity the Ip AND the port for the application.
 
 **--testFile** : (Required) : The path to the test file we want to run.
 
@@ -99,7 +99,9 @@ Essentially, all the items you would set up in the config file are set in a sing
 
 There is one special type of test that requires a data setup script to be run beforehand; this is the coverage contract test. This test runs through every list of pages for a set of contracts, but the urls for hitting all the pages of whatever contracts need to be set up before the test runs. This can be done by calling the data setup script common/write_contract_cursors.py similar to this:
 
-_python3 ./common/write_contract_cursors.py --contracts="Z9997,Z9998,Z9999" --year="2020" --month="01" --count="5" --version="v2"_
+    python3 ./common/write_contract_cursors.py --contracts="Z9997,Z9998,Z9999" --year="2020" --month="01" --count="5" --version="v2"
+
+The script will write out the results to homePath specified in the config (and expect them there during runtime.)
 
 The following are the arguments passed to this data setup script:
 
