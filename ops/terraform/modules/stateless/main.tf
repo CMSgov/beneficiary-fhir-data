@@ -146,7 +146,7 @@ resource "aws_iam_role_policy_attachment" "fhir_iam_ansible_vault_pw_ro_s3" {
 # parameter store variables
 #
 resource "aws_iam_policy" "fhir_parameter_store" {
-  name        = "bfd-${var.env_config.env}-pipeline-ro-parameter-store"
+  name        = "bfd-${var.env_config.env}-fhir-ro-parameter-store"
   description = "Read-only permissions to environment scoped parameter store variables"
 
   policy = <<EOF
