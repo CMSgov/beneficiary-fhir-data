@@ -15,11 +15,16 @@ def _execute(uri, query):
     """
     print('Collecting test data...')
 
-    with psycopg2.connect(uri) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(query)
-            results = cursor.fetchall()
-            print(f'Returned {len(results)} results from the database for the test.')
+    conn = None
+
+    try:
+        with psycopg2.connect(uri) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                results = cursor.fetchall()
+                print(f'Returned {len(results)} results from the database for the test.')
+    finally:
+        conn.close()
 
     return results
 
