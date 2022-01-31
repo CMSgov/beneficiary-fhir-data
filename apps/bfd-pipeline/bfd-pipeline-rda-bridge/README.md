@@ -33,6 +33,8 @@ usage: run_bridge.sh sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
     -m <arg>    MCS file to read from
     -n <arg>    MCS RDA output file
     -o <arg>    The directory where the output files will be written to.
+    -s <arg>    The starting sequence number for FISS claims (Must be 1 or higher)
+    -z <arg>    The starting sequence number for MCS claims (Must be 1 or higher)
 ```
 
 ## Example execution commands
@@ -41,7 +43,9 @@ usage: run_bridge.sh sourceDir [-b <arg>] [-e <arg>] [-f <arg>] [-g <arg>] [-m
 ./run_bridge.sh path/to/rif/ \
     -o output/ \
     -g rda-fiss-out.ndjson \
+    -s 10000
     -n rda-mcs-out.ndjson \
+    -z 8000
     -f inpatient.csv \
     -f outpatient.csv \
     -m carrier.csv \
