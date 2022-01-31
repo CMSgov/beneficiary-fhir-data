@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.apache.commons.csv.CSVParser;
@@ -27,388 +26,371 @@ import org.apache.commons.csv.CSVParser;
 /** Enumerates the sample RIF resources available on the classpath. */
 public enum StaticRifResource {
   SAMPLE_A_BENES(
-      resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      Optional.of(1)),
+      resourceUrl("rif-static-samples/sample-a-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
   SAMPLE_A_BENES_WITH_BACKSLASH(
       resourceUrl("rif-static-samples/sample-a-beneficiaries-with-backslash.txt"),
       RifFileType.BENEFICIARY,
-      Optional.of(1)),
+      1),
 
   SAMPLE_A_BENEFICIARY_HISTORY(
       resourceUrl("rif-static-samples/sample-a-beneficiaryhistory.txt"),
       RifFileType.BENEFICIARY_HISTORY,
-      Optional.of(3)),
+      3),
 
   SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY(
       resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory.txt"),
       RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
-      Optional.of(1)),
+      1),
 
   SAMPLE_A_MEDICARE_BENEFICIARY_ID_HISTORY_EXTRA(
       resourceUrl("rif-static-samples/sample-a-medicarebeneficiaryidhistory-extra.txt"),
       RifFileType.MEDICARE_BENEFICIARY_ID_HISTORY,
-      Optional.of(1)),
+      1),
 
-  SAMPLE_A_CARRIER(
-      resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, Optional.of(1)),
+  SAMPLE_A_CARRIER(resourceUrl("rif-static-samples/sample-a-bcarrier.txt"), RifFileType.CARRIER, 1),
 
   SAMPLE_A_INPATIENT(
-      resourceUrl("rif-static-samples/sample-a-inpatient.txt"),
-      RifFileType.INPATIENT,
-      Optional.of(1)),
+      resourceUrl("rif-static-samples/sample-a-inpatient.txt"), RifFileType.INPATIENT, 1),
 
   SAMPLE_A_OUTPATIENT(
-      resourceUrl("rif-static-samples/sample-a-outpatient.txt"),
-      RifFileType.OUTPATIENT,
-      Optional.of(1)),
+      resourceUrl("rif-static-samples/sample-a-outpatient.txt"), RifFileType.OUTPATIENT, 1),
 
-  SAMPLE_A_SNF(resourceUrl("rif-static-samples/sample-a-snf.txt"), RifFileType.SNF, Optional.of(1)),
+  SAMPLE_A_SNF(resourceUrl("rif-static-samples/sample-a-snf.txt"), RifFileType.SNF, 1),
 
-  SAMPLE_A_HOSPICE(
-      resourceUrl("rif-static-samples/sample-a-hospice.txt"), RifFileType.HOSPICE, Optional.of(1)),
+  SAMPLE_A_HOSPICE(resourceUrl("rif-static-samples/sample-a-hospice.txt"), RifFileType.HOSPICE, 1),
 
-  SAMPLE_A_HHA(resourceUrl("rif-static-samples/sample-a-hha.txt"), RifFileType.HHA, Optional.of(1)),
+  SAMPLE_A_HHA(resourceUrl("rif-static-samples/sample-a-hha.txt"), RifFileType.HHA, 1),
 
-  SAMPLE_A_DME(resourceUrl("rif-static-samples/sample-a-dme.txt"), RifFileType.DME, Optional.of(1)),
+  SAMPLE_A_DME(resourceUrl("rif-static-samples/sample-a-dme.txt"), RifFileType.DME, 1),
 
-  SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, Optional.of(1)),
+  SAMPLE_A_PDE(resourceUrl("rif-static-samples/sample-a-pde.txt"), RifFileType.PDE, 1),
 
   SAMPLE_B_BENES(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "beneficiary_test.rif"),
       RifFileType.BENEFICIARY,
-      Optional.of(100)),
+      100),
 
   SAMPLE_B_CARRIER(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "carrier_test.rif"),
       RifFileType.CARRIER,
-      Optional.of(4378)),
+      4378),
 
   SAMPLE_B_INPATIENT(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "inpatient_test.rif"),
       RifFileType.INPATIENT,
-      Optional.of(49)),
+      49),
 
   SAMPLE_B_OUTPATIENT(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "outpatient_test.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(829)),
+      829),
 
   SAMPLE_B_SNF(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "snf_test.rif"),
       RifFileType.SNF,
-      Optional.of(14)),
+      14),
 
   SAMPLE_B_HOSPICE(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hospice_test.rif"),
       RifFileType.HOSPICE,
-      Optional.of(10)),
+      10),
 
   SAMPLE_B_HHA(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "hha_test.rif"),
       RifFileType.HHA,
-      Optional.of(51)),
+      51),
 
   SAMPLE_B_DME(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "dme_test.rif"),
       RifFileType.DME,
-      Optional.of(248)),
+      248),
 
   SAMPLE_B_PDE(
       localCopyOfS3Data(TestDataSetLocation.SAMPLE_B_LOCATION, "pde_test.rif"),
       RifFileType.PDE,
-      Optional.of(5714)),
+      5714),
 
   SAMPLE_C_BENES(
       remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "beneficiary_test.rif"),
       RifFileType.BENEFICIARY,
-      Optional.of(1000000)),
+      1000000),
 
   SAMPLE_C_CARRIER(
       remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "carrier_test.rif"),
       RifFileType.CARRIER,
-      Optional.of(32943217)),
+      32943217),
 
   SAMPLE_C_DME(
       remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "dme_test.rif"),
       RifFileType.DME,
-      Optional.of(2320363)),
+      2320363),
 
   SAMPLE_C_HHA(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hha_test.rif"),
-      RifFileType.HHA,
-      Optional.of(228623)),
+      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hha_test.rif"), RifFileType.HHA, 228623),
 
   SAMPLE_C_HOSPICE(
       remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "hospice_test.rif"),
       RifFileType.HOSPICE,
-      Optional.of(106462)),
+      106462),
 
   SAMPLE_C_INPATIENT(
       remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "inpatient_test.rif"),
       RifFileType.INPATIENT,
-      Optional.of(384616)),
+      384616),
 
   SAMPLE_C_OUTPATIENT(
       remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "outpatient_test.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(6195549)),
+      6195549),
 
   SAMPLE_C_PDE(
       remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "pde_test.rif"),
       RifFileType.PDE,
-      Optional.of(67566673)),
+      67566673),
 
   SAMPLE_C_SNF(
-      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"),
-      RifFileType.SNF,
-      Optional.of(169175)),
+      remoteS3Data(TestDataSetLocation.SAMPLE_C_LOCATION, "snf_test.rif"), RifFileType.SNF, 169175),
 
   SAMPLE_U_BENES(
-      resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      Optional.of(1)),
+      resourceUrl("rif-static-samples/sample-u-beneficiaries.txt"), RifFileType.BENEFICIARY, 1),
 
   SAMPLE_U_BENES_CHANGED_WITH_8_MONTHS(
-      resourceUrl("rif-static-samples/sample-u-with-8-months.txt"),
-      RifFileType.BENEFICIARY,
-      Optional.of(1)),
+      resourceUrl("rif-static-samples/sample-u-with-8-months.txt"), RifFileType.BENEFICIARY, 1),
 
   SAMPLE_U_BENES_CHANGED_WITH_9_MONTHS(
-      resourceUrl("rif-static-samples/sample-u-with-9-months.txt"),
-      RifFileType.BENEFICIARY,
-      Optional.of(1)),
+      resourceUrl("rif-static-samples/sample-u-with-9-months.txt"), RifFileType.BENEFICIARY, 1),
 
   SAMPLE_U_BENES_UNCHANGED(
       resourceUrl("rif-static-samples/sample-u-unchanged-beneficiaries.txt"),
       RifFileType.BENEFICIARY,
-      Optional.of(1)),
+      1),
 
-  SAMPLE_U_CARRIER(
-      resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, Optional.of(1)),
+  SAMPLE_U_CARRIER(resourceUrl("rif-static-samples/sample-u-bcarrier.txt"), RifFileType.CARRIER, 1),
 
-  SAMPLE_SYNTHEA_BENE(
-      resourceUrl("rif-synthea/beneficiary.csv"), RifFileType.BENEFICIARY, Optional.empty()),
-  SAMPLE_SYNTHEA_BENEINT(
-      resourceUrl("rif-synthea/beneficiary_interim.csv"),
-      RifFileType.BENEFICIARY,
-      Optional.empty()),
-  SAMPLE_SYNTHEA_BENEFINAL(
-      resourceUrl("rif-synthea/beneficiary_final.csv"), RifFileType.BENEFICIARY, Optional.empty()),
-  SAMPLE_SYNTHEA_CARRIER(
-      resourceUrl("rif-synthea/carrier.csv"), RifFileType.CARRIER, Optional.empty()),
-  SAMPLE_SYNTHEA_INPATIENT(
-      resourceUrl("rif-synthea/inpatient.csv"), RifFileType.INPATIENT, Optional.empty()),
+  SAMPLE_SYNTHEA_BENES2011(
+      resourceUrl("rif-synthea/beneficiary_2011.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2012(
+      resourceUrl("rif-synthea/beneficiary_2012.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2013(
+      resourceUrl("rif-synthea/beneficiary_2013.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2014(
+      resourceUrl("rif-synthea/beneficiary_2014.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2015(
+      resourceUrl("rif-synthea/beneficiary_2015.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2016(
+      resourceUrl("rif-synthea/beneficiary_2016.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2017(
+      resourceUrl("rif-synthea/beneficiary_2017.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2018(
+      resourceUrl("rif-synthea/beneficiary_2018.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2019(
+      resourceUrl("rif-synthea/beneficiary_2019.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2020(
+      resourceUrl("rif-synthea/beneficiary_2020.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_BENES2021(
+      resourceUrl("rif-synthea/beneficiary_2021.csv"), RifFileType.BENEFICIARY, 10000),
+  SAMPLE_SYNTHEA_CARRIER(resourceUrl("rif-synthea/carrier.csv"), RifFileType.CARRIER, 279900),
+  SAMPLE_SYNTHEA_INPATIENT(resourceUrl("rif-synthea/inpatient.csv"), RifFileType.INPATIENT, 36606),
   SAMPLE_SYNTHEA_OUTPATIENT(
-      resourceUrl("rif-synthea/outpatient.csv"), RifFileType.OUTPATIENT, Optional.empty()),
-  SAMPLE_SYNTHEA_SNF(resourceUrl("rif-synthea/snf.csv"), RifFileType.SNF, Optional.empty()),
-  SAMPLE_SYNTHEA_HOSPICE(
-      resourceUrl("rif-synthea/hospice.csv"), RifFileType.HOSPICE, Optional.empty()),
-  SAMPLE_SYNTHEA_HHA(resourceUrl("rif-synthea/hha.csv"), RifFileType.HHA, Optional.empty()),
-  SAMPLE_SYNTHEA_DME(resourceUrl("rif-synthea/dme.csv"), RifFileType.DME, Optional.empty()),
-  SAMPLE_SYNTHEA_PDE(resourceUrl("rif-synthea/pde.csv"), RifFileType.PDE, Optional.empty()),
+      resourceUrl("rif-synthea/outpatient.csv"), RifFileType.OUTPATIENT, 328420),
+  SAMPLE_SYNTHEA_SNF(resourceUrl("rif-synthea/snf.csv"), RifFileType.SNF, 2797),
+  SAMPLE_SYNTHEA_HOSPICE(resourceUrl("rif-synthea/hospice.csv"), RifFileType.HOSPICE, 1396),
+  SAMPLE_SYNTHEA_HHA(resourceUrl("rif-synthea/home.csv"), RifFileType.HHA, 14377),
+  SAMPLE_SYNTHEA_DME(resourceUrl("rif-synthea/dme.csv"), RifFileType.DME, 8727),
+  SAMPLE_SYNTHEA_PDE(resourceUrl("rif-synthea/prescription.csv"), RifFileType.PDE, 214157),
   SAMPLE_SYNTHEA_BENEHISTORY(
-      resourceUrl("rif-synthea/beneficiary_history.csv"),
-      RifFileType.BENEFICIARY_HISTORY,
-      Optional.empty()),
+      resourceUrl("rif-synthea/beneficiary_history.csv"), RifFileType.BENEFICIARY_HISTORY, 10000),
 
   SYNTHETIC_BENEFICIARY_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-1999.rif"),
       RifFileType.BENEFICIARY,
-      Optional.of(10000)),
+      10000),
 
   SYNTHETIC_BENEFICIARY_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-2000.rif"),
       RifFileType.BENEFICIARY,
-      Optional.of(10000)),
+      10000),
 
   SYNTHETIC_BENEFICIARY_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-beneficiary-2014.rif"),
       RifFileType.BENEFICIARY,
-      Optional.of(10000)),
+      10000),
 
   SYNTHETIC_CARRIER_1999_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-1999.rif"),
       RifFileType.CARRIER,
-      Optional.of(102617)),
+      102617),
 
   SYNTHETIC_CARRIER_1999_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-2000.rif"),
       RifFileType.CARRIER,
-      Optional.of(107665)),
+      107665),
 
   SYNTHETIC_CARRIER_1999_2001(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-1999-2001.rif"),
       RifFileType.CARRIER,
-      Optional.of(113604)),
+      113604),
 
   SYNTHETIC_CARRIER_2000_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2000.rif"),
       RifFileType.CARRIER,
-      Optional.of(102178)),
+      102178),
 
   SYNTHETIC_CARRIER_2000_2001(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2001.rif"),
       RifFileType.CARRIER,
-      Optional.of(108801)),
+      108801),
 
   SYNTHETIC_CARRIER_2000_2002(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2000-2002.rif"),
       RifFileType.CARRIER,
-      Optional.of(113806)),
+      113806),
 
   SYNTHETIC_CARRIER_2014_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2014.rif"),
       RifFileType.CARRIER,
-      Optional.of(108172)),
+      108172),
 
   SYNTHETIC_CARRIER_2014_2015(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2015.rif"),
       RifFileType.CARRIER,
-      Optional.of(106577)),
+      106577),
 
   SYNTHETIC_CARRIER_2014_2016(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-carrier-2014-2016.rif"),
       RifFileType.CARRIER,
-      Optional.of(86736)),
+      86736),
 
   SYNTHETIC_INPATIENT_1999_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-1999.rif"),
       RifFileType.INPATIENT,
-      Optional.of(650)),
+      650),
 
   SYNTHETIC_INPATIENT_1999_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-2000.rif"),
       RifFileType.INPATIENT,
-      Optional.of(646)),
+      646),
 
   SYNTHETIC_INPATIENT_1999_2001(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-1999-2001.rif"),
       RifFileType.INPATIENT,
-      Optional.of(700)),
+      700),
 
   SYNTHETIC_INPATIENT_2000_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2000.rif"),
       RifFileType.INPATIENT,
-      Optional.of(706)),
+      706),
 
   SYNTHETIC_INPATIENT_2000_2001(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2001.rif"),
       RifFileType.INPATIENT,
-      Optional.of(641)),
+      641),
 
   SYNTHETIC_INPATIENT_2000_2002(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2000-2002.rif"),
       RifFileType.INPATIENT,
-      Optional.of(680)),
+      680),
 
   SYNTHETIC_INPATIENT_2014_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2014.rif"),
       RifFileType.INPATIENT,
-      Optional.of(352)),
+      352),
 
   SYNTHETIC_INPATIENT_2014_2015(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2015.rif"),
       RifFileType.INPATIENT,
-      Optional.of(309)),
+      309),
 
   SYNTHETIC_INPATIENT_2014_2016(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-inpatient-2014-2016.rif"),
       RifFileType.INPATIENT,
-      Optional.of(387)),
+      387),
 
   SYNTHETIC_PDE_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2014.rif"),
       RifFileType.PDE,
-      Optional.of(127643)),
+      127643),
 
   SYNTHETIC_PDE_2015(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2015.rif"),
       RifFileType.PDE,
-      Optional.of(140176)),
+      140176),
 
   SYNTHETIC_PDE_2016(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-pde-2016.rif"),
       RifFileType.PDE,
-      Optional.of(145526)),
+      145526),
 
   SYNTHETIC_OUTPATIENT_1999_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-1999-1999.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(20744)),
+      20744),
 
   SYNTHETIC_OUTPATIENT_2000_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2000-1999.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(22439)),
+      22439),
 
   SYNTHETIC_OUTPATIENT_2001_1999(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2001-1999.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(23241)),
+      23241),
 
   SYNTHETIC_OUTPATIENT_2002_2000(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2002-2000.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(24575)),
+      24575),
 
   SYNTHETIC_OUTPATIENT_2014_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2014-2014.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(25194)),
+      25194),
 
   SYNTHETIC_OUTPATIENT_2015_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2015-2014.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(26996)),
+      26996),
 
   SYNTHETIC_OUTPATIENT_2016_2014(
       remoteS3Data(TestDataSetLocation.SYNTHETIC_DATA, "synthetic-outpatient-2016-2014.rif"),
       RifFileType.OUTPATIENT,
-      Optional.of(27955)),
+      27955),
 
   SAMPLE_MCT_BENES(
-      resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"),
-      RifFileType.BENEFICIARY,
-      Optional.of(8)),
+      resourceUrl("rif-static-samples/sample-mct-beneficiaries.txt"), RifFileType.BENEFICIARY, 8),
 
-  SAMPLE_MCT_PDE(
-      resourceUrl("rif-static-samples/sample-mct-pde.txt"), RifFileType.PDE, Optional.of(40)),
+  SAMPLE_MCT_PDE(resourceUrl("rif-static-samples/sample-mct-pde.txt"), RifFileType.PDE, 40),
 
   SAMPLE_MCT_UPDATE_1_BENES(
       resourceUrl("rif-static-samples/sample-mct-update-1-beneficiaries.txt"),
       RifFileType.BENEFICIARY,
-      Optional.of(8)),
+      8),
 
   SAMPLE_MCT_UPDATE_2_PDE(
-      resourceUrl("rif-static-samples/sample-mct-update-2-pde.txt"),
-      RifFileType.PDE,
-      Optional.of(40)),
+      resourceUrl("rif-static-samples/sample-mct-update-2-pde.txt"), RifFileType.PDE, 40),
 
   SAMPLE_MCT_UPDATE_3_BENES(
       resourceUrl("rif-static-samples/sample-mct-update-3-beneficiaries.txt"),
       RifFileType.BENEFICIARY,
-      Optional.of(2)),
+      2),
 
   SAMPLE_MCT_UPDATE_3_PDE(
-      resourceUrl("rif-static-samples/sample-mct-update-3-pde.txt"),
-      RifFileType.PDE,
-      Optional.of(7)),
+      resourceUrl("rif-static-samples/sample-mct-update-3-pde.txt"), RifFileType.PDE, 7),
 
   SAMPLE_HICN_MULT_BENES(
       resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaries.txt"),
       RifFileType.BENEFICIARY,
-      Optional.of(10)),
+      10),
 
   SAMPLE_HICN_MULT_BENES_BENEFICIARY_HISTORY(
       resourceUrl("rif-static-samples/sample-hicn-mult-bene-beneficiaryhistory.txt"),
       RifFileType.BENEFICIARY_HISTORY,
-      Optional.of(7));
+      7);
 
   private final Supplier<URL> resourceUrlSupplier;
   private final RifFileType rifFileType;
-  private Optional<Integer> recordCount;
+  private final int recordCount;
 
   private URL resourceUrl;
 
@@ -417,11 +399,10 @@ public enum StaticRifResource {
    *
    * @param resourceUrlSupplier the value to use for {@link #getResourceSupplier()}
    * @param rifFileType the value to use for {@link #getRifFileType()}
-   * @param recordCount the value to use for {@link #getRecordCount()}, or {@link Optional#empty()}
-   *     if that count is not known in advance
+   * @param recordCount the value to use for {@link #getRecordCount()}
    */
   private StaticRifResource(
-      Supplier<URL> resourceUrlSupplier, RifFileType rifFileType, Optional<Integer> recordCount) {
+      Supplier<URL> resourceUrlSupplier, RifFileType rifFileType, int recordCount) {
     this.resourceUrlSupplier = resourceUrlSupplier;
     this.rifFileType = rifFileType;
     this.recordCount = recordCount;
@@ -440,36 +421,8 @@ public enum StaticRifResource {
   }
 
   /** @return the number of beneficiaries/claims/drug events in the RIF file */
-  public synchronized int getRecordCount() {
-    if (!recordCount.isPresent()) recordCount = Optional.of(countRecords());
-
-    return recordCount.get();
-  }
-
-  /** @return the number of records in this {@link StaticRifResource} */
-  private Integer countRecords() {
-    RifFile rifFile = new StaticRifFile(this);
-    try (CSVParser csvParser = RifParsingUtils.createCsvParser(rifFile)) {
-      Optional<Enum<?>> idColumn = rifFile.getFileType().getIdColumn();
-      Set<String> uniqueIds = new HashSet<>();
-      csvParser.forEach(
-          csvRecord -> {
-            if (idColumn.isPresent()) {
-              // We can't just count the number of lines, as that won't account for there being
-              // multiple claim lines per claim.
-              if (csvRecord.get(0).equals("INSERT")) {
-                String id = csvRecord.get(idColumn.get());
-                uniqueIds.add(id);
-              }
-            } else {
-              // Just count the number of lines
-              uniqueIds.add("" + csvRecord.getRecordNumber());
-            }
-          });
-      return uniqueIds.size();
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+  public int getRecordCount() {
+    return recordCount;
   }
 
   /** @return a {@link RifFile} based on this {@link StaticRifResource} */
@@ -640,7 +593,7 @@ public enum StaticRifResource {
         parser.forEach(
             r -> {
               if (resource.getRifFileType().getIdColumn() != null)
-                uniqueIds.add(r.get(resource.getRifFileType().getIdColumn().get()));
+                uniqueIds.add(r.get(resource.getRifFileType().getIdColumn()));
               else uniqueIds.add("" + r.getRecordNumber());
             });
       } finally {
