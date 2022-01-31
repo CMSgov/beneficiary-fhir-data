@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * Liquibase changelog is in <code>src/main/resources/db-schema.xml</code>.
  *
  * <p>TODO This is no longer only used by the CCW job, and so should be moved to a different module
- * & package
+ * and package
  */
 public final class DatabaseSchemaManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSchemaManager.class);

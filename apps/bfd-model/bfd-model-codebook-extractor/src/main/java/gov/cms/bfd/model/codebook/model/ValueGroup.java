@@ -9,15 +9,15 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 
 /**
  * Represents a grouped {@link List} of {@link Value}s in a {@link Variable}. These {@link
- * ValueGroup}ings are only used to associate a common {@link #getDescription()} value with related
+ * ValueGroup}*ings are only used to associate a common {@link #getDescription()} value with related
  * {@link Variable}s.
  *
  * <p>Note that many {@link ValueGroup}s do not have a description. This is the case for {@link
- * Variable}s that only have a single {@link ValueGroup}.
+ * Variable}*s that only have a single {@link ValueGroup}.
  *
  * <p>Note that only some {@link Variable}s are coded, and only some of those coded {@link
- * Variable}s have their possible {@link Value}s enumerated in the {@link Codebook}. For {@link
- * Variable}s that don't have their possible {@link Value}s enumerated in the {@link Codebook}, the
+ * Variable}*s have their possible {@link Value}s enumerated in the {@link Codebook}. For {@link
+ * Variable}*s that don't have their possible {@link Value}s enumerated in the {@link Codebook}, the
  * {@link Variable#getValueGroups()} property will be <code>null</code>.
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
@@ -34,6 +34,9 @@ public final class ValueGroup {
   /**
    * Constructs a new {@link ValueGroup} instance for the CCWCodebookMissingVariable. Had to add new
    * constructor for instantiation of the CCWCodebookInterface
+   *
+   * @param description the description
+   * @param values the values
    */
   public ValueGroup(List<String> description, List<Value> values) {
     this.description = description;
