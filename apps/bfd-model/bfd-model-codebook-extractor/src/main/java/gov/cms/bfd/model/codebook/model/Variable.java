@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Each {@link Variable} instance represents one of the CCW variables/fields documented in a {@link
- * Codebook}*.
+ * Codebook}.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class Variable {
@@ -356,8 +356,8 @@ public final class Variable {
    * Gets the comment.
    *
    * @return a comment providing more detail on this {@link Variable}'s purpose and/or history, zero
-   *     or more (English) paragraphs long, with one {@link List} entry per paragraph, or <code>
-   *     null     </code> if that information is unknown for this {@link Variable}
+   *     or more (English) paragraphs long, with one {@link List} entry per paragraph, or <code>null
+   *     </code> if that information is unknown for this {@link Variable}
    */
   public Optional<List<String>> getComment() {
     return Optional.ofNullable(comment);

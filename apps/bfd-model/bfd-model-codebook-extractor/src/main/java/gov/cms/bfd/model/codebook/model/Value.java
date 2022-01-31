@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlValue;
  * for its grandparent {@link Variable}.
  *
  * <p>Note that only some {@link Variable}s are coded, and only some of those coded {@link
- * Variable}*s have their possible {@link Value}s enumerated in the {@link Codebook}.
+ * Variable}s have their possible {@link Value}s enumerated in the {@link Codebook}.
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public final class Value {
