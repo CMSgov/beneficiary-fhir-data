@@ -27,7 +27,7 @@
  */
 
 
--- Find the "Beneficiaries".bene_id groupings.
+-- Find the beneficiaries.bene_id groupings.
 WITH ids AS (
   SELECT
     CAST(bene_id AS bigint) AS id
@@ -62,7 +62,7 @@ ORDER BY MIN(id);
 -- Time: 106524.199 ms
 
 
--- Find the "CarrierClaims".clm_idgroupings.
+-- Find the carrier_claims.clm_id groupings.
 WITH ids_filtered AS (
   SELECT
     CAST(clm_id AS bigint) AS id
@@ -129,7 +129,7 @@ ORDER BY MIN(id);
 -- Time: 44374.912 ms
 
 
--- Find the "DMEClaims".clm_idgroupings.
+-- Find the dme_claims.clm_id groupings.
 WITH ids AS (
   SELECT
     CAST(clm_id AS bigint) AS id
@@ -157,7 +157,7 @@ ORDER BY MIN(id);
 -- Time: 0.944 ms
 
 
--- Find the "HHAClaims".clm_idgroupings.
+-- Find the hha_claims.clm_id groupings.
 WITH ids AS (
   SELECT
 CAST(clm_id AS bigint) AS id
@@ -185,7 +185,7 @@ ORDER BY MIN(id);
 -- Time: 1.876 ms
 
 
--- Find the "HospiceClaims".clm_idgroupings.
+-- Find the hospice_claims.clm_id groupings.
 WITH ids AS (
   SELECT
     CAST(clm_id AS bigint) AS id
@@ -213,7 +213,7 @@ ORDER BY MIN(id);
 -- Time: 1.259 ms
 
 
--- Find the "InpatientClaims".clm_idgroupings.
+-- Find the inpatient_claims.clm_id groupings.
 WITH ids_filtered AS (
   SELECT
     CAST(clm_id AS bigint) AS id
@@ -273,7 +273,7 @@ ORDER BY MIN(id);
 -- Time: 8.198 ms
 
 
--- Find the "OutpatientClaims".clm_idgroupings.
+-- Find the outpatient_claims.clm_id groupings.
 WITH ids_filtered AS (
   SELECT
     CAST(clm_id AS bigint) AS id
@@ -330,7 +330,7 @@ ORDER BY MIN(id);
 -- Time: 210.042 ms
 
 
--- Find the "SNFClaims".clm_idgroupings.
+-- Find the snf_claims.clm_id groupings.
 WITH ids AS (
   SELECT
     CAST(clm_id AS bigint) AS id
@@ -358,7 +358,7 @@ ORDER BY MIN(id);
 -- Time: 1.375 ms
 
 
--- Find the "PartDEvents".clm_idgroupings.
+-- Find the partd_events.pde_id groupings.
 WITH ids_filtered AS (
   SELECT
     CAST(pde_id AS bigint) AS id
@@ -442,31 +442,31 @@ ids_dme AS (
 ids_hha AS (
   SELECT
     CAST(clm_id AS bigint) AS id
-  FROM "HHAClaims"
+  FROM hha_claims
   ORDER BY 1
 ),
 ids_hospice AS (
   SELECT
     CAST(clm_id AS bigint) AS id
-  FROM "HospiceClaims"
+  FROM hospice_claims
   ORDER BY 1
 ),
 ids_filtered_inpatient AS (
   SELECT
     CAST(clm_id AS bigint) AS id
-  FROM "InpatientClaims"
+  FROM inpatient_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
     bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND clm_idLIKE '-%'
+    AND clm_id LIKE '-%'
   ORDER BY 1
 ),
 ids_filtered_outpatient AS (
   SELECT
     CAST(clm_id AS bigint) AS id
-  FROM "OutpatientClaims"
+  FROM outpatient_claims
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
@@ -478,19 +478,19 @@ ids_filtered_outpatient AS (
 ids_snf AS (
   SELECT
     CAST(clm_id AS bigint) AS id
-  FROM "SNFClaims"
+  FROM snf_claims
   ORDER BY 1
 ),
 ids_filtered_pde AS (
   SELECT
-    CAST("eventId" AS bigint) AS id
-  FROM "PartDEvents"
+    CAST(pde_id AS bigint) AS id
+  FROM partd_events
   WHERE
     -- This query runs out of memory if we don't restrict it to only include the smaller set of synthetic
     -- claims (excluding the randomly generated test claims).
     bene_id LIKE '-%'
     -- Also filter out the duplicate synthetic IDs (>0), just to make things simpler.
-    AND "eventId" LIKE '-%'
+    AND pde_id LIKE '-%'
   ORDER BY 1
 ),
 ids_filtered_all AS (
