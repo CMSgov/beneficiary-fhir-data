@@ -144,3 +144,20 @@ DROP INDEX IF EXISTS beneficiaries_partd_contract_number_may_id_idx;
 DROP INDEX IF EXISTS beneficiaries_partd_contract_number_nov_id_idx;
 DROP INDEX IF EXISTS beneficiaries_partd_contract_number_oct_id_idx;
 DROP INDEX IF EXISTS beneficiaries_partd_contract_number_sept_id_idx;
+
+DROP INDEX IF EXISTS beneficiaries_history_bene_id_idx;
+DROP INDEX IF EXISTS beneficiaries_history_hicn_idx;
+DROP INDEX IF EXISTS beneficiaries_history_mbi_hash_idx;
+DROP INDEX IF EXISTS beneficiary_monthly_partd_contract_number_year_month_idx;
+DROP INDEX IF EXISTS beneficiary_monthly_year_month_partd_contract_bene_id_idx;
+DROP INDEX IF EXISTS medicare_beneficiaryid_history_bene_id_idx;
+
+DROP INDEX IF EXISTS carrier_claims_bene_id_idx;
+DROP INDEX IF EXISTS dme_claims_bene_id_idx;
+DROP INDEX IF EXISTS hha_claims_bene_id_idx;
+DROP INDEX IF EXISTS hospice_claims_bene_id_idx;
+DROP INDEX IF EXISTS inpatient_claims_bene_id_idx;
+DROP INDEX IF EXISTS loaded_batches_created_idx;
+DROP INDEX IF EXISTS outpatient_claims_bene_id_idx;
+DROP INDEX IF EXISTS partd_events_bene_id_idx;
+DROP INDEX IF EXISTS snf_claims_bene_id_idx;

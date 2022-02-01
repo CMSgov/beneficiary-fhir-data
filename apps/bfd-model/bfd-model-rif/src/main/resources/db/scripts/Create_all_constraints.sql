@@ -20,9 +20,6 @@ ALTER TABLE carrier_claim_lines
 ALTER TABLE carrier_claims 
     ADD CONSTRAINT carrier_claims_pkey PRIMARY KEY (clm_id);
   
-ALTER TABLE carrier_claims_tmp 
-    ADD CONSTRAINT carrier_claims_tmp_pkey PRIMARY KEY (clm_id);
-  
 ALTER TABLE dme_claim_lines 
     ADD CONSTRAINT dme_claim_lines_pkey PRIMARY KEY (clm_id, line_num);
   
@@ -55,9 +52,6 @@ ALTER TABLE loaded_files
 
 ALTER TABLE beneficiaries_history_invalid_beneficiaries 
     ADD CONSTRAINT beneficiaryies_history_invalid_beneficiaries_pkey PRIMARY KEY (bene_history_id);
-  
-ALTER TABLE beneficiaries_history 
-    ADD CONSTRAINT beneficiaries_history_pkey PRIMARY KEY (bene_mbi_id);
 
 ALTER TABLE medicare_beneficiaryid_history_invalid_beneficiaries 
     ADD CONSTRAINT medicare_beneficiaryid_history_invalid_beneficiaries_pkey PRIMARY KEY (bene_mbi_id);
