@@ -29,7 +29,7 @@ public class FissClaimStreamCallerIT {
           + "  \"totalChargeAmount\": \"3.75\","
           + "  \"currTranDtCymd\": \"2021-03-20\","
           + "  \"principleDiag\": \"uec\","
-          + "  \"mbi\": \"c1ihk7q0g3i57\","
+          + "  \"mbi\": \"c1ihk7q0g3i\","
           + "  \"fissProcCodes\": [],"
           + "  \"medaProvId\": \"oducjgzt67joc\""
           + "}";
@@ -45,7 +45,7 @@ public class FissClaimStreamCallerIT {
           + "  \"currTranDtCymd\": \"2020-12-21\","
           + "  \"principleDiag\": \"egnj\","
           + "  \"npiNumber\": \"5764657700\","
-          + "  \"mbi\": \"0vtc7u321x0se\","
+          + "  \"mbi\": \"0vtc7u321x0\","
           + "  \"fedTaxNb\": \"2845244764\","
           + "  \"fissProcCodes\": []"
           + "}";

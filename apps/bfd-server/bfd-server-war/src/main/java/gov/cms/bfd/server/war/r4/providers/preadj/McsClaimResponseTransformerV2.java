@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hl7.fhir.r4.model.ClaimResponse;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -33,7 +32,16 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
   private static final String METRIC_NAME =
       MetricRegistry.name(McsClaimResponseTransformerV2.class.getSimpleName(), "transform");
 
-  private static final Set<String> CANCELLED_STATUS_CODES = Set.of("r", "z", "9");
+  /**
+   * There are only 2 statuses currently being used, and only the ones listed below are mapped to
+   * "CANCELLED". For brevity, the rest are defaulted to "ACTIVE" using {@link
+   * Map#getOrDefault(Object, Object)}.
+   */
+  private static final Map<String, ClaimResponse.ClaimResponseStatus> STATUS_MAP =
+      Map.of(
+          "r", ClaimResponse.ClaimResponseStatus.CANCELLED,
+          "z", ClaimResponse.ClaimResponseStatus.CANCELLED,
+          "9", ClaimResponse.ClaimResponseStatus.CANCELLED);
 
   private static final Map<String, ClaimResponse.RemittanceOutcome> OUTCOME_MAP =
       Map.ofEntries(
@@ -96,11 +104,8 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     claim.setContained(List.of(getContainedPatient(claimGroup)));
     claim.setExtension(getExtension(claimGroup));
     claim.setIdentifier(getIdentifier(claimGroup));
-    claim.setStatus(
-        CANCELLED_STATUS_CODES.contains(claimGroup.getIdrStatusCode().toLowerCase())
-            ? ClaimResponse.ClaimResponseStatus.CANCELLED
-            : ClaimResponse.ClaimResponseStatus.ACTIVE);
-    claim.setOutcome(OUTCOME_MAP.get(claimGroup.getIdrStatusCode()));
+    claim.setStatus(getStatus(claimGroup));
+    claim.setOutcome(getOutcome(claimGroup));
     claim.setType(getType());
     claim.setUse(ClaimResponse.Use.CLAIM);
     claim.setInsurer(new Reference().setIdentifier(new Identifier().setValue("CMS")));
@@ -121,6 +126,37 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2 {
     claim.setCreated(new Date());
 
     return claim;
+  }
+
+  private static ClaimResponse.ClaimResponseStatus getStatus(PreAdjMcsClaim claimGroup) {
+    ClaimResponse.ClaimResponseStatus status;
+
+    if (claimGroup.getIdrStatusCode() == null) {
+      status = ClaimResponse.ClaimResponseStatus.ACTIVE;
+    } else {
+      // If it's not mapped, we assume it's ACTIVE
+      status =
+          STATUS_MAP.getOrDefault(
+              claimGroup.getIdrStatusCode().toLowerCase(),
+              ClaimResponse.ClaimResponseStatus.ACTIVE);
+    }
+
+    return status;
+  }
+
+  private static ClaimResponse.RemittanceOutcome getOutcome(PreAdjMcsClaim claimGroup) {
+    ClaimResponse.RemittanceOutcome outcome;
+
+    if (claimGroup.getIdrStatusCode() == null) {
+      outcome = ClaimResponse.RemittanceOutcome.QUEUED;
+    } else {
+      // If it's not mapped, we assume it's QUEUED
+      outcome =
+          OUTCOME_MAP.getOrDefault(
+              claimGroup.getIdrStatusCode().toLowerCase(), ClaimResponse.RemittanceOutcome.QUEUED);
+    }
+
+    return outcome;
   }
 
   private static Resource getContainedPatient(PreAdjMcsClaim claimGroup) {

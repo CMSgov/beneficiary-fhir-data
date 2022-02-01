@@ -118,9 +118,7 @@ public class McsClaimTransformerTest {
     claim.setIdrClaimReceiptDate(LocalDate.of(2020, 2, 1));
     claim.setMbiRecord(
         new Mbi(
-            1L,
-            "5467891245678",
-            "c0755c7a103d9d8556778f64cc45766686d6c02151ebfcc4639dcaeedbf00ca1"));
+            1L, "54678912456", "717ac79ed263a61100f92f7ca67df9249501d52ee4d1af49ea43b457fcabf0d1"));
     claim.setIdrHdrFromDateOfSvc(LocalDate.of(2020, 1, 7));
     claim.setIdrHdrToDateOfSvc(LocalDate.of(2020, 1, 14));
     claim.setLastUpdated(clock.instant());
@@ -152,7 +150,7 @@ public class McsClaimTransformerTest {
             McsBillingProviderStatusCode.BILLING_PROVIDER_STATUS_CODE_PARTICIPATING)
         .setIdrTotBilledAmt("67591.96")
         .setIdrClaimReceiptDate("2020-02-01")
-        .setIdrClaimMbi("5467891245678")
+        .setIdrClaimMbi("54678912456")
         .setIdrHdrFromDos("2020-01-07")
         .setIdrHdrToDos("2020-01-14");
     changeBuilder
@@ -583,9 +581,9 @@ public class McsClaimTransformerTest {
             McsClaim.Builder::setIdrClaimMbi,
             PreAdjMcsClaim::getIdrClaimMbi,
             PreAdjMcsClaim.Fields.idrClaimMbi,
-            13)
+            11)
         .verifyIdHashFieldPopulatedCorrectly(
-            McsClaim.Builder::setIdrClaimMbi, PreAdjMcsClaim::getIdrClaimMbiHash, 13, idHasher);
+            McsClaim.Builder::setIdrClaimMbi, PreAdjMcsClaim::getIdrClaimMbiHash, 11, idHasher);
   }
 
   @Test

@@ -40,7 +40,7 @@ public class R4ClaimResponseResourceProviderIT {
   }
 
   @Test
-  public void shouldGetCorrectFissClaimResponseResourceById() {
+  void shouldGetCorrectFissClaimResponseResourceById() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     ClaimResponse claimResult =
@@ -53,7 +53,7 @@ public class R4ClaimResponseResourceProviderIT {
   }
 
   @Test
-  public void shouldGetCorrectMcsClaimResponseResourceById() {
+  void shouldGetCorrectMcsClaimResponseResourceById() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     ClaimResponse claimResult =
@@ -66,7 +66,7 @@ public class R4ClaimResponseResourceProviderIT {
   }
 
   @Test
-  public void shouldGetCorrectClaimResponseResourcesByMbiHash() {
+  void shouldGetCorrectClaimResponseResourcesByMbiHash() {
     IGenericClient fhirClient = ServerTestUtils.get().createFhirClientV2();
 
     Bundle claimResult =
