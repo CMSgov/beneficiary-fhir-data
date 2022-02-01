@@ -4,6 +4,10 @@ fissOutputFile: rda-fiss.ndjson
 mcsOutputFile: rda-mcs.ndjson
 fissSeqStart: 1 # Sequence numbers must be 1 or higher
 mcsSeqStart: 1  # Sequence numbers must be 1 or higher
+buildAttributionSet: true
+attributionSetSize: 100
+attributionTemplateFile: attribution-template.sql # Input template file
+attributionScriptFile: attribution-data.sql # Output script file
 fissSources:
   - inpatient.csv
   - outpatient.csv

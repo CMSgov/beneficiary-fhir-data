@@ -33,8 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import lombok.Data;
-import lombok.experimental.FieldNameConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -61,6 +59,10 @@ public class RDABridge {
   private static final String FISS_SEQ_START = "s";
   private static final String MCS_SEQ_START = "z";
   private static final String EXTERNAL_CONFIG_FLAG = "e";
+  private static final String BUILD_ATTRIBUTION_FILE = "a";
+  private static final String ATTRIBUTION_SIZE = "x";
+  private static final String ATTRIBUTION_SCRIPT_FILE = "q";
+  private static final String ATTRIBUTION_TEMPLATE_FILE = "t";
 
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
       Map.of("csv", filePath -> new RifParser(new RifSource(filePath)));
@@ -88,7 +90,20 @@ public class RDABridge {
               .addOption(MCS_OUTPUT_FLAG, true, "MCS RDA output file")
               .addOption(EXTERNAL_CONFIG_FLAG, true, "Path to yaml file containing run configs")
               .addOption(FISS_SEQ_START, true, "Starting point for FISS sequence values")
-              .addOption(MCS_SEQ_START, true, "Starting point for MCS sequence values");
+              .addOption(MCS_SEQ_START, true, "Starting point for MCS sequence values")
+              .addOption(
+                  BUILD_ATTRIBUTION_FILE,
+                  true,
+                  "Indicates if the attribution sql script should be generated")
+              .addOption(
+                  ATTRIBUTION_SIZE,
+                  true,
+                  "The number of MBIs to pull for building the attribution file")
+              .addOption(
+                  ATTRIBUTION_TEMPLATE_FILE,
+                  true,
+                  "The template file to use for building the attribution script")
+              .addOption(ATTRIBUTION_SCRIPT_FILE, true, "The attribution script file to write to");
 
       CommandLineParser parser = new DefaultParser();
       CommandLine cmd = parser.parse(options, args);
@@ -155,6 +170,9 @@ public class RDABridge {
       throw new IllegalArgumentException(
           "Unsupported mcs output file type '" + mcsOutputType + "'");
     } else {
+      Set<String> fissMbis = new HashSet<>();
+      Set<String> mcsMbis = new HashSet<>();
+
       try (Sink<MessageOrBuilder> fissSink =
               sinkMap.get(fissOutputType).apply(new SinkArguments(fissOutputPath, fissSequence));
           Sink<MessageOrBuilder> mcsSink =
@@ -165,7 +183,13 @@ public class RDABridge {
 
         for (String fissSource : fissSources) {
           executeTransformation(
-              SourceType.FISS, inputDirectory, fissSource, fissSequence, mbiMap, fissSink);
+              SourceType.FISS,
+              inputDirectory,
+              fissSource,
+              fissSequence,
+              mbiMap,
+              fissSink,
+              fissMbis);
         }
 
         // Sorting the files so tests are more deterministic
@@ -174,8 +198,13 @@ public class RDABridge {
 
         for (String mcsSource : mcsSources) {
           executeTransformation(
-              SourceType.MCS, inputDirectory, mcsSource, mcsSequence, mbiMap, mcsSink);
+              SourceType.MCS, inputDirectory, mcsSource, mcsSequence, mbiMap, mcsSink, mcsMbis);
         }
+      }
+
+      if (config.booleanValue(AppConfig.Fields.buildAttributionSet, false)) {
+        AttributionBuilder builder = new AttributionBuilder(config);
+        builder.run(fissMbis, mcsMbis);
       }
     }
   }
@@ -197,7 +226,8 @@ public class RDABridge {
       String sourceName,
       WrappedCounter sequenceCounter,
       Map<String, BeneficiaryData> mbiMap,
-      Sink<MessageOrBuilder> sink)
+      Sink<MessageOrBuilder> sink,
+      Set<String> claimMbis)
       throws IOException {
     long claimsWritten = 0;
     Path file = path.resolve(sourceName);
@@ -210,7 +240,8 @@ public class RDABridge {
         AbstractTransformer transformer = createTransformer(sourceType, mbiMap);
 
         while (parser.hasData()) {
-          MessageOrBuilder message = transformer.transform(sequenceCounter, parser.read());
+          MessageOrBuilder message =
+              transformer.transform(sequenceCounter, parser.read(), claimMbis);
 
           if (message != null) {
             sink.write(message);
@@ -290,15 +321,35 @@ public class RDABridge {
 
       Map<String, Collection<String>> mapConfig =
           ImmutableMap.<String, Collection<String>>builder()
-              .put(AppConfig.Fields.inputDirPath, Collections.singleton(appConfig.inputDirPath))
-              .put(AppConfig.Fields.outputDirPath, Collections.singleton(appConfig.outputDirPath))
-              .put(AppConfig.Fields.fissOutputFile, Collections.singleton(appConfig.fissOutputFile))
-              .put(AppConfig.Fields.mcsOutputFile, Collections.singleton(appConfig.mcsOutputFile))
-              .put(AppConfig.Fields.fissSeqStart, Collections.singleton(appConfig.fissSeqStart))
-              .put(AppConfig.Fields.mcsSeqStart, Collections.singleton(appConfig.mcsSeqStart))
-              .put(AppConfig.Fields.fissSources, appConfig.fissSources)
-              .put(AppConfig.Fields.mcsSources, appConfig.mcsSources)
-              .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.mbiSource))
+              .put(
+                  AppConfig.Fields.inputDirPath, Collections.singleton(appConfig.getInputDirPath()))
+              .put(
+                  AppConfig.Fields.outputDirPath,
+                  Collections.singleton(appConfig.getOutputDirPath()))
+              .put(
+                  AppConfig.Fields.fissOutputFile,
+                  Collections.singleton(appConfig.getFissOutputFile()))
+              .put(
+                  AppConfig.Fields.mcsOutputFile,
+                  Collections.singleton(appConfig.getMcsOutputFile()))
+              .put(
+                  AppConfig.Fields.fissSeqStart, Collections.singleton(appConfig.getFissSeqStart()))
+              .put(AppConfig.Fields.mcsSeqStart, Collections.singleton(appConfig.getMcsSeqStart()))
+              .put(
+                  AppConfig.Fields.buildAttributionSet,
+                  Collections.singleton(appConfig.getBuildAttributionSet()))
+              .put(
+                  AppConfig.Fields.attributionSetSize,
+                  Collections.singleton(appConfig.getAttributionSetSize()))
+              .put(
+                  AppConfig.Fields.attributionTemplateFile,
+                  Collections.singleton(appConfig.getAttributionTemplateFile()))
+              .put(
+                  AppConfig.Fields.attributionScriptFile,
+                  Collections.singleton(appConfig.getAttributionScriptFile()))
+              .put(AppConfig.Fields.fissSources, appConfig.getFissSources())
+              .put(AppConfig.Fields.mcsSources, appConfig.getMcsSources())
+              .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.getMbiSource()))
               .build();
 
       return new ConfigLoader(mapConfig::get);
@@ -321,6 +372,18 @@ public class RDABridge {
     putIfNotNull(builder, AppConfig.Fields.mcsOutputFile, cmd.getOptionValue(MCS_OUTPUT_FLAG));
     putIfNotNull(builder, AppConfig.Fields.fissSources, cmd.getOptionValues(FISS_FLAG));
     putIfNotNull(builder, AppConfig.Fields.fissSeqStart, cmd.getOptionValue(FISS_SEQ_START));
+    putIfNotNull(
+        builder, AppConfig.Fields.buildAttributionSet, cmd.getOptionValue(BUILD_ATTRIBUTION_FILE));
+    putIfNotNull(
+        builder, AppConfig.Fields.attributionSetSize, cmd.getOptionValue(ATTRIBUTION_SIZE));
+    putIfNotNull(
+        builder,
+        AppConfig.Fields.attributionTemplateFile,
+        cmd.getOptionValue(ATTRIBUTION_TEMPLATE_FILE));
+    putIfNotNull(
+        builder,
+        AppConfig.Fields.attributionScriptFile,
+        cmd.getOptionValue(ATTRIBUTION_SCRIPT_FILE));
     putIfNotNull(builder, AppConfig.Fields.mcsSeqStart, cmd.getOptionValue(MCS_SEQ_START));
     putIfNotNull(builder, AppConfig.Fields.mcsSources, cmd.getOptionValues(MCS_FLAG));
     putIfNotNull(builder, AppConfig.Fields.mbiSource, cmd.getOptionValue(MBI_FLAG));
@@ -360,21 +423,5 @@ public class RDABridge {
     formatter.printOptions(writer, 80, options, 4, 4);
     writer.flush();
     log.error("Invalid execution \n" + stringValue);
-  }
-
-  /** Helper class for defining application specific configurations. */
-  @VisibleForTesting
-  @Data
-  @FieldNameConstants
-  public static class AppConfig {
-    private String inputDirPath;
-    private String outputDirPath;
-    private String fissOutputFile;
-    private String mcsOutputFile;
-    private String mbiSource;
-    private String fissSeqStart;
-    private String mcsSeqStart;
-    private Set<String> fissSources = new HashSet<>();
-    private Set<String> mcsSources = new HashSet<>();
   }
 }

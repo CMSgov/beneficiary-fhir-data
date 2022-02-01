@@ -16,6 +16,7 @@ import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -34,12 +35,15 @@ public class McsTransformer extends AbstractTransformer {
    * @return The RDA {@link McsClaimChange} object generated from the given data.
    */
   @Override
-  public MessageOrBuilder transform(WrappedCounter sequenceNumber, Parser.Data<String> data) {
+  public MessageOrBuilder transform(
+      WrappedCounter sequenceNumber, Parser.Data<String> data, Set<String> mcsMbis) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
 
     // Carrier claims break claims into multiple lines (rows).  Synthea isn't doing this, but just
     // to protect against it if it does happen, we'll ignore any row with LINE_NUM > 1
     if (isFirstLineNum(data)) {
+      mcsMbis.add(mbiMap.get(beneId).getMbi());
+
       McsClaim.Builder claimBuilder =
           McsClaim.newBuilder()
               .setIdrClmHdIcn(

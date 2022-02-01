@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +69,14 @@ class RDABridgeIT {
           "5",
           "-z",
           "1",
+          "-a",
+          "true",
+          "-x",
+          "4",
+          "-q",
+          outputDir.resolve("attribution.sql").toString(),
+          "-t",
+          resourcesDir.resolve("example-attribution-template.sql").toString(),
           rifDir
         });
 
@@ -120,14 +129,16 @@ class RDABridgeIT {
               inpatientData,
               new WrappedCounter(0),
               mbiMap,
-              testSink);
+              testSink,
+              new HashSet<>());
           bridge.executeTransformation(
               RDABridge.SourceType.MCS,
               resourcesDir,
               carrierData,
               new WrappedCounter(0),
               mbiMap,
-              testSink);
+              testSink,
+              new HashSet<>());
 
           Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
           IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));

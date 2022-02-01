@@ -17,6 +17,7 @@ import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -37,12 +38,15 @@ public class FissTransformer extends AbstractTransformer {
    * @return The RDA {@link FissClaimChange} object generated from the given data.
    */
   @Override
-  public MessageOrBuilder transform(WrappedCounter sequenceNumber, Parser.Data<String> data) {
+  public MessageOrBuilder transform(
+      WrappedCounter sequenceNumber, Parser.Data<String> data, Set<String> fissMbis) {
     String beneId = data.get(Fiss.BENE_ID).orElse("");
 
     // Some break claims into multiple lines (rows).  Synthea isn't doing this, but just
     // to protect against it if it does happen, we'll ignore any row with CLM_LINE_NUM > 1
     if (isFirstLineNum(data)) {
+      fissMbis.add(mbiMap.get(beneId).getMbi());
+
       FissClaim.Builder claimBuilder =
           FissClaim.newBuilder()
               .setDcn(
