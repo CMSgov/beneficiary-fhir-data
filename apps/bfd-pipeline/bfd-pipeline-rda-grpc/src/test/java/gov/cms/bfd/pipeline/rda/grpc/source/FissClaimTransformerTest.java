@@ -117,9 +117,7 @@ public class FissClaimTransformerTest {
     claim.setNpiNumber("npi-123456");
     claim.setMbiRecord(
         new Mbi(
-            1L,
-            "1234567890123",
-            "50ad6d78d3b8bb1a8195896c7479f04f4af76e8b42011a24146a943ede9321a0"));
+            1L, "12345678901", "3cf7b310f8fd6e7b275ddbdc6c3cd5b4eec0ea10bc9a504d471b086bd5d9b888"));
     claim.setFedTaxNumber("1234567890");
     claim.setPracLocAddr1("loc-address-1");
     claim.setPracLocAddr2("loc-address-2");
@@ -148,7 +146,7 @@ public class FissClaimTransformerTest {
         .setAdmDiagCode("1234567")
         .setPrincipleDiag("7654321")
         .setNpiNumber("npi-123456")
-        .setMbi("1234567890123")
+        .setMbi("12345678901")
         .setFedTaxNb("1234567890")
         .setPracLocAddr1("loc-address-1")
         .setPracLocAddr2("loc-address-2")
@@ -650,9 +648,9 @@ public class FissClaimTransformerTest {
   public void testClaimMbi() {
     new ClaimFieldTester()
         .verifyStringFieldCopiedCorrectly(
-            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbi, PreAdjFissClaim.Fields.mbi, 13)
+            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbi, PreAdjFissClaim.Fields.mbi, 11)
         .verifyIdHashFieldPopulatedCorrectly(
-            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbiHash, 13, idHasher);
+            FissClaim.Builder::setMbi, PreAdjFissClaim::getMbiHash, 11, idHasher);
   }
 
   @Test

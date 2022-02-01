@@ -71,6 +71,7 @@ public class RDATestUtils {
           em.merge(fissTestDataA(mbi));
           em.merge(fissTestDataB(mbi));
           em.merge(mcsTestDataA(mbi));
+          em.merge(mcsTestDataB(mbi));
         });
   }
 
@@ -379,6 +380,75 @@ public class RDATestUtils {
                 "654321", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
             new PreAdjMcsDiagnosisCode(
                 "654321", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
+
+    return claim;
+  }
+
+  /**
+   * One MCS claim for testing
+   *
+   * @return The MCS test claim B
+   */
+  private PreAdjMcsClaim mcsTestDataB(Mbi mbi) {
+    PreAdjMcsClaim claim =
+        PreAdjMcsClaim.builder()
+            .sequenceNumber(1L)
+            .idrClmHdIcn("654323")
+            .idrContrId("contr")
+            .idrHic("HicValue")
+            .idrClaimType("R")
+            .idrDtlCnt(56)
+            .idrBeneLast_1_6("SMITH")
+            .idrBeneFirstInit("J")
+            .idrBeneMidInit("D")
+            .idrBeneSex("M")
+            .idrStatusCode(null)
+            .idrStatusDate(LocalDate.ofEpochDay(2))
+            .idrBillProvNpi("9876789102")
+            .idrBillProvNum("4444422222")
+            .idrBillProvEin("1231231231")
+            .idrBillProvType("AB")
+            .idrBillProvSpec("BA")
+            .idrBillProvGroupInd("A")
+            .idrBillProvPriceSpec("FF")
+            .idrBillProvCounty("GG")
+            .idrBillProvLoc("HH")
+            .idrTotAllowed(new BigDecimal("224.41"))
+            .idrCoinsurance(new BigDecimal("14.32"))
+            .idrDeductible(new BigDecimal("11.00"))
+            .idrBillProvStatusCd(null)
+            .idrTotBilledAmt(new BigDecimal("23.00"))
+            .idrClaimReceiptDate(LocalDate.ofEpochDay(54))
+            .mbiRecord(mbi)
+            .idrHdrFromDateOfSvc(LocalDate.ofEpochDay(200))
+            .idrHdrToDateOfSvc(LocalDate.ofEpochDay(200))
+            .lastUpdated(Instant.ofEpochMilli(4000))
+            .build();
+
+    Set<PreAdjMcsDetail> procCodes =
+        Set.of(
+            PreAdjMcsDetail.builder()
+                .priority((short) 0)
+                .idrClmHdIcn("654323")
+                .idrDtlToDate(LocalDate.ofEpochDay(208))
+                .idrProcCode("FDSAE")
+                .idrModOne("A")
+                .build(),
+            PreAdjMcsDetail.builder()
+                .priority((short) 1)
+                .idrClmHdIcn("654323")
+                .idrProcCode("FDAAA")
+                .idrModTwo("B")
+                .build());
+
+    claim.setDetails(procCodes);
+
+    claim.setDiagCodes(
+        Set.of(
+            new PreAdjMcsDiagnosisCode(
+                "654323", (short) 0, "0", "HF3IJIF", Instant.ofEpochMilli(4000)),
+            new PreAdjMcsDiagnosisCode(
+                "654323", (short) 1, "1", "HF3IJIG", Instant.ofEpochMilli(4000))));
 
     return claim;
   }

@@ -461,7 +461,7 @@ public class McsClaimTransformer {
     if (from.hasIdrClaimMbi()) {
       final var mbi = from.getIdrClaimMbi();
       if (transformer.validateString(
-          namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi, false, 1, 13, mbi)) {
+          namePrefix + PreAdjMcsClaim.Fields.idrClaimMbi, false, 1, 11, mbi)) {
         to.setMbiRecord(mbiCache.lookupMbi(mbi));
       }
     }

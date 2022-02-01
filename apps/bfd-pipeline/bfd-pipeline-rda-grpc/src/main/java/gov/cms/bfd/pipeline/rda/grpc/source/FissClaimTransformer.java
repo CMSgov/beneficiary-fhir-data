@@ -594,7 +594,7 @@ public class FissClaimTransformer {
         to::setNpiNumber);
     if (from.hasMbi()) {
       final var mbi = from.getMbi();
-      if (transformer.validateString(namePrefix + PreAdjFissClaim.Fields.mbi, false, 1, 13, mbi)) {
+      if (transformer.validateString(namePrefix + PreAdjFissClaim.Fields.mbi, false, 1, 11, mbi)) {
         to.setMbiRecord(mbiCache.lookupMbi(mbi));
       }
     }

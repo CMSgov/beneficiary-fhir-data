@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
  * Provides a mechanism for reliably producing Mbi objects from an MBI string. Two implementations
  * are provided. One simply computes hash value and returns an object with no connection to a
  * database. This is suitable for use in testing. The other looks up values in a database table and
- * inserts a new record when none is found. This is used in production to ensure that all of the
- * claim objects contain a valid foreign key value referencing the proper MBI record.
+ * inserts a new record when none is found. This is used in AWS envs to ensure that all of the claim
+ * objects contain a valid foreign key value referencing the proper MBI record.
  *
  * <p>Values that have been looked up previously are kept in an in-memory LRU cache to avoid
  * excessive lookups in case we encounter the same MBI frequently during a session.

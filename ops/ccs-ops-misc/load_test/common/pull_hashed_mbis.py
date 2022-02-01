@@ -16,7 +16,7 @@ def loadData():
     if configFile is None:
         return []
 
-    beneQuery = "SELECT \"mbiHash\" FROM \"Beneficiaries\" WHERE \"mbiHash\" IS NOT NULL LIMIT 100000;"
+    beneQuery = "SELECT mbi_hash FROM beneficiaries WHERE mbi_hash IS NOT NULL LIMIT 100000;"
 
     print("Collecting test data...")
 
