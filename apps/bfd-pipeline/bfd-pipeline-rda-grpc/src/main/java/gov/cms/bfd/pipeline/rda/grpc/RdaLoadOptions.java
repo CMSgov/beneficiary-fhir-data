@@ -10,7 +10,6 @@ import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcRdaSource;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
-import gov.cms.bfd.pipeline.sharedutils.DatabaseOptions;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import java.io.Serializable;
@@ -64,7 +63,6 @@ public class RdaLoadOptions implements Serializable {
   /**
    * Factory method to construct a new job instance using standard parameters.
    *
-   * @param databaseOptions the shared application {@link DatabaseOptions}
    * @param appState the shared {@link PipelineApplicationState}
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
@@ -95,8 +93,7 @@ public class RdaLoadOptions implements Serializable {
   /**
    * Factory method to construct a new job instance using standard parameters.
    *
-   * @param databaseOptions connection options for SQL database
-   * @param appMetrics MetricRegistry used to track operational metrics
+   * @param appState the app state
    * @return a PipelineJob instance suitable for use by PipelineManager.
    */
   public RdaMcsClaimLoadJob createMcsClaimsLoadJob(PipelineApplicationState appState) {
