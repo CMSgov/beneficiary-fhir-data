@@ -57,6 +57,16 @@ data "aws_security_group" "management" {
   }
 }
 
+# BFD app engineers group
+data "aws_iam_group" "app_eng" {
+  name = "bfd-app-engineers"
+}
+
+# BFD devops engineers group
+data "aws_iam_group" "devops_eng" {
+  name = "bfd-admins"
+}
+
 
 ## VPC Private Local Zone for CNAME Records
 #
@@ -263,4 +273,86 @@ resource "aws_cloudwatch_log_group" "bfd_server_gc" {
   name       = "/bfd/${var.env_config.env}/bfd-server/gc.log"
   kms_key_id = data.aws_kms_key.master_key.arn
   tags       = var.env_config.tags
+}
+
+# IAM policies for parameter store permissions for app eng and devops groups
+#
+resource "aws_iam_policy" "app_eng_parameter_store" {
+  name        = "bfd-app-eng-parameter-store"
+  description = "IAM policy for application engineer access to parameter store"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameterHistory",
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DeleteParameter",
+                "ssm:DeleteParameters",
+                "ssm:LabelParameterVersion",
+                "ssm:PutParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/local/*"
+            ]
+        }
+    ]
+}
+EOF
+
+}
+
+resource "aws_iam_group_policy_attachment" "app_eng_parameter_store" {
+  group      = aws_iam_group.app_eng.name
+  policy_arn = aws_iam_policy.app_eng_parameter_store.arn
+}
+
+resource "aws_iam_policy" "devops_eng_parameter_store" {
+  name        = "bfd-admins-parameter-store"
+  description = "IAM policy for devops engineer access to parameter store"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DeleteParameter",
+                "ssm:DeleteParameters",
+                "ssm:DescribeParameters",
+                "ssm:GetParameterHistory",
+                "ssm:GetParametersByPath",
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+                "ssm:LabelParameterVersion",
+                "ssm:PutParameter"
+            ],
+            "Resource": [
+                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/*"
+            ]
+        }
+    ]
+}
+EOF
+
+}
+
+resource "aws_iam_group_policy_attachment" "devops_eng_parameter_store" {
+  group      = aws_iam_group.devops_eng.name
+  policy_arn = aws_iam_policy.devops_eng_parameter_store.arn
 }
