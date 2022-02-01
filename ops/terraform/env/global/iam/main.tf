@@ -8,12 +8,12 @@ data "aws_caller_identity" "current" {}
 
 # BFD app engineers group
 data "aws_iam_group" "app_eng" {
-  name = "bfd-app-engineers"
+  group_name = "bfd-app-engineers"
 }
 
 # BFD devops engineers group
 data "aws_iam_group" "devops_eng" {
-  name = "bfd-admins"
+  group_name = "bfd-admins"
 }
 
 # IAM policy and attachment for app eng group param store permissions
@@ -35,7 +35,7 @@ resource "aws_iam_policy" "app_eng_parameter_store" {
                 "ssm:GetParameter"
             ],
             "Resource": [
-                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/*"
+                "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/*"
             ]
         },
         {
@@ -47,7 +47,7 @@ resource "aws_iam_policy" "app_eng_parameter_store" {
                 "ssm:PutParameter"
             ],
             "Resource": [
-                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/local/*"
+                "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/local/*"
             ]
         }
     ]
@@ -57,7 +57,7 @@ EOF
 }
 
 resource "aws_iam_group_policy_attachment" "app_eng_parameter_store" {
-  group      = aws_iam_group.app_eng.name
+  group      = data.aws_iam_group.app_eng.group_id
   policy_arn = aws_iam_policy.app_eng_parameter_store.arn
 }
 
@@ -84,7 +84,7 @@ resource "aws_iam_policy" "devops_eng_parameter_store" {
                 "ssm:PutParameter"
             ],
             "Resource": [
-                "arn:aws:ssm:us-east-1:${var.launch_config.account_id}:parameter/bfd/*"
+                "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/bfd/*"
             ]
         }
     ]
@@ -94,6 +94,6 @@ EOF
 }
 
 resource "aws_iam_group_policy_attachment" "devops_eng_parameter_store" {
-  group      = aws_iam_group.devops_eng.name
+  group      = data.aws_iam_group.devops_eng.group_id
   policy_arn = aws_iam_policy.devops_eng_parameter_store.arn
 }
