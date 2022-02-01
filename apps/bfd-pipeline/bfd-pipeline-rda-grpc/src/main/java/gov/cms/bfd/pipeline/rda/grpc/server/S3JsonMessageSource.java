@@ -10,8 +10,8 @@ import java.util.zip.GZIPInputStream;
 
 /**
  * Implementation of {@link MessageSource} that reads and serves NDJSON data from a single {@link
- * S3Object}*. The S3Object will be closed when the message source is closed. A {@link
- * JsonMessageSource.Parser}* object is used to parse the NDJSON data.
+ * S3Object}. The S3Object will be closed when the message source is closed. A {@link
+ * JsonMessageSource.Parser} object is used to parse the NDJSON data.
  *
  * <p>Design note: Mock servers only manage a small number of clients. To simplify the design the
  * data is streamed to the client directly from S3 rather than downloading and caching the data
