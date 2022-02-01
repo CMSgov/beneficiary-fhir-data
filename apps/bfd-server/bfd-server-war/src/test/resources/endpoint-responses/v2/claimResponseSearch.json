@@ -105,6 +105,96 @@
         },
         "outcome": "queued"
       }
+    },
+    {
+      "resource": {
+        "resourceType": "ClaimResponse",
+        "id": "m-654323",
+        "meta": {
+          "versionId": "m-654323-2aae5a3c48bca88332e1d7191b2c53886bf5e173",
+          "lastUpdated": "1970-01-01T00:00:04.000+00:00"
+        },
+        "contained": [
+          {
+            "resourceType": "Patient",
+            "id": "patient",
+            "identifier": [
+              {
+                "type": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                      "code": "MC",
+                      "display": "Patient's Medicare Number"
+                    }
+                  ]
+                },
+                "system": "http://hl7.org/fhir/sid/us-mbi",
+                "value": "123456MBI"
+              }
+            ],
+            "name": [
+              {
+                "family": "S.",
+                "given": [
+                  "J.",
+                  "D."
+                ]
+              }
+            ],
+            "gender": "male"
+          }
+        ],
+        "extension": [
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/mcs/claim-receipt-date",
+            "valueDate": "1970-02-24"
+          },
+          {
+            "url": "https://bluebutton.cms.gov/resources/variables/mcs/status-date",
+            "valueDate": "1970-01-03"
+          }
+        ],
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+                  "code": "uc",
+                  "display": "Unique Claim ID"
+                }
+              ]
+            },
+            "system": "https://bluebutton.cms.gov/resources/variables/carr_clm_cntrl_num",
+            "value": "654323"
+          }
+        ],
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+              "code": "professional",
+              "display": "Professional"
+            }
+          ]
+        },
+        "use": "claim",
+        "patient": {
+          "reference": "#patient"
+        },
+        "created": "2022-01-27T18:23:51+00:00",
+        "insurer": {
+          "identifier": {
+            "value": "CMS"
+          }
+        },
+        "request": {
+          "reference": "Claim/m-654323"
+        },
+        "outcome": "queued"
+      }
     }
   ]
 }
