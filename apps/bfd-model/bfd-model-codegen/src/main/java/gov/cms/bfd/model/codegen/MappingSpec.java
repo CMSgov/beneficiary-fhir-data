@@ -74,7 +74,7 @@ public final class MappingSpec {
   }
 
   /**
-   * @return the ClassName of the Java {@link Enum} that all of the RIF field definitions will be
+   * @return the ClassName of the Java {@link Enum} that all the RIF field definitions will be
    *     placed in
    */
   public ClassName getColumnEnum() {
@@ -106,7 +106,12 @@ public final class MappingSpec {
     return headerTable;
   }
 
-  /** @param headerTable the new value for {@link #getHeaderTable()} */
+  /**
+   * Sets the header table.
+   *
+   * @param headerTable the new value for {@link #getHeaderTable()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
   public MappingSpec setHeaderTable(String headerTable) {
     this.headerTable = headerTable;
     return this;
@@ -120,7 +125,12 @@ public final class MappingSpec {
     return headerEntityIdField;
   }
 
-  /** @param headerEntityIdField the new value for {@link #getHeaderEntityIdField()} */
+  /**
+   * Sets the header entity id field.
+   *
+   * @param headerEntityIdField the new value for {@link #getHeaderEntityIdField()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
   public MappingSpec setHeaderEntityIdField(String headerEntityIdField) {
     this.headerEntityIdField = headerEntityIdField;
     return this;
@@ -233,7 +243,12 @@ public final class MappingSpec {
     return lineTable;
   }
 
-  /** @param lineTable the new value for {@link #getLineTable()} */
+  /**
+   * Sets the line table.
+   *
+   * @param lineTable the new value for {@link #getLineTable()}
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
+   */
   public MappingSpec setLineTable(String lineTable) {
     if (!hasLines) throw new IllegalStateException();
     this.lineTable = lineTable;
@@ -269,8 +284,11 @@ public final class MappingSpec {
   }
 
   /**
-   * @param the name of the field in the {@link #getLineEntity()} {@link Entity} that should be used
-   *     for the identifying line number
+   * Sets the line entity line number field.
+   *
+   * @param lineEntityLineNumberField the name of the field in the {@link #getLineEntity()} {@link
+   *     Entity} that should be used for the identifying line number
+   * @return this {@link MappingSpec} instance, for call-chaining purposes
    */
   public MappingSpec setLineEntityLineNumberField(String lineEntityLineNumberField) {
     if (!hasLines) throw new IllegalStateException();
@@ -331,7 +349,7 @@ public final class MappingSpec {
 
   /**
    * @param sequenceNumberGeneratorName the db sequence number generator name {@link
-   *     #getsequenceNumberGeneratorName()}
+   *     #getSequenceNumberGeneratorName()}
    * @return this {@link MappingSpec} instance, for call-chaining purposes
    */
   public MappingSpec setSequenceNumberGeneratorName(String sequenceNumberGeneratorName) {
@@ -339,11 +357,7 @@ public final class MappingSpec {
     return this;
   }
 
-  /**
-   * @param sequenceNumberGeneratorName the db sequence number generator name {@link
-   *     #getsequenceNumberGeneratorName()}
-   * @return this {@link MappingSpec} instance, for call-chaining purposes
-   */
+  /** @return this {@link MappingSpec} instance, for call-chaining purposes */
   public String getSequenceNumberGeneratorName() {
     return sequenceNumberGeneratorName;
   }
