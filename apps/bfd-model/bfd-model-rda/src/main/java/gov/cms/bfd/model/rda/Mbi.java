@@ -32,7 +32,7 @@ public class Mbi {
   private Long mbiId;
 
   /** Actual MBI value from RDA API. */
-  @Column(name = "`mbi`", length = 13, nullable = false, unique = true)
+  @Column(name = "`mbi`", length = 11, nullable = false, unique = true)
   @EqualsAndHashCode.Include
   private String mbi;
 
