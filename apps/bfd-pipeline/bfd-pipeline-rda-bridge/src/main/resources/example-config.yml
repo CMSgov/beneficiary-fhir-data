@@ -8,6 +8,7 @@ buildAttributionSet: true
 attributionSetSize: 100
 attributionTemplateFile: attribution-template.sql # Input template file
 attributionScriptFile: attribution-data.sql # Output script file
+attributionFissRatio: 0.5
 fissSources:
   - inpatient.csv
   - outpatient.csv

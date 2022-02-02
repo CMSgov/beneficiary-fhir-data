@@ -1,14 +1,13 @@
-package gov.cms.bfd.pipeline.bridge;
+package gov.cms.bfd.pipeline.bridge.util;
 
+import gov.cms.bfd.pipeline.bridge.AppConfig;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -22,17 +21,13 @@ public class AttributionBuilder {
   private static final Pattern attributionMarker =
       Pattern.compile("%%(?<" + LABEL_GROUP + ">.+)-(?<" + COUNT_GROUP + ">\\d+)%%");
 
-  private static final long DEFAULT_LIMIT_SIZE = 10_000;
   private static final String DEFAULT_OUTPUT_FILE = "output/attribution.sql";
   private static final String DEFAULT_INPUT_FILE = "attribution-template.sql";
 
-  private final long limit;
   private final String attributionScript;
   private final String attributionTemplate;
 
   public AttributionBuilder(ConfigLoader config) {
-    limit = config.longOption(AppConfig.Fields.attributionSetSize).orElse(DEFAULT_LIMIT_SIZE);
-
     attributionScript =
         config.stringOption(AppConfig.Fields.attributionScriptFile).orElse(DEFAULT_OUTPUT_FILE);
 
@@ -40,9 +35,7 @@ public class AttributionBuilder {
         config.stringOption(AppConfig.Fields.attributionTemplateFile).orElse(DEFAULT_INPUT_FILE);
   }
 
-  public void run(Set<String> fissMbis, Set<String> mcsMbis) {
-    Set<String> attributionSet = buildAttributionSetWithLimit(fissMbis, mcsMbis, limit);
-
+  public void run(DataSampler<String> dataSampler) {
     try (BufferedReader reader = new BufferedReader(new FileReader(attributionTemplate));
         BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
       String line;
@@ -54,7 +47,7 @@ public class AttributionBuilder {
           String label = matcher.group(LABEL_GROUP);
           long count = Long.parseLong(matcher.group(COUNT_GROUP));
 
-          Iterator<String> attribution = attributionSet.iterator();
+          Iterator<String> attribution = dataSampler.iterator();
 
           long i = -1;
 
@@ -76,28 +69,5 @@ public class AttributionBuilder {
     } catch (IOException e) {
       log.error("Unable to create attribution sql script", e);
     }
-  }
-
-  private Set<String> buildAttributionSetWithLimit(
-      Set<String> fissMbis, Set<String> mcsMbis, long limit) {
-    Set<String> attributionSet = new HashSet<>();
-
-    Iterator<String> fissSet = fissMbis.iterator();
-    Iterator<String> mcsSet = mcsMbis.iterator();
-
-    while (fissSet.hasNext() && mcsSet.hasNext() && attributionSet.size() < limit) {
-      attributionSet.add(fissSet.next());
-      attributionSet.add(mcsSet.next());
-    }
-
-    while (fissSet.hasNext() && attributionSet.size() < limit) {
-      attributionSet.add(fissSet.next());
-    }
-
-    while (mcsSet.hasNext() && attributionSet.size() < limit) {
-      attributionSet.add(mcsSet.next());
-    }
-
-    return attributionSet;
   }
 }

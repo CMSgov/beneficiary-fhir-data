@@ -9,6 +9,7 @@ import com.flipkart.zjsonpatch.JsonDiff;
 import com.google.protobuf.MessageOrBuilder;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.McsClaimTransformer;
@@ -24,7 +25,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,6 +121,16 @@ class RDABridgeIT {
           public void close() throws IOException {}
         };
 
+    final int FISS_ID = 0;
+    final int MCS_ID = 1;
+
+    DataSampler<String> dataSampler =
+        DataSampler.<String>builder()
+            .maxValues(10_000)
+            .registerSampleSet(FISS_ID, 0.5f)
+            .registerSampleSet(MCS_ID, 0.5f)
+            .build();
+
     assertDoesNotThrow(
         () -> {
           bridge.executeTransformation(
@@ -130,7 +140,8 @@ class RDABridgeIT {
               new WrappedCounter(0),
               mbiMap,
               testSink,
-              new HashSet<>());
+              dataSampler,
+              FISS_ID);
           bridge.executeTransformation(
               RDABridge.SourceType.MCS,
               resourcesDir,
@@ -138,7 +149,8 @@ class RDABridgeIT {
               new WrappedCounter(0),
               mbiMap,
               testSink,
-              new HashSet<>());
+              dataSampler,
+              MCS_ID);
 
           Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
           IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));

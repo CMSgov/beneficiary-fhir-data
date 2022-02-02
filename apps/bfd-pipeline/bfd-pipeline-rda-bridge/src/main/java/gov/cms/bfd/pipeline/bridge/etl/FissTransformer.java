@@ -5,6 +5,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Timestamp;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.model.Fiss;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -17,7 +18,6 @@ import gov.cms.mpsm.rda.v1.fiss.FissProcedureCode;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -39,13 +39,16 @@ public class FissTransformer extends AbstractTransformer {
    */
   @Override
   public MessageOrBuilder transform(
-      WrappedCounter sequenceNumber, Parser.Data<String> data, Set<String> fissMbis) {
+      WrappedCounter sequenceNumber,
+      Parser.Data<String> data,
+      DataSampler<String> mbiSampler,
+      int sampleId) {
     String beneId = data.get(Fiss.BENE_ID).orElse("");
 
     // Some break claims into multiple lines (rows).  Synthea isn't doing this, but just
     // to protect against it if it does happen, we'll ignore any row with CLM_LINE_NUM > 1
     if (isFirstLineNum(data)) {
-      fissMbis.add(mbiMap.get(beneId).getMbi());
+      mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
 
       FissClaim.Builder claimBuilder =
           FissClaim.newBuilder()

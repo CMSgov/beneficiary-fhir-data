@@ -20,6 +20,7 @@ public class AppConfig {
   private String attributionSetSize;
   private String attributionTemplateFile;
   private String attributionScriptFile;
+  private String attributionFissRatio;
   private Set<String> fissSources = new HashSet<>();
   private Set<String> mcsSources = new HashSet<>();
 }

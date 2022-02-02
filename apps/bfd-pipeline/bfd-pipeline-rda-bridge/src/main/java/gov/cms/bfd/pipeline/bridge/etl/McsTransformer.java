@@ -5,6 +5,7 @@ import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.Timestamp;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
 import gov.cms.bfd.pipeline.bridge.model.Mcs;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
@@ -16,7 +17,6 @@ import gov.cms.mpsm.rda.v1.mcs.McsStatusCode;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -36,13 +36,16 @@ public class McsTransformer extends AbstractTransformer {
    */
   @Override
   public MessageOrBuilder transform(
-      WrappedCounter sequenceNumber, Parser.Data<String> data, Set<String> mcsMbis) {
+      WrappedCounter sequenceNumber,
+      Parser.Data<String> data,
+      DataSampler<String> mbiSampler,
+      int sampleId) {
     String beneId = data.get(Mcs.BENE_ID).orElse("");
 
     // Carrier claims break claims into multiple lines (rows).  Synthea isn't doing this, but just
     // to protect against it if it does happen, we'll ignore any row with LINE_NUM > 1
     if (isFirstLineNum(data)) {
-      mcsMbis.add(mbiMap.get(beneId).getMbi());
+      mbiSampler.add(sampleId, mbiMap.get(beneId).getMbi());
 
       McsClaim.Builder claimBuilder =
           McsClaim.newBuilder()

@@ -15,6 +15,8 @@ import gov.cms.bfd.pipeline.bridge.io.RifSource;
 import gov.cms.bfd.pipeline.bridge.io.Sink;
 import gov.cms.bfd.pipeline.bridge.io.SinkArguments;
 import gov.cms.bfd.pipeline.bridge.model.BeneficiaryData;
+import gov.cms.bfd.pipeline.bridge.util.AttributionBuilder;
+import gov.cms.bfd.pipeline.bridge.util.DataSampler;
 import gov.cms.bfd.pipeline.bridge.util.WrappedCounter;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.interfaces.ThrowingFunction;
@@ -32,7 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -63,6 +64,7 @@ public class RDABridge {
   private static final String ATTRIBUTION_SIZE = "x";
   private static final String ATTRIBUTION_SCRIPT_FILE = "q";
   private static final String ATTRIBUTION_TEMPLATE_FILE = "t";
+  private static final String ATTRIBUTION_FISS_RATIO = "u";
 
   private static final Map<String, ThrowingFunction<Parser<String>, Path, IOException>> parserMap =
       Map.of("csv", filePath -> new RifParser(new RifSource(filePath)));
@@ -103,7 +105,9 @@ public class RDABridge {
                   ATTRIBUTION_TEMPLATE_FILE,
                   true,
                   "The template file to use for building the attribution script")
-              .addOption(ATTRIBUTION_SCRIPT_FILE, true, "The attribution script file to write to");
+              .addOption(ATTRIBUTION_SCRIPT_FILE, true, "The attribution script file to write to")
+              .addOption(
+                  ATTRIBUTION_FISS_RATIO, true, "Ratio of fiss to mcs MBIs to use in attribution");
 
       CommandLineParser parser = new DefaultParser();
       CommandLine cmd = parser.parse(options, args);
@@ -170,8 +174,24 @@ public class RDABridge {
       throw new IllegalArgumentException(
           "Unsupported mcs output file type '" + mcsOutputType + "'");
     } else {
-      Set<String> fissMbis = new HashSet<>();
-      Set<String> mcsMbis = new HashSet<>();
+      final int FISS_ID = 0;
+      final int MCS_ID = 1;
+
+      float fissRatio = config.floatOption(AppConfig.Fields.attributionFissRatio).orElse(0.5f);
+
+      // Calculate actual percentages as decimals
+      if (fissRatio > 1.0f) {
+        fissRatio = 1.0f - (1.0f / (1.0f + fissRatio));
+      }
+
+      float mcsRatio = 1.0f - fissRatio;
+
+      DataSampler<String> mbiSampler =
+          DataSampler.<String>builder()
+              .maxValues(config.intOption(AppConfig.Fields.attributionSetSize).orElse(10_000))
+              .registerSampleSet(FISS_ID, fissRatio)
+              .registerSampleSet(MCS_ID, mcsRatio)
+              .build();
 
       try (Sink<MessageOrBuilder> fissSink =
               sinkMap.get(fissOutputType).apply(new SinkArguments(fissOutputPath, fissSequence));
@@ -189,7 +209,8 @@ public class RDABridge {
               fissSequence,
               mbiMap,
               fissSink,
-              fissMbis);
+              mbiSampler,
+              FISS_ID);
         }
 
         // Sorting the files so tests are more deterministic
@@ -198,13 +219,20 @@ public class RDABridge {
 
         for (String mcsSource : mcsSources) {
           executeTransformation(
-              SourceType.MCS, inputDirectory, mcsSource, mcsSequence, mbiMap, mcsSink, mcsMbis);
+              SourceType.MCS,
+              inputDirectory,
+              mcsSource,
+              mcsSequence,
+              mbiMap,
+              mcsSink,
+              mbiSampler,
+              MCS_ID);
         }
       }
 
       if (config.booleanValue(AppConfig.Fields.buildAttributionSet, false)) {
         AttributionBuilder builder = new AttributionBuilder(config);
-        builder.run(fissMbis, mcsMbis);
+        builder.run(mbiSampler);
       }
     }
   }
@@ -227,7 +255,8 @@ public class RDABridge {
       WrappedCounter sequenceCounter,
       Map<String, BeneficiaryData> mbiMap,
       Sink<MessageOrBuilder> sink,
-      Set<String> claimMbis)
+      DataSampler<String> mbiSampler,
+      final int sampleId)
       throws IOException {
     long claimsWritten = 0;
     Path file = path.resolve(sourceName);
@@ -241,7 +270,7 @@ public class RDABridge {
 
         while (parser.hasData()) {
           MessageOrBuilder message =
-              transformer.transform(sequenceCounter, parser.read(), claimMbis);
+              transformer.transform(sequenceCounter, parser.read(), mbiSampler, sampleId);
 
           if (message != null) {
             sink.write(message);
@@ -347,6 +376,9 @@ public class RDABridge {
               .put(
                   AppConfig.Fields.attributionScriptFile,
                   Collections.singleton(appConfig.getAttributionScriptFile()))
+              .put(
+                  AppConfig.Fields.attributionFissRatio,
+                  Collections.singleton(appConfig.getAttributionFissRatio()))
               .put(AppConfig.Fields.fissSources, appConfig.getFissSources())
               .put(AppConfig.Fields.mcsSources, appConfig.getMcsSources())
               .put(AppConfig.Fields.mbiSource, Collections.singleton(appConfig.getMbiSource()))
@@ -384,6 +416,8 @@ public class RDABridge {
         builder,
         AppConfig.Fields.attributionScriptFile,
         cmd.getOptionValue(ATTRIBUTION_SCRIPT_FILE));
+    putIfNotNull(
+        builder, AppConfig.Fields.attributionFissRatio, cmd.getOptionValue(ATTRIBUTION_FISS_RATIO));
     putIfNotNull(builder, AppConfig.Fields.mcsSeqStart, cmd.getOptionValue(MCS_SEQ_START));
     putIfNotNull(builder, AppConfig.Fields.mcsSources, cmd.getOptionValues(MCS_FLAG));
     putIfNotNull(builder, AppConfig.Fields.mbiSource, cmd.getOptionValue(MBI_FLAG));
