@@ -1,6 +1,4 @@
---
---
---
+-- Find the beneficiaries.bene_id range to avoid collisions with synthetic data.
 WITH ids AS (
   SELECT
     CAST(bene_id AS numeric) AS id
@@ -19,9 +17,8 @@ FROM groupings
 GROUP BY grouping
 ORDER BY MIN(id);
 
---
---
---
+-- Find  min claim Ids for all claims except Part D Events.
+-- This serves as an end range to avoid collisions with future synthetic data batches.
 select min(id) from (
 	select CAST(clm_id AS numeric) id 
 	from carrier_claims
@@ -52,18 +49,16 @@ select min(id) from (
 	where bene_id LIKE '-%' AND clm_id LIKE '-%'
 	) as ids;
 	
---
---
---
+-- Find  min Part D Event id range to avoid collisions with future synthetic data batches.
 select min(id) from (
 	select CAST(pde_id AS numeric) id 
 	from partd_events
 	where bene_id LIKE '-%' AND pde_id LIKE '-%'
 	) as ids;
 
---
---
---
+-- Find claim group id ranges.
+-- This query should be run before and after generating any synthetic data in prod SBX
+-- to gauge ensure how large the next batch of synthetic data can be without overlap.
 WITH ids AS (
 	select CAST(clm_grp_id AS numeric) id 
 	from carrier_claims
