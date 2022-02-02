@@ -37,7 +37,7 @@ public class IdHasher {
   /**
    * Computes a one-way cryptographic hash of the specified ID value.
    *
-   * @param mbi any ID to be hashed
+   * @param identifier any ID to be hashed
    * @return a one-way cryptographic hash of the specified ID value, exactly 64 characters long
    */
   public String computeIdentifierHash(String identifier) {

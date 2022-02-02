@@ -61,6 +61,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
    * @param config the configuration values used to establish the channel
    * @param caller the GrpcStreamCaller used to invoke a particular RPC
    * @param appMetrics the MetricRegistry used to track metrics
+   * @param claimType the claim type
    * @param startingSequenceNumber optional hard coded sequence number
    */
   public GrpcRdaSource(
@@ -324,7 +325,7 @@ public class GrpcRdaSource<TMessage, TClaim> implements RdaSource<TMessage, TCla
     }
 
     /**
-     * Creates a CallOptions object for an API call. Will be {@link CallOptions.DEFAULT} if no token
+     * Creates a CallOptions object for an API call. Will be {@link CallOptions#DEFAULT} if no token
      * has been defined or a BearerToken if one has been defined.
      *
      * @return a valid CallOptions object
