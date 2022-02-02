@@ -46,6 +46,9 @@ import org.apache.commons.io.FilenameUtils;
 @Slf4j
 public class RDABridge {
 
+  private static final String DEFAULT_OUTPUT_FILE = "output/attribution.sql";
+  private static final String DEFAULT_INPUT_FILE = "attribution-template.sql";
+
   enum SourceType {
     FISS,
     MCS
@@ -177,9 +180,10 @@ public class RDABridge {
       final int FISS_ID = 0;
       final int MCS_ID = 1;
 
+      // Grab given ratios for fiss/mcs attribution output
       float fissRatio = config.floatOption(AppConfig.Fields.attributionFissRatio).orElse(0.5f);
 
-      // Calculate actual percentages as decimals
+      // Calculate actual individual values
       if (fissRatio > 1.0f) {
         fissRatio = 1.0f - (1.0f / (1.0f + fissRatio));
       }
@@ -231,7 +235,14 @@ public class RDABridge {
       }
 
       if (config.booleanValue(AppConfig.Fields.buildAttributionSet, false)) {
-        AttributionBuilder builder = new AttributionBuilder(config);
+        String templateFileName =
+            config.stringOption(AppConfig.Fields.attributionScriptFile).orElse(DEFAULT_OUTPUT_FILE);
+        String outputFileName =
+            config
+                .stringOption(AppConfig.Fields.attributionTemplateFile)
+                .orElse(DEFAULT_INPUT_FILE);
+
+        AttributionBuilder builder = new AttributionBuilder(templateFileName, outputFileName);
         builder.run(mbiSampler);
       }
     }

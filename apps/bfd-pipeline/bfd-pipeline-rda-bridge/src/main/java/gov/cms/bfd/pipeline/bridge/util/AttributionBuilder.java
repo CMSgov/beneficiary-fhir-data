@@ -1,7 +1,5 @@
 package gov.cms.bfd.pipeline.bridge.util;
 
-import gov.cms.bfd.pipeline.bridge.AppConfig;
-import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -10,9 +8,35 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Helper class for building the attribution sql script.
+ *
+ * <p>The design utilizes templates to build custom sql scripts based on user configuration.
+ *
+ * <h3>Example script</h3>
+ *
+ * <p>insert into my_table ("some_value") values {{#SQLValues
+ * this}}('{{this}}'){{#if @last}};{{else}},{{/if}} {{/SQLValues}}
+ *
+ * <p>This would print
+ *
+ * <p>insert into my_table ("some_value") values ('value1'), ('value2'), ('value3'), --....
+ * ('valueN');
+ *
+ * <p>A sublist can also be denoted
+ *
+ * <p>insert into my_table ("some_value") values {{#SQLValues this
+ * 2}}('{{this}}'){{#if @last}};{{else}},{{/if}} {{/SQLValues}}
+ *
+ * <p>This would print
+ *
+ * <p>insert into my_table ("some_value") values ('value1'), ('value2');
+ */
 @Slf4j
+@RequiredArgsConstructor
 public class AttributionBuilder {
 
   private static final String LABEL_GROUP = "label";
@@ -21,20 +45,15 @@ public class AttributionBuilder {
   private static final Pattern attributionMarker =
       Pattern.compile("%%(?<" + LABEL_GROUP + ">.+)-(?<" + COUNT_GROUP + ">\\d+)%%");
 
-  private static final String DEFAULT_OUTPUT_FILE = "output/attribution.sql";
-  private static final String DEFAULT_INPUT_FILE = "attribution-template.sql";
-
-  private final String attributionScript;
   private final String attributionTemplate;
+  private final String attributionScript;
 
-  public AttributionBuilder(ConfigLoader config) {
-    attributionScript =
-        config.stringOption(AppConfig.Fields.attributionScriptFile).orElse(DEFAULT_OUTPUT_FILE);
-
-    attributionTemplate =
-        config.stringOption(AppConfig.Fields.attributionTemplateFile).orElse(DEFAULT_INPUT_FILE);
-  }
-
+  /**
+   * Runs the attribution builder logic, reading the given template file and producing a new script
+   * in the given file location, interpolated with the given {@link DataSampler} dataset.
+   *
+   * @param dataSampler The {@link DataSampler} set to pull data from.
+   */
   public void run(DataSampler<String> dataSampler) {
     try (BufferedReader reader = new BufferedReader(new FileReader(attributionTemplate));
         BufferedWriter writer = new BufferedWriter(new FileWriter(attributionScript))) {
