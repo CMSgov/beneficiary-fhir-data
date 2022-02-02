@@ -54,14 +54,14 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getHicnHashIterations()} value.
+   * #getCcwRifLoadOptions()} {@link IdHasher.Config#getHashIterations()} value.
    */
   public static final String ENV_VAR_KEY_HICN_HASH_ITERATIONS = "HICN_HASH_ITERATIONS";
 
   /**
    * The name of the environment variable that should be used to provide a hex encoded
-   * representation of the {@link #getCcwRifLoadOptions()} {@link
-   * LoadAppOptions#getHicnHashPepper()} value.
+   * representation of the {@link #getCcwRifLoadOptions()} {@link IdHasher.Config#getHashPepper()}
+   * ()} value.
    */
   public static final String ENV_VAR_KEY_HICN_HASH_PEPPER = "HICN_HASH_PEPPER";
 
@@ -119,18 +119,6 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getCcwRifLoadOptions()} {@link LoadAppOptions#isFixupsEnabled()} value.
-   */
-  public static final String ENV_VAR_KEY_FIXUPS_ENABLED = "FIXUPS_ENABLED";
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
-   * #getCcwRifLoadOptions()} {@link LoadAppOptions#getFixupThreads()} value.
-   */
-  public static final String ENV_VAR_KEY_FIXUP_THREADS = "FIXUP_THREADS";
-
-  /**
-   * The name of the environment variable that should be used to provide the {@link
    * #getMetricOptions()} {@link MetricOptions#getNewRelicMetricKey()} value.
    */
   public static final String ENV_VAR_NEW_RELIC_METRIC_KEY = "NEW_RELIC_METRIC_KEY";
@@ -166,8 +154,8 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link RdaLoadJob.Config#getRunInterval()} value. This variable's value
-   * should be the frequency at which this job runs in seconds.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getRunInterval()} value. This variable's
+   * value should be the frequency at which this job runs in seconds.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_INTERVAL_SECONDS = "RDA_JOB_INTERVAL_SECONDS";
 
@@ -176,7 +164,7 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link RdaLoadJob.Config#getBatchSize()} value.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getBatchSize()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_BATCH_SIZE = "RDA_JOB_BATCH_SIZE";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_BATCH_SIZE}. */
@@ -184,7 +172,7 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link RdaLoadJob.Config#getWriteThreads()} value.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getWriteThreads()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_WRITE_THREADS = "RDA_JOB_WRITE_THREADS";
   /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_JOB_WRITE_THREADS}. */
@@ -195,7 +183,7 @@ public final class AppConfiguration implements Serializable {
    * {@link GrpcRdaSource.Config#getServerType()}
    */
   public static final String ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE = "RDA_GRPC_SERVER_TYPE";
-  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_TYPE}. */
+  /** The default value for {@link AppConfiguration#ENV_VAR_KEY_RDA_GRPC_SERVER_TYPE}. */
   public static final GrpcRdaSource.Config.ServerType DEFAULT_RDA_GRPC_SERVER_TYPE =
       GrpcRdaSource.Config.ServerType.Remote;
 
@@ -244,14 +232,14 @@ public final class AppConfiguration implements Serializable {
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getStartingFissSeqNum()} ()} value.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getStartingFissSeqNum()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_FISS_SEQ_NUM =
       "RDA_JOB_STARTING_FISS_SEQ_NUM";
 
   /**
    * The name of the environment variable that should be used to provide the {@link
-   * #getRdaLoadOptions()} {@link GrpcRdaSource.Config#getStartingMcsSeqNum()} ()} value.
+   * #getRdaLoadOptions()} {@link AbstractRdaLoadJob.Config#getStartingMcsSeqNum()} ()} value.
    */
   public static final String ENV_VAR_KEY_RDA_JOB_STARTING_MCS_SEQ_NUM =
       "RDA_JOB_STARTING_MCS_SEQ_NUM";

@@ -119,6 +119,9 @@ public final class ManifestEntryDownloadTask implements Callable<ManifestEntryDo
    *
    * @param downloadedS3File the {@link InputStream} of the file just downloaded from S3
    * @return Base64 encoded md5 value
+   * @throws IOException if there is an issue reading or closing the downloaded file
+   * @throws NoSuchAlgorithmException if there is an issue getting the specified message digest
+   *     algorithm
    */
   public static String computeMD5ChkSum(InputStream downloadedS3File)
       throws IOException, NoSuchAlgorithmException {
