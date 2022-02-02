@@ -93,7 +93,7 @@ public class FissClaimRdaSinkIT {
 
           final IdHasher defaultIdHasher = new IdHasher(new IdHasher.Config(1, "notarealpepper"));
           final FissClaimTransformer transformer =
-              new FissClaimTransformer(clock, defaultIdHasher.getConfig());
+              new FissClaimTransformer(clock, MbiCache.computedCache(defaultIdHasher.getConfig()));
           final FissClaimRdaSink sink = new FissClaimRdaSink(appState, transformer, true);
           final String expectedMbiHash = defaultIdHasher.computeIdentifierHash(claim.getMbi());
 

@@ -8,7 +8,6 @@ import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
-import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentMedicareBeneficiaryIdentifierIndicator;
 import gov.cms.mpsm.rda.v1.fiss.FissAdjustmentRequestorCode;
@@ -156,11 +155,7 @@ public class FissClaimTransformer {
   private final Clock clock;
   @Getter private final MbiCache mbiCache;
 
-  public FissClaimTransformer(Clock clock, IdHasher.Config hasherConfig) {
-    this(clock, MbiCache.computedCache(hasherConfig));
-  }
-
-  private FissClaimTransformer(Clock clock, MbiCache mbiCache) {
+  public FissClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
     this.mbiCache = mbiCache;
     PreAdjFissClaim_currStatus_Extractor =

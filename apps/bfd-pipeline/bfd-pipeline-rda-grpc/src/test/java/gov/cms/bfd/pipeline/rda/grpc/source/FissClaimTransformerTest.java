@@ -13,6 +13,7 @@ import gov.cms.bfd.model.rda.PreAdjFissDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjFissPayer;
 import gov.cms.bfd.model.rda.PreAdjFissProcCode;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
@@ -61,7 +62,7 @@ public class FissClaimTransformerTest {
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
   private final FissClaimTransformer transformer =
-      new FissClaimTransformer(clock, idHasher.getConfig());
+      new FissClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
   private FissClaimChange.Builder changeBuilder;
   private FissClaim.Builder claimBuilder;
   private PreAdjFissClaim claim;
