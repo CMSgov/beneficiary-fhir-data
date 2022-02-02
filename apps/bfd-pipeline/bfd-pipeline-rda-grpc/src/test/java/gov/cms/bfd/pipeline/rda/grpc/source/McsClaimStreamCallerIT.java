@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
 import gov.cms.bfd.pipeline.rda.grpc.server.RandomMcsClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import io.grpc.CallOptions;
@@ -17,7 +18,8 @@ public class McsClaimStreamCallerIT {
   // hard coded time for consistent values in JSON (2021-06-03T18:02:37Z)
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final McsClaimTransformer transformer =
-      new McsClaimTransformer(clock, new IdHasher.Config(10, "justsomestring"));
+      new McsClaimTransformer(
+          clock, MbiCache.computedCache(new IdHasher.Config(10, "justsomestring")));
 
   @Test
   public void basicCall() throws Exception {
