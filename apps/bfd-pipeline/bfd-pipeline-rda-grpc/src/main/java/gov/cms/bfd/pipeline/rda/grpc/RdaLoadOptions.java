@@ -3,6 +3,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 import com.google.common.base.Preconditions;
 import gov.cms.bfd.pipeline.rda.grpc.sink.concurrent.ConcurrentRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.FissClaimRdaSink;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.McsClaimRdaSink;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
@@ -81,7 +82,8 @@ public class RdaLoadOptions implements Serializable {
                 autoUpdateSequenceNumbers ->
                     new FissClaimRdaSink(
                         appState,
-                        new FissClaimTransformer(appState.getClock(), idHasherConfig),
+                        new FissClaimTransformer(
+                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
                         autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }
@@ -109,7 +111,8 @@ public class RdaLoadOptions implements Serializable {
                 autoUpdateSequenceNumbers ->
                     new McsClaimRdaSink(
                         appState,
-                        new McsClaimTransformer(appState.getClock(), idHasherConfig),
+                        new McsClaimTransformer(
+                            appState.getClock(), MbiCache.computedCache(idHasherConfig)),
                         autoUpdateSequenceNumbers)),
         appState.getMetrics());
   }

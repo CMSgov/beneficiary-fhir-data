@@ -9,7 +9,6 @@ import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
 import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
-import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
 import gov.cms.mpsm.rda.v1.mcs.McsAdjustment;
 import gov.cms.mpsm.rda.v1.mcs.McsAudit;
@@ -90,11 +89,7 @@ public class McsClaimTransformer {
   private final Clock clock;
   @Getter private final MbiCache mbiCache;
 
-  public McsClaimTransformer(Clock clock, IdHasher.Config hasherConfig) {
-    this(clock, MbiCache.computedCache(hasherConfig));
-  }
-
-  private McsClaimTransformer(Clock clock, MbiCache mbiCache) {
+  public McsClaimTransformer(Clock clock, MbiCache mbiCache) {
     this.clock = clock;
     this.mbiCache = mbiCache;
     PreAdjMcsClaim_idrClaimType_Extractor =
