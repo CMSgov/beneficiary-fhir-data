@@ -10,6 +10,7 @@ import gov.cms.bfd.pipeline.rda.grpc.server.RandomFissClaimSource;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaServer;
 import gov.cms.bfd.pipeline.rda.grpc.server.RdaService;
 import gov.cms.bfd.pipeline.rda.grpc.server.WrappedClaimSource;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.FissClaimChange;
 import io.grpc.CallOptions;
@@ -54,7 +55,7 @@ public class FissClaimStreamCallerIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(1622743357000L), ZoneOffset.UTC);
   private final IdHasher hasher = new IdHasher(new IdHasher.Config(10, "justsomestring"));
   private final FissClaimTransformer transformer =
-      new FissClaimTransformer(clock, hasher.getConfig());
+      new FissClaimTransformer(clock, MbiCache.computedCache(hasher.getConfig()));
 
   @Test
   public void basicCall() throws Exception {

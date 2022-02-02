@@ -16,6 +16,7 @@ import gov.cms.bfd.model.rda.PreAdjMcsDetail;
 import gov.cms.bfd.model.rda.PreAdjMcsDiagnosisCode;
 import gov.cms.bfd.model.rda.PreAdjMcsLocation;
 import gov.cms.bfd.pipeline.rda.grpc.RdaChange;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.sharedutils.IdHasher;
 import gov.cms.mpsm.rda.v1.ChangeType;
 import gov.cms.mpsm.rda.v1.McsClaimChange;
@@ -56,7 +57,7 @@ public class McsClaimTransformerTest {
   private final IdHasher idHasher =
       new IdHasher(new IdHasher.Config(10, "nottherealpepper".getBytes(StandardCharsets.UTF_8)));
   private final McsClaimTransformer transformer =
-      new McsClaimTransformer(clock, idHasher.getConfig());
+      new McsClaimTransformer(clock, MbiCache.computedCache(idHasher.getConfig()));
   private McsClaimChange.Builder changeBuilder;
   private McsClaim.Builder claimBuilder;
   private PreAdjMcsClaim claim;

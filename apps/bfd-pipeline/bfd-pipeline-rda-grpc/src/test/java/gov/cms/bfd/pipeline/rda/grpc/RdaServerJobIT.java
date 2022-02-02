@@ -13,6 +13,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import gov.cms.bfd.model.rda.PreAdjFissClaim;
 import gov.cms.bfd.model.rda.PreAdjMcsClaim;
+import gov.cms.bfd.pipeline.rda.grpc.sink.direct.MbiCache;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimStreamCaller;
 import gov.cms.bfd.pipeline.rda.grpc.source.FissClaimTransformer;
 import gov.cms.bfd.pipeline.rda.grpc.source.GrpcResponseStream;
@@ -44,8 +45,9 @@ public class RdaServerJobIT {
   private final Clock clock = Clock.fixed(Instant.ofEpochMilli(60_000L), ZoneOffset.UTC);
   private final IdHasher.Config hasherConfig = new IdHasher.Config(100, "whatever");
   private final FissClaimTransformer fissTransformer =
-      new FissClaimTransformer(clock, hasherConfig);
-  private final McsClaimTransformer mcsTransformer = new McsClaimTransformer(clock, hasherConfig);
+      new FissClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
+  private final McsClaimTransformer mcsTransformer =
+      new McsClaimTransformer(clock, MbiCache.computedCache(hasherConfig));
 
   @Test
   public void testRandom() throws Exception {
