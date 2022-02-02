@@ -165,7 +165,7 @@ public final class PipelineManager implements AutoCloseable {
   /**
    * Registers the specified {@link PipelineJob}, scheduling it (if it has a {@link
    * PipelineJob#getSchedule()}) and also making it available for triggering elsewhere, via {@link
-   * PipelineManager#enqueueJob(PipelineJobType)}.
+   * PipelineManager#enqueueJob(PipelineJobRecord)}.
    *
    * @param job the {@link PipelineJob} to register
    */
@@ -209,6 +209,7 @@ public final class PipelineManager implements AutoCloseable {
   /**
    * Enqueues an execution of the specified {@link PipelineJob}, with the specified parameters.
    *
+   * @param <A> the type parameter
    * @param jobRecord the {@link PipelineJobRecord} of the job to run
    * @return <code>true</code> if the specified job was enqueued, or <code>false</code> if it could
    *     not be (e.g. because {@link #stop()} has been called)

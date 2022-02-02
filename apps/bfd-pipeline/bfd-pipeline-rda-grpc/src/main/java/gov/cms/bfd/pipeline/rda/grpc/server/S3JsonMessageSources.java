@@ -106,6 +106,8 @@ public class S3JsonMessageSources {
    * range of sequence numbers within the file to be added to the key in a compatible way. Intended
    * for use in integration tests that need to upload files without using hard coded keys.
    *
+   * @param minSeq the min sequence number
+   * @param maxSeq the max sequence number
    * @return a valid object key for FISS claims data
    */
   public String createFissObjectKey(long minSeq, long maxSeq) {
@@ -128,6 +130,8 @@ public class S3JsonMessageSources {
    * range of sequence numbers within the file to be added to the key in a compatible way. Intended
    * for use in integration tests that need to upload files without using hard coded keys.
    *
+   * @param minSeq the min sequence number
+   * @param maxSeq the max sequence number
    * @return a valid object key for MCS claims data
    */
   public String createMcsObjectKey(long minSeq, long maxSeq) {

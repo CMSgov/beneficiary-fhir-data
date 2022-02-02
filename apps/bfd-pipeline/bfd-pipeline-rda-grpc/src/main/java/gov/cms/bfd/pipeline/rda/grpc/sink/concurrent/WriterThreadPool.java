@@ -156,6 +156,7 @@ public class WriterThreadPool<TMessage, TClaim> implements AutoCloseable {
    * Cleanly shuts down our thread pool. Any queued data will be written before this method returns.
    *
    * @param waitTime maximum amount of time to wait for the shutdown to complete
+   * @throws Exception if the closer encounters an issue
    */
   public void shutdown(Duration waitTime) throws Exception {
     LOGGER.info("shutdown started");

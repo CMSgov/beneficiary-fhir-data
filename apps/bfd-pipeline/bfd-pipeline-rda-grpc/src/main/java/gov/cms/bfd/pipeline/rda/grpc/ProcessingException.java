@@ -44,6 +44,7 @@ public class ProcessingException extends Exception {
    * This allows us to capture the case where some nested method call is interrupted and winds up
    * being wrapped in some other exception.
    *
+   * @param error the error
    * @return true if and only if the ultimate cause is an InterruptedException
    */
   public static boolean isInterrupted(Throwable error) {
