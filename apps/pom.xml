@@ -661,6 +661,8 @@ checkJavaFormat
 						<configuration>
 							<failOnError>false</failOnError>
 							<detectJavaApiLink>false</detectJavaApiLink>
+							<!-- Exclude javadocs on generated files, reduces build warnings -->
+							<excludePackageNames>gov.cms.mpsm.rda.*</excludePackageNames>
             			</configuration>
 					</execution>
 				</executions>

@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
  * Trivial implementation of ClaimSource that returns no objects at all. Useful when only one type
  * of claim is needed for a given configuration of RdaService.
  *
- * @param <T>
+ * @param <T> the type parameter
  */
 public class EmptyMessageSource<T> implements MessageSource<T> {
 

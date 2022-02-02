@@ -24,6 +24,7 @@ public final class TaskExecutor extends ScheduledThreadPoolExecutor {
   /**
    * Constructs a new {@link TaskExecutor} instance.
    *
+   * @param name the name of the task
    * @param threadPoolSize the number of threads to maintain in the thread pool
    */
   public TaskExecutor(String name, int threadPoolSize) {
@@ -91,6 +92,7 @@ public final class TaskExecutor extends ScheduledThreadPoolExecutor {
    *
    * @param task the task object (e.g. {@link Runnable}, {@link Future}) to try and get an
    *     identifying {@link String} for
+   * @return the task id
    */
   public static String getTaskId(Object task) {
     /*
